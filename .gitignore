@@ -1,0 +1,17 @@
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+android/.gradle
+.pub-cache/
+.pub/
+android/build/
+android/app/build/
+*.apk
+node_modules/
+hawsni_backend/node_modules/
+.env
+.DS_Store
+Thumbs.db

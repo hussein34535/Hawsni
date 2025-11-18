@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة التصنيفات - Hawsni Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5; 
+            color: #333;
+            line-height: 1.6;
+        }
+        .navbar { 
+            background: #2c3e50; 
+            color: white; 
+            padding: 1rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar h1 { 
+            font-size: 1.2rem; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .sidebar {
+            position: fixed;
+            right: -250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #2c3e50;
+            padding: 1rem;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            right: 0;
+        }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 1rem;
+        }
+        .sidebar nav a { 
+            display: block;
+            color: white; 
+            text-decoration: none; 
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background: #34495e;
+        }
+        .sidebar nav a i {
+            margin-left: 0.5rem;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 1rem auto; 
+            padding: 0 1rem; 
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .page-header h1 {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin: 0;
+        }
+        .btn { 
+            padding: 0.5rem 1rem; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            font-weight: bold;
+            text-decoration: none; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-success { 
+            background: #27ae60; 
+            color: white; 
+        }
+        .card { 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            padding: 1rem; 
+            margin-bottom: 1rem; 
+        }
+        .card h2 { 
+            font-size: 1.2rem; 
+            color: #2c3e50; 
+            margin-bottom: 1rem; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-group { 
+            margin-bottom: 1rem; 
+        }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 0.25rem; 
+            font-weight: bold; 
+            color: #2c3e50; 
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea { 
+            width: 100%; 
+            padding: 0.5rem; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 1rem; 
+        }
+        .category-list { 
+            list-style: none; 
+        }
+        .category-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0.75rem; 
+            border-bottom: 1px solid #eee; 
+            cursor: move;
+        }
+        .category-item:last-child {
+            border-bottom: none;
+        }
+        .category-item.dragging {
+            opacity: 0.5;
+            background: #f8f9fa;
+        }
+        .category-item.drag-over {
+            border-top: 2px solid #3498db;
+        }
+        .category-info { 
+            display: flex; 
+            align-items: center; 
+            flex: 1;
+        }
+        .drag-handle {
+            margin-left: 0.75rem;
+            color: #95a5a6;
+            cursor: move;
+        }
+        .category-icon { 
+            width: 40px; 
+            height: 40px; 
+            margin-left: 0.75rem; 
+            border-radius: 50%; 
+            background: #ecf0f1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+        }
+        .category-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .category-info-text h3 { 
+            font-size: 1rem; 
+            color: #2c3e50; 
+            margin-bottom: 0.1rem; 
+        }
+        .category-info-text p { 
+            color: #7f8c8d; 
+            font-size: 0.8rem; 
+            margin: 0;
+        }
+        .category-actions { 
+            display: flex; 
+            gap: 0.5rem; 
+        }
+        .btn-sm { 
+            padding: 0.25rem 0.5rem; 
+            font-size: 0.8rem;
+        }
+        .btn-danger { 
+            background: #e74c3c; 
+            color: white; 
+        }
+        .btn-secondary { 
+            background: #95a5a6; 
+            color: white; 
+            text-decoration: none; 
+            display: inline-block; 
+        }
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #95a5a6;
+        }
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .reorder-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .reorder-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .btn-warning { 
+            background: #f39c12; 
+            color: white; 
+        }
+        @media (max-width: 480px) {
+            .category-item {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: right;
+                gap: 0.5rem;
+            }
+            .category-info {
+                width: 100%;
+            }
+            .category-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .reorder-actions {
+                flex-direction: column;
+            }
+            .reorder-btn {
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+        }
+        @media (min-width: 768px) {
+            .sidebar {
+                right: 0;
+                width: 250px;
+            }
+            .menu-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>🏷️ التصنيفات</h1>
+    </nav>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <button class="close-sidebar" id="closeSidebar">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav>
+            <a href="/">
+                <i class="fas fa-home"></i> الرئيسية
+            </a>
+            <a href="/products">
+                <i class="fas fa-box"></i> المنتجات
+            </a>
+            <a href="/categories" class="active">
+                <i class="fas fa-tags"></i> التصنيفات
+            </a>
+            <a href="/orders">
+                <i class="fas fa-shopping-cart"></i> الطلبات
+            </a>
+        </nav>
+    </div>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>إدارة التصنيفات</h1>
+            <button class="btn btn-success" onclick="toggleForm()">
+                <i class="fas fa-plus"></i> إضافة تصنيف
+            </button>
+        </div>
+        
+        <div id="categoryForm" class="card" style="display: none;">
+            <h2>➕ إضافة تصنيف جديد</h2>
+            <form method="POST" action="/categories" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name">اسم التصنيف *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">الوصف</label>
+                    <textarea id="description" name="description" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="image">صورة التصنيف</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i> إضافة
+                </button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>📋 التصنيفات الحالية</h2>
+            <% if (categories.length > 0) { %>
+                <ul class="category-list" id="categoryList">
+                    <% categories.forEach((category, index) => { %>
+                        <li class="category-item" data-id="<%= category.id %>" data-sort-order="<%= category.sort_order || index %>">
+                            <div class="category-info">
+                                <div class="drag-handle">
+                                    <i class="fas fa-grip-lines"></i>
+                                </div>
+                                <div class="category-icon">
+                                    <% if (category.image) { %>
+                                        <img src="<%= category.image %>" alt="<%= category.name %>">
+                                    <% } else { %>
+                                        <i class="fas fa-folder" style="color: #f39c12; font-size: 0.8rem;"></i>
+                                    <% } %>
+                                </div>
+                                <div class="category-info-text">
+                                    <h3><%= category.name %></h3>
+                                    <p><%= category.description || 'لا يوجد وصف' %></p>
+                                </div>
+                            </div>
+                            <div class="category-actions">
+                                <a href="/categories/<%= category.id %>/edit" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="/categories/<%= category.id %>/delete" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('هل أنت متأكد؟')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    <% }); %>
+                </ul>
+                
+                <div class="reorder-actions">
+                    <button type="button" class="reorder-btn btn-warning" id="saveOrderBtn" style="display: none;">
+                        <i class="fas fa-save"></i> حفظ الترتيب
+                    </button>
+                    <button type="button" class="reorder-btn btn-secondary" id="cancelOrderBtn" style="display: none;">
+                        <i class="fas fa-times"></i> إلغاء
+                    </button>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-tags"></i>
+                    <p>لا توجد تصنيفات</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    
+    <script>
+        // Toggle form
+        function toggleForm() {
+            const form = document.getElementById('categoryForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Simple drag and drop functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryList = document.getElementById('categoryList');
+            const saveOrderBtn = document.getElementById('saveOrderBtn');
+            const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+            
+            if (!categoryList) return;
+            
+            let draggedItem = null;
+            
+            // Make all category items draggable
+            const items = categoryList.querySelectorAll('.category-item');
+            items.forEach(item => {
+                item.setAttribute('draggable', 'true');
+                
+                item.addEventListener('dragstart', function(e) {
+                    draggedItem = this;
+                    setTimeout(() => {
+                        this.classList.add('dragging');
+                    }, 0);
+                });
+                
+                item.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                    draggedItem = null;
+                });
+                
+                item.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                });
+                
+                item.addEventListener('dragenter', function(e) {
+                    e.preventDefault();
+                    this.classList.add('drag-over');
+                });
+                
+                item.addEventListener('dragleave', function() {
+                    this.classList.remove('drag-over');
+                });
+                
+                item.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('drag-over');
+                    
+                    if (draggedItem !== this) {
+                        // Get all items
+                        const allItems = Array.from(categoryList.querySelectorAll('.category-item'));
+                        const draggedIndex = allItems.indexOf(draggedItem);
+                        const targetIndex = allItems.indexOf(this);
+                        
+                        // Move the dragged item to the new position
+                        if (draggedIndex < targetIndex) {
+                            categoryList.insertBefore(draggedItem, this.nextSibling);
+                        } else {
+                            categoryList.insertBefore(draggedItem, this);
+                        }
+                        
+                        // Show save/cancel buttons
+                        if (saveOrderBtn) saveOrderBtn.style.display = 'block';
+                        if (cancelOrderBtn) cancelOrderBtn.style.display = 'block';
+                    }
+                });
+            });
+            
+            // Save order button
+            if (saveOrderBtn) {
+                saveOrderBtn.addEventListener('click', async function() {
+                    try {
+                        const items = categoryList.querySelectorAll('.category-item');
+                        const categories = Array.from(items).map((item, index) => ({
+                            id: item.dataset.id,
+                            sort_order: index
+                        }));
+                        
+                        // Debug: Log what we're sending
+                        console.log('Sending categories data:', categories);
+                        
+                        const response = await fetch('/categories/reorder', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ categories })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            alert('تم حفظ الترتيب بنجاح');
+                            saveOrderBtn.style.display = 'none';
+                            cancelOrderBtn.style.display = 'none';
+                        } else {
+                            alert('حدث خطأ: ' + result.message);
+                        }
+                    } catch (error) {
+                        alert('حدث خطأ في الاتصال');
+                    }
+                });
+            }
+            
+            // Cancel order button
+            if (cancelOrderBtn) {
+                cancelOrderBtn.addEventListener('click', function() {
+                    // Simple approach: reload the page to restore original order
+                    location.reload();
+                });
+            }
+        });
+        
+        // Sidebar functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                if (sidebar) sidebar.classList.add('active');
+                if (sidebarOverlay) sidebarOverlay.classList.add('active');
+            });
+        }
+        
+        if (closeSidebar) {
+            closeSidebar.addEventListener('click', () => {
+                if (sidebar) sidebar.classList.remove('active');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+            });
+        }
+        
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', () => {
+                if (sidebar) sidebar.classList.remove('active');
+                if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+            });
+        }
+    </script>
+</body>
+</html>

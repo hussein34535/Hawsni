@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product ? 'تعديل منتج' : 'إضافة منتج' %> - Hawsni Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .navbar { background: #2c3e50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { font-size: 1.5rem; }
+        .navbar nav a { color: white; text-decoration: none; margin-left: 1.5rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .navbar nav a:hover { background: #34495e; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 2rem; }
+        .card-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #ecf0f1; }
+        .card-header h2 { font-size: 1.5rem; color: #2c3e50; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2c3e50; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.75rem; border: 2px solid #ecf0f1; border-radius: 6px; font-size: 1rem; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #3498db; }
+        .form-group.checkbox { display: flex; align-items: center; }
+        .form-group.checkbox input { width: auto; margin-left: 0.5rem; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; font-weight: 500; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-success:hover { background: #229954; }
+        .btn-secondary { background: #95a5a6; color: white; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-secondary:hover { background: #7f8c8d; }
+        .image-preview { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+        .image-preview img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
+        .tag-input { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+        .tag { background: #3498db; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; }
+        .tag-input input { flex: 1; min-width: 150px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🛍️ Hawsni Admin</h1>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/products">المنتجات</a>
+            <a href="/categories">التصنيفات</a>
+            <a href="/orders">الطلبات</a>
+        </nav>
+    </nav>
+    
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2><%= product ? 'تعديل منتج' : 'إضافة منتج جديد' %></h2>
+            </div>
+            
+            <form method="POST" action="/products<%= product ? '/' + product.id : '' %>" enctype="multipart/form-data">
+                <% if (product) { %>
+                    <input type="hidden" name="_method" value="PUT">
+                <% } %>
+                
+                <div class="form-grid">
+                    <div>
+                        <div class="form-group">
+                            <label for="name">اسم المنتج *</label>
+                            <input type="text" id="name" name="name" value="<%= product?.name || '' %>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">الوصف *</label>
+                            <textarea id="description" name="description" rows="4" required><%= product?.description || '' %></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="category_id">التصنيف</label>
+                            <select id="category_id" name="category_id">
+                                <option value="">اختر التصنيف</option>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat.id %>" <%= product?.category_id === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="sizes">المقاسات (افصل بينها بفواصل)</label>
+                            <input type="text" id="sizes" name="sizes" value="<%= product?.sizes?.join(', ') || '' %>" placeholder="مثال: S, M, L, XL">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="colors">الألوان (افصل بينها بفواصل)</label>
+                            <input type="text" id="colors" name="colors" value="<%= product?.colors?.join(', ') || '' %>" placeholder="مثال: أحمر, أزرق, أسود">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="form-group">
+                            <label for="price">السعر *</label>
+                            <input type="number" id="price" name="price" step="0.01" value="<%= product?.price || '' %>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="discount">الخصم (%)</label>
+                            <input type="number" id="discount" name="discount" min="0" max="100" value="<%= product?.discount || 0 %>">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="stock">المخزون *</label>
+                            <input type="number" id="stock" name="stock" min="0" value="<%= product?.stock || 0 %>" required>
+                        </div>
+                        
+                        <div class="form-group checkbox">
+                            <input type="checkbox" id="is_featured" name="is_featured" <%= product?.is_featured ? 'checked' : '' %>>
+                            <label for="is_featured">منتج مميز</label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="images">الصور (اختر حتى 5 صور)</label>
+                            <input type="file" id="images" name="images" multiple accept="image/*">
+                            <% if (product?.images && product.images.length > 0) { %>
+                                <div class="image-preview">
+                                    <% product.images.forEach(image => { %>
+                                        <img src="<%= image %>" alt="Product image">
+                                    <% }); %>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> <%= product ? 'تحديث المنتج' : 'إضافة المنتج' %>
+                    </button>
+                    <a href="/products" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right"></i> العودة للمنتجات
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

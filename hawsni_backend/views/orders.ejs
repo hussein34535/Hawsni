@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلبات - Hawsni Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5; 
+            color: #333;
+            line-height: 1.6;
+        }
+        .navbar { 
+            background: #2c3e50; 
+            color: white; 
+            padding: 1rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar h1 { 
+            font-size: 1.2rem; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .sidebar {
+            position: fixed;
+            right: -250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #2c3e50;
+            padding: 1rem;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            right: 0;
+        }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 1rem;
+        }
+        .sidebar nav a { 
+            display: block;
+            color: white; 
+            text-decoration: none; 
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background: #34495e;
+        }
+        .sidebar nav a i {
+            margin-left: 0.5rem;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 1rem auto; 
+            padding: 0 1rem; 
+        }
+        .card { 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            padding: 1rem; 
+        }
+        .card h2 { 
+            font-size: 1.2rem; 
+            color: #2c3e50; 
+            margin-bottom: 1rem; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .order-list { 
+            list-style: none; 
+        }
+        .order-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0.75rem; 
+            border-bottom: 1px solid #eee; 
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-info { 
+            flex: 1;
+        }
+        .order-info h3 { 
+            font-size: 1rem; 
+            color: #2c3e50; 
+            margin-bottom: 0.1rem; 
+        }
+        .order-info p { 
+            color: #7f8c8d; 
+            font-size: 0.8rem; 
+            margin-bottom: 0.1rem; 
+        }
+        .order-price { 
+            font-weight: bold; 
+            color: #27ae60; 
+            font-size: 1rem; 
+            min-width: 60px;
+            text-align: center;
+        }
+        .order-status { 
+            padding: 0.25rem 0.5rem; 
+            border-radius: 12px; 
+            font-size: 0.8rem; 
+            font-weight: bold; 
+            min-width: 80px;
+            text-align: center;
+        }
+        .status-processing { background: #f39c12; color: white; }
+        .status-in-transit { background: #3498db; color: white; }
+        .status-delivered { background: #27ae60; color: white; }
+        .status-cancelled { background: #e74c3c; color: white; }
+        .order-actions { 
+            display: flex; 
+            gap: 0.5rem; 
+        }
+        .btn { 
+            padding: 0.25rem 0.5rem; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.8rem; 
+            font-weight: bold;
+        }
+        .btn-primary { 
+            background: #3498db; 
+            color: white; 
+        }
+        .status-select {
+            padding: 0.25rem;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 0.8rem;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #95a5a6;
+        }
+        .empty-state i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 480px) {
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: right;
+                gap: 0.5rem;
+            }
+            .order-info {
+                width: 100%;
+            }
+            .order-price, .order-status {
+                text-align: right;
+            }
+            .order-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+        @media (min-width: 768px) {
+            .sidebar {
+                right: 0;
+                width: 250px;
+            }
+            .menu-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>📦 الطلبات</h1>
+    </nav>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <button class="close-sidebar" id="closeSidebar">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav>
+            <a href="/">
+                <i class="fas fa-home"></i> الرئيسية
+            </a>
+            <a href="/products">
+                <i class="fas fa-box"></i> المنتجات
+            </a>
+            <a href="/categories">
+                <i class="fas fa-tags"></i> التصنيفات
+            </a>
+            <a href="/orders" class="active">
+                <i class="fas fa-shopping-cart"></i> الطلبات
+            </a>
+        </nav>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>📋 الطلبات الحالية</h2>
+            <% if (orders.length > 0) { %>
+                <ul class="order-list">
+                    <% orders.forEach(order => { %>
+                        <li class="order-item">
+                            <div class="order-info">
+                                <h3>طلب #<%= order.id.substring(0, 8) %></h3>
+                                <p><i class="fas fa-user"></i> <%= order.user_id ? order.user_id.substring(0, 8) : 'ضيف' %></p>
+                                <p><i class="fas fa-calendar"></i> <%= new Date(order.created_at).toLocaleDateString('ar-EG') %></p>
+                            </div>
+                            <div class="order-price">
+                                $<%= order.total.toFixed(2) %>
+                            </div>
+                            <div class="order-status status-<%= order.status.toLowerCase().replace(' ', '-') %>">
+                                <%= order.status %>
+                            </div>
+                            <div class="order-actions">
+                                <form method="POST" action="/orders/<%= order.id %>/status" style="display: inline;">
+                                    <select name="status" onchange="this.form.submit()" class="status-select">
+                                        <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>قيد المعالجة</option>
+                                        <option value="In Transit" <%= order.status === 'In Transit' ? 'selected' : '' %>>في الطريق</option>
+                                        <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>تم التوصيل</option>
+                                        <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>ملغى</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </li>
+                    <% }); %>
+                </ul>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>لا توجد طلبات</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    
+    <script>
+        // Sidebar functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+        });
+        
+        closeSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Hawsni Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .navbar { background: #2c3e50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { font-size: 1.5rem; }
+        .navbar nav a { color: white; text-decoration: none; margin-left: 1.5rem; padding: 0.5rem 1rem; border-radius: 4px; transition: background 0.3s; }
+        .navbar nav a:hover { background: #34495e; }
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .stat-card i { font-size: 2.5rem; margin-bottom: 1rem; }
+        .stat-card.products { border-right: 4px solid #3498db; }
+        .stat-card.products i { color: #3498db; }
+        .stat-card.categories { border-right: 4px solid #9b59b6; }
+        .stat-card.categories i { color: #9b59b6; }
+        .stat-card.orders { border-right: 4px solid #e67e22; }
+        .stat-card.orders i { color: #e67e22; }
+        .stat-card h3 { font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 700; }
+        .stat-card p { color: #7f8c8d; font-size: 1rem; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #ecf0f1; }
+        .card-header h2 { font-size: 1.5rem; color: #2c3e50; }
+        .btn { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 0.95rem; transition: all 0.3s; font-weight: 500; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3); }
+        .btn-success { background: #27ae60; color: white; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: right; border-bottom: 1px solid #ecf0f1; }
+        th { background: #34495e; color: white; font-weight: 600; }
+        tr:hover { background: #f8f9fa; }
+        .empty-state { text-align: center; padding: 3rem; color: #95a5a6; }
+        .empty-state i { font-size: 4rem; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🛍️ Hawsni Admin</h1>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/products">المنتجات</a>
+            <a href="/categories">التصنيفات</a>
+            <a href="/orders">الطلبات</a>
+        </nav>
+    </nav>
+    
+    <div class="container">
+        <h1 style="margin-bottom: 2rem; color: #2c3e50;">📊 لوحة التحكم</h1>
+        
+        <div class="stats">
+            <div class="stat-card products">
+                <i class="fas fa-box"></i>
+                <h3><%= products.length %></h3>
+                <p>المنتجات</p>
+            </div>
+            <div class="stat-card categories">
+                <i class="fas fa-tags"></i>
+                <h3><%= categories.length %></h3>
+                <p>التصنيفات</p>
+            </div>
+            <div class="stat-card orders">
+                <i class="fas fa-shopping-cart"></i>
+                <h3><%= orders.length %></h3>
+                <p>الطلبات</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>📦 المنتجات الأخيرة</h2>
+                <a href="/products" class="btn btn-primary">عرض الكل</a>
+            </div>
+            <% if (products.length > 0) { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>السعر</th>
+                            <th>المخزون</th>
+                            <th>الخصم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.slice(0, 5).forEach(product => { %>
+                            <tr>
+                                <td><%= product.name %></td>
+                                <td><%= product.price %> جنيه</td>
+                                <td><%= product.stock %></td>
+                                <td><%= product.discount %>%</td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <p>لا توجد منتجات بعد</p>
+                    <a href="/products/new" class="btn btn-success" style="margin-top: 1rem;">إضافة منتج</a>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>📋 الطلبات الأخيرة</h2>
+                <a href="/orders" class="btn btn-primary">عرض الكل</a>
+            </div>
+            <% if (orders.length > 0) { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>الإجمالي</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.slice(0, 5).forEach(order => { %>
+                            <tr>
+                                <td>#<%= order.id.substring(0, 8) %></td>
+                                <td><%= order.total %> جنيه</td>
+                                <td><%= order.status %></td>
+                                <td><%= new Date(order.created_at).toLocaleDateString('ar-EG') %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-shopping-bag"></i>
+                    <p>لا توجد طلبات بعد</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

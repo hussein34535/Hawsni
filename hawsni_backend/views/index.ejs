@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - Hawsni Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5; 
+            color: #333;
+            line-height: 1.6;
+        }
+        .navbar { 
+            background: #2c3e50; 
+            color: white; 
+            padding: 1rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar h1 { 
+            font-size: 1.2rem; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .sidebar {
+            position: fixed;
+            right: -250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #2c3e50;
+            padding: 1rem;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            right: 0;
+        }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 1rem;
+        }
+        .sidebar nav a { 
+            display: block;
+            color: white; 
+            text-decoration: none; 
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background: #34495e;
+        }
+        .sidebar nav a i {
+            margin-left: 0.5rem;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 1rem auto; 
+            padding: 0 1rem; 
+        }
+        .card { 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            padding: 1rem; 
+            margin-bottom: 1rem; 
+        }
+        .card h2 { 
+            font-size: 1.2rem; 
+            color: #2c3e50; 
+            margin-bottom: 1rem; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        .nav-item:hover {
+            background: #e9ecef;
+        }
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        .nav-item h3 {
+            font-size: 1rem;
+            margin: 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat h3 {
+            font-size: 1.2rem;
+            color: #27ae60;
+            margin-bottom: 0.25rem;
+        }
+        .stat p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        @media (min-width: 768px) {
+            .nav-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .stats {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .sidebar {
+                right: 0;
+                width: 250px;
+            }
+            .menu-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>🛍️ Hawsni Admin</h1>
+    </nav>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <button class="close-sidebar" id="closeSidebar">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav>
+            <a href="/" class="active">
+                <i class="fas fa-home"></i> الرئيسية
+            </a>
+            <a href="/products">
+                <i class="fas fa-box"></i> المنتجات
+            </a>
+            <a href="/categories">
+                <i class="fas fa-tags"></i> التصنيفات
+            </a>
+            <a href="/orders">
+                <i class="fas fa-shopping-cart"></i> الطلبات
+            </a>
+        </nav>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>القائمة الرئيسية</h2>
+            <div class="nav-grid">
+                <a href="/products" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <h3>المنتجات</h3>
+                </a>
+                <a href="/categories" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <h3>التصنيفات</h3>
+                </a>
+                <a href="/orders" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h3>الطلبات</h3>
+                </a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>الإحصائيات</h2>
+            <div class="stats">
+                <div class="stat">
+                    <h3><%= productsCount || 0 %></h3>
+                    <p>منتج</p>
+                </div>
+                <div class="stat">
+                    <h3><%= categoriesCount || 0 %></h3>
+                    <p>تصنيف</p>
+                </div>
+                <div class="stat">
+                    <h3><%= ordersCount || 0 %></h3>
+                    <p>طلب</p>
+                </div>
+                <div class="stat">
+                    <h3><%= usersCount || 0 %></h3>
+                    <p>مستخدم</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const menuToggle = document.getElementById('menuToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+        });
+        
+        closeSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

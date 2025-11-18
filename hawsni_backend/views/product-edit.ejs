@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعديل المنتج - Hawsni Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5; 
+            color: #333;
+            line-height: 1.6;
+        }
+        .navbar { 
+            background: #2c3e50; 
+            color: white; 
+            padding: 1rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar h1 { 
+            font-size: 1.2rem; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .sidebar {
+            position: fixed;
+            right: -250px;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            background: #2c3e50;
+            padding: 1rem;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            right: 0;
+        }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+        .sidebar-overlay.active {
+            display: block;
+        }
+        .close-sidebar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            float: left;
+            margin-bottom: 1rem;
+        }
+        .sidebar nav a { 
+            display: block;
+            color: white; 
+            text-decoration: none; 
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .sidebar nav a:hover, .sidebar nav a.active {
+            background: #34495e;
+        }
+        .sidebar nav a i {
+            margin-left: 0.5rem;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 1rem auto; 
+            padding: 0 1rem; 
+        }
+        .card { 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            padding: 1rem; 
+        }
+        .card h2 { 
+            font-size: 1.2rem; 
+            color: #2c3e50; 
+            margin-bottom: 1rem; 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-group { 
+            margin-bottom: 1rem; 
+        }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 0.25rem; 
+            font-weight: bold; 
+            color: #2c3e50; 
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea, .form-group select { 
+            width: 100%; 
+            padding: 0.5rem; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 1rem; 
+        }
+        .form-row { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 1rem; 
+        }
+        @media (min-width: 480px) {
+            .form-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .checkbox-group { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 1rem; 
+            margin-bottom: 1rem;
+        }
+        @media (min-width: 480px) {
+            .checkbox-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .form-group.checkbox { 
+            display: flex; 
+            align-items: center; 
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .form-group.checkbox input { 
+            width: auto; 
+            margin-left: 0.5rem; 
+        }
+        .btn { 
+            padding: 0.5rem 1rem; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            font-weight: bold;
+            margin: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-success { 
+            background: #27ae60; 
+            color: white; 
+        }
+        .btn-secondary { 
+            background: #95a5a6; 
+            color: white; 
+            text-decoration: none; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-preview { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 0.5rem; 
+            margin-top: 0.5rem; 
+        }
+        .image-preview img { 
+            width: 60px; 
+            height: 60px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            border: 1px solid #ddd;
+        }
+        .form-buttons { 
+            display: flex; 
+            gap: 0.5rem; 
+            margin-top: 1rem; 
+            flex-wrap: wrap;
+        }
+        @media (max-width: 480px) {
+            .form-group.checkbox {
+                justify-content: space-between;
+            }
+            .form-buttons {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+        }
+        @media (min-width: 768px) {
+            .sidebar {
+                right: 0;
+                width: 250px;
+            }
+            .menu-toggle {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1>✏️ تعديل المنتج</h1>
+    </nav>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <button class="close-sidebar" id="closeSidebar">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav>
+            <a href="/">
+                <i class="fas fa-home"></i> الرئيسية
+            </a>
+            <a href="/products" class="active">
+                <i class="fas fa-box"></i> المنتجات
+            </a>
+            <a href="/categories">
+                <i class="fas fa-tags"></i> التصنيفات
+            </a>
+            <a href="/orders">
+                <i class="fas fa-shopping-cart"></i> الطلبات
+            </a>
+        </nav>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>معلومات المنتج</h2>
+            <form method="POST" action="/products/<%= product.id %>" enctype="multipart/form-data">
+                <input type="hidden" name="_method" value="PUT">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">اسم المنتج *</label>
+                        <input type="text" id="name" name="name" value="<%= product.name %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">السعر *</label>
+                        <input type="number" id="price" name="price" step="0.01" min="0" value="<%= product.price %>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">الوصف *</label>
+                    <textarea id="description" name="description" rows="2" required><%= product.description %></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="category_id">التصنيف</label>
+                        <select id="category_id" name="category_id">
+                            <option value="">اختر التصنيف</option>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category.id %>" <%= product.category_id === category.id ? 'selected' : '' %>><%= category.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock">الكمية</label>
+                        <input type="number" id="stock" name="stock" min="0" value="<%= product.stock %>">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="images">صور المنتج</label>
+                    <input type="file" id="images" name="images" multiple accept="image/*">
+                    <% if (product.images && product.images.length > 0) { %>
+                        <div class="image-preview">
+                            <% product.images.forEach(image => { %>
+                                <img src="<%= image %>" alt="Product image">
+                            <% }); %>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <div class="checkbox-group">
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="is_featured" name="is_featured" <%= product.is_featured ? 'checked' : '' %>>
+                        <label for="is_featured">مميز</label>
+                    </div>
+                    <div class="form-group checkbox">
+                        <input type="checkbox" id="is_active" name="is_active" <%= product.is_active ? 'checked' : '' %>>
+                        <label for="is_active">مفعل</label>
+                    </div>
+                </div>
+                
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> حفظ
+                    </button>
+                    <a href="/products" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> إلغاء
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Sidebar functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            sidebarOverlay.classList.add('active');
+        });
+        
+        closeSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
