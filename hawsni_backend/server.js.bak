@@ -5,7 +5,6 @@ const supabase = require('./config/supabase');
 const path = require('path');
 const methodOverride = require('method-override');
 const upload = require('./middleware/upload');
-const uploadToSupabase = require('./utils/fileUpload');
 
 // Load env vars
 dotenv.config();
@@ -47,90 +46,17 @@ app.use('/categories/reorder', (req, res, next) => {
   next();
 });
 
-// Admin Dashboard Route
+// Admin Dashboard Routes
 app.get('/dashboard', async (req, res) => {
-  try {
-    // 1. جلب الإحصائيات (Counts)
-    const { count: productsCount, error: productsError } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: categoriesCount, error: categoriesError } = await supabase
-      .from('categories')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: ordersCount, error: ordersError } = await supabase
-      .from('orders')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: usersCount, error: usersError } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true });
-
-    // 2. حساب إجمالي الأرباح (Revenue)
-    // ملاحظة: في التطبيقات الكبيرة يفضل عمل دالة RPC في قاعدة البيانات، لكن هنا سنحسبها بالكود
-    const { data: revenueData, error: revenueError } = await supabase
-      .from('orders')
-      .select('total');
-    
-    const totalRevenue = revenueData 
-      ? revenueData.reduce((sum, order) => sum + (parseFloat(order.total) || 0), 0) 
-      : 0;
-
-    // 3. جلب أحدث المنتجات
-    const { data: recentProducts, error: productsDataError } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    // 4. جلب أحدث الطلبات
-    const { data: recentOrders, error: ordersDataError } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    // 5. تجهيز بيانات الرسم البياني (حالة الطلبات)
-    const { data: orderStats, error: orderStatsError } = await supabase
-      .from('orders')
-      .select('status');
-
-    // حساب عدد الطلبات لكل حالة
-    const statusCounts = {
-      'Processing': 0,
-      'Shipped': 0, // أو In Transit
-      'Delivered': 0,
-      'Cancelled': 0
-    };
-
-    if (orderStats) {
-      orderStats.forEach(order => {
-        // توحيد المسميات للتأكد
-        const status = order.status || 'Processing';
-        if (statusCounts[status] !== undefined) {
-          statusCounts[status]++;
-        } else if (status === 'In Transit') {
-          statusCounts['Shipped']++;
-        }
-      });
-    }
-
-    res.render('dashboard', { 
-      productsCount: productsCount || 0,
-      categoriesCount: categoriesCount || 0,
-      ordersCount: ordersCount || 0,
-      usersCount: usersCount || 0,
-      revenue: totalRevenue.toFixed(2),
-      products: recentProducts || [],
-      orders: recentOrders || [],
-      chartData: statusCounts // نمرر بيانات الرسم البياني
-    });
-
-  } catch (err) {
-    console.error('Dashboard Error:', err);
-    res.status(500).send("خطأ في تحميل لوحة التحكم");
-  }
+  const { data: products } = await supabase.from('products').select('*').limit(10);
+  const { data: categories } = await supabase.from('categories').select('*');
+  const { data: orders } = await supabase.from('orders').select('*').limit(10);
+  
+  res.render('dashboard', { 
+    products: products || [], 
+    categories: categories || [],
+    orders: orders || []
+  });
 });
 
 // Products Management
@@ -150,11 +76,9 @@ app.post('/products', upload.array('images', 5), async (req, res) => {
     const { name, description, price, discount, category_id, stock, is_featured } = req.body;
     
     // Get uploaded images URLs
-    let imageUrls = [];
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-      imageUrls = await Promise.all(uploadPromises);
-    }
+    const imageUrls = req.files && req.files.length > 0
+      ? req.files.map(file => `/uploads/${file.filename}`)
+      : [];
     
     const { data, error } = await supabase.from('products').insert({
       name,
@@ -186,36 +110,27 @@ app.get('/products/:id/edit', async (req, res) => {
 });
 
 app.post('/products/:id', upload.array('images', 5), async (req, res) => {
-  try {
-    const { name, description, price, discount, category_id, stock, is_featured } = req.body;
-    
-    // Get current product images
-    const { data: currentProduct } = await supabase.from('products').select('images').eq('id', req.params.id).single();
-    
-    let imageUrls = currentProduct?.images || [];
-    
-    // Upload new images if provided
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-      const newImageUrls = await Promise.all(uploadPromises);
-      imageUrls = [...imageUrls, ...newImageUrls];
-    }
-    
-    await supabase.from('products').update({
-      name,
-      description,
-      price: parseFloat(price),
-      discount: parseInt(discount) || 0,
-      category_id: category_id || null,
-      stock: parseInt(stock) || 0,
-      is_featured: is_featured === 'on',
-      images: imageUrls
-    }).eq('id', req.params.id);
-    res.redirect('/products');
-  } catch (err) {
-    console.error('❌ Server error:', err);
-    res.status(500).send(`خطأ في السيرفر: ${err.message}`);
-  }
+  const { name, description, price, discount, category_id, stock, is_featured } = req.body;
+  
+  // Get current product images
+  const { data: currentProduct } = await supabase.from('products').select('images').eq('id', req.params.id).single();
+  
+  // Use new images if uploaded, otherwise keep existing
+  const imageUrls = req.files && req.files.length > 0 
+    ? req.files.map(file => `/uploads/${file.filename}`)
+    : currentProduct?.images || [];
+  
+  await supabase.from('products').update({
+    name,
+    description,
+    price: parseFloat(price),
+    discount: parseInt(discount) || 0,
+    category_id: category_id || null,
+    stock: parseInt(stock) || 0,
+    is_featured: is_featured === 'on',
+    images: imageUrls
+  }).eq('id', req.params.id);
+  res.redirect('/products');
 });
 
 app.post('/products/:id/delete', async (req, res) => {
@@ -376,7 +291,7 @@ app.post('/categories', upload.single('image'), async (req, res) => {
     // Get uploaded image URL if available
     let imageUrl = null;
     if (req.file) {
-      imageUrl = await uploadToSupabase(req.file, 'categories');
+      imageUrl = `/uploads/${req.file.filename}`;
     }
     
     const { data, error } = await supabase.from('categories').insert({ 
@@ -419,6 +334,12 @@ app.post('/categories/:id', upload.single('image'), async (req, res) => {
       return res.status(400).send('اسم التصنيف مطلوب');
     }
     
+    // Get uploaded image URL if available
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
+    
     // Prepare update data
     const updateData = {
       name,
@@ -426,9 +347,8 @@ app.post('/categories/:id', upload.single('image'), async (req, res) => {
       is_active: is_active === 'on' || is_active === 'true' || is_active === true
     };
     
-    // Handle image upload if a new one was provided
-    if (req.file) {
-      const imageUrl = await uploadToSupabase(req.file, 'categories');
+    // Only update image if a new one was uploaded
+    if (imageUrl) {
       updateData.image = imageUrl;
     }
     

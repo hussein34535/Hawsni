@@ -4,6 +4,10 @@ const supabase = require('../config/supabase');
 // const Product = require('../models/Product'); // Not used with Supabase
 // const { protect, authorize } = require('../middleware/auth'); // Will implement later
 
+// Import the upload middleware and Supabase upload function
+const upload = require('../middleware/upload');
+const uploadToSupabase = require('../utils/fileUpload');
+
 // @route   GET /api/products
 // @desc    Get all products
 // @access  Public
@@ -111,36 +115,39 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/products
 // @desc    Create product (Admin only)
 // @access  Private/Admin
-router.post('/', async (req, res) => {
+router.post('/', upload.array('images', 5), async (req, res) => {
   try {
-    // Parse sizes and colors from request body
+    let imageUrls = [];
+
+    // رفع الصور إن وجدت
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
+      imageUrls = await Promise.all(uploadPromises);
+    }
+
+    // معالجة المقاسات والألوان
     let sizes = [];
     let colors = [];
     
     if (req.body.sizes) {
-      if (Array.isArray(req.body.sizes)) {
-        sizes = req.body.sizes;
-      } else if (typeof req.body.sizes === 'string') {
-        sizes = req.body.sizes.split(',').map(size => size.trim());
-      }
+      sizes = Array.isArray(req.body.sizes) ? req.body.sizes : req.body.sizes.split(',').map(s => s.trim());
     }
     
     if (req.body.colors) {
-      if (Array.isArray(req.body.colors)) {
-        colors = req.body.colors;
-      } else if (typeof req.body.colors === 'string') {
-        colors = req.body.colors.split(',').map(color => color.trim());
-      }
+      colors = Array.isArray(req.body.colors) ? req.body.colors : req.body.colors.split(',').map(c => c.trim());
     }
     
     const productData = {
-      ...req.body,
+      name: req.body.name,
+      description: req.body.description,
       price: parseFloat(req.body.price),
       discount: parseInt(req.body.discount) || 0,
+      category_id: req.body.category_id || null,
       stock: parseInt(req.body.stock) || 0,
-      is_featured: req.body.is_featured === 'on' || req.body.is_featured === true,
+      is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
       sizes: sizes,
-      colors: colors
+      colors: colors,
+      images: imageUrls // الآن هذه روابط حقيقية من Supabase
     };
     
     const { data: product, error } = await supabase
@@ -149,9 +156,7 @@ router.post('/', async (req, res) => {
       .select()
       .single();
     
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
     
     res.status(201).json({ success: true, product });
   } catch (error) {
@@ -163,36 +168,47 @@ router.post('/', async (req, res) => {
 // @route   PUT /api/products/:id
 // @desc    Update product (Admin only)
 // @access  Private/Admin
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.array('images', 5), async (req, res) => {
   try {
-    // Parse sizes and colors from request body
+    // Get current product to preserve existing images
+    const { data: currentProduct } = await supabase
+      .from('products')
+      .select('images')
+      .eq('id', req.params.id)
+      .single();
+
+    let imageUrls = currentProduct?.images || [];
+
+    // رفع الصور الجديدة إن وجدت
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
+      const newImageUrls = await Promise.all(uploadPromises);
+      imageUrls = [...imageUrls, ...newImageUrls];
+    }
+
+    // معالجة المقاسات والألوان
     let sizes = [];
     let colors = [];
     
     if (req.body.sizes) {
-      if (Array.isArray(req.body.sizes)) {
-        sizes = req.body.sizes;
-      } else if (typeof req.body.sizes === 'string') {
-        sizes = req.body.sizes.split(',').map(size => size.trim());
-      }
+      sizes = Array.isArray(req.body.sizes) ? req.body.sizes : req.body.sizes.split(',').map(s => s.trim());
     }
     
     if (req.body.colors) {
-      if (Array.isArray(req.body.colors)) {
-        colors = req.body.colors;
-      } else if (typeof req.body.colors === 'string') {
-        colors = req.body.colors.split(',').map(color => color.trim());
-      }
+      colors = Array.isArray(req.body.colors) ? req.body.colors : req.body.colors.split(',').map(c => c.trim());
     }
     
     const productData = {
-      ...req.body,
+      name: req.body.name,
+      description: req.body.description,
       price: parseFloat(req.body.price),
       discount: parseInt(req.body.discount) || 0,
+      category_id: req.body.category_id || null,
       stock: parseInt(req.body.stock) || 0,
-      is_featured: req.body.is_featured === 'on' || req.body.is_featured === true,
+      is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
       sizes: sizes,
-      colors: colors
+      colors: colors,
+      images: imageUrls
     };
     
     const { data: product, error } = await supabase
@@ -202,9 +218,7 @@ router.put('/:id', async (req, res) => {
       .select()
       .single();
     
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
     
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });

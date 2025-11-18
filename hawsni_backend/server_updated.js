@@ -47,90 +47,17 @@ app.use('/categories/reorder', (req, res, next) => {
   next();
 });
 
-// Admin Dashboard Route
+// Admin Dashboard Routes
 app.get('/dashboard', async (req, res) => {
-  try {
-    // 1. جلب الإحصائيات (Counts)
-    const { count: productsCount, error: productsError } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: categoriesCount, error: categoriesError } = await supabase
-      .from('categories')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: ordersCount, error: ordersError } = await supabase
-      .from('orders')
-      .select('*', { count: 'exact', head: true });
-
-    const { count: usersCount, error: usersError } = await supabase
-      .from('users')
-      .select('*', { count: 'exact', head: true });
-
-    // 2. حساب إجمالي الأرباح (Revenue)
-    // ملاحظة: في التطبيقات الكبيرة يفضل عمل دالة RPC في قاعدة البيانات، لكن هنا سنحسبها بالكود
-    const { data: revenueData, error: revenueError } = await supabase
-      .from('orders')
-      .select('total');
-    
-    const totalRevenue = revenueData 
-      ? revenueData.reduce((sum, order) => sum + (parseFloat(order.total) || 0), 0) 
-      : 0;
-
-    // 3. جلب أحدث المنتجات
-    const { data: recentProducts, error: productsDataError } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    // 4. جلب أحدث الطلبات
-    const { data: recentOrders, error: ordersDataError } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(5);
-
-    // 5. تجهيز بيانات الرسم البياني (حالة الطلبات)
-    const { data: orderStats, error: orderStatsError } = await supabase
-      .from('orders')
-      .select('status');
-
-    // حساب عدد الطلبات لكل حالة
-    const statusCounts = {
-      'Processing': 0,
-      'Shipped': 0, // أو In Transit
-      'Delivered': 0,
-      'Cancelled': 0
-    };
-
-    if (orderStats) {
-      orderStats.forEach(order => {
-        // توحيد المسميات للتأكد
-        const status = order.status || 'Processing';
-        if (statusCounts[status] !== undefined) {
-          statusCounts[status]++;
-        } else if (status === 'In Transit') {
-          statusCounts['Shipped']++;
-        }
-      });
-    }
-
-    res.render('dashboard', { 
-      productsCount: productsCount || 0,
-      categoriesCount: categoriesCount || 0,
-      ordersCount: ordersCount || 0,
-      usersCount: usersCount || 0,
-      revenue: totalRevenue.toFixed(2),
-      products: recentProducts || [],
-      orders: recentOrders || [],
-      chartData: statusCounts // نمرر بيانات الرسم البياني
-    });
-
-  } catch (err) {
-    console.error('Dashboard Error:', err);
-    res.status(500).send("خطأ في تحميل لوحة التحكم");
-  }
+  const { data: products } = await supabase.from('products').select('*').limit(10);
+  const { data: categories } = await supabase.from('categories').select('*');
+  const { data: orders } = await supabase.from('orders').select('*').limit(10);
+  
+  res.render('dashboard', { 
+    products: products || [], 
+    categories: categories || [],
+    orders: orders || []
+  });
 });
 
 // Products Management
@@ -150,11 +77,9 @@ app.post('/products', upload.array('images', 5), async (req, res) => {
     const { name, description, price, discount, category_id, stock, is_featured } = req.body;
     
     // Get uploaded images URLs
-    let imageUrls = [];
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-      imageUrls = await Promise.all(uploadPromises);
-    }
+    const imageUrls = req.files && req.files.length > 0
+      ? req.files.map(file => `/uploads/${file.filename}`)
+      : [];
     
     const { data, error } = await supabase.from('products').insert({
       name,
@@ -186,36 +111,27 @@ app.get('/products/:id/edit', async (req, res) => {
 });
 
 app.post('/products/:id', upload.array('images', 5), async (req, res) => {
-  try {
-    const { name, description, price, discount, category_id, stock, is_featured } = req.body;
-    
-    // Get current product images
-    const { data: currentProduct } = await supabase.from('products').select('images').eq('id', req.params.id).single();
-    
-    let imageUrls = currentProduct?.images || [];
-    
-    // Upload new images if provided
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-      const newImageUrls = await Promise.all(uploadPromises);
-      imageUrls = [...imageUrls, ...newImageUrls];
-    }
-    
-    await supabase.from('products').update({
-      name,
-      description,
-      price: parseFloat(price),
-      discount: parseInt(discount) || 0,
-      category_id: category_id || null,
-      stock: parseInt(stock) || 0,
-      is_featured: is_featured === 'on',
-      images: imageUrls
-    }).eq('id', req.params.id);
-    res.redirect('/products');
-  } catch (err) {
-    console.error('❌ Server error:', err);
-    res.status(500).send(`خطأ في السيرفر: ${err.message}`);
-  }
+  const { name, description, price, discount, category_id, stock, is_featured } = req.body;
+  
+  // Get current product images
+  const { data: currentProduct } = await supabase.from('products').select('images').eq('id', req.params.id).single();
+  
+  // Use new images if uploaded, otherwise keep existing
+  const imageUrls = req.files && req.files.length > 0 
+    ? req.files.map(file => `/uploads/${file.filename}`)
+    : currentProduct?.images || [];
+  
+  await supabase.from('products').update({
+    name,
+    description,
+    price: parseFloat(price),
+    discount: parseInt(discount) || 0,
+    category_id: category_id || null,
+    stock: parseInt(stock) || 0,
+    is_featured: is_featured === 'on',
+    images: imageUrls
+  }).eq('id', req.params.id);
+  res.redirect('/products');
 });
 
 app.post('/products/:id/delete', async (req, res) => {
@@ -358,7 +274,7 @@ app.post('/categories', upload.single('image'), async (req, res) => {
       return res.status(400).send('اسم التصنيف مطلوب');
     }
     
-    // Get the maximum sort_order value to place the new category at the end
+    // الحصول على الترتيب
     const { data: maxOrderData, error: maxOrderError } = await supabase
       .from('categories')
       .select('sort_order')
@@ -373,7 +289,7 @@ app.post('/categories', upload.single('image'), async (req, res) => {
     
     const maxOrder = maxOrderData?.sort_order || 0;
     
-    // Get uploaded image URL if available
+    // رفع الصورة لـ Supabase
     let imageUrl = null;
     if (req.file) {
       imageUrl = await uploadToSupabase(req.file, 'categories');
@@ -382,7 +298,7 @@ app.post('/categories', upload.single('image'), async (req, res) => {
     const { data, error } = await supabase.from('categories').insert({ 
       name, 
       description: description || '',
-      image: imageUrl,
+      image: imageUrl, // الرابط السحابي
       sort_order: maxOrder + 1
     }).select().single();
     
@@ -404,114 +320,4 @@ app.post('/categories/:id/delete', async (req, res) => {
   
   if (error) {
     console.error('❌ Supabase error:', error);
-    return res.status(500).send(`خطأ في حذف التصنيف: ${error.message}`);
-  }
-  
-  res.redirect('/categories');
-});
-
-app.post('/categories/:id', upload.single('image'), async (req, res) => {
-  try {
-    const { name, description, is_active } = req.body;
-    
-    // Validate required fields
-    if (!name) {
-      return res.status(400).send('اسم التصنيف مطلوب');
-    }
-    
-    // Prepare update data
-    const updateData = {
-      name,
-      description: description || '',
-      is_active: is_active === 'on' || is_active === 'true' || is_active === true
-    };
-    
-    // Handle image upload if a new one was provided
-    if (req.file) {
-      const imageUrl = await uploadToSupabase(req.file, 'categories');
-      updateData.image = imageUrl;
-    }
-    
-    const { data, error } = await supabase.from('categories').update(updateData).eq('id', req.params.id).select().single();
-    
-    if (error) {
-      console.error('❌ Supabase error:', error);
-      return res.status(500).send(`خطأ في تحديث التصنيف: ${error.message}`);
-    }
-    
-    if (!data) {
-      return res.status(404).send('التصنيف غير موجود');
-    }
-    
-    console.log('✅ Category updated successfully:', data);
-    res.redirect('/categories');
-  } catch (err) {
-    console.error('❌ Server error:', err);
-    res.status(500).send(`خطأ في السيرفر: ${err.message}`);
-  }
-});
-
-// Orders Management
-app.get('/orders', async (req, res) => {
-  const { data: orders } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-  res.render('orders', { orders: orders || [] });
-});
-
-app.post('/orders/:id/status', async (req, res) => {
-  const { status } = req.body;
-  await supabase.from('orders').update({ status }).eq('id', req.params.id);
-  res.redirect('/orders');
-});
-
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/coupons', couponRoutes);
-app.use('/api/wishlist', wishlistRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/categories', categoryRoutes);
-
-// Redirect root to dashboard
-app.get('/', (req, res) => {
-  res.redirect('/dashboard');
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: err.message || 'Server Error'
-  });
-});
-
-// Test Supabase connection
-const testSupabaseConnection = async () => {
-  try {
-    const { data, error } = await supabase.from('products').select('count').limit(1);
-    if (error && error.code !== 'PGRST116') { // PGRST116 = table doesn't exist yet
-      console.log('⚠️  Supabase connected but tables not created yet');
-      console.log('📝 Run the SQL schema to create tables');
-    } else {
-      console.log('✅ Supabase connected successfully');
-    }
-  } catch (err) {
-    console.log('⚠️  Supabase connection status unknown');
-  }
-};
-
-// Start server
-const PORT = process.env.PORT || 5000;
-const HOST = '0.0.0.0'; // Bind to all interfaces
-
-app.listen(PORT, HOST, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📚 API Documentation: http://localhost:${PORT}/`);
-  console.log(`🌐 Server accessible on network at http://${HOST}:${PORT}/`);
-  testSupabaseConnection();
-});
-
-module.exports = app;
+    return res.status(500).send(`خطأ في حذف التص

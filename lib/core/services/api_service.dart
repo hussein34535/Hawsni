@@ -278,4 +278,51 @@ class ApiService {
       return null;
     }
   }
+
+  // Get User Wishlist
+  static Future<List<dynamic>> getWishlist() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/wishlist'),
+        headers: _getHeaders(includeAuth: true),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['wishlist'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching wishlist: $e');
+      return [];
+    }
+  }
+
+  // Add to Wishlist
+  static Future<bool> addToWishlist(String productId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/wishlist/products/$productId'),
+        headers: _getHeaders(includeAuth: true),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error adding to wishlist: $e');
+      return false;
+    }
+  }
+
+  // Remove from Wishlist
+  static Future<bool> removeFromWishlist(String productId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/wishlist/products/$productId'),
+        headers: _getHeaders(includeAuth: true),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error removing from wishlist: $e');
+      return false;
+    }
+  }
 }

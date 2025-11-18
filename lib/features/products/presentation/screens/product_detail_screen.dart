@@ -9,6 +9,7 @@ import 'package:hawsni_app/features/reviews/presentation/screens/write_review_sc
 import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/features/products/presentation/widgets/product_image_gallery.dart';
 import 'package:hawsni_app/features/products/presentation/widgets/related_products.dart';
+import 'package:hawsni_app/features/products/presentation/widgets/reviews_section.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -45,28 +46,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int selectedImageIndex = 0;
   String? selectedSize;
   String? selectedColor;
-  List<dynamic> _reviews = [];
-  bool _isLoadingReviews = true;
 
   @override
   void initState() {
     super.initState();
-    _loadReviews();
-  }
-
-  Future<void> _loadReviews() async {
-    try {
-      final reviews = await ApiService.getProductReviews(widget.productId);
-      setState(() {
-        _reviews = reviews;
-        _isLoadingReviews = false;
-      });
-    } catch (e) {
-      print('Error loading reviews: $e');
-      setState(() {
-        _isLoadingReviews = false;
-      });
-    }
   }
 
   void _incrementQuantity() {
@@ -136,11 +119,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
       ),
     );
-
-    // Reload reviews if a new review was submitted
-    if (result == true) {
-      _loadReviews();
-    }
   }
 
   void _shareProduct() async {
@@ -488,52 +466,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const Divider(height: 1, thickness: 1),
 
                   // Reviews section
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Reviews',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: _writeReview,
-                              child: const Text('Write Review'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        _isLoadingReviews
-                            ? const Center(child: CircularProgressIndicator())
-                            : _reviews.isEmpty
-                                ? const Center(
-                                    child: Text(
-                                      'No reviews yet. Be the first to review this product!',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  )
-                                : Column(
-                                    children: _reviews.map((review) {
-                                      return ReviewCard(
-                                        userName: review['user']?['name'] ??
-                                            'Anonymous',
-                                        rating: review['rating'] ?? 0,
-                                        comment: review['comment'] ?? '',
-                                        date: _formatDate(
-                                            review['createdAt'] ?? ''),
-                                      );
-                                    }).toList(),
-                                  ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 16),
+                  ReviewsSection(productId: widget.productId),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),

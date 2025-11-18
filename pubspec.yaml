@@ -48,6 +48,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_local_notifications: ^17.0.0
+  carousel_slider: ^5.0.0
+  cached_network_image: ^3.4.1
+  flutter_rating_bar: ^4.0.1
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
