@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:hawsni_app/features/auth/presentation/screens/signup_screen.dart';
 import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -198,7 +199,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text("Don't have an account?"),
                   TextButton(
                     onPressed: () {
-                      // TODO: Navigate to registration screen
+                      // Navigate to registration screen
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => const SignupScreen()),
+                      );
                     },
                     child: const Text('Sign Up'),
                   ),

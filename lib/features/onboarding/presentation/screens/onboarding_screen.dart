@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:hawsni_app/features/auth/presentation/screens/signup_screen.dart';
 import 'package:hawsni_app/features/onboarding/presentation/widgets/onboarding_page.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -40,9 +41,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     });
   }
 
-  void _navigateToAuth() {
+  void _navigateToLogin() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
+  void _navigateToSignup() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const SignupScreen()),
     );
   }
 
@@ -58,7 +65,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Align(
                 alignment: Alignment.topRight,
                 child: TextButton(
-                  onPressed: _navigateToAuth,
+                  onPressed: _navigateToLogin,
                   child: const Text(
                     'Skip',
                     style: TextStyle(
@@ -124,7 +131,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             curve: Curves.easeInOut,
                           );
                         } else {
-                          _navigateToAuth();
+                          _navigateToSignup(); // Navigate to signup on last page
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -152,7 +159,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                   // Sign in option
                   TextButton(
-                    onPressed: _navigateToAuth,
+                    onPressed: _navigateToLogin,
                     child: const Text(
                       'Already have an account? Sign In',
                       style: TextStyle(

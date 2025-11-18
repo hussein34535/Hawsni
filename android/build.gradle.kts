@@ -1,6 +1,5 @@
 plugins {
-  // Add the dependency for the Google services Gradle plugin
-  id("com.google.gms.google-services") version "4.4.4" apply false
+    id("com.google.gms.google-services") version "4.4.4" apply false
 }
 
 allprojects {
@@ -10,12 +9,16 @@ allprojects {
     }
 }
 
-// Comment out the custom build directory configuration
-// rootProject.layout.buildDirectory.set(file("../build"))
+// هذا السطر يحدد مسار البناء ليكون في المجلد الرئيسي للمشروع (Hawsni/build)
+// استخدام projectDirectory.dir("../build") هو الطريقة الأدق والأكثر أماناً
+val newBuildDir = layout.projectDirectory.dir("../build")
+layout.buildDirectory.value(newBuildDir)
 
-// subprojects {
-//    project.layout.buildDirectory.set(file("../build/${project.name}"))
-// }
+subprojects {
+    // توجيه ملفات بناء المشاريع الفرعية (مثل app) إلى داخل المجلد الرئيسي أيضاً
+    val subprojectBuildDir = newBuildDir.dir(project.name)
+    layout.buildDirectory.value(subprojectBuildDir)
+}
 
 subprojects {
     project.evaluationDependsOn(":app")
