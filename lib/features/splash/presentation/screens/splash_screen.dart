@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hawsni_app/core/services/auth_service.dart';
 import 'package:hawsni_app/core/services/app_settings_service.dart';
+import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
+import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:hawsni_app/features/onboarding/presentation/screens/language_selection_screen.dart';
-import 'package:hawsni_app/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -10,70 +14,45 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
-    );
-
-    _controller.forward();
     _navigateToNextScreen();
   }
 
   void _navigateToNextScreen() async {
     await Future.delayed(const Duration(seconds: 3));
 
-    if (mounted) {
-      // Check if it's the first launch
-      final isFirstLaunch = await AppSettingsService().isFirstLaunch();
+    if (!mounted) return;
 
-      if (isFirstLaunch) {
-        // Show language selection screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const LanguageSelectionScreen(),
-          ),
-        );
-      } else {
-        // Show onboarding screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const OnboardingScreen(),
-          ),
-        );
-      }
+    if (AuthService.isAuthenticated()) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+      return;
     }
-  }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    final isFirstLaunch = await AppSettingsService().isFirstLaunch();
+
+    if (isFirstLaunch) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LanguageSelectionScreen()),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue[600]!, Colors.purple[600]!],
+            colors: [AppTheme.primaryColor, Colors.black],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -82,50 +61,26 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.shopping_bag,
-                            size: 100,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(height: 24),
-                          const Text(
-                            'Hawsni',
-                            style: TextStyle(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 2,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Your Style, Your Choice',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white70,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+              const SpinningLoader(size: 120, color: AppTheme.accentColor),
+              const SizedBox(height: 32),
+              const Text(
+                'Hawsni',
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 4,
+                  fontFamily: 'Poppins',
+                ),
               ),
-              const SizedBox(height: 48),
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              const SizedBox(height: 12),
+              Text(
+                'Your Style, Your Choice',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white.withOpacity(0.7),
+                  letterSpacing: 2,
+                  fontFamily: 'Poppins',
                 ),
               ),
             ],

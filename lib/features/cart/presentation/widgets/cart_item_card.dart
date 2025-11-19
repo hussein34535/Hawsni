@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class CartItemCard extends StatelessWidget {
   final CartItem item;
@@ -10,17 +11,18 @@ class CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -29,20 +31,20 @@ class CartItemCard extends StatelessWidget {
         child: Row(
           children: [
             // Product image
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 90,
+                height: 90,
                 color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Image.network(
-                item.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.shopping_bag,
-                      size: 40, color: Colors.grey);
-                },
+                child: Image.network(
+                  item.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.shopping_bag,
+                        size: 40, color: Colors.grey[400]);
+                  },
+                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -54,8 +56,7 @@ class CartItemCard extends StatelessWidget {
                 children: [
                   Text(
                     item.name,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                     maxLines: 1,
@@ -64,28 +65,27 @@ class CartItemCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     item.price,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.blue[700],
-                      fontWeight: FontWeight.w600,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
 
                   // Quantity selector
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Quantity selector
                       Container(
+                        height: 36,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                          border: Border.all(color: Colors.grey.shade300),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.remove, size: 18),
+                              icon: const Icon(Icons.remove, size: 16),
                               onPressed: item.quantity > 1
                                   ? () {
                                       context.read<CartBloc>().add(
@@ -94,51 +94,40 @@ class CartItemCard extends StatelessWidget {
                                           );
                                     }
                                   : null,
-                              padding: const EdgeInsets.all(2),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
                               constraints: const BoxConstraints(),
                             ),
                             Text(
                               '${item.quantity}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.add, size: 18),
+                              icon: const Icon(Icons.add, size: 16),
                               onPressed: () {
                                 context.read<CartBloc>().add(
                                       UpdateQuantity(
                                           item.id, item.quantity + 1),
                                     );
                               },
-                              padding: const EdgeInsets.all(2),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
                               constraints: const BoxConstraints(),
                             ),
                           ],
                         ),
                       ),
-                      // Fix: Parse price correctly by removing currency symbols
-                      Text(
-                        '\$${((double.tryParse(item.price.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0) * item.quantity).toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      IconButton(
+                        onPressed: () =>
+                            context.read<CartBloc>().add(RemoveFromCart(item.id)),
+                        icon: const Icon(Icons.delete_outline, color: AppTheme.errorColor),
+                        tooltip: 'Remove',
+                      )
                     ],
                   ),
                 ],
               ),
             ),
-
-            // Remove button
-            IconButton(
-              onPressed: () =>
-                  context.read<CartBloc>().add(RemoveFromCart(item.id)),
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              tooltip: 'Remove from cart',
-            )
           ],
         ),
       ),
