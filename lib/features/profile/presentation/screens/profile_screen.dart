@@ -6,9 +6,44 @@ import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_scree
 import 'package:hawsni_app/features/profile/presentation/screens/settings_screen.dart';
 import 'package:hawsni_app/features/profile/presentation/screens/profile_details_screen.dart';
 import 'package:hawsni_app/features/coupons/presentation/screens/coupons_screen.dart';
+import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hawsni_app/features/checkout/presentation/screens/address_management_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  Map<String, dynamic>? _userProfile;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final profile = await ApiService.getUserProfile();
+      if (mounted) {
+        setState(() {
+          _userProfile = profile;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading user profile: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,22 +113,26 @@ class ProfileScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'John Doe',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          _userProfile?['name'] ?? 'John Doe',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'john.doe@email.com',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
-                    ),
-                  ),
+                  _isLoading
+                      ? const SizedBox(height: 16)
+                      : Text(
+                          _userProfile?['email'] ?? 'john.doe@email.com',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
+                        ),
                   const SizedBox(height: 12),
                   Container(
                     padding:
@@ -159,9 +198,9 @@ class ProfileScreen extends StatelessWidget {
               title: 'Addresses',
               subtitle: 'Manage delivery addresses',
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Addresses feature coming soon!')),
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const AddressManagementScreen()),
                 );
               },
             ),

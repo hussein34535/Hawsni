@@ -279,6 +279,86 @@ class ApiService {
     }
   }
 
+  // --- User Profile & Addresses ---
+
+  // Get User Profile (Real Data)
+  static Future<Map<String, dynamic>?> getUserProfile() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/users/profile'),
+        headers: _getHeaders(includeAuth: true),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['user'];
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching profile: $e');
+      return null;
+    }
+  }
+
+  // Update User Profile
+  static Future<bool> updateUserProfile(String name, String phone) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/users/profile'),
+        headers: _getHeaders(includeAuth: true),
+        body: json.encode({'name': name, 'phone': phone}),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error updating profile: $e');
+      return false;
+    }
+  }
+
+  // Get Addresses
+  static Future<List<dynamic>> getAddresses() async {
+    try {
+      // ملاحظة: سنستفيد من بروفايل المستخدم لأنه يحتوي على مصفوفة العناوين
+      final profile = await getUserProfile();
+      if (profile != null && profile['addresses'] != null) {
+        return profile['addresses'];
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching addresses: $e');
+      return [];
+    }
+  }
+
+  // Add Address
+  static Future<bool> addAddress(Map<String, dynamic> addressData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/users/addresses'),
+        headers: _getHeaders(includeAuth: true),
+        body: json.encode(addressData),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error adding address: $e');
+      return false;
+    }
+  }
+
+  // Delete Address
+  static Future<bool> deleteAddress(String addressId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/users/addresses/$addressId'),
+        headers: _getHeaders(includeAuth: true),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error deleting address: $e');
+      return false;
+    }
+  }
+
   // Get User Wishlist
   static Future<List<dynamic>> getWishlist() async {
     try {
