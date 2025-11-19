@@ -80,6 +80,9 @@
     </nav>
     
     <div class="container">
+        <!-- Hidden div to store chart data -->
+        <div id="chartData" style="display: none;" data-chart='<%- JSON.stringify(chartData || {}) %>'></div>
+        
         <div style="margin: 2rem 0;">
             <h2 style="color: #2c3e50;">👋 أهلاً بك في لوحة التحكم</h2>
             <p style="color: #7f8c8d;">إليك نظرة عامة على أداء متجرك اليوم</p>
@@ -177,7 +180,8 @@
 
     <script>
         // استقبال البيانات من السيرفر
-        const chartData = <%- JSON.stringify(chartData) %>;
+        const chartDataElement = document.getElementById('chartData');
+        const chartData = JSON.parse(chartDataElement.dataset.chart);
         
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('ordersChart').getContext('2d');

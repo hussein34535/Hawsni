@@ -22,7 +22,7 @@ class _ReviewsSectionState extends State<ReviewsSection> {
   }
 
   Future<void> _loadReviews() async {
-    final reviews = await ApiService.getReviews(widget.productId);
+    final reviews = await ApiService.getProductReviews(widget.productId);
     if (mounted) {
       setState(() {
         _reviews = reviews;
