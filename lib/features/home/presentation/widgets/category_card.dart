@@ -68,7 +68,7 @@ class CategoryCard extends StatelessWidget {
       return ClipRRect(
         borderRadius: BorderRadius.circular(50),
         child: SvgImage(
-          url: 'http://192.168.100.8:5000$image',
+          url: '${ApiService.baseUrl}$image',
           width: 40,
           height: 40,
           fit: BoxFit.cover,

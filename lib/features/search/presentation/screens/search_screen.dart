@@ -393,7 +393,7 @@ class _SearchScreenState extends State<SearchScreen> {
         final product = _searchResults[index];
         final images = product['images'] as List?;
         final imageUrl = images != null && images.isNotEmpty
-            ? 'http://192.168.100.8:5000${images[0]}'
+            ? '${ApiService.baseUrl}${images[0]}'
             : 'https://picsum.photos/300?random=$index';
 
         return ProductCard(

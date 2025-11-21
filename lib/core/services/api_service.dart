@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:hawsni_app/core/config/app_config.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
 
 class ApiService {
-  // Production URL
-  static const String baseUrl = 'https://hawsnibackend.vercel.app/api';
-  // Local URL (for testing)
-  // static const String baseUrl = 'http://192.168.100.8:5000/api';
+  static late AppConfig _config;
+
+  static String get baseUrl => _config.baseUrl;
+
+  // Initialize the service with the correct configuration
+  static void initialize(AppConfig config) {
+    _config = config;
+  }
 
   // Helper method to get headers with optional auth token
   static Map<String, String> _getHeaders({bool includeAuth = false}) {
@@ -25,7 +30,7 @@ class ApiService {
   static Future<dynamic> get(String endpoint, {bool includeAuth = true}) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl$endpoint'),
+        Uri.parse('${_config.baseUrl}$endpoint'),
         headers: _getHeaders(includeAuth: includeAuth),
       );
 
@@ -45,7 +50,7 @@ class ApiService {
       {bool includeAuth = true}) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl$endpoint'),
+        Uri.parse('${_config.baseUrl}$endpoint'),
         headers: _getHeaders(includeAuth: includeAuth),
         body: json.encode(data),
       );
@@ -66,7 +71,7 @@ class ApiService {
       {bool includeAuth = true}) async {
     try {
       final response = await http.put(
-        Uri.parse('$baseUrl$endpoint'),
+        Uri.parse('${_config.baseUrl}$endpoint'),
         headers: _getHeaders(includeAuth: includeAuth),
         body: json.encode(data),
       );
@@ -87,7 +92,7 @@ class ApiService {
       {bool includeAuth = true}) async {
     try {
       final response = await http.delete(
-        Uri.parse('$baseUrl$endpoint'),
+        Uri.parse('${_config.baseUrl}$endpoint'),
         headers: _getHeaders(includeAuth: includeAuth),
       );
 
@@ -105,14 +110,8 @@ class ApiService {
   // Get all products
   static Future<List<dynamic>> getProducts() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/products'));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['products'] ?? [];
-      } else {
-        throw Exception('Failed to load products');
-      }
+      final data = await get('/products', includeAuth: false);
+      return data['products'] ?? [];
     } catch (e) {
       print('Error fetching products: $e');
       return [];
@@ -122,14 +121,8 @@ class ApiService {
   // Get product by ID
   static Future<Map<String, dynamic>?> getProduct(String id) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/products/$id'));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['product'];
-      } else {
-        throw Exception('Failed to load product');
-      }
+      final data = await get('/products/$id', includeAuth: false);
+      return data['product'];
     } catch (e) {
       print('Error fetching product: $e');
       return null;
@@ -139,50 +132,20 @@ class ApiService {
   // Get all categories
   static Future<List<dynamic>> getCategories() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/categories'));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['categories'] ?? [];
-      } else {
-        throw Exception('Failed to load categories');
-      }
+      final data = await get('/categories', includeAuth: false);
+      return data['categories'] ?? [];
     } catch (e) {
       print('Error fetching categories: $e');
       return [];
     }
   }
 
-  // Get products by category
-  static Future<List<dynamic>> getProductsByCategory(String categoryId) async {
-    try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/products?category=$categoryId'));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['products'] ?? [];
-      } else {
-        throw Exception('Failed to load products');
-      }
-    } catch (e) {
-      print('Error fetching products by category: $e');
-      return [];
-    }
-  }
 
   // Search products
   static Future<List<dynamic>> searchProducts(String query) async {
     try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/products?search=$query'));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['products'] ?? [];
-      } else {
-        throw Exception('Failed to search products');
-      }
+      final data = await get('/products?search=$query', includeAuth: false);
+      return data['products'] ?? [];
     } catch (e) {
       print('Error searching products: $e');
       return [];
@@ -227,20 +190,14 @@ class ApiService {
       }
 
       // Build URL with query parameters
-      String url = '$baseUrl/products';
+      String endpoint = '/products';
       if (queryParams.isNotEmpty) {
-        url += '?';
-        url += queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
+        endpoint += '?';
+        endpoint += queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
       }
 
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['products'] ?? [];
-      } else {
-        throw Exception('Failed to search products');
-      }
+      final data = await get(endpoint, includeAuth: false);
+      return data['products'] ?? [];
     } catch (e) {
       print('Error searching products with filters: $e');
       return [];
@@ -251,19 +208,8 @@ class ApiService {
   static Future<Map<String, dynamic>?> createOrder(
       Map<String, dynamic> orderData) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/orders'),
-        headers: _getHeaders(includeAuth: false), // Don't require auth for now
-        body: json.encode(orderData),
-      );
-
-      if (response.statusCode == 201) {
-        final data = json.decode(response.body);
-        return data;
-      } else {
-        print('Failed to create order: ${response.body}');
-        throw Exception('Failed to create order: ${response.body}');
-      }
+      final data = await post('/orders', orderData, includeAuth: false); // Guest checkout allowed
+      return data;
     } catch (e) {
       print('Error creating order: $e');
       return null;
@@ -273,18 +219,8 @@ class ApiService {
   // Get user orders
   static Future<List<dynamic>> getUserOrders() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/orders'),
-        headers: _getHeaders(includeAuth: false), // Don't require auth for now
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['orders'] ?? [];
-      } else {
-        print('Failed to load orders: ${response.body}');
-        throw Exception('Failed to load orders: ${response.body}');
-      }
+      final data = await get('/orders', includeAuth: true);
+      return data['orders'] ?? [];
     } catch (e) {
       print('Error fetching orders: $e');
       return [];
@@ -294,16 +230,8 @@ class ApiService {
   // Get product reviews
   static Future<List<dynamic>> getProductReviews(String productId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/reviews/product/$productId'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['reviews'] ?? [];
-      } else {
-        throw Exception('Failed to load reviews');
-      }
+      final data = await get('/reviews/product/$productId', includeAuth: false);
+      return data['reviews'] ?? [];
     } catch (e) {
       print('Error fetching reviews: $e');
       return [];
@@ -317,23 +245,12 @@ class ApiService {
     required String comment,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/reviews'),
-        headers: _getHeaders(includeAuth: true),
-        body: json.encode({
-          'productId': productId,
-          'rating': rating,
-          'comment': comment,
-        }),
-      );
-
-      if (response.statusCode == 201) {
-        final data = json.decode(response.body);
-        return data['review'];
-      } else {
-        print('Failed to create review: ${response.body}');
-        throw Exception('Failed to create review: ${response.body}');
-      }
+      final data = await post('/reviews', {
+        'productId': productId,
+        'rating': rating,
+        'comment': comment,
+      }, includeAuth: true);
+      return data['review'];
     } catch (e) {
       print('Error creating review: $e');
       return null;
@@ -343,18 +260,8 @@ class ApiService {
   // Get order tracking information
   static Future<Map<String, dynamic>?> getOrderTracking(String orderId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/orders/$orderId/tracking'),
-        headers: _getHeaders(includeAuth: true),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['tracking'];
-      } else {
-        print('Failed to load tracking info: ${response.body}');
-        throw Exception('Failed to load tracking info: ${response.body}');
-      }
+      final data = await get('/orders/$orderId/tracking', includeAuth: true);
+      return data['tracking'];
     } catch (e) {
       print('Error fetching tracking info: $e');
       return null;
@@ -366,16 +273,8 @@ class ApiService {
   // Get User Profile (Real Data)
   static Future<Map<String, dynamic>?> getUserProfile() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/users/profile'),
-        headers: _getHeaders(includeAuth: true),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['user'];
-      }
-      return null;
+      final data = await get('/users/profile', includeAuth: true);
+      return data['user'];
     } catch (e) {
       print('Error fetching profile: $e');
       return null;
@@ -385,12 +284,8 @@ class ApiService {
   // Update User Profile
   static Future<bool> updateUserProfile(String name, String phone) async {
     try {
-      final response = await http.put(
-        Uri.parse('$baseUrl/users/profile'),
-        headers: _getHeaders(includeAuth: true),
-        body: json.encode({'name': name, 'phone': phone}),
-      );
-      return response.statusCode == 200;
+      await put('/users/profile', {'name': name, 'phone': phone}, includeAuth: true);
+      return true;
     } catch (e) {
       print('Error updating profile: $e');
       return false;
@@ -400,7 +295,7 @@ class ApiService {
   // Get Addresses
   static Future<List<dynamic>> getAddresses() async {
     try {
-      // ملاحظة: سنستفيد من بروفايل المستخدم لأنه يحتوي على مصفوفة العناوين
+      // This method reuses getUserProfile, which is already refactored.
       final profile = await getUserProfile();
       if (profile != null && profile['addresses'] != null) {
         return profile['addresses'];
@@ -415,12 +310,8 @@ class ApiService {
   // Add Address
   static Future<bool> addAddress(Map<String, dynamic> addressData) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/users/addresses'),
-        headers: _getHeaders(includeAuth: true),
-        body: json.encode(addressData),
-      );
-      return response.statusCode == 200;
+      await post('/users/addresses', addressData, includeAuth: true);
+      return true;
     } catch (e) {
       print('Error adding address: $e');
       return false;
@@ -430,11 +321,8 @@ class ApiService {
   // Delete Address
   static Future<bool> deleteAddress(String addressId) async {
     try {
-      final response = await http.delete(
-        Uri.parse('$baseUrl/users/addresses/$addressId'),
-        headers: _getHeaders(includeAuth: true),
-      );
-      return response.statusCode == 200;
+      await delete('/users/addresses/$addressId', includeAuth: true);
+      return true;
     } catch (e) {
       print('Error deleting address: $e');
       return false;
@@ -444,16 +332,8 @@ class ApiService {
   // Get User Wishlist
   static Future<List<dynamic>> getWishlist() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/wishlist'),
-        headers: _getHeaders(includeAuth: true),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['wishlist'] ?? [];
-      }
-      return [];
+      final data = await get('/wishlist', includeAuth: true);
+      return data['wishlist'] ?? [];
     } catch (e) {
       print('Error fetching wishlist: $e');
       return [];
@@ -463,11 +343,8 @@ class ApiService {
   // Add to Wishlist
   static Future<bool> addToWishlist(String productId) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/wishlist/products/$productId'),
-        headers: _getHeaders(includeAuth: true),
-      );
-      return response.statusCode == 200;
+      await post('/wishlist/products/$productId', {}, includeAuth: true);
+      return true;
     } catch (e) {
       print('Error adding to wishlist: $e');
       return false;
@@ -477,11 +354,8 @@ class ApiService {
   // Remove from Wishlist
   static Future<bool> removeFromWishlist(String productId) async {
     try {
-      final response = await http.delete(
-        Uri.parse('$baseUrl/wishlist/products/$productId'),
-        headers: _getHeaders(includeAuth: true),
-      );
-      return response.statusCode == 200;
+      await delete('/wishlist/products/$productId', includeAuth: true);
+      return true;
     } catch (e) {
       print('Error removing from wishlist: $e');
       return false;

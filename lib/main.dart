@@ -4,27 +4,27 @@ import 'package:hawsni_app/app.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
 import 'package:hawsni_app/core/services/notification_service.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:hawsni_app/firebase_options.dart';
 
 import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
 
 import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
 import 'package:hawsni_app/features/orders/data/services/order_service.dart';
+import 'package:hawsni_app/core/config/app_config.dart';
+import 'package:hawsni_app/core/config/prod_config.dart';
+import 'package:hawsni_app/core/services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize App Configuration
+  AppConfig config = ProdConfig();
+  ApiService.initialize(config);
 
   // Load authentication token
   await AuthService.loadToken();
 
   // Initialize notification service
   await NotificationService().init();
-
-  // Firebase disabled temporarily
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
 
   runApp(
     MultiBlocProvider(
