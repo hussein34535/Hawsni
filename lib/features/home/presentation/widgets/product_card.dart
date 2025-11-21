@@ -36,7 +36,9 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        // Add a small delay to allow the ProductDetailScreen to build its Hero widget
+        await Future.delayed(const Duration(milliseconds: 50));
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(

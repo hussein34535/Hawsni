@@ -4,7 +4,8 @@ import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
 
 class ProductGrid extends StatefulWidget {
-  const ProductGrid({super.key});
+  final String? categoryId;
+  const ProductGrid({super.key, this.categoryId});
 
   @override
   State<ProductGrid> createState() => _ProductGridState();
@@ -31,7 +32,7 @@ class _ProductGridState extends State<ProductGrid> {
         });
       }
 
-      final fetchedProducts = await ApiService.getProducts();
+      final fetchedProducts = await ApiService.getProducts(categoryId: widget.categoryId);
       // Check if the widget is still mounted before calling setState
       if (mounted) {
         setState(() {

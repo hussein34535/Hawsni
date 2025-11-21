@@ -10,14 +10,15 @@ import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 
 class ProductsScreen extends StatelessWidget {
   final String categoryName;
+  final String? categoryId;
 
-  const ProductsScreen({super.key, required this.categoryName});
+  const ProductsScreen({super.key, required this.categoryName, this.categoryId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ProductBloc(ProductService())
-        ..add(LoadProducts(category: categoryName)),
+        ..add(LoadProducts(categoryId: categoryId)),
       child: Scaffold(
         backgroundColor: Colors.black,
         body: BlocBuilder<ProductBloc, ProductState>(

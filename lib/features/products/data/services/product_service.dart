@@ -2,14 +2,14 @@ import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/features/products/data/models/product_model.dart';
 
 class ProductService {
-  Future<List<ProductModel>> getProducts({String? category}) async {
+  Future<List<ProductModel>> getProducts({String? categoryId}) async {
     try {
       String endpoint = '/products';
-      if (category != null &&
-          category.isNotEmpty &&
-          category != 'All' &&
-          category != 'Featured') {
-        endpoint += '?category=$category';
+      if (categoryId != null &&
+          categoryId.isNotEmpty &&
+          categoryId != 'All' &&
+          categoryId != 'Featured') {
+        endpoint += '?category=$categoryId';
       }
 
       final data = await ApiService.get(endpoint);

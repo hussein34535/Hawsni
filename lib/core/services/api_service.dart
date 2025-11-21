@@ -108,9 +108,13 @@ class ApiService {
   }
 
   // Get all products
-  static Future<List<dynamic>> getProducts() async {
+  static Future<List<dynamic>> getProducts({String? categoryId}) async {
     try {
-      final data = await get('/products', includeAuth: false);
+      String endpoint = '/products';
+      if (categoryId != null && categoryId.isNotEmpty) {
+        endpoint += '?category=$categoryId';
+      }
+      final data = await get(endpoint, includeAuth: false);
       return data['products'] ?? [];
     } catch (e) {
       print('Error fetching products: $e');
