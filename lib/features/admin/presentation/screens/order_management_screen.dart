@@ -51,7 +51,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
     },
   ];
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   void _viewOrderDetails(String orderId) {
     ScaffoldMessenger.of(context).showSnackBar(

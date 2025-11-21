@@ -5,7 +5,6 @@ import 'package:hawsni_app/core/services/wishlist_service.dart';
 import 'package:hawsni_app/core/providers/settings_provider.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/splash/presentation/screens/splash_screen.dart';
-import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hawsni_app/features/admin/presentation/screens/admin_login_screen.dart';
 import 'package:hawsni_app/features/admin/presentation/screens/admin_dashboard_screen.dart';
 import 'package:hawsni_app/features/admin/presentation/screens/product_management_screen.dart';

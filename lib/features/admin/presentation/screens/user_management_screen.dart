@@ -51,7 +51,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     },
   ];
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   void _addUser() {
     ScaffoldMessenger.of(context).showSnackBar(

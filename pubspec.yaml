@@ -54,6 +54,8 @@ dependencies:
   intl: ^0.20.2
   google_fonts: ^6.3.2
 
+  timezone: any
+  smooth_page_indicator: ^1.2.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

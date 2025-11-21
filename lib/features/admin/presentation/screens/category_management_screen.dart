@@ -42,7 +42,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     },
   ];
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   void _addCategory() {
     ScaffoldMessenger.of(context).showSnackBar(

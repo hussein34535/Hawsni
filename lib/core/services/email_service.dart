@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class EmailService {
   static final EmailService _instance = EmailService._internal();

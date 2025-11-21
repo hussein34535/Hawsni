@@ -3,11 +3,24 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://10.0.2.2:5000/api';
+  static const String baseUrl = 'https://hawsnibackend.vercel.app/api';
   static String? _token;
+  static Map<String, dynamic>? _userData;
 
   // Get token
   static String? get token => _token;
+
+  // Get user data
+  static Map<String, dynamic>? get userData => _userData;
+
+  // Get user name
+  static String? get userName => _userData?['name'];
+
+  // Get user email
+  static String? get userEmail => _userData?['email'];
+
+  // Get user id
+  static String? get userId => _userData?['id'];
 
   // Login user
   static Future<Map<String, dynamic>?> login(
@@ -25,12 +38,15 @@ class AuthService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _token = data['token'];
+        _userData = data['user'];
 
-        // Save token to shared preferences
+        // Save token and user data to shared preferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', _token!);
+        await prefs.setString('userData', json.encode(_userData));
 
         print('Login successful, token saved: $_token');
+        print('User data saved: $_userData');
         return data;
       } else {
         final errorData = json.decode(response.body);
@@ -59,12 +75,15 @@ class AuthService {
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
         _token = data['token'];
+        _userData = data['user'];
 
-        // Save token to shared preferences
+        // Save token and user data to shared preferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', _token!);
+        await prefs.setString('userData', json.encode(_userData));
 
         print('Registration successful, token saved: $_token');
+        print('User data saved: $_userData');
         return data;
       } else {
         final errorData = json.decode(response.body);
@@ -130,16 +149,30 @@ class AuthService {
   // Logout user
   static Future<void> logout() async {
     _token = null;
+    _userData = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
-    print('User logged out, token cleared');
+    await prefs.remove('userData');
+    print('User logged out, token and data cleared');
   }
 
-  // Load token from shared preferences
+  // Load token and user data from shared preferences
   static Future<void> loadToken() async {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('token');
+    final userDataString = prefs.getString('userData');
+
+    if (userDataString != null) {
+      try {
+        _userData = json.decode(userDataString);
+      } catch (e) {
+        print('Error decoding user data: $e');
+        _userData = null;
+      }
+    }
+
     print('Token loaded from storage: $_token');
+    print('User data loaded from storage: $_userData');
   }
 
   // Check if user is authenticated

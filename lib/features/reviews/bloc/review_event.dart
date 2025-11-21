@@ -1,0 +1,32 @@
+import 'package:equatable/equatable.dart';
+
+abstract class ReviewEvent extends Equatable {
+  const ReviewEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
+class LoadReviews extends ReviewEvent {
+  final String productId;
+
+  const LoadReviews(this.productId);
+
+  @override
+  List<Object> get props => [productId];
+}
+
+class AddReview extends ReviewEvent {
+  final String productId;
+  final double rating;
+  final String comment;
+
+  const AddReview({
+    required this.productId,
+    required this.rating,
+    required this.comment,
+  });
+
+  @override
+  List<Object> get props => [productId, rating, comment];
+}

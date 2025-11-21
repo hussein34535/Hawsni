@@ -52,7 +52,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     },
   ];
 
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   void _addProduct() {
     ScaffoldMessenger.of(context).showSnackBar(

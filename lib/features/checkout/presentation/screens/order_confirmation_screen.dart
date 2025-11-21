@@ -192,7 +192,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

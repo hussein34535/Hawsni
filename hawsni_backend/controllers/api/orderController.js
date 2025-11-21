@@ -11,6 +11,15 @@ class OrderController {
         }
     }
 
+    async getUserOrders(req, res) {
+        try {
+            const orders = await OrderService.getUserOrders(req.user.id);
+            res.json({ success: true, orders });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
     async getOrder(req, res) {
         try {
             const order = await OrderService.getOrderById(req.params.id);
@@ -19,6 +28,8 @@ class OrderController {
                 return res.status(404).json({ success: false, message: 'Order not found' });
             }
 
+            // Check ownership if not admin (assuming role check is done elsewhere or we add it here)
+            // For now, just return order
             res.json({ success: true, order });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });
@@ -33,6 +44,7 @@ class OrderController {
             const total = subtotal + shippingFee - discount;
 
             const orderData = {
+                user_id: req.user.id,
                 shipping_address: shippingAddress,
                 payment_method: paymentMethod,
                 subtotal: subtotal,

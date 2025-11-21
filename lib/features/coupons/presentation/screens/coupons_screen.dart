@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/coupon_service.dart';
 
 class CouponsScreen extends StatefulWidget {
   const CouponsScreen({super.key});

@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class OrderTrackingScreen extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -62,65 +64,61 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         widget.order['shippingAddress']?['address'] ?? 'N/A';
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Order Tracking'),
+        title: const Text('Order Tracking',
+            style: TextStyle(
+                fontFamily: 'Playfair Display', fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.black,
+        elevation: 0,
       ),
       body: RefreshIndicator(
         onRefresh: _loadTrackingData,
+        color: AppTheme.primaryColor,
+        backgroundColor: Colors.black,
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Loading indicator
                 if (_isLoading)
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                          color: AppTheme.primaryColor),
                     ),
                   ),
-
-                // Error message
                 if (_errorMessage.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: AppTheme.errorColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color: AppTheme.errorColor.withOpacity(0.3)),
                     ),
                     child: Column(
                       children: [
                         Text(
                           _errorMessage,
-                          style: const TextStyle(color: Colors.red),
+                          style: const TextStyle(color: AppTheme.errorColor),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
                           onPressed: _loadTrackingData,
-                          child: const Text('Retry'),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.errorColor),
+                          child: const Text('Retry',
+                              style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     ),
                   ),
-
-                // Order header
                 if (!_isLoading && _errorMessage.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
+                  _buildGlassContainer(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -132,6 +130,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
                             ),
                             Container(
@@ -140,8 +139,11 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(status).withOpacity(0.1),
+                                color: _getStatusColor(status).withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                    color: _getStatusColor(status)
+                                        .withOpacity(0.5)),
                               ),
                               child: Text(
                                 status,
@@ -157,18 +159,15 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                         const SizedBox(height: 8),
                         Text(
                           customerAddress,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: Colors.grey,
                           ),
                         ),
                       ],
                     ),
                   ),
-
                 const SizedBox(height: 24),
-
-                // Tracking timeline
                 if (!_isLoading && _errorMessage.isEmpty)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,31 +177,17 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Playfair Display',
                         ),
                       ),
                       const SizedBox(height: 16),
                       _buildTrackingTimeline(),
                     ],
                   ),
-
                 const SizedBox(height: 24),
-
-                // Delivery information
                 if (!_isLoading && _errorMessage.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
+                  _buildGlassContainer(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -211,6 +196,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -242,12 +228,31 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     );
   }
 
+  Widget _buildGlassContainer({required Widget child}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.1)),
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
   Widget _buildTrackingTimeline() {
     if (_trackingEvents.isEmpty) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(16.0),
-          child: Text('No tracking events available'),
+          child: Text('No tracking events available',
+              style: TextStyle(color: Colors.grey)),
         ),
       );
     }
@@ -258,13 +263,14 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         final isCompleted = event['status'] == 'completed';
         final isCurrent = event['status'] == 'current';
         final isPending = event['status'] == 'pending';
+        final color =
+            isCompleted || isCurrent ? AppTheme.primaryColor : Colors.grey;
 
         return Column(
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Timeline indicator
                 Column(
                   children: [
                     Container(
@@ -272,44 +278,31 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                       height: 32,
                       decoration: BoxDecoration(
                         color: isCompleted
-                            ? event['color']
-                            : isCurrent
-                                ? event['color']
-                                : Colors.white,
+                            ? color
+                            : (isCurrent ? color : Colors.transparent),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isPending ? Colors.grey : event['color'],
+                          color: color,
                           width: 2,
                         ),
                       ),
-                      child: isCompleted
-                          ? Icon(
-                              event['icon'],
-                              color: Colors.white,
-                              size: 20,
-                            )
-                          : isCurrent
-                              ? Icon(
-                                  event['icon'],
-                                  color: Colors.white,
-                                  size: 20,
-                                )
-                              : Icon(
-                                  event['icon'],
-                                  color: Colors.grey,
-                                  size: 20,
-                                ),
+                      child: Icon(
+                        event['icon'] ?? Icons.circle,
+                        color: isCompleted || isCurrent
+                            ? Colors.black
+                            : Colors.grey,
+                        size: 16,
+                      ),
                     ),
                     if (index < _trackingEvents.length - 1)
                       Container(
                         width: 2,
                         height: 40,
-                        color: isCompleted ? event['color'] : Colors.grey[300],
+                        color: isCompleted ? color : Colors.grey[800],
                       ),
                   ],
                 ),
                 const SizedBox(width: 12),
-                // Event details
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 24),
@@ -322,15 +315,17 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                             fontSize: 16,
                             fontWeight:
                                 isCurrent ? FontWeight.bold : FontWeight.normal,
-                            color: isCurrent ? event['color'] : Colors.black,
+                            color: isCurrent
+                                ? AppTheme.primaryColor
+                                : Colors.white,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           event['description'],
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: Colors.grey,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -338,7 +333,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                           _formatDateTime(event['timestamp']),
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[500],
+                            color: Colors.grey[600],
                           ),
                         ),
                       ],
@@ -356,7 +351,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   Widget _buildDeliveryInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.blue),
+        Icon(icon, size: 20, color: AppTheme.primaryColor),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -364,9 +359,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: Colors.grey,
                 ),
               ),
               Text(
@@ -374,6 +369,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -386,14 +382,14 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Delivered':
-        return Colors.green;
+        return AppTheme.successColor;
       case 'In Transit':
       case 'Out for Delivery':
         return Colors.blue;
       case 'Processing':
         return Colors.orange;
       case 'Cancelled':
-        return Colors.red;
+        return AppTheme.errorColor;
       default:
         return Colors.grey;
     }
@@ -403,15 +399,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     DateTime dateTime;
 
     if (timestamp is String) {
-      // Try to parse ISO date string
       try {
         dateTime = DateTime.parse(timestamp);
       } catch (e) {
-        // If parsing fails, return the original string
         return timestamp;
       }
     } else if (timestamp is int) {
-      // Assume it's milliseconds since epoch
       dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
     } else if (timestamp is DateTime) {
       dateTime = timestamp;

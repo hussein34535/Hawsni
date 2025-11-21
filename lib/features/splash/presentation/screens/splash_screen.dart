@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/core/services/app_settings_service.dart';
-import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-import 'package:hawsni_app/features/onboarding/presentation/screens/language_selection_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,30 +15,22 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToNextScreen();
+    _navigateToHome();
   }
 
-  void _navigateToNextScreen() async {
+  _navigateToHome() async {
     await Future.delayed(const Duration(seconds: 3));
 
-    if (!mounted) return;
+    if (mounted) {
+      // Check if user is authenticated
+      final isAuthenticated = AuthService.isAuthenticated();
 
-    if (AuthService.isAuthenticated()) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-      );
-      return;
-    }
-
-    final isFirstLaunch = await AppSettingsService().isFirstLaunch();
-
-    if (isFirstLaunch) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LanguageSelectionScreen()),
-      );
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              isAuthenticated ? const MainScreen() : const LoginScreen(),
+        ),
       );
     }
   }
@@ -49,42 +38,34 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppTheme.primaryColor, Colors.black],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SpinningLoader(size: 120, color: AppTheme.accentColor),
-              const SizedBox(height: 32),
-              const Text(
-                'Hawsni',
-                style: TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 4,
-                  fontFamily: 'Poppins',
-                ),
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SpinningLoader(size: 100),
+            const SizedBox(height: 30),
+            const Text(
+              'HAWSNI',
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFD4AF37), // Gold
+                letterSpacing: 5,
+                fontFamily: 'Playfair Display',
               ),
-              const SizedBox(height: 12),
-              Text(
-                'Your Style, Your Choice',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white.withOpacity(0.7),
-                  letterSpacing: 2,
-                  fontFamily: 'Poppins',
-                ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Luxury Redefined',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.7),
+                letterSpacing: 2,
+                fontFamily: 'Poppins',
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

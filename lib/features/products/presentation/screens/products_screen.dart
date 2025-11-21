@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
+import 'package:hawsni_app/features/products/bloc/product_event.dart';
+import 'package:hawsni_app/features/products/bloc/product_state.dart';
+import 'package:hawsni_app/features/products/data/services/product_service.dart';
+import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 
 class ProductsScreen extends StatelessWidget {
   final String categoryName;
@@ -9,92 +15,128 @@ class ProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    // Generate sample products for the category
-    final List<Map<String, String>> products = List.generate(
-      15,
-      (index) => {
-        'id': 'product_${categoryName}_$index',
-        'image': 'https://via.placeholder.com/300',
-        'name': '$categoryName Item ${index + 1}',
-        'price': '\$${(index + 1) * 15}',
-        'description': 'A high-quality product in the $categoryName category',
-        'rating': '${4.0 + (index % 3) * 0.5}',
-        'reviewCount': '${(index + 1) * 10}',
-      },
-    );
+    return BlocProvider(
+      create: (context) => ProductBloc(ProductService())
+        ..add(LoadProducts(category: categoryName)),
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: BlocBuilder<ProductBloc, ProductState>(
+          builder: (context, state) {
+            if (state is ProductLoading) {
+              return const Center(child: SpinningLoader());
+            } else if (state is ProductError) {
+              return Center(
+                child: Text(
+                  state.message,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            } else if (state is ProductLoaded) {
+              final products = state.products;
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 120,
-            pinned: true,
-            backgroundColor: theme.scaffoldBackgroundColor,
-            elevation: 0,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                '$categoryName Collection',
-                style: TextStyle(
-                  color: theme.primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              centerTitle: true,
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white,
-                      theme.scaffoldBackgroundColor,
-                    ],
+              if (products.isEmpty) {
+                return CustomScrollView(
+                  slivers: [
+                    _buildAppBar(context),
+                    const SliverFillRemaining(
+                      child: Center(
+                        child: Text(
+                          'No products found',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+
+              return CustomScrollView(
+                slivers: [
+                  _buildAppBar(context),
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.65,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final product = products[index];
+                          return ProductCard(
+                            id: product.id,
+                            imageUrl: product.imageUrl,
+                            name: product.name,
+                            price: '\$${product.price}',
+                            description: product.description,
+                            rating: product.rating,
+                            reviewCount: product.reviewCount,
+                          );
+                        },
+                        childCount: products.length,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new, color: theme.primaryColor),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.filter_list, color: theme.primaryColor),
-                onPressed: () {
-                  // Show filter modal
-                },
-              ),
-            ],
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return ProductCard(
-                    id: products[index]['id']!,
-                    imageUrl: products[index]['image']!,
-                    name: products[index]['name']!,
-                    price: products[index]['price']!,
-                    description: products[index]['description']!,
-                    rating: double.parse(products[index]['rating']!),
-                    reviewCount: int.parse(products[index]['reviewCount']!),
-                  );
-                },
-                childCount: products.length,
-              ),
-            ),
-          ),
-        ],
+                ],
+              );
+            }
+            return const Center(child: SpinningLoader());
+          },
+        ),
       ),
+    );
+  }
+
+  Widget _buildAppBar(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 120,
+      pinned: true,
+      backgroundColor: Colors.black,
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        title: Text(
+          '$categoryName Collection',
+          style: const TextStyle(
+            color: AppTheme.primaryColor,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Playfair Display',
+          ),
+        ),
+        centerTitle: true,
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.8),
+                Colors.black,
+              ],
+            ),
+          ),
+        ),
+      ),
+      leading: IconButton(
+        icon:
+            const Icon(Icons.arrow_back_ios_new, color: AppTheme.primaryColor),
+        onPressed: () {
+          // Check if can pop, otherwise maybe go to home or do nothing if it's the main tab
+          if (Navigator.canPop(context)) {
+            Navigator.of(context).pop();
+          }
+        },
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.filter_list, color: AppTheme.primaryColor),
+          onPressed: () {
+            // Show filter modal
+          },
+        ),
+      ],
     );
   }
 }

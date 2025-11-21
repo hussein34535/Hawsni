@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:hawsni_app/features/orders/presentation/screens/orders_screen.dart';
 import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_screen.dart';
@@ -8,6 +10,7 @@ import 'package:hawsni_app/features/profile/presentation/screens/profile_details
 import 'package:hawsni_app/features/coupons/presentation/screens/coupons_screen.dart';
 import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/features/checkout/presentation/screens/address_management_screen.dart';
+import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,7 +21,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _userProfile;
-  bool _isLoading = true;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -27,37 +30,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserProfile() async {
+    // Use data from AuthService (already loaded from SharedPreferences)
+    setState(() {
+      _userProfile = AuthService.userData;
+    });
+
+    // Optionally, refresh from API in background
     try {
       final profile = await ApiService.getUserProfile();
-      if (mounted) {
+      if (profile != null && mounted) {
         setState(() {
           _userProfile = profile;
-          _isLoading = false;
         });
       }
     } catch (e) {
-      print('Error loading user profile: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      print('Error refreshing user profile: $e');
+      // Keep using cached data
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
         title: const Text(
           'My Profile',
           style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+              fontFamily: 'Playfair Display', fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.black,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings_outlined,
+                color: AppTheme.primaryColor),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
@@ -65,306 +72,289 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
           ),
         ],
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        elevation: 2,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Profile header with gradient background
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue[400]!, Colors.purple[400]!],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
+      body: _isLoading
+          ? const Center(child: SpinningLoader())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person,
-                            size: 50, color: Colors.blue[700]),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border:
-                                Border.all(color: Colors.blue[400]!, width: 2),
-                          ),
-                          child: const Icon(
-                            Icons.edit,
-                            size: 16,
-                            color: Colors.blue,
-                          ),
+                  // Profile Header
+                  _buildGlassContainer(
+                    child: Column(
+                      children: [
+                        Stack(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                    color: AppTheme.primaryColor, width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                        AppTheme.primaryColor.withOpacity(0.2),
+                                    blurRadius: 15,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: const CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.grey,
+                                child: Icon(Icons.person,
+                                    size: 40, color: Colors.white),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
+                                  color: AppTheme.primaryColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.edit,
+                                    size: 14, color: Colors.black),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
+                        const SizedBox(height: 16),
+                        Text(
                           _userProfile?['name'] ?? 'John Doe',
                           style: const TextStyle(
-                            fontSize: 24,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            fontFamily: 'Playfair Display',
                           ),
                         ),
-                  const SizedBox(height: 4),
-                  _isLoading
-                      ? const SizedBox(height: 16)
-                      : Text(
+                        Text(
                           _userProfile?['email'] ?? 'john.doe@email.com',
                           style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white70,
+                            fontSize: 14,
+                            color: Colors.grey,
                           ),
                         ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'Premium Member',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: AppTheme.primaryColor.withOpacity(0.3)),
+                          ),
+                          child: const Text(
+                            'Premium Member',
+                            style: TextStyle(
+                              color: AppTheme.primaryColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  const SizedBox(height: 24),
+
+                  // Account Section
+                  _buildSectionTitle('Account'),
+                  _buildGlassContainer(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        _buildMenuItem(
+                          icon: Icons.person_outline,
+                          title: 'Profile Details',
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const ProfileDetailsScreen())),
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.shopping_bag_outlined,
+                          title: 'My Orders',
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const OrdersScreen())),
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.favorite_border,
+                          title: 'Wishlist',
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const WishlistScreen())),
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.location_on_outlined,
+                          title: 'Addresses',
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const AddressManagementScreen())),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Payments Section
+                  _buildSectionTitle('Payments'),
+                  _buildGlassContainer(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        _buildMenuItem(
+                          icon: Icons.credit_card_outlined,
+                          title: 'Payment Methods',
+                          onTap: () {}, // TODO
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.local_offer_outlined,
+                          title: 'My Coupons',
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const CouponsScreen())),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Logout
+                  _buildGlassContainer(
+                    padding: EdgeInsets.zero,
+                    child: _buildMenuItem(
+                      icon: Icons.logout,
+                      title: 'Logout',
+                      textColor: AppTheme.errorColor,
+                      iconColor: AppTheme.errorColor,
+                      onTap: _handleLogout,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
+    );
+  }
 
-            const SizedBox(height: 16),
-
-            // Account section
-            _buildSectionTitle(context, 'Account'),
-            _buildMenuItem(
-              context,
-              icon: Icons.person_outline,
-              title: 'Profile Details',
-              subtitle: 'Manage your personal information',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const ProfileDetailsScreen()),
-                );
-              },
+  Future<void> _handleLogout() async {
+    showDialog(
+      context: context,
+      builder: (context) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: AlertDialog(
+          backgroundColor: Colors.black.withOpacity(0.8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: AppTheme.primaryColor.withOpacity(0.5)),
+          ),
+          title: const Text('Logout', style: TextStyle(color: Colors.white)),
+          content: const Text('Are you sure you want to logout?',
+              style: TextStyle(color: Colors.grey)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
             ),
-            _buildMenuItem(
-              context,
-              icon: Icons.shopping_bag_outlined,
-              title: 'My Orders',
-              subtitle: 'View your order history',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const OrdersScreen()),
-                );
+            TextButton(
+              onPressed: () async {
+                await AuthService.logout();
+                if (mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => const LoginScreen()),
+                    (route) => false,
+                  );
+                }
               },
+              child: const Text('Logout',
+                  style: TextStyle(color: AppTheme.errorColor)),
             ),
-            _buildMenuItem(
-              context,
-              icon: Icons.favorite_outline,
-              title: 'Wishlist',
-              subtitle: 'Your saved items',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const WishlistScreen()),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context,
-              icon: Icons.location_on_outlined,
-              title: 'Addresses',
-              subtitle: 'Manage delivery addresses',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const AddressManagementScreen()),
-                );
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            // Payments section
-            _buildSectionTitle(context, 'Payments'),
-            _buildMenuItem(
-              context,
-              icon: Icons.payment_outlined,
-              title: 'Payment Methods',
-              subtitle: 'Manage your payment options',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Payment methods feature coming soon!')),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context,
-              icon: Icons.local_offer_outlined,
-              title: 'My Coupons',
-              subtitle: 'Discount vouchers and offers',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => const CouponsScreen()),
-                );
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            // Support section
-            _buildSectionTitle(context, 'Support'),
-            _buildMenuItem(
-              context,
-              icon: Icons.help_outline,
-              title: 'Help & Support',
-              subtitle: 'Get help with your account',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Help feature coming soon!')),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context,
-              icon: Icons.info_outline,
-              title: 'About',
-              subtitle: 'Learn more about us',
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('About feature coming soon!')),
-                );
-              },
-            ),
-
-            const Divider(),
-
-            // Logout
-            _buildMenuItem(
-              context,
-              icon: Icons.logout,
-              title: 'Logout',
-              textColor: Colors.red,
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Logout'),
-                    content: const Text('Are you sure you want to logout?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          // Call AuthService logout to clear token
-                          await AuthService.logout();
-
-                          // Navigate back to login screen
-                          if (context.mounted) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                  builder: (context) => const LoginScreen()),
-                              (route) => false,
-                            );
-                          }
-                        },
-                        child: const Text('Logout',
-                            style: TextStyle(color: Colors.red)),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
+  Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.only(left: 8, bottom: 12),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).textTheme.titleLarge?.color,
+            color: Colors.white,
+            fontFamily: 'Playfair Display',
           ),
         ),
       ),
     );
   }
 
-  Widget _buildMenuItem(
-    BuildContext context, {
+  Widget _buildGlassContainer(
+      {required Widget child, EdgeInsetsGeometry? padding}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: padding ?? const EdgeInsets.all(16),
+          decoration: AppTheme.glassDecoration,
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
     required IconData icon,
     required String title,
-    String? subtitle,
     required VoidCallback onTap,
     Color? textColor,
+    Color? iconColor,
   }) {
     return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.blue.withOpacity(0.3)
-              : Colors.blue.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: textColor ?? Colors.blue[700]),
-      ),
+      leading: Icon(icon, color: iconColor ?? AppTheme.primaryColor),
       title: Text(
         title,
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: textColor ?? Theme.of(context).textTheme.titleMedium?.color,
+          color: textColor ?? Colors.white,
         ),
       ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-            )
-          : null,
-      trailing: const Icon(Icons.chevron_right),
+      trailing: Icon(Icons.arrow_forward_ios,
+          size: 16, color: Colors.white.withOpacity(0.3)),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      color: Colors.white.withOpacity(0.1),
+      indent: 16,
+      endIndent: 16,
     );
   }
 }

@@ -1,18 +1,24 @@
 import 'package:equatable/equatable.dart';
 
-class CartItem {
+class CartItem extends Equatable {
   final String id;
   final String name;
   final String price;
   final String imageUrl;
   final int quantity;
+  final String? size;
+  final String? color;
+  final String? productId;
 
-  CartItem({
+  const CartItem({
     required this.id,
     required this.name,
     required this.price,
     required this.imageUrl,
-    this.quantity = 1,
+    required this.quantity,
+    this.size,
+    this.color,
+    this.productId,
   });
 
   CartItem copyWith({
@@ -21,6 +27,9 @@ class CartItem {
     String? price,
     String? imageUrl,
     int? quantity,
+    String? size,
+    String? color,
+    String? productId,
   }) {
     return CartItem(
       id: id ?? this.id,
@@ -28,28 +37,15 @@ class CartItem {
       price: price ?? this.price,
       imageUrl: imageUrl ?? this.imageUrl,
       quantity: quantity ?? this.quantity,
+      size: size ?? this.size,
+      color: color ?? this.color,
+      productId: productId ?? this.productId,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'price': price,
-      'imageUrl': imageUrl,
-      'quantity': quantity,
-    };
-  }
-
-  factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(
-      id: json['id'],
-      name: json['name'],
-      price: json['price'],
-      imageUrl: json['imageUrl'],
-      quantity: json['quantity'],
-    );
-  }
+  @override
+  List<Object?> get props =>
+      [id, name, price, imageUrl, quantity, size, color, productId];
 }
 
 abstract class CartState extends Equatable {
@@ -65,4 +61,11 @@ class CartLoaded extends CartState {
   const CartLoaded({this.items = const []});
   @override
   List<Object> get props => [items];
+}
+
+class CartError extends CartState {
+  final String message;
+  const CartError(this.message);
+  @override
+  List<Object> get props => [message];
 }

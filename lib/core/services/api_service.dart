@@ -3,9 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:hawsni_app/core/services/auth_service.dart';
 
 class ApiService {
-  // Change this to your computer's IP address if testing on physical device
-  // For emulator, use 10.0.2.2 or your computer's IP address
-  static const String baseUrl = 'http://192.168.100.8:5000/api';
+  // Production URL
+  static const String baseUrl = 'https://hawsnibackend.vercel.app/api';
+  // Local URL (for testing)
+  // static const String baseUrl = 'http://192.168.100.8:5000/api';
 
   // Helper method to get headers with optional auth token
   static Map<String, String> _getHeaders({bool includeAuth = false}) {
@@ -18,6 +19,87 @@ class ApiService {
     }
 
     return headers;
+  }
+
+  // Generic GET request
+  static Future<dynamic> get(String endpoint, {bool includeAuth = true}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: _getHeaders(includeAuth: includeAuth),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to load data: ${response.body}');
+      }
+    } catch (e) {
+      print('Error in GET $endpoint: $e');
+      rethrow;
+    }
+  }
+
+  // Generic POST request
+  static Future<dynamic> post(String endpoint, Map<String, dynamic> data,
+      {bool includeAuth = true}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: _getHeaders(includeAuth: includeAuth),
+        body: json.encode(data),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to post data: ${response.body}');
+      }
+    } catch (e) {
+      print('Error in POST $endpoint: $e');
+      rethrow;
+    }
+  }
+
+  // Generic PUT request
+  static Future<dynamic> put(String endpoint, Map<String, dynamic> data,
+      {bool includeAuth = true}) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: _getHeaders(includeAuth: includeAuth),
+        body: json.encode(data),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to put data: ${response.body}');
+      }
+    } catch (e) {
+      print('Error in PUT $endpoint: $e');
+      rethrow;
+    }
+  }
+
+  // Generic DELETE request
+  static Future<dynamic> delete(String endpoint,
+      {bool includeAuth = true}) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl$endpoint'),
+        headers: _getHeaders(includeAuth: includeAuth),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to delete data: ${response.body}');
+      }
+    } catch (e) {
+      print('Error in DELETE $endpoint: $e');
+      rethrow;
+    }
   }
 
   // Get all products

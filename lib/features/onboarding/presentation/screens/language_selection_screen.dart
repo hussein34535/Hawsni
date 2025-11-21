@@ -69,7 +69,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // App logo and title
-                Icon(
+                const Icon(
                   Icons.language,
                   size: 80,
                   color: Colors.white,

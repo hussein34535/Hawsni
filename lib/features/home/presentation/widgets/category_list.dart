@@ -43,7 +43,7 @@ class _CategoryListState extends State<CategoryList> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return SizedBox(
+      return const SizedBox(
         height: 120,
         child: Center(
           child: CircularProgressIndicator(),

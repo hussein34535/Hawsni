@@ -198,7 +198,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -232,7 +232,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -292,7 +292,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

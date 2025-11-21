@@ -22,22 +22,24 @@ class WishlistItem {
   });
 
   factory WishlistItem.fromJson(Map<String, dynamic> json) {
-    // معالجة الصورة: إذا كانت مصفوفة أو نص
+    // Handle image: check imageUrl, image, or images array
     String img = 'https://via.placeholder.com/150';
     if (json['imageUrl'] != null) {
       img = json['imageUrl'];
+    } else if (json['image'] != null) {
+      img = json['image'];
     } else if (json['images'] != null && (json['images'] as List).isNotEmpty) {
       img = json['images'][0];
     }
 
     return WishlistItem(
-      id: json['id'].toString(),
+      id: json['_id']?.toString() ?? json['id'].toString(),
       name: json['name'] ?? '',
       price: json['price'],
       imageUrl: img,
       description: json['description'] ?? '',
       rating: (json['rating'] ?? 0.0).toDouble(),
-      reviewCount: json['reviewCount'] ?? 0,
+      reviewCount: json['numReviews'] ?? json['reviewCount'] ?? 0,
     );
   }
 }

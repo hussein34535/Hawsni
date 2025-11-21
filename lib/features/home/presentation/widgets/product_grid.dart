@@ -71,12 +71,12 @@ class _ProductGridState extends State<ProductGrid> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   const SizedBox(height: 12),
-                  SkeletonLoader(
+                  const SkeletonLoader(
                     height: 16,
                     width: 100,
                   ),
                   const SizedBox(height: 8),
-                  SkeletonLoader(
+                  const SkeletonLoader(
                     height: 14,
                     width: 60,
                   ),

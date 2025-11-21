@@ -11,6 +11,17 @@ class OrderService {
         return data;
     }
 
+    async getUserOrders(userId) {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*, order_items(*, products(name, images))')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data;
+    }
+
     async getOrderById(id) {
         const { data, error } = await supabase
             .from('orders')
