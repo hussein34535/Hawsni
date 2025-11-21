@@ -33,14 +33,16 @@ class ProductModel {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       price: (json['price'] ?? 0).toDouble(),
-      imageUrl: json['image'] ?? 'https://via.placeholder.com/300',
+      imageUrl: (json['images'] != null && (json['images'] as List).isNotEmpty)
+          ? json['images'][0]
+          : (json['image'] ?? 'https://via.placeholder.com/300'),
       category: json['category'] is Map
           ? json['category']['name']
           : (json['category'] ?? ''),
       rating: (json['rating'] ?? 0).toDouble(),
-      reviewCount: json['numReviews'] ?? 0,
-      stock: json['countInStock'] ?? 0,
-      isFeatured: json['isFeatured'] ?? false,
+      reviewCount: json['num_reviews'] ?? json['numReviews'] ?? 0,
+      stock: json['stock'] ?? json['countInStock'] ?? 0,
+      isFeatured: json['is_featured'] ?? json['isFeatured'] ?? false,
       sizes: json['sizes'] != null ? List<String>.from(json['sizes']) : null,
       colors: json['colors'] != null ? List<String>.from(json['colors']) : null,
     );
