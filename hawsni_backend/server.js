@@ -36,17 +36,20 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
+console.log('Debug: Initializing middleware...');
 app.use(cors({
   origin: true,
   credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+console.log('Debug: Middleware initialized successfully.');
 
 
 
 
 
+console.log('Debug: Registering routes...');
 // Admin Dashboard Route
 app.get('/dashboard', DashboardController.getDashboard);
 
@@ -80,6 +83,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
+console.log('Debug: Routes registered successfully.');
 
 // Redirect root to dashboard
 app.get('/', (req, res) => {
@@ -97,6 +101,7 @@ app.use((err, req, res, next) => {
 
 // Test Supabase connection
 const testSupabaseConnection = async () => {
+  console.log('Debug: Starting Supabase connection test...');
   try {
     const { data, error } = await supabase.from('products').select('count').limit(1);
     if (error && error.code !== 'PGRST116') { // PGRST116 = table doesn't exist yet
@@ -108,6 +113,7 @@ const testSupabaseConnection = async () => {
   } catch (err) {
     console.log('⚠️  Supabase connection status unknown');
   }
+  console.log('Debug: Supabase connection test completed.');
 };
 
 // Start server
@@ -118,7 +124,13 @@ app.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/`);
   console.log(`🌐 Server accessible on network at http://${HOST}:${PORT}/`);
-  testSupabaseConnection();
+  console.log('Debug: Calling testSupabaseConnection...');
+testSupabaseConnection();
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('Debug: Unhandled Promise Rejection:', err.stack);
 });
 
 module.exports = app;
