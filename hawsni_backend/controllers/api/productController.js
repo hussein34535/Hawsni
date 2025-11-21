@@ -155,12 +155,13 @@ class ProductController {
     // Admin UI Methods
     async renderProductsPage(req, res) {
         try {
-            const products = await ProductService.getAllProducts();
+            // Use the same logic as the original server.js to include category names
+            const { data: products } = await supabase.from('products').select('*, categories(name)');
             const { data: categories } = await supabase.from('categories').select('*');
             res.render('products', { products: products || [], categories: categories || [] });
         } catch (error) {
             console.error('Error rendering products:', error);
-            res.status(500).send(`Error: ${error.message}`);
+            res.status(500).send(`خطأ في عرض المنتجات: ${error.message}`);
         }
     }
 
@@ -170,52 +171,61 @@ class ProductController {
             res.render('product-form', { product: null, categories: categories || [] });
         } catch (error) {
             console.error('Error rendering new product form:', error);
-            res.status(500).send(`Error: ${error.message}`);
+            res.status(500).send(`خطأ في عرض صفحة المنتج الجديد: ${error.message}`);
         }
     }
 
     async createProductAdmin(req, res) {
         try {
+            const { name, description, price, discount, category_id, stock, is_featured } = req.body;
+
             let imageUrls = [];
             if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                 imageUrls = await Promise.all(uploadPromises);
             }
 
-            const productData = {
-                name: req.body.name,
-                description: req.body.description,
-                price: parseFloat(req.body.price),
-                discount: parseInt(req.body.discount) || 0,
-                category_id: req.body.category_id || null,
-                stock: parseInt(req.body.stock) || 0,
-                is_featured: req.body.is_featured === 'on',
+            const { error } = await supabase.from('products').insert({
+                name,
+                description,
+                price: parseFloat(price),
+                discount: parseInt(discount) || 0,
+                category_id: category_id || null,
+                stock: parseInt(stock) || 0,
+                is_featured: is_featured === 'on',
                 images: imageUrls
-            };
+            });
 
-            await ProductService.createProduct(productData);
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                return res.status(500).send(`خطأ في إضافة المنتج: ${error.message}`);
+            }
+
             res.redirect('/products');
-        } catch (error) {
-            console.error('Error creating product (Admin):', error);
-            res.status(500).send(`Error: ${error.message}`);
+        } catch (err) {
+            console.error('❌ Server error:', err);
+            res.status(500).send(`خطأ في السيرفر: ${err.message}`);
         }
     }
 
     async renderEditProductPage(req, res) {
         try {
-            const product = await ProductService.getProductById(req.params.id);
+            const { data: product } = await supabase.from('products').select('*').eq('id', req.params.id).single();
             const { data: categories } = await supabase.from('categories').select('*');
             res.render('product-form', { product, categories: categories || [] });
         } catch (error) {
             console.error('Error rendering edit product form:', error);
-            res.status(500).send(`Error: ${error.message}`);
+            res.status(500).send(`خطأ في عرض صفحة تعديل المنتج: ${error.message}`);
         }
     }
 
     async updateProductAdmin(req, res) {
         try {
-            const currentProduct = await ProductService.getProductById(req.params.id);
-            let imageUrls = currentProduct.images || [];
+            const { name, description, price, discount, category_id, stock, is_featured } = req.body;
+
+            const { data: currentProduct } = await supabase.from('products').select('images').eq('id', req.params.id).single();
+
+            let imageUrls = currentProduct?.images || [];
 
             if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
@@ -223,32 +233,31 @@ class ProductController {
                 imageUrls = [...imageUrls, ...newImageUrls];
             }
 
-            const productData = {
-                name: req.body.name,
-                description: req.body.description,
-                price: parseFloat(req.body.price),
-                discount: parseInt(req.body.discount) || 0,
-                category_id: req.body.category_id || null,
-                stock: parseInt(req.body.stock) || 0,
-                is_featured: req.body.is_featured === 'on',
+            await supabase.from('products').update({
+                name,
+                description,
+                price: parseFloat(price),
+                discount: parseInt(discount) || 0,
+                category_id: category_id || null,
+                stock: parseInt(stock) || 0,
+                is_featured: is_featured === 'on',
                 images: imageUrls
-            };
+            }).eq('id', req.params.id);
 
-            await ProductService.updateProduct(req.params.id, productData);
             res.redirect('/products');
-        } catch (error) {
-            console.error('Error updating product (Admin):', error);
-            res.status(500).send(`Error: ${error.message}`);
+        } catch (err) {
+            console.error('❌ Server error:', err);
+            res.status(500).send(`خطأ في السيرفر: ${err.message}`);
         }
     }
 
     async deleteProductAdmin(req, res) {
         try {
-            await ProductService.deleteProduct(req.params.id);
+            await supabase.from('products').delete().eq('id', req.params.id);
             res.redirect('/products');
         } catch (error) {
             console.error('Error deleting product (Admin):', error);
-            res.status(500).send(`Error: ${error.message}`);
+            res.status(500).send(`خطأ في حذف المنتج: ${error.message}`);
         }
     }
 }

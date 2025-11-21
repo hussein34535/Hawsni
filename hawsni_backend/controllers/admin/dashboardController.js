@@ -79,7 +79,7 @@ class DashboardController {
 
         } catch (err) {
             console.error('Dashboard Error:', err);
-            res.status(500).send("Error loading dashboard");
+            res.status(500).send("خطأ في تحميل لوحة التحكم");
         }
     }
 }

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/features/home/data/models/category_model.dart';
 

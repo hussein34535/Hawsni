@@ -1,5 +1,6 @@
-const CategoryService = require('../../services/categoryService');
+const supabase = require('../../config/supabase');
 const uploadToSupabase = require('../../utils/fileUpload');
+const CategoryService = require('../../services/categoryService');
 
 class CategoryController {
     // API Methods
@@ -77,26 +78,45 @@ class CategoryController {
     // Admin UI Methods
     async renderCategoriesPage(req, res) {
         try {
-            const categories = await CategoryService.getAllCategories();
+            const { data: categories, error } = await supabase
+                .from('categories')
+                .select('*')
+                .order('sort_order', { ascending: true })
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                return res.status(500).send(`خطأ في جلب التصنيفات: ${error.message}`);
+            }
+
             res.render('categories', { categories: categories || [] });
         } catch (error) {
-            console.error('Error fetching categories:', error);
-            res.status(500).send(`Error fetching categories: ${error.message}`);
+            console.error('Error rendering categories page:', error);
+            res.status(500).send(`خطأ في عرض صفحة التصنيفات: ${error.message}`);
         }
     }
 
     async renderEditPage(req, res) {
         try {
-            const category = await CategoryService.getCategoryById(req.params.id);
+            const { data: category, error } = await supabase
+                .from('categories')
+                .select('*')
+                .eq('id', req.params.id)
+                .single();
+
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                return res.status(500).send(`خطأ في جلب التصنيف: ${error.message}`);
+            }
 
             if (!category) {
-                return res.status(404).send('Category not found');
+                return res.status(404).send('التصنيف غير موجود');
             }
 
             res.render('category-edit', { category });
         } catch (error) {
-            console.error('Error fetching category:', error);
-            res.status(500).send(`Error fetching category: ${error.message}`);
+            console.error('Error rendering edit page:', error);
+            res.status(500).send(`خطأ في عرض صفحة التعديل: ${error.message}`);
         }
     }
 
@@ -105,24 +125,45 @@ class CategoryController {
             const { name, description } = req.body;
 
             if (!name) {
-                return res.status(400).send('Category name is required');
+                return res.status(400).send('اسم التصنيف مطلوب');
             }
+
+            const { data: maxOrderData, error: maxOrderError } = await supabase
+                .from('categories')
+                .select('sort_order')
+                .order('sort_order', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (maxOrderError) {
+                console.error('❌ Supabase error:', maxOrderError);
+                return res.status(500).send(`خطأ في جلب الترتيب: ${maxOrderError.message}`);
+            }
+
+            const maxOrder = maxOrderData?.sort_order || 0;
 
             let imageUrl = null;
             if (req.file) {
                 imageUrl = await uploadToSupabase(req.file, 'categories');
             }
 
-            await CategoryService.createCategory({
-                name,
+            const { data, error } = await supabase.from('categories').insert({ 
+                name, 
                 description: description || '',
-                image: imageUrl
-            });
+                image: imageUrl,
+                sort_order: maxOrder + 1
+            }).select().single();
 
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                return res.status(500).send(`خطأ في إضافة التصنيف: ${error.message}`);
+            }
+
+            console.log('✅ Category added successfully:', data);
             res.redirect('/categories');
         } catch (err) {
-            console.error('Server error:', err);
-            res.status(500).send(`Server error: ${err.message}`);
+            console.error('❌ Server error:', err);
+            res.status(500).send(`خطأ في السيرفر: ${err.message}`);
         }
     }
 
@@ -131,7 +172,7 @@ class CategoryController {
             const { name, description, is_active } = req.body;
 
             if (!name) {
-                return res.status(400).send('Category name is required');
+                return res.status(400).send('اسم التصنيف مطلوب');
             }
 
             const updateData = {
@@ -141,25 +182,42 @@ class CategoryController {
             };
 
             if (req.file) {
-                updateData.image = await uploadToSupabase(req.file, 'categories');
+                const imageUrl = await uploadToSupabase(req.file, 'categories');
+                updateData.image = imageUrl;
             }
 
-            await CategoryService.updateCategory(req.params.id, updateData);
+            const { data, error } = await supabase.from('categories').update(updateData).eq('id', req.params.id).select().single();
 
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                return res.status(500).send(`خطأ في تحديث التصنيف: ${error.message}`);
+            }
+
+            if (!data) {
+                return res.status(404).send('التصنيف غير موجود');
+            }
+
+            console.log('✅ Category updated successfully:', data);
             res.redirect('/categories');
         } catch (err) {
-            console.error('Server error:', err);
-            res.status(500).send(`Server error: ${err.message}`);
+            console.error('❌ Server error:', err);
+            res.status(500).send(`خطأ في السيرفر: ${err.message}`);
         }
     }
 
     async deleteCategoryAdmin(req, res) {
         try {
-            await CategoryService.deleteCategory(req.params.id);
+            const { error } = await supabase.from('categories').delete().eq('id', req.params.id);
+
+            if (error) {
+                console.error('❌ Supabase error:', error);
+                return res.status(500).send(`خطأ في حذف التصنيف: ${error.message}`);
+            }
+
             res.redirect('/categories');
         } catch (error) {
-            console.error('Supabase error:', error);
-            return res.status(500).send(`Error deleting category: ${error.message}`);
+            console.error('Error deleting category:', error);
+            res.status(500).send(`خطأ في حذف التصنيف: ${error.message}`);
         }
     }
 
@@ -168,10 +226,19 @@ class CategoryController {
             const { categories } = req.body;
 
             if (!categories || !Array.isArray(categories)) {
-                return res.status(400).json({ success: false, message: 'Invalid categories data' });
+                return res.status(400).json({ success: false, message: 'بيانات التصنيفات غير صالحة' });
             }
 
-            await CategoryService.reorderCategories(categories);
+            const updates = categories.map(({ id, sort_order }) => {
+                return supabase.from('categories').update({ sort_order: parseInt(sort_order) }).eq('id', id);
+            });
+
+            const results = await Promise.all(updates);
+
+            const errors = results.filter(result => result.error);
+            if (errors.length > 0) {
+                throw new Error('فشل تحديث ترتيب التصنيفات: ' + errors.map(e => e.error.message).join(', '));
+            }
 
             res.json({ success: true, categories });
         } catch (error) {

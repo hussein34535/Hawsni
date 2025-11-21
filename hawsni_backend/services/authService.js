@@ -21,7 +21,8 @@ class AuthService {
                 data: {
                     full_name: name,
                     role: 'user'
-                }
+                },
+                emailRedirectTo: undefined // Disable email confirmation for now
             }
         });
 
@@ -32,7 +33,7 @@ class AuthService {
         const user = authData.user;
 
         if (user) {
-            // 2. Add user to 'users' table
+            // 2. Add user to 'users' table (using service role key to bypass RLS)
             const { error: profileError } = await supabase
                 .from('users')
                 .insert([
@@ -41,7 +42,9 @@ class AuthService {
 
             if (profileError) {
                 console.error('Error creating user profile:', profileError);
-                // Continue as the auth account is created
+                // If profile creation fails, delete the auth user to maintain consistency
+                await supabase.auth.admin.deleteUser(user.id);
+                throw new Error(`Failed to create user profile: ${profileError.message}`);
             }
 
             const token = this.generateToken(user.id, user.email, 'user');

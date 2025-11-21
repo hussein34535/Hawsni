@@ -6,7 +6,6 @@ import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
 import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:hawsni_app/features/profile/presentation/screens/profile_screen.dart';
-import 'package:hawsni_app/features/products/presentation/screens/products_screen.dart';
 import 'package:hawsni_app/features/search/presentation/screens/search_screen.dart';
 import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_screen.dart';
 

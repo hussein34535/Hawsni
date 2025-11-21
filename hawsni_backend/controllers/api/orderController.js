@@ -1,3 +1,4 @@
+const supabase = require('../../config/supabase');
 const OrderService = require('../../services/orderService');
 
 class OrderController {
@@ -96,22 +97,22 @@ class OrderController {
     // Admin UI Methods
     async renderOrdersPage(req, res) {
         try {
-            const orders = await OrderService.getAllOrders();
+            const { data: orders } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
             res.render('orders', { orders: orders || [] });
         } catch (error) {
             console.error('Error fetching orders:', error);
-            res.status(500).send(`Error fetching orders: ${error.message}`);
+            res.status(500).send(`خطأ في جلب الطلبات: ${error.message}`);
         }
     }
 
     async updateStatusAdmin(req, res) {
         try {
             const { status } = req.body;
-            await OrderService.updateOrderStatus(req.params.id, status);
+            await supabase.from('orders').update({ status }).eq('id', req.params.id);
             res.redirect('/orders');
         } catch (error) {
             console.error('Error updating order status:', error);
-            res.status(500).send(`Error updating order status: ${error.message}`);
+            res.status(500).send(`خطأ في تحديث حالة الطلب: ${error.message}`);
         }
     }
 }
