@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CategoryGridItem {
   final String name;
@@ -88,19 +89,29 @@ class CategoryGrid extends StatelessWidget {
                   ),
                   child: Center(
                     child: category.imageUrl != null
-                        ? Image.network(
-                            category.imageUrl!,
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(
-                                category.icon ?? Icons.category,
-                                size: 32,
-                                color: const Color(0xFFD4AF37),
-                              );
-                            },
-                          )
+                        ? (category.imageUrl!.toLowerCase().endsWith('.svg')
+                            ? SvgPicture.network(
+                                category.imageUrl!,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.contain,
+                                placeholderBuilder: (BuildContext context) =>
+                                    const Center(
+                                        child: CircularProgressIndicator()),
+                              )
+                            : Image.network(
+                                category.imageUrl!,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(
+                                    category.icon ?? Icons.category,
+                                    size: 32,
+                                    color: const Color(0xFFD4AF37),
+                                  );
+                                },
+                              ))
                         : Icon(
                             category.icon ?? Icons.category,
                             size: 32,
