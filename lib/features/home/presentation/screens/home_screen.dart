@@ -178,16 +178,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           (context, index) {
                             final product = state.featuredProducts[index];
                             return ProductCard(
-                              id: product.id,
-                              name: product.name,
-                              price: product.price.toString(),
-                              imageUrl: product.imageUrl,
-                              rating: product.rating,
-                              reviewCount: product.reviewCount,
-                              showBadge: index % 3 == 0,
-                              badgeText: 'NEW',
-                              badgeColor: AppTheme.primaryColor,
-                            );
+                                key: ValueKey(product.id),
+                                id: product.id,
+                                name: product.name,
+                                price: product.price.toString(),
+                                imageUrl: product.imageUrl,
+                                rating: product.rating,
+                                reviewCount: product.reviewCount,
+                                showBadge: index % 3 == 0,
+                                badgeText: 'NEW',
+                                badgeColor: AppTheme.primaryColor,
+                                screenId: 'home',
+                              );
                           },
                           childCount: state.featuredProducts.length,
                         ),

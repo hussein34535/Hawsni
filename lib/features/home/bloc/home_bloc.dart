@@ -59,7 +59,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       ]);
 
       final categories = results[0] as List<CategoryModel>;
-      final featuredProducts = results[1] as List<ProductModel>;
+      final List<ProductModel> fetchedFeaturedProducts = results[1] as List<ProductModel>;
+      final Set<String> uniqueProductIds = {};
+      final List<ProductModel> featuredProducts = [];
+
+      for (var product in fetchedFeaturedProducts) {
+        if (uniqueProductIds.add(product.id)) {
+          featuredProducts.add(product);
+        }
+      }
 
       // For now, use featured products as flash deals or fetch separately if API exists
       final flashDeals = featuredProducts.take(5).toList();

@@ -68,6 +68,7 @@ class ProductsScreen extends StatelessWidget {
                         (context, index) {
                           final product = products[index];
                           return ProductCard(
+                            key: ValueKey(product.id),
                             id: product.id,
                             imageUrl: product.imageUrl,
                             name: product.name,
@@ -75,6 +76,7 @@ class ProductsScreen extends StatelessWidget {
                             description: product.description,
                             rating: product.rating,
                             reviewCount: product.reviewCount,
+                            screenId: 'products',
                           );
                         },
                         childCount: products.length,

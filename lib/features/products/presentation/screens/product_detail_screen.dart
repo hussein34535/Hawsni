@@ -26,6 +26,7 @@ class ProductDetailScreen extends StatefulWidget {
   final List<String>? sizes;
   final List<String>? colors;
   final String productId;
+  final String screenId;
 
   const ProductDetailScreen({
     super.key,
@@ -39,6 +40,7 @@ class ProductDetailScreen extends StatefulWidget {
     this.sizes,
     this.colors,
     required this.productId,
+    required this.screenId,
   });
 
   @override

@@ -126,6 +126,7 @@ class WishlistScreen extends StatelessWidget {
                     description: item.description,
                     rating: item.rating,
                     reviewCount: item.reviewCount,
+                    screenId: 'wishlist',
                   ),
                   Positioned(
                     top: 8,

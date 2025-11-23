@@ -399,11 +399,12 @@ class _SearchScreenState extends State<SearchScreen> {
         return ProductCard(
           id: product['id']?.toString() ?? 'search_product_$index',
           imageUrl: imageUrl,
-          name: product['name'] ?? 'Unknown',
-          price: '\$${product['price'] ?? 0}',
+          name: product['name'] ?? 'No Name',
+          price: product['price']?.toString() ?? '0.00',
           description: product['description'] ?? '',
-          rating: (product['rating'] ?? 4.5).toDouble(),
-          reviewCount: product['numReviews'] ?? 0,
+          rating: (product['rating'] as num?)?.toDouble() ?? 0.0,
+          reviewCount: (product['reviewCount'] as num?)?.toInt() ?? 0,
+          screenId: 'search',
         );
       },
     );

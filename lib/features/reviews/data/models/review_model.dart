@@ -19,16 +19,25 @@ class ReviewModel {
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
     return ReviewModel(
-      id: json['_id'] ?? json['id'] ?? '',
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       userId: json['user'] is Map
-          ? json['user']['_id'] ?? json['user']['id']
-          : (json['user'] ?? ''),
-      userName: json['user'] is Map ? json['user']['name'] : 'Anonymous',
-      productId: json['product'] ?? '',
-      rating: (json['rating'] ?? 0).toDouble(),
-      comment: json['comment'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ??
-          json['created_at'] ??
+          ? (json['user']['_id']?.toString() ??
+              json['user']['id']?.toString() ??
+              '')
+          : (json['user']?.toString() ?? ''),
+      userName: json['user'] is Map
+          ? (json['user']['name']?.toString() ?? 'Anonymous')
+          : 'Anonymous',
+      productId: json['product'] is Map
+          ? (json['product']['_id']?.toString() ??
+              json['product']['id']?.toString() ??
+              '')
+          : (json['product']?.toString() ?? ''),
+      rating:
+          (json['rating'] is num) ? (json['rating'] as num).toDouble() : 0.0,
+      comment: json['comment']?.toString() ?? '',
+      createdAt: DateTime.parse(json['createdAt']?.toString() ??
+          json['created_at']?.toString() ??
           DateTime.now().toIso8601String()),
     );
   }

@@ -79,60 +79,66 @@ class _FlashDealsSectionState extends State<FlashDealsSection> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.flash_on,
-                    color: Color(0xFFFFD700),
-                    size: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Flash Deals',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: 'Playfair Display',
-                      letterSpacing: 0.5,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.flash_on,
+                      color: Color(0xFFFFD700),
+                      size: 24,
                     ),
-                  ),
-                  if (widget.endTime != null) ...[
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                    const SizedBox(width: 8),
+                    const Flexible(
+                      child: Text(
+                        'Flash Deals',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Playfair Display',
+                          letterSpacing: 0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF4444).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0xFFFF4444).withOpacity(0.5),
+                    ),
+                    if (widget.endTime != null) ...[
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF4444).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFFFF4444).withOpacity(0.5),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.timer_outlined,
+                              color: Color(0xFFFF4444),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _formatDuration(_timeRemaining),
+                              style: const TextStyle(
+                                color: Color(0xFFFF4444),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.timer,
-                            color: Color(0xFFFF4444),
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatDuration(_timeRemaining),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFF4444),
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
               if (widget.onViewAll != null)
                 TextButton(
@@ -189,6 +195,7 @@ class _FlashDealsSectionState extends State<FlashDealsSection> {
                   showBadge: true,
                   badgeText: 'FLASH',
                   badgeColor: const Color(0xFFFF4444),
+                  screenId: 'flash_deals',
                 ),
               );
             },

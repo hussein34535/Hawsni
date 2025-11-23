@@ -144,7 +144,6 @@ class ApiService {
     }
   }
 
-
   // Search products
   static Future<List<dynamic>> searchProducts(String query) async {
     try {
@@ -197,7 +196,8 @@ class ApiService {
       String endpoint = '/products';
       if (queryParams.isNotEmpty) {
         endpoint += '?';
-        endpoint += queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
+        endpoint +=
+            queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
       }
 
       final data = await get(endpoint, includeAuth: false);
@@ -212,7 +212,8 @@ class ApiService {
   static Future<Map<String, dynamic>?> createOrder(
       Map<String, dynamic> orderData) async {
     try {
-      final data = await post('/orders', orderData, includeAuth: false); // Guest checkout allowed
+      final data = await post('/orders', orderData,
+          includeAuth: true); // Auth required for now
       return data;
     } catch (e) {
       print('Error creating order: $e');
@@ -249,11 +250,14 @@ class ApiService {
     required String comment,
   }) async {
     try {
-      final data = await post('/reviews', {
-        'productId': productId,
-        'rating': rating,
-        'comment': comment,
-      }, includeAuth: true);
+      final data = await post(
+          '/reviews',
+          {
+            'productId': productId,
+            'rating': rating,
+            'comment': comment,
+          },
+          includeAuth: true);
       return data['review'];
     } catch (e) {
       print('Error creating review: $e');
@@ -288,7 +292,8 @@ class ApiService {
   // Update User Profile
   static Future<bool> updateUserProfile(String name, String phone) async {
     try {
-      await put('/users/profile', {'name': name, 'phone': phone}, includeAuth: true);
+      await put('/users/profile', {'name': name, 'phone': phone},
+          includeAuth: true);
       return true;
     } catch (e) {
       print('Error updating profile: $e');

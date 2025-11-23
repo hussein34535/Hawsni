@@ -16,6 +16,7 @@ class ProductCard extends StatelessWidget {
   final bool showBadge;
   final String? badgeText;
   final Color? badgeColor;
+  final String screenId;
 
   const ProductCard({
     super.key,
@@ -31,14 +32,13 @@ class ProductCard extends StatelessWidget {
     this.showBadge = false,
     this.badgeText,
     this.badgeColor,
+    required this.screenId,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        // Add a small delay to allow the ProductDetailScreen to build its Hero widget
-        await Future.delayed(const Duration(milliseconds: 50));
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
@@ -51,6 +51,7 @@ class ProductCard extends StatelessWidget {
               sizes: sizes,
               colors: colors,
               productId: id,
+              screenId: screenId,
             ),
           ),
         );
@@ -69,7 +70,7 @@ class ProductCard extends StatelessWidget {
                   child: Stack(
                     children: [
                       Hero(
-                        tag: 'product_$id',
+                        tag: 'product_${id}_$screenId',
                         child: Container(
                           width: double.infinity,
                           height: double.infinity,
