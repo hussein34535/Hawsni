@@ -24,7 +24,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final orderData = {
       'shippingAddress':
           '123 Fashion Street, Luxury District, New York, NY 10001',
-      'paymentMethod': 'MasterCard',
+      'paymentMethod': 'Credit Card',
       'subtotal': subtotal,
       'discount': 0.0,
       'couponCode': null,
