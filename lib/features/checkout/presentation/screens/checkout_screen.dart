@@ -95,140 +95,169 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               item.quantity),
                     );
 
-                    return SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSectionTitle('Shipping Address'),
-                          _buildGlassContainer(
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        AppTheme.primaryColor.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.location_on,
-                                      color: AppTheme.primaryColor),
-                                ),
-                                const SizedBox(width: 16),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Home',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
+                    return Stack(
+                      children: [
+                        SingleChildScrollView(
+                          padding: EdgeInsets.fromLTRB(16, 16, 16,
+                              MediaQuery.of(context).padding.bottom + 120),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSectionTitle('Shipping Address'),
+                              _buildGlassContainer(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor
+                                            .withOpacity(0.1),
+                                        shape: BoxShape.circle,
                                       ),
-                                      Text(
-                                        '123 Fashion Street, Luxury District\nNew York, NY 10001',
-                                        style: TextStyle(color: Colors.grey),
+                                      child: const Icon(Icons.location_on,
+                                          color: AppTheme.primaryColor),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    const Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Home',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            '123 Fashion Street, Luxury District\nNew York, NY 10001',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                                const Icon(Icons.arrow_forward_ios,
-                                    color: Colors.grey, size: 16),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          _buildSectionTitle('Payment Method'),
-                          _buildGlassContainer(
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        AppTheme.primaryColor.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.credit_card,
-                                      color: AppTheme.primaryColor),
-                                ),
-                                const SizedBox(width: 16),
-                                const Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'MasterCard',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        '**** **** **** 1234',
-                                        style: TextStyle(color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const Icon(Icons.arrow_forward_ios,
-                                    color: Colors.grey, size: 16),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          _buildSectionTitle('Order Summary'),
-                          _buildGlassContainer(
-                            child: Column(
-                              children: [
-                                _buildSummaryRow('Subtotal',
-                                    '\$${subtotal.toStringAsFixed(2)}'),
-                                const SizedBox(height: 8),
-                                _buildSummaryRow('Shipping', '\$10.00'),
-                                const SizedBox(height: 8),
-                                _buildSummaryRow('Tax',
-                                    '\$${(subtotal * 0.05).toStringAsFixed(2)}'),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 12),
-                                  child: Divider(color: Colors.grey),
-                                ),
-                                _buildSummaryRow(
-                                  'Total',
-                                  '\$${(subtotal + 10 + (subtotal * 0.05)).toStringAsFixed(2)}',
-                                  isTotal: true,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () =>
-                                  _processCheckout(state.items, subtotal),
-                              style: ElevatedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 20),
-                                backgroundColor: AppTheme.primaryColor,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30)),
-                                elevation: 10,
-                                shadowColor:
-                                    AppTheme.primaryColor.withOpacity(0.4),
-                              ),
-                              child: const Text(
-                                'Place Order',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                                    ),
+                                    const Icon(Icons.arrow_forward_ios,
+                                        color: Colors.grey, size: 16),
+                                  ],
                                 ),
                               ),
+                              const SizedBox(height: 24),
+                              _buildSectionTitle('Payment Method'),
+                              _buildGlassContainer(
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor
+                                            .withOpacity(0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.credit_card,
+                                          color: AppTheme.primaryColor),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    const Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'MasterCard',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Text(
+                                            '**** **** **** 1234',
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Icon(Icons.arrow_forward_ios,
+                                        color: Colors.grey, size: 16),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              _buildSectionTitle('Order Summary'),
+                              _buildGlassContainer(
+                                child: Column(
+                                  children: [
+                                    _buildSummaryRow('Subtotal',
+                                        '\$${subtotal.toStringAsFixed(2)}'),
+                                    const SizedBox(height: 8),
+                                    _buildSummaryRow('Shipping', '\$10.00'),
+                                    const SizedBox(height: 8),
+                                    _buildSummaryRow('Tax',
+                                        '\$${(subtotal * 0.05).toStringAsFixed(2)}'),
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 12),
+                                      child: Divider(color: Colors.grey),
+                                    ),
+                                    _buildSummaryRow(
+                                      'Total',
+                                      '\$${(subtotal + 10 + (subtotal * 0.05)).toStringAsFixed(2)}',
+                                      isTotal: true,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: ClipRRect(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                padding: EdgeInsets.fromLTRB(24, 24, 24,
+                                    MediaQuery.of(context).padding.bottom + 24),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.05),
+                                  border: Border(
+                                      top: BorderSide(
+                                          color:
+                                              Colors.white.withOpacity(0.1))),
+                                ),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () =>
+                                        _processCheckout(state.items, subtotal),
+                                    style: ElevatedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 20),
+                                      backgroundColor: AppTheme.primaryColor,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(30)),
+                                      elevation: 10,
+                                      shadowColor: AppTheme.primaryColor
+                                          .withOpacity(0.4),
+                                    ),
+                                    child: const Text(
+                                      'Place Order',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     );
                   }
                   return const SizedBox();

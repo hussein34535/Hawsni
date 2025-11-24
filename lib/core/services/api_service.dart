@@ -276,6 +276,17 @@ class ApiService {
     }
   }
 
+  // Get Banners
+  static Future<List<dynamic>> getBanners() async {
+    try {
+      final data = await get('/banners', includeAuth: false);
+      return data is List ? data : (data['banners'] ?? []);
+    } catch (e) {
+      print('Error fetching banners: $e');
+      return [];
+    }
+  }
+
   // --- User Profile & Addresses ---
 
   // Get User Profile (Real Data)
@@ -342,7 +353,7 @@ class ApiService {
   static Future<List<dynamic>> getWishlist() async {
     try {
       final data = await get('/wishlist', includeAuth: true);
-      return data['wishlist'] ?? [];
+      return data['products'] ?? [];
     } catch (e) {
       print('Error fetching wishlist: $e');
       return [];

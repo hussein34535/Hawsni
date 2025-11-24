@@ -76,7 +76,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: _isLoading
           ? const Center(child: SpinningLoader())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(
+                  16, 16, 16, MediaQuery.of(context).padding.bottom + 20),
               child: Column(
                 children: [
                   // Profile Header
@@ -100,11 +101,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 ],
                               ),
-                              child: const CircleAvatar(
+                              child: CircleAvatar(
                                 radius: 40,
                                 backgroundColor: Colors.grey,
-                                child: Icon(Icons.person,
-                                    size: 40, color: Colors.white),
+                                backgroundImage: _userProfile?['avatar_url'] !=
+                                        null
+                                    ? NetworkImage(_userProfile!['avatar_url'])
+                                    : null,
+                                child: _userProfile?['avatar_url'] == null
+                                    ? const Icon(Icons.person,
+                                        size: 40, color: Colors.white)
+                                    : null,
                               ),
                             ),
                             Positioned(

@@ -49,7 +49,7 @@ class _SpinningLoaderState extends State<SpinningLoader>
           width: widget.size,
           height: widget.size,
           child: Image.asset(
-            'assets/images/app_icon.png',
+            'assets/images/logo.png',
             fit: BoxFit.contain,
             color: widget.color, // Optional: tint the icon if needed
           ),

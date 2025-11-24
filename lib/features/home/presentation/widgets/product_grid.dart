@@ -32,7 +32,8 @@ class _ProductGridState extends State<ProductGrid> {
         });
       }
 
-      final fetchedProducts = await ApiService.getProducts(categoryId: widget.categoryId);
+      final fetchedProducts =
+          await ApiService.getProducts(categoryId: widget.categoryId);
       // Check if the widget is still mounted before calling setState
       if (mounted) {
         setState(() {
@@ -142,6 +143,7 @@ class _ProductGridState extends State<ProductGrid> {
             reviewCount: product['reviewCount'] ?? 128,
             sizes: List<String>.from(product['sizes'] ?? []),
             colors: List<String>.from(product['colors'] ?? []),
+            screenId: 'product_grid',
           );
         },
       ),

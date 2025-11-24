@@ -106,10 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.diamond_outlined,
-                        size: 60,
-                        color: AppTheme.primaryColor,
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 60,
+                        height: 60,
+                        color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 24),

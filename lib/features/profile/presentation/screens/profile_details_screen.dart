@@ -24,6 +24,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   File? _profileImage;
   Map<String, dynamic>? _userProfile;
   bool _isLoading = true;
+  List<dynamic> _recentOrders = [];
 
   @override
   void initState() {
@@ -56,6 +57,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           _dateOfBirthController.text = profile?['dateOfBirth'] ?? '';
           _isLoading = false;
         });
+        _loadRecentOrders();
       }
     } catch (e) {
       print('Error loading user profile: $e');
@@ -67,15 +69,44 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     }
   }
 
+  Future<void> _loadRecentOrders() async {
+    try {
+      final orders = await ApiService.getUserOrders();
+      if (mounted) {
+        setState(() {
+          _recentOrders = orders.take(2).toList();
+        });
+      }
+    } catch (e) {
+      print('Error loading orders: $e');
+    }
+  }
+
   void _toggleEditing() {
     setState(() {
       _isEditing = !_isEditing;
     });
   }
 
+  Future<void> _pickProfileImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile =
+        await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+    }
+  }
+
   void _saveProfile() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
       try {
+        // Note: Actual image upload would go here if backend supported it.
+        // For now we just update text fields.
+
         final success = await ApiService.updateUserProfile(
           _nameController.text,
           _phoneController.text,
@@ -91,8 +122,10 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           );
           setState(() {
             _isEditing = false;
+            _isLoading = false;
           });
         } else if (mounted) {
+          setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text('Failed to update profile',
@@ -102,6 +135,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         }
       } catch (e) {
         if (mounted) {
+          setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 content: Text('Error updating profile',
@@ -110,18 +144,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           );
         }
       }
-    }
-  }
-
-  Future<void> _pickProfileImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile =
-        await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
     }
   }
 
@@ -172,8 +194,11 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                             backgroundColor: Colors.grey[900],
                             backgroundImage: _profileImage != null
                                 ? FileImage(_profileImage!)
-                                : null,
-                            child: _profileImage == null
+                                : (_userProfile?['avatar_url'] != null
+                                    ? NetworkImage(_userProfile!['avatar_url'])
+                                    : null) as ImageProvider?,
+                            child: _profileImage == null &&
+                                    _userProfile?['avatar_url'] == null
                                 ? const Icon(Icons.person,
                                     size: 50, color: Colors.white54)
                                 : null,
@@ -293,11 +318,23 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildOrderCard(
-                        'Order #12345', 'Processing', '\$125.99', '2023-06-15'),
-                    const SizedBox(height: 12),
-                    _buildOrderCard(
-                        'Order #12344', 'Delivered', '\$89.50', '2023-06-10'),
+                    if (_recentOrders.isEmpty)
+                      const Text('No recent orders',
+                          style: TextStyle(color: Colors.grey))
+                    else
+                      ..._recentOrders.map((order) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildOrderCard(
+                              'Order #${order['id'].toString().substring(0, 8)}',
+                              order['status'] ?? 'Processing',
+                              '\$${order['total']}',
+                              order['created_at'] != null
+                                  ? order['created_at']
+                                      .toString()
+                                      .substring(0, 10)
+                                  : '',
+                            ),
+                          )),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,

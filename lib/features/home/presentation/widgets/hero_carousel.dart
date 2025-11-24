@@ -73,7 +73,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
     }
 
     return Container(
-      height: 260, // Increased height to prevent overflow
+      height: 200, // Reduced height as requested
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Stack(
         children: [

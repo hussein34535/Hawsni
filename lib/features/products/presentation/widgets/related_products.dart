@@ -85,6 +85,7 @@ class RelatedProducts extends StatelessWidget {
                   imageUrl: product['imageUrl'],
                   rating: product['rating'],
                   reviewCount: product['reviewCount'],
+                  screenId: 'related',
                 ),
               );
             },

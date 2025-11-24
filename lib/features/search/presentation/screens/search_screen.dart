@@ -381,7 +381,8 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildResultsGrid() {
     return GridView.builder(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.fromLTRB(
+          16, 16, 16, MediaQuery.of(context).padding.bottom + 60),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.65,

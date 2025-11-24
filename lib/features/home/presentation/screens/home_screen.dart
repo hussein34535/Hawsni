@@ -103,12 +103,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Hero Carousel
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 100),
+                        padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).padding.top + 10),
                         child: HeroCarousel(
-                          imageUrls: state.featuredProducts
-                              .take(5)
-                              .map((p) => p.imageUrl)
-                              .toList(),
+                          imageUrls: state.bannerImages,
                         ),
                       ),
                     ),
@@ -149,21 +147,93 @@ class _HomeScreenState extends State<HomeScreen> {
                       SliverToBoxAdapter(
                         child: FlashDealsSection(
                           endTime: DateTime.now().add(const Duration(hours: 4)),
-                          onViewAll: () {},
+                          onViewAll: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ProductsScreen(
+                                  title: 'Flash Deals',
+                                ),
+                              ),
+                            );
+                          },
                           products: state.flashDeals,
                         ),
                       ),
 
                     // Featured Products Header
+                    if (state.featuredProducts.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: SectionHeader(
+                          title: 'Featured For You',
+                          icon: Icons.star,
+                          onViewAll: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ProductsScreen(
+                                  title: 'Featured Products',
+                                  isFeatured: true,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                    // Featured Grid
+                    if (state.featuredProducts.isNotEmpty)
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.65,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final product = state.featuredProducts[index];
+                              return ProductCard(
+                                key: ValueKey(product.id),
+                                id: product.id,
+                                name: product.name,
+                                price: product.price.toString(),
+                                imageUrl: product.imageUrl,
+                                rating: product.rating,
+                                reviewCount: product.reviewCount,
+                                showBadge: index % 3 == 0,
+                                badgeText: 'NEW',
+                                badgeColor: AppTheme.primaryColor,
+                                screenId: 'home_featured',
+                              );
+                            },
+                            childCount: state.featuredProducts.length,
+                          ),
+                        ),
+                      ),
+
+                    // All Products Header
                     SliverToBoxAdapter(
                       child: SectionHeader(
-                        title: 'Featured For You',
-                        icon: Icons.star,
-                        onViewAll: () {},
+                        title: 'New Arrivals',
+                        icon: Icons.grid_view, // Changed icon
+                        onViewAll: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProductsScreen(
+                                title: 'New Arrivals',
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
 
-                    // Featured Grid
+                    // All Products Grid
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       sliver: SliverGrid(
@@ -176,22 +246,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final product = state.featuredProducts[index];
+                            final product = state.allProducts[index];
                             return ProductCard(
-                                key: ValueKey(product.id),
-                                id: product.id,
-                                name: product.name,
-                                price: product.price.toString(),
-                                imageUrl: product.imageUrl,
-                                rating: product.rating,
-                                reviewCount: product.reviewCount,
-                                showBadge: index % 3 == 0,
-                                badgeText: 'NEW',
-                                badgeColor: AppTheme.primaryColor,
-                                screenId: 'home',
-                              );
+                              key: ValueKey('${product.id}_all'),
+                              id: product.id,
+                              name: product.name,
+                              price: product.price.toString(),
+                              imageUrl: product.imageUrl,
+                              rating: product.rating,
+                              reviewCount: product.reviewCount,
+                              showBadge: false,
+                              screenId: 'home_all',
+                            );
                           },
-                          childCount: state.featuredProducts.length,
+                          childCount: state.allProducts.length,
                         ),
                       ),
                     ),
@@ -216,14 +284,11 @@ class _HomeScreenState extends State<HomeScreen> {
       centerTitle: false,
       title: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child:
-                const Icon(Icons.shopping_bag, color: Colors.black, size: 20),
+          Image.asset(
+            'assets/images/logo.png',
+            width: 24,
+            height: 24,
+            color: Colors.white, // Changed to white
           ),
           const SizedBox(width: 12),
           const Text(

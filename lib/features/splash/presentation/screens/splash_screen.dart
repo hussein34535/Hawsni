@@ -43,7 +43,10 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SpinningLoader(size: 100),
+            const SpinningLoader(
+              size: 100,
+              color: Colors.white,
+            ),
             const SizedBox(height: 30),
             const Text(
               'HAWSNI',

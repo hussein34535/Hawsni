@@ -5,10 +5,6 @@ const path = require('path');
 const supabase = require('./config/supabase');
 const upload = require('./middleware/upload');
 
-
-
-
-
 // Load env vars
 dotenv.config();
 
@@ -19,9 +15,10 @@ const cartRoutes = require('./routes/cart');
 const orderRoutes = require('./routes/orders');
 const couponRoutes = require('./routes/coupons');
 const wishlistRoutes = require('./routes/wishlist');
-const reviewRoutes = require('./routes/reviews_supabase'); // Use Supabase reviews route
+const reviewRoutes = require('./routes/reviews_supabase');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
+const bannerRoutes = require('./routes/banners');
 
 // Import Controllers
 const DashboardController = require('./controllers/admin/dashboardController');
@@ -45,35 +42,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 console.log('Debug: Middleware initialized successfully.');
 
-
-
-
-
-console.log('Debug: Registering routes...');
-// Admin Dashboard Route
-app.get('/dashboard', DashboardController.getDashboard);
-
-// Products Management
-app.get('/products', ProductController.renderProductsPage);
-app.get('/products/new', ProductController.renderNewProductPage);
-app.post('/products', upload.array('images', 5), ProductController.createProductAdmin);
-app.get('/products/:id/edit', ProductController.renderEditProductPage);
-app.post('/products/:id', upload.array('images', 5), ProductController.updateProductAdmin);
-app.post('/products/:id/delete', ProductController.deleteProductAdmin);
-
-// Categories Management
-app.get('/categories', CategoryController.renderCategoriesPage);
-app.get('/categories/:id/edit', CategoryController.renderEditPage);
-app.post('/categories/reorder', CategoryController.reorderCategories);
-app.post('/categories', upload.single('image'), CategoryController.createCategoryAdmin);
-app.post('/categories/:id/delete', CategoryController.deleteCategoryAdmin);
-app.post('/categories/:id', upload.single('image'), CategoryController.updateCategoryAdmin);
-
-// Orders Management
-app.get('/orders', OrderController.renderOrdersPage);
-app.post('/orders/:id/status', OrderController.updateStatusAdmin);
-
 // API Routes
+console.log('Debug: Registering API routes...');
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
@@ -83,9 +53,28 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
-console.log('Debug: Routes registered successfully.');
+app.use('/api/banners', bannerRoutes);
 
-// Redirect root to dashboard
+// Admin Dashboard Route
+app.get('/dashboard', DashboardController.getDashboard);
+
+// Products Management (Admin)
+app.get('/products', ProductController.renderProductsPage);
+app.get('/products/new', ProductController.renderNewProductPage);
+app.post('/products', upload.array('images', 5), ProductController.createProductAdmin);
+app.get('/products/:id/edit', ProductController.renderEditProductPage);
+app.post('/products/:id', upload.array('images', 5), ProductController.updateProductAdmin);
+app.post('/products/:id/delete', ProductController.deleteProductAdmin);
+
+// Categories Management (Admin)
+app.get('/categories', CategoryController.renderCategoriesPage);
+app.get('/categories/:id/edit', CategoryController.renderEditPage);
+app.post('/categories/reorder', CategoryController.reorderCategories);
+app.post('/categories', upload.single('image'), CategoryController.createCategoryAdmin);
+app.post('/categories/:id/delete', CategoryController.deleteCategoryAdmin);
+app.post('/categories/:id', upload.single('image'), CategoryController.updateCategoryAdmin);
+
+// Root redirect
 app.get('/', (req, res) => {
   res.redirect('/dashboard');
 });
@@ -125,7 +114,7 @@ app.listen(PORT, HOST, () => {
   console.log(`📚 API Documentation: http://localhost:${PORT}/`);
   console.log(`🌐 Server accessible on network at http://${HOST}:${PORT}/`);
   console.log('Debug: Calling testSupabaseConnection...');
-testSupabaseConnection();
+  testSupabaseConnection();
 });
 
 // Handle unhandled promise rejections

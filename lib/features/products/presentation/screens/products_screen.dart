@@ -9,16 +9,24 @@ import 'package:hawsni_app/features/products/data/services/product_service.dart'
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 
 class ProductsScreen extends StatelessWidget {
-  final String categoryName;
+  final String? categoryName;
   final String? categoryId;
+  final String? title;
+  final bool isFeatured;
 
-  const ProductsScreen({super.key, required this.categoryName, this.categoryId});
+  const ProductsScreen({
+    super.key,
+    this.categoryName,
+    this.categoryId,
+    this.title,
+    this.isFeatured = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ProductBloc(ProductService())
-        ..add(LoadProducts(categoryId: categoryId)),
+        ..add(LoadProducts(categoryId: categoryId, isFeatured: isFeatured)),
       child: Scaffold(
         backgroundColor: Colors.black,
         body: BlocBuilder<ProductBloc, ProductState>(
@@ -101,7 +109,8 @@ class ProductsScreen extends StatelessWidget {
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          '$categoryName Collection',
+          title ??
+              (categoryName != null ? '$categoryName Collection' : 'Products'),
           style: const TextStyle(
             color: AppTheme.primaryColor,
             fontWeight: FontWeight.bold,

@@ -9,11 +9,12 @@ abstract class ProductEvent extends Equatable {
 
 class LoadProducts extends ProductEvent {
   final String? categoryId;
+  final bool isFeatured;
 
-  const LoadProducts({this.categoryId});
+  const LoadProducts({this.categoryId, this.isFeatured = false});
 
   @override
-  List<Object> get props => [categoryId ?? ''];
+  List<Object> get props => [categoryId ?? '', isFeatured];
 }
 
 class SearchProducts extends ProductEvent {

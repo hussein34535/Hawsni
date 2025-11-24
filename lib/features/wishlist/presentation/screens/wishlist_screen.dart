@@ -10,18 +10,6 @@ import 'package:hawsni_app/core/themes/app_theme.dart';
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});
 
-  void _removeFromWishlist(BuildContext context, String itemId) {
-    Provider.of<WishlistService>(context, listen: false)
-        .removeFromWishlist(itemId);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Removed from wishlist',
-            style: TextStyle(color: Colors.white)),
-        backgroundColor: AppTheme.primaryColor,
-      ),
-    );
-  }
-
   void _moveToCart(BuildContext context, WishlistItem item) {
     Provider.of<WishlistService>(context, listen: false)
         .removeFromWishlist(item.id);
@@ -106,7 +94,8 @@ class WishlistScreen extends StatelessWidget {
           }
 
           return GridView.builder(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.fromLTRB(
+                16, 16, 16, MediaQuery.of(context).padding.bottom + 60),
             itemCount: wishlistService.items.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -116,35 +105,15 @@ class WishlistScreen extends StatelessWidget {
             ),
             itemBuilder: (context, index) {
               final item = wishlistService.items[index];
-              return Stack(
-                children: [
-                  ProductCard(
-                    id: item.id,
-                    imageUrl: item.imageUrl,
-                    name: item.name,
-                    price: item.price,
-                    description: item.description,
-                    rating: item.rating,
-                    reviewCount: item.reviewCount,
-                    screenId: 'wishlist',
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: () => _removeFromWishlist(context, item.id),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.close,
-                            color: Colors.white, size: 18),
-                      ),
-                    ),
-                  ),
-                ],
+              return ProductCard(
+                id: item.id,
+                imageUrl: item.imageUrl,
+                name: item.name,
+                price: item.price,
+                description: item.description,
+                rating: item.rating,
+                reviewCount: item.reviewCount,
+                screenId: 'wishlist',
               );
             },
           );

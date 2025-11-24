@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:hawsni_app/core/services/wishlist_service.dart';
 import 'package:hawsni_app/features/products/presentation/screens/product_detail_screen.dart';
 
 class ProductCard extends StatelessWidget {
@@ -130,17 +132,44 @@ class ProductCard extends StatelessWidget {
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.favorite_border,
-                            color: Colors.white,
-                            size: 16,
-                          ),
+                        child: Consumer<WishlistService>(
+                          builder: (context, wishlistService, _) {
+                            final isInWishlist =
+                                wishlistService.isItemInWishlist(id);
+                            return GestureDetector(
+                              onTap: () {
+                                final item = WishlistItem(
+                                  id: id,
+                                  name: name,
+                                  price: price,
+                                  imageUrl: imageUrl,
+                                  description: description,
+                                  rating: rating,
+                                  reviewCount: reviewCount,
+                                );
+                                if (isInWishlist) {
+                                  wishlistService.removeFromWishlist(id);
+                                } else {
+                                  wishlistService.addToWishlist(item);
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isInWishlist
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color:
+                                      isInWishlist ? Colors.red : Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],

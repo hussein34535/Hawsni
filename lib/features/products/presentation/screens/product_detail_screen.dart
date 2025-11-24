@@ -14,6 +14,8 @@ import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
 import 'package:hawsni_app/features/products/bloc/product_event.dart';
 import 'package:hawsni_app/features/products/bloc/product_state.dart';
+import 'package:provider/provider.dart';
+import 'package:hawsni_app/core/services/wishlist_service.dart';
 import 'package:hawsni_app/features/products/data/services/product_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -127,6 +129,44 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   actions: [
+                    Container(
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Consumer<WishlistService>(
+                        builder: (context, wishlistService, _) {
+                          final isInWishlist = wishlistService
+                              .isItemInWishlist(widget.productId);
+                          return IconButton(
+                            icon: Icon(
+                              isInWishlist
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isInWishlist ? Colors.red : Colors.white,
+                            ),
+                            onPressed: () {
+                              final item = WishlistItem(
+                                id: widget.productId,
+                                name: widget.name,
+                                price: widget.price,
+                                imageUrl: widget.imageUrl,
+                                description: widget.description,
+                                rating: widget.rating,
+                                reviewCount: widget.reviewCount,
+                              );
+                              if (isInWishlist) {
+                                wishlistService
+                                    .removeFromWishlist(widget.productId);
+                              } else {
+                                wishlistService.addToWishlist(item);
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
                     Container(
                       margin: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
