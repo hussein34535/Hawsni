@@ -37,19 +37,6 @@ dependencies:
 
 
 
-  flutter_bloc: ^9.1.1
-  equatable: ^2.0.5
-  http: ^1.2.1
-  provider: ^6.1.2
-  shared_preferences: ^2.3.2
-  flutter_svg: ^2.0.13
-  image_picker: ^1.1.2
-  share_plus: ^10.0.2
-  flutter_localizations:
-    sdk: flutter
-  flutter_local_notifications: ^17.1.2
-  carousel_slider: ^5.0.0
-  cached_network_image: ^3.4.1
   flutter_rating_bar: ^4.0.1
   intl: ^0.20.2
   google_fonts: ^6.3.2

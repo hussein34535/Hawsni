@@ -5,6 +5,7 @@ import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/auth/presentation/screens/otp_verification_screen.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -23,6 +24,7 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String _completePhoneNumber = '';
 
   Future<void> _signup() async {
     if (!_formKey.currentState!.validate()) return;
@@ -36,7 +38,9 @@ class _SignupScreenState extends State<SignupScreen> {
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
-        _phoneController.text.trim(),
+        _completePhoneNumber.isNotEmpty
+            ? _completePhoneNumber
+            : _phoneController.text.trim(),
       );
 
       if (result != null) {
@@ -46,7 +50,9 @@ class _SignupScreenState extends State<SignupScreen> {
               MaterialPageRoute(
                 builder: (context) => OtpVerificationScreen(
                   email: _emailController.text.trim(),
-                  phone: _phoneController.text.trim(),
+                  phone: _completePhoneNumber.isNotEmpty
+                      ? _completePhoneNumber
+                      : _phoneController.text.trim(),
                 ),
               ),
             );
@@ -195,20 +201,44 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                _buildGlassTextField(
-                  controller: _phoneController,
-                  label: 'Phone Number',
-                  icon: Icons.phone_outlined,
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your phone number';
-                    }
-                    if (value.length < 8) {
-                      return 'Please enter a valid phone number';
-                    }
-                    return null;
-                  },
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                        border:
+                            Border.all(color: Colors.white.withOpacity(0.1)),
+                      ),
+                      child: IntlPhoneField(
+                        controller: _phoneController,
+                        decoration: InputDecoration(
+                          labelText: 'Phone Number',
+                          labelStyle:
+                              TextStyle(color: Colors.white.withOpacity(0.6)),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 16),
+                          errorStyle:
+                              const TextStyle(color: AppTheme.errorColor),
+                          counterText: '',
+                        ),
+                        style: const TextStyle(color: Colors.white),
+                        dropdownTextStyle: const TextStyle(color: Colors.white),
+                        dropdownIcon: const Icon(Icons.arrow_drop_down,
+                            color: Colors.white),
+                        initialCountryCode: 'SA', // Default to Saudi Arabia
+                        onChanged: (phone) {
+                          _completePhoneNumber = phone.completeNumber;
+                        },
+                        onCountryChanged: (country) {
+                          // Handle country change
+                        },
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 _buildGlassTextField(
