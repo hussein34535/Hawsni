@@ -24,6 +24,32 @@ class UserService {
         return data;
     }
 
+    async uploadAvatar(userId, file) {
+        const fileName = `${userId}-${Date.now()}.${file.originalname.split('.').pop()}`;
+
+        // 1. Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase
+            .storage
+            .from('avatars')
+            .upload(fileName, file.buffer, {
+                contentType: file.mimetype,
+                upsert: true
+            });
+
+        if (uploadError) {
+            throw new Error(`Upload failed: ${uploadError.message}`);
+        }
+
+        // 2. Get Public URL
+        const { data: { publicUrl } } = supabase
+            .storage
+            .from('avatars')
+            .getPublicUrl(fileName);
+
+        // 3. Update User Profile
+        return this.updateProfile(userId, { avatar_url: publicUrl });
+    }
+
     async getAddresses(userId) {
         const { data, error } = await supabase
             .from('addresses')

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -60,7 +61,7 @@ class AuthService {
 
   // Register user
   static Future<Map<String, dynamic>?> register(
-      String name, String email, String password) async {
+      String name, String email, String password, String phone) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/auth/register'),
@@ -69,21 +70,20 @@ class AuthService {
           'name': name,
           'email': email,
           'password': password,
+          'phone': phone,
         }),
       );
 
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
-        _token = data['token'];
-        _userData = data['user'];
-
-        // Save token and user data to shared preferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', _token!);
-        await prefs.setString('userData', json.encode(_userData));
-
-        print('Registration successful, token saved: $_token');
-        print('User data saved: $_userData');
+        // Note: Token might not be returned here if OTP is required
+        if (data['token'] != null) {
+          _token = data['token'];
+          _userData = data['user'];
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', _token!);
+          await prefs.setString('userData', json.encode(_userData));
+        }
         return data;
       } else {
         final errorData = json.decode(response.body);
@@ -91,6 +91,39 @@ class AuthService {
       }
     } catch (e) {
       print('Error registering: $e');
+      return null;
+    }
+  }
+
+  // Verify OTP
+  static Future<Map<String, dynamic>?> verifyOtp(
+      String email, String code) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/verify-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'email': email,
+          'code': code,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        _token = data['token'];
+        _userData = data['user'];
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', _token!);
+        await prefs.setString('userData', json.encode(_userData));
+
+        return data;
+      } else {
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['message'] ?? 'OTP verification failed');
+      }
+    } catch (e) {
+      print('Error verifying OTP: $e');
       return null;
     }
   }
@@ -116,6 +149,48 @@ class AuthService {
       }
     } catch (e) {
       print('Error sending password reset email: $e');
+      return null;
+    }
+  }
+
+  // Upload profile picture
+  static Future<Map<String, dynamic>?> uploadProfilePicture(
+      File imageFile) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/users/profile/avatar'),
+      );
+
+      request.headers.addAll({
+        'Authorization': 'Bearer $_token',
+      });
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'avatar',
+          imageFile.path,
+        ),
+      );
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        // Update local user data with new avatar URL
+        if (data['user'] != null) {
+          _userData = data['user'];
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userData', json.encode(_userData));
+        }
+        return data;
+      } else {
+        final errorData = json.decode(response.body);
+        throw Exception(errorData['message'] ?? 'Failed to upload image');
+      }
+    } catch (e) {
+      print('Error uploading profile picture: $e');
       return null;
     }
   }

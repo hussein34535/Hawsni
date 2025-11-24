@@ -4,6 +4,7 @@ import 'package:hawsni_app/core/services/auth_service.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:hawsni_app/features/auth/presentation/screens/otp_verification_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -16,6 +17,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
@@ -34,18 +36,36 @@ class _SignupScreenState extends State<SignupScreen> {
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
+        _phoneController.text.trim(),
       );
 
-      if (result != null && result['token'] != null) {
-        if (mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const MainScreen()),
-            (route) => false,
-          );
+      if (result != null) {
+        if (result['requireOtp'] == true) {
+          if (mounted) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => OtpVerificationScreen(
+                  email: _emailController.text.trim(),
+                  phone: _phoneController.text.trim(),
+                ),
+              ),
+            );
+          }
+        } else if (result['token'] != null) {
+          if (mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const MainScreen()),
+              (route) => false,
+            );
+          }
+        } else {
+          if (mounted) {
+            _showErrorSnackBar(result['message'] ?? 'Signup failed');
+          }
         }
       } else {
         if (mounted) {
-          _showErrorSnackBar(result?['message'] ?? 'Signup failed');
+          _showErrorSnackBar('Signup failed. Please try again.');
         }
       }
     } catch (e) {
@@ -76,6 +96,7 @@ class _SignupScreenState extends State<SignupScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -169,6 +190,22 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                         .hasMatch(value)) {
                       return 'Invalid email';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildGlassTextField(
+                  controller: _phoneController,
+                  label: 'Phone Number',
+                  icon: Icons.phone_outlined,
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your phone number';
+                    }
+                    if (value.length < 8) {
+                      return 'Please enter a valid phone number';
                     }
                     return null;
                   },

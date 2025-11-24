@@ -20,6 +20,19 @@ class UserController {
         }
     }
 
+    async uploadAvatar(req, res) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ success: false, message: 'No file uploaded' });
+            }
+            const user = await UserService.uploadAvatar(req.user.id, req.file);
+            res.json({ success: true, user });
+        } catch (error) {
+            console.error('Upload Avatar Error:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
     async getAddresses(req, res) {
         try {
             const addresses = await UserService.getAddresses(req.user.id);

@@ -9,11 +9,25 @@ class AuthController {
         }
 
         try {
-            const { name, email, password } = req.body;
-            const result = await AuthService.register(name, email, password);
+            const { name, email, password, phone } = req.body;
+            const result = await AuthService.register(name, email, password, phone);
             res.status(201).json({ success: true, ...result });
         } catch (error) {
             console.error('Register Error:', error);
+            res.status(400).json({ success: false, message: error.message });
+        }
+    }
+
+    async verifyOtp(req, res) {
+        try {
+            const { email, code } = req.body;
+            if (!email || !code) {
+                return res.status(400).json({ success: false, message: 'Email and code are required' });
+            }
+            const result = await AuthService.verifyOtp(email, code);
+            res.json({ success: true, ...result });
+        } catch (error) {
+            console.error('Verify OTP Error:', error);
             res.status(400).json({ success: false, message: error.message });
         }
     }

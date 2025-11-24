@@ -12,17 +12,21 @@ class AuthService {
         });
     }
 
-    async register(name, email, password) {
-        // 1. Register user in Supabase Auth
+    async register(name, email, password, phone) {
+        // 1. Check if user already exists (optional but good practice)
+        // For now, we rely on Supabase Auth constraints
+
+        // 2. Register user in Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email: email,
             password: password,
             options: {
                 data: {
                     full_name: name,
-                    role: 'user'
+                    role: 'user',
+                    phone: phone // Store phone in metadata as well
                 },
-                emailRedirectTo: undefined // Disable email confirmation for now
+                emailRedirectTo: undefined
             }
         });
 
@@ -33,34 +37,94 @@ class AuthService {
         const user = authData.user;
 
         if (user) {
-            // 2. Add user to 'users' table (using service role key to bypass RLS)
+            // Generate Mock OTP
+            const otpCode = '123456'; // Mock OTP
+            const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+            // 3. Add user to 'users' table with OTP details
             const { error: profileError } = await supabase
                 .from('users')
                 .insert([
-                    { id: user.id, name: name, role: 'user', email: email }
+                    {
+                        id: user.id,
+                        name: name,
+                        role: 'user',
+                        email: email,
+                        phone: phone,
+                        is_phone_verified: false,
+                        otp_code: otpCode,
+                        otp_expires_at: otpExpiresAt.toISOString()
+                    }
                 ]);
 
             if (profileError) {
                 console.error('Error creating user profile:', profileError);
-                // If profile creation fails, delete the auth user to maintain consistency
                 await supabase.auth.admin.deleteUser(user.id);
                 throw new Error(`Failed to create user profile: ${profileError.message}`);
             }
 
-            const token = this.generateToken(user.id, user.email, 'user');
+            console.log(`[MOCK OTP] OTP for ${email} (${phone}): ${otpCode}`);
 
             return {
-                token,
-                user: {
-                    id: user.id,
-                    name: name,
-                    email: user.email,
-                    role: 'user'
-                }
+                requireOtp: true,
+                email: email,
+                phone: phone,
+                message: 'Please verify your phone number'
             };
         }
 
         throw new Error('Registration failed');
+    }
+
+    async verifyOtp(email, code) {
+        // 1. Find user by email
+        const { data: user, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+
+        if (userError || !user) {
+            throw new Error('User not found');
+        }
+
+        // 2. Validate OTP
+        if (user.otp_code !== code) {
+            throw new Error('Invalid OTP');
+        }
+
+        if (new Date(user.otp_expires_at) < new Date()) {
+            throw new Error('OTP expired');
+        }
+
+        // 3. Mark as verified and clear OTP
+        const { error: updateError } = await supabase
+            .from('users')
+            .update({
+                is_phone_verified: true,
+                otp_code: null,
+                otp_expires_at: null
+            })
+            .eq('id', user.id);
+
+        if (updateError) {
+            throw new Error('Failed to verify user');
+        }
+
+        // 4. Generate Token
+        const token = this.generateToken(user.id, user.email, user.role);
+
+        return {
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phone: user.phone,
+                avatar_url: user.avatar_url
+            }
+        };
     }
 
     async login(email, password) {

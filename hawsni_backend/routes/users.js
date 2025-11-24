@@ -9,6 +9,10 @@ router.get('/profile', protect, UserController.getProfile);
 // Update user profile
 router.put('/profile', protect, UserController.updateProfile);
 
+// Upload avatar
+const upload = require('../middleware/upload');
+router.post('/profile/avatar', protect, upload.single('avatar'), UserController.uploadAvatar);
+
 // Get addresses
 router.get('/addresses', protect, UserController.getAddresses);
 

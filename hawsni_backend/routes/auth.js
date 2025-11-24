@@ -11,6 +11,10 @@ router.post('/register', [
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
 ], AuthController.register);
 
+// @route   POST /api/auth/verify-otp
+// @desc    Verify OTP and complete registration
+router.post('/verify-otp', AuthController.verifyOtp);
+
 // @route   POST /api/auth/login
 // @desc    Login user
 router.post('/login', [
