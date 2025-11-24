@@ -177,8 +177,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your name';
                     }
-                    if (value.length < 2) {
-                      return 'Name must be at least 2 characters';
+                    final parts = value.trim().split(' ');
+                    if (parts.length < 2 || parts.any((p) => p.isEmpty)) {
+                      return 'Please enter first and last name';
                     }
                     return null;
                   },
@@ -229,7 +230,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         dropdownTextStyle: const TextStyle(color: Colors.white),
                         dropdownIcon: const Icon(Icons.arrow_drop_down,
                             color: Colors.white),
-                        initialCountryCode: 'SA', // Default to Saudi Arabia
+                        initialCountryCode: 'EG', // Default to Egypt
                         onChanged: (phone) {
                           _completePhoneNumber = phone.completeNumber;
                         },
