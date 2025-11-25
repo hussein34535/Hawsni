@@ -6,7 +6,6 @@ import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
 import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:hawsni_app/features/profile/presentation/screens/profile_screen.dart';
-import 'package:hawsni_app/features/search/presentation/screens/search_screen.dart';
 import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_screen.dart';
 
 import 'package:hawsni_app/features/home/presentation/screens/home_screen.dart';
@@ -21,13 +20,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(), // Updated to use the new HomeScreen
-    const SearchScreen(),
-    const WishlistScreen(),
-    const CartScreen(),
-    const ProfileScreen(),
-  ];
+  List<Widget> get _screens => [
+        const HomeScreen(), // Updated to use the new HomeScreen
+        const WishlistScreen(),
+        const CartScreen(),
+        const ProfileScreen(),
+      ];
 
   @override
   void initState() {
@@ -80,11 +78,6 @@ class _MainScreenState extends State<MainScreen> {
                   icon: Icon(Icons.home_outlined),
                   activeIcon: Icon(Icons.home),
                   label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.search),
-                  activeIcon: Icon(Icons.search),
-                  label: 'Search',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.favorite_border),

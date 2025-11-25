@@ -104,7 +104,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.only(
-                            top: MediaQuery.of(context).padding.top + 10),
+                            top: MediaQuery.of(context).padding.top +
+                                kToolbarHeight +
+                                70),
                         child: HeroCarousel(
                           imageUrls: state.bannerImages,
                         ),
@@ -288,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
             'assets/images/logo.png',
             width: 24,
             height: 24,
-            color: Colors.white, // Changed to white
+            color: Colors.white,
           ),
           const SizedBox(width: 12),
           const Text(
@@ -304,13 +306,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.search, color: Colors.white),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SearchScreen()),
-          ),
-        ),
         IconButton(
           icon: const Icon(Icons.notifications_outlined, color: Colors.white),
           onPressed: () => Navigator.push(
@@ -357,6 +352,58 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(width: 8),
       ],
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchScreen()),
+            ),
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Icon(Icons.search, color: Colors.grey),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Search Hawsni...',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Icon(Icons.camera_alt_outlined,
+                        color: Colors.grey, size: 20),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

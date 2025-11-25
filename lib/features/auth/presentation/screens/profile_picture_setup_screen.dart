@@ -95,18 +95,6 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          TextButton(
-            onPressed: _skip,
-            child: const Text(
-              'Skip',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ],
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -198,6 +186,18 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen> {
                             letterSpacing: 1.5,
                           ),
                         ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: _skip,
+                child: const Text(
+                  'Skip',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

@@ -129,9 +129,9 @@ class _HeroCarouselState extends State<HeroCarousel> {
                         padding: const EdgeInsets.all(20),
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
+                          alignment: Alignment.centerRight,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
