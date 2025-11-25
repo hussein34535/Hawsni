@@ -12,6 +12,7 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>المنتج</th>
                             <th>رقم الطلب</th>
                             <th>المبلغ</th>
                             <th>الحالة</th>
@@ -21,6 +22,30 @@
                     <tbody>
                         <% orders.forEach(order=> { %>
                             <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <% if (order.product_image) { %>
+                                            <img src="<%= order.product_image %>" alt="<%= order.product_name %>"
+                                                style="width: 60px; height: 60px; border-radius: var(--radius-md); object-fit: cover; border: 2px solid var(--light-gray);">
+                                            <% } else { %>
+                                                <div
+                                                    style="width: 60px; height: 60px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%); display: flex; align-items: center; justify-content: center;">
+                                                    <i class="fas fa-shopping-bag"
+                                                        style="color: var(--dark); opacity: 0.3; font-size: 1.5rem;"></i>
+                                                </div>
+                                                <% } %>
+                                                    <div>
+                                                        <div style="font-weight: 600; color: var(--dark-gray);">
+                                                            <%= order.product_name %>
+                                                        </div>
+                                                        <% if (order.items_count> 1) { %>
+                                                            <small style="color: var(--medium-gray);">
+                                                                + <%= order.items_count - 1 %> منتجات أخرى
+                                                            </small>
+                                                            <% } %>
+                                                    </div>
+                                    </div>
+                                </td>
                                 <td>
                                     <span style="font-weight: 600; color: var(--dark-gray);">
                                         #<%= order.id.substring(0, 8) %>
