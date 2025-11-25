@@ -97,6 +97,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 color: AppTheme.primaryColor,
                 backgroundColor: Colors.black,
+                edgeOffset: MediaQuery.of(context).padding.top +
+                    kToolbarHeight +
+                    70, // Offset to show indicator below search bar
                 child: CustomScrollView(
                   controller: _scrollController,
                   slivers: [
@@ -104,9 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.only(
-                            top: MediaQuery.of(context).padding.top +
-                                kToolbarHeight +
-                                70),
+                            top: MediaQuery.of(context).padding.top + 10),
                         child: HeroCarousel(
                           banners: state.banners,
                         ),

@@ -176,13 +176,36 @@
                             </div>
                         </div>
 
+                        <!-- Opacity and Blur Controls -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">شفافية الزر (<span id="opacityValue">100</span>%)</label>
+                                <input type="range" id="buttonOpacity" name="button_opacity" class="form-control"
+                                    min="0" max="1" step="0.05"
+                                    value="<%= banner ? (banner.button_opacity || 1.0) : 1.0 %>"
+                                    oninput="updatePreview()" style="height: 45px;">
+                                <small class="text-muted">تحكم في شفافية الزر (0% = شفاف، 100% = معتم)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">ضبابية الصورة (<span id="blurValue">0</span>px)</label>
+                                <input type="range" id="imageBlur" name="image_blur" class="form-control" min="0"
+                                    max="20" step="0.5" value="<%= banner ? (banner.image_blur || 0.0) : 0.0 %>"
+                                    oninput="updateBlur()" style="height: 45px;">
+                                <small class="text-muted">تأثير ضبابي للصورة الخلفية (0-20)</small>
+                            </div>
+                        </div>
+
                         <!-- Button Preview -->
                         <div class="form-group" style="margin-top: 1.5rem;">
                             <label class="form-label">معاينة الزر</label>
-                            <div
-                                style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 2rem; border-radius: var(--radius-md); min-height: 200px; position: relative;">
+                            <div id="previewContainer"
+                                style="background: url('https://images.unsplash.com/photo-1483985988355-763728e1935b') center/cover; padding: 2rem; border-radius: var(--radius-md); min-height: 200px; position: relative; overflow: hidden;">
+                                <div id="blurOverlay"
+                                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(0px);">
+                                </div>
                                 <button id="buttonPreview" type="button"
-                                    style="position: absolute; bottom: 20px; right: 20px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); color: #000;">
+                                    style="position: absolute; bottom: 20px; right: 20px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); color: #000; z-index: 1;">
                                     Shop Now
                                 </button>
                             </div>
@@ -284,13 +307,16 @@
             const style = document.getElementById('buttonStyle').value;
             const size = document.getElementById('buttonSize').value;
             const position = document.getElementById('buttonPosition').value;
+            const opacity = document.getElementById('buttonOpacity').value;
 
             // Update text
             button.textContent = text;
 
-            // Update color
+            // Update color and opacity
             button.style.backgroundColor = color;
+            button.style.opacity = opacity;
             document.getElementById('buttonColorHex').value = color;
+            document.getElementById('opacityValue').textContent = Math.round(opacity * 100);
 
             // Update border radius based on style
             if (style === 'square') {
@@ -356,6 +382,13 @@
             }
         }
 
+        function updateBlur() {
+            const blur = document.getElementById('imageBlur').value;
+            const blurOverlay = document.getElementById('blurOverlay');
+            blurOverlay.style.backdropFilter = `blur(${blur}px)`;
+            document.getElementById('blurValue').textContent = blur;
+        }
+
         function syncColorFromHex() {
             const hexValue = document.getElementById('buttonColorHex').value;
             if (/^#[0-9A-Fa-f]{6}$/.test(hexValue)) {
@@ -368,6 +401,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             toggleImageInput();
             updatePreview();
+            updateBlur();
         });
     </script>
 
