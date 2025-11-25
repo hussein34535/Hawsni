@@ -23,29 +23,39 @@ class BannersController {
         res.render('banner-form', { banner: null });
     }
 
-    // Create banner
+    // Create a new banner
     async create(req, res) {
         try {
             const { title, image_url, link, sort_order, is_active } = req.body;
 
+            // Validate image_url
+            if (!image_url || image_url.trim() === '') {
+                return res.status(400).send('يجب إدخال رابط الصورة');
+            }
+
+            const bannerData = {
+                title: title || null,
+                image_url: image_url.trim(),
+                link: link || null,
+                sort_order: parseInt(sort_order) || 1,
+                is_active: is_active === 'true'
+            };
+
             const { data, error } = await supabase
                 .from('banners')
-                .insert([{
-                    title: title || null,
-                    image_url,
-                    link: link || null,
-                    sort_order: parseInt(sort_order) || 1,
-                    is_active: is_active === 'true'
-                }])
+                .insert([bannerData])
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
 
             res.redirect('/banners');
         } catch (err) {
             console.error('Error creating banner:', err);
-            res.status(500).send('خطأ في إضافة البنر');
+            res.status(500).send('خطأ في إضافة البنر: ' + err.message);
         }
     }
 
@@ -73,36 +83,45 @@ class BannersController {
         }
     }
 
-    // Update banner
+    // Update an existing banner
     async update(req, res) {
         try {
             const { id } = req.params;
             const { title, image_url, link, sort_order, is_active } = req.body;
 
+            // Validate image_url
+            if (!image_url || image_url.trim() === '') {
+                return res.status(400).send('يجب إدخال رابط الصورة');
+            }
+
+            const updateData = {
+                title: title || null,
+                image_url: image_url.trim(),
+                link: link || null,
+                sort_order: parseInt(sort_order) || 1,
+                is_active: is_active === 'true'
+            };
+
             const { data, error } = await supabase
                 .from('banners')
-                .update({
-                    title: title || null,
-                    image_url,
-                    link: link || null,
-                    sort_order: parseInt(sort_order) || 1,
-                    is_active: is_active === 'true',
-                    updated_at: new Date().toISOString()
-                })
+                .update(updateData)
                 .eq('id', id)
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
 
             res.redirect('/banners');
         } catch (err) {
             console.error('Error updating banner:', err);
-            res.status(500).send('خطأ في تحديث البنر');
+            res.status(500).send('خطأ في تحديث البنر: ' + err.message);
         }
     }
 
-    // Delete banner
+    // Delete a banner
     async delete(req, res) {
         try {
             const { id } = req.params;

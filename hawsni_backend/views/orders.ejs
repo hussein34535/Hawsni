@@ -17,6 +17,7 @@
                             <th>المبلغ</th>
                             <th>الحالة</th>
                             <th>التاريخ</th>
+                            <th>تغيير الحالة</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -67,6 +68,24 @@
                                 <td>
                                     <%= new Date(order.created_at).toLocaleDateString('ar-EG', { year: 'numeric' ,
                                         month: 'long' , day: 'numeric' }) %>
+                                </td>
+                                <td>
+                                    <form method="POST" action="/orders/<%= order.id %>/status">
+                                        <select name="status" class="form-control"
+                                            style="width: auto; padding: 0.3rem 0.5rem; font-size: 0.85rem;"
+                                            onchange="this.form.submit()">
+                                            <option value="Processing" <%=order.status==='Processing' ? 'selected' : ''
+                                                %>>قيد المعالجة</option>
+                                            <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>تم
+                                                الشحن</option>
+                                            <option value="In Transit" <%=order.status==='In Transit' ? 'selected' : ''
+                                                %>>في الطريق</option>
+                                            <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
+                                                >تم التوصيل</option>
+                                            <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
+                                                >ملغي</option>
+                                        </select>
+                                    </form>
                                 </td>
                             </tr>
                             <% }) %>

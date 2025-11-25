@@ -49,6 +49,28 @@ class OrdersController {
             res.status(500).send('خطأ في تحميل الطلبات');
         }
     }
+
+    // Update order status
+    async updateStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+
+            const { data, error } = await supabase
+                .from('orders')
+                .update({ status })
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) throw error;
+
+            res.redirect('/orders');
+        } catch (err) {
+            console.error('Error updating order status:', err);
+            res.status(500).send('خطأ في تحديث حالة الطلب');
+        }
+    }
 }
 
 module.exports = new OrdersController();

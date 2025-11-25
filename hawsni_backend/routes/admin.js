@@ -23,6 +23,7 @@ router.get('/users', usersController.index);
 
 // Orders Routes
 router.get('/orders', ordersController.index);
+router.post('/orders/:id/status', ordersController.updateStatus);
 
 // Settings Route (placeholder)
 router.get('/settings', (req, res) => {
