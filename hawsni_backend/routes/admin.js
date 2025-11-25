@@ -5,6 +5,7 @@ const router = express.Router();
 const dashboardController = require('../controllers/admin/dashboardController');
 const bannersController = require('../controllers/admin/bannersController');
 const usersController = require('../controllers/admin/usersController');
+const ordersController = require('../controllers/admin/ordersController');
 
 // Dashboard
 router.get('/dashboard', dashboardController.getDashboard);
@@ -19,5 +20,13 @@ router.delete('/banners/:id', bannersController.delete);
 
 // Users Routes
 router.get('/users', usersController.index);
+
+// Orders Routes
+router.get('/orders', ordersController.index);
+
+// Settings Route (placeholder)
+router.get('/settings', (req, res) => {
+    res.render('settings', { page: 'settings' });
+});
 
 module.exports = router;
