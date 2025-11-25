@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class HeroCarousel extends StatefulWidget {
-  final List<String> imageUrls;
+  final List<Map<String, dynamic>> banners;
   final Duration autoPlayDuration;
 
   const HeroCarousel({
     super.key,
-    required this.imageUrls,
+    required this.banners,
     this.autoPlayDuration = const Duration(seconds: 4),
   });
 
@@ -28,12 +28,12 @@ class _HeroCarouselState extends State<HeroCarousel> {
   }
 
   void _startAutoPlay() {
-    if (widget.imageUrls.isEmpty) return;
+    if (widget.banners.isEmpty) return;
 
     _autoPlayTimer = Timer.periodic(widget.autoPlayDuration, (timer) {
-      if (widget.imageUrls.isEmpty) return;
+      if (widget.banners.isEmpty) return;
 
-      if (_currentPage < widget.imageUrls.length - 1) {
+      if (_currentPage < widget.banners.length - 1) {
         _currentPage++;
       } else {
         _currentPage = 0;
@@ -56,9 +56,58 @@ class _HeroCarouselState extends State<HeroCarousel> {
     super.dispose();
   }
 
+  Color _parseColor(String? colorString) {
+    if (colorString == null || colorString.isEmpty) {
+      return const Color(0xFFD4AF37); // Default gold color
+    }
+
+    try {
+      final hexString = colorString.replaceAll('#', '');
+      return Color(int.parse('FF$hexString', radix: 16));
+    } catch (e) {
+      return const Color(0xFFD4AF37);
+    }
+  }
+
+  BorderRadius _getButtonBorderRadius(String? style) {
+    switch (style) {
+      case 'square':
+        return BorderRadius.circular(4);
+      case 'pill':
+        return BorderRadius.circular(50);
+      case 'rounded':
+      default:
+        return BorderRadius.circular(12);
+    }
+  }
+
+  EdgeInsets _getButtonPadding(String? size) {
+    switch (size) {
+      case 'small':
+        return const EdgeInsets.symmetric(horizontal: 16, vertical: 8);
+      case 'large':
+        return const EdgeInsets.symmetric(horizontal: 28, vertical: 16);
+      case 'medium':
+      default:
+        return const EdgeInsets.symmetric(horizontal: 20, vertical: 12);
+    }
+  }
+
+  CrossAxisAlignment _getAlignment(String? position) {
+    switch (position) {
+      case 'left':
+        return CrossAxisAlignment.start;
+      case 'center':
+        return CrossAxisAlignment.center;
+      case 'right':
+      default:
+        return CrossAxisAlignment.end;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (widget.imageUrls.isEmpty) {
+    if (widget.banners.isEmpty) {
       return Container(
         height: 260,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -73,7 +122,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
     }
 
     return Container(
-      height: 200, // Reduced height as requested
+      height: 200,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Stack(
         children: [
@@ -87,8 +136,21 @@ class _HeroCarouselState extends State<HeroCarousel> {
                   _currentPage = index;
                 });
               },
-              itemCount: widget.imageUrls.length,
+              itemCount: widget.banners.length,
               itemBuilder: (context, index) {
+                final banner = widget.banners[index];
+                final imageUrl = banner['image_url'] as String?;
+                final headingText = banner['heading_text'] as String?;
+                final subheadingText = banner['subheading_text'] as String?;
+                final buttonText =
+                    banner['button_text'] as String? ?? 'Shop Now';
+                final buttonColor =
+                    _parseColor(banner['button_color'] as String?);
+                final buttonStyle = banner['button_style'] as String?;
+                final buttonSize = banner['button_size'] as String?;
+                final buttonPosition = banner['button_position'] as String?;
+                final buttonLink = banner['button_link'] as String?;
+
                 return Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -104,13 +166,14 @@ class _HeroCarouselState extends State<HeroCarousel> {
                     fit: StackFit.expand,
                     children: [
                       // Background Image
-                      Image.network(
-                        widget.imageUrls[index],
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(color: Colors.black);
-                        },
-                      ),
+                      if (imageUrl != null)
+                        Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(color: Colors.black);
+                          },
+                        ),
                       // Overlay
                       Container(
                         decoration: BoxDecoration(
@@ -127,15 +190,14 @@ class _HeroCarouselState extends State<HeroCarousel> {
                       // Content
                       Padding(
                         padding: const EdgeInsets.all(20),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerRight,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                        child: Column(
+                          crossAxisAlignment: _getAlignment(buttonPosition),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Heading Text
+                            if (headingText != null && headingText.isNotEmpty)
                               Text(
-                                'LUXURY COLLECTION',
+                                headingText,
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -143,42 +205,66 @@ class _HeroCarouselState extends State<HeroCarousel> {
                                       const Color(0xFFD4AF37).withOpacity(0.9),
                                   letterSpacing: 2,
                                 ),
+                                textAlign: buttonPosition == 'left'
+                                    ? TextAlign.left
+                                    : buttonPosition == 'center'
+                                        ? TextAlign.center
+                                        : TextAlign.right,
                               ),
+                            if (headingText != null && headingText.isNotEmpty)
                               const SizedBox(height: 4),
-                              const Text(
-                                'Premium\nExperience',
-                                style: TextStyle(
+                            // Subheading Text
+                            if (subheadingText != null &&
+                                subheadingText.isNotEmpty)
+                              Text(
+                                subheadingText,
+                                style: const TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                   fontFamily: 'Playfair Display',
                                   height: 1.1,
                                 ),
+                                textAlign: buttonPosition == 'left'
+                                    ? TextAlign.left
+                                    : buttonPosition == 'center'
+                                        ? TextAlign.center
+                                        : TextAlign.right,
                               ),
+                            if (subheadingText != null &&
+                                subheadingText.isNotEmpty)
                               const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFD4AF37),
-                                  foregroundColor: Colors.black,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 10,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                            // Button
+                            ElevatedButton(
+                              onPressed: () {
+                                // Handle button navigation
+                                if (buttonLink != null &&
+                                    buttonLink.isNotEmpty) {
+                                  // Navigate based on link
+                                  // You can implement navigation logic here
+                                  print('Navigate to: $buttonLink');
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: buttonColor,
+                                foregroundColor: Colors.black,
+                                padding: _getButtonPadding(buttonSize),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      _getButtonBorderRadius(buttonStyle),
                                 ),
-                                child: const Text(
-                                  'Shop Now',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
+                                elevation: 4,
+                                shadowColor: buttonColor.withOpacity(0.5),
+                              ),
+                              child: Text(
+                                buttonText,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -188,7 +274,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
             ),
           ),
           // Page Indicator
-          if (widget.imageUrls.length > 1)
+          if (widget.banners.length > 1)
             Positioned(
               bottom: 16,
               left: 0,
@@ -196,12 +282,12 @@ class _HeroCarouselState extends State<HeroCarousel> {
               child: Center(
                 child: SmoothPageIndicator(
                   controller: _pageController,
-                  count: widget.imageUrls.length,
+                  count: widget.banners.length,
                   effect: ExpandingDotsEffect(
+                    activeDotColor: const Color(0xFFD4AF37),
+                    dotColor: Colors.white.withOpacity(0.5),
                     dotHeight: 8,
                     dotWidth: 8,
-                    activeDotColor: const Color(0xFFD4AF37),
-                    dotColor: Colors.white.withOpacity(0.3),
                     expansionFactor: 3,
                   ),
                 ),

@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 kToolbarHeight +
                                 70),
                         child: HeroCarousel(
-                          imageUrls: state.bannerImages,
+                          banners: state.banners,
                         ),
                       ),
                     ),

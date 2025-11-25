@@ -24,14 +24,14 @@ class HomeLoaded extends HomeState {
   final List<ProductModel> featuredProducts;
   final List<ProductModel> flashDeals;
   final List<ProductModel> allProducts;
-  final List<String> bannerImages;
+  final List<Map<String, dynamic>> banners;
 
   HomeLoaded({
     required this.categories,
     required this.featuredProducts,
     required this.flashDeals,
     required this.allProducts,
-    required this.bannerImages,
+    required this.banners,
   });
 }
 
@@ -71,14 +71,24 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final List<ProductModel> allProducts = results[2] as List<ProductModel>;
       final List<dynamic> bannersData = results[3] as List<dynamic>;
 
-      final List<String> bannerImages =
-          bannersData.map((b) => b['image_url'] as String).toList();
+      // Convert banner data to proper format
+      final List<Map<String, dynamic>> banners =
+          bannersData.map((b) => b as Map<String, dynamic>).toList();
 
       // Fallback if no banners
-      if (bannerImages.isEmpty) {
-        bannerImages.addAll([
-          'https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-          'https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+      if (banners.isEmpty) {
+        banners.addAll([
+          {
+            'image_url':
+                'https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+            'heading_text': 'LUXURY COLLECTION',
+            'subheading_text': 'Premium\nExperience',
+            'button_text': 'Shop Now',
+            'button_color': '#D4AF37',
+            'button_style': 'rounded',
+            'button_size': 'medium',
+            'button_position': 'right',
+          },
         ]);
       }
 
@@ -99,7 +109,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         featuredProducts: featuredProducts,
         flashDeals: flashDeals,
         allProducts: allProducts,
-        bannerImages: bannerImages,
+        banners: banners,
       ));
     } catch (e) {
       emit(HomeError(e.toString()));
