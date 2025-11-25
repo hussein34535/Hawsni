@@ -20,6 +20,10 @@ class DashboardController {
                 .from('users')
                 .select('*', { count: 'exact', head: true });
 
+            const { count: bannersCount } = await supabase
+                .from('banners')
+                .select('*', { count: 'exact', head: true });
+
             // 2. Calculate Revenue
             const { data: revenueData } = await supabase
                 .from('orders')
@@ -71,6 +75,7 @@ class DashboardController {
                 categoriesCount: categoriesCount || 0,
                 ordersCount: ordersCount || 0,
                 usersCount: usersCount || 0,
+                bannersCount: bannersCount || 0,
                 revenue: totalRevenue.toFixed(2),
                 products: recentProducts || [],
                 orders: recentOrders || [],
