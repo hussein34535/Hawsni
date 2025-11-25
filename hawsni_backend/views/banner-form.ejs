@@ -19,12 +19,7 @@
                 <input type="hidden" name="_method" value="PUT">
                 <% } %>
 
-                    <div class="form-group">
-                        <label class="form-label">عنوان البنر</label>
-                        <input type="text" name="title" class="form-control" placeholder="مثال: عروض الصيف"
-                            value="<%= banner ? banner.title : '' %>">
-                    </div>
-
+                    <!-- Image Section -->
                     <div class="form-group">
                         <label class="form-label">صورة البنر <span style="color: var(--danger);">*</span></label>
 
@@ -45,7 +40,8 @@
                         <div id="uploadInput" style="display: <% if (banner) { %>none<% } else { %>block<% } %>;">
                             <input type="file" name="banner_image" class="form-control" accept="image/*"
                                 onchange="previewUploadedImage(this)">
-                            <small class="text-muted">اختر صورة بجودة عالية (يفضل 1200x400 بكسل)</small>
+                            <small class="text-muted">اختر صورة بجودة عالية (المقاس المثالي: 1200x400 بكسل - نسبة
+                                3:1)</small>
                         </div>
 
                         <div id="urlInput" style="display: <% if (banner) { %>block<% } else { %>none<% } %>;">
@@ -56,23 +52,124 @@
                         </div>
                     </div>
 
+                    <!-- Image Preview with Aspect Ratio Guide -->
                     <div class="form-group">
-                        <label class="form-label">معاينة الصورة</label>
+                        <label class="form-label">معاينة الصورة (نسبة 3:1)</label>
                         <div
-                            style="max-width: 600px; border: 2px dashed var(--light-gray); border-radius: var(--radius-md); overflow: hidden;">
+                            style="position: relative; max-width: 600px; border: 2px dashed var(--light-gray); border-radius: var(--radius-md); overflow: hidden; aspect-ratio: 3/1; background: var(--light);">
                             <img id="imagePreview" src="<%= banner ? banner.image_url : '' %>"
-                                style="width: 100%; <%= banner ? 'display: block;' : 'display: none;' %> max-height: 300px; object-fit: cover;">
+                                style="width: 100%; height: 100%; <%= banner ? 'display: block;' : 'display: none;' %> object-fit: cover;">
+                            <div id="placeholderText"
+                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: var(--medium-gray); <%= banner ? 'display: none;' : 'display: block;' %>">
+                                <i class="fas fa-image"
+                                    style="font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.3;"></i>
+                                <p>معاينة الصورة بنسبة 3:1</p>
+                                <small>1200 × 400 بكسل</small>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">رابط البنر (اختياري)</label>
-                        <input type="text" name="link" class="form-control" placeholder="/products?category=summer"
-                            value="<%= banner ? banner.link : '' %>">
-                        <small class="text-muted">الرابط الذي يذهب إليه المستخدم عند الضغط على البنر</small>
+                    <!-- Text Content Section -->
+                    <div
+                        style="background: var(--light); padding: 1.5rem; border-radius: var(--radius-md); margin: 2rem 0;">
+                        <h3 style="margin-bottom: 1rem; color: var(--dark-gray);">
+                            <i class="fas fa-text-width"></i> محتوى البنر
+                        </h3>
+
+                        <div class="form-group">
+                            <label class="form-label">العنوان الرئيسي</label>
+                            <input type="text" name="heading_text" class="form-control"
+                                placeholder="مثال: Summer Collection" value="<%= banner ? banner.heading_text : '' %>">
+                            <small class="text-muted">النص الكبير الذي يظهر على البنر (اختياري)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">العنوان الفرعي</label>
+                            <input type="text" name="subheading_text" class="form-control"
+                                placeholder="مثال: Up to 50% OFF على كل المنتجات"
+                                value="<%= banner ? banner.subheading_text : '' %>">
+                            <small class="text-muted">النص الصغير الذي يظهر تحت العنوان (اختياري)</small>
+                        </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <!-- Button Customization Section -->
+                    <div
+                        style="background: var(--light); padding: 1.5rem; border-radius: var(--radius-md); margin: 2rem 0;">
+                        <h3 style="margin-bottom: 1rem; color: var(--dark-gray);">
+                            <i class="fas fa-mouse-pointer"></i> تخصيص الزر
+                        </h3>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">نص الزر</label>
+                                <input type="text" name="button_text" class="form-control" placeholder="Shop Now"
+                                    value="<%= banner ? (banner.button_text || 'Shop Now') : 'Shop Now' %>">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">لون الزر</label>
+                                <input type="color" name="button_color" class="form-control"
+                                    value="<%= banner ? (banner.button_color || '#D4AF37') : '#D4AF37' %>"
+                                    style="height: 45px;">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">شكل الزر</label>
+                                <select name="button_style" class="form-control">
+                                    <option value="rounded" <%=banner && banner.button_style==='rounded' ? 'selected'
+                                        : '' %>>دائري (Rounded)</option>
+                                    <option value="square" <%=banner && banner.button_style==='square' ? 'selected' : ''
+                                        %>>مربع (Square)</option>
+                                    <option value="pill" <%=banner && banner.button_style==='pill' ? 'selected' : '' %>
+                                        >كبسولة (Pill)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">حجم الزر</label>
+                                <select name="button_size" class="form-control">
+                                    <option value="small" <%=banner && banner.button_size==='small' ? 'selected' : '' %>
+                                        >صغير</option>
+                                    <option value="medium" <%=banner && banner.button_size==='medium' ? 'selected' : ''
+                                        %>>متوسط</option>
+                                    <option value="large" <%=banner && banner.button_size==='large' ? 'selected' : '' %>
+                                        >كبير</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">موقع الزر</label>
+                                <select name="button_position" class="form-control">
+                                    <option value="left" <%=banner && banner.button_position==='left' ? 'selected' : ''
+                                        %>>يسار</option>
+                                    <option value="center" <%=banner && banner.button_position==='center' ? 'selected'
+                                        : '' %>>وسط</option>
+                                    <option value="right" <%=banner && banner.button_position==='right' ? 'selected'
+                                        : '' %>>يمين</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">رابط الزر</label>
+                            <input type="text" name="button_link" class="form-control"
+                                placeholder="/products أو category/123" value="<%= banner ? banner.button_link : '' %>">
+                            <small class="text-muted">الصفحة التي سيذهب إليها المستخدم عند الضغط على الزر
+                                (اختياري)</small>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 2rem 0;">
+                        <div class="form-group">
+                            <label class="form-label">عنوان داخلي (للإدارة)</label>
+                            <input type="text" name="title" class="form-control" placeholder="مثال: عروض الصيف"
+                                value="<%= banner ? banner.title : '' %>">
+                            <small class="text-muted">لتمييز البنر في لوحة التحكم فقط</small>
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label">ترتيب العرض</label>
                             <input type="number" name="sort_order" class="form-control"
@@ -112,22 +209,22 @@
                 uploadInput.style.display = 'block';
                 urlInput.style.display = 'none';
                 urlField.removeAttribute('required');
-                uploadFile.setAttribute('required', 'required');
             } else {
                 uploadInput.style.display = 'none';
                 urlInput.style.display = 'block';
                 uploadFile.removeAttribute('required');
-                urlField.setAttribute('required', 'required');
             }
         }
 
         function previewUploadedImage(input) {
             const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('placeholderText');
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     preview.src = e.target.result;
                     preview.style.display = 'block';
+                    placeholder.style.display = 'none';
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -135,9 +232,11 @@
 
         function previewUrlImage(input) {
             const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('placeholderText');
             if (input.value) {
                 preview.src = input.value;
                 preview.style.display = 'block';
+                placeholder.style.display = 'none';
             }
         }
 
