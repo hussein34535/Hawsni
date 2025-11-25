@@ -93,15 +93,27 @@ class _HeroCarouselState extends State<HeroCarousel> {
     }
   }
 
-  CrossAxisAlignment _getAlignment(String? position) {
+  (MainAxisAlignment, CrossAxisAlignment) _getAlignment(String? position) {
     switch (position) {
-      case 'left':
-        return CrossAxisAlignment.start;
+      case 'top-left':
+        return (MainAxisAlignment.start, CrossAxisAlignment.start);
+      case 'top-center':
+        return (MainAxisAlignment.start, CrossAxisAlignment.center);
+      case 'top-right':
+        return (MainAxisAlignment.start, CrossAxisAlignment.end);
+      case 'center-left':
+        return (MainAxisAlignment.center, CrossAxisAlignment.start);
       case 'center':
-        return CrossAxisAlignment.center;
-      case 'right':
+        return (MainAxisAlignment.center, CrossAxisAlignment.center);
+      case 'center-right':
+        return (MainAxisAlignment.center, CrossAxisAlignment.end);
+      case 'bottom-left':
+        return (MainAxisAlignment.end, CrossAxisAlignment.start);
+      case 'bottom-center':
+        return (MainAxisAlignment.end, CrossAxisAlignment.center);
+      case 'bottom-right':
       default:
-        return CrossAxisAlignment.end;
+        return (MainAxisAlignment.end, CrossAxisAlignment.end);
     }
   }
 
@@ -191,8 +203,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
                       Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
-                          crossAxisAlignment: _getAlignment(buttonPosition),
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: _getAlignment(buttonPosition).$2,
+                          mainAxisAlignment: _getAlignment(buttonPosition).$1,
                           children: [
                             // Heading Text
                             if (headingText != null && headingText.isNotEmpty)

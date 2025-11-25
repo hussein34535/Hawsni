@@ -102,22 +102,32 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <div class="form-group">
                                 <label class="form-label">نص الزر</label>
-                                <input type="text" name="button_text" class="form-control" placeholder="Shop Now"
-                                    value="<%= banner ? (banner.button_text || 'Shop Now') : 'Shop Now' %>">
+                                <input type="text" id="buttonText" name="button_text" class="form-control"
+                                    placeholder="Shop Now"
+                                    value="<%= banner ? (banner.button_text || 'Shop Now') : 'Shop Now' %>"
+                                    onchange="updatePreview()">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">لون الزر</label>
-                                <input type="color" name="button_color" class="form-control"
-                                    value="<%= banner ? (banner.button_color || '#D4AF37') : '#D4AF37' %>"
-                                    style="height: 45px;">
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <input type="color" id="buttonColor" name="button_color" class="form-control"
+                                        value="<%= banner ? (banner.button_color || '#D4AF37') : '#D4AF37' %>"
+                                        style="height: 45px; padding: 0.25rem;" onchange="updatePreview()">
+                                    <input type="text" id="buttonColorHex" class="form-control"
+                                        value="<%= banner ? (banner.button_color || '#D4AF37') : '#D4AF37' %>"
+                                        placeholder="#D4AF37" style="width: 100px;" onchange="syncColorFromHex()"
+                                        pattern="^#[0-9A-Fa-f]{6}$">
+                                </div>
+                                <small class="text-muted">اختر اللون أو اكتب الكود</small>
                             </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                             <div class="form-group">
                                 <label class="form-label">شكل الزر</label>
-                                <select name="button_style" class="form-control">
+                                <select id="buttonStyle" name="button_style" class="form-control"
+                                    onchange="updatePreview()">
                                     <option value="rounded" <%=banner && banner.button_style==='rounded' ? 'selected'
                                         : '' %>>دائري (Rounded)</option>
                                     <option value="square" <%=banner && banner.button_style==='square' ? 'selected' : ''
@@ -129,7 +139,8 @@
 
                             <div class="form-group">
                                 <label class="form-label">حجم الزر</label>
-                                <select name="button_size" class="form-control">
+                                <select id="buttonSize" name="button_size" class="form-control"
+                                    onchange="updatePreview()">
                                     <option value="small" <%=banner && banner.button_size==='small' ? 'selected' : '' %>
                                         >صغير</option>
                                     <option value="medium" <%=banner && banner.button_size==='medium' ? 'selected' : ''
@@ -141,15 +152,41 @@
 
                             <div class="form-group">
                                 <label class="form-label">موقع الزر</label>
-                                <select name="button_position" class="form-control">
-                                    <option value="left" <%=banner && banner.button_position==='left' ? 'selected' : ''
-                                        %>>يسار</option>
+                                <select id="buttonPosition" name="button_position" class="form-control"
+                                    onchange="updatePreview()">
+                                    <option value="bottom-right" <%=banner && banner.button_position==='bottom-right'
+                                        ? 'selected' : '' %>>أسفل يمين</option>
+                                    <option value="bottom-center" <%=banner && banner.button_position==='bottom-center'
+                                        ? 'selected' : '' %>>أسفل وسط</option>
+                                    <option value="bottom-left" <%=banner && banner.button_position==='bottom-left'
+                                        ? 'selected' : '' %>>أسفل يسار</option>
+                                    <option value="center-right" <%=banner && banner.button_position==='center-right'
+                                        ? 'selected' : '' %>>وسط يمين</option>
                                     <option value="center" <%=banner && banner.button_position==='center' ? 'selected'
-                                        : '' %>>وسط</option>
-                                    <option value="right" <%=banner && banner.button_position==='right' ? 'selected'
-                                        : '' %>>يمين</option>
+                                        : '' %>>وسط وسط</option>
+                                    <option value="center-left" <%=banner && banner.button_position==='center-left'
+                                        ? 'selected' : '' %>>وسط يسار</option>
+                                    <option value="top-right" <%=banner && banner.button_position==='top-right'
+                                        ? 'selected' : '' %>>أعلى يمين</option>
+                                    <option value="top-center" <%=banner && banner.button_position==='top-center'
+                                        ? 'selected' : '' %>>أعلى وسط</option>
+                                    <option value="top-left" <%=banner && banner.button_position==='top-left'
+                                        ? 'selected' : '' %>>أعلى يسار</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <!-- Button Preview -->
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label class="form-label">معاينة الزر</label>
+                            <div
+                                style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 2rem; border-radius: var(--radius-md); min-height: 200px; position: relative;">
+                                <button id="buttonPreview" type="button"
+                                    style="position: absolute; bottom: 20px; right: 20px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); color: #000;">
+                                    Shop Now
+                                </button>
+                            </div>
+                            <small class="text-muted">معاينة مباشرة للزر مع الإعدادات الحالية</small>
                         </div>
 
                         <div class="form-group">
@@ -240,9 +277,97 @@
             }
         }
 
+        function updatePreview() {
+            const button = document.getElementById('buttonPreview');
+            const text = document.getElementById('buttonText').value || 'Shop Now';
+            const color = document.getElementById('buttonColor').value;
+            const style = document.getElementById('buttonStyle').value;
+            const size = document.getElementById('buttonSize').value;
+            const position = document.getElementById('buttonPosition').value;
+
+            // Update text
+            button.textContent = text;
+
+            // Update color
+            button.style.backgroundColor = color;
+            document.getElementById('buttonColorHex').value = color;
+
+            // Update border radius based on style
+            if (style === 'square') {
+                button.style.borderRadius = '4px';
+            } else if (style === 'pill') {
+                button.style.borderRadius = '50px';
+            } else {
+                button.style.borderRadius = '12px';
+            }
+
+            // Update size
+            if (size === 'small') {
+                button.style.padding = '8px 16px';
+                button.style.fontSize = '12px';
+            } else if (size === 'large') {
+                button.style.padding = '16px 28px';
+                button.style.fontSize = '16px';
+            } else {
+                button.style.padding = '12px 20px';
+                button.style.fontSize = '14px';
+            }
+
+            // Update position
+            button.style.position = 'absolute';
+            button.style.top = 'auto';
+            button.style.bottom = 'auto';
+            button.style.left = 'auto';
+            button.style.right = 'auto';
+            button.style.transform = 'none';
+
+            if (position === 'bottom-right') {
+                button.style.bottom = '20px';
+                button.style.right = '20px';
+            } else if (position === 'bottom-center') {
+                button.style.bottom = '20px';
+                button.style.left = '50%';
+                button.style.transform = 'translateX(-50%)';
+            } else if (position === 'bottom-left') {
+                button.style.bottom = '20px';
+                button.style.left = '20px';
+            } else if (position === 'center-right') {
+                button.style.top = '50%';
+                button.style.right = '20px';
+                button.style.transform = 'translateY(-50%)';
+            } else if (position === 'center') {
+                button.style.top = '50%';
+                button.style.left = '50%';
+                button.style.transform = 'translate(-50%, -50%)';
+            } else if (position === 'center-left') {
+                button.style.top = '50%';
+                button.style.left = '20px';
+                button.style.transform = 'translateY(-50%)';
+            } else if (position === 'top-right') {
+                button.style.top = '20px';
+                button.style.right = '20px';
+            } else if (position === 'top-center') {
+                button.style.top = '20px';
+                button.style.left = '50%';
+                button.style.transform = 'translateX(-50%)';
+            } else if (position === 'top-left') {
+                button.style.top = '20px';
+                button.style.left = '20px';
+            }
+        }
+
+        function syncColorFromHex() {
+            const hexValue = document.getElementById('buttonColorHex').value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(hexValue)) {
+                document.getElementById('buttonColor').value = hexValue;
+                updatePreview();
+            }
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function () {
             toggleImageInput();
+            updatePreview();
         });
     </script>
 
