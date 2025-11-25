@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
+// Middleware
+const upload = require('../middleware/upload');
+
 // Controllers
 const dashboardController = require('../controllers/admin/dashboardController');
 const bannersController = require('../controllers/admin/bannersController');
@@ -13,9 +16,9 @@ router.get('/dashboard', dashboardController.getDashboard);
 // Banners Routes
 router.get('/banners', bannersController.index);
 router.get('/banners/new', bannersController.new);
-router.post('/banners', bannersController.create);
+router.post('/banners', upload.single('banner_image'), bannersController.create);
 router.get('/banners/:id/edit', bannersController.edit);
-router.post('/banners/:id', bannersController.update); // Using POST with _method for PUT
+router.post('/banners/:id', upload.single('banner_image'), bannersController.update);
 router.delete('/banners/:id', bannersController.delete);
 
 // Users Routes

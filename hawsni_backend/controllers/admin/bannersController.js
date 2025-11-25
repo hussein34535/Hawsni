@@ -27,15 +27,40 @@ class BannersController {
     async create(req, res) {
         try {
             const { title, image_url, link, sort_order, is_active } = req.body;
+            let finalImageUrl = image_url;
 
-            // Validate image_url
-            if (!image_url || image_url.trim() === '') {
-                return res.status(400).send('يجب إدخال رابط الصورة');
+            // If file was uploaded, upload to Supabase Storage
+            if (req.file) {
+                const fileName = `banner-${Date.now()}-${req.file.originalname}`;
+
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('banners')
+                    .upload(fileName, req.file.buffer, {
+                        contentType: req.file.mimetype,
+                        cacheControl: '3600'
+                    });
+
+                if (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    throw uploadError;
+                }
+
+                // Get public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('banners')
+                    .getPublicUrl(fileName);
+
+                finalImageUrl = publicUrl;
+            }
+
+            // Validate we have an image URL
+            if (!finalImageUrl || finalImageUrl.trim() === '') {
+                return res.status(400).send('يجب رفع صورة أو إدخال رابط الصورة');
             }
 
             const bannerData = {
                 title: title || null,
-                image_url: image_url.trim(),
+                image_url: finalImageUrl.trim(),
                 link: link || null,
                 sort_order: parseInt(sort_order) || 1,
                 is_active: is_active === 'true'
@@ -88,15 +113,40 @@ class BannersController {
         try {
             const { id } = req.params;
             const { title, image_url, link, sort_order, is_active } = req.body;
+            let finalImageUrl = image_url;
 
-            // Validate image_url
-            if (!image_url || image_url.trim() === '') {
-                return res.status(400).send('يجب إدخال رابط الصورة');
+            // If file was uploaded, upload to Supabase Storage
+            if (req.file) {
+                const fileName = `banner-${Date.now()}-${req.file.originalname}`;
+
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('banners')
+                    .upload(fileName, req.file.buffer, {
+                        contentType: req.file.mimetype,
+                        cacheControl: '3600'
+                    });
+
+                if (uploadError) {
+                    console.error('Upload error:', uploadError);
+                    throw uploadError;
+                }
+
+                // Get public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('banners')
+                    .getPublicUrl(fileName);
+
+                finalImageUrl = publicUrl;
+            }
+
+            // Validate we have an image URL
+            if (!finalImageUrl || finalImageUrl.trim() === '') {
+                return res.status(400).send('يجب رفع صورة أو إدخال رابط الصورة');
             }
 
             const updateData = {
                 title: title || null,
-                image_url: image_url.trim(),
+                image_url: finalImageUrl.trim(),
                 link: link || null,
                 sort_order: parseInt(sort_order) || 1,
                 is_active: is_active === 'true'
