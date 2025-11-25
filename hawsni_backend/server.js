@@ -19,6 +19,7 @@ const reviewRoutes = require('./routes/reviews_supabase');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
 const bannerRoutes = require('./routes/banners');
+const adminRoutes = require('./routes/admin');
 
 // Import Controllers
 const DashboardController = require('./controllers/admin/dashboardController');
@@ -40,6 +41,8 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
 console.log('Debug: Middleware initialized successfully.');
 
 // API Routes
@@ -55,7 +58,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/banners', bannerRoutes);
 
-// Admin Dashboard Route
+// Admin Routes (new layout system)
+app.use('/', adminRoutes);
+
+// Admin Dashboard Route (old - will be replaced)
 app.get('/dashboard', DashboardController.getDashboard);
 
 // Products Management (Admin)

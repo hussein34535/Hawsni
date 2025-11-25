@@ -1,342 +1,122 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<%- include('partials/header', { title: 'لوحة التحكم' , pageTitle: 'لوحة التحكم' , page: 'dashboard' }) %>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Hawsni Admin</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- إضافة مكتبة Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <div style="margin-bottom: 2rem;">
+        <h2 style="color: var(--dark-gray); font-size: 1.5rem;">👋 أهلاً بك في لوحة التحكم</h2>
+        <p style="color: var(--medium-gray);">إليك نظرة عامة على أداء متجرك</p>
+    </div>
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fb;
-            color: #333;
-        }
-
-        /* Navbar */
-        .navbar {
-            background: #fff;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .navbar h1 {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            font-weight: 800;
-        }
-
-        .navbar h1 span {
-            color: #3498db;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: #555;
-            margin-right: 20px;
-            font-weight: 500;
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            color: #3498db;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        /* Stats Grid */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-            transition: transform 0.3s;
-            border-bottom: 4px solid transparent;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-card.revenue {
-            border-color: #3498db;
-        }
-
-        .stat-card.orders {
-            border-color: #e67e22;
-        }
-
-        .stat-card.products {
-            border-color: #9b59b6;
-        }
-
-        .stat-card.users {
-            border-color: #27ae60;
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .revenue .stat-icon {
-            background: #eaf6fc;
-            color: #3498db;
-        }
-
-        .orders .stat-icon {
-            background: #fdf2e9;
-            color: #e67e22;
-        }
-
-        .products .stat-icon {
-            background: #f5eef9;
-            color: #9b59b6;
-        }
-
-        .users .stat-icon {
-            background: #e9f7ef;
-            color: #27ae60;
-        }
-
-        .stat-card h3 {
-            font-size: 2rem;
-            margin-bottom: 0.2rem;
-            color: #2c3e50;
-        }
-
-        .stat-card p {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        /* Content Grid */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header h2 {
-            font-size: 1.25rem;
-            color: #2c3e50;
-        }
-
-        /* Table */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 1rem;
-            text-align: right;
-            border-bottom: 1px solid #f1f1f1;
-        }
-
-        th {
-            color: #7f8c8d;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        td {
-            font-weight: 500;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .status.processing {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status.delivered {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status.cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            background: #f8f9fa;
-            color: #333;
-        }
-
-        .btn:hover {
-            background: #e2e6ea;
-        }
-
-        @media (max-width: 1024px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <nav class="navbar">
-        <h1>Hawsni <span>Admin</span></h1>
-        <div class="nav-links">
-            <a href="/dashboard" class="active"><i class="fas fa-home"></i> الرئيسية</a>
-            <a href="/products"><i class="fas fa-box"></i> المنتجات</a>
-            <a href="/categories"><i class="fas fa-tags"></i> التصنيفات</a>
-            <a href="/banners"><i class="fas fa-images"></i> البنرات</a>
-            <a href="/orders"><i class="fas fa-shopping-cart"></i> الطلبات</a>
-        </div>
-    </nav>
-
-    <div class="container">
-        <!-- Hidden div to store chart data -->
-        <div id="chartData" style="display: none;" data-chart='<%- JSON.stringify(chartData || {}) %>'></div>
-
-        <div style="margin: 2rem 0;">
-            <h2 style="color: #2c3e50;">👋 أهلاً بك في لوحة التحكم</h2>
-            <p style="color: #7f8c8d;">إليك نظرة عامة على أداء متجرك اليوم</p>
-        </div>
-
-        <!-- Cards -->
-        <div class="stats">
-            <div class="stat-card revenue">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <a href="/orders" style="text-decoration: none;">
+            <div class="stat-card primary">
                 <div class="stat-header">
                     <div>
-                        <h3>
+                        <div class="stat-value">
                             <%= revenue %> ج.م
-                        </h3>
-                        <p>إجمالي المبيعات</p>
+                        </div>
+                        <div class="stat-label">إجمالي المبيعات</div>
                     </div>
-                    <div class="stat-icon"><i class="fas fa-sack-dollar"></i></div>
-                </div>
-            </div>
-            <div class="stat-card orders">
-                <div class="stat-header">
-                    <div>
-                        <h3>
-                            <%= ordersCount %>
-                        </h3>
-                        <p>الطلبات</p>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
-                </div>
-            </div>
-            <div class="stat-card products">
-                <div class="stat-header">
-                    <div>
-                        <h3>
-                            <%= productsCount %>
-                        </h3>
-                        <p>المنتجات</p>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-box"></i></div>
-                </div>
-            </div>
-            <div class="stat-card users">
-                <div class="stat-header">
-                    <div>
-                        <h3>
-                            <%= usersCount %>
-                        </h3>
-                        <p>المستخدمين</p>
-                    </div>
-                    <div class="stat-icon"><i class="fas fa-users"></i></div>
-                </div>
-            </div>
-            <div class="stat-card products" style="border-color: #e74c3c;">
-                <div class="stat-header">
-                    <div>
-                        <h3>
-                            <%= bannersCount %>
-                        </h3>
-                        <p>البنرات</p>
-                    </div>
-                    <div class="stat-icon" style="background: #fdedec; color: #e74c3c;"><i class="fas fa-images"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-sack-dollar"></i>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="content-grid">
-            <!-- Recent Orders -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>📦 أحدث الطلبات</h2>
-                    <a href="/orders" class="btn">عرض الكل</a>
+        <a href="/orders" style="text-decoration: none;">
+            <div class="stat-card warning">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">
+                            <%= ordersCount %>
+                        </div>
+                        <div class="stat-label">الطلبات</div>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(243,156,18,0.1); color: var(--warning);">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
                 </div>
-                <% if (orders.length> 0) { %>
+            </div>
+        </a>
+
+        <a href="/products" style="text-decoration: none;">
+            <div class="stat-card info">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">
+                            <%= productsCount %>
+                        </div>
+                        <div class="stat-label">المنتجات</div>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(52,152,219,0.1); color: var(--info);">
+                        <i class="fas fa-box"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/categories" style="text-decoration: none;">
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">
+                            <%= categoriesCount %>
+                        </div>
+                        <div class="stat-label">التصنيفات</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/users" style="text-decoration: none;">
+            <div class="stat-card primary">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">
+                            <%= usersCount %>
+                        </div>
+                        <div class="stat-label">المستخدمين</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/banners" style="text-decoration: none;">
+            <div class="stat-card danger">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-value">
+                            <%= bannersCount %>
+                        </div>
+                        <div class="stat-label">البنرات</div>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(231,76,60,0.1); color: var(--danger);">
+                        <i class="fas fa-images"></i>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Content Grid -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <!-- Recent Orders -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-shopping-cart"></i> أحدث الطلبات
+                </h2>
+                <a href="/orders" class="btn btn-secondary btn-sm">عرض الكل</a>
+            </div>
+
+            <% if (orders && orders.length> 0) { %>
+                <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
@@ -355,75 +135,51 @@
                                         <%= parseFloat(order.total).toFixed(2) %> ج.م
                                     </td>
                                     <td>
-                                        <span
-                                            class="status <%= order.status ? order.status.toLowerCase().replace(' ', '') : 'processing' %>">
-                                            <%= order.status || 'Processing' %>
-                                        </span>
+                                        <% const statusMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'Delivered'
+                                            : 'success' , 'Cancelled' : 'danger' }; %>
+                                            <span class="badge badge-<%= statusMap[order.status] || 'warning' %>">
+                                                <%= order.status || 'Processing' %>
+                                            </span>
                                     </td>
                                     <td>
                                         <%= new Date(order.created_at).toLocaleDateString('ar-EG') %>
                                     </td>
                                 </tr>
-                                <% }); %>
+                                <% }) %>
                         </tbody>
                     </table>
-                    <% } else { %>
-                        <div style="text-align: center; color: #999; padding: 2rem;">
-                            <i class="fas fa-shopping-bag" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                            <p>لا توجد طلبات حتى الآن</p>
-                        </div>
-                        <% } %>
+                </div>
+                <% } else { %>
+                    <div class="text-center" style="padding: 3rem; color: var(--medium-gray);">
+                        <i class="fas fa-shopping-bag" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+                        <p>لا توجد طلبات حتى الآن</p>
+                    </div>
+                    <% } %>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-bolt"></i> إجراءات سريعة
+                </h2>
             </div>
 
-            <!-- Chart -->
-            <div class="card">
-                <div class="card-header">
-                    <h2>📊 حالة الطلبات</h2>
-                </div>
-                <canvas id="ordersChart"></canvas>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <a href="/products/new" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> إضافة منتج
+                </a>
+                <a href="/categories" class="btn btn-secondary">
+                    <i class="fas fa-tags"></i> إدارة التصنيفات
+                </a>
+                <a href="/banners/new" class="btn btn-secondary">
+                    <i class="fas fa-images"></i> إضافة بنر
+                </a>
+                <a href="/orders" class="btn btn-secondary">
+                    <i class="fas fa-shopping-cart"></i> عرض الطلبات
+                </a>
             </div>
         </div>
     </div>
 
-    <script>
-        // استقبال البيانات من السيرفر
-        const chartDataElement = document.getElementById('chartData');
-        const chartData = JSON.parse(chartDataElement.dataset.chart);
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const ctx = document.getElementById('ordersChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['قيد المعالجة', 'تم الشحن', 'تم التوصيل', 'ملغى'],
-                    datasets: [{
-                        data: [
-                            chartData['Processing'],
-                            chartData['Shipped'],
-                            chartData['Delivered'],
-                            chartData['Cancelled']
-                        ],
-                        backgroundColor: [
-                            '#f1c40f', // اصفر - معالجة
-                            '#3498db', // ازرق - شحن
-                            '#27ae60', // اخضر - توصيل
-                            '#e74c3c'  // احمر - الغاء
-                        ],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { font: { family: 'Segoe UI' } }
-                        }
-                    }
-                }
-            });
-        });
-    </script>
-</body>
-
-</html>
+    <%- include('partials/footer') %>

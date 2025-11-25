@@ -1,0 +1,80 @@
+<%- include('partials/header', { title: banner ? 'تعديل بنر' : 'إضافة بنر جديد' , pageTitle: banner ? 'تعديل بنر'
+    : 'إضافة بنر جديد' , page: 'banners' }) %>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-<%= banner ? 'edit' : 'plus' %>"></i>
+                <%= banner ? 'تعديل بنر' : 'إضافة بنر جديد' %>
+            </h2>
+            <a href="/banners" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> رجوع
+            </a>
+        </div>
+
+        <form action="<%= banner ? `/banners/${banner.id}` : '/banners' %>" method="POST"
+            onsubmit="return validateForm('bannerForm')" id="bannerForm">
+
+            <% if (banner) { %>
+                <input type="hidden" name="_method" value="PUT">
+                <% } %>
+
+                    <div class="form-group">
+                        <label class="form-label">عنوان البنر</label>
+                        <input type="text" name="title" class="form-control" placeholder="مثال: عروض الصيف"
+                            value="<%= banner ? banner.title : '' %>">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">رابط الصورة <span style="color: var(--danger);">*</span></label>
+                        <input type="url" name="image_url" class="form-control"
+                            placeholder="https://example.com/image.jpg" value="<%= banner ? banner.image_url : '' %>"
+                            required onchange="previewImage(this, document.getElementById('imagePreview'))">
+                        <small class="text-muted">استخدم رابط صورة من Unsplash أو أي مصدر آخر</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">معاينة الصورة</label>
+                        <div
+                            style="max-width: 600px; border: 2px dashed var(--light-gray); border-radius: var(--radius-md); overflow: hidden;">
+                            <img id="imagePreview" src="<%= banner ? banner.image_url : '' %>"
+                                style="width: 100%; <%= banner ? 'display: block;' : 'display: none;' %> max-height: 300px; object-fit: cover;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">رابط البنر (اختياري)</label>
+                        <input type="text" name="link" class="form-control" placeholder="/products?category=summer"
+                            value="<%= banner ? banner.link : '' %>">
+                        <small class="text-muted">الرابط الذي يذهب إليه المستخدم عند الضغط على البنر</small>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">ترتيب العرض</label>
+                            <input type="number" name="sort_order" class="form-control"
+                                value="<%= banner ? banner.sort_order : 1 %>" min="1">
+                            <small class="text-muted">الترتيب من الأصغر للأكبر</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">الحالة</label>
+                            <select name="is_active" class="form-control">
+                                <option value="true" <%=banner && banner.is_active ? 'selected' : '' %>>نشط</option>
+                                <option value="false" <%=banner && !banner.is_active ? 'selected' : '' %>>غير نشط
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <%= banner ? 'حفظ التعديلات' : 'إضافة البنر' %>
+                        </button>
+                        <a href="/banners" class="btn btn-secondary">إلغاء</a>
+                    </div>
+        </form>
+    </div>
+
+    <%- include('partials/footer') %>

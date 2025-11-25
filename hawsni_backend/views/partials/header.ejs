@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title || 'Hawsni Admin' %>
+    </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/dashboard" class="sidebar-brand">
+                    <i class="fas fa-gem" style="font-size: 2rem;"></i>
+                    <h1>Hawsni <span>Admin</span></h1>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">القائمة الرئيسية</div>
+                    <a href="/dashboard" class="nav-link <%= page === 'dashboard' ? 'active' : '' %>">
+                        <i class="fas fa-home"></i>
+                        <span>لوحة التحكم</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">إدارة المتجر</div>
+                    <a href="/products" class="nav-link <%= page === 'products' ? 'active' : '' %>">
+                        <i class="fas fa-box"></i>
+                        <span>المنتجات</span>
+                    </a>
+                    <a href="/categories" class="nav-link <%= page === 'categories' ? 'active' : '' %>">
+                        <i class="fas fa-tags"></i>
+                        <span>التصنيفات</span>
+                    </a>
+                    <a href="/banners" class="nav-link <%= page === 'banners' ? 'active' : '' %>">
+                        <i class="fas fa-images"></i>
+                        <span>البنرات</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">الطلبات والعملاء</div>
+                    <a href="/orders" class="nav-link <%= page === 'orders' ? 'active' : '' %>">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>الطلبات</span>
+                    </a>
+                    <a href="/users" class="nav-link <%= page === 'users' ? 'active' : '' %>">
+                        <i class="fas fa-users"></i>
+                        <span>المستخدمين</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">الإعدادات</div>
+                    <a href="/settings" class="nav-link <%= page === 'settings' ? 'active' : '' %>">
+                        <i class="fas fa-cog"></i>
+                        <span>الإعدادات</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="topbar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button id="menuToggle" class="btn btn-secondary" style="display: none;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">
+                        <%= pageTitle || title || 'لوحة التحكم' %>
+                    </h1>
+                </div>
+
+                <div class="topbar-actions">
+                    <a href="/" target="_blank" class="btn btn-secondary">
+                        <i class="fas fa-external-link-alt"></i>
+                        عرض المتجر
+                    </a>
+                </div>
+            </div>
+
+            <div class="content-wrapper">

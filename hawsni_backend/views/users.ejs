@@ -1,0 +1,69 @@
+<%- include('partials/header', { title: 'إدارة المستخدمين' , pageTitle: 'المستخدمين' , page: 'users' }) %>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-users"></i> جميع المستخدمين
+            </h2>
+        </div>
+
+        <% if (users && users.length> 0) { %>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>رقم الهاتف</th>
+                            <th>الحالة</th>
+                            <th>تاريخ التسجيل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user=> { %>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <% if (user.avatar_url) { %>
+                                            <img src="<%= user.avatar_url %>" alt="<%= user.name %>"
+                                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                            <% } else { %>
+                                                <div
+                                                    style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--dark);">
+                                                    <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                                                </div>
+                                                <% } %>
+                                                    <span style="font-weight: 600;">
+                                                        <%= user.name || 'غير متوفر' %>
+                                                    </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <%= user.email %>
+                                </td>
+                                <td>
+                                    <%= user.phone || '-' %>
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge <%= user.is_phone_verified ? 'badge-success' : 'badge-warning' %>">
+                                        <%= user.is_phone_verified ? 'موثق' : 'غير موثق' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= new Date(user.created_at).toLocaleDateString('ar-EG') %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+                <div class="text-center" style="padding: 3rem; color: var(--medium-gray);">
+                    <i class="fas fa-users" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <p style="font-size: 1.1rem;">لا يوجد مستخدمين حتى الآن</p>
+                </div>
+                <% } %>
+    </div>
+
+    <%- include('partials/footer') %>
