@@ -72,7 +72,7 @@ class BannersController {
                 heading_text: heading_text || null,
                 subheading_text: subheading_text || null,
                 // Button customization
-                button_text: button_text || 'Shop Now',
+                button_text: button_text,
                 button_color: button_color || '#D4AF37',
                 button_style: button_style || 'rounded',
                 button_size: button_size || 'medium',
@@ -172,7 +172,7 @@ class BannersController {
                 heading_text: heading_text || null,
                 subheading_text: subheading_text || null,
                 // Button customization
-                button_text: button_text || 'Shop Now',
+                button_text: button_text,
                 button_color: button_color || '#D4AF37',
                 button_style: button_style || 'rounded',
                 button_size: button_size || 'medium',
