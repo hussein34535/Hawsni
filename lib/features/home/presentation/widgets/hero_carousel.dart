@@ -161,6 +161,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
                     _parseColor(banner['button_color'] as String?);
                 final buttonStyle = banner['button_style'] as String?;
                 final buttonSize = banner['button_size'] as String?;
+                final buttonPosition = banner['button_position'] as String?;
+                final buttonLink = banner['button_link'] as String?;
                 final buttonOpacity =
                     (banner['button_opacity'] as num?)?.toDouble() ?? 1.0;
                 final imageBlur =
@@ -182,17 +184,25 @@ class _HeroCarouselState extends State<HeroCarousel> {
                     children: [
                       // Background Image with Blur
                       if (imageUrl != null)
-                        ImageFiltered(
-                          imageFilter: ImageFilter.blur(
-                              sigmaX: imageBlur, sigmaY: imageBlur),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(color: Colors.black);
-                            },
-                          ),
-                        ),
+                        imageBlur > 0
+                            ? ImageFiltered(
+                                imageFilter: ImageFilter.blur(
+                                    sigmaX: imageBlur, sigmaY: imageBlur),
+                                child: Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(color: Colors.black);
+                                  },
+                                ),
+                              )
+                            : Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(color: Colors.black);
+                                },
+                              ),
                       // Overlay
                       Container(
                         decoration: BoxDecoration(
@@ -249,6 +259,49 @@ class _HeroCarouselState extends State<HeroCarousel> {
                                     : buttonPosition == 'center'
                                         ? TextAlign.center
                                         : TextAlign.right,
+                              ),
+                            if (subheadingText != null &&
+                                subheadingText.isNotEmpty)
+                              const SizedBox(height: 12),
+                            // Button
+                            if (buttonText.isNotEmpty)
+                              Opacity(
+                                opacity: buttonOpacity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    // Handle button navigation
+                                    if (buttonLink != null &&
+                                        buttonLink.isNotEmpty) {
+                                      // Navigate based on link
+                                      print('Navigate to: $buttonLink');
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: buttonColor,
+                                    foregroundColor: Colors.black,
+                                    padding: _getButtonPadding(buttonSize),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          _getButtonBorderRadius(buttonStyle),
+                                    ),
+                                    elevation: 4,
+                                    shadowColor: buttonColor.withOpacity(0.5),
+                                  ),
+                                  child: Text(
+                                    buttonText,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ),
