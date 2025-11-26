@@ -93,10 +93,321 @@
                     </div>
 
                     <!-- Button Customization Section -->
-                    <div document.getElementById('blurValue').textContent=blur; } function syncColorFromHex() { const
-                        hexValue=document.getElementById('buttonColorHex').value; if
-                        (/^#[0-9A-Fa-f]{6}$/.test(hexValue)) { document.getElementById('buttonColor').value=hexValue;
-                        updatePreview(); } } // Initialize on page load document.addEventListener('DOMContentLoaded',
-                        function () { toggleImageInput(); updatePreview(); updateBlur(); }); </script>
+                    <div
+                        style="background: var(--light); padding: 1.5rem; border-radius: var(--radius-md); margin: 2rem 0;">
+                        <h3 style="margin-bottom: 1rem; color: var(--dark-gray);">
+                            <i class="fas fa-mouse-pointer"></i> تخصيص الزر
+                        </h3>
 
-                        <%- include('partials/footer') %>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">نص الزر</label>
+                                <input type="text" id="buttonText" name="button_text" class="form-control"
+                                    placeholder="Shop Now" value="<%= banner ? (banner.button_text || '') : '' %>"
+                                    onchange="updatePreview()">
+                                <small class="text-muted">اتركه فارغاً لإخفاء الزر</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">لون الزر</label>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <input type="color" id="buttonColor" name="button_color" class="form-control"
+                                        value="<%= banner ? (banner.button_color || '#D4AF37') : '#D4AF37' %>"
+                                        style="height: 45px; padding: 0.25rem;" onchange="updatePreview()">
+                                    <input type="text" id="buttonColorHex" class="form-control"
+                                        value="<%= banner ? (banner.button_color || '#D4AF37') : '#D4AF37' %>"
+                                        placeholder="#D4AF37" style="width: 100px;" onchange="syncColorFromHex()"
+                                        pattern="^#[0-9A-Fa-f]{6}$">
+                                </div>
+                                <small class="text-muted">اختر اللون أو اكتب الكود</small>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">شكل الزر</label>
+                                <select id="buttonStyle" name="button_style" class="form-control"
+                                    onchange="updatePreview()">
+                                    <option value="rounded" <%=banner && banner.button_style==='rounded' ? 'selected'
+                                        : '' %>>دائري (Rounded)</option>
+                                    <option value="square" <%=banner && banner.button_style==='square' ? 'selected' : ''
+                                        %>>مربع (Square)</option>
+                                    <option value="pill" <%=banner && banner.button_style==='pill' ? 'selected' : '' %>
+                                        >كبسولة (Pill)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">حجم الزر</label>
+                                <select id="buttonSize" name="button_size" class="form-control"
+                                    onchange="updatePreview()">
+                                    <option value="small" <%=banner && banner.button_size==='small' ? 'selected' : '' %>
+                                        >صغير</option>
+                                    <option value="medium" <%=banner && banner.button_size==='medium' ? 'selected' : ''
+                                        %>>متوسط</option>
+                                    <option value="large" <%=banner && banner.button_size==='large' ? 'selected' : '' %>
+                                        >كبير</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">موقع الزر</label>
+                                <select id="buttonPosition" name="button_position" class="form-control"
+                                    onchange="updatePreview()">
+                                    <option value="bottom-right" <%=banner && banner.button_position==='bottom-right'
+                                        ? 'selected' : '' %>>أسفل يمين</option>
+                                    <option value="bottom-center" <%=banner && banner.button_position==='bottom-center'
+                                        ? 'selected' : '' %>>أسفل وسط</option>
+                                    <option value="bottom-left" <%=banner && banner.button_position==='bottom-left'
+                                        ? 'selected' : '' %>>أسفل يسار</option>
+                                    <option value="center-right" <%=banner && banner.button_position==='center-right'
+                                        ? 'selected' : '' %>>وسط يمين</option>
+                                    <option value="center" <%=banner && banner.button_position==='center' ? 'selected'
+                                        : '' %>>وسط وسط</option>
+                                    <option value="center-left" <%=banner && banner.button_position==='center-left'
+                                        ? 'selected' : '' %>>وسط يسار</option>
+                                    <option value="top-right" <%=banner && banner.button_position==='top-right'
+                                        ? 'selected' : '' %>>أعلى يمين</option>
+                                    <option value="top-center" <%=banner && banner.button_position==='top-center'
+                                        ? 'selected' : '' %>>أعلى وسط</option>
+                                    <option value="top-left" <%=banner && banner.button_position==='top-left'
+                                        ? 'selected' : '' %>>أعلى يسار</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Opacity and Blur Controls -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">شفافية الزر (<span id="opacityValue">100</span>%)</label>
+                                <input type="range" id="buttonOpacity" name="button_opacity" class="form-control"
+                                    min="0" max="1" step="0.05"
+                                    value="<%= banner ? (banner.button_opacity || 1.0) : 1.0 %>"
+                                    oninput="updatePreview()" style="height: 45px;">
+                                <small class="text-muted">تحكم في شفافية الزر (0% = شفاف، 100% = معتم)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">ضبابية الصورة (<span id="blurValue">0</span>px)</label>
+                                <input type="range" id="imageBlur" name="image_blur" class="form-control" min="0"
+                                    max="20" step="0.5" value="<%= banner ? (banner.image_blur || 0.0) : 0.0 %>"
+                                    oninput="updateBlur()" style="height: 45px;">
+                                <small class="text-muted">تأثير ضبابي للصورة الخلفية (0-20)</small>
+                            </div>
+                        </div>
+
+                        <!-- Button Preview -->
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label class="form-label">معاينة الزر</label>
+                            <div id="previewContainer"
+                                style="background: url('https://images.unsplash.com/photo-1483985988355-763728e1935b') center/cover; padding: 2rem; border-radius: var(--radius-md); min-height: 200px; position: relative; overflow: hidden;">
+                                <div id="blurOverlay"
+                                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; backdrop-filter: blur(0px);">
+                                </div>
+                                <button id="buttonPreview" type="button"
+                                    style="position: absolute; bottom: 20px; right: 20px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); color: #000; z-index: 1;">
+                                    Shop Now
+                                </button>
+                            </div>
+                            <small class="text-muted">معاينة مباشرة للزر مع الإعدادات الحالية</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">رابط الزر</label>
+                            <input type="text" name="button_link" class="form-control"
+                                placeholder="/products أو category/123" value="<%= banner ? banner.button_link : '' %>">
+                            <small class="text-muted">الصفحة التي سيذهب إليها المستخدم عند الضغط على الزر
+                                (اختياري)</small>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin: 2rem 0;">
+                        <div class="form-group">
+                            <label class="form-label">عنوان داخلي (للإدارة)</label>
+                            <input type="text" name="title" class="form-control" placeholder="مثال: عروض الصيف"
+                                value="<%= banner ? banner.title : '' %>">
+                            <small class="text-muted">لتمييز البنر في لوحة التحكم فقط</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ترتيب العرض</label>
+                            <input type="number" name="sort_order" class="form-control"
+                                value="<%= banner ? banner.sort_order : 1 %>" min="1">
+                            <small class="text-muted">الترتيب من الأصغر للأكبر</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">الحالة</label>
+                            <select name="is_active" class="form-control">
+                                <option value="true" <%=banner && banner.is_active ? 'selected' : '' %>>نشط</option>
+                                <option value="false" <%=banner && !banner.is_active ? 'selected' : '' %>>غير نشط
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <%= banner ? 'حفظ التعديلات' : 'إضافة البنر' %>
+                        </button>
+                        <a href="/banners" class="btn btn-secondary">إلغاء</a>
+                    </div>
+        </form>
+    </div>
+
+    <script>
+        function toggleImageInput() {
+            const uploadRadio = document.querySelector('input[name="image_type"][value="upload"]');
+            const uploadInput = document.getElementById('uploadInput');
+            const urlInput = document.getElementById('urlInput');
+            const uploadFile = uploadInput.querySelector('input[type="file"]');
+            const urlField = urlInput.querySelector('input[type="url"]');
+
+            if (uploadRadio.checked) {
+                uploadInput.style.display = 'block';
+                urlInput.style.display = 'none';
+                urlField.removeAttribute('required');
+            } else {
+                uploadInput.style.display = 'none';
+                urlInput.style.display = 'block';
+                uploadFile.removeAttribute('required');
+            }
+        }
+
+        function previewUploadedImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('placeholderText');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewUrlImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const placeholder = document.getElementById('placeholderText');
+            if (input.value) {
+                preview.src = input.value;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+        }
+
+        function updatePreview() {
+            const button = document.getElementById('buttonPreview');
+            const text = document.getElementById('buttonText').value;
+            const color = document.getElementById('buttonColor').value;
+            const style = document.getElementById('buttonStyle').value;
+            const size = document.getElementById('buttonSize').value;
+            const position = document.getElementById('buttonPosition').value;
+            const opacity = document.getElementById('buttonOpacity').value;
+
+            // Update text and visibility
+            if (!text) {
+                button.style.display = 'none';
+            } else {
+                button.style.display = 'block';
+                button.textContent = text;
+            }
+
+            // Update color and opacity
+            button.style.backgroundColor = color;
+            button.style.opacity = opacity;
+            document.getElementById('buttonColorHex').value = color;
+            document.getElementById('opacityValue').textContent = Math.round(opacity * 100);
+
+            // Update border radius based on style
+            if (style === 'square') {
+                button.style.borderRadius = '4px';
+            } else if (style === 'pill') {
+                button.style.borderRadius = '50px';
+            } else {
+                button.style.borderRadius = '12px';
+            }
+
+            // Update size
+            if (size === 'small') {
+                button.style.padding = '8px 16px';
+                button.style.fontSize = '12px';
+            } else if (size === 'large') {
+                button.style.padding = '16px 28px';
+                button.style.fontSize = '16px';
+            } else {
+                button.style.padding = '12px 20px';
+                button.style.fontSize = '14px';
+            }
+
+            // Update position
+            button.style.position = 'absolute';
+            button.style.top = 'auto';
+            button.style.bottom = 'auto';
+            button.style.left = 'auto';
+            button.style.right = 'auto';
+            button.style.transform = 'none';
+
+            if (position === 'bottom-right') {
+                button.style.bottom = '20px';
+                button.style.right = '20px';
+            } else if (position === 'bottom-center') {
+                button.style.bottom = '20px';
+                button.style.left = '50%';
+                button.style.transform = 'translateX(-50%)';
+            } else if (position === 'bottom-left') {
+                button.style.bottom = '20px';
+                button.style.left = '20px';
+            } else if (position === 'center-right') {
+                button.style.top = '50%';
+                button.style.right = '20px';
+                button.style.transform = 'translateY(-50%)';
+            } else if (position === 'center') {
+                button.style.top = '50%';
+                button.style.left = '50%';
+                button.style.transform = 'translate(-50%, -50%)';
+            } else if (position === 'center-left') {
+                button.style.top = '50%';
+                button.style.left = '20px';
+                button.style.transform = 'translateY(-50%)';
+            } else if (position === 'top-right') {
+                button.style.top = '20px';
+                button.style.right = '20px';
+            } else if (position === 'top-center') {
+                button.style.top = '20px';
+                button.style.left = '50%';
+                button.style.transform = 'translateX(-50%)';
+            } else if (position === 'top-left') {
+                button.style.top = '20px';
+                button.style.left = '20px';
+            }
+        }
+
+        function updateBlur() {
+            const blur = document.getElementById('imageBlur').value;
+            const blurOverlay = document.getElementById('blurOverlay');
+            blurOverlay.style.backdropFilter = `blur(${blur}px)`;
+            document.getElementById('blurValue').textContent = blur;
+        }
+
+        function syncColorFromHex() {
+            const hexValue = document.getElementById('buttonColorHex').value;
+            if (/^#[0-9A-Fa-f]{6}$/.test(hexValue)) {
+                document.getElementById('buttonColor').value = hexValue;
+                updatePreview();
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleImageInput();
+            updatePreview();
+            updateBlur();
+        });
+    </script>
+
+    <%- include('partials/footer') %>
