@@ -138,11 +138,8 @@ class _ProductGridState extends State<ProductGrid> {
             imageUrl: imageUrl,
             name: product['name'] ?? 'منتج بدون اسم',
             price: '${product['price'] ?? 0} جنيه',
-            description: product['description'] ?? 'No description available',
             rating: (product['rating'] ?? 4.5).toDouble(),
             reviewCount: product['reviewCount'] ?? 128,
-            sizes: List<String>.from(product['sizes'] ?? []),
-            colors: List<String>.from(product['colors'] ?? []),
             screenId: 'product_grid',
           );
         },

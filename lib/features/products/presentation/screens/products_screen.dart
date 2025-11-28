@@ -44,18 +44,11 @@ class ProductsScreen extends StatelessWidget {
               final products = state.products;
 
               if (products.isEmpty) {
-                return CustomScrollView(
-                  slivers: [
-                    _buildAppBar(context),
-                    const SliverFillRemaining(
-                      child: Center(
-                        child: Text(
-                          'No products found',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
+                return const Center(
+                  child: Text(
+                    'No products found.',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 );
               }
 
@@ -63,14 +56,14 @@ class ProductsScreen extends StatelessWidget {
                 slivers: [
                   _buildAppBar(context),
                   SliverPadding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16.0),
                     sliver: SliverGrid(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.65,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16.0,
+                        mainAxisSpacing: 16.0,
+                        childAspectRatio: 0.7,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -81,7 +74,6 @@ class ProductsScreen extends StatelessWidget {
                             imageUrl: product.imageUrl,
                             name: product.name,
                             price: '\$${product.price}',
-                            description: product.description,
                             rating: product.rating,
                             reviewCount: product.reviewCount,
                             screenId: 'products',
@@ -101,46 +93,16 @@ class ProductsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 120,
-      pinned: true,
       backgroundColor: Colors.black,
-      elevation: 0,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          title ??
-              (categoryName != null ? '$categoryName Collection' : 'Products'),
-          style: const TextStyle(
-            color: AppTheme.primaryColor,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Playfair Display',
-          ),
-        ),
-        centerTitle: true,
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.8),
-                Colors.black,
-              ],
-            ),
-          ),
-        ),
+      title: Text(
+        title ?? categoryName ?? 'Products',
+        style: const TextStyle(color: Colors.white),
       ),
-      leading: IconButton(
-        icon:
-            const Icon(Icons.arrow_back_ios_new, color: AppTheme.primaryColor),
-        onPressed: () {
-          // Check if can pop, otherwise maybe go to home or do nothing if it's the main tab
-          if (Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
+      centerTitle: true,
+      floating: true,
+      snap: true,
       actions: [
         IconButton(
           icon: const Icon(Icons.filter_list, color: AppTheme.primaryColor),

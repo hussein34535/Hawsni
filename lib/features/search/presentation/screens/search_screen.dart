@@ -1,10 +1,10 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/core/services/search_history_service.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -15,94 +15,111 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<dynamic> _searchResults = [];
-  List<dynamic> _categories = [];
   List<String> _searchHistory = [];
+  List<dynamic> _searchResults = [];
   bool _isLoading = false;
-  bool _hasSearched = false;
-  bool _showingHistory = true;
+  bool _showFilters = false;
+  RangeValues _priceRange = const RangeValues(0, 1000);
   String? _selectedCategory;
+  List<dynamic> _categories = [];
   double _minPrice = 0;
   double _maxPrice = 1000;
-  String _sortBy = 'createdAt.desc';
-  bool _isFeatured = false;
-  bool _showFilters = false;
 
   @override
   void initState() {
     super.initState();
-    _loadCategories();
     _loadSearchHistory();
+    _loadCategories();
+  }
+
+  Future<void> _loadSearchHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _searchHistory = prefs.getStringList('search_history') ?? [];
+    });
+  }
+
+  Future<void> _saveSearchHistory(String term) async {
+    if (term.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (!_searchHistory.contains(term)) {
+      _searchHistory.insert(0, term);
+      if (_searchHistory.length > 10) _searchHistory.removeLast();
+      await prefs.setStringList('search_history', _searchHistory);
+      setState(() {});
+    }
+  }
+
+  Future<void> _removeSearchTerm(String term) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _searchHistory.remove(term);
+    });
+    await prefs.setStringList('search_history', _searchHistory);
   }
 
   Future<void> _loadCategories() async {
     try {
-      final categories = await ApiService.getCategories();
-      if (mounted) {
+      final response =
+          await http.get(Uri.parse('${ApiService.baseUrl}/categories'));
+      if (response.statusCode == 200) {
         setState(() {
-          _categories = categories;
+          _categories = json.decode(response.body);
         });
       }
     } catch (e) {
-      print('Error loading categories: $e');
+      debugPrint('Error loading categories: $e');
     }
   }
 
-  Future<void> _loadSearchHistory() async {
-    final history = await SearchHistoryService().getSearchHistory();
-    if (mounted) {
-      setState(() {
-        _searchHistory = history;
-      });
-    }
-  }
+  Future<void> _performSearch([String? term]) async {
+    final searchTerm = term ?? _searchController.text;
+    if (searchTerm.isEmpty &&
+        _selectedCategory == null &&
+        _minPrice == 0 &&
+        _maxPrice == 1000) return;
 
-  Future<void> _performSearch([String? query]) async {
-    final searchQuery = query ?? _searchController.text.trim();
-    if (searchQuery.isEmpty && _selectedCategory == null) return;
-
-    if (searchQuery.isNotEmpty) {
-      await SearchHistoryService().addSearchTerm(searchQuery);
-      await _loadSearchHistory();
-    }
-
-    if (mounted) {
-      setState(() {
-        _isLoading = true;
-        _hasSearched = true;
-        _showingHistory = false;
-      });
-    }
+    setState(() {
+      _isLoading = true;
+      if (term != null) _searchController.text = term;
+    });
 
     try {
-      final results = await ApiService.searchProductsWithFilters(
-        query: searchQuery.isNotEmpty ? searchQuery : null,
-        category: _selectedCategory,
-        minPrice: _minPrice,
-        maxPrice: _maxPrice,
-        sortBy: _sortBy,
-        isFeatured: _isFeatured ? true : null,
-      );
+      // Build query parameters
+      final queryParams = <String, String>{};
+      if (searchTerm.isNotEmpty) queryParams['q'] = searchTerm;
+      if (_selectedCategory != null)
+        queryParams['category'] = _selectedCategory!;
+      queryParams['minPrice'] = _minPrice.toString();
+      queryParams['maxPrice'] = _maxPrice.toString();
 
-      if (mounted) {
+      final uri = Uri.parse('${ApiService.baseUrl}/products/search')
+          .replace(queryParameters: queryParams);
+
+      final response = await http.get(uri);
+
+      if (response.statusCode == 200) {
         setState(() {
-          _searchResults = results;
-          _isLoading = false;
+          _searchResults = json.decode(response.body);
+        });
+        if (searchTerm.isNotEmpty) {
+          _saveSearchHistory(searchTerm);
+        }
+      } else {
+        // Handle error
+        setState(() {
+          _searchResults = [];
         });
       }
     } catch (e) {
-      print('Error searching products: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Error searching products',
-                style: TextStyle(color: Colors.white)),
-            backgroundColor: AppTheme.errorColor),
-      );
+      debugPrint('Error searching products: $e');
+      setState(() {
+        _searchResults = [];
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -111,26 +128,9 @@ class _SearchScreenState extends State<SearchScreen> {
       _selectedCategory = null;
       _minPrice = 0;
       _maxPrice = 1000;
-      _sortBy = 'createdAt.desc';
-      _isFeatured = false;
+      _searchController.clear();
+      _searchResults = [];
     });
-    _performSearch();
-  }
-
-  void _clearSearchHistory() async {
-    await SearchHistoryService().clearSearchHistory();
-    await _loadSearchHistory();
-  }
-
-  void _removeSearchTerm(String term) async {
-    await SearchHistoryService().removeSearchTerm(term);
-    await _loadSearchHistory();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -139,39 +139,42 @@ class _SearchScreenState extends State<SearchScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        elevation: 0,
-        title: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              height: 45,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-              ),
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  hintText: 'Search products...',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: InputBorder.none,
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  contentPadding: EdgeInsets.symmetric(vertical: 10),
-                ),
-                onSubmitted: _performSearch,
-                onTap: () => setState(() => _showingHistory = true),
-              ),
-            ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: TextField(
+          controller: _searchController,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: 'Search products...',
+            hintStyle: TextStyle(color: Colors.grey[600]),
+            border: InputBorder.none,
+            suffixIcon: _searchController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear, color: Colors.grey),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _searchResults = [];
+                      });
+                    },
+                  )
+                : null,
           ),
+          onSubmitted: (value) => _performSearch(value),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.filter_list,
-                color: _showFilters ? AppTheme.primaryColor : Colors.white),
-            onPressed: () => setState(() => _showFilters = !_showFilters),
+            icon: Icon(
+              Icons.filter_list,
+              color: _showFilters ? AppTheme.primaryColor : Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                _showFilters = !_showFilters;
+              });
+            },
           ),
         ],
       ),
@@ -180,14 +183,17 @@ class _SearchScreenState extends State<SearchScreen> {
           if (_showFilters) _buildFilters(),
           Expanded(
             child: _isLoading
-                ? const Center(child: SpinningLoader())
-                : _showingHistory && !_hasSearched
-                    ? _buildSearchHistory()
-                    : _hasSearched
-                        ? _searchResults.isEmpty
-                            ? _buildEmptyState()
-                            : _buildResultsGrid()
-                        : _buildInitialState(),
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                    ),
+                  )
+                : _searchResults.isNotEmpty
+                    ? _buildResultsGrid()
+                    : _searchController.text.isEmpty && !_showFilters
+                        ? _buildSearchHistory()
+                        : _buildEmptyState(),
           ),
         ],
       ),
@@ -196,7 +202,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildFilters() {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF121212),
         border:
@@ -351,20 +357,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildInitialState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text('Search for products',
-              style: TextStyle(fontSize: 18, color: Colors.grey)),
-        ],
-      ),
-    );
-  }
-
   Widget _buildEmptyState() {
     return const Center(
       child: Column(
@@ -402,7 +394,6 @@ class _SearchScreenState extends State<SearchScreen> {
           imageUrl: imageUrl,
           name: product['name'] ?? 'No Name',
           price: product['price']?.toString() ?? '0.00',
-          description: product['description'] ?? '',
           rating: (product['rating'] as num?)?.toDouble() ?? 0.0,
           reviewCount: (product['reviewCount'] as num?)?.toInt() ?? 0,
           screenId: 'search',

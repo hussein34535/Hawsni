@@ -1,20 +1,16 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:provider/provider.dart';
-import 'package:hawsni_app/core/services/wishlist_service.dart';
 import 'package:hawsni_app/features/products/presentation/screens/product_detail_screen.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   final String id;
-  final String imageUrl;
   final String name;
   final String price;
-  final String description;
+  final String? originalPrice;
+  final String imageUrl;
   final double rating;
   final int reviewCount;
-  final List<String>? sizes;
-  final List<String>? colors;
   final bool showBadge;
   final String? badgeText;
   final Color? badgeColor;
@@ -23,14 +19,12 @@ class ProductCard extends StatelessWidget {
   const ProductCard({
     super.key,
     required this.id,
-    required this.imageUrl,
     required this.name,
     required this.price,
-    this.description = '',
+    this.originalPrice,
+    required this.imageUrl,
     this.rating = 0.0,
     this.reviewCount = 0,
-    this.sizes,
-    this.colors,
     this.showBadge = false,
     this.badgeText,
     this.badgeColor,
@@ -38,217 +32,200 @@ class ProductCard extends StatelessWidget {
   });
 
   @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  bool isFavorite = false;
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () async {
-        Navigator.of(context).push(
+      onTap: () {
+        Navigator.push(
+          context,
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
-              name: name,
-              price: price,
-              imageUrl: imageUrl,
-              description: description,
-              rating: rating,
-              reviewCount: reviewCount,
-              sizes: sizes,
-              colors: colors,
-              productId: id,
-              screenId: screenId,
+              productId: widget.id,
+              name: widget.name,
+              price: widget.price,
+              imageUrl: widget.imageUrl,
+              screenId: widget.screenId,
+              rating: widget.rating,
+              reviewCount: widget.reviewCount,
             ),
           ),
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            decoration: AppTheme.glassDecoration,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image Section
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Hero(
-                        tag: 'product_${id}_$screenId',
-                        child: Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[900],
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(16),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors
+              .transparent, // bg-card (assuming transparent/white context)
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Container
+            // relative overflow-hidden rounded-xl bg-secondary
+            Expanded(
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppTheme.secondaryColor, // bg-secondary
+                      borderRadius: BorderRadius.circular(12), // rounded-xl
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        widget.imageUrl,
+                        fit: BoxFit.cover, // object-cover
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                            child: Icon(
+                              Icons.image_not_supported_outlined,
+                              color: Colors.grey[400],
+                              size: 32,
                             ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(16),
-                            ),
-                            child: Image.network(
-                              imageUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: Colors.grey[900],
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.image_not_supported,
-                                      color: Colors.white54,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                      // Badge
-                      if (showBadge && badgeText != null)
-                        Positioned(
-                          top: 8,
-                          left: 8,
+                    ),
+                  ),
+
+                  // Favorite Button
+                  // absolute right-3 top-3 flex h-9 w-9 ... rounded-full bg-card/90 backdrop-blur-sm
+                  Positioned(
+                    top: 12, // top-3 (3 * 4 = 12px)
+                    right: 12, // right-3
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isFavorite = !isFavorite;
+                        });
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(
+                              sigmaX: 4, sigmaY: 4), // backdrop-blur-sm
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
+                            width: 36, // h-9 (9 * 4 = 36px)
+                            height: 36, // w-9
                             decoration: BoxDecoration(
-                              color: badgeColor ?? const Color(0xFFFF4444),
-                              borderRadius: BorderRadius.circular(4),
+                              color:
+                                  Colors.white.withOpacity(0.9), // bg-card/90
+                              shape: BoxShape.circle,
                             ),
-                            child: Text(
-                              badgeText!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                            child: Center(
+                              child: Icon(
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border, // Heart icon
+                                size: 20, // h-5 w-5 (5 * 4 = 20px)
+                                color: isFavorite
+                                    ? AppTheme
+                                        .primaryColor // fill-accent text-accent (using Primary Black as accent)
+                                    : Colors.grey[500], // text-muted-foreground
                               ),
                             ),
                           ),
                         ),
-                      // Wishlist Button
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Consumer<WishlistService>(
-                          builder: (context, wishlistService, _) {
-                            final isInWishlist =
-                                wishlistService.isItemInWishlist(id);
-                            return GestureDetector(
-                              onTap: () {
-                                final item = WishlistItem(
-                                  id: id,
-                                  name: name,
-                                  price: price,
-                                  imageUrl: imageUrl,
-                                  description: description,
-                                  rating: rating,
-                                  reviewCount: reviewCount,
-                                );
-                                if (isInWishlist) {
-                                  wishlistService.removeFromWishlist(id);
-                                } else {
-                                  wishlistService.addToWishlist(item);
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.5),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  isInWishlist
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color:
-                                      isInWishlist ? Colors.red : Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                // Details Section
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            color: Color(0xFFFFD700),
-                            size: 14,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            rating.toString(),
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '($reviewCount)',
-                            style: const TextStyle(
-                              color: Colors.white38,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '\$$price',
-                            style: const TextStyle(
-                              color: AppTheme.primaryColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.add_shopping_cart,
-                              color: AppTheme.primaryColor,
-                              size: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+
+            // Details Section
+            // p-3
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Name
+                  // mb-2 font-medium text-foreground line-clamp-1
+                  Text(
+                    widget.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500, // font-medium
+                      color: AppTheme.textPrimary, // text-foreground
+                    ),
+                  ),
+
+                  const SizedBox(height: 8), // mb-2
+
+                  // Rating
+                  // mb-2 flex items-center gap-1
+                  Row(
+                    children: [
+                      Row(
+                        children: List.generate(5, (index) {
+                          // i < Math.floor(rating) ? "text-accent" : "text-muted"
+                          final bool isFilled = index < widget.rating.floor();
+                          return Icon(
+                            Icons
+                                .star, // Using standard star icon to mimic the SVG path
+                            size: 14, // h-3.5 w-3.5 (approx 14px)
+                            color: isFilled
+                                ? AppTheme.primaryColor // text-accent (Black)
+                                : Colors.grey[300], // text-muted
+                          );
+                        }),
+                      ),
+                      const SizedBox(width: 4), // gap-1
+                      // text-xs text-muted-foreground
+                      Text(
+                        '(${widget.reviewCount})',
+                        style: TextStyle(
+                          fontSize: 12, // text-xs
+                          color:
+                              AppTheme.textSecondary, // text-muted-foreground
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8), // mb-2
+
+                  // Price
+                  // flex items-center gap-2
+                  Row(
+                    children: [
+                      // text-lg font-bold text-accent
+                      Text(
+                        '\$${widget.price}',
+                        style: TextStyle(
+                          fontSize: 18, // text-lg
+                          fontWeight: FontWeight.bold, // font-bold
+                          color: AppTheme.primaryColor, // text-accent
+                        ),
+                      ),
+                      if (widget.originalPrice != null) ...[
+                        const SizedBox(width: 8), // gap-2
+                        // text-sm text-muted-foreground line-through
+                        Text(
+                          '\$${widget.originalPrice}',
+                          style: TextStyle(
+                            fontSize: 14, // text-sm
+                            decoration: TextDecoration.lineThrough,
+                            color:
+                                AppTheme.textSecondary, // text-muted-foreground
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
+
+import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 
 class CouponsScreen extends StatefulWidget {
   const CouponsScreen({super.key});
@@ -25,12 +29,8 @@ class _CouponsScreenState extends State<CouponsScreen> {
         _hasError = false;
       });
 
-      // In a real app, you would fetch coupons from the backend
-      // final coupons = await CouponService.getUserCoupons();
-
-      // For now, we'll use sample data
-      await Future.delayed(
-          const Duration(seconds: 1)); // Simulate network delay
+      // Simulate network delay
+      await Future.delayed(const Duration(seconds: 1));
 
       final List<Map<String, dynamic>> sampleCoupons = [
         {
@@ -79,20 +79,38 @@ class _CouponsScreenState extends State<CouponsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('My Coupons'),
+        title: const Text(
+          'My Coupons',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: SpinningLoader())
           : _hasError
               ? _buildErrorState()
               : _coupons.isEmpty
                   ? _buildEmptyState()
                   : RefreshIndicator(
                       onRefresh: _loadCoupons,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16.0),
+                      color: AppTheme.primaryColor,
+                      backgroundColor: Colors.white,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(24.0),
                         itemCount: _coupons.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final coupon = _coupons[index];
                           return _buildCouponCard(coupon);
@@ -107,31 +125,34 @@ class _CouponsScreenState extends State<CouponsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.error_outline,
-            size: 80,
-            color: Colors.grey[300],
+            size: 64,
+            color: AppTheme.errorColor,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           const Text(
             'Failed to load coupons',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
           const Text(
             'Please try again later',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
           ),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _loadCoupons,
-            child: const Text('Retry'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30)),
+            ),
+            child: const Text('Retry', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -143,26 +164,31 @@ class _CouponsScreenState extends State<CouponsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.local_offer_outlined,
-            size: 80,
-            color: Colors.grey[300],
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.local_offer_outlined,
+              size: 48,
+              color: AppTheme.textTertiary,
+            ),
           ),
           const SizedBox(height: 24),
           const Text(
             'No coupons available',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
           const Text(
             'Check back later for exclusive offers',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -172,119 +198,165 @@ class _CouponsScreenState extends State<CouponsScreen> {
   Widget _buildCouponCard(Map<String, dynamic> coupon) {
     final bool isExpired =
         !coupon['isActive'] || coupon['expiresAt'].isBefore(DateTime.now());
-    final Color cardColor = isExpired ? Colors.grey[200]! : Colors.blue[50]!;
-    final Color textColor = isExpired ? Colors.grey : Colors.blue[700]!;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: cardColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isExpired ? Colors.grey : Colors.blue,
-          width: isExpired ? 1 : 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppTheme.borderColor),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Coupon header with discount info
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isExpired ? Colors.grey[300] : Colors.blue,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          children: [
+            // Coupon header with discount info
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isExpired ? Colors.grey[200] : AppTheme.primaryColor,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${coupon['discount']}% OFF',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color:
+                              isExpired ? AppTheme.textSecondary : Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Limited Time Offer',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isExpired
+                              ? AppTheme.textTertiary
+                              : Colors.white.withOpacity(0.9),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isExpired
+                          ? Colors.white.withOpacity(0.5)
+                          : Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color: isExpired
+                              ? Colors.transparent
+                              : Colors.white.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          coupon['code'],
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isExpired
+                                ? AppTheme.textSecondary
+                                : Colors.white,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(Icons.copy,
+                            color: isExpired
+                                ? AppTheme.textSecondary
+                                : Colors.white,
+                            size: 16),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${coupon['discount']}% OFF',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: isExpired ? Colors.grey[600] : Colors.white,
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isExpired ? Colors.grey[400] : Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    coupon['code'],
+
+            // Coupon details
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    coupon['description'],
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isExpired ? Colors.grey[700] : Colors.blue,
+                      fontWeight: FontWeight.w600,
+                      color: isExpired
+                          ? AppTheme.textTertiary
+                          : AppTheme.textPrimary,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // Coupon details
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  coupon['description'],
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: isExpired ? Colors.grey[600] : Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  isExpired
-                      ? 'Expired'
-                      : 'Expires on ${_formatDate(coupon['expiresAt'])}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isExpired ? Colors.red : Colors.green,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (!isExpired)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Coupon "${coupon['code']}" copied to clipboard!'),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time,
+                          size: 16,
+                          color: isExpired
+                              ? AppTheme.errorColor
+                              : AppTheme.successColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        isExpired
+                            ? 'Expired'
+                            : 'Expires on ${_formatDate(coupon['expiresAt'])}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isExpired
+                              ? AppTheme.errorColor
+                              : AppTheme.successColor,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                      child: const Text('Copy Code'),
-                    ),
+                    ],
                   ),
-              ],
+                  const SizedBox(height: 16),
+                  if (!isExpired)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Clipboard.setData(
+                              ClipboardData(text: coupon['code']));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Coupon "${coupon['code']}" copied to clipboard!'),
+                              backgroundColor: AppTheme.successColor,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text('Copy Code',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

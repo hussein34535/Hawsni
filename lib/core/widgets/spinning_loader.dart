@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class SpinningLoader extends StatefulWidget {
   final double size;
@@ -51,7 +52,7 @@ class _SpinningLoaderState extends State<SpinningLoader>
           child: Image.asset(
             'assets/images/logo.png',
             fit: BoxFit.contain,
-            color: widget.color, // Optional: tint the icon if needed
+            color: widget.color ?? AppTheme.primaryColor,
           ),
         ),
       ),

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors - Midnight Gold Luxury
-  static const Color primaryColor = Color(0xFFD4AF37); // Gold
+  // Colors - Modern Black
+  static const Color primaryColor = Color(0xFF1A1A1A); // Black
+  static const Color secondaryColor = Color(0xFFF5F5F5); // Light Gray
+  static const Color accentColor = Color(0xFFFF758F); // Pink/Coral
   static const Color scaffoldBackgroundColor = Color(0xFF000000); // Deep Black
   static const Color surfaceColor =
       Color(0xFF121212); // Slightly lighter black for cards
@@ -11,9 +13,52 @@ class AppTheme {
   static const Color successColor = Color(0xFF03DAC6);
   static const Color textPrimary = Colors.white;
   static const Color textSecondary = Color(0xFFB0B0B0); // Light Grey
+  static const Color textTertiary = Color(0xFF888888); // Medium Grey
+
+  // Borders & Dividers
+  static const Color borderColor = Color(0xFF2A2A2A); // Dark border
+  static const Color dividerColor = Color(0xFF1A1A1A); // Divider
+
+  // Radius values
+  static const double radiusSmall = 12.0;
+  static const double radiusMedium = 16.0;
+  static const double radiusLarge = 20.0;
+  static const double radiusXLarge = 24.0;
+
+  // Shadows
+  static List<BoxShadow> get shadowSoft => [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.2),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ];
+
+  static List<BoxShadow> get shadowMedium => [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.3),
+          blurRadius: 20,
+          offset: const Offset(0, 8),
+        ),
+      ];
+
+  static List<BoxShadow> get shadowFloating => [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.4),
+          blurRadius: 30,
+          offset: const Offset(0, 12),
+        ),
+      ];
+
+  // Card Decoration
+  static BoxDecoration get cardDecoration => BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(radiusLarge),
+        boxShadow: shadowSoft,
+      );
 
   // Text Styles
-  static final TextTheme _textTheme = GoogleFonts.playfairDisplayTextTheme(
+  static final TextTheme textTheme = GoogleFonts.playfairDisplayTextTheme(
     const TextTheme(
       displayLarge: TextStyle(
           fontSize: 36, fontWeight: FontWeight.bold, color: primaryColor),
@@ -63,7 +108,7 @@ class AppTheme {
       onSecondary: Colors.black,
       onSurface: textPrimary,
     ),
-    textTheme: _textTheme,
+    textTheme: textTheme,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,

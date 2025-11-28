@@ -3,6 +3,7 @@ import 'package:hawsni_app/core/services/auth_service.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -38,34 +39,36 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.surfaceColor, // Pure white
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Emerald loader
             const SpinningLoader(
-              size: 100,
-              color: Colors.white,
+              size: 80,
+              color: AppTheme.primaryColor,
             ),
-            const SizedBox(height: 30),
-            const Text(
+            const SizedBox(height: 40),
+            // Bold brand name
+            Text(
               'HAWSNI',
               style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFD4AF37), // Gold
-                letterSpacing: 5,
-                fontFamily: 'Playfair Display',
+                fontSize: 56,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.primaryColor,
+                letterSpacing: 2,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
+            // Simple tagline
             Text(
-              'Luxury Redefined',
+              'Your Style, Your Way',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.white.withOpacity(0.7),
-                letterSpacing: 2,
-                fontFamily: 'Poppins',
+                color: AppTheme.textSecondary,
+                letterSpacing: 1,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],

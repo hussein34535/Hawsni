@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
@@ -13,21 +12,27 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           'Shopping Bag',
           style: TextStyle(
-              fontFamily: 'Playfair Display', fontWeight: FontWeight.bold),
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+            fontSize: 20,
+          ),
         ),
-        backgroundColor: Colors.black,
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: const IconThemeData(color: AppTheme.textPrimary),
       ),
       body: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
           if (state is CartLoading) {
             return const Center(
-                child: CircularProgressIndicator(color: AppTheme.primaryColor));
+              child: CircularProgressIndicator(color: AppTheme.primaryColor),
+            );
           }
 
           if (state is CartLoaded) {
@@ -36,24 +41,41 @@ class CartScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.shopping_bag_outlined,
-                        size: 80, color: Colors.white.withOpacity(0.2)),
-                    const SizedBox(height: 16),
-                    Text(
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 20,
+                            offset: Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 48,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
                       'Your bag is empty',
-                      style:
-                          Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Colors.white,
-                                fontFamily: 'Playfair Display',
-                              ),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'Start exploring our collection',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(color: Colors.grey),
+                    const Text(
+                      'Start exploring our luxury collection',
+                      style: TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),
@@ -70,9 +92,9 @@ class CartScreen extends StatelessWidget {
 
             return Stack(
               children: [
+                // Cart Items List
                 ListView.separated(
-                  padding: EdgeInsets.fromLTRB(
-                      16, 16, 16, MediaQuery.of(context).padding.bottom + 200),
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 180),
                   itemCount: state.items.length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 16),
@@ -80,82 +102,73 @@ class CartScreen extends StatelessWidget {
                     return CartItemCard(item: state.items[index]);
                   },
                 ),
-                // Glassmorphism Checkout Summary
+
+                // Floating Receipt Summary
                 Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: ClipRRect(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(24, 24, 24,
-                            MediaQuery.of(context).padding.bottom + 24),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.05),
-                          border: Border(
-                              top: BorderSide(
-                                  color: Colors.white.withOpacity(0.1))),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                  bottom: 24,
+                  left: 24,
+                  right: 24,
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(32),
+                      boxShadow: AppTheme.shadowFloating,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Total',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                Text(
-                                  '\$${total.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryColor,
-                                    fontFamily: 'Playfair Display',
-                                  ),
-                                ),
-                              ],
+                            const Text(
+                              'Total',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
-                            const SizedBox(height: 24),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const CheckoutScreen()),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 20),
-                                  backgroundColor: AppTheme.primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30)),
-                                  elevation: 10,
-                                  shadowColor:
-                                      AppTheme.primaryColor.withOpacity(0.4),
-                                ),
-                                child: const Text(
-                                  'Proceed to Checkout',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
+                            Text(
+                              '\$${total.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => const CheckoutScreen(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor,
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Checkout',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

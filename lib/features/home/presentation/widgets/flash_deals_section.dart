@@ -189,12 +189,8 @@ class _FlashDealsSectionState extends State<FlashDealsSection> {
                   imageUrl: product.imageUrl,
                   name: product.name,
                   price: product.price.toString(),
-                  description: product.description,
                   rating: product.rating,
                   reviewCount: product.reviewCount,
-                  showBadge: true,
-                  badgeText: 'FLASH',
-                  badgeColor: const Color(0xFFFF4444),
                   screenId: 'flash_deals',
                 ),
               );

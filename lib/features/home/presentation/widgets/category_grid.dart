@@ -1,18 +1,18 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class CategoryGridItem {
+  final String id;
   final String name;
-  final IconData? icon;
   final String? imageUrl;
-  final String? categoryId;
+  final IconData? icon;
 
   CategoryGridItem({
+    required this.id,
     required this.name,
-    this.icon,
     this.imageUrl,
-    this.categoryId,
+    this.icon,
   });
 }
 
@@ -29,106 +29,72 @@ class CategoryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 120,
+      height: 140, // Increased height for bubbles + text
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         itemCount: categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        separatorBuilder: (context, index) => const SizedBox(width: 20),
         itemBuilder: (context, index) {
           final category = categories[index];
-          return _buildCategoryCard(context, category);
+          return _buildCategoryBubble(context, category);
         },
       ),
     );
   }
 
-  Widget _buildCategoryCard(BuildContext context, CategoryGridItem category) {
+  Widget _buildCategoryBubble(BuildContext context, CategoryGridItem category) {
     return GestureDetector(
       onTap: () => onCategoryTap?.call(category),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // Glassmorphism Container
           Container(
-            width: 70,
-            height: 70,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFFD4AF37).withOpacity(0.3),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFD4AF37).withOpacity(0.1),
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
+              color: AppTheme.surfaceColor,
+              shape: BoxShape.circle,
+              boxShadow: AppTheme.shadowSoft,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withOpacity(0.1),
-                        Colors.white.withOpacity(0.05),
-                      ],
+            child: Center(
+              child: category.imageUrl != null
+                  ? ClipOval(
+                      child: category.imageUrl!.toLowerCase().endsWith('.svg')
+                          ? SvgPicture.network(
+                              category.imageUrl!,
+                              width: 40,
+                              height: 40,
+                              colorFilter: const ColorFilter.mode(
+                                AppTheme.primaryColor,
+                                BlendMode.srcIn,
+                              ),
+                            )
+                          : Image.network(
+                              category.imageUrl!,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
+                    )
+                  : Icon(
+                      category.icon ?? Icons.category,
+                      size: 32,
+                      color: AppTheme.primaryColor,
                     ),
-                  ),
-                  child: Center(
-                    child: category.imageUrl != null
-                        ? (category.imageUrl!.toLowerCase().endsWith('.svg')
-                            ? SvgPicture.network(
-                                category.imageUrl!,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.contain,
-                                placeholderBuilder: (BuildContext context) =>
-                                    const Center(
-                                        child: CircularProgressIndicator()),
-                              )
-                            : Image.network(
-                                category.imageUrl!,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(
-                                    category.icon ?? Icons.category,
-                                    size: 32,
-                                    color: const Color(0xFFD4AF37),
-                                  );
-                                },
-                              ))
-                        : Icon(
-                            category.icon ?? Icons.category,
-                            size: 32,
-                            color: const Color(0xFFD4AF37),
-                          ),
-                  ),
-                ),
-              ),
             ),
           ),
-          const SizedBox(height: 8),
-          // Category Name
-          Text(
-            category.name,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-              height: 1.2,
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 90,
+            child: Text(
+              category.name,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTheme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
             ),
           ),
         ],

@@ -26,9 +26,13 @@ class WishlistScreen extends StatelessWidget {
     context.read<CartBloc>().add(AddToCart(cartItem));
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Moved to cart', style: TextStyle(color: Colors.black)),
+      SnackBar(
+        content: Text('Moved to cart',
+            style:
+                AppTheme.textTheme.bodyMedium?.copyWith(color: Colors.white)),
         backgroundColor: AppTheme.primaryColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -36,22 +40,29 @@ class WishlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           'My Wishlist',
           style: TextStyle(
-              fontFamily: 'Playfair Display', fontWeight: FontWeight.bold),
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
         ),
-        backgroundColor: Colors.black,
+        centerTitle: true,
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           Consumer<WishlistService>(
             builder: (context, wishlistService, child) {
               return wishlistService.items.isNotEmpty
                   ? IconButton(
                       icon:
-                          const Icon(Icons.share, color: AppTheme.primaryColor),
+                          const Icon(Icons.share, color: AppTheme.textPrimary),
                       onPressed: () {
                         // Share logic
                       },
@@ -68,25 +79,44 @@ class WishlistScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.favorite_border,
-                      size: 100, color: Colors.grey),
-                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.favorite_border,
+                        size: 48, color: AppTheme.textTertiary),
+                  ),
+                  const SizedBox(height: 24),
                   const Text(
                     'Your wishlist is empty',
                     style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Save items you love for later',
+                    style:
+                        TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to home
+                      Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor),
+                        backgroundColor: AppTheme.primaryColor,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30))),
                     child: const Text('Start Shopping',
-                        style: TextStyle(color: Colors.black)),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -95,7 +125,7 @@ class WishlistScreen extends StatelessWidget {
 
           return GridView.builder(
             padding: EdgeInsets.fromLTRB(
-                16, 16, 16, MediaQuery.of(context).padding.bottom + 60),
+                24, 10, 24, MediaQuery.of(context).padding.bottom + 20),
             itemCount: wishlistService.items.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -110,7 +140,6 @@ class WishlistScreen extends StatelessWidget {
                 imageUrl: item.imageUrl,
                 name: item.name,
                 price: item.price,
-                description: item.description,
                 rating: item.rating,
                 reviewCount: item.reviewCount,
                 screenId: 'wishlist',

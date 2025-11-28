@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
@@ -111,12 +110,12 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -129,47 +128,36 @@ class _SignupScreenState extends State<SignupScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
+                    color: Colors.white,
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppTheme.primaryColor, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryColor.withOpacity(0.2),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
-                    ],
+                    boxShadow: AppTheme.shadowSoft,
                   ),
                   child: Image.asset(
                     'assets/images/logo.png',
                     width: 50,
                     height: 50,
-                    color: Colors.white,
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'Create Account',
-                  style: TextStyle(
-                    fontFamily: 'Playfair Display',
-                    fontSize: 32,
+                  style: AppTheme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryColor,
-                    letterSpacing: 1.5,
+                    color: AppTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Join the luxury experience',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    color: Colors.grey,
+                  style: AppTheme.textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 40),
-                _buildGlassTextField(
+                _buildTextField(
                   controller: _nameController,
                   label: 'Full Name',
                   icon: Icons.person_outline,
@@ -185,7 +173,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                _buildGlassTextField(
+                _buildTextField(
                   controller: _emailController,
                   label: 'Email',
                   icon: Icons.email_outlined,
@@ -202,47 +190,58 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.05),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: IntlPhoneField(
+                    controller: _phoneController,
+                    decoration: InputDecoration(
+                      labelText: 'Phone Number',
+                      labelStyle:
+                          const TextStyle(color: AppTheme.textSecondary),
+                      border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.1)),
+                        borderSide: BorderSide.none,
                       ),
-                      child: IntlPhoneField(
-                        controller: _phoneController,
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          labelStyle:
-                              TextStyle(color: Colors.white.withOpacity(0.6)),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 16),
-                          errorStyle:
-                              const TextStyle(color: AppTheme.errorColor),
-                          counterText: '',
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                        dropdownTextStyle: const TextStyle(color: Colors.white),
-                        dropdownIcon: const Icon(Icons.arrow_drop_down,
-                            color: Colors.white),
-                        initialCountryCode: 'EG', // Default to Egypt
-                        onChanged: (phone) {
-                          _completePhoneNumber = phone.completeNumber;
-                        },
-                        onCountryChanged: (country) {
-                          // Handle country change
-                        },
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
                       ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: const BorderSide(
+                            color: AppTheme.primaryColor, width: 1),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 16),
+                      errorStyle: const TextStyle(color: AppTheme.errorColor),
+                      counterText: '',
                     ),
+                    style: const TextStyle(color: AppTheme.textPrimary),
+                    dropdownTextStyle:
+                        const TextStyle(color: AppTheme.textPrimary),
+                    dropdownIcon: const Icon(Icons.arrow_drop_down,
+                        color: AppTheme.textTertiary),
+                    initialCountryCode: 'EG', // Default to Egypt
+                    onChanged: (phone) {
+                      _completePhoneNumber = phone.completeNumber;
+                    },
+                    onCountryChanged: (country) {
+                      // Handle country change
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildGlassTextField(
+                _buildTextField(
                   controller: _passwordController,
                   label: 'Password',
                   icon: Icons.lock_outline,
@@ -252,7 +251,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       _obscurePassword
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: AppTheme.primaryColor,
+                      color: AppTheme.textTertiary,
                     ),
                     onPressed: () =>
                         setState(() => _obscurePassword = !_obscurePassword),
@@ -268,7 +267,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                _buildGlassTextField(
+                _buildTextField(
                   controller: _confirmPasswordController,
                   label: 'Confirm Password',
                   icon: Icons.lock_outline,
@@ -278,7 +277,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       _obscureConfirmPassword
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: AppTheme.primaryColor,
+                      color: AppTheme.textTertiary,
                     ),
                     onPressed: () => setState(() =>
                         _obscureConfirmPassword = !_obscureConfirmPassword),
@@ -302,18 +301,17 @@ class _SignupScreenState extends State<SignupScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      elevation: 5,
-                      shadowColor: AppTheme.primaryColor.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(32)),
+                      elevation: 0,
                     ),
                     child: _isLoading
-                        ? const SpinningLoader(size: 30, color: Colors.black)
+                        ? const SpinningLoader(size: 24, color: Colors.white)
                         : const Text(
                             'SIGN UP',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: Colors.white,
                               letterSpacing: 1.5,
                             ),
                           ),
@@ -323,15 +321,17 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       'Already have an account? ',
-                      style: TextStyle(color: Colors.grey),
+                      style: AppTheme.textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                     GestureDetector(
                       onTap: () => Navigator.of(context).pop(),
-                      child: const Text(
+                      child: Text(
                         'Login',
-                        style: TextStyle(
+                        style: AppTheme.textTheme.bodyMedium?.copyWith(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.bold,
                         ),
@@ -347,7 +347,7 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _buildGlassTextField({
+  Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
@@ -356,33 +356,45 @@ class _SignupScreenState extends State<SignupScreen> {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        style: const TextStyle(color: AppTheme.textPrimary),
+        validator: validator,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+          prefixIcon: Icon(icon, color: AppTheme.textTertiary),
+          suffixIcon: suffixIcon,
+          border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            borderSide: BorderSide.none,
           ),
-          child: TextFormField(
-            controller: controller,
-            obscureText: obscureText,
-            keyboardType: keyboardType,
-            style: const TextStyle(color: Colors.white),
-            validator: validator,
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-              prefixIcon: Icon(icon, color: AppTheme.primaryColor),
-              suffixIcon: suffixIcon,
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              errorStyle: const TextStyle(color: AppTheme.errorColor),
-            ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
           ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide:
+                const BorderSide(color: AppTheme.primaryColor, width: 1),
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          errorStyle: const TextStyle(color: AppTheme.errorColor),
         ),
       ),
     );

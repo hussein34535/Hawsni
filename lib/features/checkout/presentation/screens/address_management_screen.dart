@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/features/checkout/models/address.dart';
 import 'package:hawsni_app/core/services/api_service.dart';
@@ -77,16 +76,18 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
             if (success) {
               _loadAddresses();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                     content: Text('Address added successfully',
-                        style: TextStyle(color: Colors.white)),
+                        style: AppTheme.textTheme.bodyMedium
+                            ?.copyWith(color: Colors.white)),
                     backgroundColor: AppTheme.successColor),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                     content: Text('Failed to add address',
-                        style: TextStyle(color: Colors.white)),
+                        style: AppTheme.textTheme.bodyMedium
+                            ?.copyWith(color: Colors.white)),
                     backgroundColor: AppTheme.errorColor),
               );
             }
@@ -99,36 +100,32 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
   void _deleteAddress(Address address) {
     showDialog(
       context: context,
-      builder: (context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: AlertDialog(
-          backgroundColor: Colors.black.withOpacity(0.9),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: AppTheme.primaryColor.withOpacity(0.3)),
-          ),
-          title: const Text('Delete Address',
-              style: TextStyle(color: Colors.white)),
-          content: const Text('Are you sure you want to delete this address?',
-              style: TextStyle(color: Colors.white70)),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child:
-                    const Text('Cancel', style: TextStyle(color: Colors.grey))),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                final success = await ApiService.deleteAddress(address.id);
-                if (success) {
-                  _loadAddresses();
-                }
-              },
-              child: const Text('Delete',
-                  style: TextStyle(color: AppTheme.errorColor)),
-            ),
-          ],
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.surfaceColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
+        title: Text('Delete Address',
+            style: AppTheme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+        content: Text('Are you sure you want to delete this address?',
+            style: AppTheme.textTheme.bodyMedium),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: AppTheme.textTheme.bodyMedium)),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await ApiService.deleteAddress(address.id);
+              if (success) {
+                _loadAddresses();
+              }
+            },
+            child: const Text('Delete',
+                style: TextStyle(color: AppTheme.errorColor)),
+          ),
+        ],
       ),
     );
   }
@@ -142,13 +139,18 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Shipping Addresses',
-            style: TextStyle(
-                fontFamily: 'Playfair Display', fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.black,
+        title: Text('Shipping Addresses',
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+        centerTitle: true,
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconButton(
               onPressed: _addNewAddress,
@@ -159,20 +161,21 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
           ? const Center(child: SpinningLoader())
           : _addresses.isEmpty
               ? _buildEmptyState()
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
+              : ListView.separated(
+                  padding: const EdgeInsets.all(24),
                   itemCount: _addresses.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     return _buildAddressCard(_addresses[index]);
                   },
                 ),
       bottomNavigationBar: _addresses.isNotEmpty
           ? Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border(
-                    top: BorderSide(color: Colors.white.withOpacity(0.1))),
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: AppTheme.borderColor)),
               ),
               child: ElevatedButton(
                 onPressed: _selectedAddress != null
@@ -180,14 +183,17 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryColor,
-                  minimumSize: const Size(double.infinity, 50),
+                  minimumSize: const Size(double.infinity, 56),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  disabledBackgroundColor: Colors.grey[800],
+                      borderRadius: BorderRadius.circular(30)),
+                  disabledBackgroundColor: AppTheme.textTertiary,
+                  elevation: 0,
                 ),
                 child: const Text('Continue',
                     style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold)),
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold)),
               ),
             )
           : null,
@@ -199,28 +205,37 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.location_on_outlined, size: 80, color: Colors.grey[800]),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.location_on_outlined,
+                size: 48, color: AppTheme.textTertiary),
+          ),
           const SizedBox(height: 24),
           const Text('No addresses yet',
               style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white)),
+                  color: AppTheme.textPrimary)),
           const SizedBox(height: 12),
           const Text('Add your first shipping address',
-              style: TextStyle(fontSize: 16, color: Colors.grey)),
+              style: TextStyle(fontSize: 16, color: AppTheme.textSecondary)),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _addNewAddress,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(30)),
+              elevation: 0,
             ),
             child: const Text('Add Address',
                 style: TextStyle(
-                    color: Colors.black, fontWeight: FontWeight.bold)),
+                    color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -231,86 +246,76 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
     final isSelected = _selectedAddress?.id == address.id;
     return GestureDetector(
       onTap: () => _selectAddress(address),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? AppTheme.primaryColor.withOpacity(0.1)
-                  : Colors.white.withOpacity(0.05),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: isSelected
-                      ? AppTheme.primaryColor
-                      : Colors.white.withOpacity(0.1),
-                  width: isSelected ? 2 : 1),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(address.title,
-                                style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white)),
-                            const SizedBox(height: 4),
-                            Text(address.fullName,
-                                style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white70)),
-                          ],
-                        ),
-                      ),
-                      if (isSelected)
-                        const Icon(Icons.check_circle,
-                            color: AppTheme.primaryColor),
-                    ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+              color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor,
+              width: isSelected ? 2 : 1),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(address.title,
+                            style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.textPrimary)),
+                        const SizedBox(height: 4),
+                        Text(address.fullName,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: AppTheme.textSecondary)),
+                      ],
+                    ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                      '${address.address}, ${address.city}, ${address.country}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(address.phone,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                ),
-                const Divider(height: 24, color: Colors.white10),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton.icon(
-                        onPressed: () => _deleteAddress(address),
-                        icon: const Icon(Icons.delete,
-                            size: 18, color: AppTheme.errorColor),
-                        label: const Text('Delete',
-                            style: TextStyle(color: AppTheme.errorColor)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                  if (isSelected)
+                    const Icon(Icons.check_circle,
+                        color: AppTheme.primaryColor),
+                ],
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                  '${address.address}, ${address.city}, ${address.country}',
+                  style: const TextStyle(
+                      fontSize: 14, color: AppTheme.textSecondary)),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(address.phone,
+                  style: const TextStyle(
+                      fontSize: 14, color: AppTheme.textSecondary)),
+            ),
+            const Divider(height: 24, color: AppTheme.dividerColor),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => _deleteAddress(address),
+                    icon: const Icon(Icons.delete,
+                        size: 18, color: AppTheme.errorColor),
+                    label: const Text('Delete',
+                        style: TextStyle(color: AppTheme.errorColor)),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -388,77 +393,82 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(widget.address == null ? 'Add Address' : 'Edit Address',
             style: const TextStyle(
-                fontFamily: 'Playfair Display', fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.black,
+                fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+        centerTitle: true,
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           children: [
-            _buildGlassTextField(
+            _buildTextField(
                 controller: _titleController,
                 label: 'Address Title (e.g., Home, Work)',
                 icon: Icons.label_outline),
-            const SizedBox(height: 16),
-            _buildGlassTextField(
+            const SizedBox(height: 20),
+            _buildTextField(
                 controller: _fullNameController,
                 label: 'Full Name',
                 icon: Icons.person_outline),
-            const SizedBox(height: 16),
-            _buildGlassTextField(
+            const SizedBox(height: 20),
+            _buildTextField(
                 controller: _addressController,
                 label: 'Street Address',
                 icon: Icons.home_outlined,
                 maxLines: 2),
-            const SizedBox(height: 16),
-            _buildGlassTextField(
+            const SizedBox(height: 20),
+            _buildTextField(
                 controller: _cityController,
                 label: 'City',
                 icon: Icons.location_city_outlined),
-            const SizedBox(height: 16),
-            _buildGlassTextField(
+            const SizedBox(height: 20),
+            _buildTextField(
                 controller: _countryController,
                 label: 'Country',
                 icon: Icons.flag_outlined),
-            const SizedBox(height: 16),
-            _buildGlassTextField(
+            const SizedBox(height: 20),
+            _buildTextField(
                 controller: _phoneController,
                 label: 'Phone Number',
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone),
-            const SizedBox(height: 16),
-            Theme(
-              data: ThemeData(unselectedWidgetColor: Colors.grey),
-              child: CheckboxListTile(
-                title: const Text('Set as default address',
-                    style: TextStyle(color: Colors.white)),
-                value: _isDefault,
-                onChanged: (value) =>
-                    setState(() => _isDefault = value ?? false),
-                activeColor: AppTheme.primaryColor,
-                checkColor: Colors.black,
-                contentPadding: EdgeInsets.zero,
-              ),
+            const SizedBox(height: 20),
+            CheckboxListTile(
+              title: const Text('Set as default address',
+                  style: TextStyle(color: AppTheme.textPrimary)),
+              value: _isDefault,
+              onChanged: (value) => setState(() => _isDefault = value ?? false),
+              activeColor: AppTheme.primaryColor,
+              checkColor: Colors.white,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _saveAddress,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
-                minimumSize: const Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(30)),
+                elevation: 0,
               ),
               child: Text(
                   widget.address == null ? 'Add Address' : 'Save Address',
                   style: const TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -466,41 +476,34 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     );
   }
 
-  Widget _buildGlassTextField({
+  Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
     int maxLines = 1,
     TextInputType? keyboardType,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
-          ),
-          child: TextFormField(
-            controller: controller,
-            maxLines: maxLines,
-            keyboardType: keyboardType,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-              prefixIcon: Icon(icon, color: AppTheme.primaryColor),
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            ),
-            validator: (value) => value == null || value.isEmpty
-                ? 'This field is required'
-                : null,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: TextFormField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: keyboardType,
+        style: const TextStyle(color: AppTheme.textPrimary),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+          prefixIcon: Icon(icon, color: AppTheme.textTertiary),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
+        validator: (value) =>
+            value == null || value.isEmpty ? 'This field is required' : null,
       ),
     );
   }

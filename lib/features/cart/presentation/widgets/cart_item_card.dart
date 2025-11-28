@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
@@ -13,100 +12,195 @@ class CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: AppTheme.glassDecoration,
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  item.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
+    return Dismissible(
+      key: Key(item.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 24),
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.errorColor,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        ),
+        child: const Icon(
+          Icons.delete_outline,
+          color: Colors.white,
+          size: 28,
+        ),
+      ),
+      onDismissed: (direction) {
+        context.read<CartBloc>().add(RemoveFromCart(item.id));
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Stack(
+          children: [
+            // Main Ticket Body
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                boxShadow: AppTheme.shadowSoft,
               ),
-              const SizedBox(width: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      color: AppTheme.scaffoldBackgroundColor,
+                      child: Image.network(
+                        item.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.image_outlined,
+                            size: 32,
+                            color: AppTheme.textTertiary,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
 
-              // Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                  // Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTheme.textTheme.bodyLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        if (item.size != null || item.color != null)
+                          Text(
+                            [
+                              if (item.size != null) 'Size: ${item.size}',
+                              if (item.color != null) 'Color: ${item.color}',
+                            ].join(' • '),
+                            style: AppTheme.textTheme.bodySmall?.copyWith(
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              item.price,
+                              style: AppTheme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                            // Quantity Controls
+                            Container(
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  _QuantityButton(
+                                    icon: Icons.remove,
+                                    onTap: () {
+                                      if (item.quantity > 1) {
+                                        context.read<CartBloc>().add(
+                                            UpdateQuantity(
+                                                item.id, item.quantity - 1));
+                                      } else {
+                                        context
+                                            .read<CartBloc>()
+                                            .add(RemoveFromCart(item.id));
+                                      }
+                                    },
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8),
+                                    child: Text(
+                                      '${item.quantity}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  _QuantityButton(
+                                    icon: Icons.add,
+                                    onTap: () {
+                                      context.read<CartBloc>().add(
+                                          UpdateQuantity(
+                                              item.id, item.quantity + 1));
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.price,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              // Quantity Controls
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () {
-                        if (item.quantity > 1) {
-                          context
-                              .read<CartBloc>()
-                              .add(UpdateQuantity(item.id, item.quantity - 1));
-                        } else {
-                          context.read<CartBloc>().add(RemoveFromCart(item.id));
-                        }
-                      },
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child:
-                            Icon(Icons.remove, size: 16, color: Colors.white),
-                      ),
-                    ),
-                    Text(
-                      '${item.quantity}',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        context
-                            .read<CartBloc>()
-                            .add(UpdateQuantity(item.id, item.quantity + 1));
-                      },
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(Icons.add, size: 16, color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
+            // Ticket Notches (Left and Right)
+            Positioned(
+              left: -10,
+              top: 60,
+              child: CircleAvatar(
+                radius: 10,
+                backgroundColor: AppTheme.scaffoldBackgroundColor,
               ),
-            ],
-          ),
+            ),
+            Positioned(
+              right: -10,
+              top: 60,
+              child: CircleAvatar(
+                radius: 10,
+                backgroundColor: AppTheme.scaffoldBackgroundColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuantityButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _QuantityButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Icon(
+          icon,
+          size: 16,
+          color: AppTheme.textPrimary,
         ),
       ),
     );

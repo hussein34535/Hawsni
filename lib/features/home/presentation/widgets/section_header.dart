@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -15,55 +16,41 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              if (icon != null) ...[
-                Icon(
-                  icon,
-                  color: const Color(0xFFD4AF37),
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Playfair Display',
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
+          // Title - Large and Bold
+          Text(
+            title,
+            style: AppTheme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
           ),
+          // View All - Simple text button
           if (onViewAll != null)
             TextButton(
               onPressed: onViewAll,
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFFD4AF37),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                foregroundColor: AppTheme.primaryColor,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               ),
               child: Row(
                 children: [
                   Text(
                     'View All',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFFD4AF37).withOpacity(0.9),
+                      color: AppTheme.primaryColor,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Icon(
                     Icons.arrow_forward_ios,
-                    size: 12,
-                    color: const Color(0xFFD4AF37).withOpacity(0.9),
+                    size: 14,
+                    color: AppTheme.primaryColor,
                   ),
                 ],
               ),

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
@@ -67,17 +66,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
         appBar: AppBar(
-          title: const Text(
+          title: Text(
             'Checkout',
-            style: TextStyle(
-                fontFamily: 'Playfair Display', fontWeight: FontWeight.bold),
+            style: AppTheme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
+            ),
           ),
-          backgroundColor: Colors.black,
+          centerTitle: true,
+          backgroundColor: AppTheme.scaffoldBackgroundColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
@@ -98,13 +99,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     return Stack(
                       children: [
                         SingleChildScrollView(
-                          padding: EdgeInsets.fromLTRB(16, 16, 16,
+                          padding: EdgeInsets.fromLTRB(20, 10, 20,
                               MediaQuery.of(context).padding.bottom + 120),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _buildSectionTitle('Shipping Address'),
-                              _buildGlassContainer(
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: AppTheme.cardDecoration,
                                 child: Row(
                                   children: [
                                     Container(
@@ -118,33 +121,38 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                           color: AppTheme.primaryColor),
                                     ),
                                     const SizedBox(width: 16),
-                                    const Expanded(
+                                    Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Home',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold),
+                                            style: AppTheme
+                                                .textTheme.titleMedium
+                                                ?.copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                           ),
+                                          const SizedBox(height: 4),
                                           Text(
                                             '123 Fashion Street, Luxury District\nNew York, NY 10001',
                                             style:
-                                                TextStyle(color: Colors.grey),
+                                                AppTheme.textTheme.bodyMedium,
                                           ),
                                         ],
                                       ),
                                     ),
                                     const Icon(Icons.arrow_forward_ios,
-                                        color: Colors.grey, size: 16),
+                                        color: AppTheme.textTertiary, size: 16),
                                   ],
                                 ),
                               ),
                               const SizedBox(height: 24),
                               _buildSectionTitle('Payment Method'),
-                              _buildGlassContainer(
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: AppTheme.cardDecoration,
                                 child: Row(
                                   children: [
                                     Container(
@@ -158,46 +166,52 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                           color: AppTheme.primaryColor),
                                     ),
                                     const SizedBox(width: 16),
-                                    const Expanded(
+                                    Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'MasterCard',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold),
+                                            style: AppTheme
+                                                .textTheme.titleMedium
+                                                ?.copyWith(
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                           ),
+                                          const SizedBox(height: 4),
                                           Text(
                                             '**** **** **** 1234',
                                             style:
-                                                TextStyle(color: Colors.grey),
+                                                AppTheme.textTheme.bodyMedium,
                                           ),
                                         ],
                                       ),
                                     ),
                                     const Icon(Icons.arrow_forward_ios,
-                                        color: Colors.grey, size: 16),
+                                        color: AppTheme.textTertiary, size: 16),
                                   ],
                                 ),
                               ),
                               const SizedBox(height: 24),
                               _buildSectionTitle('Order Summary'),
-                              _buildGlassContainer(
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: AppTheme.cardDecoration,
                                 child: Column(
                                   children: [
                                     _buildSummaryRow('Subtotal',
                                         '\$${subtotal.toStringAsFixed(2)}'),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 12),
                                     _buildSummaryRow('Shipping', '\$10.00'),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 12),
                                     _buildSummaryRow('Tax',
                                         '\$${(subtotal * 0.05).toStringAsFixed(2)}'),
                                     const Padding(
                                       padding:
-                                          EdgeInsets.symmetric(vertical: 12),
-                                      child: Divider(color: Colors.grey),
+                                          EdgeInsets.symmetric(vertical: 16),
+                                      child:
+                                          Divider(color: AppTheme.dividerColor),
                                     ),
                                     _buildSummaryRow(
                                       'Total',
@@ -214,43 +228,45 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           bottom: 0,
                           left: 0,
                           right: 0,
-                          child: ClipRRect(
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                              child: Container(
-                                padding: EdgeInsets.fromLTRB(24, 24, 24,
-                                    MediaQuery.of(context).padding.bottom + 24),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.05),
-                                  border: Border(
-                                      top: BorderSide(
-                                          color:
-                                              Colors.white.withOpacity(0.1))),
+                          child: Container(
+                            padding: EdgeInsets.fromLTRB(24, 24, 24,
+                                MediaQuery.of(context).padding.bottom + 24),
+                            decoration: BoxDecoration(
+                              color: AppTheme.surfaceColor,
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      AppTheme.primaryColor.withOpacity(0.08),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, -5),
                                 ),
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: () =>
-                                        _processCheckout(state.items, subtotal),
-                                    style: ElevatedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 20),
-                                      backgroundColor: AppTheme.primaryColor,
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(30)),
-                                      elevation: 10,
-                                      shadowColor: AppTheme.primaryColor
-                                          .withOpacity(0.4),
-                                    ),
-                                    child: const Text(
-                                      'Place Order',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
-                                    ),
+                              ],
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(30),
+                              ),
+                            ),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    _processCheckout(state.items, subtotal),
+                                style: ElevatedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 20),
+                                  backgroundColor: AppTheme.primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16)),
+                                  elevation: 8,
+                                  shadowColor:
+                                      AppTheme.primaryColor.withOpacity(0.4),
+                                ),
+                                child: Text(
+                                  'Place Order',
+                                  style:
+                                      AppTheme.textTheme.labelLarge?.copyWith(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -271,36 +287,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: AlertDialog(
-          backgroundColor: Colors.black.withOpacity(0.8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: AppTheme.primaryColor.withOpacity(0.5)),
-          ),
-          title: const Icon(Icons.check_circle,
-              color: AppTheme.primaryColor, size: 60),
-          content: const Text(
-            'Order Placed Successfully!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          actions: [
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                child: const Text(
-                  'Continue Shopping',
-                  style: TextStyle(color: AppTheme.primaryColor, fontSize: 16),
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.surfaceColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Icon(Icons.check_circle,
+            color: AppTheme.successColor, size: 60),
+        content: Text(
+          'Order Placed Successfully!',
+          textAlign: TextAlign.center,
+          style: AppTheme.textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          Center(
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: Text(
+                'Continue Shopping',
+                style: AppTheme.textTheme.labelLarge?.copyWith(
+                  color: AppTheme.primaryColor,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -310,25 +324,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       padding: const EdgeInsets.only(bottom: 12, left: 4),
       child: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
+        style: AppTheme.textTheme.headlineSmall?.copyWith(
           fontSize: 18,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Playfair Display',
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGlassContainer({required Widget child}) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: AppTheme.glassDecoration,
-          child: child,
+          color: AppTheme.textSecondary,
         ),
       ),
     );
@@ -340,18 +338,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: isTotal ? Colors.white : Colors.grey,
-            fontSize: isTotal ? 18 : 14,
+          style: AppTheme.textTheme.bodyLarge?.copyWith(
+            color: isTotal ? AppTheme.textPrimary : AppTheme.textSecondary,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
           ),
         ),
         Text(
           value,
-          style: TextStyle(
-            color: isTotal ? AppTheme.primaryColor : Colors.white,
-            fontSize: isTotal ? 20 : 14,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+          style: AppTheme.textTheme.bodyLarge?.copyWith(
+            color: isTotal ? AppTheme.primaryColor : AppTheme.textPrimary,
+            fontSize: isTotal ? 20 : 16,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.bold,
           ),
         ),
       ],

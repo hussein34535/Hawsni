@@ -150,13 +150,14 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Profile Details',
             style: TextStyle(
-                fontFamily: 'Playfair Display', fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.black,
+                fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
         elevation: 0,
+        iconTheme: const IconThemeData(color: AppTheme.textPrimary),
         actions: [
           IconButton(
             icon: Icon(_isEditing ? Icons.check : Icons.edit,
@@ -168,7 +169,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       body: _isLoading
           ? const Center(child: SpinningLoader())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -177,21 +178,13 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                                color: AppTheme.primaryColor, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.primaryColor.withOpacity(0.2),
-                                blurRadius: 15,
-                                spreadRadius: 2,
-                              ),
-                            ],
+                            color: AppTheme.primaryColor,
                           ),
                           child: CircleAvatar(
                             radius: 50,
-                            backgroundColor: Colors.grey[900],
+                            backgroundColor: Colors.white,
                             backgroundImage: _profileImage != null
                                 ? FileImage(_profileImage!)
                                 : (_userProfile?['avatar_url'] != null
@@ -200,7 +193,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                             child: _profileImage == null &&
                                     _userProfile?['avatar_url'] == null
                                 ? const Icon(Icons.person,
-                                    size: 50, color: Colors.white54)
+                                    size: 50, color: AppTheme.textTertiary)
                                 : null,
                           ),
                         ),
@@ -217,14 +210,14 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(Icons.camera_alt,
-                                    size: 16, color: Colors.black),
+                                    size: 16, color: Colors.white),
                               ),
                             ),
                           ),
                       ],
                     ),
-                    const SizedBox(height: 32),
-                    _buildGlassTextField(
+                    const SizedBox(height: 40),
+                    _buildTextField(
                       controller: _nameController,
                       label: 'Full Name',
                       icon: Icons.person_outline,
@@ -232,15 +225,15 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       validator: (value) =>
                           value!.isEmpty ? 'Please enter your name' : null,
                     ),
-                    const SizedBox(height: 16),
-                    _buildGlassTextField(
+                    const SizedBox(height: 20),
+                    _buildTextField(
                       controller: _emailController,
                       label: 'Email Address',
                       icon: Icons.email_outlined,
                       enabled: false,
                     ),
-                    const SizedBox(height: 16),
-                    _buildGlassTextField(
+                    const SizedBox(height: 20),
+                    _buildTextField(
                       controller: _phoneController,
                       label: 'Phone Number',
                       icon: Icons.phone_outlined,
@@ -250,8 +243,8 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                           ? 'Please enter your phone number'
                           : null,
                     ),
-                    const SizedBox(height: 16),
-                    _buildGlassTextField(
+                    const SizedBox(height: 20),
+                    _buildTextField(
                       controller: _dateOfBirthController,
                       label: 'Date of Birth',
                       icon: Icons.calendar_today_outlined,
@@ -267,11 +260,11 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                 builder: (context, child) {
                                   return Theme(
                                     data: Theme.of(context).copyWith(
-                                      colorScheme: const ColorScheme.dark(
+                                      colorScheme: const ColorScheme.light(
                                         primary: AppTheme.primaryColor,
-                                        onPrimary: Colors.black,
-                                        surface: Color(0xFF1E1E1E),
-                                        onSurface: Colors.white,
+                                        onPrimary: Colors.white,
+                                        surface: Colors.white,
+                                        onSurface: AppTheme.textPrimary,
                                       ),
                                     ),
                                     child: child!,
@@ -291,21 +284,23 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     if (_isEditing)
                       SizedBox(
                         width: double.infinity,
-                        height: 50,
+                        height: 56,
                         child: ElevatedButton(
                           onPressed: _saveProfile,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.primaryColor,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                                borderRadius: BorderRadius.circular(30)),
                           ),
                           child: const Text('Save Changes',
                               style: TextStyle(
-                                  color: Colors.black,
+                                  color: Colors.white,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold)),
                         ),
                       ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 40),
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -313,14 +308,13 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Playfair Display'),
+                            color: AppTheme.textPrimary),
                       ),
                     ),
                     const SizedBox(height: 16),
                     if (_recentOrders.isEmpty)
                       const Text('No recent orders',
-                          style: TextStyle(color: Colors.grey))
+                          style: TextStyle(color: AppTheme.textSecondary))
                     else
                       ..._recentOrders.map((order) => Padding(
                             padding: const EdgeInsets.only(bottom: 12),
@@ -344,10 +338,15 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                 builder: (context) => const OrdersScreen())),
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: AppTheme.primaryColor),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
                         child: const Text('View All Orders',
-                            style: TextStyle(color: AppTheme.primaryColor)),
+                            style: TextStyle(
+                                color: AppTheme.primaryColor,
+                                fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -357,7 +356,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     );
   }
 
-  Widget _buildGlassTextField({
+  Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
@@ -367,35 +366,29 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     bool readOnly = false,
     VoidCallback? onTap,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
-          ),
-          child: TextFormField(
-            controller: controller,
-            enabled: enabled,
-            readOnly: readOnly,
-            onTap: onTap,
-            keyboardType: keyboardType,
-            style: TextStyle(color: enabled ? Colors.white : Colors.white54),
-            decoration: InputDecoration(
-              labelText: label,
-              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-              prefixIcon: Icon(icon,
-                  color: enabled ? AppTheme.primaryColor : Colors.grey),
-              border: InputBorder.none,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            ),
-            validator: validator,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: enabled ? Colors.white : Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: TextFormField(
+        controller: controller,
+        enabled: enabled,
+        readOnly: readOnly,
+        onTap: onTap,
+        keyboardType: keyboardType,
+        style: const TextStyle(color: AppTheme.textPrimary),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: AppTheme.textSecondary),
+          prefixIcon: Icon(icon,
+              color: enabled ? AppTheme.primaryColor : AppTheme.textTertiary),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
+        validator: validator,
       ),
     );
   }
@@ -406,60 +399,54 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         ? AppTheme.successColor
         : (status == 'Processing' ? Colors.orange : AppTheme.errorColor);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(orderId,
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)),
-                  const SizedBox(height: 4),
-                  Text(date,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(amount,
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor)),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(status,
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: statusColor,
-                            fontWeight: FontWeight.w500)),
-                  ),
-                ],
+              Text(orderId,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary)),
+              const SizedBox(height: 4),
+              Text(date,
+                  style: const TextStyle(
+                      fontSize: 14, color: AppTheme.textSecondary)),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(amount,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor)),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(status,
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: statusColor,
+                        fontWeight: FontWeight.w600)),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
