@@ -260,6 +260,74 @@ class ProductController {
             res.status(500).send(`خطأ في حذف المنتج: ${error.message}`);
         }
     }
+
+    // Image Management Methods
+    async renderImageManagementPage(req, res) {
+        try {
+            const { data: product } = await supabase.from('products').select('*').eq('id', req.params.id).single();
+            if (!product) {
+                return res.status(404).send('المنتج غير موجود');
+            }
+            res.render('product-images', { product });
+        } catch (error) {
+            console.error('Error rendering image management page:', error);
+            res.status(500).send(`خطأ في عرض صفحة إدارة الصور: ${error.message}`);
+        }
+    }
+
+    async uploadProductImages(req, res) {
+        try {
+            const { data: currentProduct } = await supabase.from('products').select('images').eq('id', req.params.id).single();
+
+            let imageUrls = currentProduct?.images || [];
+
+            if (req.files && req.files.length > 0) {
+                const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
+                const newImageUrls = await Promise.all(uploadPromises);
+                imageUrls = [...imageUrls, ...newImageUrls];
+            }
+
+            await supabase.from('products').update({ images: imageUrls }).eq('id', req.params.id);
+
+            res.redirect(`/products/${req.params.id}/images`);
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            res.status(500).send(`خطأ في رفع الصور: ${error.message}`);
+        }
+    }
+
+    async reorderProductImages(req, res) {
+        try {
+            const newOrder = JSON.parse(req.body.imageOrder);
+
+            await supabase.from('products').update({ images: newOrder }).eq('id', req.params.id);
+
+            res.redirect(`/products/${req.params.id}/images`);
+        } catch (error) {
+            console.error('Error reordering images:', error);
+            res.status(500).send(`خطأ في إعادة ترتيب الصور: ${error.message}`);
+        }
+    }
+
+    async deleteProductImage(req, res) {
+        try {
+            const { data: product } = await supabase.from('products').select('images').eq('id', req.params.id).single();
+
+            if (!product || !product.images) {
+                return res.status(404).json({ success: false, message: 'Product or images not found' });
+            }
+
+            const imageIndex = parseInt(req.params.imageIndex);
+            const updatedImages = product.images.filter((_, index) => index !== imageIndex);
+
+            await supabase.from('products').update({ images: updatedImages }).eq('id', req.params.id);
+
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = new ProductController();

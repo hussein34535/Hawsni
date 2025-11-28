@@ -33,4 +33,10 @@ router.put('/:id', upload.array('images', 5), ProductController.updateProduct);
 // @access  Private/Admin
 router.delete('/:id', ProductController.deleteProduct);
 
+// Image Management Routes (Admin UI)
+router.get('/:id/images', ProductController.renderImageManagementPage);
+router.post('/:id/images', upload.array('images', 5), ProductController.uploadProductImages);
+router.post('/:id/images/reorder', ProductController.reorderProductImages);
+router.delete('/:id/images/:imageIndex', ProductController.deleteProductImage);
+
 module.exports = router;
