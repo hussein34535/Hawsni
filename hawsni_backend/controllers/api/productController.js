@@ -63,7 +63,13 @@ class ProductController {
             }
 
             if (req.body.colors) {
-                colors = Array.isArray(req.body.colors) ? req.body.colors : req.body.colors.split(',').map(c => c.trim());
+                try {
+                    // Try to parse as JSON (new format with image mapping)
+                    colors = typeof req.body.colors === 'string' ? JSON.parse(req.body.colors) : req.body.colors;
+                } catch (e) {
+                    // Fallback to old format (comma-separated strings)
+                    colors = req.body.colors.split(',').map(c => c.trim());
+                }
             }
 
             const productData = {
@@ -242,7 +248,13 @@ class ProductController {
             }
 
             if (colors) {
-                colorsArray = typeof colors === 'string' ? colors.split(',').map(c => c.trim()).filter(c => c) : colors;
+                try {
+                    // Try to parse as JSON (new format with image mapping)
+                    colorsArray = typeof colors === 'string' ? JSON.parse(colors) : colors;
+                } catch (e) {
+                    // Fallback to old format (comma-separated strings)
+                    colorsArray = typeof colors === 'string' ? colors.split(',').map(c => c.trim()).filter(c => c) : colors;
+                }
             }
 
             await supabase.from('products').update({

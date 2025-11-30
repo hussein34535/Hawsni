@@ -62,13 +62,16 @@
                                     <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
                                         <input type="color" id="colorPicker" class="form-control"
                                             style="width: 50px; padding: 0; height: 40px;" value="#000000">
+                                        <select id="imageSelector" class="form-control" style="flex: 1;">
+                                            <option value="">بدون صورة (اختياري)</option>
+                                        </select>
                                         <button type="button" class="btn btn-secondary" onclick="addColor()"
                                             style="padding: 0.5rem 1rem;">
-                                            <i class="fas fa-plus"></i> إضافة لون
+                                            <i class="fas fa-plus"></i> إضافة
                                         </button>
                                     </div>
                                     <input type="hidden" name="colors" id="colorsInput"
-                                        value="<%= product && product.colors ? product.colors.join(',') : '' %>">
+                                        value="<%= product && product.colors ? JSON.stringify(product.colors) : '' %>">
                                     <div id="colorsContainer" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                                         <!-- Swatches will be added here -->
                                     </div>
@@ -109,13 +112,13 @@
                             <div class="form-group">
                                 <label class="form-label">الصور (حتى 5 صور)</label>
                                 <input type="file" name="images" class="form-control" multiple accept="image/*"
-                                    onchange="previewImages(this)">
+                                    onchange="previewImages(this)" id="imageInput">
 
                                 <% if (product && product.images && product.images.length> 0) { %>
                                     <div id="existingImages"
                                         style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
-                                        <% product.images.forEach(image=> { %>
-                                            <img src="<%= image %>"
+                                        <% product.images.forEach((image, index)=> { %>
+                                            <img src="<%= image %>" data-index="<%= index %>"
                                                 style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--light-gray);">
                                             <% }) %>
                                     </div>
@@ -148,61 +151,115 @@
     </div>
 
     <script>
+        let productImages = [];
+
         function previewImages(input) {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
 
             if (input.files) {
-                Array.from(input.files).forEach(file => {
+                Array.from(input.files).forEach((file, index) => {
                     const reader = new FileReader();
                     reader.onload = function (e) {
                         const img = document.createElement('img');
                         img.src = e.target.result;
+                        img.dataset.index = productImages.length + index;
                         img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--primary-color);';
                         preview.appendChild(img);
                     };
                     reader.readAsDataURL(file);
                 });
             }
+            updateImageSelector();
         }
 
-        // Color Management
+        function updateImageSelector() {
+            const selector = document.getElementById('imageSelector');
+            const existingImages = document.querySelectorAll('#existingImages img');
+            const newImages = document.querySelectorAll('#imagePreview img');
+
+            selector.innerHTML = '<option value="">بدون صورة (اختياري)</option>';
+
+            existingImages.forEach((img, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `صورة ${index + 1} (موجودة)`;
+                selector.appendChild(option);
+            });
+
+            newImages.forEach((img, index) => {
+                const option = document.createElement('option');
+                option.value = existingImages.length + index;
+                option.textContent = `صورة ${existingImages.length + index + 1} (جديدة)`;
+                selector.appendChild(option);
+            });
+        }
+
+        // Color Management with Image Mapping
         let colors = [];
         const colorsInput = document.getElementById('colorsInput');
         const colorsContainer = document.getElementById('colorsContainer');
 
         // Initialize colors from hidden input on page load
         document.addEventListener('DOMContentLoaded', function () {
+            updateImageSelector();
+
             if (colorsInput && colorsInput.value) {
-                colors = colorsInput.value.split(',').filter(c => c.trim() !== '');
+                try {
+                    const parsedColors = JSON.parse(colorsInput.value);
+                    // Handle both old format (array of strings) and new format (array of objects)
+                    if (Array.isArray(parsedColors)) {
+                        colors = parsedColors.map(c => {
+                            if (typeof c === 'string') {
+                                return { color: c, imageIndex: null };
+                            }
+                            return c;
+                        });
+                    }
+                } catch (e) {
+                    // Fallback for old comma-separated format
+                    colors = colorsInput.value.split(',').filter(c => c.trim() !== '').map(c => ({
+                        color: c.trim(),
+                        imageIndex: null
+                    }));
+                }
                 renderColors();
             }
         });
 
         function addColor() {
             const colorPicker = document.getElementById('colorPicker');
+            const imageSelector = document.getElementById('imageSelector');
             const color = colorPicker.value;
+            const imageIndex = imageSelector.value ? parseInt(imageSelector.value) : null;
 
-            if (!colors.includes(color)) {
-                colors.push(color);
-                updateColorsInput();
-                renderColors();
+            // Check if color already exists
+            const existingIndex = colors.findIndex(c => c.color === color);
+            if (existingIndex >= 0) {
+                // Update existing color's image
+                colors[existingIndex].imageIndex = imageIndex;
+            } else {
+                // Add new color
+                colors.push({ color, imageIndex });
             }
+
+            updateColorsInput();
+            renderColors();
         }
 
-        function removeColor(color) {
-            colors = colors.filter(c => c !== color);
+        function removeColor(index) {
+            colors.splice(index, 1);
             updateColorsInput();
             renderColors();
         }
 
         function updateColorsInput() {
-            colorsInput.value = colors.join(',');
+            colorsInput.value = JSON.stringify(colors);
         }
 
         function renderColors() {
             colorsContainer.innerHTML = '';
-            colors.forEach(color => {
+            colors.forEach((colorObj, index) => {
                 const swatch = document.createElement('div');
                 swatch.style.cssText = `
                     display: flex; 
@@ -219,13 +276,27 @@
                     width: 20px; 
                     height: 20px; 
                     border-radius: 50%; 
-                    background-color: ${color};
+                    background-color: ${colorObj.color};
                     border: 1px solid #dee2e6;
                 `;
 
                 const text = document.createElement('span');
-                text.innerText = color;
+                text.innerText = colorObj.color;
                 text.style.fontSize = '0.875rem';
+
+                // Show linked image if exists
+                if (colorObj.imageIndex !== null) {
+                    const imageIcon = document.createElement('i');
+                    imageIcon.className = 'fas fa-image';
+                    imageIcon.style.cssText = 'color: #28a745; font-size: 0.75rem;';
+                    imageIcon.title = `مرتبط بصورة ${colorObj.imageIndex + 1}`;
+                    swatch.appendChild(circle);
+                    swatch.appendChild(text);
+                    swatch.appendChild(imageIcon);
+                } else {
+                    swatch.appendChild(circle);
+                    swatch.appendChild(text);
+                }
 
                 const removeBtn = document.createElement('button');
                 removeBtn.innerHTML = '&times;';
@@ -238,10 +309,8 @@
                     line-height: 1;
                     padding: 0 0.25rem;
                 `;
-                removeBtn.onclick = () => removeColor(color);
+                removeBtn.onclick = () => removeColor(index);
 
-                swatch.appendChild(circle);
-                swatch.appendChild(text);
                 swatch.appendChild(removeBtn);
                 colorsContainer.appendChild(swatch);
             });
