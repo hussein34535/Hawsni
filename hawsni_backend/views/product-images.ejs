@@ -1,198 +1,192 @@
-\u003c%- include('partials/header', { title: product ? 'إدارة صور المنتج' : 'المنتجات' , pageTitle: product ? 'إدارة صور
-المنتج'
-: 'المنتجات' , page: 'products' }) %\u003e
+<%- include('partials/header', { title: 'إدارة صور المنتج' , pageTitle: 'إدارة صور المنتج' , page: 'products' }) %>
 
-\u003cdiv class="card"\u003e
-\u003cdiv class="card-header"\u003e
-\u003ch2 class="card-title"\u003e
-\u003ci class="fas fa-images"\u003e\u003c/i\u003e
-إدارة صور المنتج: \u003c%= product.name %\u003e
-\u003c/h2\u003e
-\u003ca href="/products" class="btn btn-secondary"\u003e
-\u003ci class="fas fa-arrow-right"\u003e\u003c/i\u003e رجوع
-\u003c/a\u003e
-\u003c/div\u003e
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-images"></i>
+                إدارة صور المنتج: <%= product.name %>
+            </h2>
+            <a href="/products" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> رجوع
+            </a>
+        </div>
 
-\u003cdiv class="card-body"\u003e
-\u003c!-- Upload New Images --\u003e
-\u003cform action="/products/\u003c%= product.id %\u003e/images" method="POST" enctype="multipart/form-data"
-style="margin-bottom: 2rem;"\u003e
-\u003cdiv class="form-group"\u003e
-\u003clabel class="form-label"\u003eإضافة صور جديدة (حتى 5 صور)\u003c/label\u003e
-\u003cinput type="file" name="images" class="form-control" multiple accept="image/*" required
-onchange="previewNewImages(this)"\u003e
-\u003cdiv id="newImagePreview"
-style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;"\u003e\u003c/div\u003e
-\u003c/div\u003e
-\u003cbutton type="submit" class="btn btn-primary"\u003e
-\u003ci class="fas fa-upload"\u003e\u003c/i\u003e رفع الصور
-\u003c/button\u003e
-\u003c/form\u003e
+        <div class="card-body">
+            <!-- Upload New Images -->
+            <form action="/products/<%= product.id %>/images" method="POST" enctype="multipart/form-data"
+                style="margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="form-label">إضافة صور جديدة (حتى 5 صور)</label>
+                    <input type="file" name="images" class="form-control" multiple accept="image/*" required
+                        onchange="previewNewImages(this)">
+                    <div id="newImagePreview" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-upload"></i> رفع الصور
+                </button>
+            </form>
 
-\u003chr style="margin: 2rem 0;"\u003e
+            <hr style="margin: 2rem 0;">
 
-\u003c!-- Current Images --\u003e
-\u003ch3 style="margin-bottom: 1.5rem;"\u003eالصور الحالية (\u003c%= product.images ? product.images.length : 0
-%\u003e)\u003c/h3\u003e
+            <!-- Current Images -->
+            <h3 style="margin-bottom: 1.5rem;">الصور الحالية (<%= product.images ? product.images.length : 0 %>)</h3>
 
-\u003c% if (product \u0026\u0026 product.images \u0026\u0026 product.images.length\u003e 0) { %\u003e
-\u003cform action="/products/\u003c%= product.id %\u003e/images/reorder" method="POST" id="reorderForm"\u003e
-\u003cinput type="hidden" name="imageOrder" id="imageOrderInput"\u003e
+            <% if (product && product.images && product.images.length> 0) { %>
+                <form action="/products/<%= product.id %>/images/reorder" method="POST" id="reorderForm">
+                    <input type="hidden" name="imageOrder" id="imageOrderInput">
 
-\u003cdiv id="imageSortable"
-style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;"\u003e
-\u003c% product.images.forEach((image, index)=\u003e { %\u003e
-\u003cdiv class="image-item" data-index="\u003c%= index %\u003e" data-url="\u003c%= image %\u003e"
-style="position: relative; cursor: move; background: white; border-radius: var(--radius-md); padding: 1rem; box-shadow:
-var(--shadow-soft);\u003e
-\u003cdiv
-style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.7); color: white; padding: 0.25rem
-0.75rem; border-radius: var(--radius-sm); font-size: 0.875rem;"\u003e
-#\u003c%= index + 1 %\u003e
-\u003c/div\u003e
+                    <div id="imageSortable"
+                        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
+                        <% product.images.forEach((image, index)=> { %>
+                            <div class="image-item" data-index="<%= index %>" data-url="<%= image %>"
+                                style="position: relative; cursor: move; background: white; border-radius: var(--radius-md); padding: 1rem; box-shadow: var(--shadow-soft);">
+                                <div
+                                    style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.7); color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.875rem;">
+                                    #<%= index + 1 %>
+                                </div>
 
-\u003cimg src="\u003c%= image %\u003e"
-style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: 1rem;"\u003e
+                                <img src="<%= image %>"
+                                    style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: 1rem;">
 
-\u003cdiv style="display: flex; gap: 0.5rem; align-items: center;"\u003e
-\u003ci class="fas fa-grip-vertical"
-style="color: var(--text-tertiary); cursor: move;"\u003e\u003c/i\u003e
-\u003cspan style="flex: 1; font-size: 0.875rem; color: var(--text-secondary)"\u003eاسحب
-لإعادة الترتيب\u003c/span\u003e
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <i class="fas fa-grip-vertical"
+                                        style="color: var(--text-tertiary); cursor: move;"></i>
+                                    <span style="flex: 1; font-size: 0.875rem; color: var(--text-secondary)">اسحب لإعادة
+                                        الترتيب</span>
 
-\u003cbutton type="button" class="btn btn-danger btn-sm"
-onclick="deleteImage('\u003c%= product.id %\u003e', '\u003c%= index %\u003e')"\u003e
-\u003ci class="fas fa-trash"\u003e\u003c/i\u003e
-\u003c/button\u003e
-\u003c/div\u003e
-\u003c/div\u003e
-\u003c% }) %\u003e
-\u003c/div\u003e
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                        onclick="deleteImage('<%= product.id %>', '<%= index %>')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <% }) %>
+                    </div>
 
-\u003cdiv style="margin-top: 2rem;"\u003e
-\u003cbutton type="button" class="btn btn-success" onclick="saveOrder()"\u003e
-\u003ci class="fas fa-save"\u003e\u003c/i\u003e حفظ الترتيب
-\u003c/button\u003e
-\u003cbutton type="button" class="btn btn-secondary" onclick="resetOrder()"\u003e
-\u003ci class="fas fa-undo"\u003e\u003c/i\u003e إلغاء
-\u003c/button\u003e
-\u003c/div\u003e
-\u003c/form\u003e
-\u003c% } else { %\u003e
-\u003cdiv
-style="text-align: center; padding: 3rem; background: var(--bg-secondary); border-radius: var(--radius-lg);"\u003e
-\u003ci class="fas fa-images" style="font-size: 4rem; color: var(--text-tertiary)"\u003e\u003c/i\u003e
-\u003cp style="margin-top: 1rem; color: var(--text-secondary)"\u003eلا توجد صور لهذا المنتج\u003c/p\u003e
-\u003c/div\u003e
-\u003c% } %\u003e
-\u003c/div\u003e
-\u003c/div\u003e
+                    <div style="margin-top: 2rem;">
+                        <button type="button" class="btn btn-success" onclick="saveOrder()">
+                            <i class="fas fa-save"></i> حفظ الترتيب
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetOrder()">
+                            <i class="fas fa-undo"></i> إلغاء
+                        </button>
+                    </div>
+                </form>
+                <% } else { %>
+                    <div
+                        style="text-align: center; padding: 3rem; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+                        <i class="fas fa-images" style="font-size: 4rem; color: var(--text-tertiary)"></i>
+                        <p style="margin-top: 1rem; color: var(--text-secondary)">لا توجد صور لهذا المنتج</p>
+                    </div>
+                    <% } %>
+        </div>
+    </div>
 
-\u003c!-- Include Sortable.js from CDN --\u003e
-\u003cscript src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"\u003e\u003c/script\u003e
+    <!-- Include Sortable.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
-\u003cscript\u003e
-let sortable;
-let originalOrder = [];
+    <script>
+        let sortable;
+        let originalOrder = [];
 
-document.addEventListener('DOMContentLoaded', function () {
-const container = document.getElementById('imageSortable');
-if (container) {
-// Store original order
-const items = container.querySelectorAll('.image-item');
-items.forEach(item =\u003e {
-originalOrder.push(item.dataset.url);
-});
+        document.addEventListener('DOMContentLoaded', function () {
+            const container = document.getElementById('imageSortable');
+            if (container) {
+                // Store original order
+                const items = container.querySelectorAll('.image-item');
+                items.forEach(item => {
+                    originalOrder.push(item.dataset.url);
+                });
 
-sortable = Sortable.create(container, {
-animation: 150,
-handle: '.image-item',
-ghostClass: 'sortable-ghost',
-chosenClass: 'sortable-chosen',
-dragClass: 'sortable-drag',
-onEnd: function () {
-updateOrderNumbers();
-}
-});
-}
-});
+                sortable = Sortable.create(container, {
+                    animation: 150,
+                    handle: '.image-item',
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    dragClass: 'sortable-drag',
+                    onEnd: function () {
+                        updateOrderNumbers();
+                    }
+                });
+            }
+        });
 
-function updateOrderNumbers() {
-const items = document.querySelectorAll('.image-item');
-items.forEach((item, index) =\u003e {
-const badge = item.querySelector('div[style*="position: absolute"]');
-if (badge) {
-badge.textContent = `#${index + 1}`;
-}
-});
-}
+        function updateOrderNumbers() {
+            const items = document.querySelectorAll('.image-item');
+            items.forEach((item, index) => {
+                const badge = item.querySelector('div[style*="position: absolute"]');
+                if (badge) {
+                    badge.textContent = `#${index + 1}`;
+                }
+            });
+        }
 
-function saveOrder() {
-const items = document.querySelectorAll('.image-item');
-const newOrder = Array.from(items).map(item =\u003e item.dataset.url);
+        function saveOrder() {
+            const items = document.querySelectorAll('.image-item');
+            const newOrder = Array.from(items).map(item => item.dataset.url);
 
-document.getElementById('imageOrderInput').value = JSON.stringify(newOrder);
-document.getElementById('reorderForm').submit();
-}
+            document.getElementById('imageOrderInput').value = JSON.stringify(newOrder);
+            document.getElementById('reorderForm').submit();
+        }
 
-function resetOrder() {
-if (sortable) {
-window.location.reload();
-}
-}
+        function resetOrder() {
+            if (sortable) {
+                window.location.reload();
+            }
+        }
 
-function deleteImage(productId, imageIndex) {
-if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
-fetch(`/products/${productId}/images/${imageIndex}`, {
-method: 'DELETE'
-}).then(response =\u003e {
-if (response.ok) {
-window.location.reload();
-} else {
-alert('حدث خطأ أثناء حذف الصورة');
-}
-});
-}
-}
+        function deleteImage(productId, imageIndex) {
+            if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
+                fetch(`/products/${productId}/images/${imageIndex}`, {
+                    method: 'DELETE'
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert('حدث خطأ أثناء حذف الصورة');
+                    }
+                });
+            }
+        }
 
-function previewNewImages(input) {
-const preview = document.getElementById('newImagePreview');
-preview.innerHTML = '';
+        function previewNewImages(input) {
+            const preview = document.getElementById('newImagePreview');
+            preview.innerHTML = '';
 
-if (input.files) {
-Array.from(input.files).forEach(file =\u003e {
-const reader = new FileReader();
-reader.onload = function (e) {
-const div = document.createElement('div');
-div.style.cssText = 'position: relative;';
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const div = document.createElement('div');
+                        div.style.cssText = 'position: relative;';
 
-const img = document.createElement('img');
-img.src = e.target.result;
-img.style.cssText = 'width: 150px; height: 150px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid
-var(--primary-color);';
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.cssText = 'width: 150px; height: 150px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--primary-color);';
 
-div.appendChild(img);
-preview.appendChild(div);
-};
-reader.readAsDataURL(file);
-});
-}
-}
-\u003c/script\u003e
+                        div.appendChild(img);
+                        preview.appendChild(div);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+    </script>
 
-\u003cstyle\u003e
-.sortable-ghost {
-opacity: 0.4;
-}
+    <style>
+        .sortable-ghost {
+            opacity: 0.4;
+        }
 
-.sortable-chosen {
-transform: scale(1.05);
-box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
-}
+        .sortable-chosen {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+        }
 
-.sortable-drag {
-opacity: 0;
-}
-\u003c/style\u003e
+        .sortable-drag {
+            opacity: 0;
+        }
+    </style>
 
-\u003c%- include('partials/footer') %\u003e
+    <%- include('partials/footer') %>

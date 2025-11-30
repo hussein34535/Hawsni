@@ -221,9 +221,9 @@ class ProductController {
 
     async updateProductAdmin(req, res) {
         try {
-            const { name, description, price, discount, category_id, stock, is_featured } = req.body;
+            const { name, description, price, discount, category_id, stock, is_featured, sizes, colors } = req.body;
 
-            const { data: currentProduct } = await supabase.from('products').select('images').eq('id', req.params.id).single();
+            const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
 
             let imageUrls = currentProduct?.images || [];
 
@@ -231,6 +231,18 @@ class ProductController {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                 const newImageUrls = await Promise.all(uploadPromises);
                 imageUrls = [...imageUrls, ...newImageUrls];
+            }
+
+            // Parse sizes and colors
+            let sizesArray = [];
+            let colorsArray = [];
+
+            if (sizes) {
+                sizesArray = typeof sizes === 'string' ? sizes.split(',').map(s => s.trim()).filter(s => s) : sizes;
+            }
+
+            if (colors) {
+                colorsArray = typeof colors === 'string' ? colors.split(',').map(c => c.trim()).filter(c => c) : colors;
             }
 
             await supabase.from('products').update({
@@ -241,6 +253,8 @@ class ProductController {
                 category_id: category_id || null,
                 stock: parseInt(stock) || 0,
                 is_featured: is_featured === 'on',
+                sizes: sizesArray.length > 0 ? sizesArray : null,
+                colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls
             }).eq('id', req.params.id);
 
