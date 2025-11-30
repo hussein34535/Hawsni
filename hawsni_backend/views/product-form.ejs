@@ -171,11 +171,13 @@
         const colorsInput = document.getElementById('colorsInput');
         const colorsContainer = document.getElementById('colorsContainer');
 
-        // Initialize colors from hidden input
-        if (colorsInput && colorsInput.value) {
-            colors = colorsInput.value.split(',').filter(c => c.trim() !== '');
-            renderColors();
-        }
+        // Initialize colors from hidden input on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            if (colorsInput && colorsInput.value) {
+                colors = colorsInput.value.split(',').filter(c => c.trim() !== '');
+                renderColors();
+            }
+        });
 
         function addColor() {
             const colorPicker = document.getElementById('colorPicker');

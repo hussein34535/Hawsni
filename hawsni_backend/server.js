@@ -72,6 +72,12 @@ app.get('/products/:id/edit', ProductController.renderEditProductPage);
 app.post('/products/:id', upload.array('images', 5), ProductController.updateProductAdmin);
 app.post('/products/:id/delete', ProductController.deleteProductAdmin);
 
+// Image Management Routes
+app.get('/products/:id/images', ProductController.renderImageManagementPage);
+app.post('/products/:id/images', upload.array('images', 5), ProductController.uploadProductImages);
+app.post('/products/:id/images/reorder', ProductController.reorderProductImages);
+app.delete('/products/:id/images/:imageIndex', ProductController.deleteProductImage);
+
 // Categories Management (Admin)
 app.get('/categories', CategoryController.renderCategoriesPage);
 app.get('/categories/:id/edit', CategoryController.renderEditPage);
