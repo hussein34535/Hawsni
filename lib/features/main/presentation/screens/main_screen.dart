@@ -47,7 +47,7 @@ class _MainScreenState extends State<MainScreen> {
         selectedItemColor: AppTheme.primaryColor,
         unselectedItemColor: Colors.grey[400],
         showSelectedLabels: true,
-        showUnselectedLabels: true,
+        showUnselectedLabels: false,
         selectedFontSize: 12,
         unselectedFontSize: 12,
         selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),

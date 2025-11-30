@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/home/bloc/home_bloc.dart';
@@ -85,7 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                         child: SizedBox(
                           height: 200,
-                          child: HeroCarousel(banners: state.banners),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: HeroCarousel(banners: state.banners),
+                          ),
                         ),
                       ),
                     ),
@@ -97,13 +101,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           const Padding(
                             padding: EdgeInsets.fromLTRB(20, 24, 20, 12),
-                            child: Text(
-                              'Shop by Category',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Shop by Category',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Icon(Icons.auto_awesome,
+                                    color: AppTheme.accentColor, size: 24),
+                              ],
                             ),
                           ),
                           SizedBox(
@@ -136,39 +147,78 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Container(
                                           width: 80,
                                           height: 80,
+                                          padding: const EdgeInsets.all(
+                                              2.5), // Gradient border width
                                           decoration: BoxDecoration(
-                                            color: Colors.white,
                                             shape: BoxShape.circle,
+                                            gradient: const LinearGradient(
+                                              colors: [
+                                                AppTheme.primaryColor,
+                                                AppTheme.accentColor
+                                              ],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                            ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.08),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
+                                                color: AppTheme.primaryColor
+                                                    .withOpacity(0.2),
+                                                blurRadius: 12,
+                                                offset: const Offset(0, 4),
                                               ),
                                             ],
                                           ),
-                                          child: ClipOval(
-                                            child: category.imageUrl != null
-                                                ? Image.network(
-                                                    category.imageUrl!,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                        error, stackTrace) {
-                                                      return Icon(
-                                                        Icons.category,
-                                                        size: 32,
-                                                        color: AppTheme
-                                                            .primaryColor,
-                                                      );
-                                                    },
-                                                  )
-                                                : Icon(
-                                                    Icons.category,
-                                                    size: 32,
-                                                    color:
-                                                        AppTheme.primaryColor,
-                                                  ),
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: ClipOval(
+                                              child: category.imageUrl != null
+                                                  ? (category.imageUrl!
+                                                          .toLowerCase()
+                                                          .endsWith('.svg')
+                                                      ? Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12.0),
+                                                          child: SvgPicture
+                                                              .network(
+                                                            category.imageUrl!,
+                                                            fit: BoxFit.contain,
+                                                            placeholderBuilder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return Icon(
+                                                                Icons.category,
+                                                                size: 32,
+                                                                color: AppTheme
+                                                                    .primaryColor,
+                                                              );
+                                                            },
+                                                          ),
+                                                        )
+                                                      : Image.network(
+                                                          category.imageUrl!,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder:
+                                                              (context, error,
+                                                                  stackTrace) {
+                                                            return Icon(
+                                                              Icons.category,
+                                                              size: 32,
+                                                              color: AppTheme
+                                                                  .primaryColor,
+                                                            );
+                                                          },
+                                                        ))
+                                                  : Icon(
+                                                      Icons.category,
+                                                      size: 32,
+                                                      color:
+                                                          AppTheme.primaryColor,
+                                                    ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 8),
@@ -193,9 +243,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-
-                    // Filter Pills
-                    SliverToBoxAdapter(child: _buildFilterPills()),
 
                     // Products Grid
                     SliverPadding(
@@ -268,32 +315,26 @@ class _HomeScreenState extends State<HomeScreen> {
           // Logo
           GestureDetector(
             onTap: () => DefaultTabController.of(context).animateTo(3),
-            child: Container(
+            child: Image.asset(
+              'assets/images/logo.png',
               width: 42,
               height: 42,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                shape: BoxShape.circle,
-              ),
-              child: Image.asset(
-                'assets/images/logo.png',
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.store, color: Colors.white, size: 20);
-                },
-              ),
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(Icons.store, color: Colors.black87, size: 28);
+              },
             ),
           ),
 
           // Logo/Title - Centered
-          Text(
+          // Logo/Title - Centered
+          const Text(
             'HAWSNI',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,
               letterSpacing: 2,
-              color: Colors.black87,
+              color: AppTheme.primaryColor,
             ),
           ),
 
@@ -372,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: Colors.black87,
+              color: AppTheme.primaryColor,
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(
@@ -382,51 +423,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFilterPills() {
-    final filters = ['All', 'Featured', 'Discount', 'New'];
-
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.only(top: 20),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: filters.length,
-        itemBuilder: (context, index) {
-          final filter = filters[index];
-          final isSelected = _selectedFilter == filter;
-
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedFilter = filter;
-              });
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.black87 : Colors.white,
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(
-                  color: isSelected ? Colors.black87 : Colors.grey[300]!,
-                ),
-              ),
-              child: Text(
-                filter,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                ),
-              ),
-            ),
-          );
-        },
       ),
     );
   }

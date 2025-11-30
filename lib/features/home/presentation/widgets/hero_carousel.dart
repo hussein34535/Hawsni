@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class HeroCarousel extends StatefulWidget {
   final List<Map<String, dynamic>> banners;
@@ -160,8 +161,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
+                              backgroundColor: AppTheme.primaryColor,
+                              foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 32, vertical: 16),
                               shape: RoundedRectangleBorder(

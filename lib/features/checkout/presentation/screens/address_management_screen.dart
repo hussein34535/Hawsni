@@ -206,13 +206,20 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
             child: const Icon(Icons.location_on_outlined,
-                size: 48, color: AppTheme.textTertiary),
+                size: 64, color: AppTheme.textTertiary),
           ),
           const SizedBox(height: 24),
           const Text('No addresses yet',
@@ -223,7 +230,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
           const SizedBox(height: 12),
           const Text('Add your first shipping address',
               style: TextStyle(fontSize: 16, color: AppTheme.textSecondary)),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           ElevatedButton(
             onPressed: _addNewAddress,
             style: ElevatedButton.styleFrom(
@@ -249,7 +256,14 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
           border: Border.all(
               color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor,
               width: isSelected ? 2 : 1),
@@ -487,6 +501,13 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
         border: Border.all(color: AppTheme.borderColor),
       ),
       child: TextFormField(

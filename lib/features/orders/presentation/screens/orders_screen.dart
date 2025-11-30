@@ -30,6 +30,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
+            fontSize: 20,
           ),
         ),
         centerTitle: true,
@@ -85,13 +86,20 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: const BoxDecoration(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
                       child: const Icon(Icons.shopping_bag_outlined,
-                          size: 48, color: AppTheme.textTertiary),
+                          size: 64, color: AppTheme.primaryColor),
                     ),
                     const SizedBox(height: 24),
                     const Text(
@@ -107,7 +115,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       style: TextStyle(
                           fontSize: 16, color: AppTheme.textSecondary),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
@@ -171,8 +179,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderColor),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
       child: InkWell(
         onTap: () => _showOrderDetails(context, order),

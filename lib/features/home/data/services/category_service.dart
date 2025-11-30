@@ -8,9 +8,18 @@ class CategoryService {
 
       if (response['success'] == true) {
         final List<dynamic> categoriesJson = response['categories'];
-        return categoriesJson
-            .map((json) => CategoryModel.fromJson(json))
-            .toList();
+        return categoriesJson.map((json) {
+          // Fix image URL if it's relative
+          if (json['image'] != null &&
+              !json['image'].toString().startsWith('http')) {
+            final baseDomain = ApiService.baseUrl.replaceAll('/api', '');
+            final imagePath = json['image'].toString();
+            json['image'] = imagePath.startsWith('/')
+                ? '$baseDomain$imagePath'
+                : '$baseDomain/$imagePath';
+          }
+          return CategoryModel.fromJson(json);
+        }).toList();
       } else {
         throw Exception(response['message'] ?? 'Failed to load categories');
       }

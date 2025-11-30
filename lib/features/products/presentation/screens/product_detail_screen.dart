@@ -62,6 +62,55 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (quantity > 1) setState(() => quantity--);
   }
 
+  Color _getColorFromName(String colorName) {
+    try {
+      if (colorName.startsWith('#')) {
+        return Color(
+            int.parse(colorName.substring(1, 7), radix: 16) + 0xFF000000);
+      }
+      switch (colorName.toLowerCase()) {
+        case 'red':
+          return Colors.red;
+        case 'blue':
+          return Colors.blue;
+        case 'green':
+          return Colors.green;
+        case 'black':
+          return Colors.black;
+        case 'white':
+          return Colors.white;
+        case 'grey':
+          return Colors.grey;
+        case 'yellow':
+          return Colors.yellow;
+        case 'orange':
+          return Colors.orange;
+        case 'purple':
+          return Colors.purple;
+        case 'pink':
+          return Colors.pink;
+        case 'brown':
+          return Colors.brown;
+        case 'gold':
+          return const Color(0xFFD4AF37);
+        case 'silver':
+          return const Color(0xFFC0C0C0);
+        case 'navy':
+          return const Color(0xFF000080);
+        case 'teal':
+          return Colors.teal;
+        case 'maroon':
+          return const Color(0xFF800000);
+        case 'beige':
+          return const Color(0xFFF5F5DC);
+        default:
+          return Colors.grey;
+      }
+    } catch (e) {
+      return Colors.grey;
+    }
+  }
+
   void _addToCart(BuildContext context) {
     final itemId =
         '${widget.productId}${selectedSize != null ? "_$selectedSize" : ""}${selectedColor != null ? "_$selectedColor" : ""}';
@@ -381,36 +430,46 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 Wrap(
                                   spacing: 12,
                                   runSpacing: 12,
-                                  children: colors.map((color) {
-                                    final isSelected = selectedColor == color;
+                                  children: colors.map((colorName) {
+                                    final isSelected =
+                                        selectedColor == colorName;
+                                    final color = _getColorFromName(colorName);
                                     return GestureDetector(
                                       onTap: () => setState(() =>
                                           selectedColor =
-                                              isSelected ? null : color),
+                                              isSelected ? null : colorName),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20, vertical: 12),
+                                        width: 42,
+                                        height: 42,
                                         decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? AppTheme.primaryColor
-                                              : AppTheme.surfaceColor,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          color: color,
+                                          shape: BoxShape.circle,
                                           border: Border.all(
                                             color: isSelected
                                                 ? AppTheme.primaryColor
-                                                : AppTheme.borderColor,
+                                                : Colors.grey[300]!,
+                                            width: isSelected ? 2 : 1,
                                           ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.1),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
                                         ),
-                                        child: Text(
-                                          color,
-                                          style: TextStyle(
-                                            color: isSelected
-                                                ? Colors.white
-                                                : AppTheme.textPrimary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                                        child: isSelected
+                                            ? Icon(
+                                                Icons.check,
+                                                color:
+                                                    color.computeLuminance() >
+                                                            0.5
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                size: 24,
+                                              )
+                                            : null,
                                       ),
                                     );
                                   }).toList(),

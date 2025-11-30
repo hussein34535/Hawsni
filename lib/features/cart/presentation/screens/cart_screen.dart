@@ -23,7 +23,7 @@ class CartScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppTheme.textPrimary),
       ),
@@ -42,21 +42,15 @@ class CartScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: const BoxDecoration(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 20,
-                            offset: Offset(0, 10),
-                          ),
-                        ],
+                        boxShadow: AppTheme.shadowMedium,
                       ),
                       child: const Icon(
                         Icons.shopping_bag_outlined,
-                        size: 48,
+                        size: 64,
                         color: AppTheme.primaryColor,
                       ),
                     ),

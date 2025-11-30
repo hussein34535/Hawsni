@@ -47,6 +47,7 @@ class WishlistScreen extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
+            fontSize: 20,
           ),
         ),
         centerTitle: true,
@@ -80,13 +81,20 @@ class WishlistScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: const BoxDecoration(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
                     child: const Icon(Icons.favorite_border,
-                        size: 48, color: AppTheme.textTertiary),
+                        size: 64, color: AppTheme.primaryColor),
                   ),
                   const SizedBox(height: 24),
                   const Text(
@@ -103,7 +111,7 @@ class WishlistScreen extends StatelessWidget {
                     style:
                         TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();

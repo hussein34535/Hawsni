@@ -136,39 +136,50 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: TextField(
-          controller: _searchController,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: 'Search products...',
-            hintStyle: TextStyle(color: Colors.grey[600]),
-            border: InputBorder.none,
-            suffixIcon: _searchController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, color: Colors.grey),
-                    onPressed: () {
-                      _searchController.clear();
-                      setState(() {
-                        _searchResults = [];
-                      });
-                    },
-                  )
-                : null,
+        title: Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(20),
           ),
-          onSubmitted: (value) => _performSearch(value),
+          child: TextField(
+            controller: _searchController,
+            style: const TextStyle(color: AppTheme.textPrimary),
+            decoration: InputDecoration(
+              hintText: 'Search products...',
+              hintStyle: TextStyle(color: Colors.grey[500]),
+              border: InputBorder.none,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchResults = [];
+                        });
+                      },
+                    )
+                  : null,
+            ),
+            onSubmitted: (value) => _performSearch(value),
+          ),
         ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.filter_list,
-              color: _showFilters ? AppTheme.primaryColor : Colors.white,
+              color:
+                  _showFilters ? AppTheme.primaryColor : AppTheme.textPrimary,
             ),
             onPressed: () {
               setState(() {
@@ -204,9 +215,14 @@ class _SearchScreenState extends State<SearchScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF121212),
-        border:
-            Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +235,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontFamily: 'Playfair Display'),
               ),
               TextButton(
@@ -233,7 +249,7 @@ class _SearchScreenState extends State<SearchScreen> {
           if (_categories.isNotEmpty) ...[
             const Text('Category',
                 style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w500)),
+                    color: AppTheme.textPrimary, fontWeight: FontWeight.w500)),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -254,14 +270,14 @@ class _SearchScreenState extends State<SearchScreen> {
             const SizedBox(height: 12),
           ],
           const Text('Price Range',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+              style: TextStyle(
+                  color: AppTheme.textPrimary, fontWeight: FontWeight.w500)),
           RangeSlider(
             values: RangeValues(_minPrice, _maxPrice),
             min: 0,
             max: 1000,
             activeColor: AppTheme.primaryColor,
-            inactiveColor: Colors.grey[800],
+            inactiveColor: Colors.grey[300],
             onChanged: (values) => setState(() {
               _minPrice = values.start;
               _maxPrice = values.end;
@@ -271,9 +287,9 @@ class _SearchScreenState extends State<SearchScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('\$${_minPrice.round()}',
-                  style: const TextStyle(color: Colors.grey)),
+                  style: const TextStyle(color: AppTheme.textSecondary)),
               Text('\$${_maxPrice.round()}',
-                  style: const TextStyle(color: Colors.grey)),
+                  style: const TextStyle(color: AppTheme.textSecondary)),
             ],
           ),
           const SizedBox(height: 12),
@@ -285,10 +301,14 @@ class _SearchScreenState extends State<SearchScreen> {
                 setState(() => _showFilters = false);
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor),
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  )),
               child: const Text('Apply Filters',
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -302,19 +322,15 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppTheme.primaryColor
-              : Colors.white.withOpacity(0.1),
+          color: isSelected ? AppTheme.primaryColor : Colors.grey[100],
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: isSelected
-                  ? AppTheme.primaryColor
-                  : Colors.white.withOpacity(0.2)),
+              color: isSelected ? AppTheme.primaryColor : Colors.transparent),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.black : Colors.white,
+            color: isSelected ? Colors.white : AppTheme.textPrimary,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
@@ -343,7 +359,8 @@ class _SearchScreenState extends State<SearchScreen> {
         final term = _searchHistory[index];
         return ListTile(
           leading: const Icon(Icons.history, color: Colors.grey),
-          title: Text(term, style: const TextStyle(color: Colors.white)),
+          title:
+              Text(term, style: const TextStyle(color: AppTheme.textPrimary)),
           trailing: IconButton(
             icon: const Icon(Icons.close, size: 18, color: Colors.grey),
             onPressed: () => _removeSearchTerm(term),

@@ -2,22 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Colors - Modern Black
-  static const Color primaryColor = Color(0xFF1A1A1A); // Black
+  // Colors - VUMNIA Light Theme
+  static const Color primaryColor =
+      Color(0xFF1B4D3E); // Emerald Green (Primary Action)
   static const Color secondaryColor = Color(0xFFF5F5F5); // Light Gray
-  static const Color accentColor = Color(0xFFFF758F); // Pink/Coral
-  static const Color scaffoldBackgroundColor = Color(0xFF000000); // Deep Black
-  static const Color surfaceColor =
-      Color(0xFF121212); // Slightly lighter black for cards
+  static const Color accentColor = Color(0xFFD4AF37); // Gold (Secondary Accent)
+  static const Color scaffoldBackgroundColor = Color(0xFFFAFAFA); // Off-White
+  static const Color surfaceColor = Colors.white; // White for cards
   static const Color errorColor = Color(0xFFCF6679);
   static const Color successColor = Color(0xFF03DAC6);
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Color(0xFFB0B0B0); // Light Grey
-  static const Color textTertiary = Color(0xFF888888); // Medium Grey
+
+  // Text Colors
+  static const Color textPrimary = Color(0xFF1A1A1A); // Black (Main Text)
+  static const Color textSecondary = Color(0xFF757575); // Dark Grey
+  static const Color textTertiary = Color(0xFFBDBDBD); // Light Grey
 
   // Borders & Dividers
-  static const Color borderColor = Color(0xFF2A2A2A); // Dark border
-  static const Color dividerColor = Color(0xFF1A1A1A); // Divider
+  static const Color borderColor = Color(0xFFEEEEEE); // Light border
+  static const Color dividerColor = Color(0xFFEEEEEE); // Light divider
 
   // Radius values
   static const double radiusSmall = 12.0;
@@ -28,25 +30,25 @@ class AppTheme {
   // Shadows
   static List<BoxShadow> get shadowSoft => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.2),
-          blurRadius: 12,
+          color: Colors.black.withOpacity(0.08), // Increased from 0.05
+          blurRadius: 10,
           offset: const Offset(0, 4),
         ),
       ];
 
   static List<BoxShadow> get shadowMedium => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.3),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
+          color: Colors.black.withOpacity(0.12), // Increased from 0.08
+          blurRadius: 16,
+          offset: const Offset(0, 6),
         ),
       ];
 
   static List<BoxShadow> get shadowFloating => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.4),
-          blurRadius: 30,
-          offset: const Offset(0, 12),
+          color: Colors.black.withOpacity(0.15), // Increased from 0.1
+          blurRadius: 24,
+          offset: const Offset(0, 8),
         ),
       ];
 
@@ -61,62 +63,67 @@ class AppTheme {
   static final TextTheme textTheme = GoogleFonts.playfairDisplayTextTheme(
     const TextTheme(
       displayLarge: TextStyle(
-          fontSize: 36, fontWeight: FontWeight.bold, color: primaryColor),
+          fontSize: 36,
+          fontWeight: FontWeight.bold,
+          color: primaryColor,
+          fontStyle: FontStyle.normal),
       displayMedium: TextStyle(
-          fontSize: 28, fontWeight: FontWeight.bold, color: textPrimary),
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: textPrimary,
+          fontStyle: FontStyle.normal),
       displaySmall: TextStyle(
-          fontSize: 24, fontWeight: FontWeight.w600, color: textPrimary),
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+          fontStyle: FontStyle.normal),
       headlineMedium: TextStyle(
-          fontSize: 20, fontWeight: FontWeight.w600, color: textPrimary),
-      bodyLarge:
-          TextStyle(fontSize: 16, color: textPrimary, fontFamily: 'Poppins'),
-      bodyMedium:
-          TextStyle(fontSize: 14, color: textSecondary, fontFamily: 'Poppins'),
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: textPrimary,
+          fontStyle: FontStyle.normal),
+      bodyLarge: TextStyle(
+          fontSize: 16,
+          color: textPrimary,
+          fontFamily: 'Poppins',
+          fontStyle: FontStyle.normal),
+      bodyMedium: TextStyle(
+          fontSize: 14,
+          color: textSecondary,
+          fontFamily: 'Poppins',
+          fontStyle: FontStyle.normal),
       labelLarge: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: Colors.black,
-          fontFamily: 'Poppins'),
+          color: Colors.white,
+          fontFamily: 'Poppins',
+          fontStyle: FontStyle.normal),
     ),
   );
 
-  // Glassmorphism Decoration
-  static BoxDecoration glassDecoration = BoxDecoration(
-    color: Colors.white.withOpacity(0.05),
-    borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: Colors.white.withOpacity(0.1)),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.2),
-        blurRadius: 10,
-        spreadRadius: 1,
-      ),
-    ],
-  );
-
-  static final ThemeData darkTheme = ThemeData(
+  static final ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: Brightness.light,
     primaryColor: primaryColor,
     scaffoldBackgroundColor: scaffoldBackgroundColor,
-    colorScheme: const ColorScheme.dark(
+    colorScheme: const ColorScheme.light(
       primary: primaryColor,
-      secondary: primaryColor,
+      secondary: accentColor,
       surface: surfaceColor,
       error: errorColor,
-      onPrimary: Colors.black,
-      onSecondary: Colors.black,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
       onSurface: textPrimary,
     ),
     textTheme: textTheme,
     appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.transparent,
+      backgroundColor: scaffoldBackgroundColor,
       elevation: 0,
       centerTitle: true,
       iconTheme: IconThemeData(color: textPrimary),
       titleTextStyle: TextStyle(
-        color: primaryColor,
-        fontSize: 24,
+        color: textPrimary,
+        fontSize: 20,
         fontWeight: FontWeight.bold,
         fontFamily: 'Playfair Display',
       ),
@@ -124,7 +131,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryColor,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
         elevation: 0,
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         shape: RoundedRectangleBorder(
@@ -154,46 +161,58 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: surfaceColor,
+      fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        borderSide: BorderSide(color: Colors.grey[400]!),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        borderSide: BorderSide(color: Colors.grey[400]!),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: primaryColor, width: 1),
+        borderSide: const BorderSide(color: primaryColor, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: errorColor),
       ),
-      labelStyle: const TextStyle(color: textSecondary),
-      hintStyle: TextStyle(color: textSecondary.withOpacity(0.5)),
+      labelStyle: const TextStyle(
+        color: textSecondary,
+        fontFamily: 'Poppins',
+        fontWeight: FontWeight.w500,
+      ),
+      floatingLabelStyle: const TextStyle(
+        color: primaryColor,
+        fontFamily: 'Poppins',
+        fontWeight: FontWeight.bold,
+      ),
+      hintStyle: TextStyle(
+        color: textSecondary.withOpacity(0.5),
+        fontFamily: 'Poppins',
+        fontStyle: FontStyle.normal,
+      ),
     ),
     cardTheme: CardThemeData(
       color: surfaceColor,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.white.withOpacity(0.05)),
+        side: const BorderSide(color: borderColor),
       ),
       margin: const EdgeInsets.all(8),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor:
-          Colors.black, // Will be transparent/glass in implementation
+      backgroundColor: Colors.white,
       selectedItemColor: primaryColor,
-      unselectedItemColor: Colors.grey,
+      unselectedItemColor: textTertiary,
       type: BottomNavigationBarType.fixed,
-      elevation: 0,
+      elevation: 8,
     ),
   );
 
-  // We only support dark theme for this concept
-  static final ThemeData lightTheme = darkTheme;
+  // Dark theme is not supported in this design language anymore
+  static final ThemeData darkTheme = lightTheme;
 }

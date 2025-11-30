@@ -58,9 +58,11 @@ class _ProductCardState extends State<ProductCard> {
         );
       },
       child: Container(
-        decoration: const BoxDecoration(
-          color: Colors
-              .transparent, // bg-card (assuming transparent/white context)
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+          // Shadow removed as requested
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +75,8 @@ class _ProductCardState extends State<ProductCard> {
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: AppTheme.secondaryColor, // bg-secondary
+                      color: const Color(
+                          0xFFF5F5F5), // Gray background for transparent images
                       borderRadius: BorderRadius.circular(12), // rounded-xl
                     ),
                     child: ClipRRect(
