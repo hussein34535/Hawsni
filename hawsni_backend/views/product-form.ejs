@@ -112,29 +112,6 @@
                                     onchange="previewImages(this)">
 
                                 <% if (product && product.images && product.images.length> 0) { %>
-                                    <div id="existingImages"
-                                        style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
-                                        <% product.images.forEach(image=> { %>
-                                            <img src="<%= image %>"
-                                                style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--light-gray);">
-                                            <% }) %>
-                                    </div>
-                                    <% } %>
-
-                                        <div id="imagePreview"
-                                            style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div
-                        style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            <%= product ? 'حفظ التعديلات' : 'إضافة المنتج' %>
-                        </button>
-                        <a href="/products" class="btn btn-secondary">إلغاء</a>
-                    </div>
         </form>
     </div>
 

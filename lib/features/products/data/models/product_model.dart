@@ -45,8 +45,22 @@ class ProductModel {
       reviewCount: json['num_reviews'] ?? json['numReviews'] ?? 0,
       stock: json['stock'] ?? json['countInStock'] ?? 0,
       isFeatured: json['is_featured'] ?? json['isFeatured'] ?? false,
-      sizes: json['sizes'] != null ? List<String>.from(json['sizes']) : null,
-      colors: json['colors'] != null ? List<String>.from(json['colors']) : null,
+      sizes: json['sizes'] != null
+          ? (json['sizes'] is String
+              ? (json['sizes'] as String)
+                  .split(',')
+                  .map((e) => e.trim())
+                  .toList()
+              : List<String>.from(json['sizes']))
+          : null,
+      colors: json['colors'] != null
+          ? (json['colors'] is String
+              ? (json['colors'] as String)
+                  .split(',')
+                  .map((e) => e.trim())
+                  .toList()
+              : List<String>.from(json['colors']))
+          : null,
       images: json['images'] != null ? List<String>.from(json['images']) : null,
     );
   }
