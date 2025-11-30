@@ -51,102 +51,308 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                                 <div class="form-group">
                                     <label class="form-label">المقاسات</label>
-                                    <input type="text" name="sizes" class="form-control"
-                                        value="<%= product && product.sizes ? product.sizes.join(', ') : '' %>"
-                                        placeholder="S, M, L, XL">
-                                    <small class="text-muted">افصل بينها بفواصل</small>
-                                </div>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                        <div class="form-group">
+                                            <label class="form-label">السعر <span
+                                                    style="color: var(--danger);">*</span></label>
+                                            <input type="number" name="price" class="form-control" step="0.01"
+                                                value="<%= product ? product.price : '' %>" required>
+                                        </div>
 
-                                <div class="form-group">
-                                    <label class="form-label">الألوان</label>
-                                    <input type="text" name="colors" class="form-control"
-                                        value="<%= product && product.colors ? product.colors.join(', ') : '' %>"
-                                        placeholder="أحمر, أزرق">
-                                    <small class="text-muted">افصل بينها بفواصل</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Column 2 -->
-                        <div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div class="form-group">
-                                    <label class="form-label">السعر <span style="color: var(--danger);">*</span></label>
-                                    <input type="number" name="price" class="form-control" step="0.01"
-                                        value="<%= product ? product.price : '' %>" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">الخصم (%)</label>
-                                    <input type="number" name="discount" class="form-control" min="0" max="100"
-                                        value="<%= product ? product.discount : 0 %>">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">المخزون <span style="color: var(--danger);">*</span></label>
-                                <input type="number" name="stock" class="form-control" min="0"
-                                    value="<%= product ? product.stock : 0 %>" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="checkbox" name="is_featured" <%=product && product.is_featured
-                                        ? 'checked' : '' %>>
-                                    <span class="form-label" style="margin: 0;">منتج مميز</span>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">الصور (حتى 5 صور)</label>
-                                <input type="file" name="images" class="form-control" multiple accept="image/*"
-                                    onchange="previewImages(this)">
-
-                                <% if (product && product.images && product.images.length> 0) { %>
-                                    <div id="existingImages"
-                                        style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
-                                        <% product.images.forEach(image=> { %>
-                                            <img src="<%= image %>"
-                                                style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--light-gray);">
-                                            <% }) %>
+                                        <div class="form-group">
+                                            <label class="form-label">الخصم (%)</label>
+                                            <input type="number" name="discount" class="form-control" min="0" max="100"
+                                                value="<%= product ? product.discount : 0 %>">
+                                        </div>
                                     </div>
-                                    <% } %>
 
-                                        <div id="imagePreview"
-                                            style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;"></div>
+                                    <div class="form-group">
+                                        <label class="form-label">المخزون <span
+                                                style="color: var(--danger);">*</span></label>
+                                        <input type="number" name="stock" class="form-control" min="0"
+                                            value="<%= product ? product.stock : 0 %>" required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label
+                                            style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                            <input type="checkbox" name="is_featured" <%=product && product.is_featured
+                                                ? 'checked' : '' %>>
+                                            <span class="form-label" style="margin: 0;">منتج مميز</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">الصور (حتى 5 صور)</label>
+                                        <input type="file" name="images" class="form-control" multiple accept="image/*"
+                                            onchange="previewImages(this)">
+
+                                        <% if (product && product.images && product.images.length> 0) { %>
+                                            <div id="existingImages"
+                                                style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                                                <% product.images.forEach(image=> { %>
+                                                    <img src="<%= image %>"
+                                                        style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--light-gray);">
+                                                    <% }) %>
+                                            </div>
+                                            <% } %>
+
+                                                <div id="imagePreview"
+                                                    style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                                                </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div
-                        style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i>
-                            <%= product ? 'حفظ التعديلات' : 'إضافة المنتج' %>
-                        </button>
-                        <a href="/products" class="btn btn-secondary">إلغاء</a>
-                    </div>
-        </form>
-    </div>
+                            <div
+                                style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i>
+                                    <%= product ? 'حفظ التعديلات' : 'إضافة المنتج' %>
+                                        <%- include('partials/header', { title: product ? 'تعديل منتج'
+                                            : 'إضافة منتج جديد' , pageTitle: product ? 'تعديل منتج' : 'إضافة منتج جديد'
+                                            , page: 'products' }) %>
 
-    <script>
-        function previewImages(input) {
-            const preview = document.getElementById('imagePreview');
-            preview.innerHTML = '';
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h2 class="card-title">
+                                                        <i class="fas fa-<%= product ? 'edit' : 'plus' %>"></i>
+                                                        <%= product ? 'تعديل منتج' : 'إضافة منتج جديد' %>
+                                                    </h2>
+                                                    <a href="/products" class="btn btn-secondary">
+                                                        <i class="fas fa-arrow-right"></i> رجوع
+                                                    </a>
+                                                </div>
 
-            if (input.files) {
-                Array.from(input.files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--primary-color);';
-                        preview.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-        }
-    </script>
+                                                <form action="/products<%= product ? '/' + product.id : '' %>"
+                                                    method="POST" enctype="multipart/form-data"
+                                                    onsubmit="return validateForm('productForm')" id="productForm">
 
-    <%- include('partials/footer') %>
+                                                    <% if (product) { %>
+                                                        <input type="hidden" name="_method" value="PUT">
+                                                        <% } %>
+
+                                                            <div
+                                                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                                                                <!-- Column 1 -->
+                                                                <div>
+                                                                    <div class="form-group">
+                                                                        <label class="form-label">اسم المنتج <span
+                                                                                style="color: var(--danger);">*</span></label>
+                                                                        <input type="text" name="name"
+                                                                            class="form-control"
+                                                                            value="<%= product ? product.name : '' %>"
+                                                                            required>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label class="form-label">الوصف <span
+                                                                                style="color: var(--danger);">*</span></label>
+                                                                        <textarea name="description"
+                                                                            class="form-control" rows="4"
+                                                                            required><%= product ? product.description : '' %></textarea>
+                                                                    </div>
+
+                                                                    <div class="form-group">
+                                                                        <label class="form-label">التصنيف</label>
+                                                                        <select name="category_id" class="form-control">
+                                                                            <option value="">اختر التصنيف</option>
+                                                                            <% categories.forEach(cat=> { %>
+                                                                                <option value="<%= cat.id %>" <%=product
+                                                                                    && product.category_id===cat.id
+                                                                                    ? 'selected' : '' %>>
+                                                                                    <%= cat.name %>
+                                                                                </option>
+                                                                                <% }) %>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div
+                                                                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                                        <div class="form-group">
+                                                                            <label class="form-label">المقاسات</label>
+                                                                            <div
+                                                                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                                                                <div class="form-group">
+                                                                                    <label class="form-label">السعر
+                                                                                        <span
+                                                                                            style="color: var(--danger);">*</span></label>
+                                                                                    <input type="number" name="price"
+                                                                                        class="form-control" step="0.01"
+                                                                                        value="<%= product ? product.price : '' %>"
+                                                                                        required>
+                                                                                </div>
+
+                                                                                <div class="form-group">
+                                                                                    <label class="form-label">الخصم
+                                                                                        (%)</label>
+                                                                                    <input type="number" name="discount"
+                                                                                        class="form-control" min="0"
+                                                                                        max="100"
+                                                                                        value="<%= product ? product.discount : 0 %>">
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div class="form-group">
+                                                                                <label class="form-label">المخزون <span
+                                                                                        style="color: var(--danger);">*</span></label>
+                                                                                <input type="number" name="stock"
+                                                                                    class="form-control" min="0"
+                                                                                    value="<%= product ? product.stock : 0 %>"
+                                                                                    required>
+                                                                            </div>
+
+                                                                            <div class="form-group">
+                                                                                <label
+                                                                                    style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                                                                    <input type="checkbox"
+                                                                                        name="is_featured" <%=product &&
+                                                                                        product.is_featured ? 'checked'
+                                                                                        : '' %>>
+                                                                                    <span class="form-label"
+                                                                                        style="margin: 0;">منتج
+                                                                                        مميز</span>
+                                                                                </label>
+                                                                            </div>
+
+                                                                            <div class="form-group">
+                                                                                <label class="form-label">الصور (حتى 5
+                                                                                    صور)</label>
+                                                                                <input type="file" name="images"
+                                                                                    class="form-control" multiple
+                                                                                    accept="image/*"
+                                                                                    onchange="previewImages(this)">
+
+                                                                                <% if (product && product.images &&
+                                                                                    product.images.length> 0) { %>
+                                                                                    <div id="existingImages"
+                                                                                        style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                                                                                        <%
+                                                                                            product.images.forEach(image=>
+                                                                                            { %>
+                                                                                            <img src="<%= image %>"
+                                                                                                style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--light-gray);">
+                                                                                            <% }) %>
+                                                                                    </div>
+                                                                                    <% } %>
+
+                                                                                        <div id="imagePreview"
+                                                                                            style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                                                                                        </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div
+                                                                        style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
+                                                                        <button type="submit" class="btn btn-primary">
+                                                                            <i class="fas fa-save"></i>
+                                                                            <%= product ? 'حفظ التعديلات'
+                                                                                : 'إضافة المنتج' %>
+                                                                        </button>
+                                                                        <a href="/products"
+                                                                            class="btn btn-secondary">إلغاء</a>
+                                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            <script>
+                                                function previewImages(input) {
+                                                    const preview = document.getElementById('imagePreview');
+                                                    preview.innerHTML = '';
+
+                                                    if (input.files) {
+                                                        Array.from(input.files).forEach(file => {
+                                                            const reader = new FileReader();
+                                                            reader.onload = function (e) {
+                                                                const img = document.createElement('img');
+                                                                img.src = e.target.result;
+                                                                img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--primary-color);';
+                                                                preview.appendChild(img);
+                                                            };
+                                                            reader.readAsDataURL(file);
+                                                        });
+                                                    }
+                                                }
+
+                                                // Color Management
+                                                let colors = [];
+                                                const colorsInput = document.getElementById('colorsInput');
+                                                const colorsContainer = document.getElementById('colorsContainer');
+
+                                                // Initialize colors from hidden input
+                                                if (colorsInput && colorsInput.value) {
+                                                    colors = colorsInput.value.split(',').filter(c => c.trim() !== '');
+                                                    renderColors();
+                                                }
+
+                                                function addColor() {
+                                                    const colorPicker = document.getElementById('colorPicker');
+                                                    const color = colorPicker.value;
+
+                                                    if (!colors.includes(color)) {
+                                                        colors.push(color);
+                                                        updateColorsInput();
+                                                        renderColors();
+                                                    }
+                                                }
+
+                                                function removeColor(color) {
+                                                    colors = colors.filter(c => c !== color);
+                                                    updateColorsInput();
+                                                    renderColors();
+                                                }
+
+                                                function updateColorsInput() {
+                                                    colorsInput.value = colors.join(',');
+                                                }
+
+                                                function renderColors() {
+                                                    colorsContainer.innerHTML = '';
+                                                    colors.forEach(color => {
+                                                        const swatch = document.createElement('div');
+                                                        swatch.style.cssText = `
+                    display: flex; 
+                    align-items: center; 
+                    gap: 0.5rem; 
+                    background: #f8f9fa; 
+                    padding: 0.25rem 0.5rem; 
+                    border-radius: 20px; 
+                    border: 1px solid #dee2e6;
+                `;
+
+                                                        const circle = document.createElement('div');
+                                                        circle.style.cssText = `
+                    width: 20px; 
+                    height: 20px; 
+                    border-radius: 50%; 
+                    background-color: ${color};
+                    border: 1px solid #dee2e6;
+                `;
+
+                                                        const text = document.createElement('span');
+                                                        text.innerText = color;
+                                                        text.style.fontSize = '0.875rem';
+
+                                                        const removeBtn = document.createElement('button');
+                                                        removeBtn.innerHTML = '&times;';
+                                                        removeBtn.style.cssText = `
+                    background: none; 
+                    border: none; 
+                    color: #dc3545; 
+                    font-size: 1.25rem; 
+                    cursor: pointer; 
+                    line-height: 1;
+                    padding: 0 0.25rem;
+                `;
+                                                        removeBtn.onclick = () => removeColor(color);
+
+                                                        swatch.appendChild(circle);
+                                                        swatch.appendChild(text);
+                                                        swatch.appendChild(removeBtn);
+                                                        colorsContainer.appendChild(swatch);
+                                                    });
+                                                }
+                                            </script>
+
+                                            <%- include('partials/footer') %>
