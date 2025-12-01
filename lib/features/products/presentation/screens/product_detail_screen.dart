@@ -28,7 +28,7 @@ class ProductDetailScreen extends StatefulWidget {
   final double rating;
   final int reviewCount;
   final List<String>? sizes;
-  final List<String>? colors;
+  final List<dynamic>? colors;
   final String productId;
   final String screenId;
 
@@ -270,7 +270,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           double rating = widget.rating;
                           int reviewCount = widget.reviewCount;
                           List<String>? sizes = widget.sizes;
-                          List<String>? colors = widget.colors;
+                          List<dynamic>? colors = widget.colors;
 
                           if (state is ProductDetailsLoaded) {
                             description = state.product.description;
@@ -431,6 +431,58 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   spacing: 12,
                                   runSpacing: 12,
                                   children: colors.map((colorData) {
+                                    // Parse color data (handle both old string format and new object format)
+                                    String colorName;
+                                    int? linkedImageIndex;
+
+                                    if (colorData is Map) {
+                                      colorName =
+                                          colorData['color']?.toString() ?? '';
+                                      final dynamic imageIndexValue =
+                                          colorData['imageIndex'];
+                                      if (imageIndexValue is int) {
+                                        linkedImageIndex = imageIndexValue;
+                                      } else if (imageIndexValue != null) {
+                                        linkedImageIndex = int.tryParse(
+                                            imageIndexValue.toString());
+                                      }
+                                    } else if (colorData is String) {
+                                      // Handle stringified JSON object (Fix for gray colors issue)
+                                      if (colorData.trim().startsWith('{')) {
+                                        try {
+                                          // Extract color using regex
+                                          final colorMatch =
+                                              RegExp(r'"color"\s*:\s*"([^"]+)"')
+                                                  .firstMatch(colorData);
+                                          if (colorMatch != null) {
+                                            colorName = colorMatch.group(1) ??
+                                                colorData;
+
+                                            // Extract imageIndex using regex
+                                            final indexMatch = RegExp(
+                                                    r'"imageIndex"\s*:\s*(\d+)')
+                                                .firstMatch(colorData);
+                                            if (indexMatch != null) {
+                                              linkedImageIndex = int.tryParse(
+                                                  indexMatch.group(1)!);
+                                            }
+                                          } else {
+                                            colorName = colorData;
+                                            linkedImageIndex = null;
+                                          }
+                                        } catch (e) {
+                                          colorName = colorData;
+                                          linkedImageIndex = null;
+                                        }
+                                      } else {
+                                        colorName = colorData;
+                                        linkedImageIndex = null;
+                                      }
+                                    } else {
+                                      colorName = colorData.toString();
+                                      linkedImageIndex = null;
+                                    }
+
                                     final isSelected =
                                         selectedColor == colorName;
                                     final color = _getColorFromName(colorName);

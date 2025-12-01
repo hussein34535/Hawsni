@@ -10,7 +10,7 @@ class ProductModel {
   final int stock;
   final bool isFeatured;
   final List<String>? sizes;
-  final List<String>? colors;
+  final List<dynamic>? colors;
   final List<String>? images;
 
   ProductModel({
@@ -59,7 +59,7 @@ class ProductModel {
                   .split(',')
                   .map((e) => e.trim())
                   .toList()
-              : List<String>.from(json['colors']))
+              : List<dynamic>.from(json['colors']))
           : null,
       images: json['images'] != null ? List<String>.from(json['images']) : null,
     );
