@@ -59,14 +59,32 @@
 
                                 <div class="form-group">
                                     <label class="form-label">الألوان</label>
-                                    <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+                                    <div
+                                        style="display: flex; gap: 0.5rem; align-items: flex-start; margin-bottom: 1rem;">
                                         <input type="color" id="colorPicker" class="form-control"
-                                            style="width: 50px; padding: 0; height: 40px;" value="#000000">
-                                        <select id="imageSelector" class="form-control" style="flex: 1;">
-                                            <option value="">بدون صورة (اختياري)</option>
-                                        </select>
+                                            style="width: 50px; padding: 0; height: 40px; flex-shrink: 0;"
+                                            value="#000000">
+                                        <div id="imageSelectorContainer" style="flex: 1; position: relative;">
+                                            <div id="selectedImagePreview"
+                                                style="display: none; border: 2px solid #dee2e6; border-radius: 8px; padding: 4px; background: white; cursor: pointer;"
+                                                onclick="toggleImageDropdown()">
+                                                <img id="selectedImageThumb"
+                                                    style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px;">
+                                                <div
+                                                    style="text-align: center; font-size: 0.75rem; color: #666; margin-top: 2px;">
+                                                    انقر للتغيير</div>
+                                            </div>
+                                            <button type="button" id="noImageButton" class="btn btn-outline-secondary"
+                                                style="width: 100%; padding: 0.5rem;" onclick="toggleImageDropdown()">
+                                                بدون صورة (اختياري) ▼
+                                            </button>
+                                            <div id="imageDropdown"
+                                                style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                                <!-- Images will be added here -->
+                                            </div>
+                                        </div>
                                         <button type="button" class="btn btn-secondary" onclick="addColor()"
-                                            style="padding: 0.5rem 1rem;">
+                                            style="padding: 0.5rem 1rem; flex-shrink: 0;">
                                             <i class="fas fa-plus"></i> إضافة
                                         </button>
                                     </div>
@@ -152,6 +170,7 @@
 
     <script>
         let productImages = [];
+        let selectedImageIndex = null;
 
         function previewImages(input) {
             const preview = document.getElementById('imagePreview');
@@ -170,28 +189,74 @@
                     reader.readAsDataURL(file);
                 });
             }
-            updateImageSelector();
+            updateImageDropdown();
         }
 
-        function updateImageSelector() {
-            const selector = document.getElementById('imageSelector');
+        function toggleImageDropdown() {
+            const dropdown = document.getElementById('imageDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function selectImage(index, imageSrc) {
+            selectedImageIndex = index;
+            const preview = document.getElementById('selectedImagePreview');
+            const thumb = document.getElementById('selectedImageThumb');
+            const noImageBtn = document.getElementById('noImageButton');
+
+            if (index === null) {
+                preview.style.display = 'none';
+                noImageBtn.style.display = 'block';
+            } else {
+                thumb.src = imageSrc;
+                preview.style.display = 'block';
+                noImageBtn.style.display = 'none';
+            }
+            toggleImageDropdown();
+        }
+
+        function updateImageDropdown() {
+            const dropdown = document.getElementById('imageDropdown');
             const existingImages = document.querySelectorAll('#existingImages img');
             const newImages = document.querySelectorAll('#imagePreview img');
 
-            selector.innerHTML = '<option value="">بدون صورة (اختياري)</option>';
+            dropdown.innerHTML = '<div style="padding: 8px; border-bottom: 1px solid #dee2e6; cursor: pointer; hover:background: #f8f9fa;" onclick="selectImage(null, null)"><i class="fas fa-times-circle"></i> بدون صورة</div>';
 
             existingImages.forEach((img, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `صورة ${index + 1} (موجودة)`;
-                selector.appendChild(option);
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid #eee;';
+                item.onmouseover = () => item.style.background = '#f8f9fa';
+                item.onmouseout = () => item.style.background = 'white';
+                item.onclick = () => selectImage(index, img.src);
+
+                const thumb = document.createElement('img');
+                thumb.src = img.src;
+                thumb.style.cssText = 'width: 50px; height: 50px; object-fit: cover; border-radius: 4px;';
+
+                const label = document.createElement('span');
+                label.textContent = `صورة ${index + 1} (موجودة)`;
+
+                item.appendChild(thumb);
+                item.appendChild(label);
+                dropdown.appendChild(item);
             });
 
             newImages.forEach((img, index) => {
-                const option = document.createElement('option');
-                option.value = existingImages.length + index;
-                option.textContent = `صورة ${existingImages.length + index + 1} (جديدة)`;
-                selector.appendChild(option);
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid #eee;';
+                item.onmouseover = () => item.style.background = '#f8f9fa';
+                item.onmouseout = () => item.style.background = 'white';
+                item.onclick = () => selectImage(existingImages.length + index, img.src);
+
+                const thumb = document.createElement('img');
+                thumb.src = img.src;
+                thumb.style.cssText = 'width: 50px; height: 50px; object-fit: cover; border-radius: 4px;';
+
+                const label = document.createElement('span');
+                label.textContent = `صورة ${existingImages.length + index + 1} (جديدة)`;
+
+                item.appendChild(thumb);
+                item.appendChild(label);
+                dropdown.appendChild(item);
             });
         }
 
@@ -202,7 +267,7 @@
 
         // Initialize colors from hidden input on page load
         document.addEventListener('DOMContentLoaded', function () {
-            updateImageSelector();
+            updateImageDropdown();
 
             if (colorsInput && colorsInput.value) {
                 try {
@@ -212,8 +277,10 @@
                         colors = parsedColors.map(c => {
                             if (typeof c === 'string') {
                                 return { color: c, imageIndex: null };
+                            } else if (c && typeof c === 'object' && c.color) {
+                                return { color: c.color, imageIndex: c.imageIndex !== undefined ? c.imageIndex : null };
                             }
-                            return c;
+                            return { color: '#000000', imageIndex: null };
                         });
                     }
                 } catch (e) {
@@ -229,9 +296,8 @@
 
         function addColor() {
             const colorPicker = document.getElementById('colorPicker');
-            const imageSelector = document.getElementById('imageSelector');
             const color = colorPicker.value;
-            const imageIndex = imageSelector.value ? parseInt(imageSelector.value) : null;
+            const imageIndex = selectedImageIndex;
 
             // Check if color already exists
             const existingIndex = colors.findIndex(c => c.color === color);
@@ -242,6 +308,11 @@
                 // Add new color
                 colors.push({ color, imageIndex });
             }
+
+            // Reset selection
+            selectedImageIndex = null;
+            document.getElementById('selectedImagePreview').style.display = 'none';
+            document.getElementById('noImageButton').style.display = 'block';
 
             updateColorsInput();
             renderColors();
@@ -284,18 +355,16 @@
                 text.innerText = colorObj.color;
                 text.style.fontSize = '0.875rem';
 
+                swatch.appendChild(circle);
+                swatch.appendChild(text);
+
                 // Show linked image if exists
-                if (colorObj.imageIndex !== null) {
+                if (colorObj.imageIndex !== null && colorObj.imageIndex !== undefined) {
                     const imageIcon = document.createElement('i');
                     imageIcon.className = 'fas fa-image';
                     imageIcon.style.cssText = 'color: #28a745; font-size: 0.75rem;';
                     imageIcon.title = `مرتبط بصورة ${colorObj.imageIndex + 1}`;
-                    swatch.appendChild(circle);
-                    swatch.appendChild(text);
                     swatch.appendChild(imageIcon);
-                } else {
-                    swatch.appendChild(circle);
-                    swatch.appendChild(text);
                 }
 
                 const removeBtn = document.createElement('button');
@@ -315,6 +384,15 @@
                 colorsContainer.appendChild(swatch);
             });
         }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('imageDropdown');
+            const container = document.getElementById('imageSelectorContainer');
+            if (!container.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
     </script>
 
     <%- include('partials/footer') %>
