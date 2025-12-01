@@ -430,14 +430,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 Wrap(
                                   spacing: 12,
                                   runSpacing: 12,
-                                  children: colors.map((colorName) {
+                                  children: colors.map((colorData) {
                                     final isSelected =
                                         selectedColor == colorName;
                                     final color = _getColorFromName(colorName);
+
                                     return GestureDetector(
-                                      onTap: () => setState(() =>
+                                      onTap: () {
+                                        setState(() {
                                           selectedColor =
-                                              isSelected ? null : colorName),
+                                              isSelected ? null : colorName;
+                                          // Change image if color has linked image
+                                          if (!isSelected &&
+                                              linkedImageIndex != null) {
+                                            _currentImageIndex =
+                                                linkedImageIndex;
+                                          }
+                                        });
+                                      },
                                       child: Container(
                                         width: 42,
                                         height: 42,
