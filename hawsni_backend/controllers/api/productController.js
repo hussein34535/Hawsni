@@ -65,10 +65,32 @@ class ProductController {
             if (req.body.colors) {
                 try {
                     // Try to parse as JSON (new format with image mapping)
-                    colors = typeof req.body.colors === 'string' ? JSON.parse(req.body.colors) : req.body.colors;
+                    let parsedColors = typeof req.body.colors === 'string' ? JSON.parse(req.body.colors) : req.body.colors;
+
+                    // Handle case where colors might be an array of stringified objects
+                    if (Array.isArray(parsedColors)) {
+                        colors = parsedColors.map(c => {
+                            if (typeof c === 'string') {
+                                // Try to parse if it's a stringified object
+                                try {
+                                    const parsed = JSON.parse(c);
+                                    return parsed.color ? parsed : { color: c, imageIndex: null };
+                                } catch {
+                                    // It's just a color string
+                                    return { color: c, imageIndex: null };
+                                }
+                            } else if (c && typeof c === 'object' && c.color) {
+                                // Already a proper object
+                                return c;
+                            }
+                            return { color: c, imageIndex: null };
+                        });
+                    } else {
+                        colors = [];
+                    }
                 } catch (e) {
                     // Fallback to old format (comma-separated strings)
-                    colors = req.body.colors.split(',').map(c => c.trim());
+                    colors = req.body.colors.split(',').map(c => ({ color: c.trim(), imageIndex: null }));
                 }
             }
 
@@ -250,10 +272,32 @@ class ProductController {
             if (colors) {
                 try {
                     // Try to parse as JSON (new format with image mapping)
-                    colorsArray = typeof colors === 'string' ? JSON.parse(colors) : colors;
+                    let parsedColors = typeof colors === 'string' ? JSON.parse(colors) : colors;
+
+                    // Handle case where colors might be an array of stringified objects
+                    if (Array.isArray(parsedColors)) {
+                        colorsArray = parsedColors.map(c => {
+                            if (typeof c === 'string') {
+                                // Try to parse if it's a stringified object
+                                try {
+                                    const parsed = JSON.parse(c);
+                                    return parsed.color ? parsed : { color: c, imageIndex: null };
+                                } catch {
+                                    // It's just a color string
+                                    return { color: c, imageIndex: null };
+                                }
+                            } else if (c && typeof c === 'object' && c.color) {
+                                // Already a proper object
+                                return c;
+                            }
+                            return { color: c, imageIndex: null };
+                        });
+                    } else {
+                        colorsArray = [];
+                    }
                 } catch (e) {
                     // Fallback to old format (comma-separated strings)
-                    colorsArray = typeof colors === 'string' ? colors.split(',').map(c => c.trim()).filter(c => c) : colors;
+                    colorsArray = typeof colors === 'string' ? colors.split(',').map(c => ({ color: c.trim(), imageIndex: null })).filter(c => c.color) : colors;
                 }
             }
 
