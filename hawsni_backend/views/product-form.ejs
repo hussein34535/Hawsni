@@ -162,442 +162,251 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i>
                             <%= product ? 'حفظ التعديلات' : 'إضافة المنتج' %>
-                                <%- include('partials/header', { title: product ? 'تعديل منتج' : 'إضافة منتج جديد' ,
-                                    pageTitle: product ? 'تعديل منتج' : 'إضافة منتج جديد' , page: 'products' }) %>
+                        </button>
+                        <a href="/products" class="btn btn-secondary">إلغاء</a>
+                    </div>
+        </form>
+    </div>
 
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h2 class="card-title">
-                                                <i class="fas fa-<%= product ? 'edit' : 'plus' %>"></i>
-                                                <%= product ? 'تعديل منتج' : 'إضافة منتج جديد' %>
-                                            </h2>
-                                            <a href="/products" class="btn btn-secondary">
-                                                <i class="fas fa-arrow-right"></i> رجوع
-                                            </a>
-                                        </div>
+    <script>
+        let productImages = [];
+        let selectedImageIndex = null;
 
-                                        <form action="/products<%= product ? '/' + product.id : '' %>" method="POST"
-                                            enctype="multipart/form-data" onsubmit="return validateForm('productForm')"
-                                            id="productForm">
+        function previewImages(input) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
 
-                                            <% if (product) { %>
-                                                <input type="hidden" name="_method" value="PUT">
-                                                <% } %>
+            if (input.files) {
+                Array.from(input.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.dataset.index = productImages.length + index;
+                        img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--primary-color);';
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            updateImageDropdown();
+        }
 
-                                                    <div
-                                                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                                                        <!-- Column 1 -->
-                                                        <div>
-                                                            <div class="form-group">
-                                                                <label class="form-label">اسم المنتج <span
-                                                                        style="color: var(--danger);">*</span></label>
-                                                                <input type="text" name="name" class="form-control"
-                                                                    value="<%= product ? product.name : '' %>" required>
-                                                            </div>
+        function toggleImageDropdown() {
+            const dropdown = document.getElementById('imageDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
 
-                                                            <div class="form-group">
-                                                                <label class="form-label">الوصف <span
-                                                                        style="color: var(--danger);">*</span></label>
-                                                                <textarea name="description" class="form-control"
-                                                                    rows="4"
-                                                                    required><%= product ? product.description : '' %></textarea>
-                                                            </div>
+        function selectImage(index, imageSrc) {
+            selectedImageIndex = index;
+            const preview = document.getElementById('selectedImagePreview');
+            const thumb = document.getElementById('selectedImageThumb');
+            const noImageBtn = document.getElementById('noImageButton');
 
-                                                            <div class="form-group">
-                                                                <label class="form-label">التصنيف</label>
-                                                                <select name="category_id" class="form-control">
-                                                                    <option value="">اختر التصنيف</option>
-                                                                    <% categories.forEach(cat=> { %>
-                                                                        <option value="<%= cat.id %>" <%=product &&
-                                                                            product.category_id===cat.id ? 'selected'
-                                                                            : '' %>>
-                                                                            <%= cat.name %>
-                                                                        </option>
-                                                                        <% }) %>
-                                                                </select>
-                                                            </div>
+            if (index === null) {
+                preview.style.display = 'none';
+                noImageBtn.style.display = 'block';
+            } else {
+                thumb.src = imageSrc;
+                preview.style.display = 'block';
+                noImageBtn.style.display = 'none';
+            }
+            toggleImageDropdown();
+        }
 
-                                                            <div
-                                                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                                                <div class="form-group">
-                                                                    <label class="form-label">المقاسات</label>
-                                                                    <input type="text" name="sizes" class="form-control"
-                                                                        value="<%= product && product.sizes ? product.sizes.join(', ') : '' %>"
-                                                                        placeholder="S, M, L, XL">
-                                                                    <small class="text-muted">افصل بينها بفواصل</small>
-                                                                </div>
+        function updateImageDropdown() {
+            const dropdown = document.getElementById('imageDropdown');
+            const existingImages = document.querySelectorAll('#existingImages img');
+            const newImages = document.querySelectorAll('#imagePreview img');
 
-                                                                <div class="form-group">
-                                                                    <label class="form-label">الألوان</label>
-                                                                    <div
-                                                                        style="display: flex; gap: 0.5rem; align-items: flex-start; margin-bottom: 1rem;">
-                                                                        <input type="color" id="colorPicker"
-                                                                            class="form-control"
-                                                                            style="width: 50px; padding: 0; height: 40px; flex-shrink: 0;"
-                                                                            value="#000000">
-                                                                        <div id="imageSelectorContainer"
-                                                                            style="flex: 1; position: relative;">
-                                                                            <div id="selectedImagePreview"
-                                                                                style="display: none; border: 2px solid #dee2e6; border-radius: 8px; padding: 4px; background: white; cursor: pointer;"
-                                                                                onclick="toggleImageDropdown()">
-                                                                                <img id="selectedImageThumb"
-                                                                                    style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px;">
-                                                                                <div
-                                                                                    style="text-align: center; font-size: 0.75rem; color: #666; margin-top: 2px;">
-                                                                                    انقر للتغيير</div>
-                                                                            </div>
-                                                                            <button type="button" id="noImageButton"
-                                                                                class="btn btn-outline-secondary"
-                                                                                style="width: 100%; padding: 0.5rem;"
-                                                                                onclick="toggleImageDropdown()">
-                                                                                بدون صورة (اختياري) ▼
-                                                                            </button>
-                                                                            <div id="imageDropdown"
-                                                                                style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                                                                                <!-- Images will be added here -->
-                                                                            </div>
-                                                                        </div>
-                                                                        <button type="button" class="btn btn-secondary"
-                                                                            onclick="addColor()"
-                                                                            style="padding: 0.5rem 1rem; flex-shrink: 0;">
-                                                                            <i class="fas fa-plus"></i> إضافة
-                                                                        </button>
-                                                                    </div>
-                                                                    <input type="hidden" name="colors" id="colorsInput"
-                                                                        value="<%= product && product.colors ? JSON.stringify(product.colors) : '' %>">
-                                                                    <div id="colorsContainer"
-                                                                        style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                                                        <!-- Swatches will be added here -->
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+            dropdown.innerHTML = '<div style="padding: 8px; border-bottom: 1px solid #dee2e6; cursor: pointer; hover:background: #f8f9fa;" onclick="selectImage(null, null)"><i class="fas fa-times-circle"></i> بدون صورة</div>';
 
-                                                        <!-- Column 2 -->
-                                                        <div>
-                                                            <div
-                                                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                                                <div class="form-group">
-                                                                    <label class="form-label">السعر <span
-                                                                            style="color: var(--danger);">*</span></label>
-                                                                    <input type="number" name="price"
-                                                                        class="form-control" step="0.01"
-                                                                        value="<%= product ? product.price : '' %>"
-                                                                        required>
-                                                                </div>
+            existingImages.forEach((img, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid #eee;';
+                item.onmouseover = () => item.style.background = '#f8f9fa';
+                item.onmouseout = () => item.style.background = 'white';
+                item.onclick = () => selectImage(index, img.src);
 
-                                                                <div class="form-group">
-                                                                    <label class="form-label">الخصم (%)</label>
-                                                                    <input type="number" name="discount"
-                                                                        class="form-control" min="0" max="100"
-                                                                        value="<%= product ? product.discount : 0 %>">
-                                                                </div>
-                                                            </div>
+                const thumb = document.createElement('img');
+                thumb.src = img.src;
+                thumb.style.cssText = 'width: 50px; height: 50px; object-fit: cover; border-radius: 4px;';
 
-                                                            <div class="form-group">
-                                                                <label class="form-label">المخزون <span
-                                                                        style="color: var(--danger);">*</span></label>
-                                                                <input type="number" name="stock" class="form-control"
-                                                                    min="0" value="<%= product ? product.stock : 0 %>"
-                                                                    required>
-                                                            </div>
+                const label = document.createElement('span');
+                label.textContent = `صورة ${index + 1} (موجودة)`;
 
-                                                            <div class="form-group">
-                                                                <label
-                                                                    style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                                                    <input type="checkbox" name="is_featured" <%=product
-                                                                        && product.is_featured ? 'checked' : '' %>>
-                                                                    <span class="form-label" style="margin: 0;">منتج
-                                                                        مميز</span>
-                                                                </label>
-                                                            </div>
+                item.appendChild(thumb);
+                item.appendChild(label);
+                dropdown.appendChild(item);
+            });
 
-                                                            <div class="form-group">
-                                                                <label class="form-label">الصور (حتى 5 صور)</label>
-                                                                <input type="file" name="images" class="form-control"
-                                                                    multiple accept="image/*"
-                                                                    onchange="previewImages(this)" id="imageInput">
+            newImages.forEach((img, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid #eee;';
+                item.onmouseover = () => item.style.background = '#f8f9fa';
+                item.onmouseout = () => item.style.background = 'white';
+                item.onclick = () => selectImage(existingImages.length + index, img.src);
 
-                                                                <% if (product && product.images &&
-                                                                    product.images.length> 0) { %>
-                                                                    <div id="existingImages"
-                                                                        style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
-                                                                        <% product.images.forEach((image, index)=> { %>
-                                                                            <img src="<%= image %>"
-                                                                                data-index="<%= index %>"
-                                                                                style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--light-gray);">
-                                                                            <% }) %>
-                                                                    </div>
-                                                                    <% } %>
+                const thumb = document.createElement('img');
+                thumb.src = img.src;
+                thumb.style.cssText = 'width: 50px; height: 50px; object-fit: cover; border-radius: 4px;';
 
-                                                                        <div id="imagePreview"
-                                                                            style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
-                                                                        </div>
+                const label = document.createElement('span');
+                label.textContent = `صورة ${existingImages.length + index + 1} (جديدة)`;
 
-                                                                        <% if (product) { %>
-                                                                            <div style="margin-top: 1rem;">
-                                                                                <a href="/products/<%= product.id %>/images"
-                                                                                    class="btn btn-info"
-                                                                                    style="width: 100%; text-align: center;">
-                                                                                    <i class="fas fa-images"></i> إدارة
-                                                                                    الصور (ترتيب / حذف)
-                                                                                </a>
-                                                                            </div>
-                                                                            <% } %>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                item.appendChild(thumb);
+                item.appendChild(label);
+                dropdown.appendChild(item);
+            });
+        }
 
-                                                    <div
-                                                        style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
-                                                        <button type="submit" class="btn btn-primary">
-                                                            <i class="fas fa-save"></i>
-                                                            <%= product ? 'حفظ التعديلات' : 'إضافة المنتج' %>
-                                                        </button>
-                                                        <a href="/products" class="btn btn-secondary">إلغاء</a>
-                                                    </div>
-                                        </form>
-                                    </div>
+        // Color Management with Image Mapping
+        let colors = [];
+        const colorsInput = document.getElementById('colorsInput');
+        const colorsContainer = document.getElementById('colorsContainer');
 
-                                    <script>
-                                        let productImages = [];
-                                        let selectedImageIndex = null;
+        // Initialize colors from hidden input on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            updateImageDropdown();
 
-                                        function previewImages(input) {
-                                            const preview = document.getElementById('imagePreview');
-                                            preview.innerHTML = '';
-
-                                            if (input.files) {
-                                                Array.from(input.files).forEach((file, index) => {
-                                                    const reader = new FileReader();
-                                                    reader.onload = function (e) {
-                                                        const img = document.createElement('img');
-                                                        img.src = e.target.result;
-                                                        img.dataset.index = productImages.length + index;
-                                                        img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-md); border: 2px solid var(--primary-color);';
-                                                        preview.appendChild(img);
-                                                    };
-                                                    reader.readAsDataURL(file);
-                                                });
-                                            }
-                                            updateImageDropdown();
+            if (colorsInput && colorsInput.value) {
+                try {
+                    const parsedColors = JSON.parse(colorsInput.value);
+                    // Handle both old format (array of strings) and new format (array of objects)
+                    if (Array.isArray(parsedColors)) {
+                        colors = parsedColors.map(c => {
+                            if (typeof c === 'string') {
+                                // Try to parse if it's a stringified object (Fix for gray colors issue)
+                                try {
+                                    if (c.trim().startsWith('{')) {
+                                        const parsed = JSON.parse(c);
+                                        if (parsed && parsed.color) {
+                                            return {
+                                                color: parsed.color,
+                                                imageIndex: parsed.imageIndex !== undefined ? parsed.imageIndex : null
+                                            };
                                         }
+                                    }
+                                } catch (e) {
+                                    // Not a JSON string, continue as normal string
+                                }
+                                return { color: c, imageIndex: null };
+                            } else if (c && typeof c === 'object' && c.color) {
+                                return { color: c.color, imageIndex: c.imageIndex !== undefined ? c.imageIndex : null };
+                            }
+                            return { color: '#000000', imageIndex: null };
+                        });
+                    }
+                } catch (e) {
+                    // Fallback for old comma-separated format
+                    colors = colorsInput.value.split(',').filter(c => c.trim() !== '').map(c => ({
+                        color: c.trim(),
+                        imageIndex: null
+                    }));
+                }
+                renderColors();
+            }
+        });
 
-                                        function toggleImageDropdown() {
-                                            const dropdown = document.getElementById('imageDropdown');
-                                            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-                                        }
+        function addColor() {
+            const colorPicker = document.getElementById('colorPicker');
+            const color = colorPicker.value;
+            const imageIndex = selectedImageIndex;
 
-                                        function selectImage(index, imageSrc) {
-                                            selectedImageIndex = index;
-                                            const preview = document.getElementById('selectedImagePreview');
-                                            const thumb = document.getElementById('selectedImageThumb');
-                                            const noImageBtn = document.getElementById('noImageButton');
+            // Check if color already exists
+            const existingIndex = colors.findIndex(c => c.color === color);
+            if (existingIndex >= 0) {
+                // Update existing color's image
+                colors[existingIndex].imageIndex = imageIndex;
+            } else {
+                // Add new color
+                colors.push({ color, imageIndex });
+            }
 
-                                            if (index === null) {
-                                                preview.style.display = 'none';
-                                                noImageBtn.style.display = 'block';
-                                            } else {
-                                                thumb.src = imageSrc;
-                                                preview.style.display = 'block';
-                                                noImageBtn.style.display = 'none';
-                                            }
-                                            toggleImageDropdown();
-                                        }
+            // Reset selection
+            selectedImageIndex = null;
+            document.getElementById('selectedImagePreview').style.display = 'none';
+            document.getElementById('noImageButton').style.display = 'block';
 
-                                        function updateImageDropdown() {
-                                            const dropdown = document.getElementById('imageDropdown');
-                                            const existingImages = document.querySelectorAll('#existingImages img');
-                                            const newImages = document.querySelectorAll('#imagePreview img');
+            updateColorsInput();
+            renderColors();
+        }
 
-                                            dropdown.innerHTML = '<div style="padding: 8px; border-bottom: 1px solid #dee2e6; cursor: pointer; hover:background: #f8f9fa;" onclick="selectImage(null, null)"><i class="fas fa-times-circle"></i> بدون صورة</div>';
+        function removeColor(index) {
+            colors.splice(index, 1);
+            updateColorsInput();
+            renderColors();
+        }
 
-                                            existingImages.forEach((img, index) => {
-                                                const item = document.createElement('div');
-                                                item.style.cssText = 'padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid #eee;';
-                                                item.onmouseover = () => item.style.background = '#f8f9fa';
-                                                item.onmouseout = () => item.style.background = 'white';
-                                                item.onclick = () => selectImage(index, img.src);
+        function updateColorsInput() {
+            colorsInput.value = JSON.stringify(colors);
+        }
 
-                                                const thumb = document.createElement('img');
-                                                thumb.src = img.src;
-                                                thumb.style.cssText = 'width: 50px; height: 50px; object-fit: cover; border-radius: 4px;';
+        function renderColors() {
+            colorsContainer.innerHTML = '';
+            colors.forEach((colorObj, index) => {
+                const swatch = document.createElement('div');
+                swatch.style.cssText = `
+                display: flex; 
+                align-items: center; 
+                gap: 0.5rem; 
+                background: #f8f9fa; 
+                padding: 0.25rem 0.5rem; 
+                border-radius: 20px; 
+                border: 1px solid #dee2e6;
+            `;
 
-                                                const label = document.createElement('span');
-                                                label.textContent = `صورة ${index + 1} (موجودة)`;
+                const circle = document.createElement('div');
+                circle.style.cssText = `
+                width: 20px; 
+                height: 20px; 
+                border-radius: 50%; 
+                background-color: ${colorObj.color};
+                border: 1px solid #dee2e6;
+            `;
 
-                                                item.appendChild(thumb);
-                                                item.appendChild(label);
-                                                dropdown.appendChild(item);
-                                            });
+                const text = document.createElement('span');
+                text.innerText = colorObj.color;
+                text.style.fontSize = '0.875rem';
 
-                                            newImages.forEach((img, index) => {
-                                                const item = document.createElement('div');
-                                                item.style.cssText = 'padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid #eee;';
-                                                item.onmouseover = () => item.style.background = '#f8f9fa';
-                                                item.onmouseout = () => item.style.background = 'white';
-                                                item.onclick = () => selectImage(existingImages.length + index, img.src);
+                swatch.appendChild(circle);
+                swatch.appendChild(text);
 
-                                                const thumb = document.createElement('img');
-                                                thumb.src = img.src;
-                                                thumb.style.cssText = 'width: 50px; height: 50px; object-fit: cover; border-radius: 4px;';
+                // Show linked image if exists
+                if (colorObj.imageIndex !== null && colorObj.imageIndex !== undefined) {
+                    const imageIcon = document.createElement('i');
+                    imageIcon.className = 'fas fa-image';
+                    imageIcon.style.cssText = 'color: #28a745; font-size: 0.75rem;';
+                    imageIcon.title = `مرتبط بصورة ${colorObj.imageIndex + 1}`;
+                    swatch.appendChild(imageIcon);
+                }
 
-                                                const label = document.createElement('span');
-                                                label.textContent = `صورة ${existingImages.length + index + 1} (جديدة)`;
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '&times;';
+                removeBtn.style.cssText = `
+                background: none; 
+                border: none; 
+                color: #dc3545; 
+                font-size: 1.25rem; 
+                cursor: pointer; 
+                line-height: 1;
+                padding: 0 0.25rem;
+            `;
+                removeBtn.onclick = () => removeColor(index);
 
-                                                item.appendChild(thumb);
-                                                item.appendChild(label);
-                                                dropdown.appendChild(item);
-                                            });
-                                        }
+                swatch.appendChild(removeBtn);
+                colorsContainer.appendChild(swatch);
+            });
+        }
 
-                                        // Color Management with Image Mapping
-                                        let colors = [];
-                                        const colorsInput = document.getElementById('colorsInput');
-                                        const colorsContainer = document.getElementById('colorsContainer');
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (event) {
+            const dropdown = document.getElementById('imageDropdown');
+            const container = document.getElementById('imageSelectorContainer');
+            if (!container.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    </script>
 
-                                        // Initialize colors from hidden input on page load
-                                        document.addEventListener('DOMContentLoaded', function () {
-                                            updateImageDropdown();
-
-                                            if (colorsInput && colorsInput.value) {
-                                                try {
-                                                    const parsedColors = JSON.parse(colorsInput.value);
-                                                    // Handle both old format (array of strings) and new format (array of objects)
-                                                    if (Array.isArray(parsedColors)) {
-                                                        colors = parsedColors.map(c => {
-                                                            if (typeof c === 'string') {
-                                                                // Try to parse if it's a stringified object (Fix for gray colors issue)
-                                                                try {
-                                                                    if (c.trim().startsWith('{')) {
-                                                                        const parsed = JSON.parse(c);
-                                                                        if (parsed && parsed.color) {
-                                                                            return {
-                                                                                color: parsed.color,
-                                                                                imageIndex: parsed.imageIndex !== undefined ? parsed.imageIndex : null
-                                                                            };
-                                                                        }
-                                                                    }
-                                                                } catch (e) {
-                                                                    // Not a JSON string, continue as normal string
-                                                                }
-                                                                return { color: c, imageIndex: null };
-                                                            } else if (c && typeof c === 'object' && c.color) {
-                                                                return { color: c.color, imageIndex: c.imageIndex !== undefined ? c.imageIndex : null };
-                                                            }
-                                                            return { color: '#000000', imageIndex: null };
-                                                        });
-                                                    }
-                                                } catch (e) {
-                                                    // Fallback for old comma-separated format
-                                                    colors = colorsInput.value.split(',').filter(c => c.trim() !== '').map(c => ({
-                                                        color: c.trim(),
-                                                        imageIndex: null
-                                                    }));
-                                                }
-                                                renderColors();
-                                            }
-                                        });
-
-                                        function addColor() {
-                                            const colorPicker = document.getElementById('colorPicker');
-                                            const color = colorPicker.value;
-                                            const imageIndex = selectedImageIndex;
-
-                                            // Check if color already exists
-                                            const existingIndex = colors.findIndex(c => c.color === color);
-                                            if (existingIndex >= 0) {
-                                                // Update existing color's image
-                                                colors[existingIndex].imageIndex = imageIndex;
-                                            } else {
-                                                // Add new color
-                                                colors.push({ color, imageIndex });
-                                            }
-
-                                            // Reset selection
-                                            selectedImageIndex = null;
-                                            document.getElementById('selectedImagePreview').style.display = 'none';
-                                            document.getElementById('noImageButton').style.display = 'block';
-
-                                            updateColorsInput();
-                                            renderColors();
-                                        }
-
-                                        function removeColor(index) {
-                                            colors.splice(index, 1);
-                                            updateColorsInput();
-                                            renderColors();
-                                        }
-
-                                        function updateColorsInput() {
-                                            colorsInput.value = JSON.stringify(colors);
-                                        }
-
-                                        function renderColors() {
-                                            colorsContainer.innerHTML = '';
-                                            colors.forEach((colorObj, index) => {
-                                                const swatch = document.createElement('div');
-                                                swatch.style.cssText = `
-                    display: flex; 
-                    align-items: center; 
-                    gap: 0.5rem; 
-                    background: #f8f9fa; 
-                    padding: 0.25rem 0.5rem; 
-                    border-radius: 20px; 
-                    border: 1px solid #dee2e6;
-                `;
-
-                                                const circle = document.createElement('div');
-                                                circle.style.cssText = `
-                    width: 20px; 
-                    height: 20px; 
-                    border-radius: 50%; 
-                    background-color: ${colorObj.color};
-                    border: 1px solid #dee2e6;
-                `;
-
-                                                const text = document.createElement('span');
-                                                text.innerText = colorObj.color;
-                                                text.style.fontSize = '0.875rem';
-
-                                                swatch.appendChild(circle);
-                                                swatch.appendChild(text);
-
-                                                // Show linked image if exists
-                                                if (colorObj.imageIndex !== null && colorObj.imageIndex !== undefined) {
-                                                    const imageIcon = document.createElement('i');
-                                                    imageIcon.className = 'fas fa-image';
-                                                    imageIcon.style.cssText = 'color: #28a745; font-size: 0.75rem;';
-                                                    imageIcon.title = `مرتبط بصورة ${colorObj.imageIndex + 1}`;
-                                                    swatch.appendChild(imageIcon);
-                                                }
-
-                                                const removeBtn = document.createElement('button');
-                                                removeBtn.innerHTML = '&times;';
-                                                removeBtn.style.cssText = `
-                    background: none; 
-                    border: none; 
-                    color: #dc3545; 
-                    font-size: 1.25rem; 
-                    cursor: pointer; 
-                    line-height: 1;
-                    padding: 0 0.25rem;
-                `;
-                                                removeBtn.onclick = () => removeColor(index);
-
-                                                swatch.appendChild(removeBtn);
-                                                colorsContainer.appendChild(swatch);
-                                            });
-                                        }
-
-                                        // Close dropdown when clicking outside
-                                        document.addEventListener('click', function (event) {
-                                            const dropdown = document.getElementById('imageDropdown');
-                                            const container = document.getElementById('imageSelectorContainer');
-                                            if (!container.contains(event.target)) {
-                                                dropdown.style.display = 'none';
-                                            }
-                                        });
-                                    </script>
-
-                                    <%- include('partials/footer') %>
+    <%- include('partials/footer') %>
