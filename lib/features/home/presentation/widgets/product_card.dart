@@ -1,7 +1,13 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
+import 'package:hawsni_app/features/products/bloc/product_event.dart';
+import 'package:hawsni_app/features/products/data/services/product_service.dart';
 import 'package:hawsni_app/features/products/presentation/screens/product_detail_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:hawsni_app/core/services/wishlist_service.dart';
 
 class ProductCard extends StatefulWidget {
   final String id;
@@ -15,6 +21,7 @@ class ProductCard extends StatefulWidget {
   final String? badgeText;
   final Color? badgeColor;
   final String screenId;
+  final List<dynamic>? colors;
 
   const ProductCard({
     super.key,
@@ -29,6 +36,7 @@ class ProductCard extends StatefulWidget {
     this.badgeText,
     this.badgeColor,
     required this.screenId,
+    this.colors,
   });
 
   @override
@@ -45,14 +53,18 @@ class _ProductCardState extends State<ProductCard> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(
-              productId: widget.id,
-              name: widget.name,
-              price: widget.price,
-              imageUrl: widget.imageUrl,
-              screenId: widget.screenId,
-              rating: widget.rating,
-              reviewCount: widget.reviewCount,
+            builder: (context) => BlocProvider(
+              create: (context) => ProductBloc(ProductService())
+                ..add(LoadProductDetails(widget.id)),
+              child: ProductDetailScreen(
+                productId: widget.id,
+                name: widget.name,
+                price: widget.price,
+                imageUrl: widget.imageUrl,
+                screenId: widget.screenId,
+                rating: widget.rating,
+                reviewCount: widget.reviewCount,
+              ),
             ),
           ),
         );
@@ -98,44 +110,57 @@ class _ProductCardState extends State<ProductCard> {
                   ),
 
                   // Favorite Button
-                  // absolute right-3 top-3 flex h-9 w-9 ... rounded-full bg-card/90 backdrop-blur-sm
                   Positioned(
-                    top: 12, // top-3 (3 * 4 = 12px)
-                    right: 12, // right-3
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isFavorite = !isFavorite;
-                        });
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(
-                              sigmaX: 4, sigmaY: 4), // backdrop-blur-sm
-                          child: Container(
-                            width: 36, // h-9 (9 * 4 = 36px)
-                            height: 36, // w-9
-                            decoration: BoxDecoration(
-                              color:
-                                  Colors.white.withOpacity(0.9), // bg-card/90
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Icon(
-                                isFavorite
-                                    ? Icons.favorite
-                                    : Icons.favorite_border, // Heart icon
-                                size: 20, // h-5 w-5 (5 * 4 = 20px)
-                                color: isFavorite
-                                    ? AppTheme
-                                        .primaryColor // fill-accent text-accent (using Primary Black as accent)
-                                    : Colors.grey[500], // text-muted-foreground
+                    top: 12,
+                    right: 12,
+                    child: Consumer<WishlistService>(
+                      builder: (context, wishlistService, _) {
+                        final isFav =
+                            wishlistService.isItemInWishlist(widget.id);
+                        return GestureDetector(
+                          onTap: () {
+                            if (isFav) {
+                              wishlistService.removeFromWishlist(widget.id);
+                            } else {
+                              wishlistService.addToWishlist(WishlistItem(
+                                id: widget.id,
+                                name: widget.name,
+                                price: widget.price,
+                                imageUrl: widget.imageUrl,
+                                description:
+                                    '', // details not available in card
+                                rating: widget.rating,
+                                reviewCount: widget.reviewCount,
+                              ));
+                            }
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                              child: Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.9),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    isFav
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    size: 20,
+                                    color: isFav
+                                        ? AppTheme.primaryColor
+                                        : Colors.grey[500],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -225,6 +250,92 @@ class _ProductCardState extends State<ProductCard> {
                       ],
                     ],
                   ),
+                  if (widget.colors != null && widget.colors!.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: widget.colors!.take(4).map((c) {
+                        String colorName = '';
+                        if (c is Map) {
+                          colorName = c['color']?.toString() ?? '';
+                        } else if (c is String) {
+                          if (c.trim().startsWith('{')) {
+                            try {
+                              final match = RegExp(r'"color"\s*:\s*"([^"]+)"')
+                                  .firstMatch(c);
+                              colorName = match?.group(1) ?? c;
+                            } catch (_) {
+                              colorName = c;
+                            }
+                          } else {
+                            colorName = c;
+                          }
+                        }
+
+                        Color color;
+                        try {
+                          if (colorName.startsWith('#')) {
+                            color = Color(int.parse(colorName.substring(1, 7),
+                                    radix: 16) +
+                                0xFF000000);
+                          } else {
+                            switch (colorName.toLowerCase()) {
+                              case 'red':
+                                color = Colors.red;
+                                break;
+                              case 'blue':
+                                color = Colors.blue;
+                                break;
+                              case 'green':
+                                color = Colors.green;
+                                break;
+                              case 'black':
+                                color = Colors.black;
+                                break;
+                              case 'white':
+                                color = Colors.white;
+                                break;
+                              case 'grey':
+                                color = Colors.grey;
+                                break;
+                              case 'yellow':
+                                color = Colors.yellow;
+                                break;
+                              case 'orange':
+                                color = Colors.orange;
+                                break;
+                              case 'purple':
+                                color = Colors.purple;
+                                break;
+                              case 'pink':
+                                color = Colors.pink;
+                                break;
+                              case 'brown':
+                                color = Colors.brown;
+                                break;
+                              default:
+                                color = Colors.transparent;
+                            }
+                          }
+                        } catch (_) {
+                          color = Colors.transparent;
+                        }
+
+                        if (color == Colors.transparent)
+                          return const SizedBox.shrink();
+
+                        return Container(
+                          width: 12,
+                          height: 12,
+                          margin: const EdgeInsets.only(right: 4),
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey[300]!),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ],
               ),
             ),

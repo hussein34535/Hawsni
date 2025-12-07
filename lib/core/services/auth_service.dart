@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,6 +8,11 @@ class AuthService {
   static const String baseUrl = 'https://hawsnibackend.vercel.app/api';
   static String? _token;
   static Map<String, dynamic>? _userData;
+
+  // Auth State Stream
+  static final StreamController<bool> _authStateController =
+      StreamController<bool>.broadcast();
+  static Stream<bool> get authStateChanges => _authStateController.stream;
 
   // Get token
   static String? get token => _token;
@@ -48,6 +54,7 @@ class AuthService {
 
         print('Login successful, token saved: $_token');
         print('User data saved: $_userData');
+        _authStateController.add(true);
         return data;
       } else {
         final errorData = json.decode(response.body);
@@ -83,6 +90,7 @@ class AuthService {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', _token!);
           await prefs.setString('userData', json.encode(_userData));
+          _authStateController.add(true);
         }
         return data;
       } else {
@@ -116,6 +124,7 @@ class AuthService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', _token!);
         await prefs.setString('userData', json.encode(_userData));
+        _authStateController.add(true);
 
         return data;
       } else {
@@ -229,6 +238,7 @@ class AuthService {
     await prefs.remove('token');
     await prefs.remove('userData');
     print('User logged out, token and data cleared');
+    _authStateController.add(false);
   }
 
   // Load token and user data from shared preferences
@@ -248,6 +258,7 @@ class AuthService {
 
     print('Token loaded from storage: $_token');
     print('User data loaded from storage: $_userData');
+    _authStateController.add(_token != null);
   }
 
   // Check if user is authenticated

@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hawsni_app/features/orders/bloc/order_event.dart';
 import 'package:hawsni_app/features/orders/bloc/order_state.dart';
 import 'package:hawsni_app/features/orders/data/services/order_service.dart';
+import 'package:hawsni_app/core/services/auth_service.dart';
 
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final OrderService _orderService;
@@ -9,6 +10,16 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   OrderBloc(this._orderService) : super(OrderInitial()) {
     on<LoadOrders>(_onLoadOrders);
     on<CreateOrder>(_onCreateOrder);
+    on<ClearOrders>(_onClearOrders);
+
+    // Listen to auth changes
+    AuthService.authStateChanges.listen((isAuthenticated) {
+      if (isAuthenticated) {
+        add(LoadOrders());
+      } else {
+        add(ClearOrders());
+      }
+    });
   }
 
   Future<void> _onLoadOrders(LoadOrders event, Emitter<OrderState> emit) async {
@@ -40,5 +51,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     } catch (e) {
       emit(OrderError('Failed to create order: $e'));
     }
+  }
+
+  void _onClearOrders(ClearOrders event, Emitter<OrderState> emit) {
+    emit(OrderInitial());
   }
 }

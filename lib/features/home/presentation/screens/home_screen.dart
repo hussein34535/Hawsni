@@ -279,6 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               badgeText: '60%',
                               badgeColor: Colors.red,
                               screenId: 'home',
+                              colors: product.colors,
                             );
                           },
                           childCount: _selectedFilter == 'All'

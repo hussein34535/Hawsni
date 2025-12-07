@@ -69,3 +69,10 @@ class CartError extends CartState {
   @override
   List<Object> get props => [message];
 }
+
+class CartAuthError extends CartState {
+  final String message;
+  const CartAuthError(this.message);
+  @override
+  List<Object> get props => [message];
+}

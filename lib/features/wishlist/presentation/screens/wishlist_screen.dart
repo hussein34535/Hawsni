@@ -2,40 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hawsni_app/core/services/wishlist_service.dart';
 import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
+
 import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});
-
-  void _moveToCart(BuildContext context, WishlistItem item) {
-    Provider.of<WishlistService>(context, listen: false)
-        .removeFromWishlist(item.id);
-
-    final cartItem = CartItem(
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      imageUrl: item.imageUrl,
-      quantity: 1,
-      productId: item.id,
-    );
-
-    context.read<CartBloc>().add(AddToCart(cartItem));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Moved to cart',
-            style:
-                AppTheme.textTheme.bodyMedium?.copyWith(color: Colors.white)),
-        backgroundColor: AppTheme.primaryColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -11,6 +11,9 @@ import 'package:hawsni_app/features/coupons/presentation/screens/coupons_screen.
 import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/features/checkout/presentation/screens/address_management_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:provider/provider.dart';
+import 'package:hawsni_app/core/providers/settings_provider.dart';
+import 'package:hawsni_app/features/profile/presentation/screens/notifications_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -209,6 +212,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         _buildDivider(),
                         _buildMenuItem(
+                          icon: Icons.lock_outline,
+                          title: 'Change Password',
+                          onTap: () {}, // TODO: Implement Change Password
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.notifications_outlined,
+                          title: 'Notifications',
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      const NotificationsSettingsScreen())),
+                        ),
+                      ]),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('App Settings'),
+                      Consumer<SettingsProvider>(
+                        builder: (context, settingsProvider, child) {
+                          return _buildMenuIsland([
+                            _buildMenuItem(
+                              icon: Icons.language,
+                              title: 'Language',
+                              subtitle: settingsProvider.language == 'en'
+                                  ? 'English'
+                                  : 'العربية',
+                              onTap: () => _showLanguageDialog(
+                                  context, settingsProvider),
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              icon: Icons.attach_money,
+                              title: 'Currency',
+                              subtitle:
+                                  _getCurrencyName(settingsProvider.currency),
+                              onTap: () => _showCurrencyDialog(
+                                  context, settingsProvider),
+                            ),
+                          ]);
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('My Activity'),
+                      _buildMenuIsland([
+                        _buildMenuItem(
                           icon: Icons.shopping_bag_outlined,
                           title: 'My Orders',
                           onTap: () => Navigator.push(
@@ -234,15 +282,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               MaterialPageRoute(
                                   builder: (_) =>
                                       const AddressManagementScreen())),
-                        ),
-                      ]),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('Payments'),
-                      _buildMenuIsland([
-                        _buildMenuItem(
-                          icon: Icons.credit_card_outlined,
-                          title: 'Payment Methods',
-                          onTap: () {}, // TODO
                         ),
                         _buildDivider(),
                         _buildMenuItem(
@@ -341,6 +380,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Color? textColor,
     Color? iconColor,
     bool showArrow = true,
+    String? subtitle,
   }) {
     return ListTile(
       leading: Container(
@@ -359,6 +399,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           color: textColor ?? AppTheme.textPrimary,
         ),
       ),
+      subtitle: subtitle != null
+          ? Text(subtitle,
+              style:
+                  const TextStyle(fontSize: 14, color: AppTheme.textSecondary))
+          : null,
       trailing: showArrow
           ? const Icon(Icons.arrow_forward_ios,
               size: 14, color: AppTheme.textTertiary)
@@ -367,6 +412,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
     );
+  }
+
+  void _showLanguageDialog(
+      BuildContext context, SettingsProvider settingsProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text('Select Language',
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildRadioTile('English', 'en', settingsProvider.language, (val) {
+              settingsProvider.setLanguage(val!);
+              Navigator.pop(context);
+            }),
+            _buildRadioTile('العربية', 'ar', settingsProvider.language, (val) {
+              settingsProvider.setLanguage(val!);
+              Navigator.pop(context);
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCurrencyDialog(
+      BuildContext context, SettingsProvider settingsProvider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text('Select Currency',
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildRadioTile('USD (\$)', 'USD', settingsProvider.currency,
+                (val) {
+              settingsProvider.setCurrency(val!);
+              Navigator.pop(context);
+            }),
+            _buildRadioTile('EUR (€)', 'EUR', settingsProvider.currency, (val) {
+              settingsProvider.setCurrency(val!);
+              Navigator.pop(context);
+            }),
+            _buildRadioTile('EGP (E£)', 'EGP', settingsProvider.currency,
+                (val) {
+              settingsProvider.setCurrency(val!);
+              Navigator.pop(context);
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRadioTile(String title, String value, String groupValue,
+      ValueChanged<String?> onChanged) {
+    return RadioListTile<String>(
+      title: Text(title,
+          style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.textPrimary)),
+      value: value,
+      groupValue: groupValue,
+      onChanged: onChanged,
+      activeColor: AppTheme.primaryColor,
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  String _getCurrencyName(String currencyCode) {
+    switch (currencyCode) {
+      case 'USD':
+        return 'USD (\$)';
+      case 'EUR':
+        return 'EUR (€)';
+      case 'EGP':
+        return 'EGP (E£)';
+      default:
+        return currencyCode;
+    }
   }
 
   Widget _buildDivider() {

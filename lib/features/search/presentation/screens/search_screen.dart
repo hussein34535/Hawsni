@@ -133,6 +133,23 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  List<String> _suggestions = [];
+
+  void _updateSuggestions(String query) {
+    setState(() {
+      _suggestions = [
+        ..._searchHistory
+            .where((term) => term.toLowerCase().contains(query.toLowerCase())),
+        ..._categories
+            .where((cat) => cat['name']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .map((cat) => cat['name'].toString())
+      ].take(10).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,6 +170,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: TextField(
             controller: _searchController,
             style: const TextStyle(color: AppTheme.textPrimary),
+            textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               hintText: 'Search products...',
               hintStyle: TextStyle(color: Colors.grey[500]),
@@ -166,11 +184,22 @@ class _SearchScreenState extends State<SearchScreen> {
                         _searchController.clear();
                         setState(() {
                           _searchResults = [];
+                          _suggestions = [];
                         });
                       },
                     )
                   : null,
             ),
+            onChanged: (value) {
+              if (value.isEmpty) {
+                setState(() {
+                  _suggestions = [];
+                  _searchResults = [];
+                });
+              } else {
+                _updateSuggestions(value);
+              }
+            },
             onSubmitted: (value) => _performSearch(value),
           ),
         ),
@@ -200,14 +229,36 @@ class _SearchScreenState extends State<SearchScreen> {
                           AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                     ),
                   )
-                : _searchResults.isNotEmpty
-                    ? _buildResultsGrid()
-                    : _searchController.text.isEmpty && !_showFilters
-                        ? _buildSearchHistory()
-                        : _buildEmptyState(),
+                : _suggestions.isNotEmpty && _searchResults.isEmpty
+                    ? _buildSuggestionsList()
+                    : _searchResults.isNotEmpty
+                        ? _buildResultsGrid()
+                        : _searchController.text.isEmpty && !_showFilters
+                            ? _buildSearchHistory()
+                            : _buildEmptyState(),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSuggestionsList() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: _suggestions.length,
+      itemBuilder: (context, index) {
+        final suggestion = _suggestions[index];
+        return ListTile(
+          leading: const Icon(Icons.search, color: Colors.grey),
+          title: Text(suggestion,
+              style: const TextStyle(color: AppTheme.textPrimary)),
+          onTap: () {
+            _searchController.text = suggestion;
+            _performSearch(suggestion);
+            setState(() => _suggestions = []);
+          },
+        );
+      },
     );
   }
 

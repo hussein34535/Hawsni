@@ -57,6 +57,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String? selectedColor;
   int _currentImageIndex = 0;
 
+  final PageController _pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+    // _pageController initialized inline
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _incrementQuantity() => setState(() => quantity++);
   void _decrementQuantity() {
     if (quantity > 1) setState(() => quantity--);
@@ -112,6 +126,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _addToCart(BuildContext context) {
+    final productState = context.read<ProductBloc>().state;
+    List<String> availableSizes = [];
+    List<dynamic> availableColors = [];
+
+    if (productState is! ProductDetailsLoaded) {
+      return;
+    }
+    availableSizes = productState.product.sizes ?? [];
+    availableColors = productState.product.colors ?? [];
+
+    // Check validation
+    if (availableSizes.isNotEmpty && selectedSize == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a size first',
+              style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.black,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
+    if (availableColors.isNotEmpty && selectedColor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a color first',
+              style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.black,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      return;
+    }
+
     final itemId =
         '${widget.productId}${selectedSize != null ? "_$selectedSize" : ""}${selectedColor != null ? "_$selectedColor" : ""}';
 
@@ -160,610 +215,660 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ..add(LoadProductDetails(widget.productId)),
         ),
       ],
-      child: Scaffold(
-        backgroundColor: AppTheme.scaffoldBackgroundColor,
-        body: Stack(
-          children: [
-            CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  expandedHeight: screenHeight * 0.6, // Slightly reduced height
-                  pinned: true,
-                  backgroundColor: Colors.transparent,
-                  leadingWidth: 0,
-                  leading: const SizedBox.shrink(),
-                  actions: const [SizedBox.shrink()],
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: BlocBuilder<ProductBloc, ProductState>(
-                      builder: (context, state) {
-                        List<String> images = [widget.imageUrl];
+      child: BlocListener<CartBloc, CartState>(
+        listener: (context, state) {
+          if (state is CartAuthError) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => AlertDialog(
+                title: const Text('Session Expired'),
+                content: const Text(
+                    'Your session has expired. Please log in again to continue.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      // Ideally navigate to login screen here
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          } else if (state is CartError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        child: Scaffold(
+          backgroundColor: AppTheme.scaffoldBackgroundColor,
+          body: Stack(
+            children: [
+              CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    expandedHeight:
+                        screenHeight * 0.6, // Slightly reduced height
+                    pinned: true,
+                    backgroundColor: Colors.transparent,
+                    leadingWidth: 0,
+                    leading: const SizedBox.shrink(),
+                    actions: const [SizedBox.shrink()],
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: BlocBuilder<ProductBloc, ProductState>(
+                        builder: (context, state) {
+                          List<String> images = [widget.imageUrl];
 
-                        if (state is ProductDetailsLoaded &&
-                            state.product.images != null &&
-                            state.product.images!.isNotEmpty) {
-                          images = state.product.images!;
-                        }
+                          if (state is ProductDetailsLoaded &&
+                              state.product.images != null &&
+                              state.product.images!.isNotEmpty) {
+                            images = state.product.images!;
+                          }
 
-                        return Stack(
-                          children: [
-                            // Image Carousel
-                            PageView.builder(
-                              itemCount: images.length,
-                              itemBuilder: (context, index) {
-                                return Hero(
-                                  tag: index == 0
-                                      ? 'product_${widget.productId}_${widget.screenId}'
-                                      : 'product_${widget.productId}_image_$index',
-                                  child: Image.network(
-                                    images[index],
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        color: Colors.grey[200],
-                                        child: const Center(
-                                          child: Icon(Icons.broken_image,
-                                              size: 48),
+                          return Stack(
+                            children: [
+                              // Image Carousel
+                              PageView.builder(
+                                controller: _pageController,
+                                itemCount: images.length,
+                                itemBuilder: (context, index) {
+                                  return Hero(
+                                    tag: index == 0
+                                        ? 'product_${widget.productId}_${widget.screenId}'
+                                        : 'product_${widget.productId}_image_$index',
+                                    child: Image.network(
+                                      images[index],
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                          color: Colors.grey[200],
+                                          child: const Center(
+                                            child: Icon(Icons.broken_image,
+                                                size: 48),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    _currentImageIndex = index;
+                                  });
+                                },
+                              ),
+                              // Image indicators
+                              if (images.length > 1)
+                                Positioned(
+                                  bottom: 20,
+                                  left: 0,
+                                  right: 0,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(
+                                      images.length,
+                                      (index) => Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 4),
+                                        width: _currentImageIndex == index
+                                            ? 24
+                                            : 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: _currentImageIndex == index
+                                              ? AppTheme.primaryColor
+                                              : Colors.white.withOpacity(0.5),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
                                         ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
-                              onPageChanged: (index) {
-                                setState(() {
-                                  _currentImageIndex = index;
-                                });
-                              },
-                            ),
-                            // Image indicators
-                            if (images.length > 1)
-                              Positioned(
-                                bottom: 20,
-                                left: 0,
-                                right: 0,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: List.generate(
-                                    images.length,
-                                    (index) => Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 4),
-                                      width:
-                                          _currentImageIndex == index ? 24 : 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: _currentImageIndex == index
-                                            ? AppTheme.primaryColor
-                                            : Colors.white.withOpacity(0.5),
-                                        borderRadius: BorderRadius.circular(4),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                          ],
-                        );
-                      },
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: AppTheme.scaffoldBackgroundColor,
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(32)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 20,
-                          offset: Offset(0, -5),
-                        ),
-                      ],
-                    ),
-                    transform: Matrix4.translationValues(0, -32, 0),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 40, 24, 120),
-                      child: BlocBuilder<ProductBloc, ProductState>(
-                        builder: (context, state) {
-                          String description = widget.description;
-                          double rating = widget.rating;
-                          int reviewCount = widget.reviewCount;
-                          List<String>? sizes = widget.sizes;
-                          List<dynamic>? colors = widget.colors;
+                  SliverToBoxAdapter(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: AppTheme.scaffoldBackgroundColor,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(32)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 20,
+                            offset: Offset(0, -5),
+                          ),
+                        ],
+                      ),
+                      transform: Matrix4.translationValues(0, -32, 0),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 40, 24, 120),
+                        child: BlocBuilder<ProductBloc, ProductState>(
+                          builder: (context, state) {
+                            String description = widget.description;
+                            double rating = widget.rating;
+                            int reviewCount = widget.reviewCount;
+                            List<String>? sizes = widget.sizes;
+                            List<dynamic>? colors = widget.colors;
 
-                          if (state is ProductDetailsLoaded) {
-                            description = state.product.description;
-                            rating = state.product.rating;
-                            reviewCount = state.product.reviewCount;
-                            sizes = state.product.sizes;
-                            colors = state.product.colors;
-                          }
+                            if (state is ProductDetailsLoaded) {
+                              description = state.product.description;
+                              rating = state.product.rating;
+                              reviewCount = state.product.reviewCount;
+                              sizes = state.product.sizes;
+                              colors = state.product.colors;
+                            }
 
-                          if (state is ProductLoading) {
-                            return const Center(
-                                child: Padding(
-                              padding: EdgeInsets.all(32.0),
-                              child: SpinningLoader(),
-                            ));
-                          }
+                            if (state is ProductLoading) {
+                              return const Center(
+                                  child: Padding(
+                                padding: EdgeInsets.all(32.0),
+                                child: SpinningLoader(),
+                              ));
+                            }
 
-                          if (state is ProductError) {
-                            return Center(
-                                child: Text('Error: ${state.message}',
-                                    style: const TextStyle(
-                                        color: AppTheme.errorColor)));
-                          }
+                            if (state is ProductError) {
+                              return Center(
+                                  child: Text('Error: ${state.message}',
+                                      style: const TextStyle(
+                                          color: AppTheme.errorColor)));
+                            }
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Header
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      widget.name,
-                                      style: AppTheme.textTheme.headlineMedium
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Header
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        widget.name,
+                                        style: AppTheme.textTheme.headlineMedium
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Text(
+                                      widget.price,
+                                      style: AppTheme.textTheme.headlineSmall
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+
+                                // Rating
+                                Row(
+                                  children: [
+                                    const Icon(Icons.star_rounded,
+                                        color: Color(0xFFFFC107), size: 24),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '$rating',
+                                      style: AppTheme.textTheme.titleMedium
                                           ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.textPrimary,
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Text(
-                                    widget.price,
-                                    style: AppTheme.textTheme.headlineSmall
-                                        ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.primaryColor,
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '($reviewCount reviews)',
+                                      style: AppTheme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                        color: AppTheme.textTertiary,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
+                                  ],
+                                ),
+                                const SizedBox(height: 32),
 
-                              // Rating
-                              Row(
-                                children: [
-                                  const Icon(Icons.star_rounded,
-                                      color: Color(0xFFFFC107), size: 24),
-                                  const SizedBox(width: 4),
+                                // Description
+                                Text(
+                                  'Description',
+                                  style:
+                                      AppTheme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  description,
+                                  style: AppTheme.textTheme.bodyLarge?.copyWith(
+                                    height: 1.6,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
+
+                                // Options (Size/Color)
+                                if (sizes != null && sizes.isNotEmpty) ...[
                                   Text(
-                                    '$rating',
+                                    'Select Size',
                                     style: AppTheme.textTheme.titleMedium
                                         ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.textPrimary,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(height: 16),
+                                  Wrap(
+                                    spacing: 12,
+                                    runSpacing: 12,
+                                    children: sizes.map((size) {
+                                      final isSelected = selectedSize == size;
+                                      return ChoiceChip(
+                                        label: Text(size),
+                                        selected: isSelected,
+                                        onSelected: (selected) => setState(() =>
+                                            selectedSize =
+                                                selected ? size : null),
+                                        selectedColor: AppTheme.primaryColor,
+                                        labelStyle: TextStyle(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : AppTheme.textPrimary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        backgroundColor: AppTheme.surfaceColor,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          side: BorderSide(
+                                            color: isSelected
+                                                ? AppTheme.primaryColor
+                                                : AppTheme.borderColor,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                  const SizedBox(height: 32),
+                                ],
+
+                                if (colors != null && colors.isNotEmpty) ...[
                                   Text(
-                                    '($reviewCount reviews)',
-                                    style:
-                                        AppTheme.textTheme.bodyMedium?.copyWith(
-                                      color: AppTheme.textTertiary,
+                                    'Select Color',
+                                    style: AppTheme.textTheme.titleMedium
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textPrimary,
                                     ),
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 32),
+                                  const SizedBox(height: 16),
+                                  Wrap(
+                                    spacing: 12,
+                                    runSpacing: 12,
+                                    children: colors.map((colorData) {
+                                      // Parse color data (handle both old string format and new object format)
+                                      String colorName;
+                                      int? linkedImageIndex;
 
-                              // Description
-                              Text(
-                                'Description',
-                                style: AppTheme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                description,
-                                style: AppTheme.textTheme.bodyLarge?.copyWith(
-                                  height: 1.6,
-                                  color: AppTheme.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(height: 32),
-
-                              // Options (Size/Color)
-                              if (sizes != null && sizes.isNotEmpty) ...[
-                                Text(
-                                  'Select Size',
-                                  style:
-                                      AppTheme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Wrap(
-                                  spacing: 12,
-                                  runSpacing: 12,
-                                  children: sizes.map((size) {
-                                    final isSelected = selectedSize == size;
-                                    return ChoiceChip(
-                                      label: Text(size),
-                                      selected: isSelected,
-                                      onSelected: (selected) => setState(() =>
-                                          selectedSize =
-                                              selected ? size : null),
-                                      selectedColor: AppTheme.primaryColor,
-                                      labelStyle: TextStyle(
-                                        color: isSelected
-                                            ? Colors.white
-                                            : AppTheme.textPrimary,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      backgroundColor: AppTheme.surfaceColor,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        side: BorderSide(
-                                          color: isSelected
-                                              ? AppTheme.primaryColor
-                                              : AppTheme.borderColor,
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                                const SizedBox(height: 32),
-                              ],
-
-                              if (colors != null && colors.isNotEmpty) ...[
-                                Text(
-                                  'Select Color',
-                                  style:
-                                      AppTheme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Wrap(
-                                  spacing: 12,
-                                  runSpacing: 12,
-                                  children: colors.map((colorData) {
-                                    // Parse color data (handle both old string format and new object format)
-                                    String colorName;
-                                    int? linkedImageIndex;
-
-                                    if (colorData is Map) {
-                                      colorName =
-                                          colorData['color']?.toString() ?? '';
-                                      final dynamic imageIndexValue =
-                                          colorData['imageIndex'];
-                                      if (imageIndexValue is int) {
-                                        linkedImageIndex = imageIndexValue;
-                                      } else if (imageIndexValue != null) {
-                                        linkedImageIndex = int.tryParse(
-                                            imageIndexValue.toString());
-                                      }
-                                    } else if (colorData is String) {
-                                      // Handle stringified JSON object (Fix for gray colors issue)
-                                      if (colorData.trim().startsWith('{')) {
-                                        try {
-                                          // Extract color using regex
-                                          final colorMatch =
-                                              RegExp(r'"color"\s*:\s*"([^"]+)"')
-                                                  .firstMatch(colorData);
-                                          if (colorMatch != null) {
-                                            colorName = colorMatch.group(1) ??
-                                                colorData;
-
-                                            // Extract imageIndex using regex
-                                            final indexMatch = RegExp(
-                                                    r'"imageIndex"\s*:\s*(\d+)')
+                                      if (colorData is Map) {
+                                        colorName =
+                                            colorData['color']?.toString() ??
+                                                '';
+                                        final dynamic imageIndexValue =
+                                            colorData['imageIndex'];
+                                        if (imageIndexValue is int) {
+                                          linkedImageIndex = imageIndexValue;
+                                        } else if (imageIndexValue != null) {
+                                          linkedImageIndex = int.tryParse(
+                                              imageIndexValue.toString());
+                                        }
+                                      } else if (colorData is String) {
+                                        // Handle stringified JSON object (Fix for gray colors issue)
+                                        if (colorData.trim().startsWith('{')) {
+                                          try {
+                                            // Extract color using regex
+                                            final colorMatch = RegExp(
+                                                    r'"color"\s*:\s*"([^"]+)"')
                                                 .firstMatch(colorData);
-                                            if (indexMatch != null) {
-                                              linkedImageIndex = int.tryParse(
-                                                  indexMatch.group(1)!);
+                                            if (colorMatch != null) {
+                                              colorName = colorMatch.group(1) ??
+                                                  colorData;
+
+                                              // Extract imageIndex using regex
+                                              final indexMatch = RegExp(
+                                                      r'"imageIndex"\s*:\s*(\d+)')
+                                                  .firstMatch(colorData);
+                                              if (indexMatch != null) {
+                                                linkedImageIndex = int.tryParse(
+                                                    indexMatch.group(1)!);
+                                              }
+                                            } else {
+                                              colorName = colorData;
+                                              linkedImageIndex = null;
                                             }
-                                          } else {
+                                          } catch (e) {
                                             colorName = colorData;
                                             linkedImageIndex = null;
                                           }
-                                        } catch (e) {
+                                        } else {
                                           colorName = colorData;
                                           linkedImageIndex = null;
                                         }
                                       } else {
-                                        colorName = colorData;
+                                        colorName = colorData.toString();
                                         linkedImageIndex = null;
                                       }
-                                    } else {
-                                      colorName = colorData.toString();
-                                      linkedImageIndex = null;
-                                    }
 
-                                    final isSelected =
-                                        selectedColor == colorName;
-                                    final color = _getColorFromName(colorName);
+                                      final isSelected =
+                                          selectedColor == colorName;
+                                      final color =
+                                          _getColorFromName(colorName);
 
-                                    return GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          selectedColor =
-                                              isSelected ? null : colorName;
-                                          // Change image if color has linked image
-                                          if (!isSelected &&
-                                              linkedImageIndex != null) {
-                                            _currentImageIndex =
-                                                linkedImageIndex;
-                                          }
-                                        });
-                                      },
-                                      child: Container(
-                                        width: 42,
-                                        height: 42,
-                                        decoration: BoxDecoration(
-                                          color: color,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? AppTheme.primaryColor
-                                                : Colors.grey[300]!,
-                                            width: isSelected ? 2 : 1,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.1),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
+                                      return GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            selectedColor =
+                                                isSelected ? null : colorName;
+                                            // Change image if color has linked image
+                                            if (!isSelected &&
+                                                linkedImageIndex != null) {
+                                              _currentImageIndex =
+                                                  linkedImageIndex;
+                                              if (_pageController.hasClients) {
+                                                _pageController.animateToPage(
+                                                  linkedImageIndex,
+                                                  duration: const Duration(
+                                                      milliseconds: 300),
+                                                  curve: Curves.easeInOut,
+                                                );
+                                              }
+                                            }
+                                          });
+                                        },
+                                        child: Container(
+                                          width: 42,
+                                          height: 42,
+                                          decoration: BoxDecoration(
+                                            color: color,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? AppTheme.primaryColor
+                                                  : Colors.grey[300]!,
+                                              width: isSelected ? 2 : 1,
                                             ),
-                                          ],
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black
+                                                    .withOpacity(0.1),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: isSelected
+                                              ? Icon(
+                                                  Icons.check,
+                                                  color:
+                                                      color.computeLuminance() >
+                                                              0.5
+                                                          ? Colors.black
+                                                          : Colors.white,
+                                                  size: 24,
+                                                )
+                                              : null,
                                         ),
-                                        child: isSelected
-                                            ? Icon(
-                                                Icons.check,
-                                                color:
-                                                    color.computeLuminance() >
-                                                            0.5
-                                                        ? Colors.black
-                                                        : Colors.white,
-                                                size: 24,
-                                              )
-                                            : null,
+                                      );
+                                    }).toList(),
+                                  ),
+                                  const SizedBox(height: 32),
+                                ],
+
+                                // Quantity
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Quantity',
+                                      style: AppTheme.textTheme.titleMedium
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.textPrimary,
                                       ),
-                                    );
-                                  }).toList(),
+                                    ),
+                                    const Spacer(),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: AppTheme.borderColor),
+                                        borderRadius: BorderRadius.circular(12),
+                                        color: AppTheme.surfaceColor,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.remove,
+                                                color: AppTheme.textPrimary),
+                                            onPressed: _decrementQuantity,
+                                          ),
+                                          Text(
+                                            '$quantity',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.add,
+                                                color: AppTheme.textPrimary),
+                                            onPressed: _incrementQuantity,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 32),
+                                const Divider(color: AppTheme.dividerColor),
+                                const SizedBox(height: 16),
+
+                                // Reviews Section
+                                ReviewsSection(productId: widget.productId),
                               ],
-
-                              // Quantity
-                              Row(
-                                children: [
-                                  Text(
-                                    'Quantity',
-                                    style: AppTheme.textTheme.titleMedium
-                                        ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.textPrimary,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: AppTheme.borderColor),
-                                      borderRadius: BorderRadius.circular(12),
-                                      color: AppTheme.surfaceColor,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.remove,
-                                              color: AppTheme.textPrimary),
-                                          onPressed: _decrementQuantity,
-                                        ),
-                                        Text(
-                                          '$quantity',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.add,
-                                              color: AppTheme.textPrimary),
-                                          onPressed: _incrementQuantity,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 32),
-                              const Divider(color: AppTheme.dividerColor),
-                              const SizedBox(height: 16),
-
-                              // Reviews Section
-                              ReviewsSection(productId: widget.productId),
-                            ],
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Custom Top Bar (Back Button & Actions)
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 16,
-              right: 16,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Back Button
-                  _buildGlassIcon(
-                    icon: Icons.arrow_back,
-                    onTap: () => Navigator.of(context).pop(),
-                  ),
-
-                  // Actions
-                  Row(
-                    children: [
-                      // Wishlist
-                      Consumer<WishlistService>(
-                        builder: (context, wishlistService, _) {
-                          final isInWishlist = wishlistService
-                              .isItemInWishlist(widget.productId);
-                          return _buildGlassIcon(
-                            icon: isInWishlist
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: isInWishlist
-                                ? AppTheme.errorColor
-                                : Colors.black,
-                            onTap: () {
-                              final item = WishlistItem(
-                                id: widget.productId,
-                                name: widget.name,
-                                price: widget.price,
-                                imageUrl: widget.imageUrl,
-                                description: widget.description,
-                                rating: widget.rating,
-                                reviewCount: widget.reviewCount,
-                              );
-                              if (isInWishlist) {
-                                wishlistService
-                                    .removeFromWishlist(widget.productId);
-                              } else {
-                                wishlistService.addToWishlist(item);
-                              }
-                            },
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Cart
-                      BlocBuilder<CartBloc, CartState>(
-                        builder: (context, state) {
-                          final itemCount =
-                              state is CartLoaded ? state.items.length : 0;
-                          return Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              _buildGlassIcon(
-                                icon: Icons.shopping_bag_outlined,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) => const CartScreen()),
-                                  );
-                                },
-                              ),
-                              if (itemCount > 0)
-                                Positioned(
-                                  right: -4,
-                                  top: -4,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: AppTheme.primaryColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Text(
-                                      '$itemCount',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
                   ),
                 ],
               ),
-            ),
 
-            // Floating Bottom Bar
-            Positioned(
-              bottom: 32,
-              left: 24,
-              right: 24,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  boxShadow: AppTheme.shadowFloating,
+              // Custom Top Bar (Back Button & Actions)
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 8,
+                left: 16,
+                right: 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Back Button
+                    _buildGlassIcon(
+                      icon: Icons.arrow_back,
+                      onTap: () => Navigator.of(context).pop(),
+                    ),
+
+                    // Actions
+                    Row(
+                      children: [
+                        // Wishlist
+                        Consumer<WishlistService>(
+                          builder: (context, wishlistService, _) {
+                            final isInWishlist = wishlistService
+                                .isItemInWishlist(widget.productId);
+                            return _buildGlassIcon(
+                              icon: isInWishlist
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isInWishlist
+                                  ? AppTheme.errorColor
+                                  : Colors.black,
+                              onTap: () {
+                                final item = WishlistItem(
+                                  id: widget.productId,
+                                  name: widget.name,
+                                  price: widget.price,
+                                  imageUrl: widget.imageUrl,
+                                  description: widget.description,
+                                  rating: widget.rating,
+                                  reviewCount: widget.reviewCount,
+                                );
+                                if (isInWishlist) {
+                                  wishlistService
+                                      .removeFromWishlist(widget.productId);
+                                } else {
+                                  wishlistService.addToWishlist(item);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 12),
+
+                        // Cart
+                        BlocBuilder<CartBloc, CartState>(
+                          builder: (context, state) {
+                            final itemCount =
+                                state is CartLoaded ? state.items.length : 0;
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                _buildGlassIcon(
+                                  icon: Icons.shopping_bag_outlined,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => const CartScreen()),
+                                    );
+                                  },
+                                ),
+                                if (itemCount > 0)
+                                  Positioned(
+                                    right: -4,
+                                    top: -4,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: AppTheme.primaryColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(
+                                        '$itemCount',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                      child: Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Total Price',
-                                style: AppTheme.textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.textSecondary,
+              ),
+
+              // Floating Bottom Bar
+              Positioned(
+                bottom: 32,
+                left: 24,
+                right: 24,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: AppTheme.shadowFloating,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(32),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        child: Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Total Price',
+                                  style: AppTheme.textTheme.bodySmall?.copyWith(
+                                    color: AppTheme.textSecondary,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                widget.price,
-                                style: AppTheme.textTheme.titleLarge?.copyWith(
-                                  color: AppTheme.primaryColor,
-                                  fontWeight: FontWeight.bold,
+                                Text(
+                                  widget.price,
+                                  style:
+                                      AppTheme.textTheme.titleLarge?.copyWith(
+                                    color: AppTheme.primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const Spacer(),
-                          ElevatedButton.icon(
-                            onPressed: () => _addToCart(context),
-                            icon: const Icon(Icons.shopping_bag_outlined,
-                                color: Colors.white),
-                            label: const Text('Add to Bag'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              elevation: 0,
+                              ],
                             ),
-                          ),
-                        ],
+                            const Spacer(),
+                            ElevatedButton.icon(
+                              onPressed: () => _addToCart(context),
+                              icon: const Icon(Icons.shopping_bag_outlined,
+                                  color: Colors.white),
+                              label: const Text('Add to Bag'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primaryColor,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                elevation: 0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

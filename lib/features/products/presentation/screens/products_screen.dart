@@ -28,7 +28,7 @@ class ProductsScreen extends StatelessWidget {
       create: (context) => ProductBloc(ProductService())
         ..add(LoadProducts(categoryId: categoryId, isFeatured: isFeatured)),
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         body: BlocBuilder<ProductBloc, ProductState>(
           builder: (context, state) {
             if (state is ProductLoading) {
@@ -47,7 +47,7 @@ class ProductsScreen extends StatelessWidget {
                 return const Center(
                   child: Text(
                     'No products found.',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                   ),
                 );
               }
@@ -77,6 +77,7 @@ class ProductsScreen extends StatelessWidget {
                             rating: product.rating,
                             reviewCount: product.reviewCount,
                             screenId: 'products',
+                            colors: product.colors,
                           );
                         },
                         childCount: products.length,
@@ -95,10 +96,12 @@ class ProductsScreen extends StatelessWidget {
 
   SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
+      iconTheme: const IconThemeData(color: Colors.black),
       title: Text(
         title ?? categoryName ?? 'Products',
-        style: const TextStyle(color: Colors.white),
+        style:
+            const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
       ),
       centerTitle: true,
       floating: true,

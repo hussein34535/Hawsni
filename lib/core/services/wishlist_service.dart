@@ -53,22 +53,38 @@ class WishlistService extends ChangeNotifier {
 
   // عند بدء التطبيق، اجلب البيانات
   WishlistService() {
+    // Initial check
     if (AuthService.isAuthenticated()) {
       fetchWishlist();
     }
+
+    // Listen to auth changes
+    AuthService.authStateChanges.listen((isAuthenticated) {
+      print('[WishlistService] Auth State Changed: $isAuthenticated');
+      if (isAuthenticated) {
+        fetchWishlist();
+      } else {
+        clearWishlist();
+      }
+    });
   }
 
   Future<void> fetchWishlist() async {
-    if (!AuthService.isAuthenticated()) return;
+    if (!AuthService.isAuthenticated()) {
+      print('[WishlistService] fetchWishlist skipped: Not authenticated');
+      return;
+    }
 
+    print('[WishlistService] Fetching wishlist...');
     _isLoading = true;
     notifyListeners();
 
     try {
       final List<dynamic> data = await ApiService.getWishlist();
+      print('[WishlistService] Wishlist fetched: ${data.length} items');
       _items = data.map((json) => WishlistItem.fromJson(json)).toList();
     } catch (e) {
-      print("Wishlist fetch error: $e");
+      print('[WishlistService] Error fetching wishlist: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -86,7 +102,9 @@ class WishlistService extends ChangeNotifier {
       notifyListeners();
 
       // 2. إرسال الطلب للسيرفر
+      print('[WishlistService] Adding item ${item.id} to backend...');
       final success = await ApiService.addToWishlist(item.id);
+      print('[WishlistService] Backend response for add: $success');
 
       // 3. التراجع في حال الفشل
       if (!success) {
@@ -108,7 +126,9 @@ class WishlistService extends ChangeNotifier {
     notifyListeners();
 
     // 3. إرسال الطلب للسيرفر
+    print('[WishlistService] Removing item $itemId from backend...');
     final success = await ApiService.removeFromWishlist(itemId);
+    print('[WishlistService] Backend response for remove: $success');
 
     // 4. التراجع في حال الفشل
     if (!success) {

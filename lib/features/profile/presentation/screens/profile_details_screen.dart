@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/features/orders/presentation/screens/orders_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
@@ -24,7 +23,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   File? _profileImage;
   Map<String, dynamic>? _userProfile;
   bool _isLoading = true;
-  List<dynamic> _recentOrders = [];
 
   @override
   void initState() {
@@ -57,7 +55,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           _dateOfBirthController.text = profile?['dateOfBirth'] ?? '';
           _isLoading = false;
         });
-        _loadRecentOrders();
       }
     } catch (e) {
       print('Error loading user profile: $e');
@@ -66,19 +63,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           _isLoading = false;
         });
       }
-    }
-  }
-
-  Future<void> _loadRecentOrders() async {
-    try {
-      final orders = await ApiService.getUserOrders();
-      if (mounted) {
-        setState(() {
-          _recentOrders = orders.take(2).toList();
-        });
-      }
-    } catch (e) {
-      print('Error loading orders: $e');
     }
   }
 
@@ -301,54 +285,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                         ),
                       ),
                     const SizedBox(height: 40),
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Recent Activity',
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (_recentOrders.isEmpty)
-                      const Text('No recent orders',
-                          style: TextStyle(color: AppTheme.textSecondary))
-                    else
-                      ..._recentOrders.map((order) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _buildOrderCard(
-                              'Order #${order['id'].toString().substring(0, 8)}',
-                              order['status'] ?? 'Processing',
-                              '\$${order['total']}',
-                              order['created_at'] != null
-                                  ? order['created_at']
-                                      .toString()
-                                      .substring(0, 10)
-                                  : '',
-                            ),
-                          )),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => const OrdersScreen())),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppTheme.primaryColor),
-                          padding: const EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: const Text('View All Orders',
-                            style: TextStyle(
-                                color: AppTheme.primaryColor,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -368,7 +304,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: enabled ? Colors.white : Colors.grey[50],
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.borderColor),
       ),
@@ -382,71 +318,12 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(color: AppTheme.textSecondary),
-          prefixIcon: Icon(icon,
-              color: enabled ? AppTheme.primaryColor : AppTheme.textTertiary),
+          prefixIcon: Icon(icon, color: AppTheme.primaryColor),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         ),
         validator: validator,
-      ),
-    );
-  }
-
-  Widget _buildOrderCard(
-      String orderId, String status, String amount, String date) {
-    Color statusColor = status == 'Delivered'
-        ? AppTheme.successColor
-        : (status == 'Processing' ? Colors.orange : AppTheme.errorColor);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.borderColor),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(orderId,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary)),
-              const SizedBox(height: 4),
-              Text(date,
-                  style: const TextStyle(
-                      fontSize: 14, color: AppTheme.textSecondary)),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(amount,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryColor)),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(status,
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: statusColor,
-                        fontWeight: FontWeight.w600)),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

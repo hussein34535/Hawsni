@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
 import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
@@ -22,6 +23,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     try {
       final items = await _cartService.getCart();
       emit(CartLoaded(items: items));
+    } on ApiException catch (e) {
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        emit(CartAuthError(e.message));
+      } else {
+        emit(CartError('Failed to load cart: ${e.message}'));
+      }
     } catch (e) {
       emit(CartError('Failed to load cart: $e'));
     }
@@ -52,6 +59,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         color: event.item.color,
       );
       emit(CartLoaded(items: items));
+    } on ApiException catch (e) {
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        emit(CartAuthError(e.message));
+      } else {
+        emit(CartError('Failed to add to cart: ${e.message}'));
+        add(CartStarted());
+      }
     } catch (e) {
       emit(CartError('Failed to add to cart: $e'));
       // Reload cart to ensure consistency
@@ -64,6 +78,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     try {
       final items = await _cartService.removeFromCart(event.itemId);
       emit(CartLoaded(items: items));
+    } on ApiException catch (e) {
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        emit(CartAuthError(e.message));
+      } else {
+        emit(CartError('Failed to remove from cart: ${e.message}'));
+        add(CartStarted());
+      }
     } catch (e) {
       emit(CartError('Failed to remove from cart: $e'));
       add(CartStarted());
@@ -76,6 +97,13 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final items =
           await _cartService.updateCartItem(event.itemId, event.quantity);
       emit(CartLoaded(items: items));
+    } on ApiException catch (e) {
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        emit(CartAuthError(e.message));
+      } else {
+        emit(CartError('Failed to update quantity: ${e.message}'));
+        add(CartStarted());
+      }
     } catch (e) {
       emit(CartError('Failed to update quantity: $e'));
       add(CartStarted());
@@ -86,6 +114,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     try {
       await _cartService.clearCart();
       emit(const CartLoaded(items: []));
+    } on ApiException catch (e) {
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        emit(CartAuthError(e.message));
+      } else {
+        emit(CartError('Failed to clear cart: ${e.message}'));
+      }
     } catch (e) {
       emit(CartError('Failed to clear cart: $e'));
     }

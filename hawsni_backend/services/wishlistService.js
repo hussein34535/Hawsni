@@ -9,7 +9,7 @@ class WishlistService {
             .eq('user_id', userId)
             .single();
 
-        if (wishlistError && wishlistError.code !== 'PGRST116') { // PGRST116 is "Row not found"
+        if (wishlistError && wishlistError.code !== 'PGRST116') {
             throw new Error(wishlistError.message);
         }
 
@@ -17,17 +17,29 @@ class WishlistService {
             return { products: [] };
         }
 
-        // 2. Get items in the wishlist
+        // 2. Get item IDs from wishlist
         const { data: items, error: itemsError } = await supabase
             .from('wishlist_items')
-            .select('product:products(*)')
+            .select('product_id')
             .eq('wishlist_id', wishlist.id);
 
         if (itemsError) throw new Error(itemsError.message);
 
-        return {
-            products: items.map(item => item.product).filter(p => p !== null)
-        };
+        if (!items || items.length === 0) {
+            return { products: [] };
+        }
+
+        const productIds = items.map(item => item.product_id);
+
+        // 3. Get products details manually
+        const { data: products, error: productsError } = await supabase
+            .from('products')
+            .select('*')
+            .in('id', productIds);
+
+        if (productsError) throw new Error(productsError.message);
+
+        return { products: products || [] };
     }
 
     async addToWishlist(userId, productId) {

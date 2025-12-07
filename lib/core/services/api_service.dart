@@ -3,6 +3,16 @@ import 'package:http/http.dart' as http;
 import 'package:hawsni_app/core/config/app_config.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
 
+class ApiException implements Exception {
+  final String message;
+  final int statusCode;
+
+  ApiException(this.message, this.statusCode);
+
+  @override
+  String toString() => 'ApiException: $message (Status: $statusCode)';
+}
+
 class ApiService {
   static late AppConfig _config;
 
@@ -37,7 +47,8 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to load data: ${response.body}');
+        throw ApiException(
+            'Failed to load data: ${response.body}', response.statusCode);
       }
     } catch (e) {
       print('Error in GET $endpoint: $e');
@@ -58,7 +69,8 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to post data: ${response.body}');
+        throw ApiException(
+            'Failed to post data: ${response.body}', response.statusCode);
       }
     } catch (e) {
       print('Error in POST $endpoint: $e');
@@ -79,7 +91,8 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to put data: ${response.body}');
+        throw ApiException(
+            'Failed to put data: ${response.body}', response.statusCode);
       }
     } catch (e) {
       print('Error in PUT $endpoint: $e');
@@ -99,7 +112,8 @@ class ApiService {
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return json.decode(response.body);
       } else {
-        throw Exception('Failed to delete data: ${response.body}');
+        throw ApiException(
+            'Failed to delete data: ${response.body}', response.statusCode);
       }
     } catch (e) {
       print('Error in DELETE $endpoint: $e');

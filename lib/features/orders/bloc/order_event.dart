@@ -8,6 +8,8 @@ abstract class OrderEvent extends Equatable {
 
 class LoadOrders extends OrderEvent {}
 
+class ClearOrders extends OrderEvent {}
+
 class CreateOrder extends OrderEvent {
   final Map<String, dynamic> orderData;
   final List<dynamic> items;
