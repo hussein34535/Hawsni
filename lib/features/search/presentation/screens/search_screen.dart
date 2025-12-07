@@ -464,7 +464,11 @@ class _SearchScreenState extends State<SearchScreen> {
           price: product['price']?.toString() ?? '0.00',
           rating: (product['rating'] as num?)?.toDouble() ?? 0.0,
           reviewCount: (product['reviewCount'] as num?)?.toInt() ?? 0,
-          screenId: 'search',
+          screenId: 'search', // Updated
+          colors: product['colors'] is List ? product['colors'] : null,
+          sizes: product['sizes'] != null
+              ? List<String>.from(product['sizes'])
+              : null,
         );
       },
     );

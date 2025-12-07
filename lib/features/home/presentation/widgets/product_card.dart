@@ -22,6 +22,7 @@ class ProductCard extends StatefulWidget {
   final Color? badgeColor;
   final String screenId;
   final List<dynamic>? colors;
+  final List<String>? sizes;
 
   const ProductCard({
     super.key,
@@ -37,6 +38,7 @@ class ProductCard extends StatefulWidget {
     this.badgeColor,
     required this.screenId,
     this.colors,
+    this.sizes,
   });
 
   @override
@@ -64,6 +66,8 @@ class _ProductCardState extends State<ProductCard> {
                 screenId: widget.screenId,
                 rating: widget.rating,
                 reviewCount: widget.reviewCount,
+                sizes: widget.sizes,
+                colors: widget.colors,
               ),
             ),
           ),

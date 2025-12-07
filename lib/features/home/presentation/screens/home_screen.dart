@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/home/bloc/home_bloc.dart';
@@ -189,35 +190,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             placeholderBuilder:
                                                                 (BuildContext
                                                                     context) {
-                                                              return Icon(
-                                                                Icons.category,
-                                                                size: 32,
-                                                                color: AppTheme
-                                                                    .primaryColor,
-                                                              );
+                                                              return Container(
+                                                                  color: Colors
+                                                                      .transparent);
                                                             },
                                                           ),
                                                         )
-                                                      : Image.network(
-                                                          category.imageUrl!,
+                                                      : CachedNetworkImage(
+                                                          imageUrl: category
+                                                              .imageUrl!,
                                                           fit: BoxFit.cover,
-                                                          errorBuilder:
-                                                              (context, error,
-                                                                  stackTrace) {
-                                                            return Icon(
-                                                              Icons.category,
-                                                              size: 32,
-                                                              color: AppTheme
-                                                                  .primaryColor,
-                                                            );
-                                                          },
+                                                          memCacheHeight:
+                                                              400, // Better quality
+                                                          placeholder: (context,
+                                                                  url) =>
+                                                              Container(
+                                                                  color: Colors
+                                                                      .transparent),
+                                                          errorWidget: (context,
+                                                                  url, error) =>
+                                                              Container(
+                                                                  color: Colors
+                                                                      .transparent),
                                                         ))
-                                                  : Icon(
-                                                      Icons.category,
-                                                      size: 32,
+                                                  : Container(
                                                       color:
-                                                          AppTheme.primaryColor,
-                                                    ),
+                                                          Colors.transparent),
                                             ),
                                           ),
                                         ),
@@ -280,6 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               badgeColor: Colors.red,
                               screenId: 'home',
                               colors: product.colors,
+                              sizes: product.sizes,
                             );
                           },
                           childCount: _selectedFilter == 'All'

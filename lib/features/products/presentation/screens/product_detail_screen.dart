@@ -130,11 +130,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     List<String> availableSizes = [];
     List<dynamic> availableColors = [];
 
-    if (productState is! ProductDetailsLoaded) {
+    // Use state if loaded, otherwise fallback to widget properties (optimistic UI)
+    if (productState is ProductDetailsLoaded) {
+      availableSizes = productState.product.sizes ?? [];
+      availableColors = productState.product.colors ?? [];
+    } else {
+      availableSizes = widget.sizes ?? [];
+      availableColors = widget.colors ?? [];
+    }
+
+    // Safety check: If we have no data and are still loading, prevent blind add
+    if (availableSizes.isEmpty &&
+        availableColors.isEmpty &&
+        productState is! ProductDetailsLoaded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Loading product options, please wait...',
+              style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.black87,
+          duration: const Duration(milliseconds: 1500),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
       return;
     }
-    availableSizes = productState.product.sizes ?? [];
-    availableColors = productState.product.colors ?? [];
 
     // Check validation
     if (availableSizes.isNotEmpty && selectedSize == null) {
@@ -324,7 +345,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         decoration: BoxDecoration(
                                           color: _currentImageIndex == index
                                               ? AppTheme.primaryColor
-                                              : Colors.white.withOpacity(0.5),
+                                              : Colors.grey.withOpacity(0.5),
                                           borderRadius:
                                               BorderRadius.circular(4),
                                         ),

@@ -63,7 +63,7 @@ class ProductsScreen extends StatelessWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: 16.0,
                         mainAxisSpacing: 16.0,
-                        childAspectRatio: 0.7,
+                        childAspectRatio: 0.6,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -78,6 +78,7 @@ class ProductsScreen extends StatelessWidget {
                             reviewCount: product.reviewCount,
                             screenId: 'products',
                             colors: product.colors,
+                            sizes: product.sizes,
                           );
                         },
                         childCount: products.length,

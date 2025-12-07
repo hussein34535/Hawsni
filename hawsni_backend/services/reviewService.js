@@ -4,7 +4,7 @@ class ReviewService {
     async getProductReviews(productId) {
         const { data, error } = await supabase
             .from('reviews')
-            .select('*, user:users(name)')
+            .select('*, user_id, user:users(id, name)')
             .eq('product_id', productId)
             .order('created_at', { ascending: false });
 

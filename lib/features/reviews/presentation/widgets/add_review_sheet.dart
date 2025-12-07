@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
 
 class AddReviewSheet extends StatefulWidget {
   final String productId;
+  final ReviewBloc reviewBloc;
 
-  const AddReviewSheet({super.key, required this.productId});
+  const AddReviewSheet({
+    super.key,
+    required this.productId,
+    required this.reviewBloc,
+  });
 
   @override
   State<AddReviewSheet> createState() => _AddReviewSheetState();
@@ -56,12 +61,12 @@ class _AddReviewSheetState extends State<AddReviewSheet>
     // Close the sheet
     Navigator.pop(context);
 
-    // Dispatch event
-    context.read<ReviewBloc>().add(AddReview(
-          productId: widget.productId,
-          rating: _rating,
-          comment: _commentController.text,
-        ));
+    // Dispatch event using the explicitly passed bloc
+    widget.reviewBloc.add(AddReview(
+      productId: widget.productId,
+      rating: _rating,
+      comment: _commentController.text,
+    ));
 
     // Show success snackbar (optimistic)
     ScaffoldMessenger.of(context).showSnackBar(
@@ -116,14 +121,7 @@ class _AddReviewSheetState extends State<AddReviewSheet>
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap the stars to rate',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
-            ),
+
             const SizedBox(height: 24),
 
             // Stars
@@ -133,7 +131,7 @@ class _AddReviewSheetState extends State<AddReviewSheet>
                 initialRating: 0,
                 minRating: 1,
                 direction: Axis.horizontal,
-                allowHalfRating: true,
+                allowHalfRating: false,
                 itemCount: 5,
                 itemSize: 48,
                 unratedColor: Colors.grey[200],

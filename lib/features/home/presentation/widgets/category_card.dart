@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/widgets/svg_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hawsni_app/core/services/api_service.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -66,22 +67,41 @@ class CategoryCard extends StatelessWidget {
   Widget _buildCategoryImage() {
     // If we have an image URL, display the image
     if (image != null && image!.isNotEmpty) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(50),
-        child: SvgImage(
-          url: '${ApiService.baseUrl}$image',
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
-        ),
-      );
+      if (image!.endsWith('.svg')) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: SvgImage(
+            url: '${ApiService.baseUrl}$image',
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+          ),
+        );
+      } else {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: CachedNetworkImage(
+            imageUrl: image!.startsWith('http')
+                ? image!
+                : '${ApiService.baseUrl}$image',
+            width: 40,
+            height: 40,
+            fit: BoxFit.cover,
+            memCacheHeight: 200, // Better quality (40 * 5)
+            placeholder: (context, url) => Container(color: Colors.transparent),
+            errorWidget: (context, url, error) =>
+                Container(color: Colors.transparent),
+          ),
+        );
+      }
     }
 
     // Fallback to default icon
-    return const Icon(
-      Icons.category,
-      size: 40,
-      color: Colors.blue,
+    // Fallback if image is null (as requested: empty/transparent)
+    return Container(
+      color: Colors.transparent,
+      width: 40,
+      height: 40,
     );
   }
 }

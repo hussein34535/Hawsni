@@ -6,6 +6,8 @@ import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_state.dart';
 import 'package:intl/intl.dart';
+import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
 import 'package:hawsni_app/features/reviews/presentation/widgets/add_review_sheet.dart';
 
 class ReviewsSection extends StatelessWidget {
@@ -14,11 +16,15 @@ class ReviewsSection extends StatelessWidget {
   const ReviewsSection({super.key, required this.productId});
 
   void _showAddReviewDialog(BuildContext context) {
+    final reviewBloc = context.read<ReviewBloc>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => AddReviewSheet(productId: productId),
+      builder: (context) => AddReviewSheet(
+        productId: productId,
+        reviewBloc: reviewBloc,
+      ),
     );
   }
 
@@ -40,19 +46,42 @@ class ReviewsSection extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Reviews",
+                const Text("Reviews",
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
                         fontFamily: 'Playfair Display')),
-                TextButton.icon(
-                  onPressed: () => _showAddReviewDialog(context),
-                  icon: const Icon(Icons.edit,
-                      size: 16, color: AppTheme.primaryColor),
-                  label: Text("Write Review",
-                      style: TextStyle(color: AppTheme.primaryColor)),
-                ),
+                if (state is ReviewLoaded) ...[
+                  if (!state.reviews.any((r) {
+                    print(
+                        'Checking review: ${r.userId} vs Current: ${AuthService.userId}');
+                    return r.userId.toString().trim() ==
+                        AuthService.userId.toString().trim();
+                  }))
+                    TextButton.icon(
+                      onPressed: () => _showAddReviewDialog(context),
+                      icon: const Icon(Icons.edit,
+                          size: 16, color: AppTheme.primaryColor),
+                      label: const Text("Write Review",
+                          style: TextStyle(color: AppTheme.primaryColor)),
+                    )
+                  else
+                    const Text(
+                      "You successfully reviewed",
+                      style: TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12),
+                    ),
+                ] else if (state is! ReviewLoading)
+                  TextButton.icon(
+                    onPressed: () => _showAddReviewDialog(context),
+                    icon: const Icon(Icons.edit,
+                        size: 16, color: AppTheme.primaryColor),
+                    label: const Text("Write Review",
+                        style: TextStyle(color: AppTheme.primaryColor)),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
@@ -139,6 +168,43 @@ class ReviewsSection extends StatelessWidget {
                                 itemCount: 5,
                                 itemSize: 16.0,
                               ),
+                              if (review.userId.toString().trim() ==
+                                  AuthService.userId.toString().trim())
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red, size: 20),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: const Text('Delete Review'),
+                                        content: const Text(
+                                            'Are you sure you want to delete your review?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              context.read<ReviewBloc>().add(
+                                                  DeleteReview(
+                                                      reviewId: review.id,
+                                                      productId: productId));
+                                            },
+                                            child: const Text('Delete',
+                                                style: TextStyle(
+                                                    color: Colors.red)),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                             ],
                           ),
                           const SizedBox(height: 12),

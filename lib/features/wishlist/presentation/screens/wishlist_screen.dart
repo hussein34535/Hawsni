@@ -118,7 +118,7 @@ class WishlistScreen extends StatelessWidget {
                 id: item.id,
                 imageUrl: item.imageUrl,
                 name: item.name,
-                price: item.price,
+                price: item.price.toString(),
                 rating: item.rating,
                 reviewCount: item.reviewCount,
                 screenId: 'wishlist',

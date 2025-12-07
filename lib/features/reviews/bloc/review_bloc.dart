@@ -9,6 +9,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   ReviewBloc(this._reviewService) : super(ReviewInitial()) {
     on<LoadReviews>(_onLoadReviews);
     on<AddReview>(_onAddReview);
+    on<DeleteReview>(_onDeleteReview);
   }
 
   Future<void> _onLoadReviews(
@@ -23,19 +24,22 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   }
 
   Future<void> _onAddReview(AddReview event, Emitter<ReviewState> emit) async {
-    // We don't want to replace the list with loading state if we are just adding
-    // But for simplicity, let's just emit adding state or handle it in UI
-    // emit(ReviewAdding()); // This might clear the list if UI listens to it exclusively
-
     try {
       await _reviewService.createReview(
           event.productId, event.rating, event.comment);
-      // Reload reviews to get the fresh list including the new one (and updated user info)
       add(LoadReviews(event.productId));
     } catch (e) {
       emit(ReviewError(e.toString()));
-      // After error, we might want to reload or revert to loaded state
-      // For now, error state is terminal until reload
+    }
+  }
+
+  Future<void> _onDeleteReview(
+      DeleteReview event, Emitter<ReviewState> emit) async {
+    try {
+      await _reviewService.deleteReview(event.reviewId);
+      add(LoadReviews(event.productId));
+    } catch (e) {
+      emit(ReviewError(e.toString()));
     }
   }
 }

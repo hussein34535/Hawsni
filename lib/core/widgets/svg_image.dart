@@ -38,12 +38,8 @@ class SvgImage extends StatelessWidget {
           return const CircularProgressIndicator();
         },
         errorBuilder: (context, error, stackTrace) {
-          // Fallback to default icon if image fails to load
-          return const Icon(
-            Icons.category,
-            size: 40,
-            color: Colors.blue,
-          );
+          // Fallback to transparent container if image fails to load
+          return Container(color: Colors.transparent);
         },
       );
     }

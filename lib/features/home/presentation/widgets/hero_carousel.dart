@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 
 class HeroCarousel extends StatefulWidget {
@@ -90,12 +91,13 @@ class _HeroCarouselState extends State<HeroCarousel> {
               children: [
                 // Background Image
                 if (imageUrl != null)
-                  Image.network(
-                    imageUrl,
+                  CachedNetworkImage(
+                    imageUrl: imageUrl,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(color: Colors.grey[100]);
-                    },
+                    placeholder: (context, url) =>
+                        Container(color: Colors.white),
+                    errorWidget: (context, url, error) =>
+                        Container(color: Colors.grey[100]),
                   ),
 
                 // Subtle bottom-weighted gradient overlay

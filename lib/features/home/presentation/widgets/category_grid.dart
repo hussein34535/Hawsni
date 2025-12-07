@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CategoryGridItem {
   final String id;
@@ -68,19 +69,28 @@ class CategoryGrid extends StatelessWidget {
                                 AppTheme.primaryColor,
                                 BlendMode.srcIn,
                               ),
+                              placeholderBuilder: (context) =>
+                                  Container(color: Colors.transparent),
                             )
-                          : Image.network(
-                              category.imageUrl!,
+                          : CachedNetworkImage(
+                              imageUrl: category.imageUrl!,
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
+                              memCacheHeight: 400, // Better quality
+                              placeholder: (context, url) =>
+                                  Container(color: Colors.transparent),
+                              errorWidget: (context, url, error) =>
+                                  Container(color: Colors.transparent),
                             ),
                     )
-                  : Icon(
-                      category.icon ?? Icons.category,
-                      size: 32,
-                      color: AppTheme.primaryColor,
-                    ),
+                  : (category.icon != null
+                      ? Icon(
+                          category.icon,
+                          size: 32,
+                          color: AppTheme.primaryColor,
+                        )
+                      : Container(color: Colors.transparent)),
             ),
           ),
           const SizedBox(height: 12),
