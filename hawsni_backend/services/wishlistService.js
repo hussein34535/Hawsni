@@ -40,14 +40,7 @@ class WishlistService {
         if (productsError) throw new Error(productsError.message);
 
         return {
-            products: products || [],
-            debug: {
-                userId,
-                wishlistId: wishlist?.id,
-                itemsFound: items?.length,
-                rawItemIds: productIds,
-                productsFound: products?.length
-            }
+            products: products || []
         };
     }
 

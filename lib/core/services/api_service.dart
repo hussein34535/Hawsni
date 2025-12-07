@@ -367,8 +367,10 @@ class ApiService {
   static Future<List<dynamic>> getWishlist() async {
     try {
       final data = await get('/wishlist', includeAuth: true);
-      print('[ApiService] Full Wishlist Response: $data');
-      return data['products'] ?? [];
+      if (data['wishlist'] != null && data['wishlist']['products'] != null) {
+        return data['wishlist']['products'];
+      }
+      return [];
     } catch (e) {
       print('Error fetching wishlist: $e');
       return [];
