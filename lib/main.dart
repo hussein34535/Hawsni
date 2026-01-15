@@ -17,13 +17,13 @@ import 'package:hawsni_app/core/services/api_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize App Configuration - Using LOCAL server (Stable)
+  // Initialize App Configuration - Using PRODUCTION server (Vercel)
   print('-------------------------------------------');
-  print('🚀 STARTING APP - CONNECTING TO LOCALHOST');
-  print('🚀 URL: http://10.0.2.2:5000/api');
+  print('🚀 STARTING APP - FORCING CONNECTION TO VERCEL');
+  print('🚀 URL: https://hawsnibackend.vercel.app/api');
   print('-------------------------------------------');
 
-  AppConfig config = DevConfig();
+  AppConfig config = ProdConfig();
   ApiService.initialize(config);
 
   // Load authentication token
