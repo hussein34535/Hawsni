@@ -11,18 +11,19 @@ import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
 import 'package:hawsni_app/features/orders/data/services/order_service.dart';
 import 'package:hawsni_app/core/config/app_config.dart';
 import 'package:hawsni_app/core/config/prod_config.dart';
+import 'package:hawsni_app/core/config/dev_config.dart'; // Added DevConfig import
 import 'package:hawsni_app/core/services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize App Configuration - Using PRODUCTION server (Vercel)
+  // Initialize App Configuration - Using LOCAL server (Stable)
   print('-------------------------------------------');
-  print('🚀 STARTING APP - FORCING CONNECTION TO VERCEL');
-  print('🚀 URL: https://hawsnibackend.vercel.app/api');
+  print('🚀 STARTING APP - CONNECTING TO LOCALHOST');
+  print('🚀 URL: http://10.0.2.2:5000/api');
   print('-------------------------------------------');
 
-  AppConfig config = ProdConfig();
+  AppConfig config = DevConfig();
   ApiService.initialize(config);
 
   // Load authentication token
