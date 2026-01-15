@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
+const fetch = require('node-fetch');
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
@@ -11,6 +12,15 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 // Use service role key for admin operations (bypasses RLS)
-const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseKey);
+// Explicitly pass node-fetch to avoid Node 18+ native fetch issues with IPv6
+const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+  global: {
+    fetch: fetch,
+  },
+});
 
 module.exports = supabase;

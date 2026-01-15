@@ -55,7 +55,7 @@ class ReviewsSection extends StatelessWidget {
                 if (state is ReviewLoaded) ...[
                   if (!state.reviews.any((r) {
                     print(
-                        'Checking review: ${r.userId} vs Current: ${AuthService.userId}');
+                        'CHECK MATCH: ReviewUser=${r.userId} vs AuthUser=${AuthService.userId}');
                     return r.userId.toString().trim() ==
                         AuthService.userId.toString().trim();
                   }))

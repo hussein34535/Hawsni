@@ -2,5 +2,6 @@ import 'package:hawsni_app/core/config/app_config.dart';
 
 class DevConfig implements AppConfig {
   @override
-  String get baseUrl => 'http://192.168.100.8:5000/api';
+  // 10.0.2.2 is the Android emulator's alias for host machine's localhost
+  String get baseUrl => 'http://10.0.2.2:5000/api';
 }

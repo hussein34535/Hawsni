@@ -18,7 +18,7 @@ class ReviewModel {
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
-    print('ReviewModel Parsing JSON: $json'); // Debug print
+    print('DEBUG JSON: $json'); // VERBOSE DEBUG
 
     String parsedUserId = '';
     // Try explicit user_id first
@@ -41,8 +41,7 @@ class ReviewModel {
       parsedUserName = json['user']['name']?.toString() ?? 'Anonymous';
     }
 
-    print(
-        'Parsed UserId: $parsedUserId, UserName: $parsedUserName'); // Debug result
+    print('PARSED: ID=$parsedUserId, Name=$parsedUserName'); // VERBOSE DEBUG
 
     return ReviewModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',

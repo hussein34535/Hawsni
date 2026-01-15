@@ -2,14 +2,38 @@ const supabase = require('../config/supabase');
 
 class ReviewService {
     async getProductReviews(productId) {
+        // Get reviews without join first
         const { data, error } = await supabase
             .from('reviews')
-            .select('*, user_id, user:users(id, name)')
+            .select('id, rating, comment, created_at, user_id')
             .eq('product_id', productId)
             .order('created_at', { ascending: false });
 
         if (error) throw new Error(error.message);
-        return data;
+
+        // Debug: Log the raw data from Supabase
+        console.log('Supabase raw response:', JSON.stringify(data, null, 2));
+
+        // Get user names for each review
+        const enhancedData = await Promise.all(data.map(async (review) => {
+            let userName = 'Anonymous';
+            if (review.user_id) {
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('name')
+                    .eq('id', review.user_id)
+                    .single();
+                if (userData) {
+                    userName = userData.name || 'Anonymous';
+                }
+            }
+            return {
+                ...review,
+                user: { name: userName, id: review.user_id }
+            };
+        }));
+
+        return enhancedData;
     }
 
     async createReview(userId, productId, rating, comment) {

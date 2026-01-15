@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon --exec \"node --dns-result-order=ipv4first\" server.js"
   },
   "keywords": [
     "ecommerce",
@@ -28,6 +28,7 @@
     "method-override": "^3.0.0",
     "mongoose": "^8.0.0",
     "multer": "^1.4.5-lts.1",
+    "node-fetch": "^2.7.0",
     "pg": "^8.16.3"
   },
   "devDependencies": {
