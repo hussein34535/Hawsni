@@ -38,8 +38,21 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? pickedFile = await _picker.pickImage(source: source);
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 70,
+      );
       if (pickedFile != null) {
+        final length = await pickedFile.length();
+        if (length > 5 * 1024 * 1024) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Image too large. Please choose a smaller one.')),
+          );
+          return;
+        }
         setState(() {
           _userImage = File(pickedFile.path);
           _status = 'idle';

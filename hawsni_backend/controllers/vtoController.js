@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
-// Replicate IDM-VTON model version
-const MODEL_VERSION = "c871bb9b046607e580929ef719e7a72be135acbd01d0883013d832960683a37b";
+// Replicate IDM-VTON model version (cuuupid/idm-vton)
+const MODEL_VERSION = "0513734a452173b8173e907e3a59d19a36266e55b48528559432bd21c7d7e985";
 
 exports.startTryOn = async (req, res) => {
     try {
@@ -20,7 +20,7 @@ exports.startTryOn = async (req, res) => {
             body: JSON.stringify({
                 version: MODEL_VERSION,
                 input: {
-                    human_image: human_image,
+                    human_img: human_image, // Changed from human_image to human_img based on cuuupid/idm-vton schema
                     garm_img: garment_image,
                     garment_des: description || "clothing",
                     crop: false,
