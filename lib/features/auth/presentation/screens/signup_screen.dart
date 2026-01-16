@@ -4,6 +4,8 @@ import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/auth/presentation/screens/otp_verification_screen.dart';
+import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
+import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 class SignupScreen extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hawsni_app/features/splash/presentation/screens/language_selection_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 
@@ -23,13 +23,25 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 3));
 
     if (mounted) {
-      // Always navigate to MainScreen (Guest is default)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MainScreen(),
-        ),
-      );
+      final prefs = await SharedPreferences.getInstance();
+      final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
+
+      if (isFirstLaunch) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LanguageSelectionScreen(),
+          ),
+        );
+      } else {
+        // Always navigate to MainScreen (Guest is default)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MainScreen(),
+          ),
+        );
+      }
     }
   }
 
