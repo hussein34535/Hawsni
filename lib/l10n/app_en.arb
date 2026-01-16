@@ -177,5 +177,11 @@
     "colors": "Colors",
     "material": "Material",
     "warranty": "Warranty",
-    "phoneNumber": "Phone Number"
+    "phoneNumber": "Phone Number",
+  "vtoTitle": "Virtual Try-On",
+  "vtoInstruction": "Upload a full-body photo of yourself to try on this item.",
+  "vtoProcessing": "Applying magic... This may take a few seconds.",
+  "vtoUpload": "Tap to upload photo",
+  "vtoTryAnother": "Try Another Photo",
+  "vtoButton": "Try On Now"
 }

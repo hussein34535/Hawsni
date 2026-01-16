@@ -6,7 +6,8 @@ import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
 import 'package:hawsni_app/features/products/presentation/widgets/reviews_section.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
-import 'package:hawsni_app/features/reviews/data/services/review_service.dart';
+import 'package:hawsni_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
+import 'package:hawsni_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
@@ -867,6 +868,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ],
                             ),
                             const Spacer(),
+                            Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.secondaryColor
+                                    .withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              child: IconButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => VirtualTryOnScreen(
+                                        productId: widget.product.id,
+                                        productImageUrl: _selectedImageIndex <
+                                                widget.product.images.length
+                                            ? widget.product
+                                                .images[_selectedImageIndex]
+                                            : widget.product.imageUrl,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.camera_alt_outlined,
+                                    color: AppTheme.primaryColor),
+                                tooltip: 'Virtual Try-On',
+                              ),
+                            ),
                             ElevatedButton.icon(
                               onPressed: () => _addToCart(context),
                               icon: const Icon(Icons.shopping_bag_outlined,

@@ -19,8 +19,8 @@ const reviewRoutes = require('./routes/reviews_supabase');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
 const bannerRoutes = require('./routes/banners');
-const adminRoutes = require('./routes/admin');
-
+const adminRoutes = require('./routes/admin'); // New admin routes
+const vtoRoutes = require('./routes/vto'); // Virtual Try-On routes
 // Import Controllers
 const DashboardController = require('./controllers/admin/dashboardController');
 const ProductController = require('./controllers/api/productController');
@@ -52,11 +52,13 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/coupons', couponRoutes);
+app.use('/api/banners', bannerRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/vto', vtoRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/banners', bannerRoutes);
 
 // Admin Routes (new layout system)
 app.use('/', adminRoutes);

@@ -156,5 +156,11 @@
     "colors": "الألوان",
     "material": "الخامة",
     "warranty": "الضمان",
-    "phoneNumber": "رقم الهاتف"
+    "phoneNumber": "رقم الهاتف",
+  "vtoTitle": "غرفة القياس الافتراضية",
+  "vtoInstruction": "ارفع صورة كاملة للجسم لتجربة القطعة عليك.",
+  "vtoProcessing": "جاري دمج الملابس... قد يستغرق ذلك بضع ثوان.",
+  "vtoUpload": "اضغط لرفع صورتك",
+  "vtoTryAnother": "جرب صورة أخرى",
+  "vtoButton": "جرب الآن"
 }
