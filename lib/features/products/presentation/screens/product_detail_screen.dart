@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
@@ -849,33 +850,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    AppLocalizations.of(context)!.totalPrice,
-                                    style:
-                                        AppTheme.textTheme.bodySmall?.copyWith(
-                                      color: AppTheme.textSecondary,
+                              child: Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: widget.price,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primaryColor,
+                                      ),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    widget.price,
-                                    style:
-                                        AppTheme.textTheme.titleLarge?.copyWith(
-                                      color: AppTheme.primaryColor,
-                                      fontWeight: FontWeight.bold,
+                                    const TextSpan(text: ' '),
+                                    TextSpan(
+                                      text: AppLocalizations.of(context)!
+                                          .currencySymbol,
+                                      style: GoogleFonts.poppins(
+                                        fontSize:
+                                            14, // Smaller font for currency
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.primaryColor,
+                                      ),
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            const Spacer(),
                             Container(
                               margin: const EdgeInsets.only(right: 8),
                               decoration: BoxDecoration(
@@ -883,8 +885,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              child: IconButton(
-                                onPressed: () {
+                              child: GestureDetector(
+                                onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -895,22 +897,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     ),
                                   );
                                 },
-                                icon: const Icon(Icons.camera_alt_outlined,
-                                    color: AppTheme.primaryColor),
-                                tooltip: 'Virtual Try-On',
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.asset(
+                                    'assets/images/vto_final_icon.png',
+                                    width: 32,
+                                    height: 32,
+                                  ),
+                                ),
                               ),
                             ),
                             ElevatedButton.icon(
                               onPressed: () => _addToCart(context),
                               icon: const Icon(Icons.shopping_bag_outlined,
                                   color: Colors.white),
-                              label:
-                                  Text(AppLocalizations.of(context)!.addToBag),
+                              label: Text(
+                                  AppLocalizations.of(context)!.addToPurchase,
+                                  style: const TextStyle(fontSize: 13)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.primaryColor,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
+                                    horizontal: 16,
+                                    vertical: 8), // Reduced vertical padding
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(24),
                                 ),

@@ -166,6 +166,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get currency => 'العملة';
 
   @override
+  String get currencySymbol => 'ج.م';
+
+  @override
   String get myProfile => 'ملفي الشخصي';
 
   @override
@@ -491,20 +494,50 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneNumber => 'رقم الهاتف';
 
   @override
-  String get vtoTitle => 'غرفة القياس الافتراضية';
+  String get vtoTitle => 'غرفة القياس الذكية';
 
   @override
-  String get vtoInstruction => 'ارفع صورة كاملة للجسم لتجربة القطعة عليك.';
+  String get vtoInstruction =>
+      '3 خطوات بسيطة لتجربة الملابس عليك:\n1. اختر صورة واضحة لك (جسم كامل يفضل)\n2. اضغط على زر \'جرب الآن\'\n3. شاهد سحر الذكاء الاصطناعي!';
 
   @override
-  String get vtoProcessing => 'جاري دمج الملابس... قد يستغرق ذلك بضع ثوان.';
+  String get vtoProcessing =>
+      'جاري تجهيز بروفتك... 🎨\nقد يستغرق الأمر ثوانٍ قليلة.';
 
   @override
-  String get vtoUpload => 'اضغط لرفع صورتك';
+  String get vtoUpload => 'اضغط هنا لاختيار صورتك';
 
   @override
   String get vtoTryAnother => 'جرب صورة أخرى';
 
   @override
-  String get vtoButton => 'جرب الآن';
+  String get vtoButton => 'جرب القطعة عليّ الآن ✨';
+
+  @override
+  String get shareImage => 'مشاركة الصورة';
+
+  @override
+  String get saveImage => 'حفظ في المعرض';
+
+  @override
+  String get imageSaved => 'تم حفظ الصورة بنجاح!';
+
+  @override
+  String get imageSavedError => 'حدث خطأ أثناء حفظ الصورة';
+
+  @override
+  String get addToPurchase => 'أضف للشراء';
+
+  @override
+  String get vtoStep1 => 'أضف صورتك';
+
+  @override
+  String get vtoStep2 => 'نعالجها بالذكاء';
+
+  @override
+  String get vtoStep3 => 'شاهد النتيجة!';
+
+  @override
+  String get vtoBestResultTip =>
+      '💡 نصيحة: استخدم صورة بإضاءة جيدة وخلفية بسيطة لأفضل نتيجة.';
 }

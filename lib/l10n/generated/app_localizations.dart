@@ -410,6 +410,12 @@ abstract class AppLocalizations {
   /// **'Currency'**
   String get currency;
 
+  /// No description provided for @currencySymbol.
+  ///
+  /// In en, this message translates to:
+  /// **'EGP'**
+  String get currencySymbol;
+
   /// No description provided for @myProfile.
   ///
   /// In en, this message translates to:
@@ -1049,25 +1055,25 @@ abstract class AppLocalizations {
   /// No description provided for @vtoTitle.
   ///
   /// In en, this message translates to:
-  /// **'Virtual Try-On'**
+  /// **'Smart Fitting Room'**
   String get vtoTitle;
 
   /// No description provided for @vtoInstruction.
   ///
   /// In en, this message translates to:
-  /// **'Upload a full-body photo of yourself to try on this item.'**
+  /// **'3 Simple Steps:\n1. Choose a clear full-body photo.\n2. Tap \'Try On Now\'.\n3. Watch the AI magic!'**
   String get vtoInstruction;
 
   /// No description provided for @vtoProcessing.
   ///
   /// In en, this message translates to:
-  /// **'Applying magic... This may take a few seconds.'**
+  /// **'Preparing your fitting... 🎨\nIt takes just a few seconds.'**
   String get vtoProcessing;
 
   /// No description provided for @vtoUpload.
   ///
   /// In en, this message translates to:
-  /// **'Tap to upload photo'**
+  /// **'Tap to choose your photo'**
   String get vtoUpload;
 
   /// No description provided for @vtoTryAnother.
@@ -1079,8 +1085,62 @@ abstract class AppLocalizations {
   /// No description provided for @vtoButton.
   ///
   /// In en, this message translates to:
-  /// **'Try On Now'**
+  /// **'Try On Now ✨'**
   String get vtoButton;
+
+  /// No description provided for @shareImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Image'**
+  String get shareImage;
+
+  /// No description provided for @saveImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Gallery'**
+  String get saveImage;
+
+  /// No description provided for @imageSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Image saved successfully!'**
+  String get imageSaved;
+
+  /// No description provided for @imageSavedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving image'**
+  String get imageSavedError;
+
+  /// No description provided for @addToPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Purchase'**
+  String get addToPurchase;
+
+  /// No description provided for @vtoStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo'**
+  String get vtoStep1;
+
+  /// No description provided for @vtoStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Processing'**
+  String get vtoStep2;
+
+  /// No description provided for @vtoStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'New Look!'**
+  String get vtoStep3;
+
+  /// No description provided for @vtoBestResultTip.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Tip: Use a well-lit photo with a simple background.'**
+  String get vtoBestResultTip;
 }
 
 class _AppLocalizationsDelegate

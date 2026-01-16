@@ -24,8 +24,8 @@ exports.startTryOn = async (req, res) => {
                     garm_img: garment_image,
                     garment_des: description || "clothing",
                     crop: false,
-                    seed: 42,
-                    steps: 30,
+                    // seed: 42, // Removed fixed seed for better variety
+                    steps: 50, // Increased for better quality
                     category: "upper_body" // Default to upper_body, can make dynamic later
                 },
             }),

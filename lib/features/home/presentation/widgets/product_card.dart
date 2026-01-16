@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
@@ -231,24 +233,40 @@ class _ProductCardState extends State<ProductCard> {
                   Row(
                     children: [
                       // text-lg font-bold text-accent
-                      Text(
-                        '\$${widget.price}',
-                        style: TextStyle(
-                          fontSize: 18, // text-lg
-                          fontWeight: FontWeight.bold, // font-bold
-                          color: AppTheme.primaryColor, // text-accent
+                      // text-lg font-bold text-accent
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: widget.price,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                            const TextSpan(text: ' '),
+                            TextSpan(
+                              text:
+                                  AppLocalizations.of(context)!.currencySymbol,
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       if (widget.originalPrice != null) ...[
                         const SizedBox(width: 8), // gap-2
                         // text-sm text-muted-foreground line-through
                         Text(
-                          '\$${widget.originalPrice}',
-                          style: TextStyle(
-                            fontSize: 14, // text-sm
+                          widget.originalPrice!,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
                             decoration: TextDecoration.lineThrough,
-                            color:
-                                AppTheme.textSecondary, // text-muted-foreground
+                            color: AppTheme.textSecondary,
                           ),
                         ),
                       ],

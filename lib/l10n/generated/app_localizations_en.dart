@@ -166,6 +166,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currency => 'Currency';
 
   @override
+  String get currencySymbol => 'EGP';
+
+  @override
   String get myProfile => 'My Profile';
 
   @override
@@ -494,21 +497,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneNumber => 'Phone Number';
 
   @override
-  String get vtoTitle => 'Virtual Try-On';
+  String get vtoTitle => 'Smart Fitting Room';
 
   @override
   String get vtoInstruction =>
-      'Upload a full-body photo of yourself to try on this item.';
+      '3 Simple Steps:\n1. Choose a clear full-body photo.\n2. Tap \'Try On Now\'.\n3. Watch the AI magic!';
 
   @override
-  String get vtoProcessing => 'Applying magic... This may take a few seconds.';
+  String get vtoProcessing =>
+      'Preparing your fitting... 🎨\nIt takes just a few seconds.';
 
   @override
-  String get vtoUpload => 'Tap to upload photo';
+  String get vtoUpload => 'Tap to choose your photo';
 
   @override
   String get vtoTryAnother => 'Try Another Photo';
 
   @override
-  String get vtoButton => 'Try On Now';
+  String get vtoButton => 'Try On Now ✨';
+
+  @override
+  String get shareImage => 'Share Image';
+
+  @override
+  String get saveImage => 'Save to Gallery';
+
+  @override
+  String get imageSaved => 'Image saved successfully!';
+
+  @override
+  String get imageSavedError => 'Error saving image';
+
+  @override
+  String get addToPurchase => 'Add to Purchase';
+
+  @override
+  String get vtoStep1 => 'Add Photo';
+
+  @override
+  String get vtoStep2 => 'AI Processing';
+
+  @override
+  String get vtoStep3 => 'New Look!';
+
+  @override
+  String get vtoBestResultTip =>
+      '💡 Tip: Use a well-lit photo with a simple background.';
 }
