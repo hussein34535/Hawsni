@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class NotificationsSettingsScreen extends StatefulWidget {
   const NotificationsSettingsScreen({super.key});
@@ -42,21 +43,21 @@ class _NotificationsSettingsScreenState
             children: [
               _buildSwitchTile(
                 icon: Icons.notifications_active_outlined,
-                title: 'Enable Notifications',
+                title: AppLocalizations.of(context)!.enableNotifications,
                 value: _notificationsEnabled,
                 onChanged: (val) => setState(() => _notificationsEnabled = val),
               ),
               _buildDivider(),
               _buildSwitchTile(
                 icon: Icons.email_outlined,
-                title: 'Email Notifications',
+                title: AppLocalizations.of(context)!.emailNotifications,
                 value: _emailNotifications,
                 onChanged: (val) => setState(() => _emailNotifications = val),
               ),
               _buildDivider(),
               _buildSwitchTile(
                 icon: Icons.message_outlined,
-                title: 'Push Notifications',
+                title: AppLocalizations.of(context)!.pushNotifications,
                 value: _pushNotifications,
                 onChanged: (val) => setState(() => _pushNotifications = val),
               ),
@@ -77,7 +78,7 @@ class _NotificationsSettingsScreenState
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppTheme.primaryColor.withOpacity(0.1),
+          color: AppTheme.primaryColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: AppTheme.primaryColor, size: 20),
@@ -91,7 +92,7 @@ class _NotificationsSettingsScreenState
         value: value,
         onChanged: onChanged,
         activeColor: AppTheme.primaryColor,
-        activeTrackColor: AppTheme.primaryColor.withOpacity(0.3),
+        activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );

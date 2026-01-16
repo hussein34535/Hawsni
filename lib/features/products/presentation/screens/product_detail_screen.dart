@@ -13,6 +13,7 @@ import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
 import 'package:hawsni_app/features/products/bloc/product_event.dart';
 import 'package:hawsni_app/features/products/bloc/product_state.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:hawsni_app/core/services/wishlist_service.dart';
 import 'package:hawsni_app/features/products/data/services/product_service.dart';
@@ -145,8 +146,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         productState is! ProductDetailsLoaded) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Loading product options, please wait...',
-              style: TextStyle(color: Colors.white)),
+          content: Text(AppLocalizations.of(context)!.loading,
+              style: const TextStyle(color: Colors.white)),
           backgroundColor: Colors.black87,
           duration: const Duration(milliseconds: 1500),
           behavior: SnackBarBehavior.floating,
@@ -161,8 +162,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (availableSizes.isNotEmpty && selectedSize == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please select a size first',
-              style: TextStyle(color: Colors.white)),
+          content: Text(AppLocalizations.of(context)!.pleaseSelectSize,
+              style: const TextStyle(color: Colors.white)),
           backgroundColor: Colors.black,
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
@@ -176,8 +177,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (availableColors.isNotEmpty && selectedColor == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please select a color first',
-              style: TextStyle(color: Colors.white)),
+          content: Text(AppLocalizations.of(context)!.pleaseSelectColor,
+              style: const TextStyle(color: Colors.white)),
           backgroundColor: Colors.black,
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
@@ -204,7 +205,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Added to cart!',
+        content: Text(AppLocalizations.of(context)!.addedToCart,
             style:
                 AppTheme.textTheme.bodyMedium?.copyWith(color: Colors.white)),
         backgroundColor: AppTheme.primaryColor,
@@ -243,9 +244,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               context: context,
               barrierDismissible: false,
               builder: (context) => AlertDialog(
-                title: const Text('Session Expired'),
-                content: const Text(
-                    'Your session has expired. Please log in again to continue.'),
+                title: Text(AppLocalizations.of(context)!.sessionExpired),
+                content:
+                    Text(AppLocalizations.of(context)!.sessionExpiredMessage),
                 actions: [
                   TextButton(
                     onPressed: () {
@@ -345,7 +346,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         decoration: BoxDecoration(
                                           color: _currentImageIndex == index
                                               ? AppTheme.primaryColor
-                                              : Colors.grey.withOpacity(0.5),
+                                              : Colors.grey
+                                                  .withValues(alpha: 0.5),
                                           borderRadius:
                                               BorderRadius.circular(4),
                                         ),
@@ -455,7 +457,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      '($reviewCount reviews)',
+                                      '($reviewCount ${AppLocalizations.of(context)!.reviews})',
                                       style: AppTheme.textTheme.bodyMedium
                                           ?.copyWith(
                                         color: AppTheme.textTertiary,
@@ -467,7 +469,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                                 // Description
                                 Text(
-                                  'Description',
+                                  AppLocalizations.of(context)!.description,
                                   style:
                                       AppTheme.textTheme.titleLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -487,7 +489,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 // Options (Size/Color)
                                 if (sizes != null && sizes.isNotEmpty) ...[
                                   Text(
-                                    'Select Size',
+                                    AppLocalizations.of(context)!.selectSize,
                                     style: AppTheme.textTheme.titleMedium
                                         ?.copyWith(
                                       fontWeight: FontWeight.bold,
@@ -533,7 +535,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                                 if (colors != null && colors.isNotEmpty) ...[
                                   Text(
-                                    'Select Color',
+                                    AppLocalizations.of(context)!.selectColor,
                                     style: AppTheme.textTheme.titleMedium
                                         ?.copyWith(
                                       fontWeight: FontWeight.bold,
@@ -639,7 +641,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Colors.black
-                                                    .withOpacity(0.1),
+                                                    .withValues(alpha: 0.1),
                                                 blurRadius: 4,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -667,7 +669,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 Row(
                                   children: [
                                     Text(
-                                      'Quantity',
+                                      AppLocalizations.of(context)!.quantity,
                                       style: AppTheme.textTheme.titleMedium
                                           ?.copyWith(
                                         fontWeight: FontWeight.bold,
@@ -839,7 +841,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 24, vertical: 16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(32),
                         ),
                         child: Row(
@@ -849,7 +851,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Total Price',
+                                  AppLocalizations.of(context)!.totalPrice,
                                   style: AppTheme.textTheme.bodySmall?.copyWith(
                                     color: AppTheme.textSecondary,
                                   ),
@@ -869,7 +871,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               onPressed: () => _addToCart(context),
                               icon: const Icon(Icons.shopping_bag_outlined,
                                   color: Colors.white),
-                              label: const Text('Add to Bag'),
+                              label:
+                                  Text(AppLocalizations.of(context)!.addToBag),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.primaryColor,
                                 foregroundColor: Colors.white,
@@ -908,7 +911,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           child: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 24),

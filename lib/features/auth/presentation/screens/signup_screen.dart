@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
-import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -28,6 +28,7 @@ class _SignupScreenState extends State<SignupScreen> {
   String _completePhoneNumber = '';
 
   Future<void> _signup() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -70,17 +71,17 @@ class _SignupScreenState extends State<SignupScreen> {
           }
         } else {
           if (mounted) {
-            _showErrorSnackBar(result['message'] ?? 'Signup failed');
+            _showErrorSnackBar(result['message'] ?? l10n.error);
           }
         }
       } else {
         if (mounted) {
-          _showErrorSnackBar('Signup failed. Please try again.');
+          _showErrorSnackBar(l10n.error);
         }
       }
     } catch (e) {
       if (mounted) {
-        _showErrorSnackBar('Error during signup: $e');
+        _showErrorSnackBar('${l10n.error}: $e');
       }
     } finally {
       if (mounted) {
@@ -114,6 +115,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -148,7 +151,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Create Account',
+                  l10n.createAccount,
                   style: AppTheme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
@@ -156,7 +159,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Join the luxury experience',
+                  l10n.joinExperience,
                   style: AppTheme.textTheme.bodyMedium?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
@@ -164,15 +167,15 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 40),
                 _buildTextField(
                   controller: _nameController,
-                  label: 'Full Name',
+                  label: l10n.fullName,
                   icon: Icons.person_outline,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
+                      return l10n.requiredField;
                     }
                     final parts = value.trim().split(' ');
                     if (parts.length < 2 || parts.any((p) => p.isEmpty)) {
-                      return 'Please enter first and last name';
+                      return l10n.requiredField;
                     }
                     return null;
                   },
@@ -180,16 +183,16 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: _emailController,
-                  label: 'Email',
+                  label: l10n.email,
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return l10n.requiredField;
                     }
                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                         .hasMatch(value)) {
-                      return 'Invalid email';
+                      return l10n.invalidEmail;
                     }
                     return null;
                   },
@@ -201,7 +204,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
+                        color: Colors.black.withValues(alpha: 0.03),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -210,7 +213,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: IntlPhoneField(
                     controller: _phoneController,
                     decoration: InputDecoration(
-                      labelText: 'Phone Number',
+                      labelText: l10n.phone,
                       labelStyle:
                           const TextStyle(color: AppTheme.textSecondary),
                       border: OutlineInputBorder(
@@ -248,7 +251,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: _passwordController,
-                  label: 'Password',
+                  label: l10n.password,
                   icon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   suffixIcon: IconButton(
@@ -263,10 +266,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
+                      return l10n.requiredField;
                     }
                     if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return l10n.passwordTooShort;
                     }
                     return null;
                   },
@@ -274,7 +277,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 const SizedBox(height: 16),
                 _buildTextField(
                   controller: _confirmPasswordController,
-                  label: 'Confirm Password',
+                  label: l10n.confirmPassword,
                   icon: Icons.lock_outline,
                   obscureText: _obscureConfirmPassword,
                   suffixIcon: IconButton(
@@ -289,10 +292,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
+                      return l10n.requiredField;
                     }
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return l10n.passwordsDoNotMatch;
                     }
                     return null;
                   },
@@ -311,9 +314,9 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     child: _isLoading
                         ? const SpinningLoader(size: 24, color: Colors.white)
-                        : const Text(
-                            'SIGN UP',
-                            style: TextStyle(
+                        : Text(
+                            l10n.signup,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -327,7 +330,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      '${l10n.alreadyHaveAccount} ',
                       style: AppTheme.textTheme.bodyMedium?.copyWith(
                         color: AppTheme.textSecondary,
                       ),
@@ -335,7 +338,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     GestureDetector(
                       onTap: () => Navigator.of(context).pop(),
                       child: Text(
-                        'Login',
+                        l10n.login,
                         style: AppTheme.textTheme.bodyMedium?.copyWith(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.bold,
@@ -367,7 +370,7 @@ class _SignupScreenState extends State<SignupScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

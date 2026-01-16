@@ -3,6 +3,7 @@ import 'package:hawsni_app/features/checkout/models/address.dart';
 import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class AddressManagementScreen extends StatefulWidget {
   final List<Address> addresses;
@@ -212,7 +213,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -259,7 +260,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -427,33 +428,33 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
           children: [
             _buildTextField(
                 controller: _titleController,
-                label: 'Address Title (e.g., Home, Work)',
+                label: AppLocalizations.of(context)!.addressTitleHint,
                 icon: Icons.label_outline),
             const SizedBox(height: 20),
             _buildTextField(
                 controller: _fullNameController,
-                label: 'Full Name',
+                label: AppLocalizations.of(context)!.fullName,
                 icon: Icons.person_outline),
             const SizedBox(height: 20),
             _buildTextField(
                 controller: _addressController,
-                label: 'Street Address',
+                label: AppLocalizations.of(context)!.streetAddress,
                 icon: Icons.home_outlined,
                 maxLines: 2),
             const SizedBox(height: 20),
             _buildTextField(
                 controller: _cityController,
-                label: 'City',
+                label: AppLocalizations.of(context)!.city,
                 icon: Icons.location_city_outlined),
             const SizedBox(height: 20),
             _buildTextField(
                 controller: _countryController,
-                label: 'Country',
+                label: AppLocalizations.of(context)!.country,
                 icon: Icons.flag_outlined),
             const SizedBox(height: 20),
             _buildTextField(
                 controller: _phoneController,
-                label: 'Phone Number',
+                label: AppLocalizations.of(context)!.phoneNumber,
                 icon: Icons.phone_outlined,
                 keyboardType: TextInputType.phone),
             const SizedBox(height: 20),
@@ -503,7 +504,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

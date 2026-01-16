@@ -248,9 +248,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: TextFormField(
             controller: controller,
@@ -258,7 +258,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               labelText: label,
-              labelStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+              labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
               prefixIcon: Icon(icon, color: AppTheme.primaryColor),
               border: InputBorder.none,
               contentPadding:

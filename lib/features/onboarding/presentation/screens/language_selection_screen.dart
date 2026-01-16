@@ -140,8 +140,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         tileColor: isSelected
-            ? Colors.white.withOpacity(0.9)
-            : Colors.white.withOpacity(0.2),
+            ? Colors.white.withValues(alpha: 0.9)
+            : Colors.white.withValues(alpha: 0.2),
         onTap: () => _selectLanguage(language['code']!),
         leading: Container(
           width: 50,

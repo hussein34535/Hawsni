@@ -5,6 +5,7 @@ import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
 import 'package:hawsni_app/features/orders/bloc/order_event.dart';
 import 'package:hawsni_app/features/orders/bloc/order_state.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -52,15 +53,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline,
-                      size: 64, color: AppTheme.errorColor),
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppTheme.errorColor,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     state.message,
                     style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
@@ -68,11 +73,15 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     onPressed: () =>
                         context.read<OrderBloc>().add(LoadOrders()),
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30))),
-                    child: const Text('Retry',
-                        style: TextStyle(color: Colors.white)),
+                      backgroundColor: AppTheme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.retry,
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
@@ -92,42 +101,55 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.shopping_bag_outlined,
-                          size: 64, color: AppTheme.primaryColor),
+                      child: const Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 64,
+                        color: AppTheme.primaryColor,
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'No orders yet',
+                    Text(
+                      AppLocalizations.of(context)!.noOrdersYet,
                       style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary),
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Start shopping to see your orders here',
+                    Text(
+                      AppLocalizations.of(context)!.startShoppingToSeeOrders,
                       style: TextStyle(
-                          fontSize: 16, color: AppTheme.textSecondary),
+                        fontSize: 16,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 32, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30))),
-                      child: const Text('Start Shopping',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
+                        backgroundColor: AppTheme.primaryColor,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.startShopping,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -182,12 +204,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: InkWell(
         onTap: () => _showOrderDetails(context, order),
@@ -216,9 +238,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               const Icon(
-                            Icons.shopping_bag,
-                            color: AppTheme.textTertiary,
-                          ),
+                                Icons.shopping_bag,
+                                color: AppTheme.textTertiary,
+                              ),
                         ),
                       ),
                     ),
@@ -229,7 +251,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Order #$orderId',
+                          AppLocalizations.of(context)!.orderNumber(orderId),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -249,14 +271,22 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(status).withOpacity(0.1),
+                      color: _getStatusColor(status).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      status,
+                      status.toLowerCase() == 'delivered'
+                          ? AppLocalizations.of(context)!.statusDelivered
+                          : status.toLowerCase() == 'processing'
+                          ? AppLocalizations.of(context)!.statusProcessing
+                          : status.toLowerCase() == 'cancelled'
+                          ? AppLocalizations.of(context)!.statusCancelled
+                          : status,
                       style: TextStyle(
                         color: _getStatusColor(status),
                         fontSize: 12,
@@ -273,14 +303,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${items.length} Items',
+                    AppLocalizations.of(context)!.itemsCount(items.length),
                     style: const TextStyle(
                       color: AppTheme.textSecondary,
                       fontSize: 14,
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios,
-                      size: 14, color: AppTheme.textTertiary),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: AppTheme.textTertiary,
+                  ),
                 ],
               ),
             ],
@@ -333,8 +366,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   controller: scrollController,
                   padding: const EdgeInsets.all(24),
                   children: [
-                    const Text(
-                      'Order Details',
+                    Text(
+                      AppLocalizations.of(context)!.orderDetails,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -344,7 +377,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Order #${order['id']}',
+                      AppLocalizations.of(
+                        context,
+                      )!.orderNumber(order['id'].toString()),
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
@@ -353,56 +388,61 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                     const SizedBox(height: 32),
                     if (order['items'] != null)
-                      ...((order['items'] as List).map((item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 24),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 80,
-                                  height: 80,
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.scaffoldBackgroundColor,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(Icons.shopping_bag,
-                                      color: AppTheme.textTertiary),
+                      ...((order['items'] as List).map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.scaffoldBackgroundColor,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item['name'] ?? 'Product',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppTheme.textPrimary,
-                                        ),
+                                child: const Icon(
+                                  Icons.shopping_bag,
+                                  color: AppTheme.textTertiary,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['name'] ?? 'Product',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.textPrimary,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Qty: ${item['quantity']}',
-                                        style: const TextStyle(
-                                          color: AppTheme.textSecondary,
-                                          fontSize: 14,
-                                        ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      AppLocalizations.of(
+                                        context,
+                                      )!.quantityAbbr(item['quantity']),
+                                      style: const TextStyle(
+                                        color: AppTheme.textSecondary,
+                                        fontSize: 14,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  '\$${((item['price'] as num?) ?? 0).toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.textPrimary,
-                                  ),
+                              ),
+                              Text(
+                                '\$${((item['price'] as num?) ?? 0).toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textPrimary,
                                 ),
-                              ],
-                            ),
-                          ))),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )),
                   ],
                 ),
               ),

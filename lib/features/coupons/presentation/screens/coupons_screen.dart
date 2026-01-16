@@ -237,7 +237,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
                           fontSize: 14,
                           color: isExpired
                               ? AppTheme.textTertiary
-                              : Colors.white.withOpacity(0.9),
+                              : Colors.white.withValues(alpha: 0.9),
                         ),
                       ),
                     ],
@@ -247,13 +247,13 @@ class _CouponsScreenState extends State<CouponsScreen> {
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: isExpired
-                          ? Colors.white.withOpacity(0.5)
-                          : Colors.white.withOpacity(0.2),
+                          ? Colors.white.withValues(alpha: 0.5)
+                          : Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                           color: isExpired
                               ? Colors.transparent
-                              : Colors.white.withOpacity(0.3)),
+                              : Colors.white.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [

@@ -13,6 +13,7 @@ import 'package:hawsni_app/features/admin/presentation/screens/order_management_
 import 'package:hawsni_app/features/admin/presentation/screens/user_management_screen.dart';
 import 'package:hawsni_app/features/search/presentation/screens/search_suggestions_screen.dart';
 import 'package:hawsni_app/features/products/presentation/screens/product_comparison_screen.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -34,15 +35,13 @@ class _AppState extends State<App> {
           return MaterialApp(
             title: 'Hawsni',
             locale: Locale(settingsProvider.language),
-            localizationsDelegates: const [
+            localizationsDelegates: [
+              AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [
-              Locale('en'), // English
-              Locale('ar'), // Arabic
-            ],
+            supportedLocales: AppLocalizations.supportedLocales,
             themeMode:
                 settingsProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             theme: AppTheme.lightTheme,

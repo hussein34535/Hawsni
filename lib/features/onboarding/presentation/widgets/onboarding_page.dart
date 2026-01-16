@@ -55,7 +55,7 @@ class OnboardingPage extends StatelessWidget {
                     color: (colors[image] ??
                             [Colors.blue[400]!, Colors.purple[400]!])
                         .first
-                        .withOpacity(0.3),
+                        .withValues(alpha: 0.3),
                     spreadRadius: 5,
                     blurRadius: 15,
                     offset: const Offset(0, 5),

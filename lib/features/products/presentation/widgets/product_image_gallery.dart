@@ -205,7 +205,7 @@ class _FullScreenImageGalleryState extends State<FullScreenImageGallery> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.5),
+        backgroundColor: Colors.black.withValues(alpha: 0.5),
         foregroundColor: Colors.white,
         title: Text('${_currentPage + 1}/${widget.imageUrls.length}'),
         actions: [

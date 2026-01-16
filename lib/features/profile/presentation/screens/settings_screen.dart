@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hawsni_app/core/providers/settings_provider.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -44,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsIsland([
                 _buildSwitchTile(
                   icon: Icons.notifications_outlined,
-                  title: 'Enable Notifications',
+                  title: AppLocalizations.of(context)!.enableNotifications,
                   value: _notificationsEnabled,
                   onChanged: (val) =>
                       setState(() => _notificationsEnabled = val),
@@ -52,14 +53,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildDivider(),
                 _buildSwitchTile(
                   icon: Icons.email_outlined,
-                  title: 'Email Notifications',
+                  title: AppLocalizations.of(context)!.emailNotifications,
                   value: _emailNotifications,
                   onChanged: (val) => setState(() => _emailNotifications = val),
                 ),
                 _buildDivider(),
                 _buildSwitchTile(
                   icon: Icons.message_outlined,
-                  title: 'Push Notifications',
+                  title: AppLocalizations.of(context)!.pushNotifications,
                   value: _pushNotifications,
                   onChanged: (val) => setState(() => _pushNotifications = val),
                 ),
@@ -69,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsIsland([
                 _buildListTile(
                   icon: Icons.language,
-                  title: 'Language',
+                  title: AppLocalizations.of(context)!.language,
                   subtitle:
                       settingsProvider.language == 'en' ? 'English' : 'العربية',
                   onTap: () => _showLanguageDialog(context, settingsProvider),
@@ -77,7 +78,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildDivider(),
                 _buildListTile(
                   icon: Icons.attach_money,
-                  title: 'Currency',
+                  title: AppLocalizations.of(context)!.currency,
                   subtitle: _getCurrencyName(settingsProvider.currency),
                   onTap: () => _showCurrencyDialog(context, settingsProvider),
                 ),
@@ -87,13 +88,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsIsland([
                 _buildListTile(
                   icon: Icons.lock_outline,
-                  title: 'Change Password',
+                  title: AppLocalizations.of(context)!.changePassword,
                   onTap: () {}, // TODO
                 ),
                 _buildDivider(),
                 _buildListTile(
                   icon: Icons.location_on_outlined,
-                  title: 'Shipping Address',
+                  title: AppLocalizations.of(context)!.shippingAddress,
                   onTap: () {}, // TODO
                 ),
               ]),
@@ -102,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsIsland([
                 _buildListTile(
                   icon: Icons.info_outline,
-                  title: 'About App',
+                  title: AppLocalizations.of(context)!.aboutApp,
                   onTap: () {
                     showAboutDialog(
                       context: context,
@@ -121,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildDivider(),
                 _buildListTile(
                   icon: Icons.privacy_tip_outlined,
-                  title: 'Privacy Policy',
+                  title: AppLocalizations.of(context)!.privacyPolicy,
                   onTap: () {}, // TODO
                 ),
               ]),
@@ -169,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppTheme.primaryColor.withOpacity(0.1),
+          color: AppTheme.primaryColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: AppTheme.primaryColor, size: 20),
@@ -183,7 +184,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value: value,
         onChanged: onChanged,
         activeColor: AppTheme.primaryColor,
-        activeTrackColor: AppTheme.primaryColor.withOpacity(0.3),
+        activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
@@ -199,7 +200,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppTheme.primaryColor.withOpacity(0.1),
+          color: AppTheme.primaryColor.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: AppTheme.primaryColor, size: 20),

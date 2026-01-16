@@ -393,13 +393,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               decoration: BoxDecoration(
                                 color: isRead
                                     ? Colors.white
-                                    : AppTheme.primaryColor.withOpacity(0.05),
+                                    : AppTheme.primaryColor
+                                        .withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                     color: isRead
                                         ? AppTheme.borderColor
                                         : AppTheme.primaryColor
-                                            .withOpacity(0.2)),
+                                            .withValues(alpha: 0.2)),
                               ),
                               child: ListTile(
                                 contentPadding: const EdgeInsets.all(16),
@@ -407,7 +408,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                     color: (notification['color'] as Color)
-                                        .withOpacity(0.1),
+                                        .withValues(alpha: 0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
@@ -530,7 +531,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: (notification['color'] as Color).withOpacity(0.1),
+                color: (notification['color'] as Color).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(

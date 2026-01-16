@@ -30,7 +30,7 @@ class AppTheme {
   // Shadows
   static List<BoxShadow> get shadowSoft => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.08), // Increased from 0.05
+          color: Colors.black.withValues(alpha: 0.08), // Increased from 0.05
           blurRadius: 10,
           offset: const Offset(0, 4),
         ),
@@ -38,7 +38,7 @@ class AppTheme {
 
   static List<BoxShadow> get shadowMedium => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.12), // Increased from 0.08
+          color: Colors.black.withValues(alpha: 0.12), // Increased from 0.08
           blurRadius: 16,
           offset: const Offset(0, 6),
         ),
@@ -46,7 +46,7 @@ class AppTheme {
 
   static List<BoxShadow> get shadowFloating => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15), // Increased from 0.1
+          color: Colors.black.withValues(alpha: 0.15), // Increased from 0.1
           blurRadius: 24,
           offset: const Offset(0, 8),
         ),
@@ -190,7 +190,7 @@ class AppTheme {
         fontWeight: FontWeight.bold,
       ),
       hintStyle: TextStyle(
-        color: textSecondary.withOpacity(0.5),
+        color: textSecondary.withValues(alpha: 0.5),
         fontFamily: 'Poppins',
         fontStyle: FontStyle.normal,
       ),

@@ -133,7 +133,7 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen> {
                       color: AppTheme.primaryColor,
                       width: 2,
                     ),
-                    color: Colors.white.withOpacity(0.05),
+                    color: Colors.white.withValues(alpha: 0.05),
                     image: _imageFile != null
                         ? DecorationImage(
                             image: FileImage(_imageFile!),
@@ -169,11 +169,11 @@ class _ProfilePictureSetupScreenState extends State<ProfilePictureSetupScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
                     disabledBackgroundColor:
-                        AppTheme.primaryColor.withOpacity(0.3),
+                        AppTheme.primaryColor.withValues(alpha: 0.3),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
                     elevation: 5,
-                    shadowColor: AppTheme.primaryColor.withOpacity(0.5),
+                    shadowColor: AppTheme.primaryColor.withValues(alpha: 0.5),
                   ),
                   child: _isLoading
                       ? const SpinningLoader(size: 30, color: Colors.black)

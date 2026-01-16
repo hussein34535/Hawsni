@@ -4,6 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class AddReviewSheet extends StatefulWidget {
   final String productId;
@@ -49,7 +50,8 @@ class _AddReviewSheetState extends State<AddReviewSheet>
   void _submit() {
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a rating')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.pleaseSelectRating)),
       );
       return;
     }
@@ -70,8 +72,8 @@ class _AddReviewSheetState extends State<AddReviewSheet>
 
     // Show success snackbar (optimistic)
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Thank you! Your review has been submitted.'),
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.yourReviewWasSubmitted),
         backgroundColor: AppTheme.primaryColor,
         behavior: SnackBarBehavior.floating,
       ),
@@ -111,8 +113,8 @@ class _AddReviewSheetState extends State<AddReviewSheet>
                   Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero)
                       .animate(CurvedAnimation(
                           parent: _controller, curve: Curves.easeOut)),
-              child: const Text(
-                'How was your experience?',
+              child: Text(
+                AppLocalizations.of(context)!.howWasYourExperience,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -156,7 +158,7 @@ class _AddReviewSheetState extends State<AddReviewSheet>
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha: 0.03),
                     spreadRadius: 0,
                     blurRadius: 10,
                     offset: const Offset(0, 4),
@@ -168,7 +170,7 @@ class _AddReviewSheetState extends State<AddReviewSheet>
                 style: const TextStyle(color: AppTheme.textPrimary),
                 maxLines: 4,
                 decoration: InputDecoration(
-                  hintText: 'Share your thoughts about the product...',
+                  hintText: AppLocalizations.of(context)!.shareYourThoughts,
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -192,7 +194,7 @@ class _AddReviewSheetState extends State<AddReviewSheet>
                   backgroundColor: AppTheme.primaryColor,
                   foregroundColor: Colors.white,
                   elevation: 8,
-                  shadowColor: AppTheme.primaryColor.withOpacity(0.3),
+                  shadowColor: AppTheme.primaryColor.withValues(alpha: 0.3),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -206,9 +208,9 @@ class _AddReviewSheetState extends State<AddReviewSheet>
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text(
-                        'Submit Review',
-                        style: TextStyle(
+                    : Text(
+                        AppLocalizations.of(context)!.submitReview,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,

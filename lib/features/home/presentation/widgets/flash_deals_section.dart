@@ -109,10 +109,11 @@ class _FlashDealsSectionState extends State<FlashDealsSection> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFF4444).withOpacity(0.2),
+                          color: const Color(0xFFFF4444).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: const Color(0xFFFF4444).withOpacity(0.5),
+                            color:
+                                const Color(0xFFFF4444).withValues(alpha: 0.5),
                           ),
                         ),
                         child: Row(
@@ -157,14 +158,14 @@ class _FlashDealsSectionState extends State<FlashDealsSection> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFFD4AF37).withOpacity(0.9),
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.9),
                         ),
                       ),
                       const SizedBox(width: 4),
                       Icon(
                         Icons.arrow_forward_ios,
                         size: 12,
-                        color: const Color(0xFFD4AF37).withOpacity(0.9),
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.9),
                       ),
                     ],
                   ),

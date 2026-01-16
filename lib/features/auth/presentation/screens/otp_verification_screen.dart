@@ -96,7 +96,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   border: Border.all(color: AppTheme.primaryColor, width: 2),
                 ),
                 child: const Icon(
@@ -134,9 +134,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1)),
                     ),
                     child: TextField(
                       controller: _otpController,
@@ -154,7 +155,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         border: InputBorder.none,
                         hintText: '------',
                         hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           letterSpacing: 8,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -175,7 +176,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
                     elevation: 5,
-                    shadowColor: AppTheme.primaryColor.withOpacity(0.5),
+                    shadowColor: AppTheme.primaryColor.withValues(alpha: 0.5),
                   ),
                   child: _isLoading
                       ? const SpinningLoader(size: 30, color: Colors.black)

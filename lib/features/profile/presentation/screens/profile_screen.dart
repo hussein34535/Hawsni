@@ -14,6 +14,7 @@ import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:provider/provider.dart';
 import 'package:hawsni_app/core/providers/settings_provider.dart';
 import 'package:hawsni_app/features/profile/presentation/screens/notifications_settings_screen.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -53,6 +54,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     // Check for Guest Mode
     if (AuthService.isGuest) {
       return Scaffold(
@@ -78,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Welcome Guest',
+                  l10n.welcomeGuest,
                   style: AppTheme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
@@ -86,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to access your profile, orders, and more.',
+                  l10n.accessProfileMessage,
                   textAlign: TextAlign.center,
                   style: AppTheme.textTheme.bodyMedium?.copyWith(
                     color: AppTheme.textSecondary,
@@ -111,9 +114,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'LOGIN / SIGN UP',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.loginSignup,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -125,13 +128,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 24),
 
                 // Settings Section for Guests (Language/Currency)
-                _buildSectionTitle('App Settings'),
+                _buildSectionTitle(l10n.appSettings),
                 Consumer<SettingsProvider>(
                   builder: (context, settingsProvider, child) {
                     return _buildMenuIsland([
                       _buildMenuItem(
                         icon: Icons.language,
-                        title: 'Language',
+                        title: l10n.language,
                         subtitle: settingsProvider.language == 'en'
                             ? 'English'
                             : 'العربية',
@@ -141,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildDivider(),
                       _buildMenuItem(
                         icon: Icons.attach_money,
-                        title: 'Currency',
+                        title: l10n.currency,
                         subtitle: _getCurrencyName(settingsProvider.currency),
                         onTap: () =>
                             _showCurrencyDialog(context, settingsProvider),
@@ -182,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'My Profile',
+                                  l10n.myProfile,
                                   style: AppTheme.textTheme.headlineMedium
                                       ?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -270,11 +273,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           horizontal: 12, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: AppTheme.primaryColor
-                                            .withOpacity(0.1),
+                                            .withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
-                                        'Premium Member',
+                                        l10n.premiumMember,
                                         style: AppTheme.textTheme.labelSmall
                                             ?.copyWith(
                                           color: AppTheme.primaryColor,
@@ -301,11 +304,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
-                      _buildSectionTitle('Account'),
+                      _buildSectionTitle(l10n.account),
                       _buildMenuIsland([
                         _buildMenuItem(
                           icon: Icons.person_outline,
-                          title: 'Profile Details',
+                          title: l10n.profileDetails,
                           onTap: () async {
                             await Navigator.push(
                                 context,
@@ -318,13 +321,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildDivider(),
                         _buildMenuItem(
                           icon: Icons.lock_outline,
-                          title: 'Change Password',
+                          title: l10n.changePassword,
                           onTap: () {}, // TODO: Implement Change Password
                         ),
                         _buildDivider(),
                         _buildMenuItem(
                           icon: Icons.notifications_outlined,
-                          title: 'Notifications',
+                          title: l10n.notifications,
                           onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -333,13 +336,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ]),
                       const SizedBox(height: 24),
-                      _buildSectionTitle('App Settings'),
+                      _buildSectionTitle(l10n.appSettings),
                       Consumer<SettingsProvider>(
                         builder: (context, settingsProvider, child) {
                           return _buildMenuIsland([
                             _buildMenuItem(
                               icon: Icons.language,
-                              title: 'Language',
+                              title: l10n.language,
                               subtitle: settingsProvider.language == 'en'
                                   ? 'English'
                                   : 'العربية',
@@ -349,7 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _buildDivider(),
                             _buildMenuItem(
                               icon: Icons.attach_money,
-                              title: 'Currency',
+                              title: l10n.currency,
                               subtitle:
                                   _getCurrencyName(settingsProvider.currency),
                               onTap: () => _showCurrencyDialog(
@@ -359,11 +362,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       const SizedBox(height: 24),
-                      _buildSectionTitle('My Activity'),
+                      _buildSectionTitle(l10n.myActivity),
                       _buildMenuIsland([
                         _buildMenuItem(
                           icon: Icons.shopping_bag_outlined,
-                          title: 'My Orders',
+                          title: l10n.myOrders,
                           onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -372,7 +375,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildDivider(),
                         _buildMenuItem(
                           icon: Icons.favorite_border,
-                          title: 'Wishlist',
+                          title: l10n.wishlist,
                           onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -381,7 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildDivider(),
                         _buildMenuItem(
                           icon: Icons.location_on_outlined,
-                          title: 'Addresses',
+                          title: l10n.addresses,
                           onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -391,7 +394,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildDivider(),
                         _buildMenuItem(
                           icon: Icons.local_offer_outlined,
-                          title: 'My Coupons',
+                          title: l10n.myCoupons,
                           onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -402,10 +405,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildMenuIsland([
                         _buildMenuItem(
                           icon: Icons.logout,
-                          title: 'Logout',
+                          title: l10n.logout,
                           textColor: AppTheme.errorColor,
                           iconColor: AppTheme.errorColor,
-                          onTap: _handleLogout,
+                          onTap: () => _handleLogout(context),
                           showArrow: false,
                         ),
                       ]),
@@ -418,7 +421,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _handleLogout() async {
+  Future<void> _handleLogout(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -426,26 +430,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        title:
-            const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(l10n.logout,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(l10n.confirmLogout),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.black)),
+            child:
+                Text(l10n.cancel, style: const TextStyle(color: Colors.black)),
           ),
           TextButton(
             onPressed: () async {
               await AuthService.logout();
-              if (mounted) {
+              if (context.mounted) {
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (context) => const LoginScreen()),
                   (route) => false,
                 );
               }
             },
-            child: const Text('Logout',
-                style: TextStyle(color: AppTheme.errorColor)),
+            child: Text(l10n.logout,
+                style: const TextStyle(color: AppTheme.errorColor)),
           ),
         ],
       ),
@@ -491,7 +496,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       leading: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: (iconColor ?? AppTheme.primaryColor).withOpacity(0.1),
+          color: (iconColor ?? AppTheme.primaryColor).withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: iconColor ?? AppTheme.primaryColor, size: 20),
@@ -521,6 +526,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showLanguageDialog(
       BuildContext context, SettingsProvider settingsProvider) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -528,8 +534,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        title: const Text('Select Language',
-            style: TextStyle(
+        title: Text(l10n.selectLanguage, // Used key
+            style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary)),
@@ -552,6 +558,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showCurrencyDialog(
       BuildContext context, SettingsProvider settingsProvider) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -559,8 +566,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        title: const Text('Select Currency',
-            style: TextStyle(
+        title: Text(l10n.selectCurrency, // Used key
+            style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary)),

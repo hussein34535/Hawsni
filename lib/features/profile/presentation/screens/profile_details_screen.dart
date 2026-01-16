@@ -1,9 +1,9 @@
-import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hawsni_app/core/services/api_service.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 
 class ProfileDetailsScreen extends StatefulWidget {
@@ -203,7 +203,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     const SizedBox(height: 40),
                     _buildTextField(
                       controller: _nameController,
-                      label: 'Full Name',
+                      label: AppLocalizations.of(context)!.fullName,
                       icon: Icons.person_outline,
                       enabled: _isEditing,
                       validator: (value) =>
@@ -212,14 +212,14 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     const SizedBox(height: 20),
                     _buildTextField(
                       controller: _emailController,
-                      label: 'Email Address',
+                      label: AppLocalizations.of(context)!.emailAddressLabel,
                       icon: Icons.email_outlined,
                       enabled: false,
                     ),
                     const SizedBox(height: 20),
                     _buildTextField(
                       controller: _phoneController,
-                      label: 'Phone Number',
+                      label: AppLocalizations.of(context)!.phoneNumber,
                       icon: Icons.phone_outlined,
                       enabled: _isEditing,
                       keyboardType: TextInputType.phone,
@@ -230,7 +230,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     const SizedBox(height: 20),
                     _buildTextField(
                       controller: _dateOfBirthController,
-                      label: 'Date of Birth',
+                      label: AppLocalizations.of(context)!.dateOfBirth,
                       icon: Icons.calendar_today_outlined,
                       enabled: _isEditing,
                       readOnly: true,

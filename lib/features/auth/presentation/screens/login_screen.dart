@@ -5,6 +5,7 @@ import 'package:hawsni_app/features/auth/presentation/screens/signup_screen.dart
 import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -44,12 +45,14 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else {
         if (mounted) {
-          _showErrorSnackBar('Login failed. Please check your credentials.');
+          _showErrorSnackBar(AppLocalizations.of(context)!
+              .error); // Using generic error for now or add specific string
         }
       }
     } catch (e) {
       if (mounted) {
-        _showErrorSnackBar('Login error: ${e.toString()}');
+        _showErrorSnackBar(
+            '${AppLocalizations.of(context)!.error}: ${e.toString()}');
       }
     } finally {
       if (mounted) {
@@ -80,6 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -112,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
                 Text(
-                  'Welcome Back',
+                  l10n.welcomeBack,
                   style: AppTheme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textPrimary,
@@ -120,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sign in to continue shopping',
+                  l10n.loginToContinue,
                   style: AppTheme.textTheme.bodyMedium?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
@@ -132,15 +137,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Email Field
                 _buildTextField(
                   controller: _emailController,
-                  label: 'Email',
+                  label: l10n.email,
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return l10n.requiredField;
                     }
                     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                      return 'Invalid email';
+                      return l10n.invalidEmail;
                     }
                     return null;
                   },
@@ -150,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Password Field
                 _buildTextField(
                   controller: _passwordController,
-                  label: 'Password',
+                  label: l10n.password,
                   icon: Icons.lock_outline,
                   obscureText: _obscurePassword,
                   suffixIcon: IconButton(
@@ -165,10 +170,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
+                      return l10n.requiredField;
                     }
                     if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return l10n.passwordTooShort;
                     }
                     return null;
                   },
@@ -181,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       // TODO: Implement forgot password
                     },
                     child: Text(
-                      'Forgot Password?',
+                      l10n.forgotPassword,
                       style: AppTheme.textTheme.bodyMedium?.copyWith(
                         color: AppTheme.primaryColor,
                         fontWeight: FontWeight.w600,
@@ -205,9 +210,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: _isLoading
                         ? const SpinningLoader(size: 24, color: Colors.white)
-                        : const Text(
-                            'LOGIN',
-                            style: TextStyle(
+                        : Text(
+                            l10n.login, // UPPERCASE REMOVED FOR BETTER LOCALIZATION or use .toUpperCase() if desired but usually bad for Arabic
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -223,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      '${l10n.dontHaveAccount} ',
                       style: AppTheme.textTheme.bodyMedium?.copyWith(
                         color: AppTheme.textSecondary,
                       ),
@@ -236,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       },
                       child: Text(
-                        'Sign Up',
+                        l10n.signup,
                         style: AppTheme.textTheme.bodyMedium?.copyWith(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.bold,
@@ -268,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

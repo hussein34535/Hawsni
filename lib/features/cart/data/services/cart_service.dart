@@ -224,7 +224,6 @@ class CartService {
   }
 
   Future<List<CartItem>> _addToLocalCart(CartItem newItem) async {
-    final prefs = await SharedPreferences.getInstance();
     List<CartItem> currentCart = await _getLocalCart();
 
     // Check if duplicate (same product, same variation)

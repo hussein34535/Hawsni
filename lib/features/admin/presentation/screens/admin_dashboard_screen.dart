@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -16,9 +17,7 @@ class AdminDashboardScreen extends StatelessWidget {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue[700],
-              ),
+              decoration: BoxDecoration(color: Colors.blue[700]),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -34,10 +33,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     'E-commerce Management',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),
@@ -119,10 +115,7 @@ class AdminDashboardScreen extends StatelessWidget {
               // Stats cards
               const Text(
                 'Dashboard Overview',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Row(
@@ -130,7 +123,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildStatCard(
                       context,
-                      title: 'Total Products',
+                      title: AppLocalizations.of(context)!.totalProducts,
                       value: '142',
                       icon: Icons.shopping_bag,
                       color: Colors.blue,
@@ -140,7 +133,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildStatCard(
                       context,
-                      title: 'Total Orders',
+                      title: AppLocalizations.of(context)!.totalOrders,
                       value: '86',
                       icon: Icons.shopping_cart,
                       color: Colors.green,
@@ -154,7 +147,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildStatCard(
                       context,
-                      title: 'Total Users',
+                      title: AppLocalizations.of(context)!.totalUsers,
                       value: '245',
                       icon: Icons.people,
                       color: Colors.orange,
@@ -164,7 +157,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   Expanded(
                     child: _buildStatCard(
                       context,
-                      title: 'Revenue',
+                      title: AppLocalizations.of(context)!.revenue,
                       value: '\$12,450',
                       icon: Icons.attach_money,
                       color: Colors.purple,
@@ -177,10 +170,7 @@ class AdminDashboardScreen extends StatelessWidget {
               // Recent orders
               const Text(
                 'Recent Orders',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Container(
@@ -189,7 +179,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 5,
                       offset: const Offset(0, 2),
@@ -221,10 +211,7 @@ class AdminDashboardScreen extends StatelessWidget {
               // Quick actions
               const Text(
                 'Quick Actions',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               GridView.count(
@@ -236,7 +223,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 children: [
                   _buildActionCard(
                     context,
-                    title: 'Add Product',
+                    title: AppLocalizations.of(context)!.addProduct,
                     icon: Icons.add_shopping_cart,
                     color: Colors.blue,
                     onTap: () {
@@ -245,7 +232,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                   _buildActionCard(
                     context,
-                    title: 'View Orders',
+                    title: AppLocalizations.of(context)!.viewOrders,
                     icon: Icons.shopping_cart,
                     color: Colors.green,
                     onTap: () {
@@ -254,7 +241,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                   _buildActionCard(
                     context,
-                    title: 'Manage Users',
+                    title: AppLocalizations.of(context)!.manageUsers,
                     icon: Icons.people,
                     color: Colors.orange,
                     onTap: () {
@@ -263,7 +250,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   ),
                   _buildActionCard(
                     context,
-                    title: 'Create Coupon',
+                    title: AppLocalizations.of(context)!.createCoupon,
                     icon: Icons.local_offer,
                     color: Colors.purple,
                     onTap: () {
@@ -279,11 +266,13 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(BuildContext context,
-      {required String title,
-      required String value,
-      required IconData icon,
-      required Color color}) {
+  Widget _buildStatCard(
+    BuildContext context, {
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -291,7 +280,7 @@ class AdminDashboardScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 2),
@@ -304,38 +293,31 @@ class AdminDashboardScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color),
           ),
           const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
+          Text(title, style: const TextStyle(fontSize: 14, color: Colors.grey)),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOrderItem(BuildContext context,
-      {required String orderId,
-      required String customer,
-      required String amount,
-      required String status,
-      required String date}) {
+  Widget _buildOrderItem(
+    BuildContext context, {
+    required String orderId,
+    required String customer,
+    required String amount,
+    required String status,
+    required String date,
+  }) {
     Color statusColor = Colors.grey;
     if (status == 'Delivered') {
       statusColor = Colors.green;
@@ -357,7 +339,7 @@ class AdminDashboardScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -377,11 +359,13 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCard(BuildContext context,
-      {required String title,
-      required IconData icon,
-      required Color color,
-      required VoidCallback onTap}) {
+  Widget _buildActionCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -391,7 +375,7 @@ class AdminDashboardScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               spreadRadius: 1,
               blurRadius: 5,
               offset: const Offset(0, 2),
@@ -404,7 +388,7 @@ class AdminDashboardScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color, size: 32),
@@ -412,10 +396,7 @@ class AdminDashboardScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ],

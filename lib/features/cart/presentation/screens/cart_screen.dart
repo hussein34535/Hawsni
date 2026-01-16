@@ -7,18 +7,20 @@ import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart'
 import 'package:hawsni_app/features/cart/presentation/widgets/cart_item_card.dart';
 import 'package:hawsni_app/features/checkout/presentation/screens/checkout_screen.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Shopping Bag',
-          style: TextStyle(
+        title: Text(
+          l10n.shoppingBag,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
             fontSize: 20,
@@ -57,18 +59,18 @@ class CartScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Your bag is empty',
-                      style: TextStyle(
+                    Text(
+                      l10n.yourBagIsEmpty,
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Start exploring our luxury collection',
-                      style: TextStyle(
+                    Text(
+                      l10n.startExploring,
+                      style: const TextStyle(
                         color: AppTheme.textSecondary,
                         fontSize: 16,
                       ),
@@ -117,9 +119,9 @@ class CartScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Total',
-                              style: TextStyle(
+                            Text(
+                              l10n.total,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.textSecondary,
@@ -144,13 +146,12 @@ class CartScreen extends StatelessWidget {
                                 showDialog(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: const Text('Account Required'),
-                                    content: const Text(
-                                        'Please sign in to complete your purchase.'),
+                                    title: Text(l10n.accountRequired),
+                                    content: Text(l10n.signInToPurchase),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
-                                        child: const Text('Cancel'),
+                                        child: Text(l10n.cancel),
                                       ),
                                       ElevatedButton(
                                         onPressed: () {
@@ -163,7 +164,7 @@ class CartScreen extends StatelessWidget {
                                             ),
                                           );
                                         },
-                                        child: const Text('Sign In'),
+                                        child: Text(l10n.signIn),
                                       ),
                                     ],
                                   ),
@@ -185,9 +186,9 @@ class CartScreen extends StatelessWidget {
                               ),
                               elevation: 0,
                             ),
-                            child: const Text(
-                              'Checkout',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.checkout,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -9,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:hawsni_app/core/services/auth_service.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
 import 'package:hawsni_app/features/reviews/presentation/widgets/add_review_sheet.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class ReviewsSection extends StatelessWidget {
   final String productId;
@@ -46,8 +46,8 @@ class ReviewsSection extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Reviews",
-                    style: TextStyle(
+                Text(AppLocalizations.of(context)!.reviews,
+                    style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.textPrimary,
@@ -63,25 +63,26 @@ class ReviewsSection extends StatelessWidget {
                       onPressed: () => _showAddReviewDialog(context),
                       icon: const Icon(Icons.edit,
                           size: 16, color: AppTheme.primaryColor),
-                      label: const Text("Write Review",
-                          style: TextStyle(color: AppTheme.primaryColor)),
+                      label: Text(AppLocalizations.of(context)!.writeReview,
+                          style: const TextStyle(color: AppTheme.primaryColor)),
                     )
                   else
-                    const Text(
-                      "You successfully reviewed",
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.youSuccessfullyReviewed,
+                      style: const TextStyle(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.w500,
                           fontSize: 12),
                     ),
-                ] else if (state is! ReviewLoading)
+                ] else if (state is! ReviewLoading) ...[
                   TextButton.icon(
                     onPressed: () => _showAddReviewDialog(context),
                     icon: const Icon(Icons.edit,
                         size: 16, color: AppTheme.primaryColor),
-                    label: const Text("Write Review",
-                        style: TextStyle(color: AppTheme.primaryColor)),
+                    label: Text(AppLocalizations.of(context)!.writeReview,
+                        style: const TextStyle(color: AppTheme.primaryColor)),
                   ),
+                ],
               ],
             ),
             const SizedBox(height: 16),
@@ -91,11 +92,11 @@ class ReviewsSection extends StatelessWidget {
                       CircularProgressIndicator(color: AppTheme.primaryColor))
             else if (state is ReviewLoaded)
               if (state.reviews.isEmpty)
-                const Center(
+                Center(
                   child: Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Text("No reviews yet. Be the first!",
-                        style: TextStyle(color: AppTheme.textSecondary)),
+                    padding: const EdgeInsets.all(20.0),
+                    child: Text(AppLocalizations.of(context)!.noReviewsYet,
+                        style: const TextStyle(color: AppTheme.textSecondary)),
                   ),
                 )
               else
@@ -114,7 +115,7 @@ class ReviewsSection extends StatelessWidget {
                         border: Border.all(color: AppTheme.borderColor),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           )
@@ -126,8 +127,8 @@ class ReviewsSection extends StatelessWidget {
                           Row(
                             children: [
                               CircleAvatar(
-                                backgroundColor:
-                                    AppTheme.primaryColor.withOpacity(0.1),
+                                backgroundColor: AppTheme.primaryColor
+                                    .withValues(alpha: 0.1),
                                 child: Text(
                                   (review.userName.isNotEmpty
                                           ? review.userName
@@ -179,14 +180,19 @@ class ReviewsSection extends StatelessWidget {
                                     showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
-                                        title: const Text('Delete Review'),
-                                        content: const Text(
-                                            'Are you sure you want to delete your review?'),
+                                        title: Text(
+                                            AppLocalizations.of(context)!
+                                                .deleteReview),
+                                        content: Text(
+                                            AppLocalizations.of(context)!
+                                                .areYouSureDeleteReview),
                                         actions: [
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(context),
-                                            child: const Text('Cancel'),
+                                            child: Text(
+                                                AppLocalizations.of(context)!
+                                                    .cancel),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -196,8 +202,10 @@ class ReviewsSection extends StatelessWidget {
                                                       reviewId: review.id,
                                                       productId: productId));
                                             },
-                                            child: const Text('Delete',
-                                                style: TextStyle(
+                                            child: Text(
+                                                AppLocalizations.of(context)!
+                                                    .delete,
+                                                style: const TextStyle(
                                                     color: Colors.red)),
                                           ),
                                         ],

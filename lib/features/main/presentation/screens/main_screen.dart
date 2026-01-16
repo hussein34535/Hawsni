@@ -8,6 +8,7 @@ import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:hawsni_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_screen.dart';
 import 'package:hawsni_app/features/home/presentation/screens/home_screen.dart';
+import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -35,6 +36,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -59,14 +61,14 @@ class _MainScreenState extends State<MainScreen> {
         },
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            activeIcon: const Icon(Icons.home),
+            label: l10n.home,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            activeIcon: Icon(Icons.favorite),
-            label: 'Wishlist',
+            icon: const Icon(Icons.favorite_border),
+            activeIcon: const Icon(Icons.favorite),
+            label: l10n.wishlist,
           ),
           BottomNavigationBarItem(
             icon: BlocBuilder<CartBloc, CartState>(
@@ -147,12 +149,12 @@ class _MainScreenState extends State<MainScreen> {
                 );
               },
             ),
-            label: 'Cart',
+            label: l10n.cart,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline),
+            activeIcon: const Icon(Icons.person),
+            label: l10n.profile,
           ),
         ],
       ),
