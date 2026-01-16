@@ -1045,6 +1045,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Phone Number'**
   String get phoneNumber;
+
+  /// No description provided for @vtoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Virtual Try-On'**
+  String get vtoTitle;
+
+  /// No description provided for @vtoInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a full-body photo of yourself to try on this item.'**
+  String get vtoInstruction;
+
+  /// No description provided for @vtoProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Applying magic... This may take a few seconds.'**
+  String get vtoProcessing;
+
+  /// No description provided for @vtoUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to upload photo'**
+  String get vtoUpload;
+
+  /// No description provided for @vtoTryAnother.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Another Photo'**
+  String get vtoTryAnother;
+
+  /// No description provided for @vtoButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Try On Now'**
+  String get vtoButton;
 }
 
 class _AppLocalizationsDelegate

@@ -489,4 +489,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get phoneNumber => 'رقم الهاتف';
+
+  @override
+  String get vtoTitle => 'غرفة القياس الافتراضية';
+
+  @override
+  String get vtoInstruction => 'ارفع صورة كاملة للجسم لتجربة القطعة عليك.';
+
+  @override
+  String get vtoProcessing => 'جاري دمج الملابس... قد يستغرق ذلك بضع ثوان.';
+
+  @override
+  String get vtoUpload => 'اضغط لرفع صورتك';
+
+  @override
+  String get vtoTryAnother => 'جرب صورة أخرى';
+
+  @override
+  String get vtoButton => 'جرب الآن';
 }

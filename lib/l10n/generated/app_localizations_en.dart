@@ -492,4 +492,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get phoneNumber => 'Phone Number';
+
+  @override
+  String get vtoTitle => 'Virtual Try-On';
+
+  @override
+  String get vtoInstruction =>
+      'Upload a full-body photo of yourself to try on this item.';
+
+  @override
+  String get vtoProcessing => 'Applying magic... This may take a few seconds.';
+
+  @override
+  String get vtoUpload => 'Tap to upload photo';
+
+  @override
+  String get vtoTryAnother => 'Try Another Photo';
+
+  @override
+  String get vtoButton => 'Try On Now';
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
@@ -46,7 +47,6 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
         });
       }
     } catch (e) {
-      // Handle permission errors etc
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error picking image: $e')),
       );
@@ -62,43 +62,25 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
     });
 
     try {
-      // In a real app with file upload, we would upload _userImage first.
-      // Since our backend expects a URL (and Node middleware might handle upload),
-      // BUT our VTO controller currently expects 'human_image' URL in body.
-      // WE NEED TO UPLOAD THE IMAGE FIRST.
-      // For this MVP, we will assume image upload is handled or we pass a placeholder/demo URL
-      // Wait, standard `ApiService` doesn't support file upload easily to return URL.
-      // I will implement a quick Base64 or assume the backend middleware handles 'multipart/form-data'.
-      //
-      // REVISION: The VTO Backend controller expects JSON body with URLs.
-      // I need to update VTO Controller to handle multipart/form-data OR
-      // I need an upload endpoint. 
-      //
-      // FOR NOW, to allow progress, I will use a simple "Upload to Cloudinary" or similar logic IF I had it.
-      // Since I don't, I will use `ApiService.uploadFile` if it exists, or create one.
-      //
-      // Let's assume there is an upload endpoint. I will check `server.js` for `upload` middleware usage.
-      //
-      // Wait, `server.js` has `app.use('/api/users', userRoutes);` which uses upload.
-      // I will create a temporary helper to upload the image to my server (public folder) and get a URL.
-      
-      // TEMPORARY FIX: I'll convert image to Base64 and send it if Replicate supports it? 
-      // Replicate supports data URIs! `data:image/jpeg;base64,...`
-      
+      // Encode image to Base64
       final bytes = await _userImage!.readAsBytes();
-      final String base64Image = "data:image/jpeg;base64,${base64Encode(bytes)}";
+      final String base64Image =
+          "data:image/jpeg;base64,${base64Encode(bytes)}";
 
+      // Call Backend API
       final response = await VtoService.startTryOn(
         humanImageUrl: base64Image,
         garmentImageUrl: widget.productImageUrl,
       );
 
       final String predictionId = response['id'];
-      _pollStatus(predictionId);
-       setState(() {
+
+      setState(() {
         _status = 'processing';
       });
 
+      // Start Polling
+      _pollStatus(predictionId);
     } catch (e) {
       setState(() {
         _status = 'failed';
@@ -106,15 +88,13 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
       });
     }
   }
-    
-  import 'dart:convert'; // Added for base64Encode
 
   void _pollStatus(String id) {
-    _pollingTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
       try {
         final statusResponse = await VtoService.checkStatus(id);
         final status = statusResponse['status'];
-        
+
         if (status == 'succeeded') {
           timer.cancel();
           setState(() {
@@ -125,13 +105,12 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
           timer.cancel();
           setState(() {
             _status = 'failed';
-            _errorMessage = 'Generation failed.';
+            _errorMessage = 'Generation failed. Please try again.';
           });
         }
-        // else still processing/starting
       } catch (e) {
         timer.cancel();
-         setState(() {
+        setState(() {
           _status = 'failed';
           _errorMessage = e.toString();
         });
@@ -144,7 +123,8 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.vtoTitle, style: const TextStyle(color: Colors.black)),
+        title: Text(AppLocalizations.of(context)!.vtoTitle,
+            style: const TextStyle(color: Colors.black)),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -154,16 +134,20 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
         child: Column(
           children: [
             // Instructions
-            Text(
-              AppLocalizations.of(context)!.vtoInstruction,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 16),
-            ),
+            if (_status == 'idle' && _userImage == null)
+              Text(
+                AppLocalizations.of(context)!.vtoInstruction,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: AppTheme.textSecondary, fontSize: 16),
+              ),
             const SizedBox(height: 24),
 
-            // Image Selection Area
+            // Image Area
             GestureDetector(
-              onTap: _status == 'processing' ? null : () => _showImageSourceSheet(),
+              onTap: (_status == 'processing' || _status == 'uploading')
+                  ? null
+                  : () => _showImageSourceSheet(),
               child: Container(
                 height: 400,
                 width: double.infinity,
@@ -175,7 +159,8 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
                 child: _resultImageUrl != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: Image.network(_resultImageUrl!, fit: BoxFit.cover),
+                        child:
+                            Image.network(_resultImageUrl!, fit: BoxFit.cover),
                       )
                     : _userImage != null
                         ? ClipRRect(
@@ -185,53 +170,70 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
                         : Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.camera_alt_outlined, size: 64, color: Colors.grey),
+                              const Icon(Icons.add_a_photo_outlined,
+                                  size: 64, color: Colors.grey),
                               const SizedBox(height: 16),
-                              Text(AppLocalizations.of(context)!.vtoUpload, style: const TextStyle(color: Colors.grey)),
+                              Text(AppLocalizations.of(context)!.vtoUpload,
+                                  style: const TextStyle(color: Colors.grey)),
                             ],
                           ),
               ),
             ),
             const SizedBox(height: 32),
 
-            // Status / Action Button
+            // Actions
             if (_status == 'processing' || _status == 'uploading') ...[
               const SpinningLoader(),
               const SizedBox(height: 16),
               Text(AppLocalizations.of(context)!.vtoProcessing),
             ] else if (_status == 'succeeded') ...[
-              Row(
-                children: [
-                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => _pickImage(ImageSource.gallery),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: const BorderSide(color: AppTheme.primaryColor),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text(AppLocalizations.of(context)!.vtoTryAnother, style: const TextStyle(color: AppTheme.primaryColor)),
-                    ),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _userImage = null;
+                      _resultImageUrl = null;
+                      _status = 'idle';
+                    });
+                  },
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: AppTheme.primaryColor),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                ],
+                  child: Text(AppLocalizations.of(context)!.vtoTryAnother,
+                      style: const TextStyle(color: AppTheme.primaryColor)),
+                ),
               )
             ] else ...[
-               if (_errorMessage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(_errorMessage, style: const TextStyle(color: Colors.red)),
-                  ),
+              if (_errorMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Text(_errorMessage,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center),
+                ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _userImage == null ? null : _startTryOn,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
+                    disabledBackgroundColor: Colors.grey[300],
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     elevation: 0,
                   ),
-                  child: Text(AppLocalizations.of(context)!.vtoButton, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    AppLocalizations.of(context)!.vtoButton,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
@@ -242,7 +244,7 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
   }
 
   void _showImageSourceSheet() {
-      showModalBottomSheet(
+    showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

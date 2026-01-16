@@ -21,6 +21,7 @@ import 'package:hawsni_app/features/products/data/services/product_service.dart'
 import 'dart:ui';
 
 import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
+import 'package:hawsni_app/features/reviews/data/services/review_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String name;
@@ -847,25 +848,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                         child: Row(
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.totalPrice,
-                                  style: AppTheme.textTheme.bodySmall?.copyWith(
-                                    color: AppTheme.textSecondary,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context)!.totalPrice,
+                                    style:
+                                        AppTheme.textTheme.bodySmall?.copyWith(
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                Text(
-                                  widget.price,
-                                  style:
-                                      AppTheme.textTheme.titleLarge?.copyWith(
-                                    color: AppTheme.primaryColor,
-                                    fontWeight: FontWeight.bold,
+                                  Text(
+                                    widget.price,
+                                    style:
+                                        AppTheme.textTheme.titleLarge?.copyWith(
+                                      color: AppTheme.primaryColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             const Spacer(),
                             Container(
@@ -881,12 +889,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => VirtualTryOnScreen(
-                                        productId: widget.product.id,
-                                        productImageUrl: _selectedImageIndex <
-                                                widget.product.images.length
-                                            ? widget.product
-                                                .images[_selectedImageIndex]
-                                            : widget.product.imageUrl,
+                                        productId: widget.productId,
+                                        productImageUrl: widget.imageUrl,
                                       ),
                                     ),
                                   );
@@ -906,7 +910,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 backgroundColor: AppTheme.primaryColor,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 12),
+                                    horizontal: 16, vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(24),
                                 ),
