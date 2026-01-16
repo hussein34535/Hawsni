@@ -208,7 +208,7 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
                         }
                       },
                 child: Container(
-                  height: 320, // Reduced height as requested
+                  height: 500, // Increased height significantly
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
@@ -225,7 +225,7 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
                                   minScale: 1.0,
                                   maxScale: 4.0,
                                   child: Image.network(_resultImageUrl!,
-                                      fit: BoxFit.contain),
+                                      fit: BoxFit.contain), // Already contained
                                 ),
                               ),
                             ),
@@ -245,7 +245,8 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
                       : _userImage != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(20),
-                              child: Image.file(_userImage!, fit: BoxFit.cover),
+                              child: Image.file(_userImage!,
+                                  fit: BoxFit.contain), // Changed to contain
                             )
                           : Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -367,8 +368,35 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            InteractiveViewer(
-              child: Image.network(_resultImageUrl!),
+            Column(
+              children: [
+                Expanded(
+                  child: InteractiveViewer(
+                    child: Image.network(_resultImageUrl!, fit: BoxFit.contain),
+                  ),
+                ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "Save Image",
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(height: 8),
+                        FloatingActionButton(
+                          onPressed: _shareImage,
+                          backgroundColor: Colors.white,
+                          child:
+                              const Icon(Icons.download, color: Colors.black),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
             Positioned(
               top: 40,
@@ -378,15 +406,6 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
                 onPressed: () => Navigator.pop(context),
               ),
             ),
-            Positioned(
-                bottom: 40,
-                child: ElevatedButton.icon(
-                    onPressed: _shareImage,
-                    icon: const Icon(Icons.download),
-                    label: Text(AppLocalizations.of(context)!.shareImage),
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black)))
           ],
         ),
       ),
