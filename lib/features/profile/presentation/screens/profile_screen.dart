@@ -33,6 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserProfile() async {
+    if (AuthService.isGuest) return; // Don't load profile for guests
+
     setState(() {
       _userProfile = AuthService.userData;
     });
@@ -51,6 +53,109 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Check for Guest Mode
+    if (AuthService.isGuest) {
+      return Scaffold(
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: AppTheme.shadowSoft,
+                  ),
+                  child: const Icon(
+                    Icons.person_outline,
+                    size: 64,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Welcome Guest',
+                  style: AppTheme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Sign in to access your profile, orders, and more.',
+                  textAlign: TextAlign.center,
+                  style: AppTheme.textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'LOGIN / SIGN UP',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Settings Section for Guests (Language/Currency)
+                _buildSectionTitle('App Settings'),
+                Consumer<SettingsProvider>(
+                  builder: (context, settingsProvider, child) {
+                    return _buildMenuIsland([
+                      _buildMenuItem(
+                        icon: Icons.language,
+                        title: 'Language',
+                        subtitle: settingsProvider.language == 'en'
+                            ? 'English'
+                            : 'العربية',
+                        onTap: () =>
+                            _showLanguageDialog(context, settingsProvider),
+                      ),
+                      _buildDivider(),
+                      _buildMenuItem(
+                        icon: Icons.attach_money,
+                        title: 'Currency',
+                        subtitle: _getCurrencyName(settingsProvider.currency),
+                        onTap: () =>
+                            _showCurrencyDialog(context, settingsProvider),
+                      ),
+                    ]);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBackgroundColor,
       body: _isLoading

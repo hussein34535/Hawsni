@@ -23,14 +23,11 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 3));
 
     if (mounted) {
-      // Check if user is authenticated
-      final isAuthenticated = AuthService.isAuthenticated();
-
+      // Always navigate to MainScreen (Guest is default)
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              isAuthenticated ? const MainScreen() : const LoginScreen(),
+          builder: (context) => const MainScreen(),
         ),
       );
     }

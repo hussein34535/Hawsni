@@ -4,6 +4,7 @@ import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/features/auth/presentation/screens/signup_screen.dart';
 import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,6 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (result != null) {
+        // Sync any guest cart items to the new account
+        await CartService().syncLocalCartToApi();
+
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -78,6 +82,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppTheme.primaryColor),
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -116,7 +125,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: AppTheme.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 8),
+                const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
                 // Email Field
                 _buildTextField(

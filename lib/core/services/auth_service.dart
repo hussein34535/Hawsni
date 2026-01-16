@@ -46,11 +46,13 @@ class AuthService {
         final data = json.decode(response.body);
         _token = data['token'];
         _userData = data['user'];
+        _isGuest = false; // Clear guest flag
 
         // Save token and user data to shared preferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', _token!);
         await prefs.setString('userData', json.encode(_userData));
+        await prefs.remove('isGuest'); // Remove guest persistence
 
         print('Login successful, token saved: $_token');
         print('User data saved: $_userData');
@@ -62,7 +64,7 @@ class AuthService {
       }
     } catch (e) {
       print('Error logging in: $e');
-      return null;
+      rethrow; // Rethrow to let UI handle it
     }
   }
 
@@ -87,9 +89,11 @@ class AuthService {
         if (data['token'] != null) {
           _token = data['token'];
           _userData = data['user'];
+          _isGuest = false;
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', _token!);
           await prefs.setString('userData', json.encode(_userData));
+          await prefs.remove('isGuest');
           _authStateController.add(true);
         }
         return data;
@@ -99,7 +103,7 @@ class AuthService {
       }
     } catch (e) {
       print('Error registering: $e');
-      return null;
+      rethrow; // Rethrow to let UI handle it
     }
   }
 
@@ -120,10 +124,12 @@ class AuthService {
         final data = json.decode(response.body);
         _token = data['token'];
         _userData = data['user'];
+        _isGuest = false;
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', _token!);
         await prefs.setString('userData', json.encode(_userData));
+        await prefs.remove('isGuest');
         _authStateController.add(true);
 
         return data;
@@ -133,7 +139,7 @@ class AuthService {
       }
     } catch (e) {
       print('Error verifying OTP: $e');
-      return null;
+      rethrow;
     }
   }
 
@@ -246,6 +252,7 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('token');
     final userDataString = prefs.getString('userData');
+    _isGuest = prefs.getBool('isGuest') ?? false;
 
     if (userDataString != null) {
       try {
@@ -258,12 +265,53 @@ class AuthService {
 
     print('Token loaded from storage: $_token');
     print('User data loaded from storage: $_userData');
-    _authStateController.add(_token != null);
+    print('Guest Mode: $_isGuest');
+
+    // Auth is true if we have a token OR we are a guest
+    if (_token == null && !_isGuest) {
+      print('No token found, defaulting to Guest Mode');
+      _isGuest = true;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isGuest', true);
+    }
+
+    _authStateController.add(true); // Always return true (Guest or User)
   }
 
   // Check if user is authenticated
   static bool isAuthenticated() {
     print('Checking authentication status: ${_token != null}');
     return _token != null;
+  }
+
+  // --- GUEST MODE LOGIC ---
+  static bool _isGuest = false;
+  static bool get isGuest => _isGuest;
+
+  static Future<void> guestLogin() async {
+    _isGuest = true;
+    _token = null; // No token for guests
+    _userData = null;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isGuest', true);
+    // Ensure we don't have old tokens confusing things
+    await prefs.remove('token');
+    await prefs.remove('userData');
+
+    _authStateController
+        .add(true); // Treat as "logged in" for navigation purposes
+    print('Guest login successful');
+  }
+
+  static Future<void> loadGuestStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isGuest = prefs.getBool('isGuest') ?? false;
+    if (_isGuest) {
+      print('Guest session loaded');
+      // If guest, we might want to emit true to authState?
+      // Usually loadToken handles the initial state.
+      // We can combine logic in loadToken.
+    }
   }
 }

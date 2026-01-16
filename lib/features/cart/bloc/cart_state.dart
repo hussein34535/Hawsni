@@ -46,6 +46,33 @@ class CartItem extends Equatable {
   @override
   List<Object?> get props =>
       [id, name, price, imageUrl, quantity, size, color, productId];
+
+  // For Local Storage serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'imageUrl': imageUrl,
+      'quantity': quantity,
+      'size': size,
+      'color': color,
+      'productId': productId,
+    };
+  }
+
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      name: json['name'] ?? '',
+      price: json['price'] ?? '0',
+      imageUrl: json['imageUrl'] ?? '',
+      quantity: json['quantity'] ?? 1,
+      size: json['size'],
+      color: json['color'],
+      productId: json['productId'],
+    );
+  }
 }
 
 abstract class CartState extends Equatable {

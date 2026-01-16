@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
+import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:hawsni_app/features/cart/presentation/widgets/cart_item_card.dart';
 import 'package:hawsni_app/features/checkout/presentation/screens/checkout_screen.dart';
 import 'package:hawsni_app/core/themes/app_theme.dart';
@@ -138,11 +140,42 @@ class CartScreen extends StatelessWidget {
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const CheckoutScreen(),
-                                ),
-                              );
+                              if (AuthService.isGuest) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Account Required'),
+                                    content: const Text(
+                                        'Please sign in to complete your purchase.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          // Navigate to login
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const LoginScreen(),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text('Sign In'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CheckoutScreen(),
+                                  ),
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primaryColor,
