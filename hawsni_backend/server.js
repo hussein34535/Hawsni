@@ -35,10 +35,19 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
 console.log('Debug: Initializing middleware...');
-app.use(cors({
-  origin: (origin, callback) => callback(null, true),
-  credentials: true
-}));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  // Reflect origin or allow all for non-browser requests
+  res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Serve static files
