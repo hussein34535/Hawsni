@@ -193,5 +193,6 @@
   "vtoStep1": "Add Photo",
   "vtoStep2": "AI Processing",
   "vtoStep3": "New Look!",
-  "vtoBestResultTip": "💡 Tip: Use a well-lit photo with a simple background."
+  "vtoBestResultTip": "💡 Tip: Use a well-lit photo with a simple background.",
+  "vtoLabel": "AI Try-On ✨"
 }

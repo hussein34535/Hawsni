@@ -196,78 +196,81 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
                 ),
               ],
 
-              // Image Area (Compact)
-              GestureDetector(
-                onTap: (_status == 'processing' || _status == 'uploading')
-                    ? null
-                    : () {
-                        if (_resultImageUrl != null) {
-                          _openFullScreenImage();
-                        } else {
-                          _showImageSourceSheet();
-                        }
-                      },
-                child: Container(
-                  height: 500, // Increased height significantly
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: _resultImageUrl != null
-                      ? Stack(
-                          children: [
-                            Positioned.fill(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: InteractiveViewer(
-                                  minScale: 1.0,
-                                  maxScale: 4.0,
-                                  child: Image.network(_resultImageUrl!,
-                                      fit: BoxFit.contain), // Already contained
+              // Image Area (Responsive)
+              Expanded(
+                child: GestureDetector(
+                  onTap: (_status == 'processing' || _status == 'uploading')
+                      ? null
+                      : () {
+                          if (_resultImageUrl != null) {
+                            _openFullScreenImage();
+                          } else {
+                            _showImageSourceSheet();
+                          }
+                        },
+                  child: Container(
+                    // height: 500 removed to allow Expanded to control size
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: _resultImageUrl != null
+                        ? Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: InteractiveViewer(
+                                    minScale: 1.0,
+                                    maxScale: 4.0,
+                                    child: Image.network(_resultImageUrl!,
+                                        fit: BoxFit
+                                            .contain), // Already contained
+                                  ),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                                bottom: 12,
-                                right: 12,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                      color: Colors.black54,
-                                      borderRadius: BorderRadius.circular(8)),
-                                  child: const Icon(Icons.zoom_in,
-                                      color: Colors.white),
-                                ))
-                          ],
-                        )
-                      : _userImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.file(_userImage!,
-                                  fit: BoxFit.contain), // Changed to contain
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const SizedBox(
-                                    height:
-                                        80), // Increased spacing to push lower
-                                const Icon(Icons.add_a_photo_outlined,
-                                    size: 48,
-                                    color: Colors.grey), // Reduced size
-                                const SizedBox(height: 12),
-                                Text(localizations.vtoUpload,
-                                    style: const TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ),
+                              Positioned(
+                                  bottom: 12,
+                                  right: 12,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius: BorderRadius.circular(8)),
+                                    child: const Icon(Icons.zoom_in,
+                                        color: Colors.white),
+                                  ))
+                            ],
+                          )
+                        : _userImage != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.file(_userImage!,
+                                    fit: BoxFit.contain), // Changed to contain
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(
+                                      height:
+                                          0), // Reduced spacing since expanded centers it
+                                  const Icon(Icons.add_a_photo_outlined,
+                                      size: 48,
+                                      color: Colors.grey), // Reduced size
+                                  const SizedBox(height: 12),
+                                  Text(localizations.vtoUpload,
+                                      style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                  ),
                 ),
               ),
-              const Spacer(), // Pushes buttons to the bottom
+              // Spacer removed
               const SizedBox(height: 16),
 
               // Actions (Fixed at bottom)

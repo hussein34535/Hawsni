@@ -415,6 +415,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // AI Try-On Button
                                 // Header
                                 Row(
                                   mainAxisAlignment:
@@ -827,109 +828,157 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
 
               // Floating Bottom Bar
+              // Legendary Floating Bottom Bar
               Positioned(
-                bottom: 32,
-                left: 24,
-                right: 24,
+                bottom: 24,
+                left: 20,
+                right: 20,
                 child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: AppTheme.shadowFloating,
+                    color:
+                        Colors.white.withValues(alpha: 0.95), // Back to White
+                    borderRadius: BorderRadius.circular(40),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black
+                            .withValues(alpha: 0.1), // Softer shadow
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(32),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(32),
-                        ),
-                        child: Row(
+                  child: Row(
+                    children: [
+                      // 1. Price Section (Premium Look - Number Only)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment:
+                              MainAxisAlignment.center, // Center vertically
                           children: [
-                            Expanded(
-                              child: Text.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: widget.price,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primaryColor,
-                                      ),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: widget.price.split('.')[0],
+                                    style: GoogleFonts.poppins(
+                                      fontSize:
+                                          20, // Slightly larger since label is gone
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          AppTheme.primaryColor, // Green Price
                                     ),
-                                    const TextSpan(text: ' '),
-                                    TextSpan(
-                                      text: AppLocalizations.of(context)!
-                                          .currencySymbol,
-                                      style: GoogleFonts.poppins(
-                                        fontSize:
-                                            14, // Smaller font for currency
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.primaryColor,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                color: AppTheme.secondaryColor
-                                    .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => VirtualTryOnScreen(
-                                        productId: widget.productId,
-                                        productImageUrl: widget.imageUrl,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Image.asset(
-                                    'assets/images/vto_final_icon.png',
-                                    width: 32,
-                                    height: 32,
                                   ),
-                                ),
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: () => _addToCart(context),
-                              icon: const Icon(Icons.shopping_bag_outlined,
-                                  color: Colors.white),
-                              label: Text(
-                                  AppLocalizations.of(context)!.addToPurchase,
-                                  style: const TextStyle(fontSize: 13)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.primaryColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8), // Reduced vertical padding
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                elevation: 0,
+                                  TextSpan(
+                                    text:
+                                        " ${AppLocalizations.of(context)!.currencySymbol}",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 14,
+                                      color:
+                                          AppTheme.primaryColor, // Green Symbol
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
+
+                      const Spacer(),
+
+                      // 2. AI VTO Button (The "Legendary" Magic Button - Purple Gradient)
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VirtualTryOnScreen(
+                                productId: widget.productId,
+                                productImageUrl: widget.imageUrl,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFF6366F1),
+                                Color(0xFFEC4899)
+                              ], // Indigo to Pink (Magic Look)
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF6366F1)
+                                    .withValues(alpha: 0.4),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.auto_awesome,
+                                  color: Colors.white, size: 16),
+                              const SizedBox(width: 8),
+                              Text(
+                                "جرب علي صورتك",
+                                style: GoogleFonts.cairo(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // 3. Add to Cart (Black Button with Text)
+                      GestureDetector(
+                        onTap: () => _addToCart(context),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.black, // Back to Black
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.shopping_bag_outlined,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "شراء", // "Buy" Text added
+                                style: GoogleFonts.cairo(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

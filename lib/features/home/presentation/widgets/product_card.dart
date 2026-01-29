@@ -115,7 +115,7 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
 
-                  // Favorite Button
+                  // Favorite Button (Conditional: Only if Favorite)
                   Positioned(
                     top: 12,
                     right: 12,
@@ -123,22 +123,14 @@ class _ProductCardState extends State<ProductCard> {
                       builder: (context, wishlistService, _) {
                         final isFav =
                             wishlistService.isItemInWishlist(widget.id);
+
+                        // If not favorite, hide completely
+                        if (!isFav) return const SizedBox.shrink();
+
                         return GestureDetector(
                           onTap: () {
-                            if (isFav) {
-                              wishlistService.removeFromWishlist(widget.id);
-                            } else {
-                              wishlistService.addToWishlist(WishlistItem(
-                                id: widget.id,
-                                name: widget.name,
-                                price: widget.price,
-                                imageUrl: widget.imageUrl,
-                                description:
-                                    '', // details not available in card
-                                rating: widget.rating,
-                                reviewCount: widget.reviewCount,
-                              ));
-                            }
+                            // Can only unlike (since it disappears after)
+                            wishlistService.removeFromWishlist(widget.id);
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(50),
@@ -148,18 +140,16 @@ class _ProductCardState extends State<ProductCard> {
                                 width: 36,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.9),
+                                  color: Colors.white.withValues(
+                                      alpha: 0.2), // Very transparent
                                   shape: BoxShape.circle,
                                 ),
                                 child: Center(
                                   child: Icon(
-                                    isFav
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
+                                    Icons.favorite,
                                     size: 20,
-                                    color: isFav
-                                        ? AppTheme.primaryColor
-                                        : Colors.grey[500],
+                                    color: AppTheme
+                                        .primaryColor, // Red/Green Heart
                                   ),
                                 ),
                               ),
@@ -219,8 +209,8 @@ class _ProductCardState extends State<ProductCard> {
                         '(${widget.reviewCount})',
                         style: TextStyle(
                           fontSize: 12, // text-xs
-                          color:
-                              AppTheme.textSecondary, // text-muted-foreground
+                          color: AppTheme.textSecondary,
+                          fontStyle: FontStyle.normal, // Force normal style
                         ),
                       ),
                     ],
@@ -238,7 +228,7 @@ class _ProductCardState extends State<ProductCard> {
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: widget.price,
+                              text: widget.price.split('.')[0], // No decimals
                               style: GoogleFonts.poppins(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -262,7 +252,7 @@ class _ProductCardState extends State<ProductCard> {
                         const SizedBox(width: 8), // gap-2
                         // text-sm text-muted-foreground line-through
                         Text(
-                          widget.originalPrice!,
+                          widget.originalPrice!.split('.')[0], // No decimals
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             decoration: TextDecoration.lineThrough,

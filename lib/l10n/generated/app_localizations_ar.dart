@@ -540,4 +540,7 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get vtoBestResultTip =>
       '💡 نصيحة: استخدم صورة بإضاءة جيدة وخلفية بسيطة لأفضل نتيجة.';
+
+  @override
+  String get vtoLabel => 'جربها بالذكاء الاصطناعي ✨';
 }

@@ -73,7 +73,8 @@ class ProductsScreen extends StatelessWidget {
                             id: product.id,
                             imageUrl: product.imageUrl,
                             name: product.name,
-                            price: '\$${product.price}',
+                            price: product.price
+                                .toString(), // Raw number, ProductCard handles symbol
                             rating: product.rating,
                             reviewCount: product.reviewCount,
                             screenId: 'products',
@@ -99,6 +100,7 @@ class ProductsScreen extends StatelessWidget {
     return SliverAppBar(
       backgroundColor: Colors.white,
       iconTheme: const IconThemeData(color: Colors.black),
+      leading: const BackButton(color: Colors.black), // Explicit Back Button
       title: Text(
         title ?? categoryName ?? 'Products',
         style:

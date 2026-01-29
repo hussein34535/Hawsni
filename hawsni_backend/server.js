@@ -36,7 +36,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Middleware
 console.log('Debug: Initializing middleware...');
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => callback(null, true),
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));

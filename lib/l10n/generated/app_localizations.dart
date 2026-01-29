@@ -1141,6 +1141,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'💡 Tip: Use a well-lit photo with a simple background.'**
   String get vtoBestResultTip;
+
+  /// No description provided for @vtoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Try-On ✨'**
+  String get vtoLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -543,4 +543,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vtoBestResultTip =>
       '💡 Tip: Use a well-lit photo with a simple background.';
+
+  @override
+  String get vtoLabel => 'AI Try-On ✨';
 }
