@@ -1,11 +1,18 @@
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
+require('dotenv').config();
+
+console.log('Cloudinary Config:', {
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY ? '***' : 'MISSING',
+  api_secret: process.env.CLOUDINARY_SECRET ? '***' : 'MISSING'
+});
 
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET
 });
 
 /**
@@ -28,9 +35,10 @@ const uploadToCloudinary = (file, folder = 'products') => {
       },
       (error, result) => {
         if (error) {
-          console.error('Cloudinary Upload Error:', error);
+          console.error('❌ Cloudinary Upload Error Details:', error);
           return reject(new Error(`Cloudinary Upload Error: ${error.message}`));
         }
+        console.log('✅ Cloudinary Upload Success:', result.secure_url);
         resolve(result.secure_url);
       }
     );

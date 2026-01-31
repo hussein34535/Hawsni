@@ -6,6 +6,7 @@ const storage = multer.memoryStorage();
 
 // فلتر للتحقق من نوع الملف (صور فقط)
 const fileFilter = (req, file, cb) => {
+  console.log('🔍 Multer fileFilter checking:', file.originalname, file.mimetype);
   const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
@@ -13,6 +14,7 @@ const fileFilter = (req, file, cb) => {
   if (mimetype && extname) {
     return cb(null, true);
   } else {
+    console.error('❌ Multer rejected file:', file.originalname);
     cb(new Error('الصور فقط مسموح بها! (Only images are allowed)'));
   }
 };

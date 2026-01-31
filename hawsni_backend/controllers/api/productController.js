@@ -207,10 +207,18 @@ class ProductController {
         try {
             const { name, description, price, discount, category_id, stock, is_featured, sizes } = req.body;
 
+            console.log('📦 CreateProductAdmin Called. Files:', req.files ? req.files.length : 'No files');
+
             let imageUrls = [];
             if (req.files && req.files.length > 0) {
-                const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                imageUrls = await Promise.all(uploadPromises);
+                try {
+                    const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
+                    imageUrls = await Promise.all(uploadPromises);
+                    console.log('✅ All images uploaded via Cloudinary:', imageUrls);
+                } catch (imgError) {
+                    console.error('❌ Error uploading images to Cloudinary:', imgError);
+                    return res.status(500).send(`خطأ في رفع الصور: ${imgError.message}`);
+                }
             }
 
             // Handle scraped images
@@ -284,15 +292,23 @@ class ProductController {
     async updateProductAdmin(req, res) {
         try {
             const { name, description, price, discount, category_id, stock, is_featured, sizes, colors } = req.body;
+            console.log('🔄 UpdateProductAdmin Called for ID:', req.params.id);
+            console.log('📂 Files received:', req.files ? req.files.length : 'None');
 
             const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
 
             let imageUrls = currentProduct?.images || [];
 
             if (req.files && req.files.length > 0) {
-                const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                const newImageUrls = await Promise.all(uploadPromises);
-                imageUrls = [...imageUrls, ...newImageUrls];
+                try {
+                    const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
+                    const newImageUrls = await Promise.all(uploadPromises);
+                    console.log('✅ New images uploaded:', newImageUrls);
+                    imageUrls = [...imageUrls, ...newImageUrls];
+                } catch (imgErr) {
+                    console.error('❌ Check Cloudinary Error in Update:', imgErr);
+                    return res.status(500).send(`خطأ في رفع الصور: ${imgErr.message}`);
+                }
             }
 
             // Parse sizes and colors
@@ -358,9 +374,19 @@ class ProductController {
     async deleteProductAdmin(req, res) {
         try {
             await supabase.from('products').delete().eq('id', req.params.id);
+
+            // Check if request expects JSON (Fetch/AJAX)
+            if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+                return res.json({ success: true, message: 'تم حذف المنتج بنجاح' });
+            }
+
+            // Fallback for standard form posts
             res.redirect('/products');
         } catch (error) {
             console.error('Error deleting product (Admin):', error);
+            if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+                return res.status(500).json({ success: false, message: `خطأ في حذف المنتج: ${error.message}` });
+            }
             res.status(500).send(`خطأ في حذف المنتج: ${error.message}`);
         }
     }

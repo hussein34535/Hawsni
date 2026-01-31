@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const supabase = require('./config/supabase');
 const upload = require('./middleware/upload');
+const methodOverride = require('method-override');
 
 // Load env vars
 dotenv.config();
@@ -50,6 +51,7 @@ app.use((req, res, next) => {
 });
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(methodOverride('_method'));
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 console.log('Debug: Middleware initialized successfully.');
@@ -82,6 +84,8 @@ app.post('/products', upload.any(), ProductController.createProductAdmin);
 app.get('/products/:id/edit', ProductController.renderEditProductPage);
 app.post('/products/:id', upload.any(), ProductController.updateProductAdmin);
 app.post('/products/:id/delete', ProductController.deleteProductAdmin);
+app.delete('/products/:id/delete', ProductController.deleteProductAdmin); // Handle actual DELETE method
+app.delete('/products/:id', ProductController.deleteProductAdmin); // RESTful fallback
 
 // Image Management Routes
 app.get('/products/:id/images', ProductController.renderImageManagementPage);

@@ -148,7 +148,14 @@
                             <!-- Scraped Images Input (Hidden JSON) -->
                             <input type="hidden" name="scraped_images" id="scrapedImagesInput">
 
-                            <!-- Hidden File Input for standard uploads -->
+                            <!-- Standard File Input (Unhidden for reliability) -->
+                            <div class="mb-3">
+                                <label class="form-label">رفع صور جديدة (مباشر)</label>
+                                <input type="file" name="images" id="fileInputSafe" class="form-control" multiple
+                                    accept="image/*">
+                            </div>
+
+                            <!-- Hidden File Input for standard uploads (Legacy - Restored Name) -->
                             <input type="file" name="images" id="fileInput" multiple accept="image/*"
                                 style="display: none;" onchange="handleFileSelect(this)">
 

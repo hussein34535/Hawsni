@@ -120,9 +120,23 @@ function validateForm(formId) {
 }
 
 // Delete Handler
-function handleDelete(url, itemName) {
+// Delete Handler
+async function handleDelete(url, itemName) {
+    // 1. Ask for confirmation
     confirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
+
+        // 2. Sanitize URL (fix common issues like /products//delete)
+        url = url.replace(/([^:]\/)\/+/g, "$1");
+
+        // 3. Validation: Check if ID is likely missing
+        if (url.endsWith('/delete') && (url.split('/').length < 4)) {
+            // Heuristic: URL like /products/delete is too short, needs ID
+            showToast('خطأ: رابط الحذف غير صحيح (رقم العنصر مفقود)', 'error');
+            return;
+        }
+
         try {
+            // 4. Try Standard DELETE Request
             const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
@@ -133,10 +147,31 @@ function handleDelete(url, itemName) {
             if (response.ok) {
                 showToast('تم الحذف بنجاح', 'success');
                 setTimeout(() => location.reload(), 1000);
+            } else if (response.status === 404 || response.status === 405) {
+                // 5. Fallback: Try POST with _method=DELETE (for legacy support)
+                console.warn('DELETE failed, trying POST fallback...');
+                const formData = new URLSearchParams();
+                formData.append('_method', 'DELETE');
+
+                const fallbackRes = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+
+                if (fallbackRes.ok) {
+                    showToast('تم الحذف بنجاح (Fallback)', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    const data = await fallbackRes.json().catch(() => ({}));
+                    showToast(data.message || 'حدث خطأ أثناء الحذف', 'error');
+                }
             } else {
-                showToast('حدث خطأ أثناء الحذف', 'error');
+                const data = await response.json().catch(() => ({}));
+                showToast(data.message || 'حدث خطأ أثناء الحذف', 'error');
             }
         } catch (error) {
+            console.error('Delete Error:', error);
             showToast('حدث خطأ أثناء الحذف', 'error');
         }
     });

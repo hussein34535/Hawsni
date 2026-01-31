@@ -92,18 +92,52 @@
 
     <script>
         // Override handleDelete for products (uses POST to /products/:id/delete)
-        function handleDelete(url, itemName) {
-            confirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
-                try {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = url;
-                    document.body.appendChild(form);
-                    form.submit();
-                } catch (error) {
-                    showToast('حدث خطأ أثناء الحذف', 'error');
+        // Handles deletion via Fetch API (Modern & Robust)
+        async function handleDelete(url, itemName) {
+            if (!confirm(`هل أنت متأكد من حذف ${itemName}؟`)) return;
+
+            // Ensure URL has no double slashes (fix for missing ID)
+            url = url.replace(/([^:]\/)\/+/g, "$1");
+
+            // Validate URL
+            if (url.endsWith('/products/') || url === '/products/delete' || url === '/products') {
+                alert('خطأ: المعرف (ID) غير موجود لهذا العنصر!');
+                return;
+            }
+
+            try {
+                // Try sending standard DELETE request first
+                const res = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (res.ok) {
+                    showToast('تم الحذف بنجاح', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                    return;
+                } else if (res.status === 404) {
+                    // Fallback: Try POST with _method override (if server expects that)
+                    const formRes = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: '_method=DELETE'
+                    });
+                    if (formRes.ok) {
+                        showToast('تم الحذف بنجاح', 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                        return;
+                    }
                 }
-            });
+
+                const data = await res.json();
+                throw new Error(data.message || 'فشل الحذف');
+            } catch (error) {
+                console.error('Delete Error:', error);
+                showToast(error.message || 'حدث خطأ أثناء الحذف', 'error');
+            }
         }
     </script>
 
