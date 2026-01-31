@@ -9,9 +9,13 @@ const dashboardController = require('../controllers/admin/dashboardController');
 const bannersController = require('../controllers/admin/bannersController');
 const usersController = require('../controllers/admin/usersController');
 const ordersController = require('../controllers/admin/ordersController');
+const scraperController = require('../controllers/admin/scraperController');
 
 // Dashboard
 router.get('/dashboard', dashboardController.getDashboard);
+
+// Scraper
+router.post('/scrape-product', scraperController.scrape);
 
 // Banners Routes
 router.get('/banners', bannersController.index);

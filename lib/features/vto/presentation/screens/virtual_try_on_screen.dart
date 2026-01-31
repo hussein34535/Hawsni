@@ -10,6 +10,8 @@ import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/vto/data/services/vto_service.dart';
 import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
 
 class VirtualTryOnScreen extends StatefulWidget {
   final String productImageUrl;
@@ -32,6 +34,20 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
   String _errorMessage = '';
   final ImagePicker _picker = ImagePicker();
   Timer? _pollingTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Auth safety check
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!AuthService.isAuthenticated()) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    });
+  }
 
   @override
   void dispose() {

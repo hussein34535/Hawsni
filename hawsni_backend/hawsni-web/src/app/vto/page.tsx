@@ -1,7 +1,7 @@
 'use client';
 
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { vtoApi, productsApi, Product } from '@/lib/api';
 import {
@@ -11,8 +11,18 @@ import {
 import Link from 'next/link';
 
 export default function VTOPage() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const productIdFromUrl = searchParams.get('product');
+
+    // Auth check
+    useEffect(() => {
+        const token = localStorage.getItem('hawsni_token');
+        if (!token) {
+            const currentPath = window.location.pathname + window.location.search;
+            router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+        }
+    }, [router, searchParams]);
 
     const [userImage, setUserImage] = useState<string | null>(null);
     const [product, setProduct] = useState<Product | null>(null);

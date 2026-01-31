@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { productsApi, cartApi, Product } from '@/lib/api';
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 export default function ProductDetailPage() {
+    const router = useRouter();
     const params = useParams();
     const productId = params.id as string;
 
@@ -250,13 +251,21 @@ export default function ProductDetailPage() {
                     {/* Action Buttons */}
                     <div className="flex gap-4 pt-4">
                         {/* VTO Button */}
-                        <Link
-                            href={`/vto?product=${product.id}`}
+                        <button
+                            onClick={() => {
+                                const token = localStorage.getItem('hawsni_token');
+                                if (!token) {
+                                    const currentPath = window.location.pathname + window.location.search;
+                                    router.push(`/login?redirect=${encodeURIComponent(`/vto?product=${product.id}`)}`);
+                                    return;
+                                }
+                                router.push(`/vto?product=${product.id}`);
+                            }}
                             className="flex-1 vto-gradient text-white py-4 rounded-full font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
                         >
                             <Sparkles className="w-5 h-5" />
                             Try On AI
-                        </Link>
+                        </button>
 
                         {/* Add to Cart Button */}
                         <button

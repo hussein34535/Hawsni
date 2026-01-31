@@ -205,12 +205,44 @@ class ProductController {
 
     async createProductAdmin(req, res) {
         try {
-            const { name, description, price, discount, category_id, stock, is_featured } = req.body;
+            const { name, description, price, discount, category_id, stock, is_featured, sizes } = req.body;
 
             let imageUrls = [];
             if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                 imageUrls = await Promise.all(uploadPromises);
+            }
+
+            // Handle scraped images
+            if (req.body.scraped_images) {
+                try {
+                    const scraped = JSON.parse(req.body.scraped_images);
+                    if (Array.isArray(scraped)) imageUrls = [...imageUrls, ...scraped];
+                } catch (e) {
+                    console.error('Error parsing scraped images:', e);
+                }
+            }
+
+            // Parse Sizes
+            let sizesArray = [];
+            if (sizes) {
+                sizesArray = typeof sizes === 'string' ? sizes.split(',').map(s => s.trim()).filter(s => s) : sizes;
+            }
+
+            // Parse Colors
+            let colorsArray = [];
+            if (req.body.colors) {
+                try {
+                    let parsedColors = typeof req.body.colors === 'string' ? JSON.parse(req.body.colors) : req.body.colors;
+                    if (Array.isArray(parsedColors)) {
+                        colorsArray = parsedColors.map(c => {
+                            if (typeof c === 'string') return { color: c, imageIndex: null };
+                            return c; // Assuming it's already { color, imageIndex }
+                        });
+                    }
+                } catch (e) {
+                    colorsArray = typeof req.body.colors === 'string' ? req.body.colors.split(',').map(c => ({ color: c.trim(), imageIndex: null })) : [];
+                }
             }
 
             const { error } = await supabase.from('products').insert({
@@ -221,6 +253,8 @@ class ProductController {
                 category_id: category_id || null,
                 stock: parseInt(stock) || 0,
                 is_featured: is_featured === 'on',
+                sizes: sizesArray.length > 0 ? sizesArray : null,
+                colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls
             });
 

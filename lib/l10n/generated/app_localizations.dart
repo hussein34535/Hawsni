@@ -146,6 +146,12 @@ abstract class AppLocalizations {
   /// **'Welcome Back'**
   String get welcomeBack;
 
+  /// No description provided for @pleaseLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login to continue'**
+  String get pleaseLogin;
+
   /// No description provided for @loginToContinue.
   ///
   /// In en, this message translates to:

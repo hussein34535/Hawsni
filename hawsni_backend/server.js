@@ -78,9 +78,9 @@ app.get('/dashboard', DashboardController.getDashboard);
 // Products Management (Admin)
 app.get('/products', ProductController.renderProductsPage);
 app.get('/products/new', ProductController.renderNewProductPage);
-app.post('/products', upload.array('images', 5), ProductController.createProductAdmin);
+app.post('/products', upload.any(), ProductController.createProductAdmin);
 app.get('/products/:id/edit', ProductController.renderEditProductPage);
-app.post('/products/:id', upload.array('images', 5), ProductController.updateProductAdmin);
+app.post('/products/:id', upload.any(), ProductController.updateProductAdmin);
 app.post('/products/:id/delete', ProductController.deleteProductAdmin);
 
 // Image Management Routes

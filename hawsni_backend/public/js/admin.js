@@ -79,7 +79,7 @@ function confirm(message, onConfirm) {
 
     overlay.querySelector('.confirm-ok').addEventListener('click', () => {
         overlay.remove();
-        onConfirm();
+        if (typeof onConfirm === 'function') onConfirm();
     });
 }
 

@@ -33,6 +33,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcomeBack => 'مرحباً بعودتك';
 
   @override
+  String get pleaseLogin => 'يرجى تسجيل الدخول للمتابعة';
+
+  @override
   String get loginToContinue => 'سجل دخولك للمتابعة';
 
   @override

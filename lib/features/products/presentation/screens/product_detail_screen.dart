@@ -8,8 +8,7 @@ import 'package:hawsni_app/features/products/presentation/widgets/reviews_sectio
 import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
 import 'package:hawsni_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
-import 'package:hawsni_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
-import 'package:share_plus/share_plus.dart';
+
 import 'package:hawsni_app/core/themes/app_theme.dart';
 import 'package:hawsni_app/core/widgets/spinning_loader.dart';
 import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
@@ -21,6 +20,8 @@ import 'package:hawsni_app/core/services/wishlist_service.dart';
 import 'package:hawsni_app/features/products/data/services/product_service.dart';
 import 'dart:ui';
 
+import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:hawsni_app/features/reviews/data/services/review_service.dart';
 
@@ -215,13 +216,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
-    );
-  }
-
-  void _shareProduct() {
-    Share.share(
-      'Check out ${widget.name} on Hawsni App!\nPrice: ${widget.price}\nRating: ${widget.rating} ⭐',
-      subject: 'Check out this product: ${widget.name}',
     );
   }
 
@@ -894,6 +888,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       // 2. AI VTO Button (The "Legendary" Magic Button - Purple Gradient)
                       GestureDetector(
                         onTap: () {
+                          if (!AuthService.isAuthenticated()) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  AppLocalizations.of(context)!.pleaseLogin,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                backgroundColor: Colors.black87,
+                                behavior: SnackBarBehavior.floating,
+                                action: SnackBarAction(
+                                  label: 'Login',
+                                  textColor: AppTheme.primaryColor,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginScreen(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                            return;
+                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(

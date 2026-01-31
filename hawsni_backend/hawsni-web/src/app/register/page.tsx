@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/lib/api';
 import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight } from 'lucide-react';
 
 export default function RegisterPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectUrl = searchParams.get('redirect');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -52,7 +54,7 @@ export default function RegisterPage() {
             if (res.data?.token) {
                 localStorage.setItem('hawsni_token', res.data.token);
                 localStorage.setItem('hawsni_user', JSON.stringify(res.data.user));
-                router.push('/');
+                router.push(redirectUrl || '/');
             } else {
                 throw new Error(res.error || 'Registration failed');
             }
