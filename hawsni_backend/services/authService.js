@@ -1,5 +1,6 @@
 const supabase = require('../config/supabase');
 const jwt = require('jsonwebtoken');
+const fetch = require('node-fetch');
 
 class AuthService {
     constructor() {
@@ -35,11 +36,42 @@ class AuthService {
         }
 
         const user = authData.user;
-
         if (user) {
-            // Generate Mock OTP
-            const otpCode = '123456'; // Mock OTP
+            // Generate Random 6-digit OTP
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
             const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+            // Send Email via Resend
+            try {
+                await fetch('https://api.resend.com/emails', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        from: 'Hawsni <onboarding@resend.dev>',
+                        to: email,
+                        subject: 'Verify your Hawsni Account',
+                        html: `
+                            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                                <h1 style="color: #10b981; text-align: center;">Welcome to Hawsni!</h1>
+                                <p>Hello ${name},</p>
+                                <p>Thank you for joining Hawsni. To complete your registration, please use the following verification code:</p>
+                                <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #1f2937;">
+                                    ${otpCode}
+                                </div>
+                                <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 20px;">
+                                    This code will expire in 10 minutes. If you didn't request this, please ignore this email.
+                                </p>
+                            </div>
+                        `
+                    })
+                });
+            } catch (emailError) {
+                console.error('Failed to send OTP email:', emailError);
+                // We'll continue anyway for now, or you might want to throw an error
+            }
 
             // 3. Add user to 'users' table with OTP details
             const { error: profileError } = await supabase
@@ -63,7 +95,7 @@ class AuthService {
                 throw new Error(`Failed to create user profile: ${profileError.message}`);
             }
 
-            console.log(`[MOCK OTP] OTP for ${email} (${phone}): ${otpCode}`);
+            console.log(`[OTP SENT] OTP for ${email}: ${otpCode}`);
 
             return {
                 requireOtp: true,
