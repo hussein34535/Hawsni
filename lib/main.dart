@@ -13,6 +13,9 @@ import 'package:hawsni_app/core/config/app_config.dart';
 import 'package:hawsni_app/core/config/prod_config.dart';
 import 'package:hawsni_app/core/config/dev_config.dart'; // Added DevConfig import
 import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:hawsni_app/firebase_options.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,11 +29,18 @@ void main() async {
   AppConfig config = ProdConfig();
   ApiService.initialize(config);
 
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // Load authentication token
   await AuthService.loadToken();
 
   // Initialize notification service
-  await NotificationService().init();
+  if (!kIsWeb) {
+    await NotificationService().init();
+  }
 
   runApp(
     MultiBlocProvider(
