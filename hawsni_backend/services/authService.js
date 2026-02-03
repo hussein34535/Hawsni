@@ -14,24 +14,23 @@ class AuthService {
     }
 
     async register(name, email, password, phone) {
-        // 1. Check if user already exists (optional but good practice)
-        // For now, we rely on Supabase Auth constraints
-
-        // 2. Register user in Supabase Auth
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        // 1. Register user in Supabase Auth using Admin API for immediate confirmation and robustness
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email: email,
             password: password,
-            options: {
-                data: {
-                    full_name: name,
-                    role: 'user',
-                    phone: phone // Store phone in metadata as well
-                },
-                emailRedirectTo: undefined
+            email_confirm: true,
+            user_metadata: {
+                full_name: name,
+                role: 'user',
+                phone: phone
             }
         });
 
         if (authError) {
+            // Check if user already exists
+            if (authError.message.includes('already registered') || authError.status === 422) {
+                throw new Error('This email is already registered');
+            }
             throw new Error(authError.message);
         }
 
@@ -73,10 +72,11 @@ class AuthService {
                 // We'll continue anyway for now, or you might want to throw an error
             }
 
-            // 3. Add user to 'users' table with OTP details
+            // 3. Add or Update user profile in 'users' table
+            // We use upsert to handle cases where a database trigger might have already created the profile
             const { error: profileError } = await supabase
                 .from('users')
-                .insert([
+                .upsert([
                     {
                         id: user.id,
                         name: name,
@@ -87,12 +87,13 @@ class AuthService {
                         otp_code: otpCode,
                         otp_expires_at: otpExpiresAt.toISOString()
                     }
-                ]);
+                ], { onConflict: 'id' });
 
             if (profileError) {
                 console.error('Error creating user profile:', profileError);
+                // If it's still a foreign key error, we'll try to delete the auth user to stay in sync
                 await supabase.auth.admin.deleteUser(user.id);
-                throw new Error(`Failed to create user profile: ${profileError.message}`);
+                throw new Error(`Database Error: ${profileError.message}`);
             }
 
             console.log(`[OTP SENT] OTP for ${email}: ${otpCode}`);
