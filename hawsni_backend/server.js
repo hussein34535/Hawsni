@@ -133,16 +133,18 @@ const testSupabaseConnection = async () => {
 };
 
 // Start server
-const PORT = process.env.PORT || 5000;
-const HOST = '0.0.0.0'; // Bind to all interfaces
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  const HOST = '0.0.0.0'; // Bind to all interfaces
 
-app.listen(PORT, HOST, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📚 API Documentation: http://localhost:${PORT}/`);
-  console.log(`🌐 Server accessible on network at http://${HOST}:${PORT}/`);
-  console.log('Debug: Calling testSupabaseConnection...');
-  testSupabaseConnection();
-});
+  app.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📚 API Documentation: http://localhost:${PORT}/`);
+    console.log(`🌐 Server accessible on network at http://${HOST}:${PORT}/`);
+    console.log('Debug: Calling testSupabaseConnection...');
+    testSupabaseConnection();
+  });
+}
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
