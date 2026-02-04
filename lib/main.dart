@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/app.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/core/services/notification_service.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
+import 'package:hwasi_app/app.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/core/services/notification_service.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
 
-import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
+import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
 
-import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
-import 'package:hawsni_app/features/orders/data/services/order_service.dart';
-import 'package:hawsni_app/core/config/app_config.dart';
-import 'package:hawsni_app/core/config/prod_config.dart';
-import 'package:hawsni_app/core/config/dev_config.dart'; // Added DevConfig import
-import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
+import 'package:hwasi_app/features/orders/data/services/order_service.dart';
+import 'package:hwasi_app/core/config/app_config.dart';
+import 'package:hwasi_app/core/config/prod_config.dart';
+
+import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:hawsni_app/firebase_options.dart';
+import 'package:hwasi_app/firebase_options.dart';
 import 'package:flutter/foundation.dart';
 
 void main() async {
@@ -23,10 +23,10 @@ void main() async {
   // Initialize App Configuration - Using PRODUCTION server (Vercel)
   print('-------------------------------------------');
   print('🚀 STARTING APP - FORCING CONNECTION TO VERCEL');
-  print('🚀 URL: https://hawsnibackend.vercel.app/api');
+  print('🚀 URL: https://hwasibackend.vercel.app/api');
   print('-------------------------------------------');
 
-  AppConfig config = ProdConfig();
+  final config = ProdConfig();
   ApiService.initialize(config);
 
   // Initialize Firebase

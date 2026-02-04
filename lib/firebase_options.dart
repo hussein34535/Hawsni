@@ -47,17 +47,17 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyBEvldDPwenjWXnX5GK8YMIeqthlSzPXBI',
     appId: '1:165507639857:android:b11f32e783bfe6fd6bc310',
     messagingSenderId: '165507639857',
-    projectId: 'hawsni-ceafc',
-    storageBucket: 'hawsni-ceafc.firebasestorage.app',
+    projectId: 'hwasi-ceafc',
+    storageBucket: 'hwasi-ceafc.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyACL6LBAw4J7fdnfOkf8YkBeDtw9vc6Was',
     appId: '1:165507639857:ios:92d69819cfb29d016bc310',
     messagingSenderId: '165507639857',
-    projectId: 'hawsni-ceafc',
-    storageBucket: 'hawsni-ceafc.firebasestorage.app',
-    iosBundleId: 'com.example.hawsniClean',
+    projectId: 'hwasi-ceafc',
+    storageBucket: 'hwasi-ceafc.firebasestorage.app',
+    iosBundleId: 'com.example.hwasiClean',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

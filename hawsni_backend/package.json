@@ -1,5 +1,5 @@
 {
-  "name": "hawsni-backend",
+  "name": "hwasi-backend",
   "version": "1.0.0",
   "description": "Backend API for Hawsni E-commerce App",
   "main": "server.js",

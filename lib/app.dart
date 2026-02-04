@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:hawsni_app/core/services/wishlist_service.dart';
-import 'package:hawsni_app/core/providers/settings_provider.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/features/splash/presentation/screens/splash_screen.dart';
-import 'package:hawsni_app/features/admin/presentation/screens/admin_login_screen.dart';
-import 'package:hawsni_app/features/admin/presentation/screens/admin_dashboard_screen.dart';
-import 'package:hawsni_app/features/admin/presentation/screens/product_management_screen.dart';
-import 'package:hawsni_app/features/admin/presentation/screens/category_management_screen.dart';
-import 'package:hawsni_app/features/admin/presentation/screens/order_management_screen.dart';
-import 'package:hawsni_app/features/admin/presentation/screens/user_management_screen.dart';
-import 'package:hawsni_app/features/search/presentation/screens/search_suggestions_screen.dart';
-import 'package:hawsni_app/features/products/presentation/screens/product_comparison_screen.dart';
+import 'package:hwasi_app/core/services/wishlist_service.dart';
+import 'package:hwasi_app/core/providers/settings_provider.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/splash/presentation/screens/splash_screen.dart';
+import 'package:hwasi_app/features/admin/presentation/screens/admin_login_screen.dart';
+import 'package:hwasi_app/features/admin/presentation/screens/admin_dashboard_screen.dart';
+import 'package:hwasi_app/features/admin/presentation/screens/product_management_screen.dart';
+import 'package:hwasi_app/features/admin/presentation/screens/category_management_screen.dart';
+import 'package:hwasi_app/features/admin/presentation/screens/order_management_screen.dart';
+import 'package:hwasi_app/features/admin/presentation/screens/user_management_screen.dart';
+import 'package:hwasi_app/features/search/presentation/screens/search_suggestions_screen.dart';
+import 'package:hwasi_app/features/products/presentation/screens/product_comparison_screen.dart';
 import 'package:hawsni_app/l10n/generated/app_localizations.dart';
 
 class App extends StatefulWidget {
@@ -33,7 +33,7 @@ class _AppState extends State<App> {
       child: Consumer<SettingsProvider>(
         builder: (context, settingsProvider, child) {
           return MaterialApp(
-            title: 'Hawsni',
+            title: 'HWASI',
             locale: Locale(settingsProvider.language),
             localizationsDelegates: [
               AppLocalizations.delegate,

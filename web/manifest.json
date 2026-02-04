@@ -1,11 +1,11 @@
 {
-    "name": "hawsni_clean",
-    "short_name": "hawsni_clean",
+    "name": "Hawsni",
+    "short_name": "Hawsni",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Hawsni - Your favorite content in one place.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

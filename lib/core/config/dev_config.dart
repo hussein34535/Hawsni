@@ -1,4 +1,4 @@
-import 'package:hawsni_app/core/config/app_config.dart';
+import 'package:hwasi_app/core/config/app_config.dart';
 
 class DevConfig implements AppConfig {
   @override
