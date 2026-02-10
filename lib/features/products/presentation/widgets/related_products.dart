@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
 
 class RelatedProducts extends StatelessWidget {
   final String categoryId;

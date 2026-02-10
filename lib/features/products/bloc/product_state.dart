@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:hawsni_app/features/products/data/models/product_model.dart';
+import 'package:hwasi_app/features/products/data/models/product_model.dart';
 
 abstract class ProductState extends Equatable {
   const ProductState();

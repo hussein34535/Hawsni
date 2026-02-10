@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/orders/bloc/order_event.dart';
-import 'package:hawsni_app/features/orders/bloc/order_state.dart';
-import 'package:hawsni_app/features/orders/data/services/order_service.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:hwasi_app/features/orders/bloc/order_event.dart';
+import 'package:hwasi_app/features/orders/bloc/order_state.dart';
+import 'package:hwasi_app/features/orders/data/services/order_service.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
 
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final OrderService _orderService;

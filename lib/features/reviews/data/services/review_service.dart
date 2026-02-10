@@ -1,5 +1,5 @@
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/features/reviews/data/models/review_model.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/features/reviews/data/models/review_model.dart';
 
 class ReviewService {
   Future<List<ReviewModel>> getProductReviews(String productId) async {

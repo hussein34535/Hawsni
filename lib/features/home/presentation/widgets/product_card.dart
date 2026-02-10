@@ -1,15 +1,15 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
-import 'package:hawsni_app/features/products/bloc/product_event.dart';
-import 'package:hawsni_app/features/products/data/services/product_service.dart';
-import 'package:hawsni_app/features/products/presentation/screens/product_detail_screen.dart';
+import 'package:hwasi_app/features/products/bloc/product_bloc.dart';
+import 'package:hwasi_app/features/products/bloc/product_event.dart';
+import 'package:hwasi_app/features/products/data/services/product_service.dart';
+import 'package:hwasi_app/features/products/presentation/screens/product_detail_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:hawsni_app/core/services/wishlist_service.dart';
+import 'package:hwasi_app/core/services/wishlist_service.dart';
 
 class ProductCard extends StatefulWidget {
   final String id;

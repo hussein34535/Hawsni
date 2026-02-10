@@ -1,4 +1,5 @@
-import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
 
 class OrderService {
   Future<List<dynamic>> getUserOrders() async {

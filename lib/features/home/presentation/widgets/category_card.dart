@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/widgets/svg_image.dart';
+import 'package:hwasi_app/core/widgets/svg_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
 
 class CategoryCard extends StatelessWidget {
   final String name;

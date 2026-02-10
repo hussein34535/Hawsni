@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
 
 class SpinningLoader extends StatefulWidget {
   final double size;

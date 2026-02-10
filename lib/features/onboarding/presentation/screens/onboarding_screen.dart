@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/signup_screen.dart';
-import 'package:hawsni_app/features/onboarding/presentation/widgets/onboarding_page.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/signup_screen.dart';
+import 'package:hwasi_app/features/onboarding/presentation/widgets/onboarding_page.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -17,7 +17,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<Map<String, String>> _onboardingData = [
     {
       "image": "Placeholder for Image 1",
-      "title": "Welcome to Hawsni",
+      "title": "Welcome to hwasi",
       "description":
           "Discover the latest trends in fashion and shop your favorite styles with ease.",
     },

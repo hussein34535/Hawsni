@@ -6,12 +6,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http; // Add http for downloading
 import 'package:path_provider/path_provider.dart'; // Add path_provider
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/features/vto/data/services/vto_service.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/features/vto/data/services/vto_service.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
 
 class VirtualTryOnScreen extends StatefulWidget {
   final String productImageUrl;
@@ -440,7 +440,7 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
       file.writeAsBytesSync(response.bodyBytes);
 
       await Share.shareXFiles([XFile(file.path)],
-          text: 'Check out my new look with Hawsni AI! 👗✨');
+          text: 'Check out my new look with hwasi AI! 👗✨');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error sharing image: $e')),

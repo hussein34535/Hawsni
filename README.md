@@ -1,6 +1,6 @@
-# 🛍️ Hawsni E-Commerce Application
+# 🛍️ hwasi E-Commerce Application
 
-**Hawsni** is a premium, modern e-commerce mobile application built with **Flutter**, designed to provide a luxury shopping experience similar to high-end fashion apps (like Nike or Farfetch). It features a "Legendary" UI design, robust state management, and a scalable backend.
+**hwasi** is a premium, modern e-commerce mobile application built with **Flutter**, designed to provide a luxury shopping experience similar to high-end fashion apps (like Nike or Farfetch). It features a "Legendary" UI design, robust state management, and a scalable backend.
 
 ---
 
@@ -16,7 +16,7 @@
 -   **Runtime:** Node.js + Express.js.
 -   **Database:** Supabase (PostgreSQL).
 -   **Deployment:** Vercel (Live Server).
--   **Location:** Code stored in `hawsni_backend/` folder.
+-   **Location:** Code stored in `hwasi_backend/` folder.
 
 ---
 
@@ -75,11 +75,11 @@ lib/
 You have two options to run the backend:
 
 *   **Option A: Live Server (Recommended)**
-    *   The app is pre-configured to use the live Vercel server (`https://hawsnibackend.vercel.app`).
+    *   The app is pre-configured to use the live Vercel server (`https://hwasibackend.vercel.app`).
     *   No action needed.
 
 *   **Option B: Local Server (For Development)**
-    1.  Open terminal: `cd hawsni_backend`
+    1.  Open terminal: `cd hwasi_backend`
     2.  Run: `npm run dev` (Starts on port 5000).
     3.  **Important:** Update `lib/core/config/dev_config.dart` with your IP (e.g., `10.0.2.2` for Emulator).
 
@@ -103,4 +103,4 @@ You have two options to run the backend:
 
 ---
 
-**Developed with ❤️ by Hawsni Team**
+**Developed with ❤️ by hwasi Team**

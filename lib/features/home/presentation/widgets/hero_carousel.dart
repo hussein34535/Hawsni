@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
 
 class HeroCarousel extends StatefulWidget {
   final List<Map<String, dynamic>> banners;

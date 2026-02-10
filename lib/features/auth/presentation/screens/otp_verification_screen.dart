@@ -1,10 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/profile_picture_setup_screen.dart';
-import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/profile_picture_setup_screen.dart';
+import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final String email;

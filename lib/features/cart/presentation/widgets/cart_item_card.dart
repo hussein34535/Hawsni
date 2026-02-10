@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
 
 class CartItemCard extends StatelessWidget {
   final CartItem item;

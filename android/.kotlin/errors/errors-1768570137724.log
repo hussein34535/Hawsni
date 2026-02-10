@@ -41,7 +41,7 @@ java.lang.Exception
 	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
 	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
 	at java.base/java.lang.Thread.run(Unknown Source)
-Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
 	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:236)
 	at org.jetbrains.kotlin.incremental.IncrementalCachesManager.close(IncrementalCachesManager.kt:55)
 	at kotlin.io.CloseableKt.closeFinally(Closeable.kt:56)
@@ -63,12 +63,12 @@ Caused by: java.lang.AssertionError: java.lang.Exception: Could not close increm
 	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
 	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unknown Source)
 	... 3 more
-Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+Caused by: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
 	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:95)
 	at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMapsOwner.kt:53)
 	at org.jetbrains.kotlin.com.google.common.io.Closer.close(Closer.java:223)
 	... 22 more
-	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
+	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
 		at kotlin.io.FilesKt__UtilsKt.toRelativeString(Utils.kt:117)
 		at kotlin.io.FilesKt__UtilsKt.relativeTo(Utils.kt:128)
 		at org.jetbrains.kotlin.incremental.storage.RelocatableFileToPathConverter.toPath(RelocatableFileToPathConverter.kt:24)
@@ -85,7 +85,7 @@ Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
 		... 24 more
-	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
+	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
 		at kotlin.io.FilesKt__UtilsKt.toRelativeString(Utils.kt:117)
 		at kotlin.io.FilesKt__UtilsKt.relativeTo(Utils.kt:128)
 		at org.jetbrains.kotlin.incremental.storage.RelocatableFileToPathConverter.toPath(RelocatableFileToPathConverter.kt:24)
@@ -107,7 +107,7 @@ Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
 		... 24 more
-	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
+	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
 		at kotlin.io.FilesKt__UtilsKt.toRelativeString(Utils.kt:117)
 		at kotlin.io.FilesKt__UtilsKt.relativeTo(Utils.kt:128)
 		at org.jetbrains.kotlin.incremental.storage.RelocatableFileToPathConverter.toPath(RelocatableFileToPathConverter.kt:24)
@@ -127,12 +127,12 @@ Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
 		... 24 more
-	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
+	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:95)
 		at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.close(BasicMapsOwner.kt:53)
 		at org.jetbrains.kotlin.incremental.LookupStorage.close(LookupStorage.kt:155)
 		... 23 more
-		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
+		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
 			at kotlin.io.FilesKt__UtilsKt.toRelativeString(Utils.kt:117)
 			at kotlin.io.FilesKt__UtilsKt.relativeTo(Utils.kt:128)
 			at org.jetbrains.kotlin.incremental.storage.RelocatableFileToPathConverter.toPath(RelocatableFileToPathConverter.kt:24)
@@ -149,7 +149,7 @@ Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\
 			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
 			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
 			... 25 more
-		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
+		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
 			at kotlin.io.FilesKt__UtilsKt.toRelativeString(Utils.kt:117)
 			at kotlin.io.FilesKt__UtilsKt.relativeTo(Utils.kt:128)
 			at org.jetbrains.kotlin.incremental.storage.RelocatableFileToPathConverter.toPath(RelocatableFileToPathConverter.kt:24)
@@ -170,9 +170,9 @@ Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\
 			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner$close$1.invoke(BasicMapsOwner.kt:53)
 			at org.jetbrains.kotlin.incremental.storage.BasicMapsOwner.forEachMapSafe(BasicMapsOwner.kt:87)
 			... 25 more
-	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
+	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
 		... 25 more
-		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
+		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
 			at kotlin.io.FilesKt__UtilsKt.toRelativeString(Utils.kt:117)
 			at kotlin.io.FilesKt__UtilsKt.relativeTo(Utils.kt:128)
 			at org.jetbrains.kotlin.incremental.storage.RelocatableFileToPathConverter.toPath(RelocatableFileToPathConverter.kt:24)

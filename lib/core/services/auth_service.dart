@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String baseUrl = 'https://hawsnibackend.vercel.app/api';
+  static const String baseUrl = 'https://hwasibackend.vercel.app/api';
   static String? _token;
   static Map<String, dynamic>? _userData;
 

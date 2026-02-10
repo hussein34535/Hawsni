@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
 
 class OrderTrackingScreen extends StatefulWidget {
   final Map<String, dynamic> order;

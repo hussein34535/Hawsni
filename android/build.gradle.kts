@@ -9,7 +9,7 @@ allprojects {
     }
 }
 
-// هذا السطر يحدد مسار البناء ليكون في المجلد الرئيسي للمشروع (Hawsni/build)
+// هذا السطر يحدد مسار البناء ليكون في المجلد الرئيسي للمشروع (hwasi/build)
 // استخدام projectDirectory.dir("../build") هو الطريقة الأدق والأكثر أماناً
 val newBuildDir = layout.projectDirectory.dir("../build")
 layout.buildDirectory.value(newBuildDir)

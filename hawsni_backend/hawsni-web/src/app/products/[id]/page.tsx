@@ -253,7 +253,7 @@ export default function ProductDetailPage() {
                         {/* VTO Button */}
                         <button
                             onClick={() => {
-                                const token = localStorage.getItem('hawsni_token');
+                                const token = localStorage.getItem('hwasi_token');
                                 if (!token) {
                                     const currentPath = window.location.pathname + window.location.search;
                                     router.push(`/login?redirect=${encodeURIComponent(`/vto?product=${product.id}`)}`);

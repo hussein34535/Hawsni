@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartService _cartService;

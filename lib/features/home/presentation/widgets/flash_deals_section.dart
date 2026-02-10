@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/features/products/data/models/product_model.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
+import 'package:hwasi_app/features/products/data/models/product_model.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
 
 class FlashDealsSection extends StatefulWidget {
   final List<ProductModel> products;

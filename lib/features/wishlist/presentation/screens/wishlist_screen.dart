@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:hawsni_app/core/services/wishlist_service.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
+import 'package:hwasi_app/core/services/wishlist_service.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
 
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/features/products/data/models/product_model.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});

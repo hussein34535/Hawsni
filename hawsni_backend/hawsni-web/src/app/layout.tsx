@@ -9,8 +9,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Hawsni - Premium Fashion E-Commerce",
-  description: "Experience the future of shopping with AI-powered Virtual Try-On. Discover premium fashion at Hawsni.",
+  title: "hwasi - Premium Fashion E-Commerce",
+  description: "Experience the future of shopping with AI-powered Virtual Try-On. Discover premium fashion at hwasi.",
   keywords: ["fashion", "e-commerce", "virtual try-on", "AI", "shopping", "clothes"],
 };
 

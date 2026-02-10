@@ -1,8 +1,8 @@
-const supabase = require('./hawsni_backend/config/supabase');
+const supabase = require('./hwasi_backend/config/supabase');
 
 async function testAPI() {
   console.log('Testing API...');
-  
+
   // Test creating an order without user_id
   console.log('Creating test order...');
   const { data: order, error: orderError } = await supabase
@@ -19,7 +19,7 @@ async function testAPI() {
     })
     .select()
     .single();
-  
+
   if (orderError) {
     console.error('Error creating order:', orderError);
   } else {

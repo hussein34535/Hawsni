@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/features/products/presentation/screens/products_screen.dart';
+import 'package:hwasi_app/features/products/presentation/screens/products_screen.dart';
 
 class CategoryItem extends StatelessWidget {
   final IconData icon;

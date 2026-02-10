@@ -1,4 +1,4 @@
--- Hawsni E-commerce Database Schema for Supabase (PostgreSQL)
+-- hwasi E-commerce Database Schema for Supabase (PostgreSQL)
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -433,5 +433,5 @@ ON CONFLICT (name) DO UPDATE SET image = EXCLUDED.image;
 INSERT INTO coupons (code, discount, expires_at) VALUES
   ('WELCOME10', 10, NOW() + INTERVAL '30 days'),
   ('SAVE20', 20, NOW() + INTERVAL '30 days'),
-  ('HAWSNI50', 50, NOW() + INTERVAL '30 days')
+  ('hwasi50', 50, NOW() + INTERVAL '30 days')
 ON CONFLICT (code) DO NOTHING;

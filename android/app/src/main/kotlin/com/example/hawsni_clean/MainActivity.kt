@@ -1,4 +1,4 @@
-package com.example.hawsni_clean
+package com.example.hwasi_clean
 
 import io.flutter.embedding.android.FlutterActivity
 

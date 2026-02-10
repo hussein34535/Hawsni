@@ -1,12 +1,12 @@
-# 🛍️ Hawsni Project - Comprehensive Guide
+# 🛍️ hwasi Project - Comprehensive Guide
 
-Welcome to the **Hawsni** project documentation. This file provides a complete overview of the application, its architecture, key features (including the new AI Virtual Try-On), and how to maintain it.
+Welcome to the **hwasi** project documentation. This file provides a complete overview of the application, its architecture, key features (including the new AI Virtual Try-On), and how to maintain it.
 
 ---
 
 ## 🌟 Project Overview
 
-**Hawsni** is a high-end e-commerce mobile application built with **Flutter**. It differentiates itself with:
+**hwasi** is a high-end e-commerce mobile application built with **Flutter**. It differentiates itself with:
 1.  **"Legendary" UI Design:** Custom animations, floating UI elements, and a premium "Aurora" aesthetic.
 2.  **AI Virtual Try-On (VTO):** Integrated AI feature allowing users to try clothes on their own photos.
 3.  **Clean Architecture:** Built for scalability using the BLoC pattern.
@@ -96,7 +96,7 @@ lib/
     *(Note: If changes don't appear, use Hot Restart `R` or fully stop and restart).*
 
 ### **Backend Note**
-The app connects to a live backend (`hawsnibackend.vercel.app`). No local backend setup is required unless you are developing server-side features.
+The app connects to a live backend (`hwasibackend.vercel.app`). No local backend setup is required unless you are developing server-side features.
 
 ---
 
@@ -112,4 +112,4 @@ The app connects to a live backend (`hawsnibackend.vercel.app`). No local backen
 
 ---
 
-*Documentation created for Hawsni Team.*
+*Documentation created for hwasi Team.*

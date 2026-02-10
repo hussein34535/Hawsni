@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
-import 'package:hawsni_app/features/profile/presentation/screens/profile_screen.dart';
-import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_screen.dart';
-import 'package:hawsni_app/features/home/presentation/screens/home_screen.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/features/cart/presentation/screens/cart_screen.dart';
+import 'package:hwasi_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:hwasi_app/features/wishlist/presentation/screens/wishlist_screen.dart';
+import 'package:hwasi_app/features/home/presentation/screens/home_screen.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

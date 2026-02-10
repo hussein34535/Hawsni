@@ -1,20 +1,20 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-import 'package:hawsni_app/features/orders/presentation/screens/orders_screen.dart';
-import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_screen.dart';
-import 'package:hawsni_app/features/profile/presentation/screens/settings_screen.dart';
-import 'package:hawsni_app/features/profile/presentation/screens/profile_details_screen.dart';
-import 'package:hawsni_app/features/coupons/presentation/screens/coupons_screen.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/features/checkout/presentation/screens/address_management_screen.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:hwasi_app/features/orders/presentation/screens/orders_screen.dart';
+import 'package:hwasi_app/features/wishlist/presentation/screens/wishlist_screen.dart';
+import 'package:hwasi_app/features/profile/presentation/screens/settings_screen.dart';
+import 'package:hwasi_app/features/profile/presentation/screens/profile_details_screen.dart';
+import 'package:hwasi_app/features/coupons/presentation/screens/coupons_screen.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/features/checkout/presentation/screens/address_management_screen.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:provider/provider.dart';
-import 'package:hawsni_app/core/providers/settings_provider.dart';
-import 'package:hawsni_app/features/profile/presentation/screens/notifications_settings_screen.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/providers/settings_provider.dart';
+import 'package:hwasi_app/features/profile/presentation/screens/notifications_settings_screen.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:hwasi_app/features/reviews/bloc/review_state.dart';
 
 abstract class ReviewEvent extends Equatable {
   const ReviewEvent();

@@ -64,9 +64,9 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyAfNB4Bur4FUDo7xFNnLK1yUXcnBMGjn50',
     appId: '1:165507639857:web:6dcc7b2efcb951a96bc310',
     messagingSenderId: '165507639857',
-    projectId: 'hawsni-ceafc',
-    authDomain: 'hawsni-ceafc.firebaseapp.com',
-    storageBucket: 'hawsni-ceafc.firebasestorage.app',
+    projectId: 'hwasi-ceafc',
+    authDomain: 'hwasi-ceafc.firebaseapp.com',
+    storageBucket: 'hwasi-ceafc.firebasestorage.app',
     measurementId: 'G-L3WFP4EX6N',
   );
 
@@ -74,9 +74,9 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyAfNB4Bur4FUDo7xFNnLK1yUXcnBMGjn50',
     appId: '1:165507639857:web:6dcc7b2efcb951a96bc310',
     messagingSenderId: '165507639857',
-    projectId: 'hawsni-ceafc',
-    authDomain: 'hawsni-ceafc.firebaseapp.com',
-    storageBucket: 'hawsni-ceafc.firebasestorage.app',
+    projectId: 'hwasi-ceafc',
+    authDomain: 'hwasi-ceafc.firebaseapp.com',
+    storageBucket: 'hwasi-ceafc.firebasestorage.app',
     measurementId: 'G-L3WFP4EX6N',
   );
 }

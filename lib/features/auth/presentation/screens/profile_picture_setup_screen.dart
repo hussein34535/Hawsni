@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
 
 class ProfilePictureSetupScreen extends StatefulWidget {
   const ProfilePictureSetupScreen({super.key});

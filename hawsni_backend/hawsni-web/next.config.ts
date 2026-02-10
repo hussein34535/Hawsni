@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'hawsnibackend.vercel.app',
+        hostname: 'hwasibackend.vercel.app',
         pathname: '/**',
       },
       {

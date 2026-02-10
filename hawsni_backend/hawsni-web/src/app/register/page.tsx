@@ -52,8 +52,8 @@ export default function RegisterPage() {
             });
 
             if (res.data?.token) {
-                localStorage.setItem('hawsni_token', res.data.token);
-                localStorage.setItem('hawsni_user', JSON.stringify(res.data.user));
+                localStorage.setItem('hwasi_token', res.data.token);
+                localStorage.setItem('hwasi_user', JSON.stringify(res.data.user));
                 router.push(redirectUrl || '/');
             } else {
                 throw new Error(res.error || 'Registration failed');
@@ -75,7 +75,7 @@ export default function RegisterPage() {
                         <span className="text-3xl font-bold text-white">H</span>
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-                    <p className="text-gray-500 mt-2">Join Hawsni for exclusive fashion</p>
+                    <p className="text-gray-500 mt-2">Join hwasi for exclusive fashion</p>
                 </div>
 
                 {/* Register Form */}

@@ -21,7 +21,7 @@ Dart
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
+import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
 
 class PromoSlider extends StatefulWidget {
   const PromoSlider({super.key});
@@ -184,7 +184,7 @@ class _PromoSliderState extends State<PromoSlider> {
 (لا تنس استيراد ملف الـ PromoSlider في الأعلى)
 code
 Dart
-import 'package:hawsni_app/features/home/presentation/widgets/promo_slider.dart'; // <--- استيراد مهم
+import 'package:hwasi_app/features/home/presentation/widgets/promo_slider.dart'; // <--- استيراد مهم
 
 // ... داخل الكلاس HomeScreen ...
 
@@ -270,7 +270,7 @@ chevron_right
 اضغط Save.
 الخطوة 2: تعديل upload.js لاستخدام الذاكرة 🧠
 حالياً multer يحفظ الملفات على القرص (diskStorage). سنغيره ليحفظها في الذاكرة المؤقتة (memoryStorage) لكي نتمكن من إرسالها لـ Supabase.
-اذهب للملف: hawsni_backend/middleware/upload.js
+اذهب للملف: hwasi_backend/middleware/upload.js
 استبدل محتواه بالكامل بهذا الكود:
 code
 JavaScript
@@ -302,7 +302,7 @@ const upload = multer({
 module.exports = upload;
 الخطوة 3: إنشاء دالة رفع الصور لـ Supabase ☁️
 سننشئ ملفاً مساعداً (Helper) يقوم بمهمة الرفع وإرجاع الرابط العام للصورة.
-أنشئ مجلداً جديداً داخل hawsni_backend اسمه utils.
+أنشئ مجلداً جديداً داخل hwasi_backend اسمه utils.
 داخل utils، أنشئ ملفاً اسمه fileUpload.js وضع فيه هذا الكود:
 code
 JavaScript
@@ -350,7 +350,7 @@ const uploadToSupabase = async (file, folder = 'products') => {
 module.exports = uploadToSupabase;
 الخطوة 4: تحديث إضافة المنتجات (products.js) 🛠️
 الآن سنعدل كود إضافة المنتج ليستخدم الدالة الجديدة بدلاً من المسار المحلي.
-اذهب للملف: hawsni_backend/routes/products.js
+اذهب للملف: hwasi_backend/routes/products.js
 1. استورد الدالة في الأعلى:
 code
 JavaScript
@@ -427,10 +427,10 @@ chevron_right
 تمام، لنكمل عملية التحول إلى السحابة ☁️.
 لقد قمنا بتحديث المنتجات لرفع الصور إلى Supabase. الآن سنفعل نفس الشيء مع التصنيفات (Categories) ليكون التطبيق متسقاً بالكامل.
 سنقوم بتحديث ملفين:
-hawsni_backend/routes/categories.js: الخاص بـ API التطبيق.
-hawsni_backend/server.js: الخاص بلوحة تحكم الأدمن (الويب)، لأنك غالباً ستضيف التصنيفات من هناك.
+hwasi_backend/routes/categories.js: الخاص بـ API التطبيق.
+hwasi_backend/server.js: الخاص بلوحة تحكم الأدمن (الويب)، لأنك غالباً ستضيف التصنيفات من هناك.
 الخطوة 1: تحديث API التصنيفات (routes/categories.js)
-اذهب للملف: hawsni_backend/routes/categories.js
+اذهب للملف: hwasi_backend/routes/categories.js
 استبدل الكود بداخله بهذا الكود المحدث الذي يدعم رفع الصور:
 code
 JavaScript
@@ -559,7 +559,7 @@ router.delete('/:id', async (req, res) => {
 module.exports = router;
 الخطوة 2: تحديث server.js (لوحة تحكم الأدمن)
 بما أنك تستخدم server.js لعرض صفحات الويب (EJS) للإدارة، يجب تحديث الكود هناك أيضاً لرفع الصور لسوبابيس بدلاً من السيرفر المحلي.
-اذهب للملف: hawsni_backend/server.js
+اذهب للملف: hwasi_backend/server.js
 1. أضف استيراد الدالة في أعلى الملف (مع باقي الـ requires):
 code
 JavaScript
@@ -661,9 +661,9 @@ Dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -1088,9 +1088,9 @@ code
 Dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
 
 class SearchScreen extends StatefulWidget {
   final String? initialQuery;
@@ -1475,7 +1475,7 @@ chevron_right
 سنقوم بتحديث الباك اند (Backend) ثم التطبيق (Frontend).
 أولاً: الباك اند (Backend)
 سنقوم بكتابة منطق التعامل مع جدول wishlists و wishlist_items.
-اذهب للملف: hawsni_backend/routes/wishlist.js
+اذهب للملف: hwasi_backend/routes/wishlist.js
 استبدل محتواه بهذا الكود:
 code
 JavaScript
@@ -1661,8 +1661,8 @@ Dart
 code
 Dart
 import 'package:flutter/foundation.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
 
 class WishlistItem {
   final String id;
@@ -1804,7 +1804,7 @@ chevron_right
 سنقوم بتعديل ملفين في الباك اند.
 الخطوة 1: تحديث server.js لجلب البيانات الحقيقية 🧠
 سنقوم بتغيير الـ Route الخاص بـ /dashboard ليقوم بحساب الأرقام من قاعدة البيانات قبل عرض الصفحة.
-اذهب للملف: hawsni_backend/server.js
+اذهب للملف: hwasi_backend/server.js
 ابحث عن: app.get('/dashboard', ...)
 استبدلها بالكود التالي:
 code
@@ -1896,7 +1896,7 @@ app.get('/dashboard', async (req, res) => {
 });
 الخطوة 2: تحديث واجهة dashboard.ejs 🎨
 سنضيف مكتبة Chart.js لرسم المبيعات، وسنربط الأرقام بالمتغيرات التي أرسلناها من السيرفر.
-اذهب للملف: hawsni_backend/views/dashboard.ejs
+اذهب للملف: hwasi_backend/views/dashboard.ejs
 استبدل المحتوى بالكامل بهذا الكود المحسن:
 code
 Html
@@ -1905,7 +1905,7 @@ Html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Hawsni Admin</title>
+    <title>Dashboard - hwasi Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- إضافة مكتبة Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1972,7 +1972,7 @@ Html
 </head>
 <body>
     <nav class="navbar">
-        <h1>Hawsni <span>Admin</span></h1>
+        <h1>hwasi <span>Admin</span></h1>
         <div class="nav-links">
             <a href="/dashboard" class="active"><i class="fas fa-home"></i> الرئيسية</a>
             <a href="/products"><i class="fas fa-box"></i> المنتجات</a>
@@ -2142,7 +2142,7 @@ chevron_right
 تحديث متوسط تقييم المنتج تلقائياً (مثلاً: إذا كان 4.0 وجاء تقييم 5.0، يرتفع المتوسط).
 أولاً: الباك اند (Backend) 🛠️
 سنقوم بتحديث ملف reviews.js ليتعامل مع Supabase ويقوم بحساب المتوسط الحسابي للنجوم.
-اذهب للملف: hawsni_backend/routes/reviews.js
+اذهب للملف: hwasi_backend/routes/reviews.js
 استبدل محتواه بالكامل بهذا الكود الذكي:
 code
 JavaScript
@@ -2286,7 +2286,7 @@ code
 Dart
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:intl/intl.dart';
 
 class ReviewsSection extends StatefulWidget {
@@ -2472,7 +2472,7 @@ class _ReviewsSectionState extends State<ReviewsSection> {
 عدنا لملف product_detail_screen.dart الذي عدلناه سابقاً.
 سنضيف ReviewsSection في أسفل الصفحة.
 أضف الاستيراد في الأعلى:
-import 'package:hawsni_app/features/products/presentation/widgets/reviews_section.dart';
+import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
 داخل build، انزل لأسفل الـ Column (قبل SizedBox(height: 80)) وأضف التالي:
 code
 Dart

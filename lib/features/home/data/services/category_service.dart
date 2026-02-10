@@ -1,5 +1,5 @@
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/features/home/data/models/category_model.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/features/home/data/models/category_model.dart';
 
 class CategoryService {
   Future<List<CategoryModel>> getCategories() async {

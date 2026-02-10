@@ -24,8 +24,8 @@ export default function LoginPage() {
         try {
             const res = await authApi.login(email, password);
             if (res.data?.token) {
-                localStorage.setItem('hawsni_token', res.data.token);
-                localStorage.setItem('hawsni_user', JSON.stringify(res.data.user));
+                localStorage.setItem('hwasi_token', res.data.token);
+                localStorage.setItem('hwasi_user', JSON.stringify(res.data.user));
                 router.push(redirectUrl || '/');
             } else {
                 throw new Error(res.error || 'Login failed');
@@ -47,7 +47,7 @@ export default function LoginPage() {
                         <span className="text-3xl font-bold text-white">H</span>
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
-                    <p className="text-gray-500 mt-2">Sign in to your Hawsni account</p>
+                    <p className="text-gray-500 mt-2">Sign in to your hwasi account</p>
                 </div>
 
                 {/* Login Form */}

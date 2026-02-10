@@ -1,4 +1,4 @@
-# Hawsni Backend API
+# hwasi Backend API
 
 ## Installation
 
@@ -101,7 +101,7 @@ Authorization: Bearer <token>
 ## Project Structure
 
 ```
-hawsni_backend/
+hwasi_backend/
 ├── models/          # Database models
 ├── routes/          # API routes
 ├── middleware/      # Custom middleware

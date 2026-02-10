@@ -20,8 +20,8 @@ export default function Header() {
     return (
         <header
             className={`fixed top-0 left-0 right-0 z-50 transition-all-500 ${isScrolled
-                    ? 'glass shadow-lg py-3'
-                    : 'bg-transparent py-5'
+                ? 'glass shadow-lg py-3'
+                : 'bg-transparent py-5'
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +30,7 @@ export default function Header() {
                     <Link href="/" className="flex items-center gap-2 group">
                         <span className={`text-2xl font-black tracking-wider transition-all-300 ${isScrolled ? 'text-[var(--primary)]' : 'text-white'
                             } group-hover:scale-105`}>
-                            HAWSNI
+                            hwasi
                         </span>
                     </Link>
 
@@ -70,8 +70,8 @@ export default function Header() {
                     <div className="flex items-center gap-2">
                         {/* Search */}
                         <button className={`p-3 rounded-full transition-all-300 hover:scale-110 ${isScrolled
-                                ? 'hover:bg-gray-100 text-gray-700'
-                                : 'hover:bg-white/10 text-white'
+                            ? 'hover:bg-gray-100 text-gray-700'
+                            : 'hover:bg-white/10 text-white'
                             }`}>
                             <Search className="w-5 h-5" />
                         </button>
@@ -80,8 +80,8 @@ export default function Header() {
                         <Link
                             href="/wishlist"
                             className={`p-3 rounded-full transition-all-300 hover:scale-110 ${isScrolled
-                                    ? 'hover:bg-gray-100 text-gray-700'
-                                    : 'hover:bg-white/10 text-white'
+                                ? 'hover:bg-gray-100 text-gray-700'
+                                : 'hover:bg-white/10 text-white'
                                 }`}
                         >
                             <Heart className="w-5 h-5" />
@@ -91,8 +91,8 @@ export default function Header() {
                         <Link
                             href="/cart"
                             className={`relative p-3 rounded-full transition-all-300 hover:scale-110 ${isScrolled
-                                    ? 'hover:bg-gray-100 text-gray-700'
-                                    : 'hover:bg-white/10 text-white'
+                                ? 'hover:bg-gray-100 text-gray-700'
+                                : 'hover:bg-white/10 text-white'
                                 }`}
                         >
                             <ShoppingBag className="w-5 h-5" />
@@ -107,8 +107,8 @@ export default function Header() {
                         <Link
                             href="/profile"
                             className={`hidden sm:flex p-3 rounded-full transition-all-300 hover:scale-110 ${isScrolled
-                                    ? 'hover:bg-gray-100 text-gray-700'
-                                    : 'hover:bg-white/10 text-white'
+                                ? 'hover:bg-gray-100 text-gray-700'
+                                : 'hover:bg-white/10 text-white'
                                 }`}
                         >
                             <User className="w-5 h-5" />
@@ -117,8 +117,8 @@ export default function Header() {
                         {/* Mobile Menu Toggle */}
                         <button
                             className={`md:hidden p-3 rounded-full transition-all-300 ${isScrolled
-                                    ? 'hover:bg-gray-100 text-gray-700'
-                                    : 'hover:bg-white/10 text-white'
+                                ? 'hover:bg-gray-100 text-gray-700'
+                                : 'hover:bg-white/10 text-white'
                                 }`}
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                         >

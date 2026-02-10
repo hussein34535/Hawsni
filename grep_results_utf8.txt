@@ -1,517 +1,517 @@
-﻿.gitignore:hawsni_backend/node_modules/
-.idea/modules.xml:      <module fileurl="file://$PROJECT_DIR$/hawsni_clean.iml" filepath="$PROJECT_DIR$/hawsni_clean.iml" />
-.idea/modules.xml:      <module fileurl="file://$PROJECT_DIR$/android/hawsni_clean_android.iml" filepath="$PROJECT_DIR$/android/hawsni_clean_android.iml" />
-.vscode/launch.json:            "name": "Hawsni",
-.vscode/launch.json:            "name": "Hawsni (profile mode)",
-.vscode/launch.json:            "name": "Hawsni (release mode)",
-HAWSNI_PROJECT_GUIDE.md:# ≡ƒ¢ì∩╕Å Hawsni Project - Comprehensive Guide
-HAWSNI_PROJECT_GUIDE.md:Welcome to the **Hawsni** project documentation. This file provides a complete overview of the application, its architecture, key features (including the new AI Virtual Try-On), and how to maintain it.
-HAWSNI_PROJECT_GUIDE.md:**Hawsni** is a high-end e-commerce mobile application built with **Flutter**. It differentiates itself with:
-HAWSNI_PROJECT_GUIDE.md:The app connects to a live backend (`hawsnibackend.vercel.app`). No local backend setup is required unless you are developing server-side features.
-HAWSNI_PROJECT_GUIDE.md:*Documentation created for Hawsni Team.*
-NODEJS_WEB_APP_PLAN.md:# ≡ƒîÉ Hawsni Web App - Node.js Build Plan
-NODEJS_WEB_APP_PLAN.md:This document outlines the plan to build a **new web version** of Hawsni using **Node.js** and a modern frontend framework (React/Next.js).
-NODEJS_WEB_APP_PLAN.md:1.  **Reuses the existing Hawsni Backend API** (`hawsni_backend/`).
-NODEJS_WEB_APP_PLAN.md:hawsni-web/
-NODEJS_WEB_APP_PLAN.md:    npx create-next-app@latest hawsni-web --typescript --tailwind --app
-NODEJS_WEB_APP_PLAN.md:2.  Configure Tailwind with custom Hawsni colors (Green theme).
-New Text Document.txt:import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
-New Text Document.txt:import 'package:hawsni_app/features/home/presentation/widgets/promo_slider.dart'; // <--- ╪º╪│╪¬┘è╪▒╪º╪» ┘à┘ç┘à
-New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hawsni_backend/middleware/upload.js
-New Text Document.txt:╪ú┘å╪┤╪ª ┘à╪¼┘ä╪»╪º┘ï ╪¼╪»┘è╪»╪º┘ï ╪»╪º╪«┘ä hawsni_backend ╪º╪│┘à┘ç utils.
-New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hawsni_backend/routes/products.js
-New Text Document.txt:hawsni_backend/routes/categories.js: ╪º┘ä╪«╪º╪╡ ╪¿┘Ç API ╪º┘ä╪¬╪╖╪¿┘è┘é.
-New Text Document.txt:hawsni_backend/server.js: ╪º┘ä╪«╪º╪╡ ╪¿┘ä┘ê╪¡╪⌐ ╪¬╪¡┘â┘à ╪º┘ä╪ú╪»┘à┘å (╪º┘ä┘ê┘è╪¿)╪î ┘ä╪ú┘å┘â ╪║╪º┘ä╪¿╪º┘ï ╪│╪¬╪╢┘è┘ü ╪º┘ä╪¬╪╡┘å┘è┘ü╪º╪¬ ┘à┘å ┘ç┘å╪º┘â.
-New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hawsni_backend/routes/categories.js
-New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hawsni_backend/server.js
-New Text Document.txt:import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-New Text Document.txt:import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-New Text Document.txt:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-New Text Document.txt:import 'package:hawsni_app/core/services/api_service.dart';
-New Text Document.txt:import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
-New Text Document.txt:import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hawsni_backend/routes/wishlist.js
-New Text Document.txt:import 'package:hawsni_app/core/services/api_service.dart';
-New Text Document.txt:import 'package:hawsni_app/core/services/auth_service.dart';
-New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hawsni_backend/server.js
-New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hawsni_backend/views/dashboard.ejs
-New Text Document.txt:    <title>Dashboard - Hawsni Admin</title>
-New Text Document.txt:        <h1>Hawsni <span>Admin</span></h1>
-New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hawsni_backend/routes/reviews.js
-New Text Document.txt:import 'package:hawsni_app/core/services/api_service.dart';
-New Text Document.txt:import 'package:hawsni_app/features/products/presentation/widgets/reviews_section.dart';
-README.md:# ≡ƒ¢ì∩╕Å Hawsni E-Commerce Application
-README.md:**Hawsni** is a premium, modern e-commerce mobile application built with **Flutter**, designed to provide a luxury shopping experience similar to high-end fashion apps (like Nike or Farfetch). It features a "Legendary" UI design, robust state management, and a scalable backend.
-README.md:-   **Location:** Code stored in `hawsni_backend/` folder.
-README.md:    *   The app is pre-configured to use the live Vercel server (`https://hawsnibackend.vercel.app`).
-README.md:    1.  Open terminal: `cd hawsni_backend`
-README.md:**Developed with Γ¥ñ∩╕Å by Hawsni Team**
-android/.kotlin/errors/errors-1763490458817.log:Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\share_plus\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-android/.kotlin/errors/errors-1763490458817.log:Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\share_plus\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\share_plus\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
-android/.kotlin/errors/errors-1763490458817.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458817.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\share_plus\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
-android/.kotlin/errors/errors-1763490458817.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458825.log:Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-android/.kotlin/errors/errors-1763490458825.log:Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
-android/.kotlin/errors/errors-1763490458825.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458825.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
-android/.kotlin/errors/errors-1763490458825.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1764026587418.log:Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-android/.kotlin/errors/errors-1764026587418.log:Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
-android/.kotlin/errors/errors-1764026587418.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1764026587418.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
-android/.kotlin/errors/errors-1764026587418.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1768570137724.log:Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-android/.kotlin/errors/errors-1768570137724.log:Caused by: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
-android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
-android/.kotlin/errors/errors-1768570137724.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1768570137724.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
-android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\Hawsni\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
-android/.kotlin/errors/errors-1768570137724.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\Hawsni\android.
-android/app/build.gradle.kts:    namespace = "com.example.hawsni_clean"
-android/app/build.gradle.kts:        applicationId = "com.example.hawsni_clean"
-android/app/google-services.json:    "project_id": "hawsni-ceafc",
-android/app/google-services.json:    "storage_bucket": "hawsni-ceafc.firebasestorage.app"
-android/app/google-services.json:          "package_name": "com.example.hawsni_app"
-android/app/google-services.json:          "package_name": "com.example.hawsni_clean"
-android/app/src/main/AndroidManifest.xml:        android:label="hawsni_clean"
-android/app/src/main/kotlin/com/example/hawsni_app/MainActivity.kt:package com.example.hawsni_app
-android/app/src/main/kotlin/com/example/hawsni_clean/MainActivity.kt:package com.example.hawsni_clean
-android/build.gradle.kts:// ┘ç╪░╪º ╪º┘ä╪│╪╖╪▒ ┘è╪¡╪»╪» ┘à╪│╪º╪▒ ╪º┘ä╪¿┘å╪º╪í ┘ä┘è┘â┘ê┘å ┘ü┘è ╪º┘ä┘à╪¼┘ä╪» ╪º┘ä╪▒╪ª┘è╪│┘è ┘ä┘ä┘à╪┤╪▒┘ê╪╣ (Hawsni/build)
-build/web/index.html:  <meta name="apple-mobile-web-app-title" content="hawsni_clean">
-build/web/index.html:  <title>hawsni_clean</title>
-build/web/main.dart.js:return A.o(A.b49(A.ef("https://hawsnibackend.vercel.app/api"+a,0,null),A.ajI(b)),$async$iU)
-build/web/main.dart.js:l=A.ef("https://hawsnibackend.vercel.app/api"+a,0,null)
-build/web/main.dart.js:l=A.ef("https://hawsnibackend.vercel.app/api"+a,0,null)
-build/web/main.dart.js:return A.o(A.bj2(A.ef("https://hawsnibackend.vercel.app/api"+a,0,null),A.ajI(!0)),$async$u6)
-build/web/main.dart.js:A.bH("\ud83d\ude80 URL: https://hawsnibackend.vercel.app/api")
-build/web/main.dart.js:i=A.ef("https://hawsnibackend.vercel.app/api/auth/login",0,null)
-build/web/main.dart.js:i=A.ef("https://hawsnibackend.vercel.app/api/auth/register",0,null)
-build/web/main.dart.js:i=A.ef("https://hawsnibackend.vercel.app/api/auth/verify-otp",0,null)
-build/web/main.dart.js:n=A.brD("POST",A.ef("https://hawsnibackend.vercel.app/api/users/profile/avatar",0,null))
-build/web/main.dart.js:return new A.vN(B.at4,A.aa(["/admin/login",new A.aKl(),"/admin/dashboard",new A.aKm(),"/admin/products",new A.aKn(),"/admin/categories",new A.aKo(),"/admin/orders",new A.aKp(),"/admin/users",new A.aKq(),"/search/suggestions",new A.aKr(),"/products/compare",new A.aKs()],t.N,t.Ab),"Hawsni",p,o,q,new A.jW(s,null),r,B.abw,null)},
-build/web/main.dart.js:n=A.b([A.aa(["code","WELCOME10","discount",10,"description","10% off your first order","expiresAt",new A.c6(Date.now(),0,!1).lm(2592e9),"isActive",!0],k,l),A.aa(["code","SAVE20","discount",20,"description","20% off on orders over $50","expiresAt",new A.c6(Date.now(),0,!1).lm(1296e9),"isActive",!0],k,l),A.aa(["code","HAWSNI50","discount",50,"description","50% off on selected items","expiresAt",new A.c6(Date.now(),0,!1).lm(6048e8),"isActive",!0],k,l),A.aa(["code","EXPIRED10","discount",10,"description","10% off (Expired)","expiresAt",new A.c6(Date.now(),0,!1).lm(-432e9),"isActive",!1],k,l)],t.H7)
-build/web/main.dart.js:s=A.dJ("https://hawsnibackend.vercel.app/api","/api","")
-build/web/main.dart.js:$0(){A.bCW(B.a2D,"Hawsni","1.0.0",A.b([B.aAW,B.ad,B.azr],t.p),this.a)},
-build/web/main.dart.js:return A.o(A.b49(A.ef("https://hawsnibackend.vercel.app/api/categories",0,null),null),$async$EU)
-build/web/main.dart.js:k=A.ef("https://hawsnibackend.vercel.app/api/products/search",0,null).abC(l)
-build/web/main.dart.js:s="https://hawsnibackend.vercel.app/api"+A.j(J.aC(i,0))}else s="https://picsum.photos/300?random="+b
-build/web/main.dart.js:return A.da(s,B.f,A.ci(A.aR(A.b([B.at3,B.e_,A.M("HAWSNI",s,s,s,A.ce(s,s,B.o,s,s,s,s,s,s,s,s,56,s,s,B.eo,s,s,!0,s,2,s,s,s,s,s,s),s,s,s),B.br,A.M("Your Style, Your Way",s,s,s,A.ce(s,s,B.aj,s,s,s,s,s,s,s,s,16,s,s,B.a8,s,s,!0,s,1,s,s,s,s,s,s),s,s,s)],t.p),B.r,B.aI,B.n,s),s,s),s,s,s)}}
-build/web/main.dart.js:return A.o(A.b7u(A.b([A.aIP(k.a,null,null,null,null)],t.FQ),"Check out my new look with Hawsni AI! \ud83d\udc57\u2728"),$async$t7)
-build/web/main.dart.js:B.aAy=new A.as("Hawsni Admin",null,B.auQ,null,null,null,null,null,null,null)
-build/web/main.dart.js:B.aAh=new A.as("HAWSNI",null,B.axC,null,null,null,null,null,null,null)
-build/web/manifest.json:    "name": "hawsni_clean",
-build/web/manifest.json:    "short_name": "hawsni_clean",
-build/web/version.json:{"app_name":"hawsni_app","version":"1.0.0","build_number":"1","package_name":"hawsni_app"}
-firebase.json:{"flutter":{"platforms":{"android":{"default":{"projectId":"hawsni-ceafc","appId":"1:165507639857:android:b11f32e783bfe6fd6bc310","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"hawsni-ceafc","configurations":{"android":"1:165507639857:android:b11f32e783bfe6fd6bc310","ios":"1:165507639857:ios:92d69819cfb29d016bc310","windows":"1:165507639857:web:6dcc7b2efcb951a96bc310"}}}}}}
-hawsni_backend/.env.example:# MONGODB_URI=mongodb://localhost:27017/hawsni
-hawsni_backend/README.md:# ≡ƒªà Hawsni Backend
-hawsni_backend/README.md:This is the server-side application for the Hawsni E-Commerce App. It provides the REST API that the Flutter app communicates with.
-hawsni_backend/README.md:hawsni_backend/
-hawsni_backend/README.md:**┬⌐ 2025 Hawsni Team**
-hawsni_backend/SETUP.md:# Hawsni Backend API
-hawsni_backend/SETUP.md:hawsni_backend/
-hawsni_backend/hawsni-web/next.config.ts:        hostname: 'hawsnibackend.vercel.app',
-hawsni_backend/hawsni-web/package-lock.json:  "name": "hawsni-web",
-hawsni_backend/hawsni-web/package-lock.json:      "name": "hawsni-web",
-hawsni_backend/hawsni-web/package.json:  "name": "hawsni-web",
-hawsni_backend/hawsni-web/src/app/globals.css:/* ≡ƒîƒ HAWSNI THEME - MATCHING FLUTTER APP */
-hawsni_backend/hawsni-web/src/app/layout.tsx:  title: "Hawsni - Premium Fashion E-Commerce",
-hawsni_backend/hawsni-web/src/app/layout.tsx:  description: "Experience the future of shopping with AI-powered Virtual Try-On. Discover premium fashion at Hawsni.",
-hawsni_backend/hawsni-web/src/app/login/page.tsx:                localStorage.setItem('hawsni_token', res.data.token);
-hawsni_backend/hawsni-web/src/app/login/page.tsx:                localStorage.setItem('hawsni_user', JSON.stringify(res.data.user));
-hawsni_backend/hawsni-web/src/app/login/page.tsx:                    <p className="text-gray-500 mt-2">Sign in to your Hawsni account</p>
-hawsni_backend/hawsni-web/src/app/products/[id]/page.tsx:                                const token = localStorage.getItem('hawsni_token');
-hawsni_backend/hawsni-web/src/app/register/page.tsx:                localStorage.setItem('hawsni_token', res.data.token);
-hawsni_backend/hawsni-web/src/app/register/page.tsx:                localStorage.setItem('hawsni_user', JSON.stringify(res.data.user));
-hawsni_backend/hawsni-web/src/app/register/page.tsx:                    <p className="text-gray-500 mt-2">Join Hawsni for exclusive fashion</p>
-hawsni_backend/hawsni-web/src/app/vto/page.tsx:        const token = localStorage.getItem('hawsni_token');
-hawsni_backend/hawsni-web/src/app/vto/page.tsx:            link.download = 'hawsni-virtual-tryon.png';
-hawsni_backend/hawsni-web/src/components/Footer.tsx:                            HAWSNI
-hawsni_backend/hawsni-web/src/components/Footer.tsx:                        ┬⌐ {new Date().getFullYear()} Hawsni. All rights reserved.
-hawsni_backend/hawsni-web/src/components/Header.tsx:                            HAWSNI
-hawsni_backend/hawsni-web/src/lib/api.ts:// API Configuration for Hawsni Backend
-hawsni_backend/hawsni-web/src/lib/api.ts:const API_BASE_URL = 'https://hawsnibackend.vercel.app/api';
-hawsni_backend/hawsni-web/src/lib/api.ts:    const token = typeof window !== 'undefined' ? localStorage.getItem('hawsni_token') : null;
-hawsni_backend/hawsni-web/src/lib/api.ts:            localStorage.removeItem('hawsni_token');
-hawsni_backend/package-lock.json:  "name": "hawsni-backend",
-hawsni_backend/package-lock.json:      "name": "hawsni-backend",
-hawsni_backend/package.json:  "name": "hawsni-backend",
-hawsni_backend/package.json:  "description": "Backend API for Hawsni E-commerce App",
-hawsni_backend/services/authService.js:                        from: 'Hawsni <onboarding@resend.dev>',
-hawsni_backend/services/authService.js:                        subject: 'Verify your Hawsni Account',
-hawsni_backend/services/authService.js:                                <h1 style="color: #10b981; text-align: center;">Welcome to Hawsni!</h1>
-hawsni_backend/services/authService.js:                                <p>Thank you for joining Hawsni. To complete your registration, please use the following verification code:</p>
-hawsni_backend/services/authService.js:            redirectTo: 'io.supabase.hawsniapp://reset-password', // Deep link for mobile app
-hawsni_backend/supabase-complete-schema.sql:-- Hawsni E-commerce Database Schema for Supabase (PostgreSQL)
-hawsni_backend/supabase-complete-schema.sql:  ('HAWSNI50', 50, NOW() + INTERVAL '30 days')
-hawsni_backend/views/category-edit.ejs:    <title>╪¬╪╣╪»┘è┘ä ╪º┘ä╪¬╪╡┘å┘è┘ü - Hawsni Admin</title>
-hawsni_backend/views/index.ejs:    <title>┘ä┘ê╪¡╪⌐ ╪º┘ä╪¬╪¡┘â┘à - Hawsni Admin</title>
-hawsni_backend/views/index.ejs:        <h1>≡ƒ¢ì∩╕Å Hawsni Admin</h1>
-hawsni_backend/views/layout.ejs:    <title>Hawsni Admin Dashboard</title>
-hawsni_backend/views/layout.ejs:        <h1>≡ƒ¢ì∩╕Å Hawsni Admin</h1>
-hawsni_backend/views/partials/header.ejs:        <%= title || 'Hawsni Admin' %>
-hawsni_backend/views/partials/header.ejs:                    <h1>Hawsni <span>Admin</span></h1>
-hawsni_backend/views/product-edit.ejs:    <title>╪¬╪╣╪»┘è┘ä ╪º┘ä┘à┘å╪¬╪¼ - Hawsni Admin</title>
-hawsni_backend/views/product-form.ejs:        window.addEventListener('hawsni-data-pasted', (event) => {
-hawsni_scraper_extension/manifest.json:    "name": "Hawsni Product Scraper",
-hawsni_scraper_extension/manifest.json:    "description": "Scrape products from Aff.ven-door and paste into Hawsni Admin",
-hawsni_scraper_extension/popup.html:    <h3>Hawsni Scraper</h3>
-hawsni_scraper_extension/popup.html:    <button id="pasteBtn" disabled>≡ƒôï Paste to Hawsni</button>
-hawsni_scraper_extension/popup.js:                statusDiv.textContent = 'Scraped! Go to Hawsni and Paste.';
-hawsni_scraper_extension/popup.js:// === PASTING LOGIC (Runs on Hawsni Tab) ===
-hawsni_scraper_extension/popup.js:    window.dispatchEvent(new CustomEvent('hawsni-data-pasted', { detail: product }));
-ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean;
-ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean.RunnerTests;
-ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean.RunnerTests;
-ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean.RunnerTests;
-ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean;
-ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean;
-ios/Runner/Info.plist:	<string>Hawsni Clean</string>
-ios/Runner/Info.plist:	<string>hawsni_clean</string>
-lib/app.dart:import 'package:hawsni_app/core/services/wishlist_service.dart';
-lib/app.dart:import 'package:hawsni_app/core/providers/settings_provider.dart';
-lib/app.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/app.dart:import 'package:hawsni_app/features/splash/presentation/screens/splash_screen.dart';
-lib/app.dart:import 'package:hawsni_app/features/admin/presentation/screens/admin_login_screen.dart';
-lib/app.dart:import 'package:hawsni_app/features/admin/presentation/screens/admin_dashboard_screen.dart';
-lib/app.dart:import 'package:hawsni_app/features/admin/presentation/screens/product_management_screen.dart';
-lib/app.dart:import 'package:hawsni_app/features/admin/presentation/screens/category_management_screen.dart';
-lib/app.dart:import 'package:hawsni_app/features/admin/presentation/screens/order_management_screen.dart';
-lib/app.dart:import 'package:hawsni_app/features/admin/presentation/screens/user_management_screen.dart';
-lib/app.dart:import 'package:hawsni_app/features/search/presentation/screens/search_suggestions_screen.dart';
-lib/app.dart:import 'package:hawsni_app/features/products/presentation/screens/product_comparison_screen.dart';
-lib/app.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/app.dart:            title: 'Hawsni',
-lib/core/config/dev_config.dart:import 'package:hawsni_app/core/config/app_config.dart';
-lib/core/config/prod_config.dart:import 'package:hawsni_app/core/config/app_config.dart';
-lib/core/config/prod_config.dart:  String get baseUrl => 'https://hawsnibackend.vercel.app/api';
-lib/core/providers/settings_provider.dart:import 'package:hawsni_app/core/services/app_settings_service.dart';
-lib/core/services/api_service.dart:import 'package:hawsni_app/core/config/app_config.dart';
-lib/core/services/api_service.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/core/services/auth_service.dart:  static const String baseUrl = 'https://hawsnibackend.vercel.app/api';
-lib/core/services/coupon_service.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/core/services/wishlist_service.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/core/services/wishlist_service.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/core/widgets/floating_card.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/core/widgets/organic_container.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/core/widgets/spinning_loader.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/admin/presentation/screens/admin_dashboard_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/admin/presentation/screens/admin_dashboard_screen.dart:                    'Hawsni Admin',
-lib/features/auth/presentation/screens/forgot_password_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/auth/presentation/screens/forgot_password_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/auth/presentation/screens/forgot_password_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/auth/presentation/screens/login_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/auth/presentation/screens/login_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/auth/presentation/screens/login_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/signup_screen.dart';
-lib/features/auth/presentation/screens/login_screen.dart:import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
-lib/features/auth/presentation/screens/login_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/auth/presentation/screens/login_screen.dart:import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
-lib/features/auth/presentation/screens/login_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/profile_picture_setup_screen.dart';
-lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
-lib/features/auth/presentation/screens/profile_picture_setup_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/auth/presentation/screens/profile_picture_setup_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/auth/presentation/screens/profile_picture_setup_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/auth/presentation/screens/profile_picture_setup_screen.dart:import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
-lib/features/auth/presentation/screens/reset_password_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/auth/presentation/screens/reset_password_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/auth/presentation/screens/reset_password_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/otp_verification_screen.dart';
-lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
-lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
-lib/features/cart/bloc/cart_bloc.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/cart/bloc/cart_bloc.dart:import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-lib/features/cart/bloc/cart_bloc.dart:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-lib/features/cart/bloc/cart_bloc.dart:import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
-lib/features/cart/bloc/cart_event.dart:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-lib/features/cart/data/services/cart_service.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/cart/data/services/cart_service.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/cart/data/services/cart_service.dart:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hawsni_app/features/cart/presentation/widgets/cart_item_card.dart';
-lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hawsni_app/features/checkout/presentation/screens/checkout_screen.dart';
-lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/cart/presentation/widgets/cart_item_card.dart:import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-lib/features/cart/presentation/widgets/cart_item_card.dart:import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-lib/features/cart/presentation/widgets/cart_item_card.dart:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-lib/features/cart/presentation/widgets/cart_item_card.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hawsni_app/features/checkout/models/address.dart';
-lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/features/orders/bloc/order_event.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/features/orders/bloc/order_state.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/coupons/presentation/screens/coupons_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/coupons/presentation/screens/coupons_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/coupons/presentation/screens/coupons_screen.dart:          'code': 'HAWSNI50',
-lib/features/home/bloc/home_bloc.dart:import 'package:hawsni_app/features/home/data/models/category_model.dart';
-lib/features/home/bloc/home_bloc.dart:import 'package:hawsni_app/features/home/data/services/category_service.dart';
-lib/features/home/bloc/home_bloc.dart:import 'package:hawsni_app/features/products/data/models/product_model.dart';
-lib/features/home/bloc/home_bloc.dart:import 'package:hawsni_app/features/products/data/services/product_service.dart';
-lib/features/home/bloc/home_bloc.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/home/data/services/category_service.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/home/data/services/category_service.dart:import 'package:hawsni_app/features/home/data/models/category_model.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/features/home/bloc/home_bloc.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/features/home/data/services/category_service.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/features/home/presentation/widgets/hero_carousel.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/features/notifications/presentation/screens/notifications_screen.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/features/products/data/services/product_service.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/features/products/presentation/screens/products_screen.dart';
-lib/features/home/presentation/screens/home_screen.dart:import 'package:hawsni_app/features/search/presentation/screens/search_screen.dart';
-lib/features/home/presentation/screens/home_screen.dart:            'HAWSNI',
-lib/features/home/presentation/widgets/category_card.dart:import 'package:hawsni_app/core/widgets/svg_image.dart';
-lib/features/home/presentation/widgets/category_card.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/home/presentation/widgets/category_grid.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/home/presentation/widgets/category_item.dart:import 'package:hawsni_app/features/products/presentation/screens/products_screen.dart';
-lib/features/home/presentation/widgets/category_list.dart:import 'package:hawsni_app/features/home/presentation/widgets/category_card.dart';
-lib/features/home/presentation/widgets/category_list.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/home/presentation/widgets/flash_deals_section.dart:import 'package:hawsni_app/features/products/data/models/product_model.dart';
-lib/features/home/presentation/widgets/flash_deals_section.dart:import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-lib/features/home/presentation/widgets/hero_carousel.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/home/presentation/widgets/product_card.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/home/presentation/widgets/product_card.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/home/presentation/widgets/product_card.dart:import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
-lib/features/home/presentation/widgets/product_card.dart:import 'package:hawsni_app/features/products/bloc/product_event.dart';
-lib/features/home/presentation/widgets/product_card.dart:import 'package:hawsni_app/features/products/data/services/product_service.dart';
-lib/features/home/presentation/widgets/product_card.dart:import 'package:hawsni_app/features/products/presentation/screens/product_detail_screen.dart';
-lib/features/home/presentation/widgets/product_card.dart:import 'package:hawsni_app/core/services/wishlist_service.dart';
-lib/features/home/presentation/widgets/product_grid.dart:import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-lib/features/home/presentation/widgets/product_grid.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/home/presentation/widgets/product_grid.dart:import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
-lib/features/home/presentation/widgets/promo_slider.dart:import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
-lib/features/home/presentation/widgets/section_header.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/features/profile/presentation/screens/profile_screen.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_screen.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/features/home/presentation/screens/home_screen.dart';
-lib/features/main/presentation/screens/main_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/notifications/presentation/screens/notifications_screen.dart:import 'package:hawsni_app/core/services/notification_service.dart';
-lib/features/notifications/presentation/screens/notifications_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/notifications/presentation/screens/notifications_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/onboarding/presentation/screens/language_selection_screen.dart:import 'package:hawsni_app/core/providers/settings_provider.dart';
-lib/features/onboarding/presentation/screens/language_selection_screen.dart:import 'package:hawsni_app/core/services/app_settings_service.dart';
-lib/features/onboarding/presentation/screens/language_selection_screen.dart:import 'package:hawsni_app/features/onboarding/presentation/screens/onboarding_screen.dart';
-lib/features/onboarding/presentation/screens/onboarding_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-lib/features/onboarding/presentation/screens/onboarding_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/signup_screen.dart';
-lib/features/onboarding/presentation/screens/onboarding_screen.dart:import 'package:hawsni_app/features/onboarding/presentation/widgets/onboarding_page.dart';
-lib/features/onboarding/presentation/screens/onboarding_screen.dart:      "title": "Welcome to Hawsni",
-lib/features/orders/bloc/order_bloc.dart:import 'package:hawsni_app/features/orders/bloc/order_event.dart';
-lib/features/orders/bloc/order_bloc.dart:import 'package:hawsni_app/features/orders/bloc/order_state.dart';
-lib/features/orders/bloc/order_bloc.dart:import 'package:hawsni_app/features/orders/data/services/order_service.dart';
-lib/features/orders/bloc/order_bloc.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/orders/data/services/order_service.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/orders/presentation/screens/order_tracking_screen.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/orders/presentation/screens/order_tracking_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
-lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hawsni_app/features/orders/bloc/order_event.dart';
-lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hawsni_app/features/orders/bloc/order_state.dart';
-lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/products/bloc/product_bloc.dart:import 'package:hawsni_app/features/products/bloc/product_event.dart';
-lib/features/products/bloc/product_bloc.dart:import 'package:hawsni_app/features/products/bloc/product_state.dart';
-lib/features/products/bloc/product_bloc.dart:import 'package:hawsni_app/features/products/data/services/product_service.dart';
-lib/features/products/bloc/product_state.dart:import 'package:hawsni_app/features/products/data/models/product_model.dart';
-lib/features/products/data/services/product_service.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/products/data/services/product_service.dart:import 'package:hawsni_app/features/products/data/models/product_model.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/products/presentation/widgets/reviews_section.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/products/bloc/product_event.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/products/bloc/product_state.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/core/services/wishlist_service.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/products/data/services/product_service.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
-lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hawsni_app/features/reviews/data/services/review_service.dart';
-lib/features/products/presentation/screens/products_screen.dart:import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-lib/features/products/presentation/screens/products_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/products/presentation/screens/products_screen.dart:import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
-lib/features/products/presentation/screens/products_screen.dart:import 'package:hawsni_app/features/products/bloc/product_event.dart';
-lib/features/products/presentation/screens/products_screen.dart:import 'package:hawsni_app/features/products/bloc/product_state.dart';
-lib/features/products/presentation/screens/products_screen.dart:import 'package:hawsni_app/features/products/data/services/product_service.dart';
-lib/features/products/presentation/screens/products_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/products/presentation/widgets/related_products.dart:import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
-lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hawsni_app/features/reviews/bloc/review_state.dart';
-lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
-lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hawsni_app/features/reviews/presentation/widgets/add_review_sheet.dart';
-lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/profile/presentation/screens/notifications_settings_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/profile/presentation/screens/notifications_settings_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/profile/presentation/screens/profile_details_screen.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/profile/presentation/screens/profile_details_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/profile/presentation/screens/profile_details_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/profile/presentation/screens/profile_details_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/features/orders/presentation/screens/orders_screen.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/features/wishlist/presentation/screens/wishlist_screen.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/features/profile/presentation/screens/settings_screen.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/features/profile/presentation/screens/profile_details_screen.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/features/coupons/presentation/screens/coupons_screen.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/features/checkout/presentation/screens/address_management_screen.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/core/providers/settings_provider.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/features/profile/presentation/screens/notifications_settings_screen.dart';
-lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/profile/presentation/screens/settings_screen.dart:import 'package:hawsni_app/core/providers/settings_provider.dart';
-lib/features/profile/presentation/screens/settings_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/profile/presentation/screens/settings_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/profile/presentation/screens/settings_screen.dart:                      applicationName: 'Hawsni',
-lib/features/reviews/bloc/review_bloc.dart:import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
-lib/features/reviews/bloc/review_bloc.dart:import 'package:hawsni_app/features/reviews/bloc/review_state.dart';
-lib/features/reviews/bloc/review_bloc.dart:import 'package:hawsni_app/features/reviews/data/services/review_service.dart';
-lib/features/reviews/bloc/review_state.dart:import 'package:hawsni_app/features/reviews/data/models/review_model.dart';
-lib/features/reviews/data/services/review_service.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/reviews/data/services/review_service.dart:import 'package:hawsni_app/features/reviews/data/models/review_model.dart';
-lib/features/reviews/presentation/screens/write_review_screen.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/reviews/presentation/widgets/add_review_sheet.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/reviews/presentation/widgets/add_review_sheet.dart:import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
-lib/features/reviews/presentation/widgets/add_review_sheet.dart:import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
-lib/features/reviews/presentation/widgets/add_review_sheet.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/search/presentation/screens/search_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/search/presentation/screens/search_screen.dart:import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-lib/features/search/presentation/screens/search_screen.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/search/presentation/screens/search_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/splash/presentation/screens/language_selection_screen.dart:import 'package:hawsni_app/core/providers/settings_provider.dart';
-lib/features/splash/presentation/screens/language_selection_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/splash/presentation/screens/language_selection_screen.dart:import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
-lib/features/splash/presentation/screens/splash_screen.dart:import 'package:hawsni_app/features/splash/presentation/screens/language_selection_screen.dart';
-lib/features/splash/presentation/screens/splash_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/splash/presentation/screens/splash_screen.dart:import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
-lib/features/splash/presentation/screens/splash_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/splash/presentation/screens/splash_screen.dart:              'HAWSNI',
-lib/features/vto/data/services/vto_service.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hawsni_app/features/vto/data/services/vto_service.dart';
-lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-lib/features/vto/presentation/screens/virtual_try_on_screen.dart:          text: 'Check out my new look with Hawsni AI! ≡ƒæùΓ£¿');
-lib/features/wishlist/presentation/screens/wishlist_screen.dart:import 'package:hawsni_app/core/services/wishlist_service.dart';
-lib/features/wishlist/presentation/screens/wishlist_screen.dart:import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-lib/features/wishlist/presentation/screens/wishlist_screen.dart:import 'package:hawsni_app/core/themes/app_theme.dart';
-lib/features/wishlist/presentation/screens/wishlist_screen.dart:import 'package:hawsni_app/l10n/generated/app_localizations.dart';
-lib/firebase_options.dart:    projectId: 'hawsni-ceafc',
-lib/firebase_options.dart:    storageBucket: 'hawsni-ceafc.firebasestorage.app',
-lib/firebase_options.dart:    projectId: 'hawsni-ceafc',
-lib/firebase_options.dart:    storageBucket: 'hawsni-ceafc.firebasestorage.app',
-lib/firebase_options.dart:    iosBundleId: 'com.example.hawsniClean',
-lib/firebase_options.dart:    projectId: 'hawsni-ceafc',
-lib/firebase_options.dart:    authDomain: 'hawsni-ceafc.firebaseapp.com',
-lib/firebase_options.dart:    storageBucket: 'hawsni-ceafc.firebasestorage.app',
-lib/firebase_options.dart:    projectId: 'hawsni-ceafc',
-lib/firebase_options.dart:    authDomain: 'hawsni-ceafc.firebaseapp.com',
-lib/firebase_options.dart:    storageBucket: 'hawsni-ceafc.firebasestorage.app',
-lib/l10n/app_en.arb:    "appName": "Hawsni",
-lib/l10n/generated/app_localizations.dart:  /// **'Hawsni'**
-lib/l10n/generated/app_localizations_en.dart:  String get appName => 'Hawsni';
-lib/main.dart:import 'package:hawsni_app/app.dart';
-lib/main.dart:import 'package:hawsni_app/core/services/auth_service.dart';
-lib/main.dart:import 'package:hawsni_app/core/services/notification_service.dart';
-lib/main.dart:import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-lib/main.dart:import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
-lib/main.dart:import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
-lib/main.dart:import 'package:hawsni_app/features/orders/data/services/order_service.dart';
-lib/main.dart:import 'package:hawsni_app/core/config/app_config.dart';
-lib/main.dart:import 'package:hawsni_app/core/config/prod_config.dart';
-lib/main.dart:import 'package:hawsni_app/core/config/dev_config.dart'; // Added DevConfig import
-lib/main.dart:import 'package:hawsni_app/core/services/api_service.dart';
-lib/main.dart:import 'package:hawsni_app/firebase_options.dart';
-lib/main.dart:  print('≡ƒÜÇ URL: https://hawsnibackend.vercel.app/api');
-linux/CMakeLists.txt:set(BINARY_NAME "hawsni_clean")
-linux/CMakeLists.txt:set(APPLICATION_ID "com.example.hawsni_clean")
-linux/runner/my_application.cc:    gtk_header_bar_set_title(header_bar, "hawsni_clean");
-linux/runner/my_application.cc:    gtk_window_set_title(window, "hawsni_clean");
-macos/Runner.xcodeproj/project.pbxproj:		33CC10ED2044A3C60003C045 /* hawsni_clean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hawsni_clean.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-macos/Runner.xcodeproj/project.pbxproj:				33CC10ED2044A3C60003C045 /* hawsni_clean.app */,
-macos/Runner.xcodeproj/project.pbxproj:			productReference = 33CC10ED2044A3C60003C045 /* hawsni_clean.app */;
-macos/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean.RunnerTests;
-macos/Runner.xcodeproj/project.pbxproj:				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hawsni_clean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hawsni_clean";
-macos/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean.RunnerTests;
-macos/Runner.xcodeproj/project.pbxproj:				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hawsni_clean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hawsni_clean";
-macos/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean.RunnerTests;
-macos/Runner.xcodeproj/project.pbxproj:				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hawsni_clean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hawsni_clean";
-macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme:               BuildableName = "hawsni_clean.app"
-macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme:            BuildableName = "hawsni_clean.app"
-macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme:            BuildableName = "hawsni_clean.app"
-macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme:            BuildableName = "hawsni_clean.app"
-macos/Runner/Configs/AppInfo.xcconfig:PRODUCT_NAME = hawsni_clean
-macos/Runner/Configs/AppInfo.xcconfig:PRODUCT_BUNDLE_IDENTIFIER = com.example.hawsniClean
-pubspec.yaml:name: hawsni_app
-test/widget_test.dart:import 'package:hawsni_app/app.dart';
-test/widget_test.dart:    expect(find.text('Hawsni'), findsOneWidget);
-test_api.js:const supabase = require('./hawsni_backend/config/supabase');
-web/index.html:  <meta name="description" content="Hawsni - Your favorite content in one place.">
-web/index.html:  <meta name="apple-mobile-web-app-title" content="Hawsni">
-web/index.html:  <title>Hawsni</title>
-web/manifest.json:    "name": "Hawsni",
-web/manifest.json:    "short_name": "Hawsni",
-web/manifest.json:    "description": "Hawsni - Your favorite content in one place.",
-windows/CMakeLists.txt:project(hawsni_clean LANGUAGES CXX)
-windows/CMakeLists.txt:set(BINARY_NAME "hawsni_clean")
-windows/runner/Runner.rc:            VALUE "FileDescription", "hawsni_clean" "\0"
-windows/runner/Runner.rc:            VALUE "InternalName", "hawsni_clean" "\0"
-windows/runner/Runner.rc:            VALUE "OriginalFilename", "hawsni_clean.exe" "\0"
-windows/runner/Runner.rc:            VALUE "ProductName", "hawsni_clean" "\0"
-windows/runner/main.cpp:  if (!window.Create(L"hawsni_clean", origin, size)) {
+﻿.gitignore:hwasi_backend/node_modules/
+.idea/modules.xml:      <module fileurl="file://$PROJECT_DIR$/hwasi_clean.iml" filepath="$PROJECT_DIR$/hwasi_clean.iml" />
+.idea/modules.xml:      <module fileurl="file://$PROJECT_DIR$/android/hwasi_clean_android.iml" filepath="$PROJECT_DIR$/android/hwasi_clean_android.iml" />
+.vscode/launch.json:            "name": "hwasi",
+.vscode/launch.json:            "name": "hwasi (profile mode)",
+.vscode/launch.json:            "name": "hwasi (release mode)",
+hwasi_PROJECT_GUIDE.md:# ≡ƒ¢ì∩╕Å hwasi Project - Comprehensive Guide
+hwasi_PROJECT_GUIDE.md:Welcome to the **hwasi** project documentation. This file provides a complete overview of the application, its architecture, key features (including the new AI Virtual Try-On), and how to maintain it.
+hwasi_PROJECT_GUIDE.md:**hwasi** is a high-end e-commerce mobile application built with **Flutter**. It differentiates itself with:
+hwasi_PROJECT_GUIDE.md:The app connects to a live backend (`hwasibackend.vercel.app`). No local backend setup is required unless you are developing server-side features.
+hwasi_PROJECT_GUIDE.md:*Documentation created for hwasi Team.*
+NODEJS_WEB_APP_PLAN.md:# ≡ƒîÉ hwasi Web App - Node.js Build Plan
+NODEJS_WEB_APP_PLAN.md:This document outlines the plan to build a **new web version** of hwasi using **Node.js** and a modern frontend framework (React/Next.js).
+NODEJS_WEB_APP_PLAN.md:1.  **Reuses the existing hwasi Backend API** (`hwasi_backend/`).
+NODEJS_WEB_APP_PLAN.md:hwasi-web/
+NODEJS_WEB_APP_PLAN.md:    npx create-next-app@latest hwasi-web --typescript --tailwind --app
+NODEJS_WEB_APP_PLAN.md:2.  Configure Tailwind with custom hwasi colors (Green theme).
+New Text Document.txt:import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
+New Text Document.txt:import 'package:hwasi_app/features/home/presentation/widgets/promo_slider.dart'; // <--- ╪º╪│╪¬┘è╪▒╪º╪» ┘à┘ç┘à
+New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hwasi_backend/middleware/upload.js
+New Text Document.txt:╪ú┘å╪┤╪ª ┘à╪¼┘ä╪»╪º┘ï ╪¼╪»┘è╪»╪º┘ï ╪»╪º╪«┘ä hwasi_backend ╪º╪│┘à┘ç utils.
+New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hwasi_backend/routes/products.js
+New Text Document.txt:hwasi_backend/routes/categories.js: ╪º┘ä╪«╪º╪╡ ╪¿┘Ç API ╪º┘ä╪¬╪╖╪¿┘è┘é.
+New Text Document.txt:hwasi_backend/server.js: ╪º┘ä╪«╪º╪╡ ╪¿┘ä┘ê╪¡╪⌐ ╪¬╪¡┘â┘à ╪º┘ä╪ú╪»┘à┘å (╪º┘ä┘ê┘è╪¿)╪î ┘ä╪ú┘å┘â ╪║╪º┘ä╪¿╪º┘ï ╪│╪¬╪╢┘è┘ü ╪º┘ä╪¬╪╡┘å┘è┘ü╪º╪¬ ┘à┘å ┘ç┘å╪º┘â.
+New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hwasi_backend/routes/categories.js
+New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hwasi_backend/server.js
+New Text Document.txt:import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+New Text Document.txt:import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+New Text Document.txt:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+New Text Document.txt:import 'package:hwasi_app/core/services/api_service.dart';
+New Text Document.txt:import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
+New Text Document.txt:import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hwasi_backend/routes/wishlist.js
+New Text Document.txt:import 'package:hwasi_app/core/services/api_service.dart';
+New Text Document.txt:import 'package:hwasi_app/core/services/auth_service.dart';
+New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hwasi_backend/server.js
+New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hwasi_backend/views/dashboard.ejs
+New Text Document.txt:    <title>Dashboard - hwasi Admin</title>
+New Text Document.txt:        <h1>hwasi <span>Admin</span></h1>
+New Text Document.txt:╪º╪░┘ç╪¿ ┘ä┘ä┘à┘ä┘ü: hwasi_backend/routes/reviews.js
+New Text Document.txt:import 'package:hwasi_app/core/services/api_service.dart';
+New Text Document.txt:import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
+README.md:# ≡ƒ¢ì∩╕Å hwasi E-Commerce Application
+README.md:**hwasi** is a premium, modern e-commerce mobile application built with **Flutter**, designed to provide a luxury shopping experience similar to high-end fashion apps (like Nike or Farfetch). It features a "Legendary" UI design, robust state management, and a scalable backend.
+README.md:-   **Location:** Code stored in `hwasi_backend/` folder.
+README.md:    *   The app is pre-configured to use the live Vercel server (`https://hwasibackend.vercel.app`).
+README.md:    1.  Open terminal: `cd hwasi_backend`
+README.md:**Developed with Γ¥ñ∩╕Å by hwasi Team**
+android/.kotlin/errors/errors-1763490458817.log:Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\share_plus\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+android/.kotlin/errors/errors-1763490458817.log:Caused by: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\share_plus\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\share_plus\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
+android/.kotlin/errors/errors-1763490458817.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458817.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458817.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\share_plus\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
+android/.kotlin/errors/errors-1763490458817.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\share_plus-10.1.4\android\src\main\kotlin\dev\fluttercommunity\plus\share\MethodCallHandler.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458825.log:Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+android/.kotlin/errors/errors-1763490458825.log:Caused by: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
+android/.kotlin/errors/errors-1763490458825.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458825.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1763490458825.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
+android/.kotlin/errors/errors-1763490458825.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1764026587418.log:Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+android/.kotlin/errors/errors-1764026587418.log:Caused by: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
+android/.kotlin/errors/errors-1764026587418.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1764026587418.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1764026587418.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\shared_preferences_android\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
+android/.kotlin/errors/errors-1764026587418.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.17\android\src\main\kotlin\io\flutter\plugins\sharedpreferences\MessagesAsync.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1768570137724.log:Caused by: java.lang.AssertionError: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+android/.kotlin/errors/errors-1768570137724.log:Caused by: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\jvm\kotlin: class-fq-name-to-source.tab, source-to-classes.tab, internal-name-to-source.tab
+android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\lookups: id-to-file.tab, file-to-id.tab
+android/.kotlin/errors/errors-1768570137724.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1768570137724.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
+android/.kotlin/errors/errors-1768570137724.log:	Suppressed: java.lang.Exception: Could not close incremental caches in D:\hwasi\build\camera_android_camerax\kotlin\compileDebugKotlin\cacheable\caches-jvm\inputs: source-to-output.tab
+android/.kotlin/errors/errors-1768570137724.log:		Suppressed: java.lang.IllegalArgumentException: this and base files have different roots: C:\Users\husso\AppData\Local\Pub\Cache\hosted\pub.dev\camera_android_camerax-0.6.27\android\src\main\java\io\flutter\plugins\camerax\CameraXLibrary.g.kt and D:\hwasi\android.
+android/app/build.gradle.kts:    namespace = "com.example.hwasi_clean"
+android/app/build.gradle.kts:        applicationId = "com.example.hwasi_clean"
+android/app/google-services.json:    "project_id": "hwasi-ceafc",
+android/app/google-services.json:    "storage_bucket": "hwasi-ceafc.firebasestorage.app"
+android/app/google-services.json:          "package_name": "com.example.hwasi_app"
+android/app/google-services.json:          "package_name": "com.example.hwasi_clean"
+android/app/src/main/AndroidManifest.xml:        android:label="hwasi_clean"
+android/app/src/main/kotlin/com/example/hwasi_app/MainActivity.kt:package com.example.hwasi_app
+android/app/src/main/kotlin/com/example/hwasi_clean/MainActivity.kt:package com.example.hwasi_clean
+android/build.gradle.kts:// ┘ç╪░╪º ╪º┘ä╪│╪╖╪▒ ┘è╪¡╪»╪» ┘à╪│╪º╪▒ ╪º┘ä╪¿┘å╪º╪í ┘ä┘è┘â┘ê┘å ┘ü┘è ╪º┘ä┘à╪¼┘ä╪» ╪º┘ä╪▒╪ª┘è╪│┘è ┘ä┘ä┘à╪┤╪▒┘ê╪╣ (hwasi/build)
+build/web/index.html:  <meta name="apple-mobile-web-app-title" content="hwasi_clean">
+build/web/index.html:  <title>hwasi_clean</title>
+build/web/main.dart.js:return A.o(A.b49(A.ef("https://hwasibackend.vercel.app/api"+a,0,null),A.ajI(b)),$async$iU)
+build/web/main.dart.js:l=A.ef("https://hwasibackend.vercel.app/api"+a,0,null)
+build/web/main.dart.js:l=A.ef("https://hwasibackend.vercel.app/api"+a,0,null)
+build/web/main.dart.js:return A.o(A.bj2(A.ef("https://hwasibackend.vercel.app/api"+a,0,null),A.ajI(!0)),$async$u6)
+build/web/main.dart.js:A.bH("\ud83d\ude80 URL: https://hwasibackend.vercel.app/api")
+build/web/main.dart.js:i=A.ef("https://hwasibackend.vercel.app/api/auth/login",0,null)
+build/web/main.dart.js:i=A.ef("https://hwasibackend.vercel.app/api/auth/register",0,null)
+build/web/main.dart.js:i=A.ef("https://hwasibackend.vercel.app/api/auth/verify-otp",0,null)
+build/web/main.dart.js:n=A.brD("POST",A.ef("https://hwasibackend.vercel.app/api/users/profile/avatar",0,null))
+build/web/main.dart.js:return new A.vN(B.at4,A.aa(["/admin/login",new A.aKl(),"/admin/dashboard",new A.aKm(),"/admin/products",new A.aKn(),"/admin/categories",new A.aKo(),"/admin/orders",new A.aKp(),"/admin/users",new A.aKq(),"/search/suggestions",new A.aKr(),"/products/compare",new A.aKs()],t.N,t.Ab),"hwasi",p,o,q,new A.jW(s,null),r,B.abw,null)},
+build/web/main.dart.js:n=A.b([A.aa(["code","WELCOME10","discount",10,"description","10% off your first order","expiresAt",new A.c6(Date.now(),0,!1).lm(2592e9),"isActive",!0],k,l),A.aa(["code","SAVE20","discount",20,"description","20% off on orders over $50","expiresAt",new A.c6(Date.now(),0,!1).lm(1296e9),"isActive",!0],k,l),A.aa(["code","hwasi50","discount",50,"description","50% off on selected items","expiresAt",new A.c6(Date.now(),0,!1).lm(6048e8),"isActive",!0],k,l),A.aa(["code","EXPIRED10","discount",10,"description","10% off (Expired)","expiresAt",new A.c6(Date.now(),0,!1).lm(-432e9),"isActive",!1],k,l)],t.H7)
+build/web/main.dart.js:s=A.dJ("https://hwasibackend.vercel.app/api","/api","")
+build/web/main.dart.js:$0(){A.bCW(B.a2D,"hwasi","1.0.0",A.b([B.aAW,B.ad,B.azr],t.p),this.a)},
+build/web/main.dart.js:return A.o(A.b49(A.ef("https://hwasibackend.vercel.app/api/categories",0,null),null),$async$EU)
+build/web/main.dart.js:k=A.ef("https://hwasibackend.vercel.app/api/products/search",0,null).abC(l)
+build/web/main.dart.js:s="https://hwasibackend.vercel.app/api"+A.j(J.aC(i,0))}else s="https://picsum.photos/300?random="+b
+build/web/main.dart.js:return A.da(s,B.f,A.ci(A.aR(A.b([B.at3,B.e_,A.M("hwasi",s,s,s,A.ce(s,s,B.o,s,s,s,s,s,s,s,s,56,s,s,B.eo,s,s,!0,s,2,s,s,s,s,s,s),s,s,s),B.br,A.M("Your Style, Your Way",s,s,s,A.ce(s,s,B.aj,s,s,s,s,s,s,s,s,16,s,s,B.a8,s,s,!0,s,1,s,s,s,s,s,s),s,s,s)],t.p),B.r,B.aI,B.n,s),s,s),s,s,s)}}
+build/web/main.dart.js:return A.o(A.b7u(A.b([A.aIP(k.a,null,null,null,null)],t.FQ),"Check out my new look with hwasi AI! \ud83d\udc57\u2728"),$async$t7)
+build/web/main.dart.js:B.aAy=new A.as("hwasi Admin",null,B.auQ,null,null,null,null,null,null,null)
+build/web/main.dart.js:B.aAh=new A.as("hwasi",null,B.axC,null,null,null,null,null,null,null)
+build/web/manifest.json:    "name": "hwasi_clean",
+build/web/manifest.json:    "short_name": "hwasi_clean",
+build/web/version.json:{"app_name":"hwasi_app","version":"1.0.0","build_number":"1","package_name":"hwasi_app"}
+firebase.json:{"flutter":{"platforms":{"android":{"default":{"projectId":"hwasi-ceafc","appId":"1:165507639857:android:b11f32e783bfe6fd6bc310","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"hwasi-ceafc","configurations":{"android":"1:165507639857:android:b11f32e783bfe6fd6bc310","ios":"1:165507639857:ios:92d69819cfb29d016bc310","windows":"1:165507639857:web:6dcc7b2efcb951a96bc310"}}}}}}
+hwasi_backend/.env.example:# MONGODB_URI=mongodb://localhost:27017/hwasi
+hwasi_backend/README.md:# ≡ƒªà hwasi Backend
+hwasi_backend/README.md:This is the server-side application for the hwasi E-Commerce App. It provides the REST API that the Flutter app communicates with.
+hwasi_backend/README.md:hwasi_backend/
+hwasi_backend/README.md:**┬⌐ 2025 hwasi Team**
+hwasi_backend/SETUP.md:# hwasi Backend API
+hwasi_backend/SETUP.md:hwasi_backend/
+hwasi_backend/hwasi-web/next.config.ts:        hostname: 'hwasibackend.vercel.app',
+hwasi_backend/hwasi-web/package-lock.json:  "name": "hwasi-web",
+hwasi_backend/hwasi-web/package-lock.json:      "name": "hwasi-web",
+hwasi_backend/hwasi-web/package.json:  "name": "hwasi-web",
+hwasi_backend/hwasi-web/src/app/globals.css:/* ≡ƒîƒ hwasi THEME - MATCHING FLUTTER APP */
+hwasi_backend/hwasi-web/src/app/layout.tsx:  title: "hwasi - Premium Fashion E-Commerce",
+hwasi_backend/hwasi-web/src/app/layout.tsx:  description: "Experience the future of shopping with AI-powered Virtual Try-On. Discover premium fashion at hwasi.",
+hwasi_backend/hwasi-web/src/app/login/page.tsx:                localStorage.setItem('hwasi_token', res.data.token);
+hwasi_backend/hwasi-web/src/app/login/page.tsx:                localStorage.setItem('hwasi_user', JSON.stringify(res.data.user));
+hwasi_backend/hwasi-web/src/app/login/page.tsx:                    <p className="text-gray-500 mt-2">Sign in to your hwasi account</p>
+hwasi_backend/hwasi-web/src/app/products/[id]/page.tsx:                                const token = localStorage.getItem('hwasi_token');
+hwasi_backend/hwasi-web/src/app/register/page.tsx:                localStorage.setItem('hwasi_token', res.data.token);
+hwasi_backend/hwasi-web/src/app/register/page.tsx:                localStorage.setItem('hwasi_user', JSON.stringify(res.data.user));
+hwasi_backend/hwasi-web/src/app/register/page.tsx:                    <p className="text-gray-500 mt-2">Join hwasi for exclusive fashion</p>
+hwasi_backend/hwasi-web/src/app/vto/page.tsx:        const token = localStorage.getItem('hwasi_token');
+hwasi_backend/hwasi-web/src/app/vto/page.tsx:            link.download = 'hwasi-virtual-tryon.png';
+hwasi_backend/hwasi-web/src/components/Footer.tsx:                            hwasi
+hwasi_backend/hwasi-web/src/components/Footer.tsx:                        ┬⌐ {new Date().getFullYear()} hwasi. All rights reserved.
+hwasi_backend/hwasi-web/src/components/Header.tsx:                            hwasi
+hwasi_backend/hwasi-web/src/lib/api.ts:// API Configuration for hwasi Backend
+hwasi_backend/hwasi-web/src/lib/api.ts:const API_BASE_URL = 'https://hwasibackend.vercel.app/api';
+hwasi_backend/hwasi-web/src/lib/api.ts:    const token = typeof window !== 'undefined' ? localStorage.getItem('hwasi_token') : null;
+hwasi_backend/hwasi-web/src/lib/api.ts:            localStorage.removeItem('hwasi_token');
+hwasi_backend/package-lock.json:  "name": "hwasi-backend",
+hwasi_backend/package-lock.json:      "name": "hwasi-backend",
+hwasi_backend/package.json:  "name": "hwasi-backend",
+hwasi_backend/package.json:  "description": "Backend API for hwasi E-commerce App",
+hwasi_backend/services/authService.js:                        from: 'hwasi <onboarding@resend.dev>',
+hwasi_backend/services/authService.js:                        subject: 'Verify your hwasi Account',
+hwasi_backend/services/authService.js:                                <h1 style="color: #10b981; text-align: center;">Welcome to hwasi!</h1>
+hwasi_backend/services/authService.js:                                <p>Thank you for joining hwasi. To complete your registration, please use the following verification code:</p>
+hwasi_backend/services/authService.js:            redirectTo: 'io.supabase.hwasiapp://reset-password', // Deep link for mobile app
+hwasi_backend/supabase-complete-schema.sql:-- hwasi E-commerce Database Schema for Supabase (PostgreSQL)
+hwasi_backend/supabase-complete-schema.sql:  ('hwasi50', 50, NOW() + INTERVAL '30 days')
+hwasi_backend/views/category-edit.ejs:    <title>╪¬╪╣╪»┘è┘ä ╪º┘ä╪¬╪╡┘å┘è┘ü - hwasi Admin</title>
+hwasi_backend/views/index.ejs:    <title>┘ä┘ê╪¡╪⌐ ╪º┘ä╪¬╪¡┘â┘à - hwasi Admin</title>
+hwasi_backend/views/index.ejs:        <h1>≡ƒ¢ì∩╕Å hwasi Admin</h1>
+hwasi_backend/views/layout.ejs:    <title>hwasi Admin Dashboard</title>
+hwasi_backend/views/layout.ejs:        <h1>≡ƒ¢ì∩╕Å hwasi Admin</h1>
+hwasi_backend/views/partials/header.ejs:        <%= title || 'hwasi Admin' %>
+hwasi_backend/views/partials/header.ejs:                    <h1>hwasi <span>Admin</span></h1>
+hwasi_backend/views/product-edit.ejs:    <title>╪¬╪╣╪»┘è┘ä ╪º┘ä┘à┘å╪¬╪¼ - hwasi Admin</title>
+hwasi_backend/views/product-form.ejs:        window.addEventListener('hwasi-data-pasted', (event) => {
+hwasi_scraper_extension/manifest.json:    "name": "hwasi Product Scraper",
+hwasi_scraper_extension/manifest.json:    "description": "Scrape products from Aff.ven-door and paste into hwasi Admin",
+hwasi_scraper_extension/popup.html:    <h3>hwasi Scraper</h3>
+hwasi_scraper_extension/popup.html:    <button id="pasteBtn" disabled>≡ƒôï Paste to hwasi</button>
+hwasi_scraper_extension/popup.js:                statusDiv.textContent = 'Scraped! Go to hwasi and Paste.';
+hwasi_scraper_extension/popup.js:// === PASTING LOGIC (Runs on hwasi Tab) ===
+hwasi_scraper_extension/popup.js:    window.dispatchEvent(new CustomEvent('hwasi-data-pasted', { detail: product }));
+ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean;
+ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean.RunnerTests;
+ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean.RunnerTests;
+ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean.RunnerTests;
+ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean;
+ios/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean;
+ios/Runner/Info.plist:	<string>hwasi Clean</string>
+ios/Runner/Info.plist:	<string>hwasi_clean</string>
+lib/app.dart:import 'package:hwasi_app/core/services/wishlist_service.dart';
+lib/app.dart:import 'package:hwasi_app/core/providers/settings_provider.dart';
+lib/app.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/app.dart:import 'package:hwasi_app/features/splash/presentation/screens/splash_screen.dart';
+lib/app.dart:import 'package:hwasi_app/features/admin/presentation/screens/admin_login_screen.dart';
+lib/app.dart:import 'package:hwasi_app/features/admin/presentation/screens/admin_dashboard_screen.dart';
+lib/app.dart:import 'package:hwasi_app/features/admin/presentation/screens/product_management_screen.dart';
+lib/app.dart:import 'package:hwasi_app/features/admin/presentation/screens/category_management_screen.dart';
+lib/app.dart:import 'package:hwasi_app/features/admin/presentation/screens/order_management_screen.dart';
+lib/app.dart:import 'package:hwasi_app/features/admin/presentation/screens/user_management_screen.dart';
+lib/app.dart:import 'package:hwasi_app/features/search/presentation/screens/search_suggestions_screen.dart';
+lib/app.dart:import 'package:hwasi_app/features/products/presentation/screens/product_comparison_screen.dart';
+lib/app.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/app.dart:            title: 'hwasi',
+lib/core/config/dev_config.dart:import 'package:hwasi_app/core/config/app_config.dart';
+lib/core/config/prod_config.dart:import 'package:hwasi_app/core/config/app_config.dart';
+lib/core/config/prod_config.dart:  String get baseUrl => 'https://hwasibackend.vercel.app/api';
+lib/core/providers/settings_provider.dart:import 'package:hwasi_app/core/services/app_settings_service.dart';
+lib/core/services/api_service.dart:import 'package:hwasi_app/core/config/app_config.dart';
+lib/core/services/api_service.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/core/services/auth_service.dart:  static const String baseUrl = 'https://hwasibackend.vercel.app/api';
+lib/core/services/coupon_service.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/core/services/wishlist_service.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/core/services/wishlist_service.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/core/widgets/floating_card.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/core/widgets/organic_container.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/core/widgets/spinning_loader.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/admin/presentation/screens/admin_dashboard_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/admin/presentation/screens/admin_dashboard_screen.dart:                    'hwasi Admin',
+lib/features/auth/presentation/screens/forgot_password_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/auth/presentation/screens/forgot_password_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/auth/presentation/screens/forgot_password_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/auth/presentation/screens/login_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/auth/presentation/screens/login_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/auth/presentation/screens/login_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/signup_screen.dart';
+lib/features/auth/presentation/screens/login_screen.dart:import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
+lib/features/auth/presentation/screens/login_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/auth/presentation/screens/login_screen.dart:import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
+lib/features/auth/presentation/screens/login_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/profile_picture_setup_screen.dart';
+lib/features/auth/presentation/screens/otp_verification_screen.dart:import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
+lib/features/auth/presentation/screens/profile_picture_setup_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/auth/presentation/screens/profile_picture_setup_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/auth/presentation/screens/profile_picture_setup_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/auth/presentation/screens/profile_picture_setup_screen.dart:import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
+lib/features/auth/presentation/screens/reset_password_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/auth/presentation/screens/reset_password_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/auth/presentation/screens/reset_password_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/otp_verification_screen.dart';
+lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
+lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/auth/presentation/screens/signup_screen.dart:import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
+lib/features/cart/bloc/cart_bloc.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/cart/bloc/cart_bloc.dart:import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+lib/features/cart/bloc/cart_bloc.dart:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+lib/features/cart/bloc/cart_bloc.dart:import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
+lib/features/cart/bloc/cart_event.dart:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+lib/features/cart/data/services/cart_service.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/cart/data/services/cart_service.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/cart/data/services/cart_service.dart:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hwasi_app/features/cart/presentation/widgets/cart_item_card.dart';
+lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hwasi_app/features/checkout/presentation/screens/checkout_screen.dart';
+lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/cart/presentation/screens/cart_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/cart/presentation/widgets/cart_item_card.dart:import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+lib/features/cart/presentation/widgets/cart_item_card.dart:import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+lib/features/cart/presentation/widgets/cart_item_card.dart:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+lib/features/cart/presentation/widgets/cart_item_card.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hwasi_app/features/checkout/models/address.dart';
+lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/checkout/presentation/screens/address_management_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/features/orders/bloc/order_event.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/features/orders/bloc/order_state.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/checkout/presentation/screens/checkout_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/coupons/presentation/screens/coupons_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/coupons/presentation/screens/coupons_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/coupons/presentation/screens/coupons_screen.dart:          'code': 'hwasi50',
+lib/features/home/bloc/home_bloc.dart:import 'package:hwasi_app/features/home/data/models/category_model.dart';
+lib/features/home/bloc/home_bloc.dart:import 'package:hwasi_app/features/home/data/services/category_service.dart';
+lib/features/home/bloc/home_bloc.dart:import 'package:hwasi_app/features/products/data/models/product_model.dart';
+lib/features/home/bloc/home_bloc.dart:import 'package:hwasi_app/features/products/data/services/product_service.dart';
+lib/features/home/bloc/home_bloc.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/home/data/services/category_service.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/home/data/services/category_service.dart:import 'package:hwasi_app/features/home/data/models/category_model.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/features/home/bloc/home_bloc.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/features/home/data/services/category_service.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/features/home/presentation/widgets/hero_carousel.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/features/notifications/presentation/screens/notifications_screen.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/features/products/data/services/product_service.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/features/products/presentation/screens/products_screen.dart';
+lib/features/home/presentation/screens/home_screen.dart:import 'package:hwasi_app/features/search/presentation/screens/search_screen.dart';
+lib/features/home/presentation/screens/home_screen.dart:            'hwasi',
+lib/features/home/presentation/widgets/category_card.dart:import 'package:hwasi_app/core/widgets/svg_image.dart';
+lib/features/home/presentation/widgets/category_card.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/home/presentation/widgets/category_grid.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/home/presentation/widgets/category_item.dart:import 'package:hwasi_app/features/products/presentation/screens/products_screen.dart';
+lib/features/home/presentation/widgets/category_list.dart:import 'package:hwasi_app/features/home/presentation/widgets/category_card.dart';
+lib/features/home/presentation/widgets/category_list.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/home/presentation/widgets/flash_deals_section.dart:import 'package:hwasi_app/features/products/data/models/product_model.dart';
+lib/features/home/presentation/widgets/flash_deals_section.dart:import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+lib/features/home/presentation/widgets/hero_carousel.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/home/presentation/widgets/product_card.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/home/presentation/widgets/product_card.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/home/presentation/widgets/product_card.dart:import 'package:hwasi_app/features/products/bloc/product_bloc.dart';
+lib/features/home/presentation/widgets/product_card.dart:import 'package:hwasi_app/features/products/bloc/product_event.dart';
+lib/features/home/presentation/widgets/product_card.dart:import 'package:hwasi_app/features/products/data/services/product_service.dart';
+lib/features/home/presentation/widgets/product_card.dart:import 'package:hwasi_app/features/products/presentation/screens/product_detail_screen.dart';
+lib/features/home/presentation/widgets/product_card.dart:import 'package:hwasi_app/core/services/wishlist_service.dart';
+lib/features/home/presentation/widgets/product_grid.dart:import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+lib/features/home/presentation/widgets/product_grid.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/home/presentation/widgets/product_grid.dart:import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
+lib/features/home/presentation/widgets/promo_slider.dart:import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
+lib/features/home/presentation/widgets/section_header.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/features/cart/presentation/screens/cart_screen.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/features/profile/presentation/screens/profile_screen.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/features/wishlist/presentation/screens/wishlist_screen.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/features/home/presentation/screens/home_screen.dart';
+lib/features/main/presentation/screens/main_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/notifications/presentation/screens/notifications_screen.dart:import 'package:hwasi_app/core/services/notification_service.dart';
+lib/features/notifications/presentation/screens/notifications_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/notifications/presentation/screens/notifications_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/onboarding/presentation/screens/language_selection_screen.dart:import 'package:hwasi_app/core/providers/settings_provider.dart';
+lib/features/onboarding/presentation/screens/language_selection_screen.dart:import 'package:hwasi_app/core/services/app_settings_service.dart';
+lib/features/onboarding/presentation/screens/language_selection_screen.dart:import 'package:hwasi_app/features/onboarding/presentation/screens/onboarding_screen.dart';
+lib/features/onboarding/presentation/screens/onboarding_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+lib/features/onboarding/presentation/screens/onboarding_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/signup_screen.dart';
+lib/features/onboarding/presentation/screens/onboarding_screen.dart:import 'package:hwasi_app/features/onboarding/presentation/widgets/onboarding_page.dart';
+lib/features/onboarding/presentation/screens/onboarding_screen.dart:      "title": "Welcome to hwasi",
+lib/features/orders/bloc/order_bloc.dart:import 'package:hwasi_app/features/orders/bloc/order_event.dart';
+lib/features/orders/bloc/order_bloc.dart:import 'package:hwasi_app/features/orders/bloc/order_state.dart';
+lib/features/orders/bloc/order_bloc.dart:import 'package:hwasi_app/features/orders/data/services/order_service.dart';
+lib/features/orders/bloc/order_bloc.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/orders/data/services/order_service.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/orders/presentation/screens/order_tracking_screen.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/orders/presentation/screens/order_tracking_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
+lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hwasi_app/features/orders/bloc/order_event.dart';
+lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hwasi_app/features/orders/bloc/order_state.dart';
+lib/features/orders/presentation/screens/orders_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/products/bloc/product_bloc.dart:import 'package:hwasi_app/features/products/bloc/product_event.dart';
+lib/features/products/bloc/product_bloc.dart:import 'package:hwasi_app/features/products/bloc/product_state.dart';
+lib/features/products/bloc/product_bloc.dart:import 'package:hwasi_app/features/products/data/services/product_service.dart';
+lib/features/products/bloc/product_state.dart:import 'package:hwasi_app/features/products/data/models/product_model.dart';
+lib/features/products/data/services/product_service.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/products/data/services/product_service.dart:import 'package:hwasi_app/features/products/data/models/product_model.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/products/bloc/product_bloc.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/products/bloc/product_event.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/products/bloc/product_state.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/core/services/wishlist_service.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/products/data/services/product_service.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/cart/presentation/screens/cart_screen.dart';
+lib/features/products/presentation/screens/product_detail_screen.dart:import 'package:hwasi_app/features/reviews/data/services/review_service.dart';
+lib/features/products/presentation/screens/products_screen.dart:import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+lib/features/products/presentation/screens/products_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/products/presentation/screens/products_screen.dart:import 'package:hwasi_app/features/products/bloc/product_bloc.dart';
+lib/features/products/presentation/screens/products_screen.dart:import 'package:hwasi_app/features/products/bloc/product_event.dart';
+lib/features/products/presentation/screens/products_screen.dart:import 'package:hwasi_app/features/products/bloc/product_state.dart';
+lib/features/products/presentation/screens/products_screen.dart:import 'package:hwasi_app/features/products/data/services/product_service.dart';
+lib/features/products/presentation/screens/products_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/products/presentation/widgets/related_products.dart:import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
+lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hwasi_app/features/reviews/bloc/review_state.dart';
+lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
+lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hwasi_app/features/reviews/presentation/widgets/add_review_sheet.dart';
+lib/features/products/presentation/widgets/reviews_section.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/profile/presentation/screens/notifications_settings_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/profile/presentation/screens/notifications_settings_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/profile/presentation/screens/profile_details_screen.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/profile/presentation/screens/profile_details_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/profile/presentation/screens/profile_details_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/profile/presentation/screens/profile_details_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/features/orders/presentation/screens/orders_screen.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/features/wishlist/presentation/screens/wishlist_screen.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/features/profile/presentation/screens/settings_screen.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/features/profile/presentation/screens/profile_details_screen.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/features/coupons/presentation/screens/coupons_screen.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/features/checkout/presentation/screens/address_management_screen.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/core/providers/settings_provider.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/features/profile/presentation/screens/notifications_settings_screen.dart';
+lib/features/profile/presentation/screens/profile_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/profile/presentation/screens/settings_screen.dart:import 'package:hwasi_app/core/providers/settings_provider.dart';
+lib/features/profile/presentation/screens/settings_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/profile/presentation/screens/settings_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/profile/presentation/screens/settings_screen.dart:                      applicationName: 'hwasi',
+lib/features/reviews/bloc/review_bloc.dart:import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
+lib/features/reviews/bloc/review_bloc.dart:import 'package:hwasi_app/features/reviews/bloc/review_state.dart';
+lib/features/reviews/bloc/review_bloc.dart:import 'package:hwasi_app/features/reviews/data/services/review_service.dart';
+lib/features/reviews/bloc/review_state.dart:import 'package:hwasi_app/features/reviews/data/models/review_model.dart';
+lib/features/reviews/data/services/review_service.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/reviews/data/services/review_service.dart:import 'package:hwasi_app/features/reviews/data/models/review_model.dart';
+lib/features/reviews/presentation/screens/write_review_screen.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/reviews/presentation/widgets/add_review_sheet.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/reviews/presentation/widgets/add_review_sheet.dart:import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
+lib/features/reviews/presentation/widgets/add_review_sheet.dart:import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
+lib/features/reviews/presentation/widgets/add_review_sheet.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/search/presentation/screens/search_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/search/presentation/screens/search_screen.dart:import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+lib/features/search/presentation/screens/search_screen.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/search/presentation/screens/search_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/splash/presentation/screens/language_selection_screen.dart:import 'package:hwasi_app/core/providers/settings_provider.dart';
+lib/features/splash/presentation/screens/language_selection_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/splash/presentation/screens/language_selection_screen.dart:import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
+lib/features/splash/presentation/screens/splash_screen.dart:import 'package:hwasi_app/features/splash/presentation/screens/language_selection_screen.dart';
+lib/features/splash/presentation/screens/splash_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/splash/presentation/screens/splash_screen.dart:import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
+lib/features/splash/presentation/screens/splash_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/splash/presentation/screens/splash_screen.dart:              'hwasi',
+lib/features/vto/data/services/vto_service.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hwasi_app/features/vto/data/services/vto_service.dart';
+lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/features/vto/presentation/screens/virtual_try_on_screen.dart:import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+lib/features/vto/presentation/screens/virtual_try_on_screen.dart:          text: 'Check out my new look with hwasi AI! ≡ƒæùΓ£¿');
+lib/features/wishlist/presentation/screens/wishlist_screen.dart:import 'package:hwasi_app/core/services/wishlist_service.dart';
+lib/features/wishlist/presentation/screens/wishlist_screen.dart:import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+lib/features/wishlist/presentation/screens/wishlist_screen.dart:import 'package:hwasi_app/core/themes/app_theme.dart';
+lib/features/wishlist/presentation/screens/wishlist_screen.dart:import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+lib/firebase_options.dart:    projectId: 'hwasi-ceafc',
+lib/firebase_options.dart:    storageBucket: 'hwasi-ceafc.firebasestorage.app',
+lib/firebase_options.dart:    projectId: 'hwasi-ceafc',
+lib/firebase_options.dart:    storageBucket: 'hwasi-ceafc.firebasestorage.app',
+lib/firebase_options.dart:    iosBundleId: 'com.example.hwasiClean',
+lib/firebase_options.dart:    projectId: 'hwasi-ceafc',
+lib/firebase_options.dart:    authDomain: 'hwasi-ceafc.firebaseapp.com',
+lib/firebase_options.dart:    storageBucket: 'hwasi-ceafc.firebasestorage.app',
+lib/firebase_options.dart:    projectId: 'hwasi-ceafc',
+lib/firebase_options.dart:    authDomain: 'hwasi-ceafc.firebaseapp.com',
+lib/firebase_options.dart:    storageBucket: 'hwasi-ceafc.firebasestorage.app',
+lib/l10n/app_en.arb:    "appName": "hwasi",
+lib/l10n/generated/app_localizations.dart:  /// **'hwasi'**
+lib/l10n/generated/app_localizations_en.dart:  String get appName => 'hwasi';
+lib/main.dart:import 'package:hwasi_app/app.dart';
+lib/main.dart:import 'package:hwasi_app/core/services/auth_service.dart';
+lib/main.dart:import 'package:hwasi_app/core/services/notification_service.dart';
+lib/main.dart:import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+lib/main.dart:import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
+lib/main.dart:import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
+lib/main.dart:import 'package:hwasi_app/features/orders/data/services/order_service.dart';
+lib/main.dart:import 'package:hwasi_app/core/config/app_config.dart';
+lib/main.dart:import 'package:hwasi_app/core/config/prod_config.dart';
+lib/main.dart:import 'package:hwasi_app/core/config/dev_config.dart'; // Added DevConfig import
+lib/main.dart:import 'package:hwasi_app/core/services/api_service.dart';
+lib/main.dart:import 'package:hwasi_app/firebase_options.dart';
+lib/main.dart:  print('≡ƒÜÇ URL: https://hwasibackend.vercel.app/api');
+linux/CMakeLists.txt:set(BINARY_NAME "hwasi_clean")
+linux/CMakeLists.txt:set(APPLICATION_ID "com.example.hwasi_clean")
+linux/runner/my_application.cc:    gtk_header_bar_set_title(header_bar, "hwasi_clean");
+linux/runner/my_application.cc:    gtk_window_set_title(window, "hwasi_clean");
+macos/Runner.xcodeproj/project.pbxproj:		33CC10ED2044A3C60003C045 /* hwasi_clean.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "hwasi_clean.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+macos/Runner.xcodeproj/project.pbxproj:				33CC10ED2044A3C60003C045 /* hwasi_clean.app */,
+macos/Runner.xcodeproj/project.pbxproj:			productReference = 33CC10ED2044A3C60003C045 /* hwasi_clean.app */;
+macos/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean.RunnerTests;
+macos/Runner.xcodeproj/project.pbxproj:				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hwasi_clean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hwasi_clean";
+macos/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean.RunnerTests;
+macos/Runner.xcodeproj/project.pbxproj:				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hwasi_clean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hwasi_clean";
+macos/Runner.xcodeproj/project.pbxproj:				PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean.RunnerTests;
+macos/Runner.xcodeproj/project.pbxproj:				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hwasi_clean.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/hwasi_clean";
+macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme:               BuildableName = "hwasi_clean.app"
+macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme:            BuildableName = "hwasi_clean.app"
+macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme:            BuildableName = "hwasi_clean.app"
+macos/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme:            BuildableName = "hwasi_clean.app"
+macos/Runner/Configs/AppInfo.xcconfig:PRODUCT_NAME = hwasi_clean
+macos/Runner/Configs/AppInfo.xcconfig:PRODUCT_BUNDLE_IDENTIFIER = com.example.hwasiClean
+pubspec.yaml:name: hwasi_app
+test/widget_test.dart:import 'package:hwasi_app/app.dart';
+test/widget_test.dart:    expect(find.text('hwasi'), findsOneWidget);
+test_api.js:const supabase = require('./hwasi_backend/config/supabase');
+web/index.html:  <meta name="description" content="hwasi - Your favorite content in one place.">
+web/index.html:  <meta name="apple-mobile-web-app-title" content="hwasi">
+web/index.html:  <title>hwasi</title>
+web/manifest.json:    "name": "hwasi",
+web/manifest.json:    "short_name": "hwasi",
+web/manifest.json:    "description": "hwasi - Your favorite content in one place.",
+windows/CMakeLists.txt:project(hwasi_clean LANGUAGES CXX)
+windows/CMakeLists.txt:set(BINARY_NAME "hwasi_clean")
+windows/runner/Runner.rc:            VALUE "FileDescription", "hwasi_clean" "\0"
+windows/runner/Runner.rc:            VALUE "InternalName", "hwasi_clean" "\0"
+windows/runner/Runner.rc:            VALUE "OriginalFilename", "hwasi_clean.exe" "\0"
+windows/runner/Runner.rc:            VALUE "ProductName", "hwasi_clean" "\0"
+windows/runner/main.cpp:  if (!window.Create(L"hwasi_clean", origin, size)) {

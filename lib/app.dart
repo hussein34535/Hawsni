@@ -13,7 +13,7 @@ import 'package:hwasi_app/features/admin/presentation/screens/order_management_s
 import 'package:hwasi_app/features/admin/presentation/screens/user_management_screen.dart';
 import 'package:hwasi_app/features/search/presentation/screens/search_suggestions_screen.dart';
 import 'package:hwasi_app/features/products/presentation/screens/product_comparison_screen.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class App extends StatefulWidget {
   const App({super.key});

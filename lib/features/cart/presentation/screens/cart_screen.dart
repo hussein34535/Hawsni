@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-import 'package:hawsni_app/features/cart/presentation/widgets/cart_item_card.dart';
-import 'package:hawsni_app/features/checkout/presentation/screens/checkout_screen.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:hwasi_app/features/cart/presentation/widgets/cart_item_card.dart';
+import 'package:hwasi_app/features/checkout/presentation/screens/checkout_screen.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});

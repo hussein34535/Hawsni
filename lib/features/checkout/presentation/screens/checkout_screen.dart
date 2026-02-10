@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
-import 'package:hawsni_app/features/orders/bloc/order_event.dart';
-import 'package:hawsni_app/features/orders/bloc/order_state.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
+import 'package:hwasi_app/features/orders/bloc/order_event.dart';
+import 'package:hwasi_app/features/orders/bloc/order_state.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -44,8 +44,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         .toList();
 
     context.read<OrderBloc>().add(
-      CreateOrder(orderData: orderData, items: items),
-    );
+          CreateOrder(orderData: orderData, items: items),
+        );
   }
 
   @override
@@ -142,13 +142,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                           Text(
                                             AppLocalizations.of(
                                               context,
-                                            )!.homeLabel,
+                                            )!
+                                                .homeLabel,
                                             style: AppTheme
-                                                .textTheme
-                                                .titleMedium
+                                                .textTheme.titleMedium
                                                 ?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
@@ -198,11 +198,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                           Text(
                                             'MasterCard',
                                             style: AppTheme
-                                                .textTheme
-                                                .titleMedium
+                                                .textTheme.titleMedium
                                                 ?.copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
@@ -309,12 +308,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 ),
                                 child: Text(
                                   AppLocalizations.of(context)!.placeOrder,
-                                  style: AppTheme.textTheme.labelLarge
-                                      ?.copyWith(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
+                                  style:
+                                      AppTheme.textTheme.labelLarge?.copyWith(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),

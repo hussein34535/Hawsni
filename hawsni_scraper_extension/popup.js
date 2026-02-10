@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (product) {
                 await chrome.storage.local.set({ scrapedProduct: product });
                 pasteBtn.disabled = false;
-                statusDiv.textContent = 'Scraped! Go to Hawsni and Paste.';
+                statusDiv.textContent = 'Scraped! Go to hwasi and Paste.';
             } else {
                 statusDiv.textContent = 'No data found or scraping failed.';
             }
@@ -192,7 +192,7 @@ function scrapeLogic() {
     }
 }
 
-// === PASTING LOGIC (Runs on Hawsni Tab) ===
+// === PASTING LOGIC (Runs on hwasi Tab) ===
 function pasteLogic(product) {
     if (!product) return;
 
@@ -237,7 +237,7 @@ function pasteLogic(product) {
     }
 
     // Notify the page to update UI (Unified Event)
-    window.dispatchEvent(new CustomEvent('hawsni-data-pasted', { detail: product }));
+    window.dispatchEvent(new CustomEvent('hwasi-data-pasted', { detail: product }));
 
     alert('Product pasted! Review details and Save.');
 }

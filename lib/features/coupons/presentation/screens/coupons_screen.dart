@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 
 class CouponsScreen extends StatefulWidget {
   const CouponsScreen({super.key});
@@ -48,7 +49,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
           'isActive': true,
         },
         {
-          'code': 'HAWSNI50',
+          'code': 'hwasi50',
           'discount': 50,
           'description': '50% off on selected items',
           'expiresAt': DateTime.now().add(const Duration(days: 7)),

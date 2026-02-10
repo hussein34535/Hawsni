@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/home/data/models/category_model.dart';
-import 'package:hawsni_app/features/home/data/services/category_service.dart';
-import 'package:hawsni_app/features/products/data/models/product_model.dart';
-import 'package:hawsni_app/features/products/data/services/product_service.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hwasi_app/features/home/data/models/category_model.dart';
+import 'package:hwasi_app/features/home/data/services/category_service.dart';
+import 'package:hwasi_app/features/products/data/models/product_model.dart';
+import 'package:hwasi_app/features/products/data/services/product_service.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
 
 // Events
 abstract class HomeEvent {}

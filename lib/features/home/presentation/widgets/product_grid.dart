@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
-import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
 
 class ProductGrid extends StatefulWidget {
   final String? categoryId;

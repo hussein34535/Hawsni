@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
 
 abstract class CartEvent extends Equatable {
   const CartEvent();

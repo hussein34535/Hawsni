@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});

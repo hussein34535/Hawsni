@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
-import 'package:hawsni_app/features/reviews/bloc/review_state.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
+import 'package:hwasi_app/features/reviews/bloc/review_state.dart';
 import 'package:intl/intl.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
-import 'package:hawsni_app/features/reviews/presentation/widgets/add_review_sheet.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/features/reviews/presentation/widgets/add_review_sheet.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
 
 class ReviewsSection extends StatelessWidget {
   final String productId;

@@ -1,4 +1,4 @@
-import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
 
 class CouponService {
   // Validate coupon

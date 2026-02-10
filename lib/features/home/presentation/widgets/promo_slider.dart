@@ -1,7 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/widgets/skeleton_loader.dart';
+import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
 
 class PromoSlider extends StatefulWidget {
   const PromoSlider({super.key});

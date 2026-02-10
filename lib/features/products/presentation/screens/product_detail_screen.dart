@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_bloc.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_event.dart';
-import 'package:hawsni_app/features/cart/bloc/cart_state.dart';
-import 'package:hawsni_app/features/products/presentation/widgets/reviews_section.dart';
-import 'package:hawsni_app/features/reviews/bloc/review_bloc.dart';
-import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
-import 'package:hawsni_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
+import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
+import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
+import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
 
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
-import 'package:hawsni_app/features/products/bloc/product_event.dart';
-import 'package:hawsni_app/features/products/bloc/product_state.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/features/products/bloc/product_bloc.dart';
+import 'package:hwasi_app/features/products/bloc/product_event.dart';
+import 'package:hwasi_app/features/products/bloc/product_state.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:hawsni_app/core/services/wishlist_service.dart';
-import 'package:hawsni_app/features/products/data/services/product_service.dart';
+import 'package:hwasi_app/core/services/wishlist_service.dart';
+import 'package:hwasi_app/features/products/data/services/product_service.dart';
 import 'dart:ui';
 
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/login_screen.dart';
-import 'package:hawsni_app/features/cart/presentation/screens/cart_screen.dart';
-import 'package:hawsni_app/features/reviews/data/services/review_service.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:hwasi_app/features/cart/presentation/screens/cart_screen.dart';
+import 'package:hwasi_app/features/reviews/data/services/review_service.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String name;

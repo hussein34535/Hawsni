@@ -6,7 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hawsni_app/app.dart';
+import 'package:hwasi_app/app.dart';
 
 void main() {
   testWidgets('App launches and displays main screen',
@@ -15,6 +15,6 @@ void main() {
     await tester.pumpWidget(const App());
 
     // Verify that the app title is displayed.
-    expect(find.text('Hawsni'), findsOneWidget);
+    expect(find.text('hwasi'), findsOneWidget);
   });
 }

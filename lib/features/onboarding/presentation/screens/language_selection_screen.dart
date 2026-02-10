@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:hawsni_app/core/providers/settings_provider.dart';
-import 'package:hawsni_app/core/services/app_settings_service.dart';
-import 'package:hawsni_app/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:hwasi_app/core/providers/settings_provider.dart';
+import 'package:hwasi_app/core/services/app_settings_service.dart';
+import 'package:hwasi_app/features/onboarding/presentation/screens/onboarding_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});

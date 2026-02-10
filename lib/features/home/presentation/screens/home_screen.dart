@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/features/home/bloc/home_bloc.dart';
-import 'package:hawsni_app/features/home/data/services/category_service.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/hero_carousel.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-import 'package:hawsni_app/features/notifications/presentation/screens/notifications_screen.dart';
-import 'package:hawsni_app/features/products/data/services/product_service.dart';
-import 'package:hawsni_app/features/products/presentation/screens/products_screen.dart';
-import 'package:hawsni_app/features/search/presentation/screens/search_screen.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/features/home/bloc/home_bloc.dart';
+import 'package:hwasi_app/features/home/data/services/category_service.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/hero_carousel.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+import 'package:hwasi_app/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:hwasi_app/features/products/data/services/product_service.dart';
+import 'package:hwasi_app/features/products/presentation/screens/products_screen.dart';
+import 'package:hwasi_app/features/search/presentation/screens/search_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -329,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Logo/Title - Centered
           // Logo/Title - Centered
           const Text(
-            'HAWSNI',
+            'hwasi',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,

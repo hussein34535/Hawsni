@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/auth_service.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/features/auth/presentation/screens/signup_screen.dart';
-import 'package:hawsni_app/features/main/presentation/screens/main_screen.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/features/cart/data/services/cart_service.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/signup_screen.dart';
+import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

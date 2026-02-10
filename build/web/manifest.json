@@ -1,6 +1,6 @@
 {
-    "name": "hawsni_clean",
-    "short_name": "hawsni_clean",
+    "name": "hwasi_clean",
+    "short_name": "hwasi_clean",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

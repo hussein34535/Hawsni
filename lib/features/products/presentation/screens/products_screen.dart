@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/product_card.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/features/products/bloc/product_bloc.dart';
-import 'package:hawsni_app/features/products/bloc/product_event.dart';
-import 'package:hawsni_app/features/products/bloc/product_state.dart';
-import 'package:hawsni_app/features/products/data/services/product_service.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/products/bloc/product_bloc.dart';
+import 'package:hwasi_app/features/products/bloc/product_event.dart';
+import 'package:hwasi_app/features/products/bloc/product_state.dart';
+import 'package:hwasi_app/features/products/data/services/product_service.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 
 class ProductsScreen extends StatelessWidget {
   final String? categoryName;

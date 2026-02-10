@@ -1,5 +1,5 @@
-// API Configuration for Hawsni Backend
-const API_BASE_URL = 'https://hawsnibackend.vercel.app/api';
+// API Configuration for hwasi Backend
+const API_BASE_URL = 'https://hwasibackend.vercel.app/api';
 
 interface ApiResponse<T> {
     data?: T;
@@ -12,7 +12,7 @@ async function fetchApi<T>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('hawsni_token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('hwasi_token') : null;
 
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ export const authApi = {
     getProfile: () => fetchApi<User>('/auth/profile'),
     logout: () => {
         if (typeof window !== 'undefined') {
-            localStorage.removeItem('hawsni_token');
+            localStorage.removeItem('hwasi_token');
         }
     },
 };

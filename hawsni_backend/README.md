@@ -1,6 +1,6 @@
-# 🦅 Hawsni Backend
+# 🦅 hwasi Backend
 
-This is the server-side application for the Hawsni E-Commerce App. It provides the REST API that the Flutter app communicates with.
+This is the server-side application for the hwasi E-Commerce App. It provides the REST API that the Flutter app communicates with.
 
 ## 🛠️ Tech Stack
 -   **Runtime:** Node.js
@@ -15,7 +15,7 @@ This is the server-side application for the Hawsni E-Commerce App. It provides t
 ## 📂 Project Structure
 
 ```
-hawsni_backend/
+hwasi_backend/
 ├── config/             # Configuration (Supabase, DB)
 ├── controllers/        # Logic for handling requests
 │   ├── api/            # API Controllers (used by Mobile App)
@@ -75,4 +75,4 @@ The backend is configured to be deployed on **Vercel**.
 
 ---
 
-**© 2025 Hawsni Team**
+**© 2025 hwasi Team**

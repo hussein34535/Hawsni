@@ -17,7 +17,7 @@ export default function VTOPage() {
 
     // Auth check
     useEffect(() => {
-        const token = localStorage.getItem('hawsni_token');
+        const token = localStorage.getItem('hwasi_token');
         if (!token) {
             const currentPath = window.location.pathname + window.location.search;
             router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
@@ -118,7 +118,7 @@ export default function VTOPage() {
         if (resultImage) {
             const link = document.createElement('a');
             link.href = resultImage;
-            link.download = 'hawsni-virtual-tryon.png';
+            link.download = 'hwasi-virtual-tryon.png';
             link.click();
         }
     };

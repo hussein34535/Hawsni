@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:hawsni_app/features/reviews/data/models/review_model.dart';
+import 'package:hwasi_app/features/reviews/data/models/review_model.dart';
 
 abstract class ReviewState extends Equatable {
   const ReviewState();

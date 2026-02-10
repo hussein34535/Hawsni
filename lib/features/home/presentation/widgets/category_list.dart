@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/features/home/presentation/widgets/category_card.dart';
-import 'package:hawsni_app/core/services/api_service.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/category_card.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
 
 class CategoryList extends StatefulWidget {
   const CategoryList({super.key});

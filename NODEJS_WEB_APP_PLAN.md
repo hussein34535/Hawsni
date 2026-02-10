@@ -1,13 +1,13 @@
-# 🌐 Hawsni Web App - Node.js Build Plan
+# 🌐 hwasi Web App - Node.js Build Plan
 
-This document outlines the plan to build a **new web version** of Hawsni using **Node.js** and a modern frontend framework (React/Next.js).
+This document outlines the plan to build a **new web version** of hwasi using **Node.js** and a modern frontend framework (React/Next.js).
 
 ---
 
 ## 🎯 Goal
 
 Create a full-featured e-commerce web application that:
-1.  **Reuses the existing Hawsni Backend API** (`hawsni_backend/`).
+1.  **Reuses the existing hwasi Backend API** (`hwasi_backend/`).
 2.  Has a modern, responsive UI matching the mobile app's "Legendary" design.
 3.  Supports all existing features: Products, Cart, Wishlist, Auth, VTO.
 
@@ -29,7 +29,7 @@ Create a full-featured e-commerce web application that:
 ## 📂 Proposed Project Structure
 
 ```
-hawsni-web/
+hwasi-web/
 ├── app/                    # Next.js App Router pages
 │   ├── page.tsx            # Home page
 │   ├── products/
@@ -63,9 +63,9 @@ hawsni-web/
 ### Phase 1: Project Setup
 1.  Create Next.js project:
     ```bash
-    npx create-next-app@latest hawsni-web --typescript --tailwind --app
+    npx create-next-app@latest hwasi-web --typescript --tailwind --app
     ```
-2.  Configure Tailwind with custom Hawsni colors (Green theme).
+2.  Configure Tailwind with custom hwasi colors (Green theme).
 3.  Set up API base URL pointing to existing backend.
 
 ### Phase 2: Core Features

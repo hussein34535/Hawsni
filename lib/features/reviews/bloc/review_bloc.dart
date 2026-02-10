@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/reviews/bloc/review_event.dart';
-import 'package:hawsni_app/features/reviews/bloc/review_state.dart';
-import 'package:hawsni_app/features/reviews/data/services/review_service.dart';
+import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
+import 'package:hwasi_app/features/reviews/bloc/review_state.dart';
+import 'package:hwasi_app/features/reviews/data/services/review_service.dart';
 
 class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   final ReviewService _reviewService;

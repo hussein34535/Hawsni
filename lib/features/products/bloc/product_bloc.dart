@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/features/products/bloc/product_event.dart';
-import 'package:hawsni_app/features/products/bloc/product_state.dart';
-import 'package:hawsni_app/features/products/data/services/product_service.dart';
+import 'package:hwasi_app/features/products/bloc/product_event.dart';
+import 'package:hwasi_app/features/products/bloc/product_state.dart';
+import 'package:hwasi_app/features/products/data/services/product_service.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductService _productService;

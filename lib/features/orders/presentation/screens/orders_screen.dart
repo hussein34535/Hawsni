@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/core/widgets/spinning_loader.dart';
-import 'package:hawsni_app/features/orders/bloc/order_bloc.dart';
-import 'package:hawsni_app/features/orders/bloc/order_event.dart';
-import 'package:hawsni_app/features/orders/bloc/order_state.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
+import 'package:hwasi_app/features/orders/bloc/order_event.dart';
+import 'package:hwasi_app/features/orders/bloc/order_state.dart';
+import 'package:hwasi_app/features/orders/data/services/order_service.dart';
+import 'package:hwasi_app/features/orders/presentation/screens/order_tracking_screen.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -238,9 +240,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               const Icon(
-                                Icons.shopping_bag,
-                                color: AppTheme.textTertiary,
-                              ),
+                            Icons.shopping_bag,
+                            color: AppTheme.textTertiary,
+                          ),
                         ),
                       ),
                     ),
@@ -283,10 +285,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       status.toLowerCase() == 'delivered'
                           ? AppLocalizations.of(context)!.statusDelivered
                           : status.toLowerCase() == 'processing'
-                          ? AppLocalizations.of(context)!.statusProcessing
-                          : status.toLowerCase() == 'cancelled'
-                          ? AppLocalizations.of(context)!.statusCancelled
-                          : status,
+                              ? AppLocalizations.of(context)!.statusProcessing
+                              : status.toLowerCase() == 'cancelled'
+                                  ? AppLocalizations.of(context)!
+                                      .statusCancelled
+                                  : status,
                       style: TextStyle(
                         color: _getStatusColor(status),
                         fontSize: 12,
@@ -379,7 +382,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     Text(
                       AppLocalizations.of(
                         context,
-                      )!.orderNumber(order['id'].toString()),
+                      )!
+                          .orderNumber(order['id'].toString()),
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
@@ -422,7 +426,8 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                     Text(
                                       AppLocalizations.of(
                                         context,
-                                      )!.quantityAbbr(item['quantity']),
+                                      )!
+                                          .quantityAbbr(item['quantity']),
                                       style: const TextStyle(
                                         color: AppTheme.textSecondary,
                                         fontSize: 14,

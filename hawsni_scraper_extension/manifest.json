@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Hawsni Product Scraper",
+    "name": "hwasi Product Scraper",
     "version": "1.0",
-    "description": "Scrape products from Aff.ven-door and paste into Hawsni Admin",
+    "description": "Scrape products from Aff.ven-door and paste into hwasi Admin",
     "permissions": [
         "activeTab",
         "scripting",

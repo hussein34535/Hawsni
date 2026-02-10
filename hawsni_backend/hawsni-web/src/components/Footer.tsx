@@ -9,7 +9,7 @@ export default function Footer() {
                     {/* Brand */}
                     <div className="col-span-1 md:col-span-2">
                         <h2 className="text-2xl font-black tracking-wider text-[var(--primary-light)]">
-                            HAWSNI
+                            hwasi
                         </h2>
                         <p className="mt-4 text-gray-400 max-w-md">
                             Your premium destination for fashion. Experience the future of shopping with our AI-powered Virtual Try-On technology.
@@ -85,7 +85,7 @@ export default function Footer() {
                 {/* Bottom Bar */}
                 <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-gray-500 text-sm">
-                        © {new Date().getFullYear()} Hawsni. All rights reserved.
+                        © {new Date().getFullYear()} hwasi. All rights reserved.
                     </p>
                     <div className="flex gap-6 text-sm text-gray-500">
                         <Link href="/privacy" className="hover:text-white transition-colors">

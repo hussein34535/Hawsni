@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:hawsni_app/core/providers/settings_provider.dart';
-import 'package:hawsni_app/core/themes/app_theme.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/providers/settings_provider.dart';
+import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -107,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () {
                     showAboutDialog(
                       context: context,
-                      applicationName: 'Hawsni',
+                      applicationName: 'hwasi',
                       applicationVersion: '1.0.0',
                       applicationIcon: const Icon(Icons.shopping_bag,
                           size: 48, color: AppTheme.primaryColor),

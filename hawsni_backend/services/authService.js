@@ -49,14 +49,14 @@ class AuthService {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        from: 'Hawsni <onboarding@resend.dev>',
+                        from: 'hwasi <onboarding@resend.dev>',
                         to: email,
-                        subject: 'Verify your Hawsni Account',
+                        subject: 'Verify your hwasi Account',
                         html: `
                             <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                                <h1 style="color: #10b981; text-align: center;">Welcome to Hawsni!</h1>
+                                <h1 style="color: #10b981; text-align: center;">Welcome to hwasi!</h1>
                                 <p>Hello ${name},</p>
-                                <p>Thank you for joining Hawsni. To complete your registration, please use the following verification code:</p>
+                                <p>Thank you for joining hwasi. To complete your registration, please use the following verification code:</p>
                                 <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #1f2937;">
                                     ${otpCode}
                                 </div>
@@ -198,7 +198,7 @@ class AuthService {
 
     async forgotPassword(email) {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: 'io.supabase.hawsniapp://reset-password', // Deep link for mobile app
+            redirectTo: 'io.supabase.hwasiapp://reset-password', // Deep link for mobile app
         });
 
         if (error) {

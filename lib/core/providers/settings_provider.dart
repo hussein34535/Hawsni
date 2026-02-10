@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/core/services/app_settings_service.dart';
+import 'package:hwasi_app/core/services/app_settings_service.dart';
 
 class SettingsProvider with ChangeNotifier {
   bool _isDarkMode = AppSettingsService.defaultDarkMode;

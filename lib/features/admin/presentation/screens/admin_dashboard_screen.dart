@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hawsni_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -23,7 +23,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    'Hawsni Admin',
+                    'hwasi Admin',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,

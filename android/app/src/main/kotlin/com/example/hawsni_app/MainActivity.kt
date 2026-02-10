@@ -1,4 +1,4 @@
-package com.example.hawsni_app
+package com.example.hwasi_app
 
 import io.flutter.embedding.android.FlutterActivity
 
