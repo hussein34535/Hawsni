@@ -297,7 +297,20 @@ class ProductController {
 
             const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
 
-            let imageUrls = currentProduct?.images || [];
+            // Handle Retained Images (deletion/persistence)
+            let imageUrls = [];
+            if (req.body.retained_images) {
+                try {
+                    imageUrls = JSON.parse(req.body.retained_images);
+                    if (!Array.isArray(imageUrls)) imageUrls = [];
+                } catch (e) {
+                    console.error('Error parsing retained images:', e);
+                    imageUrls = [];
+                }
+            } else {
+                // Fallback: keep all existing if field missing (shouldn't happen with updated form)
+                imageUrls = currentProduct?.images || [];
+            }
 
             if (req.files && req.files.length > 0) {
                 try {
