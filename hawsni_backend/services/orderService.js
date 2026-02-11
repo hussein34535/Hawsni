@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase');
+const emailService = require('./emailService');
 
 class OrderService {
     async getAllOrders() {
@@ -62,6 +63,22 @@ class OrderService {
             order.items = orderItems;
         }
 
+        // Send order confirmation email (non-blocking)
+        try {
+            const { data: user } = await supabase
+                .from('users')
+                .select('email, name')
+                .eq('id', orderData.user_id)
+                .single();
+
+            if (user && user.email) {
+                emailService.sendOrderConfirmationEmail(user.email, user.name || 'عميل', order)
+                    .catch(err => console.error('Order confirmation email failed:', err));
+            }
+        } catch (emailErr) {
+            console.error('Failed to fetch user for order email:', emailErr);
+        }
+
         return order;
     }
 
@@ -79,6 +96,31 @@ class OrderService {
             .single();
 
         if (error) throw error;
+
+        // Send status update email (non-blocking)
+        try {
+            const { data: order } = await supabase
+                .from('orders')
+                .select('user_id')
+                .eq('id', id)
+                .single();
+
+            if (order) {
+                const { data: user } = await supabase
+                    .from('users')
+                    .select('email, name')
+                    .eq('id', order.user_id)
+                    .single();
+
+                if (user && user.email) {
+                    emailService.sendOrderStatusEmail(user.email, user.name || 'عميل', id, status)
+                        .catch(err => console.error('Order status email failed:', err));
+                }
+            }
+        } catch (emailErr) {
+            console.error('Failed to send order status email:', emailErr);
+        }
+
         return data;
     }
 

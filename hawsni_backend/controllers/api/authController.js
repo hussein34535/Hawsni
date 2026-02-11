@@ -64,11 +64,11 @@ class AuthController {
 
     async resetPassword(req, res) {
         try {
-            const { token, password } = req.body;
-            if (!token || !password) {
-                return res.status(400).json({ success: false, message: 'Token and password are required' });
+            const { code, password } = req.body;
+            if (!code || !password) {
+                return res.status(400).json({ success: false, message: 'Reset code and new password are required' });
             }
-            const result = await AuthService.resetPassword(token, password);
+            const result = await AuthService.resetPassword(code, password);
             res.json(result);
         } catch (error) {
             console.error('Reset Password Error:', error);

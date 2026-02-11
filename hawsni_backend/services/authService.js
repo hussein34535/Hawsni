@@ -1,6 +1,6 @@
 const supabase = require('../config/supabase');
 const jwt = require('jsonwebtoken');
-const fetch = require('node-fetch');
+const emailService = require('./emailService');
 
 class AuthService {
     constructor() {
@@ -40,36 +40,12 @@ class AuthService {
             const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
             const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-            // Send Email via Resend
+            // Send OTP Email via Brevo
             try {
-                await fetch('https://api.resend.com/emails', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        from: 'hwasi <onboarding@resend.dev>',
-                        to: email,
-                        subject: 'Verify your hwasi Account',
-                        html: `
-                            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                                <h1 style="color: #10b981; text-align: center;">Welcome to hwasi!</h1>
-                                <p>Hello ${name},</p>
-                                <p>Thank you for joining hwasi. To complete your registration, please use the following verification code:</p>
-                                <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #1f2937;">
-                                    ${otpCode}
-                                </div>
-                                <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 20px;">
-                                    This code will expire in 10 minutes. If you didn't request this, please ignore this email.
-                                </p>
-                            </div>
-                        `
-                    })
-                });
+                await emailService.sendOtpEmail(email, name, otpCode);
             } catch (emailError) {
-                console.error('Failed to send OTP email:', emailError);
-                // We'll continue anyway for now, or you might want to throw an error
+                console.error('Failed to send OTP email via Brevo:', emailError);
+                // Continue registration even if email fails
             }
 
             // 3. Add or Update user profile in 'users' table
@@ -83,7 +59,7 @@ class AuthService {
                         role: 'user',
                         email: email,
                         phone: phone,
-                        is_phone_verified: false,
+                        is_email_verified: false,
                         otp_code: otpCode,
                         otp_expires_at: otpExpiresAt.toISOString()
                     }
@@ -102,7 +78,7 @@ class AuthService {
                 requireOtp: true,
                 email: email,
                 phone: phone,
-                message: 'Please verify your phone number'
+                message: 'Please verify your email address'
             };
         }
 
@@ -134,7 +110,7 @@ class AuthService {
         const { error: updateError } = await supabase
             .from('users')
             .update({
-                is_phone_verified: true,
+                is_email_verified: true,
                 otp_code: null,
                 otp_expires_at: null
             })
@@ -197,58 +173,66 @@ class AuthService {
     }
 
     async forgotPassword(email) {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: 'io.supabase.hwasiapp://reset-password', // Deep link for mobile app
-        });
+        // Generate a 6-digit reset code
+        const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-        if (error) {
-            throw new Error(error.message);
+        // Store the reset code in the users table
+        const { error: dbError } = await supabase
+            .from('users')
+            .update({
+                reset_code: resetCode,
+                reset_code_expires_at: expiresAt.toISOString()
+            })
+            .eq('email', email);
+
+        if (dbError) {
+            throw new Error(dbError.message);
+        }
+
+        // Send reset email via Brevo
+        try {
+            await emailService.sendPasswordResetEmail(email, resetCode);
+        } catch (emailError) {
+            console.error('Failed to send password reset email:', emailError);
+            throw new Error('Failed to send reset email');
         }
 
         return { success: true, message: 'Password reset email sent' };
     }
 
-    async resetPassword(token, newPassword) {
-        // Note: In a typical Supabase flow, the user clicks a link which contains the access_token (which we call 'token' here).
-        // We then use that token to set the session, and then update the user.
-        // However, passing the token directly to update user might not work if we are not in a session.
-        // A common pattern for backend-handled reset is to verify the token or use the admin API if available.
-        // But for client-side apps, usually the client handles the deep link, gets the session, and then calls update user.
-        // If the frontend sends a token (access_token from the link), we can try to set the session.
+    async resetPassword(code, newPassword) {
+        // 1. Find user by reset code
+        const { data: user, error: findError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('reset_code', code)
+            .single();
 
-        // For now, assuming the 'token' passed is the access_token from the reset link.
-
-        /* 
-           LIMITATION: Supabase 'updateUser' requires an active session or admin privileges.
-           If we are doing this from the backend, we might need to use the service_role key to update the user by ID,
-           but we don't have the user ID here, only the token.
-           
-           Alternative: The frontend should use the Supabase Client SDK to update the password directly after handling the deep link.
-           But since we are building a backend API, we can try to use the token to set the session.
-        */
-
-        // Attempt to recover session with the token (if it's a recovery token) or just update if we can.
-        // Actually, Supabase `resetPasswordForEmail` sends a link. When clicked, it redirects with `#access_token=...&type=recovery`.
-        // The frontend should extract this.
-
-        // If the frontend sends this token to the backend:
-        const { data, error } = await supabase.auth.getUser(token);
-
-        if (error || !data.user) {
-            throw new Error('Invalid or expired token');
+        if (findError || !user) {
+            throw new Error('Invalid or expired reset code');
         }
 
-        // Now update the user using the admin client or by acting as the user.
-        // Since we verified the token, we know the user.
+        // 2. Check expiry
+        if (new Date(user.reset_code_expires_at) < new Date()) {
+            throw new Error('Reset code has expired');
+        }
 
+        // 3. Update password in Supabase Auth
         const { error: updateError } = await supabase.auth.admin.updateUserById(
-            data.user.id,
+            user.id,
             { password: newPassword }
         );
 
         if (updateError) {
             throw new Error(updateError.message);
         }
+
+        // 4. Clear reset code
+        await supabase
+            .from('users')
+            .update({ reset_code: null, reset_code_expires_at: null })
+            .eq('id', user.id);
 
         return { success: true, message: 'Password updated successfully' };
     }
