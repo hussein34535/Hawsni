@@ -34,6 +34,14 @@
 
   <title>hwasi</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Performance Optimizations: Preload critical assets -->
+  <link rel="preload" href="index.css" as="style">
+  <link rel="preload" href="main.dart.js" as="script">
+
+  <!-- Content Delivery Optimization -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
 
 <body>

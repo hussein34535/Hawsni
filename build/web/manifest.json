@@ -1,11 +1,11 @@
 {
-    "name": "hwasi_clean",
-    "short_name": "hwasi_clean",
+    "name": "hwasi",
+    "short_name": "hwasi",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "hwasi - Your favorite content in one place.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
