@@ -24,7 +24,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final orderData = {
       'shippingAddress':
           '123 Fashion Street, Luxury District, New York, NY 10001',
-      'paymentMethod': 'Credit Card',
+      'paymentMethod': 'Cash on Delivery',
       'subtotal': subtotal,
       'discount': 0.0,
       'couponCode': null,
@@ -185,7 +185,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                         shape: BoxShape.circle,
                                       ),
                                       child: const Icon(
-                                        Icons.credit_card,
+                                        Icons
+                                            .money, // Changed icon to money/cash
                                         color: AppTheme.primaryColor,
                                       ),
                                     ),
@@ -196,7 +197,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'MasterCard',
+                                            AppLocalizations.of(context)!
+                                                .paymentMethod, // Use localized "Payment Method" or hardcode "Cash on Delivery" if localization missing
                                             style: AppTheme
                                                 .textTheme.titleMedium
                                                 ?.copyWith(
@@ -205,18 +207,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            '**** **** **** 1234',
+                                            'Cash on Delivery (Only option)',
                                             style:
                                                 AppTheme.textTheme.bodyMedium,
                                           ),
                                         ],
                                       ),
                                     ),
-                                    const Icon(
-                                      Icons.arrow_forward_ios,
-                                      color: AppTheme.textTertiary,
-                                      size: 16,
-                                    ),
+                                    // Removed arrow as it is the only option
                                   ],
                                 ),
                               ),

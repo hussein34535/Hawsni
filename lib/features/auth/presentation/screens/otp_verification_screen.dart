@@ -118,7 +118,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Enter the code sent to\n${widget.phone}',
+                'Enter the code sent to\n${widget.email}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontFamily: 'Poppins',

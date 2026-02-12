@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/features/auth/presentation/screens/signup_screen.dart';
+import 'package:hwasi_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
@@ -183,7 +184,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Implement forgot password
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
                     },
                     child: Text(
                       l10n.forgotPassword,

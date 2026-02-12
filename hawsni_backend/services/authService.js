@@ -236,6 +236,41 @@ class AuthService {
 
         return { success: true, message: 'Password updated successfully' };
     }
+
+    async changePassword(userId, oldPassword, newPassword) {
+        // 1. Get user email to verify old password
+        const { data: user, error: findError } = await supabase
+            .from('users')
+            .select('email')
+            .eq('id', userId)
+            .single();
+
+        if (findError || !user) {
+            throw new Error('User not found');
+        }
+
+        // 2. Verify old password by attempting to sign in
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: user.email,
+            password: oldPassword
+        });
+
+        if (signInError) {
+            throw new Error('Incorrect old password');
+        }
+
+        // 3. Update to new password
+        const { error: updateError } = await supabase.auth.admin.updateUserById(
+            userId,
+            { password: newPassword }
+        );
+
+        if (updateError) {
+            throw new Error(updateError.message);
+        }
+
+        return { success: true, message: 'Password changed successfully' };
+    }
 }
 
 module.exports = new AuthService();

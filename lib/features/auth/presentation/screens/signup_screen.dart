@@ -175,7 +175,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     }
                     final parts = value.trim().split(' ');
                     if (parts.length < 2 || parts.any((p) => p.isEmpty)) {
-                      return l10n.requiredField;
+                      return 'الرجاء كتابة الاسم الثنائي على الأقل (Full Name Required)';
                     }
                     return null;
                   },

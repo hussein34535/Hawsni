@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
 const AuthController = require('../controllers/api/authController');
+const { protect } = require('../middleware/auth');
 
 // @route   POST /api/auth/register
 // @desc    Register new user
@@ -28,6 +29,15 @@ router.post('/forgot-password', AuthController.forgotPassword);
 
 // @route   POST /api/auth/reset-password
 // @desc    Reset password using token
+// @route   POST /api/auth/reset-password
+// @desc    Reset password using token
 router.post('/reset-password', AuthController.resetPassword);
+
+// @route   POST /api/auth/change-password
+// @desc    Change password for logged in user
+router.post('/change-password', protect, [
+  body('oldPassword').notEmpty().withMessage('Old password is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters')
+], AuthController.changePassword);
 
 module.exports = router;

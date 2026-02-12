@@ -14,6 +14,7 @@ import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:provider/provider.dart';
 import 'package:hwasi_app/core/providers/settings_provider.dart';
 import 'package:hwasi_app/features/profile/presentation/screens/notifications_settings_screen.dart';
+import 'package:hwasi_app/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -322,7 +323,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildMenuItem(
                           icon: Icons.lock_outline,
                           title: l10n.changePassword,
-                          onTap: () {}, // TODO: Implement Change Password
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ChangePasswordScreen(),
+                              ),
+                            );
+                          },
                         ),
                         _buildDivider(),
                         _buildMenuItem(

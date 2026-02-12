@@ -75,6 +75,23 @@ class AuthController {
             res.status(400).json({ success: false, message: error.message });
         }
     }
+
+    async changePassword(req, res) {
+        try {
+            const { oldPassword, newPassword } = req.body;
+            const userId = req.user.id; // From protect middleware
+
+            if (!oldPassword || !newPassword) {
+                return res.status(400).json({ success: false, message: 'Old and new passwords are required' });
+            }
+
+            const result = await AuthService.changePassword(userId, oldPassword, newPassword);
+            res.json(result);
+        } catch (error) {
+            console.error('Change Password Error:', error);
+            res.status(400).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = new AuthController();

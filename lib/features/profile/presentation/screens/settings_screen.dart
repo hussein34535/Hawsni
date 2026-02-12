@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:hwasi_app/core/providers/settings_provider.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/features/profile/presentation/screens/change_password_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -89,7 +90,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildListTile(
                   icon: Icons.lock_outline,
                   title: AppLocalizations.of(context)!.changePassword,
-                  onTap: () {}, // TODO
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ChangePasswordScreen(),
+                      ),
+                    );
+                  },
                 ),
                 _buildDivider(),
                 _buildListTile(

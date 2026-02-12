@@ -237,6 +237,36 @@ class AuthService {
     }
   }
 
+  // Change password
+  static Future<Map<String, dynamic>?> changePassword(
+      String oldPassword, String newPassword) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/change-password'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: json.encode({
+          'oldPassword': oldPassword,
+          'newPassword': newPassword,
+        }),
+      );
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        print('Password changed successfully');
+        return data;
+      } else {
+        throw Exception(data['message'] ?? 'Failed to change password');
+      }
+    } catch (e) {
+      print('Error changing password: $e');
+      rethrow;
+    }
+  }
+
   // Logout user
   static Future<void> logout() async {
     _token = null;
