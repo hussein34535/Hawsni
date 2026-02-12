@@ -85,11 +85,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                        child: SizedBox(
-                          height: 200,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: HeroCarousel(banners: state.banners),
+                        child: RepaintBoundary(
+                          child: SizedBox(
+                            height: 200,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: HeroCarousel(banners: state.banners),
+                            ),
                           ),
                         ),
                       ),
@@ -118,124 +120,129 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(
-                            height: 120,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              itemCount: state.categories.length,
-                              itemBuilder: (context, index) {
-                                final category = state.categories[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ProductsScreen(
-                                          categoryName: category.name,
-                                          categoryId: category.id,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    width: 100,
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 4),
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          width: 80,
-                                          height: 80,
-                                          padding: const EdgeInsets.all(
-                                              2.5), // Gradient border width
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient: const LinearGradient(
-                                              colors: [
-                                                AppTheme.primaryColor,
-                                                AppTheme.accentColor
-                                              ],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: AppTheme.primaryColor
-                                                    .withValues(alpha: 0.2),
-                                                blurRadius: 12,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ],
+                          RepaintBoundary(
+                            child: SizedBox(
+                              height: 120,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                itemCount: state.categories.length,
+                                itemBuilder: (context, index) {
+                                  final category = state.categories[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ProductsScreen(
+                                            categoryName: category.name,
+                                            categoryId: category.id,
                                           ),
-                                          child: Container(
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white,
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      width: 100,
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 4),
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            width: 80,
+                                            height: 80,
+                                            padding: const EdgeInsets.all(
+                                                2.5), // Gradient border width
+                                            decoration: BoxDecoration(
                                               shape: BoxShape.circle,
+                                              gradient: const LinearGradient(
+                                                colors: [
+                                                  AppTheme.primaryColor,
+                                                  AppTheme.accentColor
+                                                ],
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: AppTheme.primaryColor
+                                                      .withValues(alpha: 0.2),
+                                                  blurRadius: 12,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
                                             ),
-                                            child: ClipOval(
-                                              child: category.imageUrl != null
-                                                  ? (category.imageUrl!
-                                                          .toLowerCase()
-                                                          .endsWith('.svg')
-                                                      ? Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(12.0),
-                                                          child: SvgPicture
-                                                              .network(
-                                                            category.imageUrl!,
-                                                            fit: BoxFit.contain,
-                                                            placeholderBuilder:
-                                                                (BuildContext
-                                                                    context) {
-                                                              return Container(
-                                                                  color: Colors
-                                                                      .transparent);
-                                                            },
-                                                          ),
-                                                        )
-                                                      : CachedNetworkImage(
-                                                          imageUrl: category
-                                                              .imageUrl!,
-                                                          fit: BoxFit.cover,
-                                                          memCacheHeight:
-                                                              400, // Better quality
-                                                          placeholder: (context,
-                                                                  url) =>
-                                                              Container(
-                                                                  color: Colors
-                                                                      .transparent),
-                                                          errorWidget: (context,
-                                                                  url, error) =>
-                                                              Container(
-                                                                  color: Colors
-                                                                      .transparent),
-                                                        ))
-                                                  : Container(
-                                                      color:
-                                                          Colors.transparent),
+                                            child: Container(
+                                              decoration: const BoxDecoration(
+                                                color: Colors.white,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: ClipOval(
+                                                child: category.imageUrl != null
+                                                    ? (category.imageUrl!
+                                                            .toLowerCase()
+                                                            .endsWith('.svg')
+                                                        ? Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(12.0),
+                                                            child: SvgPicture
+                                                                .network(
+                                                              category
+                                                                  .imageUrl!,
+                                                              fit: BoxFit
+                                                                  .contain,
+                                                              placeholderBuilder:
+                                                                  (BuildContext
+                                                                      context) {
+                                                                return Container(
+                                                                    color: Colors
+                                                                        .transparent);
+                                                              },
+                                                            ),
+                                                          )
+                                                        : CachedNetworkImage(
+                                                            imageUrl: category
+                                                                .imageUrl!,
+                                                            fit: BoxFit.cover,
+                                                            memCacheHeight:
+                                                                400, // Better quality
+                                                            placeholder: (context,
+                                                                    url) =>
+                                                                Container(
+                                                                    color: Colors
+                                                                        .transparent),
+                                                            errorWidget: (context,
+                                                                    url,
+                                                                    error) =>
+                                                                Container(
+                                                                    color: Colors
+                                                                        .transparent),
+                                                          ))
+                                                    : Container(
+                                                        color:
+                                                            Colors.transparent),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          category.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.black87,
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            category.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.black87,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ],
@@ -265,20 +272,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               return const SizedBox();
 
                             final product = products[index];
-                            return ProductCard(
-                              key: ValueKey(product.id),
-                              id: product.id,
-                              name: product.name,
-                              price: product.price.toString(),
-                              imageUrl: product.imageUrl,
-                              rating: product.rating,
-                              reviewCount: product.reviewCount,
-                              showBadge: _selectedFilter == 'Discount',
-                              badgeText: '60%',
-                              badgeColor: Colors.red,
-                              screenId: 'home',
-                              colors: product.colors,
-                              sizes: product.sizes,
+                            return RepaintBoundary(
+                              child: ProductCard(
+                                key: ValueKey(product.id),
+                                id: product.id,
+                                name: product.name,
+                                price: product.price.toString(),
+                                imageUrl: product.imageUrl,
+                                rating: product.rating,
+                                reviewCount: product.reviewCount,
+                                showBadge: _selectedFilter == 'Discount',
+                                badgeText: '60%',
+                                badgeColor: Colors.red,
+                                screenId: 'home',
+                                colors: product.colors,
+                                sizes: product.sizes,
+                              ),
                             );
                           },
                           childCount: _selectedFilter == 'All'

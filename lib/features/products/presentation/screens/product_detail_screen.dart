@@ -7,7 +7,8 @@ import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
 import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
 import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
-import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
+import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_screen.dart'
+    deferred as vto;
 
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
@@ -917,9 +918,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => VirtualTryOnScreen(
-                                productId: widget.productId,
-                                productImageUrl: widget.imageUrl,
+                              builder: (context) => _DeferredLoader(
+                                loader: vto.loadLibrary(),
+                                builder: () => vto.VirtualTryOnScreen(
+                                  productId: widget.productId,
+                                  productImageUrl: widget.imageUrl,
+                                ),
                               ),
                             ),
                           );
@@ -1029,6 +1033,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DeferredLoader extends StatelessWidget {
+  final Future<void> loader;
+  final Widget Function() builder;
+
+  const _DeferredLoader({required this.loader, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: loader,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return builder();
+        }
+        return const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
     );
   }
 }
