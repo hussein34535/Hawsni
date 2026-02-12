@@ -1,6 +1,7 @@
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 console.log('Cloudinary Config:', {
   cloud_name: process.env.CLOUDINARY_NAME,

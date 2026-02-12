@@ -131,16 +131,9 @@ class _ProductCardState extends State<ProductCard> {
         );
       },
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16), // Softer corners
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+        decoration: const BoxDecoration(
+          color: Colors
+              .transparent, // Minimalist: No background color for the card itself
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,11 +149,11 @@ class _ProductCardState extends State<ProductCard> {
                     decoration: BoxDecoration(
                       color: const Color(0xFFF5F5F5),
                       borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(12)),
+                          BorderRadius.circular(16), // Fully rounded image
                     ),
                     child: ClipRRect(
                       borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(12)),
+                          BorderRadius.circular(16), // Fully rounded image
                       child: CachedNetworkImage(
                         imageUrl: _selectedImageUrl ?? widget.imageUrl,
                         fit: BoxFit.cover,
@@ -364,53 +357,33 @@ class _ProductCardState extends State<ProductCard> {
                   const SizedBox(height: 4),
 
                   // 3. Rating & Price Row
+                  // 3. Price Only (Rating removed as per request)
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      // Price
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: widget.price.split('.')[0],
-                                style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryColor,
-                                ),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: widget.price.split('.')[0],
+                              style: GoogleFonts.poppins(
+                                fontSize: 16, // Slightly larger for emphasis
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primaryColor,
                               ),
-                              const TextSpan(text: ' '),
-                              TextSpan(
-                                text: AppLocalizations.of(context)!
-                                    .currencySymbol,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Minimized Star Rating
-                      Row(
-                        children: [
-                          Icon(Icons.star,
-                              size: 10, color: AppTheme.primaryColor),
-                          const SizedBox(width: 2),
-                          Text(
-                            widget.rating.toStringAsFixed(1),
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textPrimary,
                             ),
-                          ),
-                        ],
+                            const TextSpan(text: ' '),
+                            TextSpan(
+                              text:
+                                  AppLocalizations.of(context)!.currencySymbol,
+                              style: GoogleFonts.poppins(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
