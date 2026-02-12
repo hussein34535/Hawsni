@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -49,7 +48,60 @@ class ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<ProductCard> {
-  bool isFavorite = false;
+  String? _selectedImageUrl;
+  String? _selectedColorCode;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedImageUrl = widget.imageUrl;
+  }
+
+  @override
+  void didUpdateWidget(ProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imageUrl != widget.imageUrl) {
+      _selectedImageUrl = widget.imageUrl;
+    }
+  }
+
+  Color _getColorFromHex(String colorName) {
+    try {
+      if (colorName.startsWith('#')) {
+        return Color(
+            int.parse(colorName.substring(1, 7), radix: 16) + 0xFF000000);
+      } else {
+        switch (colorName.toLowerCase()) {
+          case 'red':
+            return Colors.red;
+          case 'blue':
+            return Colors.blue;
+          case 'green':
+            return Colors.green;
+          case 'black':
+            return Colors.black;
+          case 'white':
+            return Colors.white;
+          case 'grey':
+            return Colors.grey;
+          case 'yellow':
+            return Colors.yellow;
+          case 'orange':
+            return Colors.orange;
+          case 'purple':
+            return Colors.purple;
+          case 'pink':
+            return Colors.pink;
+          case 'brown':
+            return Colors.brown;
+          default:
+            return Colors.transparent;
+        }
+      }
+    } catch (_) {
+      return Colors.transparent;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +117,7 @@ class _ProductCardState extends State<ProductCard> {
                 productId: widget.id,
                 name: widget.name,
                 price: widget.price,
-                imageUrl: widget.imageUrl,
+                imageUrl: _selectedImageUrl ?? widget.imageUrl,
                 screenId: widget.screenId,
                 rating: widget.rating,
                 reviewCount: widget.reviewCount,
@@ -81,29 +133,30 @@ class _ProductCardState extends State<ProductCard> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey[200]!),
-          // Shadow removed as requested
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Container
-            // relative overflow-hidden rounded-xl bg-secondary
-            Expanded(
+            // Image Container - Fixed Aspect Ratio
+            AspectRatio(
+              aspectRatio: 1,
               child: Stack(
                 children: [
                   Container(
                     width: double.infinity,
+                    height: double.infinity,
                     decoration: BoxDecoration(
-                      color: const Color(
-                          0xFFF5F5F5), // Gray background for transparent images
-                      borderRadius: BorderRadius.circular(12), // rounded-xl
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
                       child: CachedNetworkImage(
-                        imageUrl: widget.imageUrl,
-                        fit: BoxFit.cover, // object-cover
-                        memCacheHeight: 600, // Faster decoding for scrolling
+                        imageUrl: _selectedImageUrl ?? widget.imageUrl,
+                        fit: BoxFit.cover,
+                        memCacheHeight: 600,
                         placeholder: (context, url) => Container(
                           color: const Color(0xFFF5F5F5),
                         ),
@@ -118,43 +171,34 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
 
-                  // Favorite Button (Conditional: Only if Favorite)
+                  // Favorite Button Overlay
                   Positioned(
-                    top: 12,
-                    right: 12,
+                    top: 8,
+                    right: 8,
                     child: Consumer<WishlistService>(
                       builder: (context, wishlistService, _) {
                         final isFav =
                             wishlistService.isItemInWishlist(widget.id);
-
-                        // If not favorite, hide completely
                         if (!isFav) return const SizedBox.shrink();
 
-                        return GestureDetector(
-                          onTap: () {
-                            // Can only unlike (since it disappears after)
-                            wishlistService.removeFromWishlist(widget.id);
-                          },
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(
-                                  alpha: 0.9), // Less heavy than blur
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 4,
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Icon(
-                                Icons.favorite,
-                                size: 20,
-                                color: AppTheme.primaryColor, // Red/Green Heart
+                        return Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
                               ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.favorite,
+                              size: 16,
+                              color: AppTheme.primaryColor,
                             ),
                           ),
                         );
@@ -166,190 +210,150 @@ class _ProductCardState extends State<ProductCard> {
             ),
 
             // Details Section
-            // p-3
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name
-                  // mb-2 font-medium text-foreground line-clamp-1
+                  // 1. Product Name
                   Text(
                     widget.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500, // font-medium
-                      color: AppTheme.textPrimary, // text-foreground
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
                     ),
                   ),
 
-                  const SizedBox(height: 8), // mb-2
+                  const SizedBox(height: 6),
 
-                  // Rating
-                  // mb-2 flex items-center gap-1
-                  Row(
-                    children: [
-                      Row(
-                        children: List.generate(5, (index) {
-                          // i < Math.floor(rating) ? "text-accent" : "text-muted"
-                          final bool isFilled = index < widget.rating.floor();
-                          return Icon(
-                            Icons
-                                .star, // Using standard star icon to mimic the SVG path
-                            size: 14, // h-3.5 w-3.5 (approx 14px)
-                            color: isFilled
-                                ? AppTheme.primaryColor // text-accent (Black)
-                                : Colors.grey[300], // text-muted
+                  // 2. Interactive Colors
+                  if (widget.colors != null && widget.colors!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: Row(
+                        children: widget.colors!.take(4).map((c) {
+                          String colorCode = '';
+                          String? variantImage;
+                          if (c is Map) {
+                            colorCode = c['color']?.toString() ?? '';
+                            variantImage = c['image']?.toString();
+                          } else if (c is String) {
+                            colorCode = c;
+                          }
+                          Color color = _getColorFromHex(colorCode);
+                          if (color == Colors.transparent) {
+                            return const SizedBox.shrink();
+                          }
+
+                          final bool isSelected =
+                              _selectedColorCode == colorCode;
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedColorCode = colorCode;
+                                if (variantImage != null &&
+                                    variantImage.isNotEmpty) {
+                                  _selectedImageUrl = variantImage;
+                                }
+                              });
+                            },
+                            child: Container(
+                              width: 14,
+                              height: 14,
+                              margin: const EdgeInsets.only(right: 6),
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppTheme.primaryColor
+                                      : Colors.grey[300]!,
+                                  width: isSelected ? 1.5 : 0.5,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: AppTheme.primaryColor
+                                              .withValues(alpha: 0.3),
+                                          blurRadius: 4,
+                                        )
+                                      ]
+                                    : null,
+                              ),
+                            ),
                           );
-                        }),
+                        }).toList(),
                       ),
-                      const SizedBox(width: 4), // gap-1
-                      // text-xs text-muted-foreground
-                      Text(
-                        '(${widget.reviewCount})',
-                        style: TextStyle(
-                          fontSize: 12, // text-xs
-                          color: AppTheme.textSecondary,
-                          fontStyle: FontStyle.normal, // Force normal style
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8), // mb-2
-
-                  // Price
-                  // flex items-center gap-2
-                  Row(
-                    children: [
-                      // text-lg font-bold text-accent
-                      // text-lg font-bold text-accent
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: widget.price.split('.')[0], // No decimals
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ),
-                            const TextSpan(text: ' '),
-                            TextSpan(
-                              text:
-                                  AppLocalizations.of(context)!.currencySymbol,
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (widget.originalPrice != null) ...[
-                        const SizedBox(width: 8), // gap-2
-                        // text-sm text-muted-foreground line-through
-                        Text(
-                          widget.originalPrice!.split('.')[0], // No decimals
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            decoration: TextDecoration.lineThrough,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  if (widget.colors != null && widget.colors!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: widget.colors!.take(4).map((c) {
-                        String colorName = '';
-                        if (c is Map) {
-                          colorName = c['color']?.toString() ?? '';
-                        } else if (c is String) {
-                          if (c.trim().startsWith('{')) {
-                            try {
-                              final match = RegExp(r'"color"\s*:\s*"([^"]+)"')
-                                  .firstMatch(c);
-                              colorName = match?.group(1) ?? c;
-                            } catch (_) {
-                              colorName = c;
-                            }
-                          } else {
-                            colorName = c;
-                          }
-                        }
-
-                        Color color;
-                        try {
-                          if (colorName.startsWith('#')) {
-                            color = Color(int.parse(colorName.substring(1, 7),
-                                    radix: 16) +
-                                0xFF000000);
-                          } else {
-                            switch (colorName.toLowerCase()) {
-                              case 'red':
-                                color = Colors.red;
-                                break;
-                              case 'blue':
-                                color = Colors.blue;
-                                break;
-                              case 'green':
-                                color = Colors.green;
-                                break;
-                              case 'black':
-                                color = Colors.black;
-                                break;
-                              case 'white':
-                                color = Colors.white;
-                                break;
-                              case 'grey':
-                                color = Colors.grey;
-                                break;
-                              case 'yellow':
-                                color = Colors.yellow;
-                                break;
-                              case 'orange':
-                                color = Colors.orange;
-                                break;
-                              case 'purple':
-                                color = Colors.purple;
-                                break;
-                              case 'pink':
-                                color = Colors.pink;
-                                break;
-                              case 'brown':
-                                color = Colors.brown;
-                                break;
-                              default:
-                                color = Colors.transparent;
-                            }
-                          }
-                        } catch (_) {
-                          color = Colors.transparent;
-                        }
-
-                        if (color == Colors.transparent)
-                          return const SizedBox.shrink();
-
-                        return Container(
-                          width: 12,
-                          height: 12,
-                          margin: const EdgeInsets.only(right: 4),
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey[300]!),
-                          ),
-                        );
-                      }).toList(),
                     ),
-                  ],
+
+                  // 3. Size Indicator
+                  if (widget.sizes != null && widget.sizes!.isNotEmpty)
+                    Text(
+                      '${widget.sizes!.length} sizes',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+
+                  const SizedBox(height: 6),
+
+                  // 4. Rating & Price Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Price
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: widget.price.split('.')[0],
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                              const TextSpan(text: ' '),
+                              TextSpan(
+                                text: AppLocalizations.of(context)!
+                                    .currencySymbol,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Minimized Star Rating
+                      Row(
+                        children: [
+                          Icon(Icons.star,
+                              size: 10, color: AppTheme.primaryColor),
+                          const SizedBox(width: 2),
+                          Text(
+                            widget.rating.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

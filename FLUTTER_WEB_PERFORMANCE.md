@@ -23,6 +23,24 @@ flutter build web --web-renderer canvaskit
 2. **Skwasm**: A modern rendering engine that uses the GPU more efficiently for smooth scrolling and animations.
 3. **Deferred Loading**: I've separated the Admin code so regular users don't have to download it, making the first load much faster.
 
-## Deployment Notes
-- Ensure your hosting provider (like Firebase Hosting) supports **Brotli** or **Gzip** compression.
-- WASM files can be large, but they parse much faster than JS.
+## How to Run Locally (After Build)
+
+Since WASM and Skwasm require specific security headers (**COOP** and **COEP**), you cannot simply open the `index.html` file or use a standard file server.
+
+### Option 1: Using Node.js (Easiest)
+Run this command from your terminal:
+```bash
+npx serve build/web --cors
+```
+
+### Option 2: Using Flutter (During Dev)
+If you want to test and debug with the high-performance renderer:
+```bash
+flutter run -d chrome --web-renderer skwasm
+```
+
+### Option 3: Python Script (Manual Headers)
+Created a small script `serve_web.py` to handle the required headers automatically.
+```bash
+python serve_web.py
+```

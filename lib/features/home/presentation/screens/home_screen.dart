@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                         child: RepaintBoundary(
                           child: SizedBox(
-                            height: 200,
+                            height: 160,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(16),
                               child: HeroCarousel(banners: state.banners),
@@ -123,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           RepaintBoundary(
                             child: SizedBox(
-                              height: 120,
+                              height: 100,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 padding:
@@ -144,14 +144,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                       );
                                     },
                                     child: Container(
-                                      width: 100,
+                                      width: 80,
                                       margin: const EdgeInsets.symmetric(
                                           horizontal: 4),
                                       child: Column(
                                         children: [
                                           Container(
-                                            width: 80,
-                                            height: 80,
+                                            width: 65,
+                                            height: 65,
                                             padding: const EdgeInsets.all(
                                                 2.5), // Gradient border width
                                             decoration: BoxDecoration(
@@ -257,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          childAspectRatio: 0.65,
+                          childAspectRatio: 0.72,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 16,
                         ),
@@ -269,8 +269,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ? state.featuredProducts
                                     : state.flashDeals;
 
-                            if (index >= products.length)
+                            if (index >= products.length) {
                               return const SizedBox();
+                            }
 
                             final product = products[index];
                             return RepaintBoundary(
@@ -336,7 +337,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Logo/Title - Centered
           // Logo/Title - Centered
           const Text(
             'hwasi',

@@ -9,7 +9,6 @@ import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
 
 import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
 import 'package:hwasi_app/features/orders/data/services/order_service.dart';
-import 'package:hwasi_app/core/config/app_config.dart';
 import 'package:hwasi_app/core/config/prod_config.dart';
 
 import 'package:hwasi_app/core/services/api_service.dart';
