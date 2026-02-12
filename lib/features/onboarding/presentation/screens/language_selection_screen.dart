@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:hwasi_app/core/providers/settings_provider.dart';
 import 'package:hwasi_app/core/services/app_settings_service.dart';
@@ -35,15 +36,11 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   }
 
   void _continueToOnboarding(BuildContext context) async {
-    // Save the selected language using the settings provider
     final settingsProvider =
         Provider.of<SettingsProvider>(context, listen: false);
     await settingsProvider.setLanguage(_selectedLanguage);
-
-    // Mark first launch as completed
     await AppSettingsService().setFirstLaunchCompleted();
 
-    // Navigate to onboarding screen
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const OnboardingScreen()),
@@ -55,12 +52,8 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue[600]!, Colors.purple[600]!],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
         ),
         child: SafeArea(
           child: Padding(
@@ -70,27 +63,32 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
               children: [
                 // App logo and title
                 const Icon(
-                  Icons.language,
-                  size: 80,
-                  color: Colors.white,
+                  Icons.language_rounded,
+                  size: 64,
+                  color: Colors.black87,
                 ),
-                const SizedBox(height: 24),
-                const Text(
+                const SizedBox(height: 32),
+
+                Text(
                   'Select Language',
-                  style: TextStyle(
+                  style: GoogleFonts.playfairDisplay(
                     fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
                   ),
                 ),
+
                 const SizedBox(height: 8),
-                const Text(
+
+                Text(
                   'اختر اللغة',
-                  style: TextStyle(
+                  style: GoogleFonts.cairo(
                     fontSize: 24,
-                    color: Colors.white70,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black54,
                   ),
                 ),
+
                 const SizedBox(height: 48),
 
                 // Language options
@@ -101,20 +99,20 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 // Continue button
                 SizedBox(
                   width: double.infinity,
+                  height: 56,
                   child: ElevatedButton(
                     onPressed: () => _continueToOnboarding(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.blue[700],
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 2,
                     ),
-                    child: const Text(
-                      'Continue',
-                      style: TextStyle(
+                    child: Text(
+                      _selectedLanguage == 'ar' ? 'استمرار' : 'Continue',
+                      style: GoogleFonts.poppins(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -132,62 +130,80 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   Widget _buildLanguageOption(Map<String, String> language) {
     final bool isSelected = _selectedLanguage == language['code'];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        tileColor: isSelected
-            ? Colors.white.withValues(alpha: 0.9)
-            : Colors.white.withValues(alpha: 0.2),
-        onTap: () => _selectLanguage(language['code']!),
-        leading: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: Colors.white, width: 2),
+    return GestureDetector(
+      onTap: () => _selectLanguage(language['code']!),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.black.withValues(alpha: 0.05)
+              : Colors.grey[50],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.black : Colors.transparent,
+            width: 1.5,
           ),
-          child: Center(
-            child: Text(
-              language['code']!.toUpperCase(),
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.blue[700] : Colors.white,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: isSelected ? Colors.black : Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  if (!isSelected)
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  language['code']!.toUpperCase(),
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        title: Text(
-          language['name']!,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.blue[700] : Colors.white,
-          ),
-        ),
-        subtitle: Text(
-          language['nativeName']!,
-          style: TextStyle(
-            fontSize: 16,
-            color: isSelected ? Colors.blue[400] : Colors.white70,
-          ),
-        ),
-        trailing: isSelected
-            ? const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 28,
-              )
-            : const Icon(
-                Icons.circle_outlined,
-                color: Colors.white70,
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    language['name']!,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    language['nativeName']!,
+                    style: GoogleFonts.cairo(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.black,
                 size: 28,
               ),
+          ],
+        ),
       ),
     );
   }

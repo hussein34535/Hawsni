@@ -27,33 +27,94 @@
 
   <style>
     /* Global fallback to prevent "tofu" squares before fonts load */
-    body {
-      font-family: 'Poppins', 'Playfair Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-    }
-
     html,
     body {
       background-color: #FAFAFA;
       margin: 0;
       padding: 0;
       overflow: hidden;
+      height: 100%;
+      width: 100%;
+      /* Critical: Use Cairo as primary for Arabic support globally */
+      font-family: 'Cairo', 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* CSS Loader - Shows immediately */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      background-color: #FAFAFA;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .loader {
+      /* Optimized Simple Loader */
+      width: 40px;
+      height: 40px;
+      border: 3px solid #E0E0E0;
+      border-top: 3px solid #1B4D3E;
+      /* App Primary Color */
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      /* Faster spin */
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      display: none;
+      /* User requested "one loader", removing text to be minimal */
     }
   </style>
 
-  <!-- Performance Optimizations: Preload critical assets -->
-  <link rel="preload" href="index.css" as="style">
-  <link rel="preload" href="main.dart.js" as="script">
-
-  <!-- Content Delivery Optimization -->
+  <!-- Performance Optimizations -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap"
     rel="stylesheet">
 </head>
 
 <body>
+  <div id="loading-indicator" class="loading-container">
+    <div class="loader"></div>
+    <div class="loading-text">hwasi</div>
+  </div>
+
+  <!-- The Flutter bootstrapping script -->
   <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    // Remove loading indicator when Flutter app is ready
+    window.addEventListener('load', function (ev) {
+      const loader = document.getElementById('loading-indicator');
+      if (loader) {
+        // Reduced timeout to ensure snappy feel
+        // Flutter engine takes over once it's ready
+        // Immediate transition when Flutter is known to be active
+        setTimeout(() => {
+          loader.style.opacity = '0';
+          setTimeout(() => loader.remove(), 200); // Fast removal
+        }, 100);
+      }
+    });
+  </script>
 </body>
 
 </html>

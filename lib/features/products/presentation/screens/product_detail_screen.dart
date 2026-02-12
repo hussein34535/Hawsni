@@ -410,8 +410,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // AI Try-On Button
-                                // Header
+                                // 0. AI Try-On Button (If applicable, keeping existing logic)
+
+                                // 1. Header (Title & Price)
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -420,8 +421,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     Expanded(
                                       child: Text(
                                         widget.name,
-                                        style: AppTheme.textTheme.headlineMedium
-                                            ?.copyWith(
+                                        style: GoogleFonts.cairo(
+                                          fontSize: 24,
                                           fontWeight: FontWeight.bold,
                                           color: AppTheme.textPrimary,
                                         ),
@@ -430,8 +431,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     const SizedBox(width: 16),
                                     Text(
                                       widget.price,
-                                      style: AppTheme.textTheme.headlineSmall
-                                          ?.copyWith(
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.primaryColor,
                                       ),
@@ -440,7 +441,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 ),
                                 const SizedBox(height: 8),
 
-                                // Rating
+                                // Rating Section
                                 Row(
                                   children: [
                                     const Icon(Icons.star_rounded,
@@ -448,8 +449,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     const SizedBox(width: 4),
                                     Text(
                                       '$rating',
-                                      style: AppTheme.textTheme.titleMedium
-                                          ?.copyWith(
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.textPrimary,
                                       ),
@@ -457,86 +458,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     const SizedBox(width: 8),
                                     Text(
                                       '($reviewCount ${AppLocalizations.of(context)!.reviews})',
-                                      style: AppTheme.textTheme.bodyMedium
-                                          ?.copyWith(
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 14,
                                         color: AppTheme.textTertiary,
                                       ),
                                     ),
                                   ],
                                 ),
+
                                 const SizedBox(height: 32),
 
-                                // Description
-                                Text(
-                                  AppLocalizations.of(context)!.description,
-                                  style:
-                                      AppTheme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  description,
-                                  style: AppTheme.textTheme.bodyLarge?.copyWith(
-                                    height: 1.6,
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 32),
-
-                                // Options (Size/Color)
-                                if (sizes != null && sizes.isNotEmpty) ...[
-                                  Text(
-                                    AppLocalizations.of(context)!.selectSize,
-                                    style: AppTheme.textTheme.titleMedium
-                                        ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Wrap(
-                                    spacing: 12,
-                                    runSpacing: 12,
-                                    children: sizes.map((size) {
-                                      final isSelected = selectedSize == size;
-                                      return ChoiceChip(
-                                        label: Text(size),
-                                        selected: isSelected,
-                                        onSelected: (selected) => setState(() =>
-                                            selectedSize =
-                                                selected ? size : null),
-                                        selectedColor: AppTheme.primaryColor,
-                                        labelStyle: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white
-                                              : AppTheme.textPrimary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        backgroundColor: AppTheme.surfaceColor,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 12),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          side: BorderSide(
-                                            color: isSelected
-                                                ? AppTheme.primaryColor
-                                                : AppTheme.borderColor,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                  const SizedBox(height: 32),
-                                ],
-
+                                // 2. Color Selection
                                 if (colors != null && colors.isNotEmpty) ...[
                                   Text(
                                     AppLocalizations.of(context)!.selectColor,
-                                    style: AppTheme.textTheme.titleMedium
-                                        ?.copyWith(
+                                    style: GoogleFonts.cairo(
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.textPrimary,
                                     ),
@@ -546,7 +483,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     spacing: 12,
                                     runSpacing: 12,
                                     children: colors.map((colorData) {
-                                      // Parse color data (handle both old string format and new object format)
                                       String colorName;
                                       int? linkedImageIndex;
 
@@ -563,18 +499,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                               imageIndexValue.toString());
                                         }
                                       } else if (colorData is String) {
-                                        // Handle stringified JSON object (Fix for gray colors issue)
                                         if (colorData.trim().startsWith('{')) {
                                           try {
-                                            // Extract color using regex
                                             final colorMatch = RegExp(
                                                     r'"color"\s*:\s*"([^"]+)"')
                                                 .firstMatch(colorData);
                                             if (colorMatch != null) {
                                               colorName = colorMatch.group(1) ??
                                                   colorData;
-
-                                              // Extract imageIndex using regex
                                               final indexMatch = RegExp(
                                                       r'"imageIndex"\s*:\s*(\d+)')
                                                   .firstMatch(colorData);
@@ -584,19 +516,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                               }
                                             } else {
                                               colorName = colorData;
-                                              linkedImageIndex = null;
                                             }
                                           } catch (e) {
                                             colorName = colorData;
-                                            linkedImageIndex = null;
                                           }
                                         } else {
                                           colorName = colorData;
-                                          linkedImageIndex = null;
                                         }
                                       } else {
                                         colorName = colorData.toString();
-                                        linkedImageIndex = null;
                                       }
 
                                       final isSelected =
@@ -609,7 +537,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           setState(() {
                                             selectedColor =
                                                 isSelected ? null : colorName;
-                                            // Change image if color has linked image
                                             if (!isSelected &&
                                                 linkedImageIndex != null) {
                                               _currentImageIndex =
@@ -626,35 +553,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           });
                                         },
                                         child: Container(
-                                          width: 42,
-                                          height: 42,
+                                          width: 44,
+                                          height: 44,
                                           decoration: BoxDecoration(
                                             color: color,
                                             shape: BoxShape.circle,
                                             border: Border.all(
                                               color: isSelected
                                                   ? AppTheme.primaryColor
-                                                  : Colors.grey[300]!,
-                                              width: isSelected ? 2 : 1,
+                                                  : Colors.grey[200]!,
+                                              width: isSelected ? 2.5 : 1,
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withValues(alpha: 0.1),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
+                                            boxShadow: isSelected
+                                                ? [
+                                                    BoxShadow(
+                                                      color: AppTheme
+                                                          .primaryColor
+                                                          .withValues(
+                                                              alpha: 0.2),
+                                                      blurRadius: 8,
+                                                      spreadRadius: 2,
+                                                    )
+                                                  ]
+                                                : null,
                                           ),
                                           child: isSelected
                                               ? Icon(
-                                                  Icons.check,
+                                                  Icons.check_rounded,
                                                   color:
                                                       color.computeLuminance() >
                                                               0.5
                                                           ? Colors.black
                                                           : Colors.white,
-                                                  size: 24,
+                                                  size: 20,
                                                 )
                                               : null,
                                         ),
@@ -663,6 +594,73 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   ),
                                   const SizedBox(height: 32),
                                 ],
+
+                                // 3. Size Selection
+                                if (sizes != null && sizes.isNotEmpty) ...[
+                                  Text(
+                                    AppLocalizations.of(context)!.selectSize,
+                                    style: GoogleFonts.cairo(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Wrap(
+                                    spacing: 12,
+                                    runSpacing: 12,
+                                    children: sizes.map((size) {
+                                      final isSelected = selectedSize == size;
+                                      return ChoiceChip(
+                                        label: Text(size),
+                                        selected: isSelected,
+                                        onSelected: (selected) => setState(() =>
+                                            selectedSize =
+                                                selected ? size : null),
+                                        selectedColor: Colors.black,
+                                        labelStyle: GoogleFonts.poppins(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        backgroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          side: BorderSide(
+                                            color: isSelected
+                                                ? Colors.black
+                                                : Colors.grey[300]!,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                  const SizedBox(height: 32),
+                                ],
+
+                                // 4. Description
+                                Text(
+                                  AppLocalizations.of(context)!.description,
+                                  style: GoogleFonts.cairo(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  description,
+                                  style: GoogleFonts.cairo(
+                                    fontSize: 15,
+                                    height: 1.6,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
 
                                 // Quantity
                                 Row(

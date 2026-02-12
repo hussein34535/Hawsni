@@ -25,6 +25,7 @@ class ProductCard extends StatefulWidget {
   final String screenId;
   final List<dynamic>? colors;
   final List<String>? sizes;
+  final List<String>? images;
 
   const ProductCard({
     super.key,
@@ -41,6 +42,7 @@ class ProductCard extends StatefulWidget {
     required this.screenId,
     this.colors,
     this.sizes,
+    this.images,
   });
 
   @override
@@ -214,6 +216,7 @@ class _ProductCardState extends State<ProductCard> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // 1. Product Name
                   Text(
@@ -229,20 +232,58 @@ class _ProductCardState extends State<ProductCard> {
 
                   const SizedBox(height: 6),
 
-                  // 2. Interactive Colors
+                  // 2. Interactive Colors (Requested: Show them prominent outside)
                   if (widget.colors != null && widget.colors!.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 6.0),
                       child: Row(
-                        children: widget.colors!.take(4).map((c) {
+                        children: widget.colors!.take(5).map((c) {
                           String colorCode = '';
                           String? variantImage;
                           if (c is Map) {
                             colorCode = c['color']?.toString() ?? '';
-                            variantImage = c['image']?.toString();
+                            variantImage = c['imageIndex']
+                                ?.toString(); // Corrected key if needed, or stick to what API sends
+                            // Try to check if imageIndex is sent, usually it's 'imageIndex' or 'image'
+                            if (c.containsKey('image'))
+                              variantImage = c['image']?.toString();
+                            if (c.containsKey('imageIndex'))
+                              variantImage = c['imageIndex']?.toString();
                           } else if (c is String) {
-                            colorCode = c;
+                            // Robust JSON parsing for stringified data
+                            if (c.trim().startsWith('{')) {
+                              try {
+                                final colorMatch =
+                                    RegExp(r'"color"\s*:\s*"([^"]+)"')
+                                        .firstMatch(c);
+                                if (colorMatch != null) {
+                                  colorCode = colorMatch.group(1) ?? c;
+
+                                  // Try to extract image/imageIndex
+                                  final imageMatch =
+                                      RegExp(r'"image"\s*:\s*"([^"]+)"')
+                                          .firstMatch(c);
+                                  if (imageMatch != null) {
+                                    variantImage = imageMatch.group(1);
+                                  } else {
+                                    // Fallback to imageIndex if that's what is used
+                                    final indexMatch =
+                                        RegExp(r'"imageIndex"\s*:\s*(\d+)')
+                                            .firstMatch(c);
+                                    if (indexMatch != null)
+                                      variantImage = indexMatch.group(1);
+                                  }
+                                } else {
+                                  colorCode = c;
+                                }
+                              } catch (e) {
+                                colorCode = c;
+                              }
+                            } else {
+                              colorCode = c;
+                            }
                           }
+
                           Color color = _getColorFromHex(colorCode);
                           if (color == Colors.transparent) {
                             return const SizedBox.shrink();
@@ -257,7 +298,26 @@ class _ProductCardState extends State<ProductCard> {
                                 _selectedColorCode = colorCode;
                                 if (variantImage != null &&
                                     variantImage.isNotEmpty) {
-                                  _selectedImageUrl = variantImage;
+                                  // If it is an index (digits only), we can't swap the image URL directly unless we have the list of images.
+                                  // But ProductCard only has `imageUrl`.
+                                  // Limitation: We can only swap if we have the URL. `ProductDetailScreen` has the full `images` list.
+                                  // `ProductCard` does NOT have the full list.
+                                  // Strategy: If `variantImage` is a URL, use it. If it's an index, we can't do much without the list.
+                                  // Checking if it looks like a URL:
+                                  if (variantImage!.startsWith('http')) {
+                                    _selectedImageUrl = variantImage;
+                                  } else if (RegExp(r'^\d+$')
+                                          .hasMatch(variantImage!) &&
+                                      widget.images != null) {
+                                    // It is an index
+                                    try {
+                                      final images = widget.images!;
+                                      int index = int.parse(variantImage!);
+                                      if (index >= 0 && index < images.length) {
+                                        _selectedImageUrl = images[index];
+                                      }
+                                    } catch (_) {}
+                                  }
                                 }
                               });
                             },
@@ -290,20 +350,11 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                     ),
 
-                  // 3. Size Indicator
-                  if (widget.sizes != null && widget.sizes!.isNotEmpty)
-                    Text(
-                      '${widget.sizes!.length} sizes',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: AppTheme.textSecondary,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                  // NOTE: Number of sizes removed as per user request
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
 
-                  // 4. Rating & Price Row
+                  // 3. Rating & Price Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/features/home/bloc/home_bloc.dart';
@@ -53,7 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
                     Text(
                       state.message,
-                      style: const TextStyle(color: Colors.black87),
+                      style: GoogleFonts.cairo(
+                        color: Colors.black87,
+                        fontSize: 16,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
@@ -103,13 +107,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(20, 24, 20, 12),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
                             child: Row(
                               children: [
                                 Text(
-                                  'Shop by Category',
-                                  style: TextStyle(
+                                  'Shop by Category', // If this is translated, it will use Cairo
+                                  style: GoogleFonts.cairo(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black87,
@@ -232,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             textAlign: TextAlign.center,
-                                            style: const TextStyle(
+                                            style: GoogleFonts.cairo(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
                                               color: Colors.black87,
@@ -289,6 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 screenId: 'home',
                                 colors: product.colors,
                                 sizes: product.sizes,
+                                images: product.images,
                               ),
                             );
                           },
@@ -338,12 +343,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // Logo/Title - Centered
-          const Text(
+          Text(
             'hwasi',
-            style: TextStyle(
-              fontSize: 20,
+            style: GoogleFonts.poppins(
+              fontSize: 22,
               fontWeight: FontWeight.w900,
-              letterSpacing: 2,
+              letterSpacing: 1.5,
               color: AppTheme.primaryColor,
             ),
           ),
@@ -405,7 +410,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 12),
                     Text(
                       'Search Products',
-                      style: TextStyle(
+                      style: GoogleFonts.cairo(
                         color: Colors.grey[600],
                         fontSize: 15,
                       ),
