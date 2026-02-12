@@ -74,6 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppTheme.primaryColor,
                 child: CustomScrollView(
                   controller: _scrollController,
+                  physics: const ClampingScrollPhysics(),
                   slivers: [
                     // Modern Clean AppBar
                     SliverToBoxAdapter(child: _buildAppBar(context)),

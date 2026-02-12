@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -99,18 +100,20 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        widget.imageUrl,
+                      child: CachedNetworkImage(
+                        imageUrl: widget.imageUrl,
                         fit: BoxFit.cover, // object-cover
-                        errorBuilder: (context, error, stackTrace) {
-                          return Center(
-                            child: Icon(
-                              Icons.image_not_supported_outlined,
-                              color: Colors.grey[400],
-                              size: 32,
-                            ),
-                          );
-                        },
+                        memCacheHeight: 600, // Faster decoding for scrolling
+                        placeholder: (context, url) => Container(
+                          color: const Color(0xFFF5F5F5),
+                        ),
+                        errorWidget: (context, url, error) => Center(
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: Colors.grey[400],
+                            size: 32,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -132,26 +135,25 @@ class _ProductCardState extends State<ProductCard> {
                             // Can only unlike (since it disappears after)
                             wishlistService.removeFromWishlist(widget.id);
                           },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-                              child: Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(
-                                      alpha: 0.2), // Very transparent
-                                  shape: BoxShape.circle,
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(
+                                  alpha: 0.9), // Less heavy than blur
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 4,
                                 ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.favorite,
-                                    size: 20,
-                                    color: AppTheme
-                                        .primaryColor, // Red/Green Heart
-                                  ),
-                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Icon(
+                                Icons.favorite,
+                                size: 20,
+                                color: AppTheme.primaryColor, // Red/Green Heart
                               ),
                             ),
                           ),
