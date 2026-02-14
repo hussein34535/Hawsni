@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/features/products/presentation/widgets/related_products.dart';
 import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
 import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
@@ -711,6 +712,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                                 // Reviews Section
                                 ReviewsSection(productId: widget.productId),
+
+                                const SizedBox(height: 32),
+                                // Related Products
+                                if (state is ProductDetailsLoaded)
+                                  RelatedProducts(
+                                      products: state.relatedProducts),
                               ],
                             );
                           },

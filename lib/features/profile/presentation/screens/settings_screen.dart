@@ -4,6 +4,8 @@ import 'package:hwasi_app/core/providers/settings_provider.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/features/profile/presentation/screens/change_password_screen.dart';
+import 'package:hwasi_app/features/profile/presentation/screens/privacy_policy_screen.dart';
+import 'package:hwasi_app/features/checkout/presentation/screens/address_management_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -102,7 +104,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildListTile(
                   icon: Icons.location_on_outlined,
                   title: AppLocalizations.of(context)!.shippingAddress,
-                  onTap: () {}, // TODO
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AddressManagementScreen(),
+                      ),
+                    );
+                  },
                 ),
               ]),
               const SizedBox(height: 32),
@@ -130,7 +138,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildListTile(
                   icon: Icons.privacy_tip_outlined,
                   title: AppLocalizations.of(context)!.privacyPolicy,
-                  onTap: () {}, // TODO
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PrivacyPolicyScreen(),
+                      ),
+                    );
+                  },
                 ),
               ]),
               const SizedBox(height: 40),

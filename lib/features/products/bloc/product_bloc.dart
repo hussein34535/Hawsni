@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hwasi_app/features/products/bloc/product_event.dart';
 import 'package:hwasi_app/features/products/bloc/product_state.dart';
 import 'package:hwasi_app/features/products/data/services/product_service.dart';
+import 'package:hwasi_app/features/products/data/models/product_model.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductService _productService;
@@ -30,7 +31,27 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     emit(ProductLoading());
     try {
       final product = await _productService.getProductById(event.productId);
-      emit(ProductDetailsLoaded(product));
+
+      // Fetch related products (same category)
+      List<ProductModel> relatedProducts = [];
+      try {
+        if (product.category != null) {
+          final allRelated =
+              await _productService.getProducts(categoryId: product.category);
+          // Filter out current product
+          relatedProducts =
+              allRelated.where((p) => p.id != product.id).toList();
+        } else {
+          // Fallback to featured if no category
+          final featured = await _productService.getFeaturedProducts();
+          relatedProducts = featured.where((p) => p.id != product.id).toList();
+        }
+      } catch (e) {
+        // Silently fail for related products, don't block main product load
+        print('Error fetching related products: $e');
+      }
+
+      emit(ProductDetailsLoaded(product, relatedProducts: relatedProducts));
     } catch (e) {
       emit(ProductError(e.toString()));
     }

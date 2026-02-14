@@ -3,18 +3,19 @@ import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
 import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
+import 'package:hwasi_app/core/services/wishlist_service.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final CartService _cartService;
+  final WishlistService _wishlistService;
 
-  CartBloc(this._cartService) : super(CartLoading()) {
+  CartBloc(this._cartService, this._wishlistService) : super(CartLoading()) {
     on<CartStarted>(_onCartStarted);
     on<AddToCart>(_onAddToCart);
     on<RemoveFromCart>(_onRemoveFromCart);
     on<UpdateQuantity>(_onUpdateQuantity);
     on<ClearCart>(_onClearCart);
-    // on<SaveForLater>(_onSaveForLater); // TODO: Implement SaveForLater with backend if needed
-    // on<MoveFromSaved>(_onMoveFromSaved); // TODO: Implement MoveFromSaved with backend if needed
+    on<SaveForLater>(_onSaveForLater);
   }
 
   Future<void> _onCartStarted(
@@ -122,6 +123,43 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       }
     } catch (e) {
       emit(CartError('Failed to clear cart: $e'));
+    }
+  }
+
+  Future<void> _onSaveForLater(
+      SaveForLater event, Emitter<CartState> emit) async {
+    try {
+      if (state is CartLoaded) {
+        final currentState = state as CartLoaded;
+        final cartItem = currentState.items.firstWhere(
+            (item) => item.id == event.itemId,
+            orElse: () => CartItem(
+                id: '',
+                productId: '',
+                name: '',
+                price: '0',
+                imageUrl: '',
+                quantity: 0));
+
+        if (cartItem.id.isNotEmpty) {
+          final wishlistItem = WishlistItem(
+            id: event.productId,
+            name: cartItem.name,
+            price: double.tryParse(
+                    cartItem.price.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+                0.0,
+            imageUrl: cartItem.imageUrl,
+            description: '', // Not available in CartItem
+            rating: 0.0, // Not available
+            reviewCount: 0, // Not available
+          );
+
+          await _wishlistService.addToWishlist(wishlistItem);
+          add(RemoveFromCart(event.itemId));
+        }
+      }
+    } catch (e) {
+      emit(CartError('Failed to save for later: $e'));
     }
   }
 }

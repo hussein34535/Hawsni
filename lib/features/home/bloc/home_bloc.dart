@@ -77,19 +77,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
       // Fallback if no banners
       if (banners.isEmpty) {
-        banners.addAll([
-          {
-            'image_url':
-                'https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-            'heading_text': 'LUXURY COLLECTION',
-            'subheading_text': 'Premium\nExperience',
-            'button_text': 'Shop Now',
-            'button_color': '#D4AF37',
-            'button_style': 'rounded',
-            'button_size': 'medium',
-            'button_position': 'right',
-          },
-        ]);
+        // No banners from API
       }
 
       final Set<String> uniqueProductIds = {};

@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hwasi_app/app.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:hwasi_app/core/services/notification_service.dart';
+import 'package:provider/provider.dart';
+import 'package:hwasi_app/core/providers/settings_provider.dart';
+import 'package:hwasi_app/core/services/wishlist_service.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
 
 import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
@@ -42,16 +45,25 @@ void main() async {
   }
 
   runApp(
-    MultiBlocProvider(
+    MultiProvider(
       providers: [
-        BlocProvider(
-          create: (context) => CartBloc(CartService()),
-        ),
-        BlocProvider(
-          create: (context) => OrderBloc(OrderService()),
-        ),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistService()),
       ],
-      child: const App(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => CartBloc(
+              CartService(),
+              Provider.of<WishlistService>(context, listen: false),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => OrderBloc(OrderService()),
+          ),
+        ],
+        child: const App(),
+      ),
     ),
   );
 }

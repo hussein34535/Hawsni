@@ -34,10 +34,12 @@ class UpdateQuantity extends CartEvent {
 class ClearCart extends CartEvent {}
 
 class SaveForLater extends CartEvent {
-  final List<String> itemIds;
-  const SaveForLater(this.itemIds);
+  final String itemId;
+  final String productId; // Needed for wishlist
+
+  const SaveForLater(this.itemId, this.productId);
   @override
-  List<Object> get props => [itemIds];
+  List<Object> get props => [itemId, productId];
 }
 
 class MoveFromSaved extends CartEvent {

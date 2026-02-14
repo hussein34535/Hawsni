@@ -32,9 +32,10 @@ class ProductError extends ProductState {
 
 class ProductDetailsLoaded extends ProductState {
   final ProductModel product;
+  final List<ProductModel> relatedProducts;
 
-  const ProductDetailsLoaded(this.product);
+  const ProductDetailsLoaded(this.product, {this.relatedProducts = const []});
 
   @override
-  List<Object> get props => [product];
+  List<Object> get props => [product, relatedProducts];
 }
