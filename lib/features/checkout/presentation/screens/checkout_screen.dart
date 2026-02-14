@@ -9,6 +9,7 @@ import 'package:hwasi_app/features/orders/bloc/order_state.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -19,8 +20,24 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isLoading = false;
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  bool get _isGuest => AuthService.token == null;
 
   void _processCheckout(List<CartItem> cartItems, double subtotal) {
+    if (_isGuest && !_formKey.currentState!.validate()) {
+      return;
+    }
+
     final orderData = {
       'shippingAddress':
           '123 Fashion Street, Luxury District, New York, NY 10001',
@@ -28,6 +45,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       'subtotal': subtotal,
       'discount': 0.0,
       'couponCode': null,
+      if (_isGuest) ...{
+        'guestName': _nameController.text,
+        'guestPhone': _phoneController.text,
+        'guestEmail': '', // Optional or add field if needed
+      }
     };
 
     final items = cartItems
@@ -112,6 +134,71 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              if (_isGuest) ...[
+                                _buildSectionTitle('Guest Information'),
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: AppTheme.cardDecoration,
+                                  child: Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: _nameController,
+                                          decoration: InputDecoration(
+                                            labelText: 'Full Name',
+                                            hintText: 'Enter your name',
+                                            prefixIcon: const Icon(
+                                                Icons.person_outline),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            filled: true,
+                                            fillColor: AppTheme.primaryColor
+                                                .withValues(alpha: 0.05),
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Please enter your name';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                        const SizedBox(height: 16),
+                                        TextFormField(
+                                          controller: _phoneController,
+                                          keyboardType: TextInputType.phone,
+                                          decoration: InputDecoration(
+                                            labelText: 'Phone Number',
+                                            hintText: 'Enter your phone number',
+                                            prefixIcon: const Icon(
+                                                Icons.phone_outlined),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              borderSide: BorderSide.none,
+                                            ),
+                                            filled: true,
+                                            fillColor: AppTheme.primaryColor
+                                                .withValues(alpha: 0.05),
+                                          ),
+                                          validator: (value) {
+                                            if (value == null ||
+                                                value.isEmpty) {
+                                              return 'Please enter your phone number';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                              ],
                               _buildSectionTitle(
                                 AppLocalizations.of(context)!.shippingAddress,
                               ),

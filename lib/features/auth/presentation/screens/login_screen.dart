@@ -7,6 +7,7 @@ import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/features/orders/presentation/screens/guest_track_order_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -254,6 +255,25 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 32),
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const GuestTrackOrderScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.travel_explore,
+                      color: AppTheme.textSecondary),
+                  label: Text(
+                    'Track Guest Order', // Consider creating a l10n key
+                    style: AppTheme.textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textSecondary,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
                 ),
               ],
             ),

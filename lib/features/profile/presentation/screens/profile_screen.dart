@@ -16,6 +16,7 @@ import 'package:hwasi_app/core/providers/settings_provider.dart';
 import 'package:hwasi_app/features/profile/presentation/screens/notifications_settings_screen.dart';
 import 'package:hwasi_app/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/features/orders/presentation/screens/guest_track_order_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -121,6 +122,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const GuestTrackOrderScreen(),
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppTheme.primaryColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(32),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Track Order',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
                         letterSpacing: 1,
                       ),
                     ),

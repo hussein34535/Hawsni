@@ -227,7 +227,7 @@ class ApiService {
       Map<String, dynamic> orderData) async {
     try {
       final data = await post('/orders', orderData,
-          includeAuth: true); // Auth required for now
+          includeAuth: AuthService.token != null);
       return data;
     } catch (e) {
       print('Error creating order: $e');
@@ -282,7 +282,8 @@ class ApiService {
   // Get order tracking information
   static Future<Map<String, dynamic>?> getOrderTracking(String orderId) async {
     try {
-      final data = await get('/orders/$orderId/tracking', includeAuth: true);
+      final data = await get('/orders/$orderId/tracking',
+          includeAuth: AuthService.token != null);
       return data['tracking'];
     } catch (e) {
       print('Error fetching tracking info: $e');
