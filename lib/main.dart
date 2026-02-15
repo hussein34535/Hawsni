@@ -6,6 +6,7 @@ import 'package:hwasi_app/core/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:hwasi_app/core/providers/settings_provider.dart';
 import 'package:hwasi_app/core/services/wishlist_service.dart';
+import 'package:hwasi_app/core/services/analytics_service.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
 
 import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
@@ -49,6 +50,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => WishlistService()),
+        Provider(create: (_) => AnalyticsService()),
       ],
       child: MultiBlocProvider(
         providers: [

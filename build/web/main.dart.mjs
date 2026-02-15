@@ -430,10 +430,12 @@ class CompiledApp {
       _1320: (x0,x1,x2,x3) => x0.addEventListener(x1,x2,x3),
       _1321: (x0,x1,x2,x3) => x0.removeEventListener(x1,x2,x3),
       _1322: (x0,x1) => x0.createElement(x1),
-      _1330: (x0,x1) => x0.canShare(x1),
-      _1331: (x0,x1) => x0.share(x1),
-      _1335: (x0,x1) => ({files: x0,text: x1}),
-      _1337: x0 => ({files: x0}),
+      _1328: (x0,x1,x2,x3) => x0.open(x1,x2,x3),
+      _1329: (x0,x1) => x0.canShare(x1),
+      _1330: (x0,x1) => x0.share(x1),
+      _1333: (x0,x1) => ({files: x0,text: x1}),
+      _1335: x0 => ({files: x0}),
+      _1337: x0 => ({text: x0}),
       _1338: x0 => x0.click(),
       _1339: x0 => x0.remove(),
       _1340: () => ({}),
@@ -456,6 +458,7 @@ class CompiledApp {
       _1357: () => new XMLHttpRequest(),
       _1361: (x0,x1,x2,x3,x4,x5,x6,x7) => ({apiKey: x0,authDomain: x1,databaseURL: x2,projectId: x3,storageBucket: x4,messagingSenderId: x5,measurementId: x6,appId: x7}),
       _1362: (x0,x1) => globalThis.firebase_core.initializeApp(x0,x1),
+      _1363: x0 => globalThis.firebase_core.getApp(x0),
       _1364: () => globalThis.firebase_core.getApp(),
       _1365: (x0,x1) => x0.debug(x1),
       _1366: f => finalizeWrapper(f, function(x0) { return dartInstance.exports._1366(f,arguments.length,x0) }),
@@ -668,6 +671,7 @@ class CompiledApp {
             constructor, [null, ...args]);
         return new factoryFunction();
       },
+      _1624: (o, p) => p in o,
       _1625: (o, p) => o[p],
       _1626: (o, p, v) => o[p] = v,
       _1627: (o, m, a) => o[m].apply(o, a),
@@ -772,6 +776,7 @@ class CompiledApp {
         return s;
       },
       _1649: x0 => x0.index,
+      _1650: x0 => x0.groups,
       _1651: x0 => x0.flags,
       _1652: x0 => x0.multiline,
       _1653: x0 => x0.ignoreCase,
@@ -859,6 +864,9 @@ class CompiledApp {
       _12288: x0 => x0.name,
       _12289: x0 => x0.message,
       _13004: () => globalThis.console,
+      _13032: x0 => x0.name,
+      _13033: x0 => x0.message,
+      _13034: x0 => x0.code,
 
     };
 

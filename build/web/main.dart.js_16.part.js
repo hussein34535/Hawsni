@@ -1,24 +1,24 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,B,F,G,H,C={
-by0(){return new C.tv(null)},
-tv:function tv(d){this.a=d},
-S_:function S_(d){this.d=d
+bBG(){return new C.u7(null)},
+u7:function u7(d){this.a=d},
+SQ:function SQ(d){this.d=d
 this.c=this.a=null},
-b3X:function b3X(d,e){this.a=d
+b6C:function b6C(d,e){this.a=d
 this.b=e},
-b3V:function b3V(d){this.a=d},
-b3W:function b3W(d,e,f){this.a=d
+b6A:function b6A(d){this.a=d},
+b6B:function b6B(d,e,f){this.a=d
 this.b=e
 this.c=f},
-b3U:function b3U(d,e){this.a=d
+b6z:function b6z(d,e){this.a=d
 this.b=e},
-b3T:function b3T(d){this.a=d},
-b3Z:function b3Z(){},
-b3Y:function b3Y(){},
-b4_:function b4_(d){this.a=d},
-b3S:function b3S(d,e){this.a=d
+b6y:function b6y(d){this.a=d},
+b6E:function b6E(){},
+b6D:function b6D(){},
+b6F:function b6F(d){this.a=d},
+b6x:function b6x(d,e){this.a=d
 this.b=e},
-b3R:function b3R(d){this.a=d}},D,I,E
+b6w:function b6w(d){this.a=d}},D,I,E
 J=c[1]
 A=c[0]
 B=c[2]
@@ -29,105 +29,105 @@ C=a.updateHolder(c[8],C)
 D=c[23]
 I=c[14]
 E=c[16]
-C.tv.prototype={
-Z(){var x=y.w,w=y.m
-return new C.S_(A.b([A.ab(["id","1","name","Ahmed Hassan","email","ahmed@example.com","role","Customer","status","Active","joinDate","2023-01-15"],x,w),A.ab(["id","2","name","Fatima Ali","email","fatima@example.com","role","Customer","status","Active","joinDate","2023-02-20"],x,w),A.ab(["id","3","name","Mohamed Khalid","email","mohamed@example.com","role","Admin","status","Active","joinDate","2022-11-10"],x,w),A.ab(["id","4","name","Sara Mahmoud","email","sara@example.com","role","Customer","status","Inactive","joinDate","2023-03-05"],x,w),A.ab(["id","5","name","Omar Farouk","email","omar@example.com","role","Customer","status","Active","joinDate","2023-04-12"],x,w)],y.k))}}
-C.S_.prototype={
-ams(){this.c.Y(y.v).f.d_(D.atB)},
-apS(d){var x=null,w=this.c
+C.u7.prototype={
+Y(){var x=y.w,w=y.m
+return new C.SQ(A.b([A.ab(["id","1","name","Ahmed Hassan","email","ahmed@example.com","role","Customer","status","Active","joinDate","2023-01-15"],x,w),A.ab(["id","2","name","Fatima Ali","email","fatima@example.com","role","Customer","status","Active","joinDate","2023-02-20"],x,w),A.ab(["id","3","name","Mohamed Khalid","email","mohamed@example.com","role","Admin","status","Active","joinDate","2022-11-10"],x,w),A.ab(["id","4","name","Sara Mahmoud","email","sara@example.com","role","Customer","status","Inactive","joinDate","2023-03-05"],x,w),A.ab(["id","5","name","Omar Farouk","email","omar@example.com","role","Customer","status","Active","joinDate","2023-04-12"],x,w)],y.k))}}
+C.SQ.prototype={
+anS(){this.c.Z(y.v).f.d4(D.au5)},
+arp(d){var x=null,w=this.c
 w.toString
-A.i4(x,x,!0,x,new C.b3X(this,d),w,x,!0,y.m)},
-F(d){var x=null,w=y.u,v=A.dp(A.b([A.cv(x,x,x,E.pB,x,x,this.gamr(),x,x,x,x)],w),x,x,!0,B.dr,x,1,x,x,x,!1,x,!1,B.e,x,x,x,!0,x,x,x,x,x,D.aAM,x,x,x,1,x,!0),u=A.c3(A.tl(x,B.cD,!1,x,!0,B.w,x,A.yS(),x,x,x,x,x,x,2,A.fc(x,new A.di(4,A.Z(12),B.f0),x,x,x,x,x,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,"Search users...",x,x,x,x,x,x,x,x,x,!0,!0,x,B.iU,x,x,x,x,x,x,x,x,x,x,x,x),B.R,!0,x,!0,x,!1,x,B.cO,x,x,x,x,x,x,x,x,1,x,x,!1,"\u2022",x,x,x,x,x,!1,x,x,!1,x,!0,x,B.bI,x,x,x,x,x,x,x,x,x,x,x,x,!0,B.ak,x,B.e6,x,x,x,x),1),t=A.dP(B.ag,1),s=A.Z(12)
-w=A.ap(A.b([new A.aD(B.ax,A.bd(A.b([u,B.cJ,A.a6(x,A.rJ(x,F.py,new C.b3Y(),new C.b3Z(),x,y.w),B.j,x,x,new A.ae(x,x,t,s,x,x,B.y),x,x,x,x,x,x,x)],w),B.p,B.n,B.k,0,x),x),A.c3(A.p2(new C.b4_(this),this.d.length,B.cC,B.U,!1),1)],w),B.p,B.n,B.k,x)
-return A.cx(v,x,w,x,x,x)},
-anC(d){var x,w,v,u,t,s,r="role",q=null,p=J.c(d.i(0,"status"),"Active")?B.dj:B.ag,o=J.c(d.i(0,r),"Admin")?B.bY:B.cn,n=A.Z(12),m=A.b([new A.bI(1,B.a8,B.ag.b7(0.1),B.dE,5)],y.c),l=A.Z(25)
-l=A.a6(q,A.cG(J.c(d.i(0,r),"Admin")?I.we:B.hm,B.ag,q,q),B.j,q,q,new A.ae(B.bb,q,q,l,q,q,B.y),q,50,q,q,q,q,50)
-x=A.B(d.i(0,"name"),q,q,q,B.jK,q,q,q)
-w=A.B(d.i(0,"email"),q,q,q,B.eT,q,q,q)
-v=o.b7(0.1)
-u=A.Z(12)
-u=A.a6(q,A.B(d.i(0,r),q,q,q,A.cb(q,q,o,q,q,q,q,q,q,q,q,12,q,q,B.v,q,q,!0,q,q,q,q,q,q,q,q),q,q,q),B.j,q,q,new A.ae(v,q,q,u,q,q,B.y),q,q,q,B.iN,q,q,q)
-v=p.b7(0.1)
-t=A.Z(12)
+A.ii(x,x,!0,x,new C.b6C(this,d),w,x,!0,y.m)},
+F(d){var x=null,w=y.u,v=A.dp(A.b([A.cE(x,x,x,E.pO,x,x,this.ganR(),x,x,x,x)],w),x,x,!0,B.dC,x,1,x,x,x,!1,x,!1,B.e,x,x,x,!0,x,x,x,x,x,D.aBh,x,x,x,1,x,!0),u=A.c6(A.tZ(x,B.cK,!1,x,!0,B.w,x,A.zA(),x,x,x,x,x,x,2,A.fo(x,new A.dm(4,A.a0(12),B.f8),x,x,x,x,x,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,"Search users...",x,x,x,x,x,x,x,x,x,!0,!0,x,B.j1,x,x,x,x,x,x,x,x,x,x,x,x),B.O,!0,x,!0,x,!1,x,B.cB,x,x,x,x,x,x,x,x,1,x,x,!1,"\u2022",x,x,x,x,x,!1,x,x,!1,x,!0,x,B.bC,x,x,x,x,x,x,x,x,x,x,x,x,!0,B.al,x,B.dU,x,x,x,x),1),t=A.dX(B.ah,1),s=A.a0(12)
+w=A.aq(A.b([new A.aD(B.aB,A.bj(A.b([u,B.cP,A.a8(x,A.ts(x,F.pQ,new C.b6D(),new C.b6E(),x,y.w),B.j,x,x,new A.ah(x,x,t,s,x,x,B.y),x,x,x,x,x,x,x)],w),B.p,B.m,B.k,0,x),x),A.c6(A.pw(new C.b6F(this),this.d.length,B.cJ,B.V,!1),1)],w),B.p,B.m,B.k,x)
+return A.cy(v,x,w,x,x,x)},
+ap5(d){var x,w,v,u,t,s,r="role",q=null,p=J.d(d.i(0,"status"),"Active")?B.dr:B.ah,o=J.d(d.i(0,r),"Admin")?B.c0:B.ct,n=A.a0(12),m=A.b([new A.bM(1,B.a8,B.ah.ba(0.1),B.dQ,5)],y.c),l=A.a0(25)
+l=A.a8(q,A.cX(J.d(d.i(0,r),"Admin")?I.wz:B.hA,B.ah,q,q),B.j,q,q,new A.ah(B.b6,q,q,l,q,q,B.y),q,50,q,q,q,q,50)
+x=A.D(d.i(0,"name"),q,q,q,B.jS,q,q,q)
+w=A.D(d.i(0,"email"),q,q,q,B.f0,q,q,q)
+v=o.ba(0.1)
+u=A.a0(12)
+u=A.a8(q,A.D(d.i(0,r),q,q,q,A.ci(q,q,o,q,q,q,q,q,q,q,q,12,q,q,B.u,q,q,!0,q,q,q,q,q,q,q,q),q,q,q),B.j,q,q,new A.ah(v,q,q,u,q,q,B.y),q,q,q,B.iV,q,q,q)
+v=p.ba(0.1)
+t=A.a0(12)
 s=y.u
-return A.a6(q,A.ey(!1,B.ax,q,q,!0,q,!0,q,l,q,q,!1,q,q,q,A.ap(A.b([B.bl,w,B.aH,A.bd(A.b([u,B.dI,A.a6(q,A.B(d.i(0,"status"),q,q,q,A.cb(q,q,p,q,q,q,q,q,q,q,q,12,q,q,B.v,q,q,!0,q,q,q,q,q,q,q,q),q,q,q),B.j,q,q,new A.ae(v,q,q,t,q,q,B.y),q,q,q,B.iN,q,q,q)],s),B.p,B.n,B.k,0,q),B.bl,A.B("Joined: "+A.i(d.i(0,"joinDate")),q,q,q,B.rA,q,q,q)],s),B.Q,B.n,B.k,q),q,x,q,A.rJ(q,H.lf,new C.b3R(d),new C.b3S(this,d),q,y.w),q),B.j,q,q,new A.ae(B.e,q,q,n,m,q,B.y),q,q,G.iK,q,q,q,q)}}
+return A.a8(q,A.eH(!1,B.aB,q,q,!0,q,!0,q,l,q,q,!1,q,q,q,A.aq(A.b([B.bl,w,B.aI,A.bj(A.b([u,B.ef,A.a8(q,A.D(d.i(0,"status"),q,q,q,A.ci(q,q,p,q,q,q,q,q,q,q,q,12,q,q,B.u,q,q,!0,q,q,q,q,q,q,q,q),q,q,q),B.j,q,q,new A.ah(v,q,q,t,q,q,B.y),q,q,q,B.iV,q,q,q)],s),B.p,B.m,B.k,0,q),B.bl,A.D("Joined: "+A.i(d.i(0,"joinDate")),q,q,q,B.rX,q,q,q)],s),B.R,B.m,B.k,q),q,x,q,A.ts(q,H.lp,new C.b6w(d),new C.b6x(this,d),q,y.w),q),B.j,q,q,new A.ah(B.e,q,q,n,m,q,B.y),q,q,G.iS,q,q,q,q)}}
 var z=a.updateTypes(["~()"])
-C.b3X.prototype={
+C.b6C.prototype={
 $1(d){var x=null
-return A.j4(A.b([A.dT(!1,E.rG,x,x,x,x,x,x,new C.b3V(d),x,x),A.dT(!1,E.rF,x,x,x,x,x,x,new C.b3W(this.a,d,this.b),x,x)],y.u),x,D.aBE,!1,x,D.aAZ)},
-$S:31}
-C.b3V.prototype={
-$0(){A.az(this.a,!1).dm(null)
+return A.jq(A.b([A.dW(!1,E.t1,x,x,x,x,x,x,new C.b6A(d),x,x),A.dW(!1,E.t0,x,x,x,x,x,x,new C.b6B(this.a,d,this.b),x,x)],y.u),x,D.aCa,!1,x,D.aBv)},
+$S:32}
+C.b6A.prototype={
+$0(){A.aA(this.a,!1).ds(null)
 return null},
 $S:0}
-C.b3W.prototype={
+C.b6B.prototype={
 $0(){var x,w=this.b
-A.az(w,!1).dm(null)
+A.aA(w,!1).ds(null)
 x=this.a
-x.N(new C.b3U(x,this.c))
-w.Y(y.v).f.d_(D.atw)},
+x.N(new C.b6z(x,this.c))
+w.Z(y.v).f.d4(D.au0)},
 $S:0}
-C.b3U.prototype={
-$0(){B.b.hF(this.a.d,new C.b3T(this.b))},
+C.b6z.prototype={
+$0(){B.b.hv(this.a.d,new C.b6y(this.b))},
 $S:0}
-C.b3T.prototype={
-$1(d){return J.c(d.i(0,"id"),this.a)},
-$S:90}
-C.b3Z.prototype={
+C.b6y.prototype={
+$1(d){return J.d(d.i(0,"id"),this.a)},
+$S:83}
+C.b6E.prototype={
 $1(d){},
 $S:17}
-C.b3Y.prototype={
-$1(d){return A.b([D.apS,D.aq3,D.apQ,D.aq1,D.apT],y.b)},
-$S:51}
-C.b4_.prototype={
+C.b6D.prototype={
+$1(d){return A.b([D.aql,D.aqx,D.aqj,D.aqv,D.aqm],y.b)},
+$S:50}
+C.b6F.prototype={
 $2(d,e){var x=this.a
-return x.anC(x.d[e])},
-$S:46}
-C.b3S.prototype={
+return x.ap5(x.d[e])},
+$S:44}
+C.b6x.prototype={
 $1(d){var x=this
 switch(d){case"edit":x.b.i(0,"id")
-x.a.c.Y(y.v).f.d_(D.atA)
+x.a.c.Z(y.v).f.d4(D.au4)
 break
-case"delete":x.a.apS(x.b.i(0,"id"))
+case"delete":x.a.arp(x.b.i(0,"id"))
 break
 case"change_role":x.b.i(0,"id")
-x.a.c.Y(y.v).f.d_(D.atq)
+x.a.c.Z(y.v).f.d4(D.atV)
 break}},
 $S:17}
-C.b3R.prototype={
-$1(d){var x=A.b([E.qx],y.b)
-if(!J.c(this.a.i(0,"role"),"Admin"))x.push(D.aq2)
-x.push(E.qw)
+C.b6w.prototype={
+$1(d){var x=A.b([E.qM],y.b)
+if(!J.d(this.a.i(0,"role"),"Admin"))x.push(D.aqw)
+x.push(E.qL)
 return x},
-$S:51};(function installTearOffs(){var x=a._instance_0u
-x(C.S_.prototype,"gamr","ams",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(C.tv,A.S)
-x(C.S_,A.W)
-w(A.jb,[C.b3X,C.b3T,C.b3Z,C.b3Y,C.b3S,C.b3R])
-w(A.mT,[C.b3V,C.b3W,C.b3U])
-x(C.b4_,A.or)})()
-A.yB(b.typeUniverse,JSON.parse('{"tv":{"S":[],"d":[]},"S_":{"W":["tv"]}}'))
-var y={c:A.a0("A<bI>"),k:A.a0("A<bg<h,@>>"),b:A.a0("A<l2<h>>"),u:A.a0("A<d>"),j:A.a0("dR<h>"),w:A.a0("h"),v:A.a0("mA"),m:A.a0("@")};(function constants(){D.azR=new A.ah("Inactive",null,null,null,null,null,null,null,null,null)
-D.apQ=new A.dR("inactive",D.azR,null,y.j)
-D.azT=new A.ah("All Users",null,null,null,null,null,null,null,null,null)
-D.apS=new A.dR("all",D.azT,null,y.j)
-D.aAp=new A.ah("Customers",null,null,null,null,null,null,null,null,null)
-D.apT=new A.dR("customer",D.aAp,null,y.j)
-D.aA9=new A.ah("Admins",null,null,null,null,null,null,null,null,null)
-D.aq1=new A.dR("admin",D.aA9,null,y.j)
-D.aAd=new A.ah("Make Admin",null,null,null,null,null,null,null,null,null)
-D.aq2=new A.dR("change_role",D.aAd,null,y.j)
-D.aBJ=new A.ah("Active",null,null,null,null,null,null,null,null,null)
-D.aq3=new A.dR("active",D.aBJ,null,y.j)
-D.aBu=new A.ah("Change user role feature coming soon!",null,null,null,null,null,null,null,null,null)
-D.atq=new A.ej(D.aBu,null,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
-D.azZ=new A.ah("User deleted successfully!",null,null,null,null,null,null,null,null,null)
-D.atw=new A.ej(D.azZ,B.dj,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
-D.azU=new A.ah("Edit user feature coming soon!",null,null,null,null,null,null,null,null,null)
-D.atA=new A.ej(D.azU,null,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
-D.aAf=new A.ah("Add user feature coming soon!",null,null,null,null,null,null,null,null,null)
-D.atB=new A.ej(D.aAf,null,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
-D.aAM=new A.ah("User Management",null,null,null,null,null,null,null,null,null)
-D.aAZ=new A.ah("Delete User",null,null,null,null,null,null,null,null,null)
-D.aBE=new A.ah("Are you sure you want to delete this user?",null,null,null,null,null,null,null,null,null)})()};
-(a=>{a["X1YxjUvPnQgeKui8NvRFZHBMjXY="]=a.current})($__dart_deferred_initializers__);
+$S:50};(function installTearOffs(){var x=a._instance_0u
+x(C.SQ.prototype,"ganR","anS",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(C.u7,A.R)
+x(C.SQ,A.V)
+w(A.jy,[C.b6C,C.b6y,C.b6E,C.b6D,C.b6x,C.b6w])
+w(A.nl,[C.b6A,C.b6B,C.b6z])
+x(C.b6F,A.oV)})()
+A.zk(b.typeUniverse,JSON.parse('{"u7":{"R":[],"c":[]},"SQ":{"V":["u7"]}}'))
+var y={c:A.Z("B<bM>"),k:A.Z("B<aW<f,@>>"),b:A.Z("B<lr<f>>"),u:A.Z("B<c>"),j:A.Z("e_<f>"),w:A.Z("f"),v:A.Z("n0"),m:A.Z("@")};(function constants(){D.aAk=new A.ai("Inactive",null,null,null,null,null,null,null,null,null)
+D.aqj=new A.e_("inactive",D.aAk,null,y.j)
+D.aAm=new A.ai("All Users",null,null,null,null,null,null,null,null,null)
+D.aql=new A.e_("all",D.aAm,null,y.j)
+D.aAT=new A.ai("Customers",null,null,null,null,null,null,null,null,null)
+D.aqm=new A.e_("customer",D.aAT,null,y.j)
+D.aAD=new A.ai("Admins",null,null,null,null,null,null,null,null,null)
+D.aqv=new A.e_("admin",D.aAD,null,y.j)
+D.aAH=new A.ai("Make Admin",null,null,null,null,null,null,null,null,null)
+D.aqw=new A.e_("change_role",D.aAH,null,y.j)
+D.aCf=new A.ai("Active",null,null,null,null,null,null,null,null,null)
+D.aqx=new A.e_("active",D.aCf,null,y.j)
+D.aC0=new A.ai("Change user role feature coming soon!",null,null,null,null,null,null,null,null,null)
+D.atV=new A.er(D.aC0,null,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
+D.aAs=new A.ai("User deleted successfully!",null,null,null,null,null,null,null,null,null)
+D.au0=new A.er(D.aAs,B.dr,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
+D.aAn=new A.ai("Edit user feature coming soon!",null,null,null,null,null,null,null,null,null)
+D.au4=new A.er(D.aAn,null,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
+D.aAJ=new A.ai("Add user feature coming soon!",null,null,null,null,null,null,null,null,null)
+D.au5=new A.er(D.aAJ,null,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
+D.aBh=new A.ai("User Management",null,null,null,null,null,null,null,null,null)
+D.aBv=new A.ai("Delete User",null,null,null,null,null,null,null,null,null)
+D.aCa=new A.ai("Are you sure you want to delete this user?",null,null,null,null,null,null,null,null,null)})()};
+(a=>{a["p3UcZcg//Sp/1AfvnxOUXrhx9/s="]=a.current})($__dart_deferred_initializers__);
