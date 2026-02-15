@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class OrderConfirmationScreen extends StatelessWidget {
   final Map<String, dynamic> orderData;
@@ -7,6 +8,7 @@ class OrderConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final orderId =
         orderData['order']?['id']?.toString().substring(0, 8) ?? 'N/A';
     final totalAmount = orderData['order']?['total'] ?? 0.0;
@@ -17,7 +19,7 @@ class OrderConfirmationScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Order Confirmed'),
+        title: Text(l10n.orderConfirmed),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -40,16 +42,18 @@ class OrderConfirmationScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Success message
-            const Text(
-              'Order Placed Successfully!',
-              style: TextStyle(
+            Text(
+              l10n.orderPlacedSuccess,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Thank you for your purchase',
+              l10n.thankYouForPurchase,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -75,26 +79,26 @@ class OrderConfirmationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Order Details',
-                    style: TextStyle(
+                  Text(
+                    l10n.orderDetails,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildDetailRow('Order ID', '#$orderId'),
+                  _buildDetailRow(l10n.orderIdLabel, '#$orderId'),
                   _buildDetailRow(
-                      'Date', _formatDate(DateTime.now().toString())),
+                      l10n.date, _formatDate(DateTime.now().toString())),
                   _buildDetailRow(
-                      'Total Amount', '\$${totalAmount.toStringAsFixed(2)}'),
-                  _buildDetailRow('Payment Method', paymentMethod),
+                      l10n.totalAmount, '\$${totalAmount.toStringAsFixed(2)}'),
+                  _buildDetailRow(l10n.paymentMethod, paymentMethod),
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Shipping Address',
-                    style: TextStyle(
+                  Text(
+                    l10n.shippingAddress,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -127,9 +131,9 @@ class OrderConfirmationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Order Items',
-                    style: TextStyle(
+                  Text(
+                    l10n.orderItems,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -214,7 +218,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: const Text('View Orders'),
+                    child: Text(l10n.viewOrders),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -232,7 +236,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Colors.blue[700],
                     ),
-                    child: const Text('Continue Shopping'),
+                    child: Text(l10n.continueShopping),
                   ),
                 ),
               ],

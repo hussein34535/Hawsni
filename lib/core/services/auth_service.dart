@@ -271,11 +271,22 @@ class AuthService {
   static Future<void> logout() async {
     _token = null;
     _userData = null;
+
+    // Switch to guest mode
+    _isGuest = true;
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     await prefs.remove('userData');
-    print('User logged out, token and data cleared');
-    _authStateController.add(false);
+    await prefs.setBool('isGuest', true); // Persist guest mode
+
+    print('User logged out, switched to guest mode');
+    _authStateController
+        .add(false); // Notify app of logout (optional, depending on nav)
+    // Actually, if we switch to guest, maybe we should emit true?
+    // But usually logout implies clearing state.
+    // If the app listens to this to show LoginScreen, then false is correct.
+    // If the app allows guest usage, it might check isGuest.
   }
 
   // Load token and user data from shared preferences

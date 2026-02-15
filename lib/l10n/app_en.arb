@@ -196,5 +196,19 @@
   "vtoStep3": "New Look!",
   "vtoBestResultTip": "💡 Tip: Use a well-lit photo with a simple background.",
   "vtoLabel": "AI Try-On ✨",
-  "relatedProducts": "Related Products"
+  "shopNow": "Shop Now",
+  "trackGuestOrder": "Track Guest Order",
+  "orderConfirmed": "Order Confirmed",
+  "thankYouForPurchase": "Thank you for your purchase",
+  "date": "Date",
+  "totalAmount": "Total Amount",
+  "orderItems": "Order Items",
+  "enterOrderId": "Enter your Order ID",
+  "trackOrderHint": "You can find this in your order tracking email or SMS.",
+  "orderIdLabel": "Order ID",
+  "orderIdPlaceholder": "e.g., 64a1b2c3...",
+  "enterOrderIdError": "Please enter an Order ID",
+  "trackOrderTitle": "Track Order",
+  "relatedProducts": "Related Products",
+  "ok": "OK"
 }

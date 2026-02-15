@@ -1153,6 +1153,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI Try-On ✨'**
   String get vtoLabel;
+
+  /// No description provided for @shopNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop Now'**
+  String get shopNow;
+
+  /// No description provided for @trackGuestOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Guest Order'**
+  String get trackGuestOrder;
+
+  /// No description provided for @orderConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Confirmed'**
+  String get orderConfirmed;
+
+  /// No description provided for @thankYouForPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your purchase'**
+  String get thankYouForPurchase;
+
+  /// No description provided for @date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get date;
+
+  /// No description provided for @totalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get totalAmount;
+
+  /// No description provided for @orderItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Items'**
+  String get orderItems;
+
+  /// No description provided for @enterOrderId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your Order ID'**
+  String get enterOrderId;
+
+  /// No description provided for @trackOrderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can find this in your order tracking email or SMS.'**
+  String get trackOrderHint;
+
+  /// No description provided for @orderIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Order ID'**
+  String get orderIdLabel;
+
+  /// No description provided for @orderIdPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 64a1b2c3...'**
+  String get orderIdPlaceholder;
+
+  /// No description provided for @enterOrderIdError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an Order ID'**
+  String get enterOrderIdError;
+
+  /// No description provided for @trackOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Order'**
+  String get trackOrderTitle;
+
+  /// No description provided for @relatedProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'Related Products'**
+  String get relatedProducts;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
 }
 
 class _AppLocalizationsDelegate

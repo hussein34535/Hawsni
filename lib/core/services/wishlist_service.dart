@@ -89,7 +89,7 @@ class WishlistService extends ChangeNotifier {
     return _items.any((item) => item.id == itemId);
   }
 
-  Future<void> addToWishlist(WishlistItem item) async {
+  Future<bool> addToWishlist(WishlistItem item) async {
     // 1. تحديث الواجهة فوراً (Optimistic UI Update)
     if (!isItemInWishlist(item.id)) {
       _items.add(item);
@@ -102,8 +102,11 @@ class WishlistService extends ChangeNotifier {
       if (!success) {
         _items.removeWhere((i) => i.id == item.id);
         notifyListeners();
+        return false;
       }
+      return true;
     }
+    return true; // Already in wishlist is considered success
   }
 
   Future<void> removeFromWishlist(String itemId) async {

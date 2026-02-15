@@ -1,24 +1,24 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,B,G,H,I,C={
-bui(){return new C.rG(null)},
-rG:function rG(d){this.a=d},
-PT:function PT(d){this.d=d
+bvN(){return new C.rP(null)},
+rP:function rP(d){this.a=d},
+Q6:function Q6(d){this.d=d
 this.c=this.a=null},
-aWT:function aWT(d,e){this.a=d
+aXQ:function aXQ(d,e){this.a=d
 this.b=e},
-aWR:function aWR(d){this.a=d},
-aWS:function aWS(d,e,f){this.a=d
+aXO:function aXO(d){this.a=d},
+aXP:function aXP(d,e,f){this.a=d
 this.b=e
 this.c=f},
-aWQ:function aWQ(d,e){this.a=d
+aXN:function aXN(d,e){this.a=d
 this.b=e},
-aWP:function aWP(d){this.a=d},
-aWV:function aWV(){},
-aWU:function aWU(){},
-aWW:function aWW(d){this.a=d},
-aWO:function aWO(d,e){this.a=d
+aXM:function aXM(d){this.a=d},
+aXS:function aXS(){},
+aXR:function aXR(){},
+aXT:function aXT(d){this.a=d},
+aXL:function aXL(d,e){this.a=d
 this.b=e},
-aWN:function aWN(){}},D,F,E
+aXK:function aXK(){}},D,F,E
 J=c[1]
 A=c[0]
 B=c[2]
@@ -29,87 +29,87 @@ C=a.updateHolder(c[5],C)
 D=c[22]
 F=c[17]
 E=c[16]
-C.rG.prototype={
-a_(){var x=y.w,w=y.m
-return new C.PT(A.b([A.a8(["id","1","name","Summer Dress","price",49.99,"category","Women","stock",25,"featured",!0],x,w),A.a8(["id","2","name","Casual T-Shirt","price",29.99,"category","Men","stock",42,"featured",!1],x,w),A.a8(["id","3","name","Kids Backpack","price",39.99,"category","Kids","stock",15,"featured",!0],x,w),A.a8(["id","4","name","Leather Wallet","price",59.99,"category","Accessories","stock",8,"featured",!1],x,w),A.a8(["id","5","name","Designer Handbag","price",129.99,"category","Bags","stock",5,"featured",!0],x,w)],y.k))}}
-C.PT.prototype={
-alV(){this.c.Y(y.v).f.cZ(D.asU)},
-apl(d){var x=null,w=this.c
+C.rP.prototype={
+Z(){var x=y.w,w=y.m
+return new C.Q6(A.b([A.ab(["id","1","name","Summer Dress","price",49.99,"category","Women","stock",25,"featured",!0],x,w),A.ab(["id","2","name","Casual T-Shirt","price",29.99,"category","Men","stock",42,"featured",!1],x,w),A.ab(["id","3","name","Kids Backpack","price",39.99,"category","Kids","stock",15,"featured",!0],x,w),A.ab(["id","4","name","Leather Wallet","price",59.99,"category","Accessories","stock",8,"featured",!1],x,w),A.ab(["id","5","name","Designer Handbag","price",129.99,"category","Bags","stock",5,"featured",!0],x,w)],y.k))}}
+C.Q6.prototype={
+amm(){this.c.Y(y.v).f.d_(D.atj)},
+apR(d){var x=null,w=this.c
 w.toString
-A.hE(x,x,!0,x,new C.aWT(this,d),w,x,!0,y.m)},
-F(d){var x=null,w=y.u,v=A.dP(A.b([A.cZ(x,x,x,E.pf,x,x,this.galU(),x,x,x,x)],w),x,x,!0,B.dk,x,1,x,x,x,!1,x,!1,B.f,x,x,x,!0,x,x,x,x,x,D.azz,x,x,x,1,x,!0),u=A.cy(A.te(x,B.cy,!1,x,!0,B.u,x,A.yL(),x,x,x,x,x,x,2,A.hL(x,new A.dJ(4,A.a4(12),B.fP),x,x,x,x,x,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,"Search products...",x,x,x,x,x,x,x,x,x,!0,!0,x,B.iJ,x,x,x,x,x,x,x,x,x,x,x,x),B.R,!0,x,!0,x,!1,x,B.cH,x,x,x,x,x,x,x,x,1,x,x,!1,"\u2022",x,x,x,x,x,!1,x,x,!1,x,!0,x,B.bM,x,x,x,x,x,x,x,x,x,x,x,x,!0,B.at,x,B.e4,x,x,x,x),1),t=A.eP(B.aj,1),s=A.a4(12)
-w=A.aM(A.b([new A.aJ(B.b3,A.bD(A.b([u,B.dC,A.ag(x,A.rD(x,G.pd,new C.aWU(),new C.aWV(),x,y.w),B.j,x,x,new A.as(x,x,t,s,x,x,B.A),x,x,x,x,x,x,x)],w),B.r,B.t,B.o,0,x),x),A.cy(A.rc(new C.aWW(this),this.d.length,B.cO,B.a2,!1),1)],w),B.r,B.t,B.o,x)
-return A.d1(v,x,w,x,x,x)},
-an_(d){var x=null,w=A.a4(12),v=A.b([new A.bE(1,B.a3,B.cA.bn(0.1),B.dy,5)],y.c),u=A.ag(x,D.a2K,B.j,x,x,new A.as(B.bd,x,x,A.a4(8),x,x,B.A),x,60,x,x,x,x,60),t=A.K(d.i(0,"name"),x,x,x,B.jz,x,x,x),s=A.b([B.bB,A.K("$"+J.bbY(d.i(0,"price"),2),x,x,x,D.awk,x,x,x),D.asF,A.K(A.i(d.i(0,"category"))+" \u2022 Stock: "+A.i(d.i(0,"stock")),x,x,x,B.rh,x,x,x)],y.u)
-if(d.i(0,"featured"))s.push(A.ag(x,F.Nx,B.j,x,x,new A.as(B.cA.bn(0.1),x,x,A.a4(4),x,x,B.A),x,x,D.a0G,F.vh,x,x,x))
-return A.ag(x,A.et(!1,B.b3,x,x,!0,x,!0,x,u,x,x,!1,x,x,x,A.aM(s,B.a4,B.t,B.o,x),x,t,x,A.rD(x,I.l3,new C.aWN(),new C.aWO(this,d),x,y.w),x),B.j,x,x,new A.as(B.f,x,x,w,v,x,B.A),x,x,H.ix,x,x,x,x)}}
+A.i4(x,x,!0,x,new C.aXQ(this,d),w,x,!0,y.m)},
+F(d){var x=null,w=y.u,v=A.dp(A.b([A.cv(x,x,x,E.pB,x,x,this.gaml(),x,x,x,x)],w),x,x,!0,B.dr,x,1,x,x,x,!1,x,!1,B.e,x,x,x,!0,x,x,x,x,x,D.aA_,x,x,x,1,x,!0),u=A.c3(A.tl(x,B.cD,!1,x,!0,B.w,x,A.yS(),x,x,x,x,x,x,2,A.fc(x,new A.di(4,A.Z(12),B.f0),x,x,x,x,x,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,"Search products...",x,x,x,x,x,x,x,x,x,!0,!0,x,B.iU,x,x,x,x,x,x,x,x,x,x,x,x),B.R,!0,x,!0,x,!1,x,B.cO,x,x,x,x,x,x,x,x,1,x,x,!1,"\u2022",x,x,x,x,x,!1,x,x,!1,x,!0,x,B.bI,x,x,x,x,x,x,x,x,x,x,x,x,!0,B.ak,x,B.e6,x,x,x,x),1),t=A.dP(B.ag,1),s=A.Z(12)
+w=A.ap(A.b([new A.aD(B.ax,A.bd(A.b([u,B.cJ,A.a6(x,A.rJ(x,G.py,new C.aXR(),new C.aXS(),x,y.w),B.j,x,x,new A.ae(x,x,t,s,x,x,B.y),x,x,x,x,x,x,x)],w),B.p,B.n,B.k,0,x),x),A.c3(A.p2(new C.aXT(this),this.d.length,B.cC,B.U,!1),1)],w),B.p,B.n,B.k,x)
+return A.cx(v,x,w,x,x,x)},
+anp(d){var x=null,w=A.Z(12),v=A.b([new A.bI(1,B.a8,B.cn.b7(0.1),B.dE,5)],y.c),u=A.a6(x,D.a38,B.j,x,x,new A.ae(B.bb,x,x,A.Z(8),x,x,B.y),x,60,x,x,x,x,60),t=A.B(d.i(0,"name"),x,x,x,B.jK,x,x,x),s=A.b([B.bl,A.B("$"+J.bdm(d.i(0,"price"),2),x,x,x,D.awI,x,x,x),D.at6,A.B(A.i(d.i(0,"category"))+" \u2022 Stock: "+A.i(d.i(0,"stock")),x,x,x,B.rA,x,x,x)],y.u)
+if(d.i(0,"featured"))s.push(A.a6(x,F.NY,B.j,x,x,new A.ae(B.cn.b7(0.1),x,x,A.Z(4),x,x,B.y),x,x,D.a15,F.vw,x,x,x))
+return A.a6(x,A.ey(!1,B.ax,x,x,!0,x,!0,x,u,x,x,!1,x,x,x,A.ap(s,B.Q,B.n,B.k,x),x,t,x,A.rJ(x,I.lf,new C.aXK(),new C.aXL(this,d),x,y.w),x),B.j,x,x,new A.ae(B.e,x,x,w,v,x,B.y),x,x,H.iK,x,x,x,x)}}
 var z=a.updateTypes(["~()"])
-C.aWT.prototype={
+C.aXQ.prototype={
 $1(d){var x=null
-return A.it(A.b([A.dM(!1,E.rn,x,x,x,x,x,x,new C.aWR(d),x,x),A.dM(!1,E.rm,x,x,x,x,x,x,new C.aWS(this.a,d,this.b),x,x)],y.u),x,D.aAX,!1,x,D.aB9)},
-$S:28}
-C.aWR.prototype={
-$0(){A.aG(this.a,!1).d9(null)
+return A.j4(A.b([A.dT(!1,E.rG,x,x,x,x,x,x,new C.aXO(d),x,x),A.dT(!1,E.rF,x,x,x,x,x,x,new C.aXP(this.a,d,this.b),x,x)],y.u),x,D.aBp,!1,x,D.aBC)},
+$S:31}
+C.aXO.prototype={
+$0(){A.az(this.a,!1).dm(null)
 return null},
 $S:0}
-C.aWS.prototype={
+C.aXP.prototype={
 $0(){var x,w=this.b
-A.aG(w,!1).d9(null)
+A.az(w,!1).dm(null)
 x=this.a
-x.O(new C.aWQ(x,this.c))
-w.Y(y.v).f.cZ(D.at3)},
+x.N(new C.aXN(x,this.c))
+w.Y(y.v).f.d_(D.att)},
 $S:0}
-C.aWQ.prototype={
-$0(){B.b.hE(this.a.d,new C.aWP(this.b))},
+C.aXN.prototype={
+$0(){B.b.hF(this.a.d,new C.aXM(this.b))},
 $S:0}
-C.aWP.prototype={
+C.aXM.prototype={
 $1(d){return J.c(d.i(0,"id"),this.a)},
-$S:86}
-C.aWV.prototype={
+$S:90}
+C.aXS.prototype={
 $1(d){},
-$S:16}
-C.aWU.prototype={
-$1(d){return A.b([D.apz,D.apE,D.apn],y.b)},
-$S:50}
-C.aWW.prototype={
+$S:17}
+C.aXR.prototype={
+$1(d){return A.b([D.aq_,D.aq4,D.apO],y.b)},
+$S:51}
+C.aXT.prototype={
 $2(d,e){var x=this.a
-return x.an_(x.d[e])},
-$S:45}
-C.aWO.prototype={
+return x.anp(x.d[e])},
+$S:46}
+C.aXL.prototype={
 $1(d){var x=this
 switch(d){case"edit":x.b.i(0,"id")
-x.a.c.Y(y.v).f.cZ(D.asV)
+x.a.c.Y(y.v).f.d_(D.atk)
 break
-case"delete":x.a.apl(x.b.i(0,"id"))
+case"delete":x.a.apR(x.b.i(0,"id"))
 break}},
-$S:16}
-C.aWN.prototype={
-$1(d){return A.b([E.qa,E.q9],y.b)},
-$S:50};(function installTearOffs(){var x=a._instance_0u
-x(C.PT.prototype,"galU","alV",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(C.rG,A.T)
-x(C.PT,A.W)
-w(A.j5,[C.aWT,C.aWP,C.aWV,C.aWU,C.aWO,C.aWN])
-w(A.mM,[C.aWR,C.aWS,C.aWQ])
-x(C.aWW,A.oi)})()
-A.yt(b.typeUniverse,JSON.parse('{"rG":{"T":[],"d":[]},"PT":{"W":["rG"]}}'))
-var y={c:A.Z("A<bE>"),k:A.Z("A<bd<h,@>>"),b:A.Z("A<kW<h>>"),u:A.Z("A<d>"),j:A.Z("dK<h>"),w:A.Z("h"),v:A.Z("mr"),m:A.Z("@")};(function constants(){D.a0G=new A.ad(0,4,0,0)
-D.a2K=new A.aQ(B.iG,null,B.aj,null,null)
-D.aBn=new A.ah("Out of Stock",null,null,null,null,null,null,null,null,null)
-D.apn=new A.dK("out_of_stock",D.aBn,null,y.j)
-D.aAK=new A.ah("All Products",null,null,null,null,null,null,null,null,null)
-D.apz=new A.dK("all",D.aAK,null,y.j)
-D.azu=new A.ah("Featured",null,null,null,null,null,null,null,null,null)
-D.apE=new A.dK("featured",D.azu,null,y.j)
-D.asF=new A.da(null,2,null,null)
-D.azR=new A.ah("Add product feature coming soon!",null,null,null,null,null,null,null,null,null)
-D.asU=new A.ef(D.azR,null,null,null,null,null,null,null,null,null,null,null,null,B.a1,null,null,null,B.u,null)
-D.azT=new A.ah("Edit product feature coming soon!",null,null,null,null,null,null,null,null,null)
-D.asV=new A.ef(D.azT,null,null,null,null,null,null,null,null,null,null,null,null,B.a1,null,null,null,B.u,null)
-D.aAy=new A.ah("Product deleted successfully!",null,null,null,null,null,null,null,null,null)
-D.at3=new A.ef(D.aAy,B.dd,null,null,null,null,null,null,null,null,null,null,null,B.a1,null,null,null,B.u,null)
-D.awk=new A.p(!0,B.c8,null,null,null,null,14,B.ac,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.azz=new A.ah("Product Management",null,null,null,null,null,null,null,null,null)
-D.aAX=new A.ah("Are you sure you want to delete this product?",null,null,null,null,null,null,null,null,null)
-D.aB9=new A.ah("Delete Product",null,null,null,null,null,null,null,null,null)})()};
-(a=>{a["6Uq4YBgcvYmpD40JsAlFaQRUDXM="]=a.current})($__dart_deferred_initializers__);
+$S:17}
+C.aXK.prototype={
+$1(d){return A.b([E.qx,E.qw],y.b)},
+$S:51};(function installTearOffs(){var x=a._instance_0u
+x(C.Q6.prototype,"gaml","amm",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(C.rP,A.S)
+x(C.Q6,A.W)
+w(A.jb,[C.aXQ,C.aXM,C.aXS,C.aXR,C.aXL,C.aXK])
+w(A.mT,[C.aXO,C.aXP,C.aXN])
+x(C.aXT,A.or)})()
+A.yB(b.typeUniverse,JSON.parse('{"rP":{"S":[],"d":[]},"Q6":{"W":["rP"]}}'))
+var y={c:A.a0("A<bI>"),k:A.a0("A<bg<h,@>>"),b:A.a0("A<l2<h>>"),u:A.a0("A<d>"),j:A.a0("dR<h>"),w:A.a0("h"),v:A.a0("mA"),m:A.a0("@")};(function constants(){D.a15=new A.af(0,4,0,0)
+D.a38=new A.aL(B.iT,null,B.ag,null,null)
+D.aBQ=new A.ah("Out of Stock",null,null,null,null,null,null,null,null,null)
+D.apO=new A.dR("out_of_stock",D.aBQ,null,y.j)
+D.aBc=new A.ah("All Products",null,null,null,null,null,null,null,null,null)
+D.aq_=new A.dR("all",D.aBc,null,y.j)
+D.azV=new A.ah("Featured",null,null,null,null,null,null,null,null,null)
+D.aq4=new A.dR("featured",D.azV,null,y.j)
+D.at6=new A.cY(null,2,null,null)
+D.aAh=new A.ah("Add product feature coming soon!",null,null,null,null,null,null,null,null,null)
+D.atj=new A.ej(D.aAh,null,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
+D.aAj=new A.ah("Edit product feature coming soon!",null,null,null,null,null,null,null,null,null)
+D.atk=new A.ej(D.aAj,null,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
+D.aB_=new A.ah("Product deleted successfully!",null,null,null,null,null,null,null,null,null)
+D.att=new A.ej(D.aB_,B.dj,null,null,null,null,null,null,null,null,null,null,null,B.a5,null,null,null,B.w,null)
+D.awI=new A.q(!0,B.bY,null,null,null,null,14,B.ae,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.aA_=new A.ah("Product Management",null,null,null,null,null,null,null,null,null)
+D.aBp=new A.ah("Are you sure you want to delete this product?",null,null,null,null,null,null,null,null,null)
+D.aBC=new A.ah("Delete Product",null,null,null,null,null,null,null,null,null)})()};
+(a=>{a["50C2qRXxLT1S57VP9qOb/Gzz/gI="]=a.current})($__dart_deferred_initializers__);

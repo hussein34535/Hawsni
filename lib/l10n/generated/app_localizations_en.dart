@@ -549,4 +549,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vtoLabel => 'AI Try-On ✨';
+
+  @override
+  String get shopNow => 'Shop Now';
+
+  @override
+  String get trackGuestOrder => 'Track Guest Order';
+
+  @override
+  String get orderConfirmed => 'Order Confirmed';
+
+  @override
+  String get thankYouForPurchase => 'Thank you for your purchase';
+
+  @override
+  String get date => 'Date';
+
+  @override
+  String get totalAmount => 'Total Amount';
+
+  @override
+  String get orderItems => 'Order Items';
+
+  @override
+  String get enterOrderId => 'Enter your Order ID';
+
+  @override
+  String get trackOrderHint =>
+      'You can find this in your order tracking email or SMS.';
+
+  @override
+  String get orderIdLabel => 'Order ID';
+
+  @override
+  String get orderIdPlaceholder => 'e.g., 64a1b2c3...';
+
+  @override
+  String get enterOrderIdError => 'Please enter an Order ID';
+
+  @override
+  String get trackOrderTitle => 'Track Order';
+
+  @override
+  String get relatedProducts => 'Related Products';
+
+  @override
+  String get ok => 'OK';
 }

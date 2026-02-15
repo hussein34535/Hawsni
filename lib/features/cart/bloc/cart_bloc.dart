@@ -154,8 +154,17 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             reviewCount: 0, // Not available
           );
 
-          await _wishlistService.addToWishlist(wishlistItem);
-          add(RemoveFromCart(event.itemId));
+          // Return success status from service
+          final success = await _wishlistService.addToWishlist(wishlistItem);
+
+          if (success) {
+            add(RemoveFromCart(event.itemId));
+          } else {
+            emit(CartError('Failed to save item to wishlist'));
+            // Re-emit loaded state to clear error after a bit or handle differently
+            // For now, reload cart to reset state
+            add(CartStarted());
+          }
         }
       }
     } catch (e) {

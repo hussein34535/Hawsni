@@ -90,7 +90,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get search => 'بحث';
 
   @override
-  String get addToCart => 'أضف للسلة';
+  String get addToCart => 'إضافة للسلة';
 
   @override
   String get buyNow => 'اشتر الآن';
@@ -546,4 +546,49 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vtoLabel => 'جربها بالذكاء الاصطناعي ✨';
+
+  @override
+  String get shopNow => 'تسوق الآن';
+
+  @override
+  String get trackGuestOrder => 'تتبع طلب زائر';
+
+  @override
+  String get orderConfirmed => 'تم تأكيد الطلب';
+
+  @override
+  String get thankYouForPurchase => 'شكراً لشرائك';
+
+  @override
+  String get date => 'التاريخ';
+
+  @override
+  String get totalAmount => 'المبلغ الإجمالي';
+
+  @override
+  String get orderItems => 'عناصر الطلب';
+
+  @override
+  String get enterOrderId => 'أدخل رقم الطلب';
+
+  @override
+  String get trackOrderHint => 'يمكنك العثور عليه في رسالة تتبع الطلب.';
+
+  @override
+  String get orderIdLabel => 'رقم الطلب';
+
+  @override
+  String get orderIdPlaceholder => 'مثال: 64a1b2c3...';
+
+  @override
+  String get enterOrderIdError => 'يرجى إدخال رقم الطلب';
+
+  @override
+  String get trackOrderTitle => 'تتبع الطلب';
+
+  @override
+  String get relatedProducts => 'منتجات ذات صلة';
+
+  @override
+  String get ok => 'حسناً';
 }

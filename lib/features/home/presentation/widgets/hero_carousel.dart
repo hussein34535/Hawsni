@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/utils/responsive_layout.dart';
 
 class HeroCarousel extends StatefulWidget {
   final List<Map<String, dynamic>> banners;
@@ -81,7 +83,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
             final imageUrl = banner['image_url'] as String?;
             final headingText = banner['heading_text'] as String?;
             final subheadingText = banner['subheading_text'] as String?;
-            final buttonText = banner['button_text'] as String? ?? 'Shop Now';
+            final buttonText = banner['button_text'] as String? ??
+                AppLocalizations.of(context)!.shopNow;
             final buttonLink = banner['button_link'] as String?;
             final buttonOpacity =
                 (banner['button_opacity'] as num?)?.toDouble() ?? 1.0;
@@ -127,22 +130,27 @@ class _HeroCarouselState extends State<HeroCarousel> {
                       if (headingText != null && headingText.isNotEmpty)
                         Text(
                           headingText.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: TextStyle(
+                            fontSize:
+                                ResponsiveLayout.isDesktop(context) ? 14 : 10,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
-                            letterSpacing: 2,
+                            letterSpacing:
+                                ResponsiveLayout.isDesktop(context) ? 2 : 1.5,
                           ),
                         ),
                       if (headingText != null && headingText.isNotEmpty)
-                        const SizedBox(height: 8),
+                        SizedBox(
+                            height:
+                                ResponsiveLayout.isDesktop(context) ? 12 : 8),
 
                       // Subheading Text (Main Title)
                       if (subheadingText != null && subheadingText.isNotEmpty)
                         Text(
                           subheadingText,
-                          style: const TextStyle(
-                            fontSize: 36,
+                          style: TextStyle(
+                            fontSize:
+                                ResponsiveLayout.isDesktop(context) ? 42 : 28,
                             fontWeight: FontWeight.w900,
                             color: Colors.white,
                             height: 1.1,
@@ -150,7 +158,9 @@ class _HeroCarouselState extends State<HeroCarousel> {
                           ),
                         ),
                       if (subheadingText != null && subheadingText.isNotEmpty)
-                        const SizedBox(height: 20),
+                        SizedBox(
+                            height:
+                                ResponsiveLayout.isDesktop(context) ? 32 : 20),
 
                       // Button
                       if (buttonText.isNotEmpty)

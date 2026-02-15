@@ -13,6 +13,7 @@ import 'package:hwasi_app/features/notifications/presentation/screens/notificati
 import 'package:hwasi_app/features/products/data/services/product_service.dart';
 import 'package:hwasi_app/features/products/presentation/screens/products_screen.dart';
 import 'package:hwasi_app/features/search/presentation/screens/search_screen.dart';
+import 'package:hwasi_app/core/utils/responsive_layout.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,278 +41,303 @@ class _HomeScreenState extends State<HomeScreen> {
       )..add(LoadHomeData()),
       child: Scaffold(
         backgroundColor: const Color(0xFFFAFAFA), // Light gray background
-        body: BlocBuilder<HomeBloc, HomeState>(
-          builder: (context, state) {
-            if (state is HomeLoading) {
-              return const Center(child: SpinningLoader());
-            } else if (state is HomeError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline,
-                        color: Colors.red, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.message,
-                      style: GoogleFonts.cairo(
-                        color: Colors.black87,
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                if (state is HomeLoading) {
+                  return const Center(child: SpinningLoader());
+                } else if (state is HomeError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline,
+                            color: Colors.red, size: 48),
+                        const SizedBox(height: 16),
+                        Text(
+                          state.message,
+                          style: GoogleFonts.cairo(
+                            color: Colors.black87,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<HomeBloc>().add(RefreshHomeData());
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<HomeBloc>().add(RefreshHomeData());
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              );
-            } else if (state is HomeLoaded) {
-              return RefreshIndicator(
-                onRefresh: () async {
-                  context.read<HomeBloc>().add(RefreshHomeData());
-                },
-                color: AppTheme.primaryColor,
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  physics: const ClampingScrollPhysics(),
-                  slivers: [
-                    // Modern Clean AppBar
-                    SliverToBoxAdapter(child: _buildAppBar(context)),
+                  );
+                } else if (state is HomeLoaded) {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HomeBloc>().add(RefreshHomeData());
+                    },
+                    color: AppTheme.primaryColor,
+                    child: CustomScrollView(
+                      controller: _scrollController,
+                      physics: const ClampingScrollPhysics(),
+                      slivers: [
+                        // Modern Clean AppBar
+                        SliverToBoxAdapter(child: _buildAppBar(context)),
 
-                    // Search Bar
-                    SliverToBoxAdapter(child: _buildSearchBar(context)),
+                        // Search Bar
+                        SliverToBoxAdapter(child: _buildSearchBar(context)),
 
-                    // Hero Banner
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                        child: RepaintBoundary(
-                          child: SizedBox(
-                            height: 160,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: HeroCarousel(banners: state.banners),
+                        // Hero Banner
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                            child: RepaintBoundary(
+                              child: SizedBox(
+                                height: ResponsiveLayout.isDesktop(context)
+                                    ? 400
+                                    : ResponsiveLayout.isTablet(context)
+                                        ? 280
+                                        : 160,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: HeroCarousel(banners: state.banners),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
 
-                    // Categories Section
-                    SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Shop by Category', // If this is translated, it will use Cairo
-                                  style: GoogleFonts.cairo(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(Icons.auto_awesome,
-                                    color: AppTheme.accentColor, size: 24),
-                              ],
-                            ),
-                          ),
-                          RepaintBoundary(
-                            child: SizedBox(
-                              height: 100,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
+                        // Categories Section
+                        SliverToBoxAdapter(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                itemCount: state.categories.length,
-                                itemBuilder: (context, index) {
-                                  final category = state.categories[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ProductsScreen(
-                                            categoryName: category.name,
-                                            categoryId: category.id,
+                                    const EdgeInsets.fromLTRB(20, 24, 20, 12),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'Shop by Category', // If this is translated, it will use Cairo
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Icon(Icons.auto_awesome,
+                                        color: AppTheme.accentColor, size: 24),
+                                  ],
+                                ),
+                              ),
+                              RepaintBoundary(
+                                child: SizedBox(
+                                  height: 100,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    itemCount: state.categories.length,
+                                    itemBuilder: (context, index) {
+                                      final category = state.categories[index];
+                                      return GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProductsScreen(
+                                                categoryName: category.name,
+                                                categoryId: category.id,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          width: 80,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 4),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                width: 65,
+                                                height: 65,
+                                                padding: const EdgeInsets.all(
+                                                    2.5), // Gradient border width
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  gradient:
+                                                      const LinearGradient(
+                                                    colors: [
+                                                      AppTheme.primaryColor,
+                                                      AppTheme.accentColor
+                                                    ],
+                                                    begin: Alignment.topLeft,
+                                                    end: Alignment.bottomRight,
+                                                  ),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: AppTheme
+                                                          .primaryColor
+                                                          .withValues(
+                                                              alpha: 0.2),
+                                                      blurRadius: 12,
+                                                      offset:
+                                                          const Offset(0, 4),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Container(
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    color: Colors.white,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: ClipOval(
+                                                    child: category.imageUrl !=
+                                                            null
+                                                        ? (category.imageUrl!
+                                                                .toLowerCase()
+                                                                .endsWith(
+                                                                    '.svg')
+                                                            ? Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        12.0),
+                                                                child: SvgPicture
+                                                                    .network(
+                                                                  category
+                                                                      .imageUrl!,
+                                                                  fit: BoxFit
+                                                                      .contain,
+                                                                  placeholderBuilder:
+                                                                      (BuildContext
+                                                                          context) {
+                                                                    return Container(
+                                                                        color: Colors
+                                                                            .transparent);
+                                                                  },
+                                                                ),
+                                                              )
+                                                            : CachedNetworkImage(
+                                                                imageUrl: category
+                                                                    .imageUrl!,
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                memCacheHeight:
+                                                                    400, // Better quality
+                                                                placeholder: (context,
+                                                                        url) =>
+                                                                    Container(
+                                                                        color: Colors
+                                                                            .transparent),
+                                                                errorWidget: (context,
+                                                                        url,
+                                                                        error) =>
+                                                                    Container(
+                                                                        color: Colors
+                                                                            .transparent),
+                                                              ))
+                                                        : Container(
+                                                            color: Colors
+                                                                .transparent),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                category.name,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.cairo(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       );
                                     },
-                                    child: Container(
-                                      width: 80,
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 4),
-                                      child: Column(
-                                        children: [
-                                          Container(
-                                            width: 65,
-                                            height: 65,
-                                            padding: const EdgeInsets.all(
-                                                2.5), // Gradient border width
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              gradient: const LinearGradient(
-                                                colors: [
-                                                  AppTheme.primaryColor,
-                                                  AppTheme.accentColor
-                                                ],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: AppTheme.primaryColor
-                                                      .withValues(alpha: 0.2),
-                                                  blurRadius: 12,
-                                                  offset: const Offset(0, 4),
-                                                ),
-                                              ],
-                                            ),
-                                            child: Container(
-                                              decoration: const BoxDecoration(
-                                                color: Colors.white,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: ClipOval(
-                                                child: category.imageUrl != null
-                                                    ? (category.imageUrl!
-                                                            .toLowerCase()
-                                                            .endsWith('.svg')
-                                                        ? Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(12.0),
-                                                            child: SvgPicture
-                                                                .network(
-                                                              category
-                                                                  .imageUrl!,
-                                                              fit: BoxFit
-                                                                  .contain,
-                                                              placeholderBuilder:
-                                                                  (BuildContext
-                                                                      context) {
-                                                                return Container(
-                                                                    color: Colors
-                                                                        .transparent);
-                                                              },
-                                                            ),
-                                                          )
-                                                        : CachedNetworkImage(
-                                                            imageUrl: category
-                                                                .imageUrl!,
-                                                            fit: BoxFit.cover,
-                                                            memCacheHeight:
-                                                                400, // Better quality
-                                                            placeholder: (context,
-                                                                    url) =>
-                                                                Container(
-                                                                    color: Colors
-                                                                        .transparent),
-                                                            errorWidget: (context,
-                                                                    url,
-                                                                    error) =>
-                                                                Container(
-                                                                    color: Colors
-                                                                        .transparent),
-                                                          ))
-                                                    : Container(
-                                                        color:
-                                                            Colors.transparent),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            category.name,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.cairo(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
+                                  ),
+                                ),
                               ),
+                            ],
+                          ),
+                        ),
+
+                        // Products Grid
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                          sliver: SliverGrid(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount:
+                                  ResponsiveLayout.isDesktop(context)
+                                      ? 5
+                                      : ResponsiveLayout.isTablet(context)
+                                          ? 3
+                                          : 2,
+                              childAspectRatio:
+                                  0.68, // Slightly taller to fit content comfortably without cramping
+                              crossAxisSpacing: 16, // More breathing room
+                              mainAxisSpacing: 24, // More vertical separation
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final products = _selectedFilter == 'All'
+                                    ? state.allProducts
+                                    : _selectedFilter == 'Featured'
+                                        ? state.featuredProducts
+                                        : state.flashDeals;
+
+                                if (index >= products.length) {
+                                  return const SizedBox();
+                                }
+
+                                final product = products[index];
+                                return RepaintBoundary(
+                                  child: ProductCard(
+                                    key: ValueKey(product.id),
+                                    id: product.id,
+                                    name: product.name,
+                                    price: product.price.toString(),
+                                    imageUrl: product.imageUrl,
+                                    rating: product.rating,
+                                    reviewCount: product.reviewCount,
+                                    showBadge: _selectedFilter == 'Discount',
+                                    badgeText: '60%',
+                                    badgeColor: Colors.red,
+                                    screenId: 'home',
+                                    colors: product.colors,
+                                    sizes: product.sizes,
+                                    images: product.images,
+                                  ),
+                                );
+                              },
+                              childCount: _selectedFilter == 'All'
+                                  ? state.allProducts.length
+                                  : _selectedFilter == 'Featured'
+                                      ? state.featuredProducts.length
+                                      : state.flashDeals.length,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-
-                    // Products Grid
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                      sliver: SliverGrid(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio:
-                              0.68, // Slightly taller to fit content comfortably without cramping
-                          crossAxisSpacing: 16, // More breathing room
-                          mainAxisSpacing: 24, // More vertical separation
                         ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final products = _selectedFilter == 'All'
-                                ? state.allProducts
-                                : _selectedFilter == 'Featured'
-                                    ? state.featuredProducts
-                                    : state.flashDeals;
-
-                            if (index >= products.length) {
-                              return const SizedBox();
-                            }
-
-                            final product = products[index];
-                            return RepaintBoundary(
-                              child: ProductCard(
-                                key: ValueKey(product.id),
-                                id: product.id,
-                                name: product.name,
-                                price: product.price.toString(),
-                                imageUrl: product.imageUrl,
-                                rating: product.rating,
-                                reviewCount: product.reviewCount,
-                                showBadge: _selectedFilter == 'Discount',
-                                badgeText: '60%',
-                                badgeColor: Colors.red,
-                                screenId: 'home',
-                                colors: product.colors,
-                                sizes: product.sizes,
-                                images: product.images,
-                              ),
-                            );
-                          },
-                          childCount: _selectedFilter == 'All'
-                              ? state.allProducts.length
-                              : _selectedFilter == 'Featured'
-                                  ? state.featuredProducts.length
-                                  : state.flashDeals.length,
-                        ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          },
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
         ),
       ),
     );

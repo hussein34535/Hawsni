@@ -10,6 +10,7 @@ import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
+import 'package:hwasi_app/core/utils/responsive_layout.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -121,6 +122,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               ) *
                               item.quantity),
                     );
+
+                    if (ResponsiveLayout.isDesktop(context)) {
+                      return _buildDesktopLayout(context, state, subtotal);
+                    }
 
                     return Stack(
                       children: [
@@ -485,6 +490,218 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDesktopLayout(
+      BuildContext context, CartLoaded state, double subtotal) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left Column: Forms
+              Expanded(
+                flex: 2,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (_isGuest) ...[
+                        _buildSectionTitle('Guest Information'),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: AppTheme.cardDecoration,
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  controller: _nameController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Full Name',
+                                    hintText: 'Enter your name',
+                                    prefixIcon:
+                                        const Icon(Icons.person_outline),
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none),
+                                    filled: true,
+                                    fillColor: AppTheme.primaryColor
+                                        .withValues(alpha: 0.05),
+                                  ),
+                                  validator: (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Please enter your name'
+                                          : null,
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _phoneController,
+                                  keyboardType: TextInputType.phone,
+                                  decoration: InputDecoration(
+                                    labelText: 'Phone Number',
+                                    hintText: 'Enter your phone number',
+                                    prefixIcon:
+                                        const Icon(Icons.phone_outlined),
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none),
+                                    filled: true,
+                                    fillColor: AppTheme.primaryColor
+                                        .withValues(alpha: 0.05),
+                                  ),
+                                  validator: (value) =>
+                                      value == null || value.isEmpty
+                                          ? 'Please enter your phone number'
+                                          : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                      _buildSectionTitle(
+                          AppLocalizations.of(context)!.shippingAddress),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: AppTheme.cardDecoration,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor
+                                      .withValues(alpha: 0.1),
+                                  shape: BoxShape.circle),
+                              child: const Icon(Icons.location_on,
+                                  color: AppTheme.primaryColor),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(AppLocalizations.of(context)!.homeLabel,
+                                      style: AppTheme.textTheme.titleMedium
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                      '123 Fashion Street, Luxury District\nNew York, NY 10001',
+                                      style: AppTheme.textTheme.bodyMedium),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle(
+                          AppLocalizations.of(context)!.paymentMethod),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: AppTheme.cardDecoration,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  color: AppTheme.primaryColor
+                                      .withValues(alpha: 0.1),
+                                  shape: BoxShape.circle),
+                              child: const Icon(Icons.money,
+                                  color: AppTheme.primaryColor),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      AppLocalizations.of(context)!
+                                          .paymentMethod,
+                                      style: AppTheme.textTheme.titleMedium
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 4),
+                                  Text('Cash on Delivery (Only option)',
+                                      style: AppTheme.textTheme.bodyMedium),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 32),
+              // Right Column: Summary & Button
+              Expanded(
+                flex: 1,
+                child: Column(
+                  children: [
+                    _buildSectionTitle(
+                        AppLocalizations.of(context)!.orderSummary),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: AppTheme.cardDecoration,
+                      child: Column(
+                        children: [
+                          _buildSummaryRow(
+                              AppLocalizations.of(context)!.subtotal,
+                              '\$${subtotal.toStringAsFixed(2)}'),
+                          const SizedBox(height: 12),
+                          _buildSummaryRow(
+                              AppLocalizations.of(context)!.shipping,
+                              '\$10.00'),
+                          const SizedBox(height: 12),
+                          _buildSummaryRow(AppLocalizations.of(context)!.tax,
+                              '\$${(subtotal * 0.05).toStringAsFixed(2)}'),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Divider(color: AppTheme.dividerColor),
+                          ),
+                          _buildSummaryRow(AppLocalizations.of(context)!.total,
+                              '\$${(subtotal + 10 + (subtotal * 0.05)).toStringAsFixed(2)}',
+                              isTotal: true),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            _processCheckout(state.items, subtotal),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          backgroundColor: AppTheme.primaryColor,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          elevation: 8,
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context)!.placeOrder,
+                          style: AppTheme.textTheme.labelLarge?.copyWith(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
