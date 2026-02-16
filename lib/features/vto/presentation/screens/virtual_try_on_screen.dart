@@ -439,8 +439,9 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
       final file = File('${documentDirectory.path}/try_on_result.jpg');
       file.writeAsBytesSync(response.bodyBytes);
 
-      await Share.shareXFiles([XFile(file.path)],
-          text: 'Check out my new look with hwasi AI! 👗✨');
+      await SharePlus.instance.share(ShareParams(
+          files: [XFile(file.path)],
+          text: 'Check out my new look with hwasi AI! 👗✨'));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error sharing image: $e')),

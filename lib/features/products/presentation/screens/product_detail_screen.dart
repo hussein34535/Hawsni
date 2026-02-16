@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
@@ -133,8 +134,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _shareProduct(BuildContext context, String name, String id) {
-    Share.share(
-        'Check out this amazing product: $name\nhttps://hawsni.com/product/$id');
+    SharePlus.instance.share(ShareParams(
+        text:
+            'Check out this amazing product: $name\nhttps://hawsni.com/product/$id'));
     context.read<AnalyticsService>().logShare(
           contentType: 'product',
           itemId: id,
@@ -271,167 +273,98 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
       ],
       child: MultiBlocListener(
-          listeners: [
-            BlocListener<CartBloc, CartState>(
-              listener: (context, state) {
-                if (state is CartAuthError) {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) => AlertDialog(
-                      title: Text(AppLocalizations.of(context)!.sessionExpired),
-                      content: Text(
-                          AppLocalizations.of(context)!.sessionExpiredMessage),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginScreen(),
-                              ),
-                            );
-                          },
-                          child: Text(AppLocalizations.of(context)!.ok),
-                        ),
-                      ],
-                    ),
-                  );
-                } else if (state is CartError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              },
-            ),
-            BlocListener<ProductBloc, ProductState>(
-              listener: (context, state) {
-                if (state is ProductDetailsLoaded) {
-                  context.read<AnalyticsService>().logViewItem(
-                        itemId: state.product.id,
-                        itemName: state.product.name,
-                        itemCategory: state.product.category,
-                      );
-                }
-              },
-            ),
-          ],
-          child: ResponsiveLayout.isDesktop(context)
-              ? BlocBuilder<ProductBloc, ProductState>(
-                  builder: (context, state) {
-                    // Resolve values inside BlocBuilder for Desktop
-                    String? displayName = widget.name;
-                    String? displayPrice = widget.price;
-                    String? displayImageUrl = widget.imageUrl;
-                    String displayDescription = widget.description;
-                    List<String> displayImages = [];
-                    if (widget.imageUrl != null)
-                      displayImages.add(widget.imageUrl!);
-
-                    if (state is ProductDetailsLoaded) {
-                      displayName = state.product.name;
-                      displayPrice = '\$${state.product.price}';
-                      if (state.product.images != null &&
-                          state.product.images!.isNotEmpty) {
-                        displayImageUrl = state.product.images![0];
-                        displayImages = state.product.images!;
-                      }
-                      displayDescription = state.product.description;
-                    }
-
-                    if (displayName == null) {
-                      return const Scaffold(
-                          body: Center(child: CircularProgressIndicator()));
-                    }
-
-                    return _buildDesktopLayout(
-                        context,
-                        displayName,
-                        displayPrice ?? '',
-                        displayImageUrl ?? '',
-                        displayDescription,
-                        displayImages,
-                        state);
-                  },
-                )
-              : Scaffold(
-                  backgroundColor: AppTheme.scaffoldBackgroundColor,
-                  bottomNavigationBar: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, -5),
-                        )
-                      ],
-                    ),
-                    child: SafeArea(
-                      child: Row(
-                        children: [
-                          Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey[200]!),
-                                borderRadius: BorderRadius.circular(25)),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                    icon: const Icon(Icons.remove, size: 20),
-                                    onPressed: _decrementQuantity),
-                                Text('$quantity',
-                                    style: GoogleFonts.poppins(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                                IconButton(
-                                    icon: const Icon(Icons.add, size: 20),
-                                    onPressed: _incrementQuantity),
-                              ],
+        listeners: [
+          BlocListener<CartBloc, CartState>(
+            listener: (context, state) {
+              if (state is CartAuthError) {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => AlertDialog(
+                    title: Text(AppLocalizations.of(context)!.sessionExpired),
+                    content: Text(
+                        AppLocalizations.of(context)!.sessionExpiredMessage),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: SizedBox(
-                              height: 54,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primaryColor,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(27)),
-                                ),
-                                onPressed: () => _addToCart(context),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.shopping_bag_outlined,
-                                        color: Colors.white, size: 22),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      AppLocalizations.of(context)!.addToCart,
-                                      style: GoogleFonts.cairo(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                          );
+                        },
+                        child: Text(AppLocalizations.of(context)!.ok),
                       ),
-                    ),
+                    ],
                   ),
-                  body: CustomScrollView(
+                );
+              } else if (state is CartError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+          ),
+          BlocListener<ProductBloc, ProductState>(
+            listener: (context, state) {
+              if (state is ProductDetailsLoaded) {
+                context.read<AnalyticsService>().logViewItem(
+                      itemId: state.product.id,
+                      itemName: state.product.name,
+                      itemCategory: state.product.category,
+                    );
+              }
+            },
+          ),
+        ],
+        child: ResponsiveLayout.isDesktop(context)
+            ? BlocBuilder<ProductBloc, ProductState>(
+                builder: (context, state) {
+                  // Resolve values inside BlocBuilder for Desktop
+                  String? displayName = widget.name;
+                  String? displayPrice = widget.price;
+                  String? displayImageUrl = widget.imageUrl;
+                  String displayDescription = widget.description;
+                  List<String> displayImages = [];
+                  if (widget.imageUrl != null)
+                    displayImages.add(widget.imageUrl!);
+
+                  if (state is ProductDetailsLoaded) {
+                    displayName = state.product.name;
+                    displayPrice = '\$${state.product.price}';
+                    if (state.product.images != null &&
+                        state.product.images!.isNotEmpty) {
+                      displayImageUrl = state.product.images![0];
+                      displayImages = state.product.images!;
+                    }
+                    displayDescription = state.product.description;
+                  }
+
+                  if (displayName == null) {
+                    return const Scaffold(
+                        body: Center(child: CircularProgressIndicator()));
+                  }
+
+                  return _buildDesktopLayout(
+                      context,
+                      displayName,
+                      displayPrice ?? '',
+                      displayImageUrl ?? '',
+                      displayDescription,
+                      displayImages,
+                      state);
+                },
+              )
+            : Scaffold(
+                backgroundColor: AppTheme.scaffoldBackgroundColor,
+                body: Stack(children: [
+                  CustomScrollView(
                     slivers: [
                       SliverAppBar(
                         expandedHeight:
@@ -964,54 +897,53 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     ),
                                     const SizedBox(height: 32),
 
-                                    // Quantity (Original - Unused now but keeping format reference)
-                                    /* Row(
-                                        children: [
-                                          Text(
-                                            AppLocalizations.of(context)!
-                                                .quantity,
-                                            style: AppTheme
-                                                .textTheme.titleMedium
-                                                ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppTheme.textPrimary,
-                                            ),
+                                    // Quantity (Restored in Body)
+                                    Row(
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(context)!
+                                              .quantity,
+                                          style: AppTheme.textTheme.titleMedium
+                                              ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppTheme.textPrimary,
                                           ),
-                                          const Spacer(),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: AppTheme.borderColor),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              color: AppTheme.surfaceColor,
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                IconButton(
-                                                  icon: const Icon(Icons.remove,
-                                                      color:
-                                                          AppTheme.textPrimary),
-                                                  onPressed: _decrementQuantity,
-                                                ),
-                                                Text(
-                                                  '$quantity',
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.add,
-                                                      color:
-                                                          AppTheme.textPrimary),
-                                                  onPressed: _incrementQuantity,
-                                                ),
-                                              ],
-                                            ),
+                                        ),
+                                        const Spacer(),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppTheme.borderColor),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: AppTheme.surfaceColor,
                                           ),
-                                        ],
-                                      ), */
+                                          child: Row(
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(Icons.remove,
+                                                    color:
+                                                        AppTheme.textPrimary),
+                                                onPressed: _decrementQuantity,
+                                              ),
+                                              Text(
+                                                '$quantity',
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.add,
+                                                    color:
+                                                        AppTheme.textPrimary),
+                                                onPressed: _incrementQuantity,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                     const SizedBox(height: 32),
                                     const Divider(color: AppTheme.dividerColor),
                                     const SizedBox(height: 16),
@@ -1024,6 +956,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     if (state is ProductDetailsLoaded)
                                       RelatedProducts(
                                           products: state.relatedProducts),
+
+                                    // Bottom Padding for Floating Bar
+                                    const SizedBox(height: 100),
                                   ],
                                 );
                               },
@@ -1033,7 +968,103 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ],
                   ),
-                )),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, -5),
+                          )
+                        ],
+                      ),
+                      child: SafeArea(
+                        child: Row(
+                          children: [
+                            // Try On Button
+                            Expanded(
+                              child: SizedBox(
+                                height: 54,
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(
+                                        color: AppTheme.primaryColor, width: 2),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(27)),
+                                  ),
+                                  onPressed: () {
+                                    final state =
+                                        context.read<ProductBloc>().state;
+                                    if (state is ProductDetailsLoaded) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => VirtualTryOnScreen(
+                                            productImageUrl: state.product
+                                                        .images?.isNotEmpty ==
+                                                    true
+                                                ? state.product.images![0]
+                                                : widget.imageUrl ?? '',
+                                            productId: widget.productId,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  icon: const Icon(Icons.camera_alt_outlined,
+                                      color: AppTheme.primaryColor),
+                                  label: Text(
+                                    AppLocalizations.of(context)!.vtoButton,
+                                    style: GoogleFonts.cairo(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.primaryColor),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // Add to Cart Button
+                            Expanded(
+                              child: SizedBox(
+                                height: 54,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primaryColor,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(27)),
+                                  ),
+                                  onPressed: () => _addToCart(context),
+                                  icon: const Icon(Icons.shopping_bag_outlined,
+                                      color: Colors.white),
+                                  label: Text(
+                                    AppLocalizations.of(context)!.addToCart,
+                                    style: GoogleFonts.cairo(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+      ),
     );
   }
 
