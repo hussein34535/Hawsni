@@ -42,46 +42,65 @@
 
     /* CSS Loader - Shows immediately */
     .loading-container {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      width: 100vw;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 9999;
-      background-color: #FAFAFA;
-      transition: opacity 0.1s ease-in-out;
-    }
 
-    .loader {
-      /* Optimized Simple Loader */
-      width: 40px;
-      height: 40px;
-      border: 3px solid #E0E0E0;
-      border-top: 3px solid #1B4D3E;
-      /* App Primary Color */
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      /* Faster spin */
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
+      /* CSS Loader - Shows immediately */
+      .loading-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        background-color: #FAFAFA;
+        transition: opacity 0.4s ease-in-out;
       }
 
-      100% {
-        transform: rotate(360deg);
+      .loader {
+        /* Optimized Simple Loader */
+        width: 50px;
+        height: 50px;
+        border: 3px solid #E0E0E0;
+        border-top: 3px solid #1B4D3E;
+        /* App Primary Color */
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
       }
-    }
 
-    .loading-text {
-      display: none;
-      /* User requested "one loader", removing text to be minimal */
-    }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        display: block;
+        margin-top: 16px;
+        font-family: 'Cairo', sans-serif;
+        font-weight: 700;
+        font-size: 24px;
+        color: #1B4D3E;
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+
+      @keyframes pulse {
+
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+
+        50% {
+          opacity: 1;
+        }
+      }
   </style>
 
   <!-- Performance Optimizations -->
@@ -94,8 +113,9 @@
 
 <body>
   <div id="loading-indicator" class="loading-container">
+    <!-- HWASI Logo/Text for Splah -->
+    <div class="loading-text" style="font-size: 32px; letter-spacing: 2px; margin-bottom: 20px;">HWASI</div>
     <div class="loader"></div>
-    <div class="loading-text">hwasi</div>
   </div>
 
   <!-- The Flutter bootstrapping script -->
@@ -106,13 +126,11 @@
     window.addEventListener('load', function (ev) {
       const loader = document.getElementById('loading-indicator');
       if (loader) {
-        // Reduced timeout to ensure snappy feel
-        // Flutter engine takes over once it's ready
-        // Immediate transition when Flutter is known to be active
+        // Delayed removal to ensure user sees the brand
         setTimeout(() => {
           loader.style.opacity = '0';
-          setTimeout(() => loader.remove(), 100); // Fast removal
-        }, 10);
+          setTimeout(() => loader.remove(), 400);
+        }, 1500); // 1.5s delay
       }
     });
   </script>

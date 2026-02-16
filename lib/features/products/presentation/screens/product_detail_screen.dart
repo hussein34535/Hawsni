@@ -8,8 +8,7 @@ import 'package:hwasi_app/features/products/presentation/widgets/related_product
 import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
 import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
-import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_screen.dart'
-    deferred as vto;
+
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/utils/responsive_layout.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
@@ -22,9 +21,9 @@ import 'package:hwasi_app/core/services/analytics_service.dart';
 import 'package:provider/provider.dart';
 import 'package:hwasi_app/core/services/wishlist_service.dart';
 import 'package:hwasi_app/features/products/data/services/product_service.dart';
-import 'package:hwasi_app/core/router/deferred_loader.dart';
+
 import 'dart:ui';
-import 'package:hwasi_app/core/services/auth_service.dart';
+
 import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:hwasi_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:hwasi_app/features/reviews/data/services/review_service.dart';
@@ -891,78 +890,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         const SizedBox(height: 32),
                                       ],
 
-                                      // 3.5 Quantity & Add to Cart
+                                      // 3.5 Quantity & Add to Cart - MOVED TO FLOATING BAR
                                       const SizedBox(height: 24),
-                                      Row(
-                                        children: [
-                                          // Quantity
-                                          Container(
-                                            height: 44, // Reduced from 50
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: Colors.grey[300]!),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        10)), // Reduced radius
-                                            child: Row(
-                                              children: [
-                                                IconButton(
-                                                    icon: const Icon(
-                                                        Icons.remove,
-                                                        size:
-                                                            20), // Smaller icon
-                                                    onPressed:
-                                                        _decrementQuantity),
-                                                Text('$quantity',
-                                                    style: const TextStyle(
-                                                        fontSize:
-                                                            16, // Reduced from 18
-                                                        fontWeight:
-                                                            FontWeight.bold)),
-                                                IconButton(
-                                                    icon: const Icon(Icons.add,
-                                                        size:
-                                                            20), // Smaller icon
-                                                    onPressed:
-                                                        _incrementQuantity),
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                              width: 12), // Reduced form 16
-                                          // Add to Cart
-                                          Expanded(
-                                            child: SizedBox(
-                                              height: 44, // Reduced from 50
-                                              child: ElevatedButton.icon(
-                                                icon: const Icon(
-                                                    Icons.shopping_bag_outlined,
-                                                    color: Colors.white,
-                                                    size: 20), // Smaller icon
-                                                label: Text(AppLocalizations.of(
-                                                        context)!
-                                                    .addToCart),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.black,
-                                                  textStyle: GoogleFonts.cairo(
-                                                      fontSize:
-                                                          16, // Reduced from 18
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10)), // Reduced radius
-                                                ),
-                                                onPressed: () =>
-                                                    _addToCart(context),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(
-                                          height: 24), // Reduced from 32
 
                                       // 4. Description
                                       Text(
@@ -1058,8 +987,91 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
 
                     // Floating Bottom Bar
-                    // Legendary Floating Bottom Bar
-// Floating bottom bar removed
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(30),
+                              topRight: Radius.circular(30)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, -5),
+                            )
+                          ],
+                        ),
+                        child: SafeArea(
+                          child: Row(
+                            children: [
+                              // Quantity
+                              Container(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                    border:
+                                        Border.all(color: Colors.grey[200]!),
+                                    borderRadius: BorderRadius.circular(25)),
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                        icon:
+                                            const Icon(Icons.remove, size: 20),
+                                        onPressed: _decrementQuantity),
+                                    Text('$quantity',
+                                        style: GoogleFonts.poppins(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold)),
+                                    IconButton(
+                                        icon: const Icon(Icons.add, size: 20),
+                                        onPressed: _incrementQuantity),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              // Add to Cart
+                              Expanded(
+                                child: SizedBox(
+                                  height: 54,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppTheme.primaryColor,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(27)),
+                                    ),
+                                    onPressed: () => _addToCart(context),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.shopping_bag_outlined,
+                                            color: Colors.white, size: 22),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          AppLocalizations.of(context)!
+                                              .addToCart,
+                                          style: GoogleFonts.cairo(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1368,14 +1380,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8), // Reduced from 12
             decoration: BoxDecoration(
               color: Colors.black
                   .withValues(alpha: 0.2), // Darker, more transparent
               shape: BoxShape.circle,
             ),
-            child: Icon(icon,
-                color: Colors.white, size: 24), // White icon for contrast
+            child: Icon(icon, color: Colors.white, size: 18), // Reduced from 24
           ),
         ),
       ),

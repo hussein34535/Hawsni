@@ -16,6 +16,35 @@ import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+final List<String> egyptGovernorates = [
+  'القاهرة',
+  'الجيزة',
+  'الأسكندرية',
+  'الدقهلية',
+  'البحر الأحمر',
+  'البحيرة',
+  'الفيوم',
+  'الغربية',
+  'الإسماعيلية',
+  'المنوفية',
+  'المنيا',
+  'القليوبية',
+  'السويس',
+  'أسوان',
+  'أسيوط',
+  'بني سويف',
+  'بور سعيد',
+  'دمياط',
+  'الشرقية',
+  'جنوب سيناء',
+  'كفر الشيخ',
+  'مطروح',
+  'الأقصر',
+  'قنا',
+  'سوهاج',
+  'الساحل الشمالي',
+];
+
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
 
@@ -206,8 +235,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         .toList();
 
     context.read<OrderBloc>().add(
-      CreateOrder(orderData: orderData, items: items),
-    );
+          CreateOrder(orderData: orderData, items: items),
+        );
   }
 
   @override
@@ -247,204 +276,209 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               item.quantity),
                     );
 
-                    return CustomScrollView(
-                      slivers: [
-                        // Legendary AppBar
-                        SliverAppBar(
-                          floating: true,
-                          pinned: true,
-                          elevation: 0,
-                          backgroundColor: AppTheme.scaffoldBackgroundColor,
-                          leading: IconButton(
-                            icon: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.arrow_back,
-                                color: Colors.black,
-                                size: 20,
-                              ),
-                            ),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                          title: Text(
-                            AppLocalizations.of(context)!.checkout,
-                            style: GoogleFonts.cairo(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
-                          centerTitle: true,
-                        ),
-
-                        SliverPadding(
-                          padding: const EdgeInsets.all(20),
-                          sliver: SliverList(
-                            delegate: SliverChildListDelegate([
-                              // 1. Guest Info (Only if Guest)
-                              if (_isGuest) ...[
-                                _buildSectionTitle(
-                                  'Guest Information',
-                                  Icons.person_outline,
-                                ),
-                                _buildGuestForm(),
-                                const SizedBox(height: 32),
-                              ],
-
-                              // 2. Shipping Address
-                              _buildSectionTitle(
-                                AppLocalizations.of(context)!.shippingAddress,
-                                Icons.location_on_outlined,
-                              ),
-                              if (!_isGuest)
-                                BlocBuilder<AddressBloc, AddressState>(
-                                  builder: (context, addressState) {
-                                    if (addressState.status ==
-                                        AddressStatus.loading) {
-                                      return const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: CircularProgressIndicator(),
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: CustomScrollView(
+                            slivers: [
+                              // Legendary AppBar
+                              SliverAppBar(
+                                floating: true,
+                                pinned: true,
+                                elevation: 0,
+                                backgroundColor:
+                                    AppTheme.scaffoldBackgroundColor,
+                                leading: IconButton(
+                                  icon: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: 0.05),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
                                         ),
-                                      );
-                                    }
-                                    return _buildSavedAddressesList(
-                                      addressState,
-                                    );
-                                  },
-                                ),
-
-                              if (_isGuest || _isAddingAddress)
-                                _buildAddressForm(),
-
-                              if (!_isGuest && !_isAddingAddress)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 16),
-                                  child: TextButton.icon(
-                                    onPressed: () =>
-                                        setState(() => _isAddingAddress = true),
-                                    icon: const Icon(
-                                      Icons.add,
-                                      color: AppTheme.primaryColor,
+                                      ],
                                     ),
-                                    label: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.addNewAddress,
-                                      style: GoogleFonts.cairo(
-                                        color: AppTheme.primaryColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    style: TextButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                        horizontal: 24,
-                                      ),
-                                      backgroundColor: AppTheme.primaryColor
-                                          .withValues(alpha: 0.05),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
+                                    child: const Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.black,
+                                      size: 20,
                                     ),
                                   ),
+                                  onPressed: () => Navigator.of(context).pop(),
                                 ),
-                              const SizedBox(height: 32),
-
-                              // 3. Payment Method
-                              _buildSectionTitle(
-                                AppLocalizations.of(context)!.paymentMethod,
-                                Icons.payment,
+                                title: Text(
+                                  AppLocalizations.of(context)!.checkout,
+                                  style: GoogleFonts.cairo(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                centerTitle: true,
                               ),
-                              _buildPaymentMethodSelector(context),
-                              const SizedBox(height: 32),
 
-                              // 4. Order Summary
-                              _buildSectionTitle(
-                                AppLocalizations.of(context)!.orderSummary,
-                                Icons.receipt_long,
+                              SliverPadding(
+                                padding: const EdgeInsets.all(20),
+                                sliver: SliverList(
+                                  delegate: SliverChildListDelegate([
+                                    // 1. Guest Info (Only if Guest)
+                                    if (_isGuest) ...[
+                                      _buildSectionTitle(
+                                        'Guest Information',
+                                        Icons.person_outline,
+                                      ),
+                                      _buildGuestForm(),
+                                      const SizedBox(height: 32),
+                                    ],
+
+                                    // 2. Shipping Address
+                                    _buildSectionTitle(
+                                      AppLocalizations.of(context)!
+                                          .shippingAddress,
+                                      Icons.location_on_outlined,
+                                    ),
+                                    if (!_isGuest)
+                                      BlocBuilder<AddressBloc, AddressState>(
+                                        builder: (context, addressState) {
+                                          if (addressState.status ==
+                                              AddressStatus.loading) {
+                                            return const Center(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child:
+                                                    CircularProgressIndicator(),
+                                              ),
+                                            );
+                                          }
+                                          return _buildSavedAddressesList(
+                                            addressState,
+                                          );
+                                        },
+                                      ),
+
+                                    if (_isGuest || _isAddingAddress)
+                                      _buildAddressForm(),
+
+                                    if (!_isGuest && !_isAddingAddress)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 16),
+                                        child: TextButton.icon(
+                                          onPressed: () => setState(
+                                              () => _isAddingAddress = true),
+                                          icon: const Icon(
+                                            Icons.add,
+                                            color: AppTheme.primaryColor,
+                                          ),
+                                          label: Text(
+                                            AppLocalizations.of(
+                                              context,
+                                            )!
+                                                .addNewAddress,
+                                            style: GoogleFonts.cairo(
+                                              color: AppTheme.primaryColor,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 16,
+                                              horizontal: 24,
+                                            ),
+                                            backgroundColor: AppTheme
+                                                .primaryColor
+                                                .withValues(alpha: 0.05),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    const SizedBox(height: 32),
+
+                                    // 3. Payment Method
+                                    _buildSectionTitle(
+                                      AppLocalizations.of(context)!
+                                          .paymentMethod,
+                                      Icons.payment,
+                                    ),
+                                    _buildPaymentMethodSelector(context),
+                                    const SizedBox(height: 32),
+
+                                    // 4. Order Summary
+                                    _buildSectionTitle(
+                                      AppLocalizations.of(context)!
+                                          .orderSummary,
+                                      Icons.receipt_long,
+                                    ),
+                                    _buildOrderSummary(context, subtotal),
+                                    const SizedBox(height: 40),
+                                  ]),
+                                ),
                               ),
-                              _buildOrderSummary(context, subtotal),
-                              const SizedBox(height: 40),
-
-                              // Bottom Padding for FAB
-                              const SizedBox(height: 80),
-                            ]),
+                            ],
+                          ),
+                        ),
+                        // Sticky Bottom Bar
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, -5),
+                              ),
+                            ],
+                          ),
+                          child: SafeArea(
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    _processCheckout(state.items, subtotal),
+                                style: ElevatedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 18),
+                                  backgroundColor:
+                                      Colors.black, // Premium Black
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)!.placeOrder,
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Icon(
+                                      Icons.arrow_forward_rounded,
+                                      color: Colors.white,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     );
                   }
-                  return const Center(
-                    child: Text("Cart is empty"),
-                  ); // Should handle empty cart gracefully
-                },
-              ),
-
-        // Floating Action Button for Submit (Legendary Style)
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: _isLoading
-            ? null
-            : BlocBuilder<CartBloc, CartState>(
-                builder: (context, state) {
-                  if (state is CartLoaded && state.items.isNotEmpty) {
-                    double subtotal = state.items.fold(
-                      0,
-                      (sum, item) =>
-                          sum +
-                          (double.parse(
-                                item.price.replaceAll(RegExp(r'[^0-9.]'), ''),
-                              ) *
-                              item.quantity),
-                    );
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            _processCheckout(state.items, subtotal),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 18),
-                          backgroundColor: Colors.black, // Premium Black
-                          elevation: 10,
-                          shadowColor: Colors.black.withValues(alpha: 0.4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              AppLocalizations.of(context)!.placeOrder,
-                              style: GoogleFonts.cairo(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Icon(
-                              Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
+                  return const Center(child: Text("Cart is empty"));
                 },
               ),
       ),
@@ -554,10 +588,50 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildTextField(
-                  controller: _stateController,
-                  label: AppLocalizations.of(context)!.state,
-                  icon: Icons.map,
+                child: DropdownButtonFormField<String>(
+                  value: _stateController.text.isNotEmpty &&
+                          egyptGovernorates.contains(_stateController.text)
+                      ? _stateController.text
+                      : null,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context)!.state,
+                    labelStyle: GoogleFonts.cairo(color: Colors.grey[600]),
+                    prefixIcon: Icon(
+                      Icons.map,
+                      color: AppTheme.primaryColor.withValues(alpha: 0.7),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[200]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: AppTheme.primaryColor,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                  items: egyptGovernorates.map((String gov) {
+                    return DropdownMenuItem<String>(
+                      value: gov,
+                      child: Text(gov, style: GoogleFonts.cairo(fontSize: 14)),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _stateController.text = newValue ?? '';
+                    });
+                  },
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Required' : null,
+                  icon: const Icon(Icons.keyboard_arrow_down),
                 ),
               ),
             ],
@@ -659,8 +733,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     icon: const Icon(Icons.delete_outline, color: Colors.grey),
                     onPressed: () {
                       context.read<AddressBloc>().add(
-                        DeleteAddress(address.id!),
-                      );
+                            DeleteAddress(address.id!),
+                          );
                     },
                   ),
               ],
@@ -767,14 +841,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         children: [
           _buildSummaryRow(
             AppLocalizations.of(context)!.subtotal,
-            '\$${subtotal.toStringAsFixed(2)}',
+            '${subtotal.toStringAsFixed(2)} EGP',
           ),
           const SizedBox(height: 12),
-          _buildSummaryRow(AppLocalizations.of(context)!.shipping, '\$10.00'),
+          _buildSummaryRow(
+              AppLocalizations.of(context)!.shipping, '100.00 EGP'),
           const SizedBox(height: 12),
           _buildSummaryRow(
             AppLocalizations.of(context)!.tax,
-            '\$${(subtotal * 0.05).toStringAsFixed(2)}',
+            '${(subtotal * 0.05).toStringAsFixed(2)} EGP',
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
@@ -782,7 +857,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           _buildSummaryRow(
             AppLocalizations.of(context)!.total,
-            '\$${(subtotal + 10 + (subtotal * 0.05)).toStringAsFixed(2)}',
+            '${(subtotal + 100 + (subtotal * 0.05)).toStringAsFixed(2)} EGP', // Using 100 EGP as base shipping
             isTotal: true,
           ),
         ],
