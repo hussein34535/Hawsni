@@ -63,37 +63,37 @@ class AppTheme {
   static final TextTheme textTheme = GoogleFonts.playfairDisplayTextTheme(
     const TextTheme(
       displayLarge: TextStyle(
-          fontSize: 36,
+          fontSize: 28, // Reduced from 36
           fontWeight: FontWeight.bold,
           color: primaryColor,
           fontStyle: FontStyle.normal),
       displayMedium: TextStyle(
-          fontSize: 28,
+          fontSize: 24, // Reduced from 28
           fontWeight: FontWeight.bold,
           color: textPrimary,
           fontStyle: FontStyle.normal),
       displaySmall: TextStyle(
-          fontSize: 24,
+          fontSize: 20, // Reduced from 24
           fontWeight: FontWeight.w600,
           color: textPrimary,
           fontStyle: FontStyle.normal),
       headlineMedium: TextStyle(
-          fontSize: 20,
+          fontSize: 18, // Reduced from 20
           fontWeight: FontWeight.w600,
           color: textPrimary,
           fontStyle: FontStyle.normal),
       bodyLarge: TextStyle(
-          fontSize: 16,
+          fontSize: 15, // Reduced from 16
           color: textPrimary,
           fontFamily: 'Poppins',
           fontStyle: FontStyle.normal),
       bodyMedium: TextStyle(
-          fontSize: 14,
+          fontSize: 13, // Reduced from 14
           color: textSecondary,
           fontFamily: 'Poppins',
           fontStyle: FontStyle.normal),
       labelLarge: TextStyle(
-          fontSize: 14,
+          fontSize: 13, // Reduced from 14
           fontWeight: FontWeight.bold,
           color: Colors.white,
           fontFamily: 'Poppins',

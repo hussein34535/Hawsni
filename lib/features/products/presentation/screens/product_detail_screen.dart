@@ -647,7 +647,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             child: Text(
                                               displayName,
                                               style: GoogleFonts.cairo(
-                                                fontSize: 20,
+                                                fontSize: 18, // Reduced from 20
                                                 fontWeight: FontWeight.bold,
                                                 color: AppTheme.textPrimary,
                                               ),
@@ -657,7 +657,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           Text(
                                             displayPrice ?? '',
                                             style: GoogleFonts.poppins(
-                                              fontSize: 20,
+                                              fontSize: 18, // Reduced from 20
                                               fontWeight: FontWeight.bold,
                                               color: AppTheme.primaryColor,
                                             ),
@@ -671,12 +671,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         children: [
                                           const Icon(Icons.star_rounded,
                                               color: Color(0xFFFFC107),
-                                              size: 24),
+                                              size: 20), // Reduced from 24
                                           const SizedBox(width: 4),
                                           Text(
                                             '$rating',
                                             style: GoogleFonts.poppins(
-                                              fontSize: 16,
+                                              fontSize: 14, // Reduced from 16
                                               fontWeight: FontWeight.bold,
                                               color: AppTheme.textPrimary,
                                             ),
@@ -685,14 +685,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           Text(
                                             '($reviewCount ${AppLocalizations.of(context)!.reviews})',
                                             style: GoogleFonts.cairo(
-                                              fontSize: 14,
+                                              fontSize: 12, // Reduced from 14
                                               color: AppTheme.textTertiary,
                                             ),
                                           ),
                                         ],
                                       ),
 
-                                      const SizedBox(height: 32),
+                                      const SizedBox(
+                                          height: 24), // Reduced from 32
 
                                       // 2. Color Selection
                                       if (colors != null &&
@@ -794,8 +795,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                 });
                                               },
                                               child: Container(
-                                                width: 44,
-                                                height: 44,
+                                                width: 36, // Reduced from 44
+                                                height: 36, // Reduced from 44
                                                 decoration: BoxDecoration(
                                                   color: color,
                                                   shape: BoxShape.circle,
@@ -826,14 +827,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                                     0.5
                                                                 ? Colors.black
                                                                 : Colors.white,
-                                                        size: 20,
+                                                        size:
+                                                            18, // Reduced from 20
                                                       )
                                                     : null,
                                               ),
                                             );
                                           }).toList(),
                                         ),
-                                        const SizedBox(height: 32),
+                                        const SizedBox(
+                                            height: 24), // Reduced from 32
                                       ],
 
                                       // 3. Size Selection
@@ -894,53 +897,62 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         children: [
                                           // Quantity
                                           Container(
-                                            height: 50,
+                                            height: 44, // Reduced from 50
                                             decoration: BoxDecoration(
                                                 border: Border.all(
                                                     color: Colors.grey[300]!),
                                                 borderRadius:
-                                                    BorderRadius.circular(12)),
+                                                    BorderRadius.circular(
+                                                        10)), // Reduced radius
                                             child: Row(
                                               children: [
                                                 IconButton(
                                                     icon: const Icon(
-                                                        Icons.remove),
+                                                        Icons.remove,
+                                                        size:
+                                                            20), // Smaller icon
                                                     onPressed:
                                                         _decrementQuantity),
                                                 Text('$quantity',
                                                     style: const TextStyle(
-                                                        fontSize: 18,
+                                                        fontSize:
+                                                            16, // Reduced from 18
                                                         fontWeight:
                                                             FontWeight.bold)),
                                                 IconButton(
-                                                    icon: const Icon(Icons.add),
+                                                    icon: const Icon(Icons.add,
+                                                        size:
+                                                            20), // Smaller icon
                                                     onPressed:
                                                         _incrementQuantity),
                                               ],
                                             ),
                                           ),
-                                          const SizedBox(width: 16),
+                                          const SizedBox(
+                                              width: 12), // Reduced form 16
                                           // Add to Cart
                                           Expanded(
                                             child: SizedBox(
-                                              height: 50,
+                                              height: 44, // Reduced from 50
                                               child: ElevatedButton.icon(
                                                 icon: const Icon(
                                                     Icons.shopping_bag_outlined,
-                                                    color: Colors.white),
+                                                    color: Colors.white,
+                                                    size: 20), // Smaller icon
                                                 label: Text(AppLocalizations.of(
                                                         context)!
                                                     .addToCart),
                                                 style: ElevatedButton.styleFrom(
                                                   backgroundColor: Colors.black,
                                                   textStyle: GoogleFonts.cairo(
-                                                      fontSize: 18,
+                                                      fontSize:
+                                                          16, // Reduced from 18
                                                       fontWeight:
                                                           FontWeight.bold),
                                                   shape: RoundedRectangleBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              12)),
+                                                              10)), // Reduced radius
                                                 ),
                                                 onPressed: () =>
                                                     _addToCart(context),
@@ -949,7 +961,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 32),
+                                      const SizedBox(
+                                          height: 24), // Reduced from 32
 
                                       // 4. Description
                                       Text(
