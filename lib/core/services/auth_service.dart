@@ -17,6 +17,13 @@ class AuthService {
   // Get token
   static String? get token => _token;
 
+  static Future<String?> getToken() async {
+    // If token is in memory, return it.
+    // If not, maybe fetch from SharedPreferences (if you have persistence logic)
+    // For now returning the memory token.
+    return _token;
+  }
+
   // Get user data
   static Map<String, dynamic>? get userData => _userData;
 
@@ -28,12 +35,6 @@ class AuthService {
 
   // Get user id
   static String? get userId => _userData?['id'];
-
-  // Get user role
-  static String? get userRole => _userData?['role'];
-
-  // Check if admin
-  static bool get isAdmin => userRole == 'admin';
 
   // Login user
   static Future<Map<String, dynamic>?> login(

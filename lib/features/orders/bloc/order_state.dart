@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
 
 abstract class OrderState extends Equatable {
   const OrderState();

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:hwasi_app/features/checkout/models/address.dart';
 
 abstract class OrderEvent extends Equatable {
   const OrderEvent();

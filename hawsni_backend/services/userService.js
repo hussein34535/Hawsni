@@ -111,15 +111,6 @@ class UserService {
         return true;
     }
 
-    async getAllUsers() {
-        const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw new Error(error.message);
-        return data;
-    }
 }
 
 module.exports = new UserService();
