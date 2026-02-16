@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:hwasi_app/features/splash/presentation/screens/language_selection_screen.dart';
+import 'package:hwasi_app/features/admin/presentation/widgets/admin_layout.dart';
 import 'package:hwasi_app/features/splash/presentation/screens/splash_screen.dart';
 import 'package:hwasi_app/features/home/presentation/screens/home_screen.dart';
 import 'package:hwasi_app/features/products/presentation/screens/product_detail_screen.dart';
@@ -95,40 +96,54 @@ class AppRouter {
           builder: () => admin_login.AdminLoginScreen(),
         ),
       ),
-      GoRoute(
-        path: '/admin/dashboard',
-        builder: (context, state) => DeferredLoader(
-          loader: admin_dashboard.loadLibrary(),
-          builder: () => admin_dashboard.AdminDashboardScreen(),
+
+      // Admin Shell Route (Layout)
+      ShellRoute(
+        builder: (context, state, child) => DeferredLoader(
+          loader: admin_dashboard
+              .loadLibrary(), // Load dashboard lib as it contains layout usage mostly?
+          // Actually AdminLayout is in 'widgets'. We need to import it.
+          // But since we are using deferred loading, we might face issues if we don't import AdminLayout directly or deferred.
+          // For simplicity, let's assume valid imports. I will add the import above.
+          builder: () => AdminLayout(currentPath: state.uri.path, child: child),
         ),
-      ),
-      GoRoute(
-        path: '/admin/products',
-        builder: (context, state) => DeferredLoader(
-          loader: product_mgmt.loadLibrary(),
-          builder: () => product_mgmt.ProductManagementScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/admin/categories',
-        builder: (context, state) => DeferredLoader(
-          loader: category_mgmt.loadLibrary(),
-          builder: () => category_mgmt.CategoryManagementScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/admin/orders',
-        builder: (context, state) => DeferredLoader(
-          loader: order_mgmt.loadLibrary(),
-          builder: () => order_mgmt.OrderManagementScreen(),
-        ),
-      ),
-      GoRoute(
-        path: '/admin/users',
-        builder: (context, state) => DeferredLoader(
-          loader: user_mgmt.loadLibrary(),
-          builder: () => user_mgmt.UserManagementScreen(),
-        ),
+        routes: [
+          GoRoute(
+            path: '/admin/dashboard',
+            builder: (context, state) => DeferredLoader(
+              loader: admin_dashboard.loadLibrary(),
+              builder: () => admin_dashboard.AdminDashboardScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/products',
+            builder: (context, state) => DeferredLoader(
+              loader: product_mgmt.loadLibrary(),
+              builder: () => product_mgmt.ProductManagementScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/categories',
+            builder: (context, state) => DeferredLoader(
+              loader: category_mgmt.loadLibrary(),
+              builder: () => category_mgmt.CategoryManagementScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/orders',
+            builder: (context, state) => DeferredLoader(
+              loader: order_mgmt.loadLibrary(),
+              builder: () => order_mgmt.OrderManagementScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/users',
+            builder: (context, state) => DeferredLoader(
+              loader: user_mgmt.loadLibrary(),
+              builder: () => user_mgmt.UserManagementScreen(),
+            ),
+          ),
+        ],
       ),
     ],
   );

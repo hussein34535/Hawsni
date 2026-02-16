@@ -20,7 +20,8 @@ const reviewRoutes = require('./routes/reviews_supabase');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
 const bannerRoutes = require('./routes/banners');
-const adminRoutes = require('./routes/admin'); // New admin routes
+const adminRoutes = require('./routes/admin'); // Old EJS admin routes
+const adminApiRoutes = require('./routes/api/admin'); // New JSON admin routes
 const vtoRoutes = require('./routes/vto'); // Virtual Try-On routes
 // Import Controllers
 const DashboardController = require('./controllers/admin/dashboardController');
@@ -64,7 +65,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/banners', bannerRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminApiRoutes);
 app.use('/api/vto', vtoRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/reviews', reviewRoutes);

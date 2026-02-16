@@ -3,13 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hwasi_app/features/products/bloc/product_bloc.dart';
-import 'package:hwasi_app/features/products/bloc/product_event.dart';
-import 'package:hwasi_app/features/products/data/services/product_service.dart';
-import 'package:hwasi_app/features/products/presentation/screens/product_detail_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:hwasi_app/core/services/wishlist_service.dart';
+import 'package:go_router/go_router.dart';
 
 class ProductCard extends StatefulWidget {
   final String id;
@@ -109,25 +105,18 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BlocProvider(
-              create: (context) => ProductBloc(ProductService())
-                ..add(LoadProductDetails(widget.id)),
-              child: ProductDetailScreen(
-                productId: widget.id,
-                name: widget.name,
-                price: widget.price,
-                imageUrl: _selectedImageUrl ?? widget.imageUrl,
-                screenId: widget.screenId,
-                rating: widget.rating,
-                reviewCount: widget.reviewCount,
-                sizes: widget.sizes,
-                colors: widget.colors,
-              ),
-            ),
-          ),
+        context.push(
+          '/product/${widget.id}',
+          extra:
+              null, // We want to force a fetch or handle it via ID in the screen for deep link consistency,
+          // but for smooth transition we can pass the object if we have a model.
+          // reliable way is to let the screen handle it or pass arguments.
+          // For now, let's keep it simple and just push the route.
+          // Actually, if we pass the product object to the screen via extra,
+          // the ProductDetailScreen needs to be ready to receive it.
+          // The router define showed: final product = state.extra as ProductModel?;
+          // But here we don't have a ProductModel, we have individual fields.
+          // So we'll just navigate by ID and let the screen fetch/use what it has.
         );
       },
       child: Container(

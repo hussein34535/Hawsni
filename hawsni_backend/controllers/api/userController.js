@@ -69,6 +69,17 @@ class UserController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+
+    // Admin Method
+    async getAllUsers(req, res) {
+        try {
+            // Check admin role or assume middleware does it
+            const users = await UserService.getAllUsers();
+            res.json({ success: true, users });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = new UserController();

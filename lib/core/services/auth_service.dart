@@ -29,6 +29,12 @@ class AuthService {
   // Get user id
   static String? get userId => _userData?['id'];
 
+  // Get user role
+  static String? get userRole => _userData?['role'];
+
+  // Check if admin
+  static bool get isAdmin => userRole == 'admin';
+
   // Login user
   static Future<Map<String, dynamic>?> login(
       String email, String password) async {
