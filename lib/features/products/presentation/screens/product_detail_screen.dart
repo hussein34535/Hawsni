@@ -362,66 +362,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               )
             : Scaffold(
                 backgroundColor: AppTheme.scaffoldBackgroundColor,
-                bottomNavigationBar: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.scaffoldBackgroundColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, -5),
-                      ),
-                    ],
-                  ),
-                  child: SafeArea(
-                    child: Row(
-                      children: [
-                        Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey[300]!),
-                              borderRadius: BorderRadius.circular(12)),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                  icon: const Icon(Icons.remove),
-                                  onPressed: _decrementQuantity),
-                              Text('$quantity',
-                                  style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold)),
-                              IconButton(
-                                  icon: const Icon(Icons.add),
-                                  onPressed: _incrementQuantity),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: SizedBox(
-                            height: 56,
-                            child: ElevatedButton.icon(
-                              icon: const Icon(Icons.shopping_bag_outlined,
-                                  color: Colors.white),
-                              label:
-                                  Text(AppLocalizations.of(context)!.addToCart),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                textStyle: GoogleFonts.cairo(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                              ),
-                              onPressed: () => _addToCart(context),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+// Bottom bar removed
                 body: Stack(
                   children: [
                     CustomScrollView(
@@ -947,6 +888,69 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         const SizedBox(height: 32),
                                       ],
 
+                                      // 3.5 Quantity & Add to Cart
+                                      const SizedBox(height: 24),
+                                      Row(
+                                        children: [
+                                          // Quantity
+                                          Container(
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.grey[300]!),
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                            child: Row(
+                                              children: [
+                                                IconButton(
+                                                    icon: const Icon(
+                                                        Icons.remove),
+                                                    onPressed:
+                                                        _decrementQuantity),
+                                                Text('$quantity',
+                                                    style: const TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                IconButton(
+                                                    icon: const Icon(Icons.add),
+                                                    onPressed:
+                                                        _incrementQuantity),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          // Add to Cart
+                                          Expanded(
+                                            child: SizedBox(
+                                              height: 50,
+                                              child: ElevatedButton.icon(
+                                                icon: const Icon(
+                                                    Icons.shopping_bag_outlined,
+                                                    color: Colors.white),
+                                                label: Text(AppLocalizations.of(
+                                                        context)!
+                                                    .addToCart),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Colors.black,
+                                                  textStyle: GoogleFonts.cairo(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12)),
+                                                ),
+                                                onPressed: () =>
+                                                    _addToCart(context),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 32),
+
                                       // 4. Description
                                       Text(
                                         AppLocalizations.of(context)!
@@ -1042,192 +1046,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                     // Floating Bottom Bar
                     // Legendary Floating Bottom Bar
-                    Positioned(
-                      bottom: 24,
-                      left: 20,
-                      right: 20,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: Colors.white
-                              .withValues(alpha: 0.95), // Back to White
-                          borderRadius: BorderRadius.circular(40),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black
-                                  .withValues(alpha: 0.1), // Softer shadow
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // 1. Price Section (Premium Look - Number Only)
-                            Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment
-                                    .center, // Center vertically
-                                children: [
-                                  Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: (widget.price ?? '0')
-                                              .split('.')[0],
-                                          style: GoogleFonts.poppins(
-                                            fontSize:
-                                                20, // Slightly larger since label is gone
-                                            fontWeight: FontWeight.bold,
-                                            color: AppTheme
-                                                .primaryColor, // Green Price
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text:
-                                              " ${AppLocalizations.of(context)!.currencySymbol}",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 14,
-                                            color: AppTheme
-                                                .primaryColor, // Green Symbol
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const Spacer(),
-
-                            // 2. AI VTO Button (The "Legendary" Magic Button - Purple Gradient)
-                            GestureDetector(
-                              onTap: () {
-                                if (!AuthService.isAuthenticated()) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        AppLocalizations.of(context)!
-                                            .pleaseLogin,
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      ),
-                                      backgroundColor: Colors.black87,
-                                      behavior: SnackBarBehavior.floating,
-                                      action: SnackBarAction(
-                                        label: 'Login',
-                                        textColor: AppTheme.primaryColor,
-                                        onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const LoginScreen(),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DeferredLoader(
-                                      loader: vto.loadLibrary(),
-                                      builder: () => vto.VirtualTryOnScreen(
-                                        productId: widget.productId,
-                                        productImageUrl: widget.imageUrl ?? '',
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF6366F1),
-                                      Color(0xFFEC4899)
-                                    ], // Indigo to Pink (Magic Look)
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(24),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFF6366F1)
-                                          .withValues(alpha: 0.4),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.auto_awesome,
-                                        color: Colors.white, size: 16),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      "جرب علي صورتك",
-                                      style: GoogleFonts.cairo(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            // 3. Add to Cart (Black Button with Text)
-                            GestureDetector(
-                              onTap: () => _addToCart(context),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: Colors.black, // Back to Black
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.shopping_bag_outlined,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      "شراء", // "Buy" Text added
-                                      style: GoogleFonts.cairo(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+// Floating bottom bar removed
                   ],
                 ),
               ),

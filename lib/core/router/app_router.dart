@@ -11,6 +11,8 @@ import 'package:hwasi_app/features/products/presentation/screens/product_compari
 
 import 'package:hwasi_app/features/products/data/models/product_model.dart';
 
+import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
+
 class AppRouter {
   static final router = GoRouter(
     initialLocation: '/',
@@ -22,7 +24,7 @@ class AppRouter {
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const MainScreen(),
       ),
       GoRoute(
         path: '/login',
