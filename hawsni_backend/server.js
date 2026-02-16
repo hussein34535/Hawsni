@@ -24,7 +24,7 @@ const bannerRoutes = require('./routes/banners');
 // app.use('/api/payment', paymentRoutes);
 const adminRoutes = require('./routes/admin'); // Admin routes (EJS)
 // ...
-app.use('/api/admin', adminRoutes);
+// app.use('/api/admin', adminRoutes);
 const vtoRoutes = require('./routes/vto'); // Virtual Try-On routes
 // Import Controllers
 const DashboardController = require('./controllers/admin/dashboardController');
