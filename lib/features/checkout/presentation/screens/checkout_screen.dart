@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
-import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
 import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
 import 'package:hwasi_app/features/orders/bloc/order_event.dart';
 import 'package:hwasi_app/features/orders/bloc/order_state.dart';
+import 'package:hwasi_app/features/address/bloc/address_bloc.dart';
+import 'package:hwasi_app/features/address/bloc/address_event.dart';
+import 'package:hwasi_app/features/address/bloc/address_state.dart';
+import 'package:hwasi_app/features/address/data/models/address_model.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
-import 'package:hwasi_app/core/utils/responsive_layout.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -22,26 +26,148 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
+
+  // Guest Controllers
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+
+  // Address Controllers
+  final _streetController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _stateController = TextEditingController();
+  final _zipController = TextEditingController();
+
+  // State
+  bool _isAddingAddress = false;
+
+  bool get _isGuest => AuthService.token == null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!_isGuest) {
+      context.read<AddressBloc>().add(LoadAddresses());
+    } else {
+      _isAddingAddress = true; // Guests must enter address
+    }
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _streetController.dispose();
+    _cityController.dispose();
+    _stateController.dispose();
+    _zipController.dispose();
     super.dispose();
   }
 
-  bool get _isGuest => AuthService.token == null;
+  void _saveAddress() {
+    if (_streetController.text.isEmpty || _cityController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.fillAddressDetails),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final newAddress = AddressModel(
+      title: 'Home', // Default label
+      name: AuthService.userName ?? 'User',
+      phone: AuthService.userData?['phone'] ?? '',
+      addressLine1: _streetController.text,
+      city: _cityController.text,
+      state: _stateController.text,
+      zipCode: _zipController.text,
+      country: 'Egypt',
+    );
+
+    context.read<AddressBloc>().add(AddAddress(newAddress));
+    setState(() {
+      _isAddingAddress = false;
+      // Clear controllers? Maybe keep them populated in case of edit?
+      // For now clear to show fresh state
+      _streetController.clear();
+      _cityController.clear();
+      _stateController.clear();
+      _zipController.clear();
+    });
+  }
 
   void _processCheckout(List<CartItem> cartItems, double subtotal) {
     if (_isGuest && !_formKey.currentState!.validate()) {
       return;
     }
 
+    // Auth User Validation
+    AddressModel? selectedAddress;
+    if (!_isGuest) {
+      final addressState = context.read<AddressBloc>().state;
+      selectedAddress = addressState.selectedAddress;
+
+      if (selectedAddress == null && !_isAddingAddress) {
+        // If no address selected and not adding one, prompt to add or select
+        if (addressState.addresses.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.pleaseAddAddress),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+          setState(() => _isAddingAddress = true);
+          return;
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select a shipping address'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+          return;
+        }
+      }
+    }
+
+    if (_isAddingAddress && (!_isGuest)) {
+      // If adding address, user must save it first (or we auto-save?)
+      // Better to force save for consistency
+      if (_streetController.text.isNotEmpty) {
+        _saveAddress();
+        // Return and ask user to click Place Order again?
+        // Or await the saving? Awaiting bloc is tricky here.
+        // Let's ask user to click place order again after saving.
+        return;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.fillAddressDetails),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+        return;
+      }
+    }
+
+    // Construct Address String
+    String fullAddress;
+    if (_isGuest) {
+      fullAddress =
+          '${_streetController.text}, ${_cityController.text}, ${_stateController.text}';
+    } else {
+      if (selectedAddress != null) {
+        fullAddress =
+            '${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state}';
+      } else {
+        // Fallback (should be covered by validation above)
+        fullAddress = '${_streetController.text}, ${_cityController.text}';
+      }
+    }
+
     final orderData = {
-      'shippingAddress':
-          '123 Fashion Street, Luxury District, New York, NY 10001',
+      'shippingAddress': fullAddress,
       'paymentMethod': 'Cash on Delivery',
       'subtotal': subtotal,
       'discount': 0.0,
@@ -49,7 +175,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (_isGuest) ...{
         'guestName': _nameController.text,
         'guestPhone': _phoneController.text,
-        'guestEmail': '', // Optional or add field if needed
+        'guestEmail': '',
       }
     };
 
@@ -92,22 +218,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            AppLocalizations.of(context)!.checkout,
-            style: AppTheme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          centerTitle: true,
-          backgroundColor: AppTheme.scaffoldBackgroundColor,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ),
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
         body: _isLoading
             ? const Center(child: SpinningLoader())
             : BlocBuilder<CartBloc, CartState>(
@@ -123,333 +234,202 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               item.quantity),
                     );
 
-                    if (ResponsiveLayout.isDesktop(context)) {
-                      return _buildDesktopLayout(context, state, subtotal);
-                    }
-
-                    return Stack(
-                      children: [
-                        SingleChildScrollView(
-                          padding: EdgeInsets.fromLTRB(
-                            20,
-                            10,
-                            20,
-                            MediaQuery.of(context).padding.bottom + 120,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (_isGuest) ...[
-                                _buildSectionTitle('Guest Information'),
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: AppTheme.cardDecoration,
-                                  child: Form(
-                                    key: _formKey,
-                                    child: Column(
-                                      children: [
-                                        TextFormField(
-                                          controller: _nameController,
-                                          decoration: InputDecoration(
-                                            labelText: 'Full Name',
-                                            hintText: 'Enter your name',
-                                            prefixIcon: const Icon(
-                                                Icons.person_outline),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: BorderSide.none,
-                                            ),
-                                            filled: true,
-                                            fillColor: AppTheme.primaryColor
-                                                .withValues(alpha: 0.05),
-                                          ),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'Please enter your name';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                        const SizedBox(height: 16),
-                                        TextFormField(
-                                          controller: _phoneController,
-                                          keyboardType: TextInputType.phone,
-                                          decoration: InputDecoration(
-                                            labelText: 'Phone Number',
-                                            hintText: 'Enter your phone number',
-                                            prefixIcon: const Icon(
-                                                Icons.phone_outlined),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              borderSide: BorderSide.none,
-                                            ),
-                                            filled: true,
-                                            fillColor: AppTheme.primaryColor
-                                                .withValues(alpha: 0.05),
-                                          ),
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'Please enter your phone number';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ],
-                                    ),
+                    return CustomScrollView(
+                      slivers: [
+                        // Legendary AppBar
+                        SliverAppBar(
+                          floating: true,
+                          pinned: true,
+                          elevation: 0,
+                          backgroundColor: AppTheme.scaffoldBackgroundColor,
+                          leading: IconButton(
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
                                   ),
-                                ),
-                                const SizedBox(height: 24),
-                              ],
-                              _buildSectionTitle(
-                                AppLocalizations.of(context)!.shippingAddress,
+                                ],
                               ),
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: AppTheme.cardDecoration,
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.location_on,
-                                        color: AppTheme.primaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            AppLocalizations.of(
-                                              context,
-                                            )!
-                                                .homeLabel,
-                                            style: AppTheme
-                                                .textTheme.titleMedium
-                                                ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '123 Fashion Street, Luxury District\nNew York, NY 10001',
-                                            style:
-                                                AppTheme.textTheme.bodyMedium,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_forward_ios,
-                                      color: AppTheme.textTertiary,
-                                      size: 16,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              _buildSectionTitle(
-                                AppLocalizations.of(context)!.paymentMethod,
-                              ),
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: AppTheme.cardDecoration,
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor.withValues(
-                                          alpha: 0.1,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons
-                                            .money, // Changed icon to money/cash
-                                        color: AppTheme.primaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            AppLocalizations.of(context)!
-                                                .paymentMethod, // Use localized "Payment Method" or hardcode "Cash on Delivery" if localization missing
-                                            style: AppTheme
-                                                .textTheme.titleMedium
-                                                ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            'Cash on Delivery (Only option)',
-                                            style:
-                                                AppTheme.textTheme.bodyMedium,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // Removed arrow as it is the only option
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              _buildSectionTitle(
-                                AppLocalizations.of(context)!.orderSummary,
-                              ),
-                              Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: AppTheme.cardDecoration,
-                                child: Column(
-                                  children: [
-                                    _buildSummaryRow(
-                                      AppLocalizations.of(context)!.subtotal,
-                                      '\$${subtotal.toStringAsFixed(2)}',
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _buildSummaryRow(
-                                      AppLocalizations.of(context)!.shipping,
-                                      '\$10.00',
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _buildSummaryRow(
-                                      AppLocalizations.of(context)!.tax,
-                                      '\$${(subtotal * 0.05).toStringAsFixed(2)}',
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      child: Divider(
-                                        color: AppTheme.dividerColor,
-                                      ),
-                                    ),
-                                    _buildSummaryRow(
-                                      AppLocalizations.of(context)!.total,
-                                      '\$${(subtotal + 10 + (subtotal * 0.05)).toStringAsFixed(2)}',
-                                      isTotal: true,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                              child: const Icon(Icons.arrow_back,
+                                  color: Colors.black, size: 20),
+                            ),
+                            onPressed: () => Navigator.of(context).pop(),
                           ),
+                          title: Text(
+                            AppLocalizations.of(context)!.checkout,
+                            style: GoogleFonts.cairo(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          centerTitle: true,
                         ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.fromLTRB(
-                              24,
-                              24,
-                              24,
-                              MediaQuery.of(context).padding.bottom + 24,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.surfaceColor,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppTheme.primaryColor.withValues(
-                                    alpha: 0.08,
-                                  ),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, -5),
-                                ),
+
+                        SliverPadding(
+                          padding: const EdgeInsets.all(20),
+                          sliver: SliverList(
+                            delegate: SliverChildListDelegate([
+                              // 1. Guest Info (Only if Guest)
+                              if (_isGuest) ...[
+                                _buildSectionTitle(
+                                    'Guest Information', Icons.person_outline),
+                                _buildGuestForm(),
+                                const SizedBox(height: 32),
                               ],
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(30),
-                              ),
-                            ),
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () =>
-                                    _processCheckout(state.items, subtotal),
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 20,
-                                  ),
-                                  backgroundColor: AppTheme.primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  elevation: 8,
-                                  shadowColor: AppTheme.primaryColor.withValues(
-                                    alpha: 0.4,
+
+                              // 2. Shipping Address
+                              _buildSectionTitle(
+                                  AppLocalizations.of(context)!.shippingAddress,
+                                  Icons.location_on_outlined),
+                              if (!_isGuest)
+                                BlocBuilder<AddressBloc, AddressState>(
+                                    builder: (context, addressState) {
+                                  if (addressState.status ==
+                                      AddressStatus.loading) {
+                                    return const Center(
+                                        child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: CircularProgressIndicator(),
+                                    ));
+                                  }
+                                  return _buildSavedAddressesList(addressState);
+                                }),
+
+                              if (_isGuest || _isAddingAddress)
+                                _buildAddressForm(),
+
+                              if (!_isGuest && !_isAddingAddress)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: TextButton.icon(
+                                    onPressed: () =>
+                                        setState(() => _isAddingAddress = true),
+                                    icon: const Icon(Icons.add,
+                                        color: AppTheme.primaryColor),
+                                    label: Text(
+                                      AppLocalizations.of(context)!
+                                          .addNewAddress,
+                                      style: GoogleFonts.cairo(
+                                        color: AppTheme.primaryColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16, horizontal: 24),
+                                      backgroundColor: AppTheme.primaryColor
+                                          .withValues(alpha: 0.05),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                    ),
                                   ),
                                 ),
-                                child: Text(
-                                  AppLocalizations.of(context)!.placeOrder,
-                                  style:
-                                      AppTheme.textTheme.labelLarge?.copyWith(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
+                              const SizedBox(height: 32),
+
+                              // 3. Payment Method
+                              _buildSectionTitle(
+                                  AppLocalizations.of(context)!.paymentMethod,
+                                  Icons.payment),
+                              _buildPaymentMethodSelector(context),
+                              const SizedBox(height: 32),
+
+                              // 4. Order Summary
+                              _buildSectionTitle(
+                                  AppLocalizations.of(context)!.orderSummary,
+                                  Icons.receipt_long),
+                              _buildOrderSummary(context, subtotal),
+                              const SizedBox(height: 40),
+
+                              // Bottom Padding for FAB
+                              const SizedBox(height: 80),
+                            ]),
                           ),
                         ),
                       ],
                     );
                   }
-                  return const SizedBox();
+                  return const Center(
+                      child: Text(
+                          "Cart is empty")); // Should handle empty cart gracefully
+                },
+              ),
+
+        // Floating Action Button for Submit (Legendary Style)
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: _isLoading
+            ? null
+            : BlocBuilder<CartBloc, CartState>(
+                builder: (context, state) {
+                  if (state is CartLoaded && state.items.isNotEmpty) {
+                    double subtotal = state.items.fold(
+                        0,
+                        (sum, item) =>
+                            sum +
+                            (double.parse(item.price
+                                    .replaceAll(RegExp(r'[^0-9.]'), '')) *
+                                item.quantity));
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            _processCheckout(state.items, subtotal),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          backgroundColor: Colors.black, // Premium Black
+                          elevation: 10,
+                          shadowColor: Colors.black.withValues(alpha: 0.4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.placeOrder,
+                              style: GoogleFonts.cairo(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            const Icon(Icons.arrow_forward_rounded,
+                                color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
       ),
     );
   }
 
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.surfaceColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Icon(
-          Icons.check_circle,
-          color: AppTheme.successColor,
-          size: 60,
-        ),
-        content: Text(
-          AppLocalizations.of(context)!.orderPlacedSuccess,
-          textAlign: TextAlign.center,
-          style: AppTheme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          Center(
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-              child: Text(
-                AppLocalizations.of(context)!.continueShopping,
-                style: AppTheme.textTheme.labelLarge?.copyWith(
-                  color: AppTheme.primaryColor,
-                ),
-              ),
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16, left: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: AppTheme.primaryColor, size: 24),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: GoogleFonts.cairo(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textPrimary,
             ),
           ),
         ],
@@ -457,15 +437,310 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 4),
-      child: Text(
-        title,
-        style: AppTheme.textTheme.headlineSmall?.copyWith(
-          fontSize: 18,
-          color: AppTheme.textSecondary,
+  Widget _buildGuestForm() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            _buildTextField(
+              controller: _nameController,
+              label: AppLocalizations.of(context)!.fullName,
+              icon: Icons.person_outline,
+              validator: (v) => v?.isEmpty == true ? 'Required' : null,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: _phoneController,
+              label: AppLocalizations.of(context)!.phoneNumber,
+              icon: Icons.phone_outlined,
+              validator: (v) => v?.isEmpty == true ? 'Required' : null,
+              keyboardType: TextInputType.phone,
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAddressForm() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!_isGuest)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(AppLocalizations.of(context)!.addNewAddress,
+                  style: GoogleFonts.cairo(
+                      fontWeight: FontWeight.bold, fontSize: 16)),
+            ),
+          _buildTextField(
+            controller: _streetController,
+            label: AppLocalizations.of(context)!.streetAddress,
+            icon: Icons.home_outlined,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTextField(
+                  controller: _cityController,
+                  label: AppLocalizations.of(context)!.city,
+                  icon: Icons.location_city,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildTextField(
+                  controller: _stateController,
+                  label: AppLocalizations.of(context)!.state,
+                  icon: Icons.map,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (!_isGuest)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveAddress,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(AppLocalizations.of(context)!.saveAddress,
+                    style: GoogleFonts.cairo(fontWeight: FontWeight.bold)),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSavedAddressesList(AddressState addressState) {
+    if (addressState.addresses.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      children: List.generate(addressState.addresses.length, (index) {
+        final address = addressState.addresses[index];
+        final isSelected = addressState.selectedAddressId == address.id;
+
+        return GestureDetector(
+          onTap: () {
+            context.read<AddressBloc>().add(SelectAddress(address.id!));
+            setState(() => _isAddingAddress = false);
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? AppTheme.primaryColor.withValues(alpha: 0.05)
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected ? AppTheme.primaryColor : Colors.grey[200]!,
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ]
+                  : null,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                  color: isSelected ? AppTheme.primaryColor : Colors.grey,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        address.title,
+                        style: GoogleFonts.cairo(
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${address.addressLine1}, ${address.city}, ${address.state}',
+                        style: GoogleFonts.cairo(
+                          color: AppTheme.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (isSelected)
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                    onPressed: () {
+                      context
+                          .read<AddressBloc>()
+                          .add(DeleteAddress(address.id!));
+                    },
+                  )
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: validator,
+      style: GoogleFonts.cairo(fontSize: 16),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.cairo(color: Colors.grey[600]),
+        prefixIcon:
+            Icon(icon, color: AppTheme.primaryColor.withValues(alpha: 0.7)),
+        filled: true,
+        fillColor: Colors.grey[50],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide:
+              const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentMethodSelector(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4), // For the border/padding effect
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.money, color: Colors.green),
+        ),
+        title: Text(
+          AppLocalizations.of(context)!.cashOnDelivery,
+          style: GoogleFonts.cairo(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Text(
+          AppLocalizations.of(context)!.payOnDeliverySubtitle,
+          style: GoogleFonts.cairo(
+            color: Colors.grey[500],
+            fontSize: 12,
+          ),
+        ),
+        trailing: const Icon(Icons.check_circle, color: AppTheme.primaryColor),
+      ),
+    );
+  }
+
+  Widget _buildOrderSummary(BuildContext context, double subtotal) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey[100]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildSummaryRow(AppLocalizations.of(context)!.subtotal,
+              '\$${subtotal.toStringAsFixed(2)}'),
+          const SizedBox(height: 12),
+          _buildSummaryRow(AppLocalizations.of(context)!.shipping, '\$10.00'),
+          const SizedBox(height: 12),
+          _buildSummaryRow(AppLocalizations.of(context)!.tax,
+              '\$${(subtotal * 0.05).toStringAsFixed(2)}'),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Divider(color: Colors.grey[200]),
+          ),
+          _buildSummaryRow(AppLocalizations.of(context)!.total,
+              '\$${(subtotal + 10 + (subtotal * 0.05)).toStringAsFixed(2)}',
+              isTotal: true),
+        ],
       ),
     );
   }
@@ -476,230 +751,87 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       children: [
         Text(
           label,
-          style: AppTheme.textTheme.bodyLarge?.copyWith(
-            color: isTotal ? AppTheme.textPrimary : AppTheme.textSecondary,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+          style: GoogleFonts.cairo(
+            color: isTotal ? Colors.black : Colors.grey[600],
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
+            fontSize: isTotal ? 18 : 16,
           ),
         ),
         Text(
           value,
-          style: AppTheme.textTheme.bodyLarge?.copyWith(
-            color: isTotal ? AppTheme.primaryColor : AppTheme.textPrimary,
-            fontSize: isTotal ? 20 : 16,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.bold,
+          style: GoogleFonts.poppins(
+            color: isTotal ? AppTheme.primaryColor : Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: isTotal ? 22 : 16,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDesktopLayout(
-      BuildContext context, CartLoaded state, double subtotal) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left Column: Forms
-              Expanded(
-                flex: 2,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      if (_isGuest) ...[
-                        _buildSectionTitle('Guest Information'),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: AppTheme.cardDecoration,
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              children: [
-                                TextFormField(
-                                  controller: _nameController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Full Name',
-                                    hintText: 'Enter your name',
-                                    prefixIcon:
-                                        const Icon(Icons.person_outline),
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none),
-                                    filled: true,
-                                    fillColor: AppTheme.primaryColor
-                                        .withValues(alpha: 0.05),
-                                  ),
-                                  validator: (value) =>
-                                      value == null || value.isEmpty
-                                          ? 'Please enter your name'
-                                          : null,
-                                ),
-                                const SizedBox(height: 16),
-                                TextFormField(
-                                  controller: _phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: InputDecoration(
-                                    labelText: 'Phone Number',
-                                    hintText: 'Enter your phone number',
-                                    prefixIcon:
-                                        const Icon(Icons.phone_outlined),
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none),
-                                    filled: true,
-                                    fillColor: AppTheme.primaryColor
-                                        .withValues(alpha: 0.05),
-                                  ),
-                                  validator: (value) =>
-                                      value == null || value.isEmpty
-                                          ? 'Please enter your phone number'
-                                          : null,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                      _buildSectionTitle(
-                          AppLocalizations.of(context)!.shippingAddress),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: AppTheme.cardDecoration,
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  color: AppTheme.primaryColor
-                                      .withValues(alpha: 0.1),
-                                  shape: BoxShape.circle),
-                              child: const Icon(Icons.location_on,
-                                  color: AppTheme.primaryColor),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(AppLocalizations.of(context)!.homeLabel,
-                                      style: AppTheme.textTheme.titleMedium
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                      '123 Fashion Street, Luxury District\nNew York, NY 10001',
-                                      style: AppTheme.textTheme.bodyMedium),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle(
-                          AppLocalizations.of(context)!.paymentMethod),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: AppTheme.cardDecoration,
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  color: AppTheme.primaryColor
-                                      .withValues(alpha: 0.1),
-                                  shape: BoxShape.circle),
-                              child: const Icon(Icons.money,
-                                  color: AppTheme.primaryColor),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      AppLocalizations.of(context)!
-                                          .paymentMethod,
-                                      style: AppTheme.textTheme.titleMedium
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 4),
-                                  Text('Cash on Delivery (Only option)',
-                                      style: AppTheme.textTheme.bodyMedium),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        contentPadding: const EdgeInsets.all(32),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_rounded,
+                  color: Colors.green, size: 48),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              AppLocalizations.of(context)!.orderPlacedSuccess,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.cairo(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              AppLocalizations.of(context)!.orderConfirmationMessage,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.cairo(
+                color: Colors.grey[600],
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.continueShopping,
+                  style: GoogleFonts.cairo(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
               ),
-              const SizedBox(width: 32),
-              // Right Column: Summary & Button
-              Expanded(
-                flex: 1,
-                child: Column(
-                  children: [
-                    _buildSectionTitle(
-                        AppLocalizations.of(context)!.orderSummary),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: AppTheme.cardDecoration,
-                      child: Column(
-                        children: [
-                          _buildSummaryRow(
-                              AppLocalizations.of(context)!.subtotal,
-                              '\$${subtotal.toStringAsFixed(2)}'),
-                          const SizedBox(height: 12),
-                          _buildSummaryRow(
-                              AppLocalizations.of(context)!.shipping,
-                              '\$10.00'),
-                          const SizedBox(height: 12),
-                          _buildSummaryRow(AppLocalizations.of(context)!.tax,
-                              '\$${(subtotal * 0.05).toStringAsFixed(2)}'),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Divider(color: AppTheme.dividerColor),
-                          ),
-                          _buildSummaryRow(AppLocalizations.of(context)!.total,
-                              '\$${(subtotal + 10 + (subtotal * 0.05)).toStringAsFixed(2)}',
-                              isTotal: true),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            _processCheckout(state.items, subtotal),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          backgroundColor: AppTheme.primaryColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                          elevation: 8,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context)!.placeOrder,
-                          style: AppTheme.textTheme.labelLarge?.copyWith(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

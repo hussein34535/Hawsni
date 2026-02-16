@@ -221,7 +221,7 @@ class _ProductCardState extends State<ProductCard> {
             // Details Section
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -240,27 +240,23 @@ class _ProductCardState extends State<ProductCard> {
                     ),
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
 
-                  // 2. Interactive Colors (Requested: Show them prominent outside)
+                  // 2. Interactive Colors
                   if (widget.colors != null && widget.colors!.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 6.0),
+                      padding: const EdgeInsets.only(bottom: 4.0),
                       child: Row(
                         children: widget.colors!.take(5).map((c) {
                           String colorCode = '';
                           String? variantImage;
                           if (c is Map) {
                             colorCode = c['color']?.toString() ?? '';
-                            variantImage = c['imageIndex']
-                                ?.toString(); // Corrected key if needed, or stick to what API sends
-                            // Try to check if imageIndex is sent, usually it's 'imageIndex' or 'image'
                             if (c.containsKey('image'))
                               variantImage = c['image']?.toString();
                             if (c.containsKey('imageIndex'))
                               variantImage = c['imageIndex']?.toString();
                           } else if (c is String) {
-                            // Robust JSON parsing for stringified data
                             if (c.trim().startsWith('{')) {
                               try {
                                 final colorMatch =
@@ -268,15 +264,12 @@ class _ProductCardState extends State<ProductCard> {
                                         .firstMatch(c);
                                 if (colorMatch != null) {
                                   colorCode = colorMatch.group(1) ?? c;
-
-                                  // Try to extract image/imageIndex
                                   final imageMatch =
                                       RegExp(r'"image"\s*:\s*"([^"]+)"')
                                           .firstMatch(c);
                                   if (imageMatch != null) {
                                     variantImage = imageMatch.group(1);
                                   } else {
-                                    // Fallback to imageIndex if that's what is used
                                     final indexMatch =
                                         RegExp(r'"imageIndex"\s*:\s*(\d+)')
                                             .firstMatch(c);
@@ -308,18 +301,11 @@ class _ProductCardState extends State<ProductCard> {
                                 _selectedColorCode = colorCode;
                                 if (variantImage != null &&
                                     variantImage.isNotEmpty) {
-                                  // If it is an index (digits only), we can't swap the image URL directly unless we have the list of images.
-                                  // But ProductCard only has `imageUrl`.
-                                  // Limitation: We can only swap if we have the URL. `ProductDetailScreen` has the full `images` list.
-                                  // `ProductCard` does NOT have the full list.
-                                  // Strategy: If `variantImage` is a URL, use it. If it's an index, we can't do much without the list.
-                                  // Checking if it looks like a URL:
                                   if (variantImage!.startsWith('http')) {
                                     _selectedImageUrl = variantImage;
                                   } else if (RegExp(r'^\d+$')
                                           .hasMatch(variantImage!) &&
                                       widget.images != null) {
-                                    // It is an index
                                     try {
                                       final images = widget.images!;
                                       int index = int.parse(variantImage!);
@@ -360,37 +346,36 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                     ),
 
-                  // NOTE: Number of sizes removed as per user request
-
-                  const SizedBox(height: 4),
-
-                  // 3. Rating & Price Row
-                  // 3. Price Only (Rating removed as per request)
+                  // 3. Price
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: widget.price.split('.')[0],
-                              style: GoogleFonts.poppins(
-                                fontSize: 16, // Slightly larger for emphasis
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: widget.price.split('.')[0],
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
+                                ),
                               ),
-                            ),
-                            const TextSpan(text: ' '),
-                            TextSpan(
-                              text:
-                                  AppLocalizations.of(context)!.currencySymbol,
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.primaryColor,
+                              const TextSpan(text: ' '),
+                              TextSpan(
+                                text: AppLocalizations.of(context)!
+                                    .currencySymbol,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.primaryColor,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

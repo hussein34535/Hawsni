@@ -362,6 +362,66 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               )
             : Scaffold(
                 backgroundColor: AppTheme.scaffoldBackgroundColor,
+                bottomNavigationBar: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: AppTheme.scaffoldBackgroundColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
+                  ),
+                  child: SafeArea(
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 56,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey[300]!),
+                              borderRadius: BorderRadius.circular(12)),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                  icon: const Icon(Icons.remove),
+                                  onPressed: _decrementQuantity),
+                              Text('$quantity',
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
+                              IconButton(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: _incrementQuantity),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: SizedBox(
+                            height: 56,
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.shopping_bag_outlined,
+                                  color: Colors.white),
+                              label:
+                                  Text(AppLocalizations.of(context)!.addToCart),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                textStyle: GoogleFonts.cairo(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                              onPressed: () => _addToCart(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 body: Stack(
                   children: [
                     CustomScrollView(
@@ -371,9 +431,116 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               screenHeight * 0.6, // Slightly reduced height
                           pinned: true,
                           backgroundColor: Colors.transparent,
-                          leadingWidth: 0,
-                          leading: const SizedBox.shrink(),
+                          leadingWidth: 70,
+                          leading: Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: _buildGlassIcon(
+                              icon: Icons.arrow_back,
+                              onTap: () => Navigator.of(context).pop(),
+                            ),
+                          ),
                           actions: [
+                            // Wishlist
+                            BlocBuilder<ProductBloc, ProductState>(
+                              builder: (context, state) {
+                                String currentName = widget.name ?? '';
+                                String currentPrice = widget.price ?? '0';
+                                String currentImageUrl = widget.imageUrl ?? '';
+
+                                if (state is ProductDetailsLoaded) {
+                                  currentName = state.product.name;
+                                  currentPrice = state.product.price.toString();
+                                  if (state.product.images != null &&
+                                      state.product.images!.isNotEmpty) {
+                                    currentImageUrl = state.product.images![0];
+                                  }
+                                }
+
+                                return Consumer<WishlistService>(
+                                  builder: (context, wishlistService, _) {
+                                    final isInWishlist = wishlistService
+                                        .isItemInWishlist(widget.productId);
+                                    return _buildGlassIcon(
+                                      icon: isInWishlist
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: isInWishlist
+                                          ? AppTheme.errorColor
+                                          : Colors.black,
+                                      onTap: () {
+                                        if (currentName.isEmpty) return;
+
+                                        final item = WishlistItem(
+                                          id: widget.productId,
+                                          name: currentName,
+                                          price: currentPrice,
+                                          imageUrl: currentImageUrl.isNotEmpty
+                                              ? currentImageUrl
+                                              : 'https://via.placeholder.com/400',
+                                          description: widget.description,
+                                          rating: widget.rating,
+                                          reviewCount: widget.reviewCount,
+                                        );
+                                        if (isInWishlist) {
+                                          wishlistService.removeFromWishlist(
+                                              widget.productId);
+                                        } else {
+                                          wishlistService.addToWishlist(item);
+                                        }
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 12),
+
+                            // Cart
+                            BlocBuilder<CartBloc, CartState>(
+                              builder: (context, state) {
+                                final itemCount = state is CartLoaded
+                                    ? state.items.length
+                                    : 0;
+                                return Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    _buildGlassIcon(
+                                      icon: Icons.shopping_bag_outlined,
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const CartScreen()),
+                                        );
+                                      },
+                                    ),
+                                    if (itemCount > 0)
+                                      Positioned(
+                                        right: -4,
+                                        top: -4,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: AppTheme.primaryColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Text(
+                                            '$itemCount',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 12),
+
                             _buildGlassIcon(
                               icon: Icons.share,
                               onTap: () {
@@ -537,7 +704,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              displayName ?? '',
+                                              displayName,
                                               style: GoogleFonts.cairo(
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.bold,
@@ -871,129 +1038,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ),
                       ],
-                    ),
-
-                    // Custom Top Bar (Back Button & Actions)
-                    Positioned(
-                      top: MediaQuery.of(context).padding.top + 8,
-                      left: 16,
-                      right: 16,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Back Button
-                          _buildGlassIcon(
-                            icon: Icons.arrow_back,
-                            onTap: () => Navigator.of(context).pop(),
-                          ),
-
-                          // Actions
-                          Row(
-                            children: [
-                              // Wishlist
-                              BlocBuilder<ProductBloc, ProductState>(
-                                  builder: (context, state) {
-                                // Resolve functionality for Wishlist
-                                String currentName = widget.name ?? '';
-                                String currentPrice = widget.price ?? '0';
-                                String currentImageUrl = widget.imageUrl ?? '';
-
-                                if (state is ProductDetailsLoaded) {
-                                  currentName = state.product.name;
-                                  currentPrice = state.product.price.toString();
-                                  if (state.product.images != null &&
-                                      state.product.images!.isNotEmpty) {
-                                    currentImageUrl = state.product.images![0];
-                                  }
-                                }
-
-                                return Consumer<WishlistService>(
-                                  builder: (context, wishlistService, _) {
-                                    final isInWishlist = wishlistService
-                                        .isItemInWishlist(widget.productId);
-                                    return _buildGlassIcon(
-                                      icon: isInWishlist
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: isInWishlist
-                                          ? AppTheme.errorColor
-                                          : Colors.black,
-                                      onTap: () {
-                                        if (currentName.isEmpty)
-                                          return; // Not loaded yet
-
-                                        final item = WishlistItem(
-                                          id: widget.productId,
-                                          name: currentName,
-                                          price: currentPrice,
-                                          imageUrl: currentImageUrl.isNotEmpty
-                                              ? currentImageUrl
-                                              : 'https://via.placeholder.com/400',
-                                          description: widget.description,
-                                          rating: widget.rating,
-                                          reviewCount: widget.reviewCount,
-                                        );
-                                        if (isInWishlist) {
-                                          wishlistService.removeFromWishlist(
-                                              widget.productId);
-                                        } else {
-                                          wishlistService.addToWishlist(item);
-                                        }
-                                      },
-                                    );
-                                  },
-                                );
-                              }),
-                              const SizedBox(width: 12),
-
-                              // Cart
-                              BlocBuilder<CartBloc, CartState>(
-                                builder: (context, state) {
-                                  final itemCount = state is CartLoaded
-                                      ? state.items.length
-                                      : 0;
-                                  return Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      _buildGlassIcon(
-                                        icon: Icons.shopping_bag_outlined,
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (_) =>
-                                                    const CartScreen()),
-                                          );
-                                        },
-                                      ),
-                                      if (itemCount > 0)
-                                        Positioned(
-                                          right: -4,
-                                          top: -4,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: const BoxDecoration(
-                                              color: AppTheme.primaryColor,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Text(
-                                              '$itemCount',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                     ),
 
                     // Floating Bottom Bar
@@ -1381,51 +1425,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             const SizedBox(height: 32),
                           ],
 
-                          // Quantity
-                          Row(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                    border:
-                                        Border.all(color: Colors.grey[300]!),
-                                    borderRadius: BorderRadius.circular(12)),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                        icon: Icon(Icons.remove),
-                                        onPressed: _decrementQuantity),
-                                    Text('$quantity',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold)),
-                                    IconButton(
-                                        icon: Icon(Icons.add),
-                                        onPressed: _incrementQuantity),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: ElevatedButton.icon(
-                                  icon: Icon(Icons.shopping_bag_outlined,
-                                      color: Colors.white),
-                                  label: Text(
-                                      AppLocalizations.of(context)!.addToCart),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    textStyle: GoogleFonts.cairo(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                  ),
-                                  onPressed: () => _addToCart(context),
-                                ),
-                              ),
-                            ],
-                          ),
                           const SizedBox(height: 32),
 
                           Text(AppLocalizations.of(context)!.description,
@@ -1444,13 +1443,62 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                           Row(
                             children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                    border:
+                                        Border.all(color: Colors.grey[300]!),
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                        icon: const Icon(Icons.remove),
+                                        onPressed: _decrementQuantity),
+                                    Text('$quantity',
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold)),
+                                    IconButton(
+                                        icon: const Icon(Icons.add),
+                                        onPressed: _incrementQuantity),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 56,
+                                  child: ElevatedButton.icon(
+                                    icon: const Icon(
+                                        Icons.shopping_bag_outlined,
+                                        color: Colors.white),
+                                    label: Text(AppLocalizations.of(context)!
+                                        .addToCart),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black,
+                                      textStyle: GoogleFonts.cairo(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                    ),
+                                    onPressed: () => _addToCart(context),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          Row(
+                            children: [
                               ElevatedButton.icon(
                                 onPressed: () {
                                   _shareProduct(
                                       context, name, widget.productId);
                                 },
                                 icon: const Icon(Icons.share),
-                                label: Text('Share'), // Fallback as key missing
+                                label: Text('Share'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.grey[200],
                                   foregroundColor: Colors.black,

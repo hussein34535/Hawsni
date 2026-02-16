@@ -210,5 +210,15 @@
   "enterOrderIdError": "Please enter an Order ID",
   "trackOrderTitle": "Track Order",
   "relatedProducts": "Related Products",
+  "cashOnDelivery": "Cash on Delivery",
+  "fillAddressDetails": "Please fill in valid address details",
+  "pleaseAddAddress": "Please add a shipping address",
+  "addNewAddress": "Add New Address",
+  "state": "State",
+  "saveAddress": "Save Address",
+  "zipCode": "Zip Code",
+  "addressSaved": "Address saved successfully",
+  "payOnDeliverySubtitle": "Pay when you receive your order",
+  "orderConfirmationMessage": "Thank you for your purchase! You will receive a confirmation shortly.",
   "ok": "OK"
 }

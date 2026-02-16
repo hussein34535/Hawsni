@@ -19,6 +19,9 @@ import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hwasi_app/firebase_options.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hwasi_app/features/address/data/services/address_service.dart';
+import 'package:hwasi_app/features/address/bloc/address_bloc.dart';
+import 'package:hwasi_app/features/address/bloc/address_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,19 +55,29 @@ void main() async {
         ChangeNotifierProvider(create: (_) => WishlistService()),
         Provider(create: (_) => AnalyticsService()),
       ],
-      child: MultiBlocProvider(
+      child: MultiRepositoryProvider(
         providers: [
-          BlocProvider(
-            create: (context) => CartBloc(
-              CartService(),
-              Provider.of<WishlistService>(context, listen: false),
-            ),
-          ),
-          BlocProvider(
-            create: (context) => OrderBloc(OrderService()),
-          ),
+          RepositoryProvider(create: (_) => AddressService()),
         ],
-        child: const App(),
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => CartBloc(
+                CartService(),
+                Provider.of<WishlistService>(context, listen: false),
+              ),
+            ),
+            BlocProvider(
+              create: (context) => OrderBloc(OrderService()),
+            ),
+            BlocProvider(
+              create: (context) => AddressBloc(
+                addressService: RepositoryProvider.of<AddressService>(context),
+              )..add(LoadAddresses()),
+            ),
+          ],
+          child: const App(),
+        ),
       ),
     ),
   );

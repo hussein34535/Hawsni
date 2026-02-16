@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hwasi_app/core/services/api_service.dart';
+
 import 'package:hwasi_app/core/themes/app_theme.dart';
-import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 
 class CouponsScreen extends StatefulWidget {

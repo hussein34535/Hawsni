@@ -1238,6 +1238,66 @@ abstract class AppLocalizations {
   /// **'Related Products'**
   String get relatedProducts;
 
+  /// No description provided for @cashOnDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash on Delivery'**
+  String get cashOnDelivery;
+
+  /// No description provided for @fillAddressDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill in valid address details'**
+  String get fillAddressDetails;
+
+  /// No description provided for @pleaseAddAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add a shipping address'**
+  String get pleaseAddAddress;
+
+  /// No description provided for @addNewAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Address'**
+  String get addNewAddress;
+
+  /// No description provided for @state.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get state;
+
+  /// No description provided for @saveAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Address'**
+  String get saveAddress;
+
+  /// No description provided for @zipCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Zip Code'**
+  String get zipCode;
+
+  /// No description provided for @addressSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Address saved successfully'**
+  String get addressSaved;
+
+  /// No description provided for @payOnDeliverySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay when you receive your order'**
+  String get payOnDeliverySubtitle;
+
+  /// No description provided for @orderConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your purchase! You will receive a confirmation shortly.'**
+  String get orderConfirmationMessage;
+
   /// No description provided for @ok.
   ///
   /// In en, this message translates to:

@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:hwasi_app/features/splash/presentation/screens/language_selection_screen.dart';
 import 'package:hwasi_app/features/splash/presentation/screens/splash_screen.dart';
 import 'package:hwasi_app/features/home/presentation/screens/home_screen.dart';
 import 'package:hwasi_app/features/products/presentation/screens/product_detail_screen.dart';
@@ -41,6 +42,10 @@ class AppRouter {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/language',
+        builder: (context, state) => const LanguageSelectionScreen(),
       ),
       GoRoute(
         path: '/product/:id',

@@ -45,7 +45,7 @@ class OrderController {
             const total = subtotal + shippingFee - discount;
 
             const orderData = {
-                user_id: req.user.id,
+                user_id: req.user ? req.user.id : null,
                 shipping_address: shippingAddress,
                 payment_method: paymentMethod,
                 subtotal: subtotal,

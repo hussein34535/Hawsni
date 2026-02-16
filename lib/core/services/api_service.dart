@@ -330,12 +330,8 @@ class ApiService {
   // Get Addresses
   static Future<List<dynamic>> getAddresses() async {
     try {
-      // This method reuses getUserProfile, which is already refactored.
-      final profile = await getUserProfile();
-      if (profile != null && profile['addresses'] != null) {
-        return profile['addresses'];
-      }
-      return [];
+      final data = await get('/users/addresses', includeAuth: true);
+      return data['addresses'] ?? [];
     } catch (e) {
       print('Error fetching addresses: $e');
       return [];
@@ -343,13 +339,28 @@ class ApiService {
   }
 
   // Add Address
-  static Future<bool> addAddress(Map<String, dynamic> addressData) async {
+  static Future<Map<String, dynamic>?> addAddress(
+      Map<String, dynamic> addressData) async {
     try {
-      await post('/users/addresses', addressData, includeAuth: true);
-      return true;
+      final data =
+          await post('/users/addresses', addressData, includeAuth: true);
+      return data['address'];
     } catch (e) {
       print('Error adding address: $e');
-      return false;
+      return null;
+    }
+  }
+
+  // Update Address
+  static Future<Map<String, dynamic>?> updateAddress(
+      String addressId, Map<String, dynamic> addressData) async {
+    try {
+      final data = await put('/users/addresses/$addressId', addressData,
+          includeAuth: true);
+      return data['address'];
+    } catch (e) {
+      print('Error updating address: $e');
+      return null;
     }
   }
 

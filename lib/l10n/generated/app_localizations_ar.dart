@@ -590,5 +590,35 @@ class AppLocalizationsAr extends AppLocalizations {
   String get relatedProducts => 'منتجات ذات صلة';
 
   @override
+  String get cashOnDelivery => 'الدفع عند الاستلام';
+
+  @override
+  String get fillAddressDetails => 'يرجى ملء تفاصيل العنوان بشكل صحيح';
+
+  @override
+  String get pleaseAddAddress => 'يرجى إضافة عنوان الشحن';
+
+  @override
+  String get addNewAddress => 'إضافة عنوان جديد';
+
+  @override
+  String get state => 'المحافظة';
+
+  @override
+  String get saveAddress => 'حفظ العنوان';
+
+  @override
+  String get zipCode => 'الرمز البريدي';
+
+  @override
+  String get addressSaved => 'تم حفظ العنوان بنجاح';
+
+  @override
+  String get payOnDeliverySubtitle => 'ادفع عند استلام طلبك';
+
+  @override
+  String get orderConfirmationMessage => 'شكراً لشرائك! ستتلقى تأكيداً قريباً.';
+
+  @override
   String get ok => 'حسناً';
 }

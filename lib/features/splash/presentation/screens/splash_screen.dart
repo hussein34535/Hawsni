@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hwasi_app/features/splash/presentation/screens/language_selection_screen.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
-import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -29,20 +28,10 @@ class _SplashScreenState extends State<SplashScreen> {
     final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
 
     if (isFirstLaunch) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const LanguageSelectionScreen(),
-        ),
-      );
+      context.go('/language');
     } else {
       // Always navigate to MainScreen (Guest is default)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MainScreen(),
-        ),
-      );
+      context.go('/home');
     }
   }
 

@@ -594,5 +594,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get relatedProducts => 'Related Products';
 
   @override
+  String get cashOnDelivery => 'Cash on Delivery';
+
+  @override
+  String get fillAddressDetails => 'Please fill in valid address details';
+
+  @override
+  String get pleaseAddAddress => 'Please add a shipping address';
+
+  @override
+  String get addNewAddress => 'Add New Address';
+
+  @override
+  String get state => 'State';
+
+  @override
+  String get saveAddress => 'Save Address';
+
+  @override
+  String get zipCode => 'Zip Code';
+
+  @override
+  String get addressSaved => 'Address saved successfully';
+
+  @override
+  String get payOnDeliverySubtitle => 'Pay when you receive your order';
+
+  @override
+  String get orderConfirmationMessage =>
+      'Thank you for your purchase! You will receive a confirmation shortly.';
+
+  @override
   String get ok => 'OK';
 }

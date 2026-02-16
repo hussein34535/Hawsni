@@ -35,17 +35,11 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       // Fetch related products (same category)
       List<ProductModel> relatedProducts = [];
       try {
-        if (product.category != null) {
-          final allRelated =
-              await _productService.getProducts(categoryId: product.category);
-          // Filter out current product
-          relatedProducts =
-              allRelated.where((p) => p.id != product.id).toList();
-        } else {
-          // Fallback to featured if no category
-          final featured = await _productService.getFeaturedProducts();
-          relatedProducts = featured.where((p) => p.id != product.id).toList();
-        }
+        // Fetch related products (same category)
+        final allRelated =
+            await _productService.getProducts(categoryId: product.category);
+        // Filter out current product
+        relatedProducts = allRelated.where((p) => p.id != product.id).toList();
       } catch (e) {
         // Silently fail for related products, don't block main product load
         print('Error fetching related products: $e');

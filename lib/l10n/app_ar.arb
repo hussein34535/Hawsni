@@ -189,5 +189,15 @@
   "enterOrderIdError": "يرجى إدخال رقم الطلب",
   "trackOrderTitle": "تتبع الطلب",
   "relatedProducts": "منتجات ذات صلة",
+  "cashOnDelivery": "الدفع عند الاستلام",
+  "fillAddressDetails": "يرجى ملء تفاصيل العنوان بشكل صحيح",
+  "pleaseAddAddress": "يرجى إضافة عنوان الشحن",
+  "addNewAddress": "إضافة عنوان جديد",
+  "state": "المحافظة",
+  "saveAddress": "حفظ العنوان",
+  "zipCode": "الرمز البريدي",
+  "addressSaved": "تم حفظ العنوان بنجاح",
+  "payOnDeliverySubtitle": "ادفع عند استلام طلبك",
+  "orderConfirmationMessage": "شكراً لشرائك! ستتلقى تأكيداً قريباً.",
   "ok": "حسناً"
 }

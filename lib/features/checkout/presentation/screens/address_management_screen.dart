@@ -40,14 +40,14 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
       setState(() {
         _addresses = addressesData
             .map((data) => Address(
-                  id: data['_id'] ?? data['id'] ?? '',
+                  id: data['id'] ?? '',
                   title: data['title'] ?? 'Home',
-                  fullName: data['fullName'] ?? '',
-                  address: data['address'] ?? '',
+                  fullName: data['name'] ?? '',
+                  address: data['address_line1'] ?? '',
                   city: data['city'] ?? '',
                   country: data['country'] ?? '',
                   phone: data['phone'] ?? '',
-                  isDefault: data['isDefault'] ?? false,
+                  isDefault: data['is_default'] ?? false,
                 ))
             .toList();
         _isLoading = false;
@@ -66,15 +66,18 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
           onAddressSaved: (newAddress) async {
             final addressMap = {
               'title': newAddress.title,
-              'address': newAddress.address,
+              'name': newAddress.fullName,
+              'address_line1': newAddress.address,
               'city': newAddress.city,
+              'state': '', // Optional or add field
+              'zip_code': '', // Optional or add field
               'country': newAddress.country,
               'phone': newAddress.phone,
-              'isDefault': newAddress.isDefault
+              'is_default': newAddress.isDefault
             };
 
-            final success = await ApiService.addAddress(addressMap);
-            if (success) {
+            final result = await ApiService.addAddress(addressMap);
+            if (result != null) {
               _loadAddresses();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const OrderController = require('../controllers/api/orderController');
-const { protect } = require('../middleware/auth');
+const { protect, protectOptional } = require('../middleware/auth');
 
 // Get user orders
 router.get('/', protect, OrderController.getUserOrders);
@@ -10,7 +10,7 @@ router.get('/', protect, OrderController.getUserOrders);
 router.get('/:id', protect, OrderController.getOrder);
 
 // Create order
-router.post('/', protect, OrderController.createOrder);
+router.post('/', protectOptional, OrderController.createOrder);
 
 // Update order status (Admin)
 router.put('/:id/status', protect, OrderController.updateStatus);
