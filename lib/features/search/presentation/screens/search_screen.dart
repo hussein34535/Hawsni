@@ -20,7 +20,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<dynamic> _searchResults = [];
   bool _isLoading = false;
   bool _showFilters = false;
-  RangeValues _priceRange = const RangeValues(0, 1000);
+  // RangeValues _priceRange = const RangeValues(0, 1000);
   String? _selectedCategory;
   List<dynamic> _categories = [];
   double _minPrice = 0;

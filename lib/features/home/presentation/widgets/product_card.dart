@@ -290,14 +290,14 @@ class _ProductCardState extends State<ProductCard> {
                                 _selectedColorCode = colorCode;
                                 if (variantImage != null &&
                                     variantImage.isNotEmpty) {
-                                  if (variantImage!.startsWith('http')) {
+                                  if (variantImage.startsWith('http')) {
                                     _selectedImageUrl = variantImage;
                                   } else if (RegExp(r'^\d+$')
-                                          .hasMatch(variantImage!) &&
+                                          .hasMatch(variantImage) &&
                                       widget.images != null) {
                                     try {
                                       final images = widget.images!;
-                                      int index = int.parse(variantImage!);
+                                      int index = int.parse(variantImage);
                                       if (index >= 0 && index < images.length) {
                                         _selectedImageUrl = images[index];
                                       }

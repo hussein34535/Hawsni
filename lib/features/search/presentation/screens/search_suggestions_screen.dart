@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hwasi_app/core/themes/app_theme.dart';
-import 'package:hwasi_app/l10n/generated/app_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:hwasi_app/core/themes/app_theme.dart';
+// import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchSuggestionsScreen extends StatefulWidget {
   final Function(String) onSuggestionSelected;

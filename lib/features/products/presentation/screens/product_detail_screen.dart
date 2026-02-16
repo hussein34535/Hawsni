@@ -654,7 +654,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   const EdgeInsets.fromLTRB(24, 24, 24, 120),
                               child: BlocBuilder<ProductBloc, ProductState>(
                                 builder: (context, state) {
-                                  String description = widget.description;
+                                  // String description = widget.description;
                                   double rating = widget.rating;
                                   int reviewCount = widget.reviewCount;
                                   List<String>? sizes = widget.sizes;

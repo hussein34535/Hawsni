@@ -254,7 +254,7 @@ class _ProductComparisonScreenState extends State<ProductComparisonScreen> {
           ),
         ),
         ...widget.products.asMap().entries.map((entry) {
-          final index = entry.key;
+          // final index = entry.key;
           final product = entry.value;
           return SizedBox(
             width: 200,

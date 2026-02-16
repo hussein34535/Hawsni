@@ -68,7 +68,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final categories = results[0] as List<CategoryModel>;
       final List<ProductModel> fetchedFeaturedProducts =
           results[1] as List<ProductModel>;
-      final List<ProductModel> allProducts = results[2] as List<ProductModel>;
+      final List<ProductModel> allProducts =
+          List<ProductModel>.from(results[2]);
       final List<dynamic> bannersData = results[3] as List<dynamic>;
 
       // Convert banner data to proper format

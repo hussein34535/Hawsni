@@ -263,7 +263,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         final event = _trackingEvents[index];
         final isCompleted = event['status'] == 'completed';
         final isCurrent = event['status'] == 'current';
-        final isPending = event['status'] == 'pending';
+        // final isPending = event['status'] == 'pending';
         final color =
             isCompleted || isCurrent ? AppTheme.primaryColor : Colors.grey;
 

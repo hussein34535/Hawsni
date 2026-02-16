@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:hwasi_app/core/themes/app_theme.dart';
-import 'package:hwasi_app/features/reviews/data/models/review_model.dart';
-import 'package:intl/intl.dart';
+// import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+// import 'package:hwasi_app/core/themes/app_theme.dart';
+// import 'package:hwasi_app/features/reviews/data/models/review_model.dart';
+// import 'package:intl/intl.dart';
 
 class ReviewCard extends StatelessWidget {
   final String userName;
