@@ -53,7 +53,7 @@
       left: 0;
       z-index: 9999;
       background-color: #FAFAFA;
-      transition: opacity 0.5s ease-in-out;
+      transition: opacity 0.1s ease-in-out;
     }
 
     .loader {
@@ -111,8 +111,8 @@
         // Immediate transition when Flutter is known to be active
         setTimeout(() => {
           loader.style.opacity = '0';
-          setTimeout(() => loader.remove(), 200); // Fast removal
-        }, 100);
+          setTimeout(() => loader.remove(), 100); // Fast removal
+        }, 10);
       }
     });
   </script>
