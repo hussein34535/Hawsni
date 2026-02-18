@@ -205,7 +205,7 @@ class ProductController {
 
     async createProductAdmin(req, res) {
         try {
-            const { name, description, price, discount, category_id, stock, is_featured, sizes } = req.body;
+            const { name, description, price, discount, category_id, stock, is_featured, sizes, size_guide } = req.body;
 
             console.log('📦 CreateProductAdmin Called. Files:', req.files ? req.files.length : 'No files');
 
@@ -263,7 +263,8 @@ class ProductController {
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
-                images: imageUrls
+                images: imageUrls,
+                size_guide: size_guide || ''
             });
 
             if (error) {
@@ -291,7 +292,7 @@ class ProductController {
 
     async updateProductAdmin(req, res) {
         try {
-            const { name, description, price, discount, category_id, stock, is_featured, sizes, colors } = req.body;
+            const { name, description, price, discount, category_id, stock, is_featured, sizes, colors, size_guide } = req.body;
             console.log('🔄 UpdateProductAdmin Called for ID:', req.params.id);
             console.log('📂 Files received:', req.files ? req.files.length : 'None');
 
@@ -374,7 +375,8 @@ class ProductController {
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
-                images: imageUrls
+                images: imageUrls,
+                size_guide: size_guide || ''
             }).eq('id', req.params.id);
 
             res.redirect('/products');

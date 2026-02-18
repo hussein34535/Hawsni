@@ -40,6 +40,10 @@ const productSchema = new mongoose.Schema({
     type: String,
     enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL']
   }],
+  sizeGuide: {
+    type: String,
+    default: ''
+  },
   colors: [{
     type: String
   }],
@@ -68,7 +72,7 @@ const productSchema = new mongoose.Schema({
 });
 
 // Calculate discounted price
-productSchema.virtual('discountedPrice').get(function() {
+productSchema.virtual('discountedPrice').get(function () {
   if (this.discount > 0) {
     return this.price - (this.price * this.discount / 100);
   }

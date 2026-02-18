@@ -68,11 +68,15 @@ class CartScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      l10n.startExploring,
-                      style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 16,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Text(
+                        l10n.startExploring,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ],

@@ -23,7 +23,7 @@ class CartService {
             price: product['price'].toString(),
             imageUrl: (product['images'] as List).isNotEmpty
                 ? product['images'][0]
-                : 'https://via.placeholder.com/150',
+                : '',
             quantity: item['quantity'],
             size: item['size'],
             color: item['color'],
@@ -88,7 +88,7 @@ class CartService {
             price: product['price'].toString(),
             imageUrl: (product['images'] as List).isNotEmpty
                 ? product['images'][0]
-                : 'https://via.placeholder.com/150',
+                : '',
             quantity: item['quantity'],
             size: item['size'],
             color: item['color'],
@@ -122,7 +122,7 @@ class CartService {
             price: product['price'].toString(),
             imageUrl: (product['images'] as List).isNotEmpty
                 ? product['images'][0]
-                : 'https://via.placeholder.com/150',
+                : '',
             quantity: item['quantity'],
             size: item['size'],
             color: item['color'],
@@ -154,7 +154,7 @@ class CartService {
             price: product['price'].toString(),
             imageUrl: (product['images'] as List).isNotEmpty
                 ? product['images'][0]
-                : 'https://via.placeholder.com/150',
+                : '',
             quantity: item['quantity'],
             size: item['size'],
             color: item['color'],

@@ -111,15 +111,6 @@ class CartItemCard extends StatelessWidget {
                                 color: AppTheme.primaryColor,
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.favorite_border,
-                                  color: AppTheme.textSecondary),
-                              onPressed: () {
-                                context.read<CartBloc>().add(SaveForLater(
-                                    item.id, item.productId ?? item.id));
-                              },
-                              tooltip: 'Save for later',
-                            ),
                             // Quantity Controls
                             Container(
                               decoration: BoxDecoration(

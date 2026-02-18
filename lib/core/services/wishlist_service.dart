@@ -23,7 +23,7 @@ class WishlistItem {
 
   factory WishlistItem.fromJson(Map<String, dynamic> json) {
     // Handle image: check imageUrl, image, or images array
-    String img = 'https://via.placeholder.com/150';
+    String img = '';
     if (json['imageUrl'] != null) {
       img = json['imageUrl'];
     } else if (json['image'] != null) {

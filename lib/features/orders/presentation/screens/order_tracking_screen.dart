@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/features/orders/presentation/widgets/tracking_stepper.dart';
 
 class OrderTrackingScreen extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -248,105 +249,87 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   }
 
   Widget _buildTrackingTimeline() {
-    if (_trackingEvents.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Text('No tracking events available',
-              style: TextStyle(color: Colors.grey)),
-        ),
-      );
+    final status = widget.order['status'] ?? 'Processing';
+
+    // If we have real tracking events from API, build steps from them
+    if (_trackingEvents.isNotEmpty) {
+      final steps = _trackingEvents.map((event) {
+        return TrackingStep(
+          title: event['title'] ?? '',
+          subtitle: event['description'] ?? '',
+          icon: _getStepIcon(event['title'] ?? ''),
+          status: event['status'] ?? 'pending',
+          timestamp: _formatDateTime(event['timestamp']),
+        );
+      }).toList();
+      return TrackingStepper(steps: steps);
     }
 
-    return Column(
-      children: List.generate(_trackingEvents.length, (index) {
-        final event = _trackingEvents[index];
-        final isCompleted = event['status'] == 'completed';
-        final isCurrent = event['status'] == 'current';
-        // final isPending = event['status'] == 'pending';
-        final color =
-            isCompleted || isCurrent ? AppTheme.primaryColor : Colors.grey;
+    // Fallback: Build default steps from order status
+    final allStatuses = [
+      'Pending',
+      'Confirmed',
+      'Processing',
+      'Shipped',
+      'Delivered'
+    ];
+    final currentIndex = allStatuses.indexOf(status);
 
-        return Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: isCompleted
-                            ? color
-                            : (isCurrent ? color : Colors.transparent),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: color,
-                          width: 2,
-                        ),
-                      ),
-                      child: Icon(
-                        event['icon'] ?? Icons.circle,
-                        color: isCompleted || isCurrent
-                            ? Colors.black
-                            : Colors.grey,
-                        size: 16,
-                      ),
-                    ),
-                    if (index < _trackingEvents.length - 1)
-                      Container(
-                        width: 2,
-                        height: 40,
-                        color: isCompleted ? color : Colors.grey[800],
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          event['title'],
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight:
-                                isCurrent ? FontWeight.bold : FontWeight.normal,
-                            color: isCurrent
-                                ? AppTheme.primaryColor
-                                : Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          event['description'],
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatDateTime(event['timestamp']),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      }),
-    );
+    final defaultSteps = [
+      TrackingStep(
+        title: 'تم استلام الطلب',
+        subtitle: 'طلبك تم إرساله بنجاح',
+        icon: Icons.shopping_bag_outlined,
+        status: currentIndex >= 0 ? 'completed' : 'pending',
+      ),
+      TrackingStep(
+        title: 'تأكيد الطلب',
+        subtitle: 'تم تأكيد الطلب وجاري التجهيز',
+        icon: Icons.check_circle_outline,
+        status: currentIndex >= 1
+            ? (currentIndex == 1 ? 'current' : 'completed')
+            : 'pending',
+      ),
+      TrackingStep(
+        title: 'جاري التجهيز',
+        subtitle: 'يتم تجهيز طلبك للشحن',
+        icon: Icons.inventory_2_outlined,
+        status: currentIndex >= 2
+            ? (currentIndex == 2 ? 'current' : 'completed')
+            : 'pending',
+      ),
+      TrackingStep(
+        title: 'تم الشحن',
+        subtitle: 'طلبك في الطريق إليك',
+        icon: Icons.local_shipping_outlined,
+        status: currentIndex >= 3
+            ? (currentIndex == 3 ? 'current' : 'completed')
+            : 'pending',
+      ),
+      TrackingStep(
+        title: 'تم التوصيل',
+        subtitle: 'تم تسليم الطلب بنجاح 🎉',
+        icon: Icons.home_outlined,
+        status: currentIndex >= 4 ? 'completed' : 'pending',
+      ),
+    ];
+
+    return TrackingStepper(steps: defaultSteps);
+  }
+
+  IconData _getStepIcon(String title) {
+    final lower = title.toLowerCase();
+    if (lower.contains('order') || lower.contains('طلب'))
+      return Icons.shopping_bag_outlined;
+    if (lower.contains('confirm') || lower.contains('تأكيد'))
+      return Icons.check_circle_outline;
+    if (lower.contains('process') || lower.contains('تجهيز'))
+      return Icons.inventory_2_outlined;
+    if (lower.contains('ship') || lower.contains('شحن'))
+      return Icons.local_shipping_outlined;
+    if (lower.contains('deliver') || lower.contains('توصيل'))
+      return Icons.home_outlined;
+    return Icons.circle_outlined;
   }
 
   Widget _buildDeliveryInfoRow(IconData icon, String label, String value) {

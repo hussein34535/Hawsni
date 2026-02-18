@@ -128,7 +128,7 @@ class _ProductGridState extends State<ProductGrid> {
           final images = product['images'] as List?;
           final imageUrl = images != null && images.isNotEmpty
               ? '${ApiService.baseUrl}${images[0]}'
-              : 'https://via.placeholder.com/300';
+              : '';
 
           // Generate a unique ID for the product (in a real app, this would come from the backend)
           final productId = product['id']?.toString() ?? 'product_$index';

@@ -12,6 +12,7 @@ class ProductModel {
   final List<String>? sizes;
   final List<dynamic>? colors;
   final List<String>? images;
+  final String? sizeGuide;
 
   ProductModel({
     required this.id,
@@ -27,6 +28,7 @@ class ProductModel {
     this.sizes,
     this.colors,
     this.images,
+    this.sizeGuide,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -37,7 +39,7 @@ class ProductModel {
       price: (json['price'] ?? 0).toDouble(),
       imageUrl: (json['images'] != null && (json['images'] as List).isNotEmpty)
           ? json['images'][0]
-          : (json['image'] ?? 'https://via.placeholder.com/300'),
+          : (json['image'] ?? ''),
       category: json['category'] is Map
           ? json['category']['name']
           : (json['category'] ?? ''),
@@ -62,6 +64,7 @@ class ProductModel {
               : List<dynamic>.from(json['colors']))
           : null,
       images: json['images'] != null ? List<String>.from(json['images']) : null,
+      sizeGuide: json['size_guide'] as String?,
     );
   }
 
@@ -80,6 +83,7 @@ class ProductModel {
       if (sizes != null) 'sizes': sizes,
       if (colors != null) 'colors': colors,
       if (images != null) 'images': images,
+      if (sizeGuide != null) 'size_guide': sizeGuide,
     };
   }
 }

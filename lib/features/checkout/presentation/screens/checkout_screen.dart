@@ -15,6 +15,8 @@ import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hwasi_app/core/services/coupon_service.dart';
+import 'package:hwasi_app/features/checkout/presentation/screens/order_success_screen.dart';
 
 final List<String> egyptGovernorates = [
   'القاهرة',
@@ -69,6 +71,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   // State
   bool _isAddingAddress = false;
 
+  // Coupon State
+  final _couponController = TextEditingController();
+  bool _isCouponValidating = false;
+  bool _isCouponApplied = false;
+  String? _couponCode;
+  double _couponDiscount = 0.0;
+  String _couponType = 'percentage'; // percentage or fixed
+  String? _couponError;
+
+  // Payment State
+  String _selectedPaymentMethod =
+      'Cash on Delivery'; // 'Cash on Delivery' or 'Online Card'
+
   bool get _isGuest => AuthService.token == null;
 
   @override
@@ -89,11 +104,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _cityController.dispose();
     _stateController.dispose();
     _zipController.dispose();
+    _couponController.dispose();
     super.dispose();
   }
 
   void _saveAddress() {
-    if (_streetController.text.isEmpty || _cityController.text.isEmpty) {
+    if (_streetController.text.isEmpty ||
+        _cityController.text.isEmpty ||
+        _phoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.fillAddressDetails),
@@ -105,8 +123,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     final newAddress = AddressModel(
       title: 'Home', // Default label
-      name: AuthService.userName ?? 'User',
-      phone: AuthService.userData?['phone'] ?? '',
+      name: _isGuest ? _nameController.text : (AuthService.userName ?? 'User'),
+      phone: _isGuest
+          ? _phoneController.text
+          : (AuthService.userData?['phone'] ?? _phoneController.text),
       addressLine1: _streetController.text,
       city: _cityController.text,
       state: _stateController.text,
@@ -117,13 +137,62 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     context.read<AddressBloc>().add(AddAddress(newAddress));
     setState(() {
       _isAddingAddress = false;
-      // Clear controllers? Maybe keep them populated in case of edit?
-      // For now clear to show fresh state
-      _streetController.clear();
-      _cityController.clear();
-      _stateController.clear();
-      _zipController.clear();
+      // Keep controllers populated
     });
+  }
+
+  // Coupon Validation
+  Future<void> _validateCoupon() async {
+    final code = _couponController.text.trim();
+    if (code.isEmpty) return;
+
+    setState(() {
+      _isCouponValidating = true;
+      _couponError = null;
+    });
+
+    try {
+      final result = await CouponService.validateCoupon(code);
+      if (result != null) {
+        setState(() {
+          _isCouponApplied = true;
+          _couponCode = result['code'];
+          _couponDiscount = (result['discount'] ?? 0).toDouble();
+          _couponType = result['type'] ?? 'percentage';
+          _couponError = null;
+        });
+      } else {
+        setState(() {
+          _couponError = 'كوبون غير صالح';
+          _isCouponApplied = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _couponError = 'كوبون غير صالح أو منتهي الصلاحية';
+        _isCouponApplied = false;
+      });
+    } finally {
+      setState(() => _isCouponValidating = false);
+    }
+  }
+
+  void _removeCoupon() {
+    setState(() {
+      _isCouponApplied = false;
+      _couponCode = null;
+      _couponDiscount = 0.0;
+      _couponError = null;
+      _couponController.clear();
+    });
+  }
+
+  double _calculateDiscount(double subtotal) {
+    if (!_isCouponApplied) return 0.0;
+    if (_couponType == 'percentage') {
+      return subtotal * (_couponDiscount / 100);
+    }
+    return _couponDiscount; // fixed amount
   }
 
   // Payment Method
@@ -183,9 +252,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       }
     }
 
+    // Strict Validation for Address
+    if (_streetController.text.isEmpty ||
+        _cityController.text.isEmpty ||
+        _stateController.text.isEmpty) {
+      if (_isGuest || _isAddingAddress) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Please fill all address fields (Street, City, State)'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+        return;
+      }
+    }
+
+    if (_isGuest &&
+        (_nameController.text.isEmpty || _phoneController.text.isEmpty)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill your contact information'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+      return;
+    }
+
     // Construct Address String
     String fullAddress;
-    if (_isGuest) {
+    if (_isGuest || _isAddingAddress) {
       fullAddress =
           '${_streetController.text}, ${_cityController.text}, ${_stateController.text}';
     } else {
@@ -193,12 +289,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         fullAddress =
             '${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state}';
       } else {
-        // Fallback (should be covered by validation above)
-        fullAddress = '${_streetController.text}, ${_cityController.text}';
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select or add an address'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+        return;
       }
     }
 
-    // Direct Cash on Delivery Submission
+    // Payment Processing - Cash Only for now
     _submitOrder(cartItems, subtotal, fullAddress, 'Cash on Delivery');
   }
 
@@ -208,12 +309,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     String fullAddress,
     String paymentMethod,
   ) {
+    final discount = _calculateDiscount(subtotal);
     final orderData = {
       'shippingAddress': fullAddress,
       'paymentMethod': paymentMethod,
       'subtotal': subtotal,
-      'discount': 0.0,
-      'couponCode': null,
+      'discount': discount,
+      'couponCode': _couponCode,
       if (_isGuest) ...{
         'guestName': _nameController.text,
         'guestPhone': _phoneController.text,
@@ -248,7 +350,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         } else if (state is OrderCreated) {
           setState(() => _isLoading = false);
           context.read<CartBloc>().add(ClearCart());
-          _showSuccessDialog();
+          final orderId = state.order['id']?.toString() ??
+              state.order['orderId']?.toString() ??
+              'N/A';
+          _navigateToSuccessScreen(orderId);
         } else if (state is OrderError) {
           setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
@@ -410,7 +515,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     _buildPaymentMethodSelector(context),
                                     const SizedBox(height: 32),
 
-                                    // 4. Order Summary
+                                    // 4. Promo Code
+                                    _buildSectionTitle(
+                                      'كود الخصم',
+                                      Icons.local_offer_outlined,
+                                    ),
+                                    _buildCouponInput(),
+                                    const SizedBox(height: 32),
+
+                                    // 5. Order Summary
                                     _buildSectionTitle(
                                       AppLocalizations.of(context)!
                                           .orderSummary,
@@ -593,6 +706,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           egyptGovernorates.contains(_stateController.text)
                       ? _stateController.text
                       : null,
+                  isExpanded: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.state,
                     labelStyle: GoogleFonts.cairo(color: Colors.grey[600]),
@@ -621,7 +735,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   items: egyptGovernorates.map((String gov) {
                     return DropdownMenuItem<String>(
                       value: gov,
-                      child: Text(gov, style: GoogleFonts.cairo(fontSize: 14)),
+                      child: Text(gov,
+                          style: GoogleFonts.cairo(fontSize: 14),
+                          overflow: TextOverflow.ellipsis),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
@@ -786,11 +902,119 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildPaymentMethodSelector(BuildContext context) {
+    return Column(
+      children: [
+        // Cash on Delivery Option (Premium UI)
+        _buildPaymentOption(
+          context,
+          title: AppLocalizations.of(context)!.cashOnDelivery,
+          subtitle: AppLocalizations.of(context)!.payOnDeliverySubtitle,
+          icon: Icons.local_atm_outlined, // Better icon
+          value: 'Cash on Delivery',
+          color: Colors.black, // Sleek black
+          isPremium: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaymentOption(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required String value,
+    required Color color,
+    bool isPremium = false,
+  }) {
+    final isSelected = _selectedPaymentMethod == value;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedPaymentMethod = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isPremium ? Colors.black : color.withValues(alpha: 0.05))
+              : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? (isPremium ? Colors.black : color)
+                : Colors.transparent,
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? (isPremium
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : color.withValues(alpha: 0.1))
+                  : Colors.black.withValues(alpha: 0.03),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.grey[100],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon,
+                  color: isSelected ? Colors.white : Colors.grey[600],
+                  size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.cairo(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: isSelected ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.cairo(
+                      color: isSelected ? Colors.white70 : Colors.grey[500],
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              const Icon(Icons.check_circle, color: Colors.white, size: 28)
+            else
+              Icon(Icons.circle_outlined, color: Colors.grey[300], size: 28),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCouponInput() {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _isCouponApplied
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.grey[100]!,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -799,30 +1023,157 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _couponController,
+                  enabled: !_isCouponApplied,
+                  textDirection: TextDirection.ltr,
+                  style: GoogleFonts.poppins(fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: 'أدخل كود الخصم',
+                    hintStyle: GoogleFonts.cairo(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.local_offer_outlined,
+                      color: _isCouponApplied ? Colors.green : Colors.grey[400],
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[200]!),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[200]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: AppTheme.primaryColor,
+                        width: 1.5,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: _isCouponApplied
+                        ? Colors.green.withValues(alpha: 0.05)
+                        : Colors.grey[50],
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                height: 50,
+                child: _isCouponApplied
+                    ? ElevatedButton.icon(
+                        onPressed: _removeCoupon,
+                        icon: const Icon(Icons.close, size: 18),
+                        label: Text(
+                          'إزالة',
+                          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[50],
+                          foregroundColor: Colors.red,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      )
+                    : ElevatedButton(
+                        onPressed: _isCouponValidating ? null : _validateCoupon,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _isCouponValidating
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'تطبيق',
+                                style: GoogleFonts.cairo(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+              ),
+            ],
           ),
-          child: const Icon(Icons.money, color: Colors.green),
-        ),
-        title: Text(
-          AppLocalizations.of(context)!.cashOnDelivery,
-          style: GoogleFonts.cairo(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        subtitle: Text(
-          AppLocalizations.of(context)!.payOnDeliverySubtitle,
-          style: GoogleFonts.cairo(color: Colors.grey[500], fontSize: 12),
-        ),
-        trailing: const Icon(Icons.check_circle, color: AppTheme.primaryColor),
+          if (_couponError != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 16),
+                const SizedBox(width: 6),
+                Text(
+                  _couponError!,
+                  style: GoogleFonts.cairo(
+                    color: Colors.red,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (_isCouponApplied) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.green, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _couponType == 'percentage'
+                          ? 'تم تطبيق خصم ${_couponDiscount.toStringAsFixed(0)}%'
+                          : 'تم تطبيق خصم ${_couponDiscount.toStringAsFixed(2)} EGP',
+                      style: GoogleFonts.cairo(
+                        color: Colors.green[700],
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
   Widget _buildOrderSummary(BuildContext context, double subtotal) {
+    final discount = _calculateDiscount(subtotal);
+    const shipping = 100.0;
+    final tax = subtotal * 0.05;
+    final total = subtotal - discount + shipping + tax;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -843,13 +1194,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             AppLocalizations.of(context)!.subtotal,
             '${subtotal.toStringAsFixed(2)} EGP',
           ),
+          if (_isCouponApplied) ...[
+            const SizedBox(height: 12),
+            _buildSummaryRow(
+              'الخصم ($_couponCode)',
+              '- ${discount.toStringAsFixed(2)} EGP',
+              isDiscount: true,
+            ),
+          ],
           const SizedBox(height: 12),
-          _buildSummaryRow(
-              AppLocalizations.of(context)!.shipping, '100.00 EGP'),
+          _buildSummaryRow(AppLocalizations.of(context)!.shipping,
+              '${shipping.toStringAsFixed(2)} EGP'),
           const SizedBox(height: 12),
           _buildSummaryRow(
             AppLocalizations.of(context)!.tax,
-            '${(subtotal * 0.05).toStringAsFixed(2)} EGP',
+            '${tax.toStringAsFixed(2)} EGP',
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
@@ -857,7 +1216,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           _buildSummaryRow(
             AppLocalizations.of(context)!.total,
-            '${(subtotal + 100 + (subtotal * 0.05)).toStringAsFixed(2)} EGP', // Using 100 EGP as base shipping
+            '${total.toStringAsFixed(2)} EGP',
             isTotal: true,
           ),
         ],
@@ -865,14 +1224,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
+  Widget _buildSummaryRow(String label, String value,
+      {bool isTotal = false, bool isDiscount = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: GoogleFonts.cairo(
-            color: isTotal ? Colors.black : Colors.grey[600],
+            color: isDiscount
+                ? Colors.green[700]
+                : isTotal
+                    ? Colors.black
+                    : Colors.grey[600],
             fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
             fontSize: isTotal ? 18 : 16,
           ),
@@ -880,7 +1244,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         Text(
           value,
           style: GoogleFonts.poppins(
-            color: isTotal ? AppTheme.primaryColor : Colors.black,
+            color: isDiscount
+                ? Colors.green[700]
+                : isTotal
+                    ? AppTheme.primaryColor
+                    : Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: isTotal ? 22 : 16,
           ),
@@ -889,72 +1257,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        contentPadding: const EdgeInsets.all(32),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_rounded,
-                color: Colors.green,
-                size: 48,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              AppLocalizations.of(context)!.orderPlacedSuccess,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.cairo(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              AppLocalizations.of(context)!.orderConfirmationMessage,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.cairo(color: Colors.grey[600], fontSize: 16),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Text(
-                  AppLocalizations.of(context)!.continueShopping,
-                  style: GoogleFonts.cairo(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-          ],
+  void _navigateToSuccessScreen(String? orderId) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OrderSuccessScreen(
+          orderDetails: {
+            'orderId': orderId ?? 'N/A',
+            'total': _calculateTotal().toStringAsFixed(2),
+            'paymentMethod': _selectedPaymentMethod,
+          },
         ),
       ),
     );
+  }
+
+  double _calculateTotal() {
+    final state = context.read<CartBloc>().state;
+    double subtotal = 0.0;
+    if (state is CartLoaded) {
+      subtotal = state.items.fold(
+        0,
+        (sum, item) =>
+            sum +
+            (double.parse(item.price.replaceAll(RegExp(r'[^0-9.]'), '')) *
+                item.quantity),
+      );
+    }
+    final discount = _calculateDiscount(subtotal);
+    const shipping = 100.0;
+    final tax = subtotal * 0.05;
+    return subtotal - discount + shipping + tax;
   }
 }

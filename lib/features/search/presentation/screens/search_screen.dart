@@ -24,7 +24,8 @@ class _SearchScreenState extends State<SearchScreen> {
   String? _selectedCategory;
   List<dynamic> _categories = [];
   double _minPrice = 0;
-  double _maxPrice = 1000;
+  double _maxPrice = 5000;
+  String _sortBy = 'newest'; // newest, price_asc, price_desc, rating
 
   @override
   void initState() {
@@ -94,6 +95,7 @@ class _SearchScreenState extends State<SearchScreen> {
         queryParams['category'] = _selectedCategory!;
       queryParams['minPrice'] = _minPrice.toString();
       queryParams['maxPrice'] = _maxPrice.toString();
+      queryParams['sortBy'] = _sortBy;
 
       final uri = Uri.parse(
         '${ApiService.baseUrl}/products/search',
@@ -130,7 +132,8 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       _selectedCategory = null;
       _minPrice = 0;
-      _maxPrice = 1000;
+      _maxPrice = 5000;
+      _sortBy = 'newest';
       _searchController.clear();
       _searchResults = [];
     });
@@ -354,7 +357,8 @@ class _SearchScreenState extends State<SearchScreen> {
           RangeSlider(
             values: RangeValues(_minPrice, _maxPrice),
             min: 0,
-            max: 1000,
+            max: 5000,
+            divisions: 50,
             activeColor: AppTheme.primaryColor,
             inactiveColor: Colors.grey[300],
             onChanged: (values) => setState(() {
@@ -366,13 +370,37 @@ class _SearchScreenState extends State<SearchScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '\$${_minPrice.round()}',
+                '${_minPrice.round()} EGP',
                 style: const TextStyle(color: AppTheme.textSecondary),
               ),
               Text(
-                '\$${_maxPrice.round()}',
+                '${_maxPrice.round()} EGP',
                 style: const TextStyle(color: AppTheme.textSecondary),
               ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Sort By
+          Text(
+            'ترتيب حسب',
+            style: TextStyle(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildFilterChip('الأحدث', _sortBy == 'newest',
+                  () => setState(() => _sortBy = 'newest')),
+              _buildFilterChip('الأرخص', _sortBy == 'price_asc',
+                  () => setState(() => _sortBy = 'price_asc')),
+              _buildFilterChip('الأغلى', _sortBy == 'price_desc',
+                  () => setState(() => _sortBy = 'price_desc')),
+              _buildFilterChip('التقييم', _sortBy == 'rating',
+                  () => setState(() => _sortBy = 'rating')),
             ],
           ),
           const SizedBox(height: 12),

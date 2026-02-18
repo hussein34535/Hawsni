@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
@@ -84,8 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _scrollController,
                       physics: const ClampingScrollPhysics(),
                       slivers: [
-                        // Modern Clean AppBar
-                        SliverToBoxAdapter(child: _buildAppBar(context)),
+                        // Modern Clean AppBar (Mobile/Tablet only)
+                        if (!ResponsiveLayout.isDesktop(context))
+                          SliverToBoxAdapter(child: _buildAppBar(context)),
 
                         // Search Bar
                         SliverToBoxAdapter(child: _buildSearchBar(context)),
@@ -224,25 +226,39 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                   },
                                                                 ),
                                                               )
-                                                            : CachedNetworkImage(
-                                                                imageUrl: category
-                                                                    .imageUrl!,
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                                memCacheHeight:
-                                                                    400, // Better quality
-                                                                placeholder: (context,
-                                                                        url) =>
-                                                                    Container(
-                                                                        color: Colors
-                                                                            .transparent),
-                                                                errorWidget: (context,
-                                                                        url,
-                                                                        error) =>
-                                                                    Container(
-                                                                        color: Colors
-                                                                            .transparent),
-                                                              ))
+                                                            : kIsWeb
+                                                                ? Image.network(
+                                                                    category
+                                                                        .imageUrl!,
+                                                                    fit: BoxFit
+                                                                        .cover,
+                                                                    errorBuilder: (context,
+                                                                            error,
+                                                                            stackTrace) =>
+                                                                        Container(
+                                                                            color:
+                                                                                Colors.transparent),
+                                                                  )
+                                                                : CachedNetworkImage(
+                                                                    imageUrl:
+                                                                        category
+                                                                            .imageUrl!,
+                                                                    fit: BoxFit
+                                                                        .cover,
+                                                                    memCacheHeight:
+                                                                        400,
+                                                                    placeholder: (context,
+                                                                            url) =>
+                                                                        Container(
+                                                                            color:
+                                                                                Colors.transparent),
+                                                                    errorWidget: (context,
+                                                                            url,
+                                                                            error) =>
+                                                                        Container(
+                                                                            color:
+                                                                                Colors.transparent),
+                                                                  ))
                                                         : Container(
                                                             color: Colors
                                                                 .transparent),

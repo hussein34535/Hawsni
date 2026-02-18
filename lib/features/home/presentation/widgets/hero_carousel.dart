@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -94,14 +95,23 @@ class _HeroCarouselState extends State<HeroCarousel> {
               children: [
                 // Background Image
                 if (imageUrl != null)
-                  CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) =>
-                        Container(color: Colors.white),
-                    errorWidget: (context, url, error) =>
-                        Container(color: Colors.grey[100]),
-                  ),
+                  kIsWeb
+                      ? Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(color: Colors.grey[100]),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) =>
+                              Container(color: Colors.white),
+                          errorWidget: (context, url, error) =>
+                              Container(color: Colors.grey[100]),
+                        ),
 
                 // Subtle bottom-weighted gradient overlay
                 Container(
@@ -111,8 +121,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withValues(alpha: 0.3),
-                        Colors.black.withValues(alpha: 0.6),
+                        Colors.black.withOpacity(0.3),
+                        Colors.black.withOpacity(0.6),
                       ],
                       stops: const [0.3, 0.7, 1.0],
                     ),

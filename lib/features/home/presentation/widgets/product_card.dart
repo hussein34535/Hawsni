@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
@@ -137,35 +138,49 @@ class _ProductCardState extends State<ProductCard> {
                     height: double.infinity,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF5F5F5),
-                      borderRadius:
-                          BorderRadius.circular(16), // Fully rounded image
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black
-                              .withValues(alpha: 0.08), // Subtle shadow
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: kIsWeb
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                     ),
                     child: ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(16), // Fully rounded image
-                      child: CachedNetworkImage(
-                        imageUrl: _selectedImageUrl ?? widget.imageUrl,
-                        fit: BoxFit.cover,
-                        memCacheHeight: 600,
-                        placeholder: (context, url) => Container(
-                          color: const Color(0xFFF5F5F5),
-                        ),
-                        errorWidget: (context, url, error) => Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            color: Colors.grey[400],
-                            size: 32,
-                          ),
-                        ),
-                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      child: kIsWeb
+                          ? Image.network(
+                              _selectedImageUrl ?? widget.imageUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Center(
+                                child: Icon(
+                                  Icons.image_not_supported_outlined,
+                                  color: Colors.grey[400],
+                                  size: 32,
+                                ),
+                              ),
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: _selectedImageUrl ?? widget.imageUrl,
+                              fit: BoxFit.cover,
+                              memCacheHeight: 600,
+                              placeholder: (context, url) => Container(
+                                color: const Color(0xFFF5F5F5),
+                              ),
+                              errorWidget: (context, url, error) => Center(
+                                child: Icon(
+                                  Icons.image_not_supported_outlined,
+                                  color: Colors.grey[400],
+                                  size: 32,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
 
@@ -183,11 +198,11 @@ class _ProductCardState extends State<ProductCard> {
                           width: 28,
                           height: 28,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: Colors.white.withOpacity(0.9),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
+                                color: Colors.black.withOpacity(0.1),
                                 blurRadius: 4,
                               ),
                             ],

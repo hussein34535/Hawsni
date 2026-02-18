@@ -162,6 +162,13 @@
                                     <small class="text-muted">افصل بينها بفواصل</small>
                                 </div>
 
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label class="form-label">دليل المقاسات</label>
+                                    <textarea name="size_guide" class="form-control" rows="3"
+                                        placeholder="مثال: S=صدر 90سم، M=صدر 95سم، L=صدر 100سم"><%= product && product.size_guide ? product.size_guide : '' %></textarea>
+                                    <small class="text-muted">أدخل تفاصيل المقاسات لعرضها في التطبيق</small>
+                                </div>
+
                                 <div class="form-group">
                                     <label class="form-label">الألوان</label>
                                     <div

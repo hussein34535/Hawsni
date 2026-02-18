@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:hwasi_app/core/themes/app_theme.dart';
-import 'package:hwasi_app/core/services/notification_service.dart';
 
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 
@@ -27,65 +26,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       _isLoading = true;
     });
 
-    // Simulate loading notifications from a service
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Sample notifications data
-    final List<Map<String, dynamic>> sampleNotifications = [
-      {
-        'id': '1',
-        'title': 'Order Delivered',
-        'message': 'Your order #12345 has been delivered successfully!',
-        'time': DateTime.now().subtract(const Duration(hours: 2)),
-        'icon': Icons.check_circle,
-        'color': AppTheme.successColor,
-        'isRead': false,
-        'type': 'order',
-      },
-      {
-        'id': '2',
-        'title': 'Special Offer',
-        'message': 'Get 50% off on all winter collection. Limited time only!',
-        'time': DateTime.now().subtract(const Duration(hours: 5)),
-        'icon': Icons.local_offer,
-        'color': AppTheme.primaryColor,
-        'isRead': false,
-        'type': 'promotion',
-      },
-      {
-        'id': '3',
-        'title': 'Order Shipped',
-        'message': 'Your order #12344 is on the way. Track your order now.',
-        'time': DateTime.now().subtract(const Duration(days: 1)),
-        'icon': Icons.local_shipping,
-        'color': Colors.blue,
-        'isRead': true,
-        'type': 'order',
-      },
-      {
-        'id': '4',
-        'title': 'Payment Successful',
-        'message': 'Payment of \$85.00 has been processed successfully.',
-        'time': DateTime.now().subtract(const Duration(days: 2)),
-        'icon': Icons.payment,
-        'color': AppTheme.successColor,
-        'isRead': true,
-        'type': 'payment',
-      },
-      {
-        'id': '5',
-        'title': 'New Arrival',
-        'message': 'Check out our latest collection of summer dresses!',
-        'time': DateTime.now().subtract(const Duration(days: 3)),
-        'icon': Icons.new_releases,
-        'color': Colors.purple,
-        'isRead': true,
-        'type': 'product',
-      },
-    ];
-
+    // TODO: Replace with real notification fetching from backend
     setState(() {
-      _notifications = sampleNotifications;
+      _notifications = [];
       _isLoading = false;
     });
   }
@@ -273,61 +216,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       body: Column(
         children: [
-          // Test notification button
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Show a test notification
-                      NotificationService().showOrderUpdateNotification(
-                        orderId: '12345',
-                        status: 'confirmed',
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Text(
-                              'Test notification sent! Check your status bar.',
-                              style: TextStyle(color: Colors.white)),
-                          backgroundColor: AppTheme.primaryColor,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: const Text('Send Test Notification',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _loadNotifications,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.primaryColor,
-                      side: const BorderSide(color: AppTheme.primaryColor),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30)),
-                    ),
-                    child: const Text('Refresh',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ],
-            ),
-          ),
           Expanded(
             child: _isLoading
                 ? Center(child: SpinningLoader())

@@ -7,8 +7,7 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="hwasi - Your favorite content in one place.">
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
   <meta name="theme-color" content="#1B4D3E">
 
   <!-- iOS meta tags & icons -->
@@ -41,66 +40,64 @@
     }
 
     /* CSS Loader - Shows immediately */
+    /* CSS Loader - Shows immediately */
     .loading-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      background-color: #FAFAFA;
+      transition: opacity 0.4s ease-in-out;
+    }
 
-      /* CSS Loader - Shows immediately */
-      .loading-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        width: 100vw;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 9999;
-        background-color: #FAFAFA;
-        transition: opacity 0.4s ease-in-out;
+    .loader {
+      /* Optimized Simple Loader */
+      width: 50px;
+      height: 50px;
+      border: 3px solid #E0E0E0;
+      border-top: 3px solid #1B4D3E;
+      /* App Primary Color */
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
       }
 
-      .loader {
-        /* Optimized Simple Loader */
-        width: 50px;
-        height: 50px;
-        border: 3px solid #E0E0E0;
-        border-top: 3px solid #1B4D3E;
-        /* App Primary Color */
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      display: block;
+      margin-top: 16px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: 24px;
+      color: #1B4D3E;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 0.6;
       }
 
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-
-        100% {
-          transform: rotate(360deg);
-        }
+      50% {
+        opacity: 1;
       }
-
-      .loading-text {
-        display: block;
-        margin-top: 16px;
-        font-family: 'Cairo', sans-serif;
-        font-weight: 700;
-        font-size: 24px;
-        color: #1B4D3E;
-        animation: pulse 1.5s infinite ease-in-out;
-      }
-
-      @keyframes pulse {
-
-        0%,
-        100% {
-          opacity: 0.6;
-        }
-
-        50% {
-          opacity: 1;
-        }
-      }
+    }
   </style>
 
   <!-- Performance Optimizations -->

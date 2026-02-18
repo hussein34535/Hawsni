@@ -36,6 +36,25 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width >= 900;
+
+    if (isDesktop) {
+      return Scaffold(
+        backgroundColor: AppTheme.scaffoldBackgroundColor,
+        body: Column(
+          children: [
+            _buildDesktopHeader(context),
+            Expanded(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _screens,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: IndexedStack(
@@ -157,6 +176,120 @@ class _MainScreenState extends State<MainScreen> {
             label: l10n.profile,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopHeader(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1)),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+      child: Row(
+        children: [
+          // Logo (Start/Right in RTL)
+          Image.asset(
+            'assets/images/logo.png',
+            width: 60,
+            fit: BoxFit.contain,
+          ),
+
+          const Spacer(),
+
+          // Centered Navigation Items
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildDesktopNavItem(
+                  0, l10n.home, Icons.home_outlined, Icons.home),
+              const SizedBox(width: 32),
+              _buildDesktopNavItem(
+                  1, l10n.wishlist, Icons.favorite_border, Icons.favorite),
+              const SizedBox(width: 32),
+              _buildDesktopNavItem(
+                  2, l10n.cart, Icons.shopping_bag_outlined, Icons.shopping_bag,
+                  isCart: true),
+            ],
+          ),
+
+          const Spacer(),
+
+          // Profile Icon (End/Left in RTL)
+          InkWell(
+            onTap: () => setState(() => _currentIndex = 3),
+            borderRadius: BorderRadius.circular(50),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: _currentIndex == 3
+                    ? AppTheme.primaryColor.withOpacity(0.1)
+                    : Colors.transparent,
+              ),
+              child: Icon(
+                _currentIndex == 3 ? Icons.person : Icons.person_outline,
+                color: _currentIndex == 3
+                    ? AppTheme.primaryColor
+                    : Colors.grey[600],
+                size: 28,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopNavItem(
+      int index, String label, IconData icon, IconData activeIcon,
+      {bool isCart = false}) {
+    final isSelected = _currentIndex == index;
+    return InkWell(
+      onTap: () => setState(() => _currentIndex = index),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isCart)
+              BlocBuilder<CartBloc, CartState>(
+                builder: (context, state) {
+                  int count = 0;
+                  if (state is CartLoaded) count = state.items.length;
+                  return Badge(
+                    isLabelVisible: count > 0,
+                    label: Text('$count'),
+                    child: Icon(
+                      isSelected ? activeIcon : icon,
+                      color:
+                          isSelected ? AppTheme.primaryColor : Colors.grey[600],
+                      size: 24,
+                    ),
+                  );
+                },
+              )
+            else
+              Icon(
+                isSelected ? activeIcon : icon,
+                color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
+                size: 24,
+              ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
