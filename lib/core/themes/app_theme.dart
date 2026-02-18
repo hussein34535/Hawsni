@@ -60,7 +60,8 @@ class AppTheme {
       );
 
   // Text Styles
-  static final TextTheme textTheme = GoogleFonts.playfairDisplayTextTheme(
+  // Text Styles
+  static final TextTheme textTheme = GoogleFonts.cairoTextTheme(
     const TextTheme(
       displayLarge: TextStyle(
           fontSize: 28, // Reduced from 36
@@ -85,18 +86,15 @@ class AppTheme {
       bodyLarge: TextStyle(
           fontSize: 15, // Reduced from 16
           color: textPrimary,
-          fontFamily: 'Poppins',
           fontStyle: FontStyle.normal),
       bodyMedium: TextStyle(
           fontSize: 13, // Reduced from 14
           color: textSecondary,
-          fontFamily: 'Poppins',
           fontStyle: FontStyle.normal),
       labelLarge: TextStyle(
           fontSize: 13, // Reduced from 14
           fontWeight: FontWeight.bold,
           color: Colors.white,
-          fontFamily: 'Poppins',
           fontStyle: FontStyle.normal),
     ),
   );
@@ -125,7 +123,7 @@ class AppTheme {
         color: textPrimary,
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        fontFamily: 'Playfair Display',
+        fontFamily: 'Cairo',
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -140,7 +138,7 @@ class AppTheme {
         textStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          fontFamily: 'Poppins',
+          fontFamily: 'Cairo',
         ),
       ),
     ),
@@ -155,7 +153,7 @@ class AppTheme {
         textStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          fontFamily: 'Poppins',
+          fontFamily: 'Cairo',
         ),
       ),
     ),
@@ -181,17 +179,14 @@ class AppTheme {
       ),
       labelStyle: const TextStyle(
         color: textSecondary,
-        fontFamily: 'Poppins',
         fontWeight: FontWeight.w500,
       ),
       floatingLabelStyle: const TextStyle(
         color: primaryColor,
-        fontFamily: 'Poppins',
         fontWeight: FontWeight.bold,
       ),
       hintStyle: TextStyle(
         color: textSecondary.withValues(alpha: 0.5),
-        fontFamily: 'Poppins',
         fontStyle: FontStyle.normal,
       ),
     ),

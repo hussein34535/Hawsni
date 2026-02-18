@@ -199,5 +199,6 @@
   "addressSaved": "تم حفظ العنوان بنجاح",
   "payOnDeliverySubtitle": "ادفع عند استلام طلبك",
   "orderConfirmationMessage": "شكراً لشرائك! ستتلقى تأكيداً قريباً.",
-  "ok": "حسناً"
+  "ok": "حسناً",
+  "viewAll": "عرض الكل"
 }

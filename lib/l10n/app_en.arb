@@ -220,5 +220,6 @@
   "addressSaved": "Address saved successfully",
   "payOnDeliverySubtitle": "Pay when you receive your order",
   "orderConfirmationMessage": "Thank you for your purchase! You will receive a confirmation shortly.",
-  "ok": "OK"
+  "ok": "OK",
+  "viewAll": "View All"
 }

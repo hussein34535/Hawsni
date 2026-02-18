@@ -99,11 +99,12 @@ class ReviewsSection extends StatelessWidget {
                         style: const TextStyle(color: AppTheme.textSecondary)),
                   ),
                 )
-              else
+              else ...[
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: state.reviews.length,
+                  itemCount:
+                      state.reviews.length > 3 ? 3 : state.reviews.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final review = state.reviews[index];
@@ -217,13 +218,106 @@ class ReviewsSection extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(review.comment,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                   color: AppTheme.textPrimary, height: 1.5)),
                         ],
                       ),
                     );
                   },
-                )
+                ),
+                if (state.reviews.length > 3)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // Ideally navigate to a full reviews page
+                          // For now, expand or show bottom sheet could be future work
+                          // Or just show full list in a modal
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (ctx) => Container(
+                              height: MediaQuery.of(context).size.height * 0.8,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20)),
+                              ),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text(
+                                        AppLocalizations.of(context)!.reviews,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18)),
+                                  ),
+                                  Expanded(
+                                    child: ListView.separated(
+                                        padding: const EdgeInsets.all(16),
+                                        itemCount: state.reviews.length,
+                                        separatorBuilder: (_, __) =>
+                                            const SizedBox(height: 16),
+                                        itemBuilder: (ctx, i) {
+                                          final r = state.reviews[i];
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                      r.userName.isNotEmpty
+                                                          ? r.userName
+                                                          : 'User',
+                                                      style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  const Spacer(),
+                                                  RatingBarIndicator(
+                                                      rating: r.rating,
+                                                      itemBuilder: (context,
+                                                              index) =>
+                                                          const Icon(Icons.star,
+                                                              color: Color(
+                                                                  0xFFFFD700)),
+                                                      itemCount: 5,
+                                                      itemSize: 14.0),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(r.comment),
+                                            ],
+                                          );
+                                        }),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: AppTheme.primaryColor),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          '${AppLocalizations.of(context)!.viewAll} (${state.reviews.length})',
+                          style: const TextStyle(
+                              color: AppTheme.primaryColor,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ),
+              ]
             else
               const Center(child: Text("Something went wrong"))
           ],

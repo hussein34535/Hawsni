@@ -1,7 +1,5 @@
-import 'dart:math' show Random;
-import 'dart:ui' show ImageFilter;
-
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:math';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -399,11 +397,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 tag: i == 0
                     ? 'product_${widget.productId}_${widget.screenId}'
                     : 'product_${widget.productId}_image_$i',
-                child: Image.network(data.images[i],
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                    errorBuilder: (_, __, ___) =>
-                        Container(color: Colors.grey[100])),
+                child: CachedNetworkImage(
+                  imageUrl: data.images[i],
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  memCacheWidth: 800, // Optimize memory usage
+                  placeholder: (_, __) => Container(color: Colors.grey[100]),
+                  errorWidget: (_, __, ___) =>
+                      Container(color: Colors.grey[100]),
+                ),
               ),
             ),
 
@@ -777,9 +779,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       height: 76,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       decoration: BoxDecoration(
-          color: Colors.black.withOpacity(kIsWeb ? 0.95 : 0.85),
+          color: const Color(0xFF1A1A1A).withValues(alpha: 0.95),
           borderRadius: BorderRadius.circular(100),
-          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1)),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 5))
+          ],
+          border:
+              Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1)),
       child: Row(
         children: [
           // Price Area
@@ -840,23 +849,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     return SafeArea(
       child: Container(
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        decoration: kIsWeb
-            ? null
-            : BoxDecoration(boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 30,
-                    offset: const Offset(0, 10))
-              ]),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(100),
-          child: kIsWeb
-              ? pillContent
-              : BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                  child: pillContent,
-                ),
-        ),
+        child: pillContent,
       ),
     );
   }
@@ -961,27 +954,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   // ── App-bar icon buttons (PREMIUM GLASS EFFECT) ───────────────────────────
   Widget _glassIcon(IconData icon, VoidCallback fn,
       {Color iconColor = Colors.white}) {
-    final iconContainer = Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(kIsWeb ? 0.4 : 0.2),
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 0.5),
-      ),
-      child: Icon(icon, color: iconColor, size: 20),
-    );
-
     return GestureDetector(
       onTap: fn,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(100),
-        child: kIsWeb
-            ? iconContainer
-            : BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                child: iconContainer,
-              ),
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A1A1A)
+              .withValues(alpha: 0.8), // Fast, premium dark
+          shape: BoxShape.circle,
+          border: Border.all(
+              color: Colors.white.withValues(alpha: 0.2), width: 0.5),
+        ),
+        child: Icon(icon, color: iconColor, size: 20),
       ),
     );
   }
@@ -1236,10 +1221,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       setState(() => _currentImageIndex = i),
                                   itemBuilder: (_, i) => Hero(
                                     tag: 'desktop_img_$i',
-                                    child: Image.network(
-                                      data.images[i],
+                                    child: CachedNetworkImage(
+                                      imageUrl: data.images[i],
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
+                                      memCacheWidth: 800,
+                                      errorWidget: (_, __, ___) =>
                                           Container(color: Colors.grey[200]),
                                     ),
                                   ),

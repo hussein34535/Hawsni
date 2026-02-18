@@ -626,4 +626,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ok => 'OK';
+
+  @override
+  String get viewAll => 'View All';
 }

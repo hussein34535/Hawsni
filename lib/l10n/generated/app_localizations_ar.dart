@@ -621,4 +621,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ok => 'حسناً';
+
+  @override
+  String get viewAll => 'عرض الكل';
 }
