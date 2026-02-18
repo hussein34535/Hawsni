@@ -11,10 +11,40 @@
         </div>
 
         <% if (products && products.length> 0) { %>
+            <!-- Bulk Action Bar -->
+            <div id="bulkBar"
+                style="display:none; background: #f0f4ff; border: 1px solid #c7d7ff; border-radius: 10px; padding: 0.75rem 1.25rem; margin-bottom: 1rem; display: none; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <span id="selectedCount" style="font-weight: 600; color: #3b5bdb;">0 محدد</span>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button onclick="bulkDelete()" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> حذف المحدد
+                    </button>
+                    <select id="bulkCategorySelect" class="form-control"
+                        style="width: auto; padding: 0.3rem 0.75rem; font-size: 0.85rem;">
+                        <option value="">-- تغيير التصنيف --</option>
+                        <% categories.forEach(cat=> { %>
+                            <option value="<%= cat.id %>">
+                                <%= cat.name %>
+                            </option>
+                            <% }) %>
+                    </select>
+                    <button onclick="bulkChangeCategory()" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-tag"></i> تطبيق التصنيف
+                    </button>
+                    <button onclick="clearSelection()" class="btn btn-sm" style="background:#e9ecef; color:#555;">
+                        <i class="fas fa-times"></i> إلغاء التحديد
+                    </button>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
+                            <th style="width:40px;">
+                                <input type="checkbox" id="selectAll" onchange="toggleAll(this)"
+                                    style="width:16px;height:16px;cursor:pointer;">
+                            </th>
                             <th>المنتج</th>
                             <th>السعر</th>
                             <th>الكمية</th>
@@ -24,7 +54,11 @@
                     </thead>
                     <tbody>
                         <% products.forEach(product=> { %>
-                            <tr>
+                            <tr id="row-<%= product.id %>">
+                                <td>
+                                    <input type="checkbox" class="product-checkbox" value="<%= product.id %>"
+                                        onchange="updateBulkBar()" style="width:16px;height:16px;cursor:pointer;">
+                                </td>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                                         <% if (product.images && product.images.length> 0) { %>
@@ -91,27 +125,98 @@
     </div>
 
     <script>
+        function getSelectedIds() {
+            return [...document.querySelectorAll('.product-checkbox:checked')].map(cb => cb.value);
+        }
+
+        function updateBulkBar() {
+            const ids = getSelectedIds();
+            const bar = document.getElementById('bulkBar');
+            document.getElementById('selectedCount').textContent = ids.length + ' محدد';
+            bar.style.display = ids.length > 0 ? 'flex' : 'none';
+            document.getElementById('selectAll').indeterminate =
+                ids.length > 0 && ids.length < document.querySelectorAll('.product-checkbox').length;
+            document.getElementById('selectAll').checked =
+                ids.length === document.querySelectorAll('.product-checkbox').length;
+        }
+
+        function toggleAll(cb) {
+            document.querySelectorAll('.product-checkbox').forEach(c => c.checked = cb.checked);
+            updateBulkBar();
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.product-checkbox').forEach(c => c.checked = false);
+            document.getElementById('selectAll').checked = false;
+            updateBulkBar();
+        }
+
+        async function bulkDelete() {
+            const ids = getSelectedIds();
+            if (!ids.length) return;
+            if (!confirm(`هل أنت متأكد من حذف ${ids.length} منتج؟`)) return;
+
+            try {
+                const res = await fetch('/products/bulk-delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`تم حذف ${ids.length} منتج بنجاح`, 'success');
+                    ids.forEach(id => {
+                        const row = document.getElementById('row-' + id);
+                        if (row) row.remove();
+                    });
+                    clearSelection();
+                } else {
+                    showToast(data.message || 'فشل الحذف', 'error');
+                }
+            } catch (e) {
+                showToast('حدث خطأ أثناء الحذف', 'error');
+            }
+        }
+
+        async function bulkChangeCategory() {
+            const ids = getSelectedIds();
+            const categoryId = document.getElementById('bulkCategorySelect').value;
+            if (!ids.length) return showToast('اختر منتجات أولاً', 'error');
+            if (!categoryId) return showToast('اختر تصنيفاً', 'error');
+
+            try {
+                const res = await fetch('/products/bulk-update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids, updates: { category_id: categoryId } })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('تم تغيير التصنيف بنجاح', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast(data.message || 'فشل التحديث', 'error');
+                }
+            } catch (e) {
+                showToast('حدث خطأ', 'error');
+            }
+        }
+
         // Override handleDelete for products (uses POST to /products/:id/delete)
-        // Handles deletion via Fetch API (Modern & Robust)
         async function handleDelete(url, itemName) {
             if (!confirm(`هل أنت متأكد من حذف ${itemName}؟`)) return;
 
-            // Ensure URL has no double slashes (fix for missing ID)
             url = url.replace(/([^:]\/)\/+/g, "$1");
 
-            // Validate URL
             if (url.endsWith('/products/') || url === '/products/delete' || url === '/products') {
                 alert('خطأ: المعرف (ID) غير موجود لهذا العنصر!');
                 return;
             }
 
             try {
-                // Try sending standard DELETE request first
                 const res = await fetch(url, {
                     method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                    headers: { 'Content-Type': 'application/json' }
                 });
 
                 if (res.ok) {
@@ -119,7 +224,6 @@
                     setTimeout(() => window.location.reload(), 1000);
                     return;
                 } else if (res.status === 404) {
-                    // Fallback: Try POST with _method override (if server expects that)
                     const formRes = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

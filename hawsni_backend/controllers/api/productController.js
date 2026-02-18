@@ -231,10 +231,12 @@ class ProductController {
                 }
             }
 
-            // Parse Sizes
+            // Parse Sizes — support Arabic comma ، and English comma ,
             let sizesArray = [];
             if (sizes) {
-                sizesArray = typeof sizes === 'string' ? sizes.split(',').map(s => s.trim()).filter(s => s) : sizes;
+                sizesArray = typeof sizes === 'string'
+                    ? sizes.split(/[,،]/).map(s => s.trim()).filter(s => s)
+                    : sizes;
             }
 
             // Parse Colors
@@ -325,12 +327,14 @@ class ProductController {
                 }
             }
 
-            // Parse sizes and colors
+            // Parse sizes — support Arabic comma ، and English comma ,
             let sizesArray = [];
             let colorsArray = [];
 
             if (sizes) {
-                sizesArray = typeof sizes === 'string' ? sizes.split(',').map(s => s.trim()).filter(s => s) : sizes;
+                sizesArray = typeof sizes === 'string'
+                    ? sizes.split(/[,،]/).map(s => s.trim()).filter(s => s)
+                    : sizes;
             }
 
             if (colors) {
@@ -473,6 +477,51 @@ class ProductController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    // Bulk delete products (Admin)
+    async bulkDelete(req, res) {
+        try {
+            const { ids } = req.body;
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({ success: false, message: 'لا توجد منتجات محددة' });
+            }
+
+            const { error } = await supabase.from('products').delete().in('id', ids);
+            if (error) throw error;
+
+            res.json({ success: true, message: `تم حذف ${ids.length} منتج` });
+        } catch (err) {
+            console.error('Error bulk deleting products:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
+
+    // Bulk update products (Admin) — e.g. change category
+    async bulkUpdate(req, res) {
+        try {
+            const { ids, updates } = req.body;
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({ success: false, message: 'لا توجد منتجات محددة' });
+            }
+            if (!updates || Object.keys(updates).length === 0) {
+                return res.status(400).json({ success: false, message: 'لا توجد تحديثات' });
+            }
+
+            // Whitelist allowed fields for safety
+            const allowed = ['category_id', 'is_featured', 'discount'];
+            const safeUpdates = Object.fromEntries(
+                Object.entries(updates).filter(([k]) => allowed.includes(k))
+            );
+
+            const { error } = await supabase.from('products').update(safeUpdates).in('id', ids);
+            if (error) throw error;
+
+            res.json({ success: true, message: `تم تحديث ${ids.length} منتج` });
+        } catch (err) {
+            console.error('Error bulk updating products:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
 }
 
 module.exports = new ProductController();
+

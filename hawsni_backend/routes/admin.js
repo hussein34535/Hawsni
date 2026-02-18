@@ -10,6 +10,8 @@ const bannersController = require('../controllers/admin/bannersController');
 const usersController = require('../controllers/admin/usersController');
 const ordersController = require('../controllers/admin/ordersController');
 const scraperController = require('../controllers/admin/scraperController');
+const ProductController = require('../controllers/api/productController');
+const shippingController = require('../controllers/admin/shippingController');
 
 // Dashboard
 router.get('/dashboard', dashboardController.getDashboard);
@@ -31,6 +33,15 @@ router.get('/users', usersController.index);
 // Orders Routes
 router.get('/orders', ordersController.index);
 router.post('/orders/:id/status', ordersController.updateStatus);
+router.post('/orders/bulk-status', ordersController.bulkUpdateStatus);
+
+// Products Bulk Routes
+router.post('/products/bulk-delete', ProductController.bulkDelete);
+router.post('/products/bulk-update', ProductController.bulkUpdate);
+
+// Shipping Settings Routes
+router.get('/shipping', shippingController.index);
+router.post('/shipping', shippingController.update);
 
 // Settings Route (placeholder)
 router.get('/settings', (req, res) => {

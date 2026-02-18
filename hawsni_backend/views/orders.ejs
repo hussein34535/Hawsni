@@ -8,10 +8,37 @@
         </div>
 
         <% if (orders && orders.length> 0) { %>
+            <!-- Bulk Action Bar -->
+            <div id="bulkBar"
+                style="display:none; background: #f0f4ff; border: 1px solid #c7d7ff; border-radius: 10px; padding: 0.75rem 1.25rem; margin-bottom: 1rem; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <span id="selectedCount" style="font-weight: 600; color: #3b5bdb;">0 محدد</span>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                    <select id="bulkStatusSelect" class="form-control"
+                        style="width: auto; padding: 0.3rem 0.75rem; font-size: 0.85rem;">
+                        <option value="">-- تغيير الحالة --</option>
+                        <option value="Processing">قيد المعالجة</option>
+                        <option value="Shipped">تم الشحن</option>
+                        <option value="In Transit">في الطريق</option>
+                        <option value="Delivered">تم التوصيل</option>
+                        <option value="Cancelled">ملغي</option>
+                    </select>
+                    <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm">
+                        <i class="fas fa-check"></i> تطبيق الحالة
+                    </button>
+                    <button onclick="clearSelection()" class="btn btn-sm" style="background:#e9ecef; color:#555;">
+                        <i class="fas fa-times"></i> إلغاء التحديد
+                    </button>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
+                            <th style="width:40px;">
+                                <input type="checkbox" id="selectAll" onchange="toggleAll(this)"
+                                    style="width:16px;height:16px;cursor:pointer;">
+                            </th>
                             <th>المنتج</th>
                             <th>رقم الطلب</th>
                             <th>المبلغ</th>
@@ -22,7 +49,11 @@
                     </thead>
                     <tbody>
                         <% orders.forEach(order=> { %>
-                            <tr>
+                            <tr id="row-<%= order.id %>">
+                                <td>
+                                    <input type="checkbox" class="order-checkbox" value="<%= order.id %>"
+                                        onchange="updateBulkBar()" style="width:16px;height:16px;cursor:pointer;">
+                                </td>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                                         <% if (order.product_image) { %>
@@ -61,7 +92,7 @@
                                     <% const statusMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'In Transit'
                                         : 'info' , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; const
                                         statusClass=statusMap[order.status] || 'warning' ; %>
-                                        <span class="badge badge-<%= statusClass %>">
+                                        <span class="badge badge-<%= statusClass %>" id="status-badge-<%= order.id %>">
                                             <%= order.status || 'Processing' %>
                                         </span>
                                 </td>
@@ -99,5 +130,57 @@
                 </div>
                 <% } %>
     </div>
+
+    <script>
+        function getSelectedIds() {
+            return [...document.querySelectorAll('.order-checkbox:checked')].map(cb => cb.value);
+        }
+
+        function updateBulkBar() {
+            const ids = getSelectedIds();
+            const bar = document.getElementById('bulkBar');
+            document.getElementById('selectedCount').textContent = ids.length + ' محدد';
+            bar.style.display = ids.length > 0 ? 'flex' : 'none';
+            document.getElementById('selectAll').indeterminate =
+                ids.length > 0 && ids.length < document.querySelectorAll('.order-checkbox').length;
+            document.getElementById('selectAll').checked =
+                ids.length === document.querySelectorAll('.order-checkbox').length;
+        }
+
+        function toggleAll(cb) {
+            document.querySelectorAll('.order-checkbox').forEach(c => c.checked = cb.checked);
+            updateBulkBar();
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.order-checkbox').forEach(c => c.checked = false);
+            document.getElementById('selectAll').checked = false;
+            updateBulkBar();
+        }
+
+        async function bulkChangeStatus() {
+            const ids = getSelectedIds();
+            const status = document.getElementById('bulkStatusSelect').value;
+            if (!ids.length) return showToast('اختر طلبات أولاً', 'error');
+            if (!status) return showToast('اختر حالة', 'error');
+
+            try {
+                const res = await fetch('/orders/bulk-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids, status })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`تم تحديث ${ids.length} طلب بنجاح`, 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast(data.message || 'فشل التحديث', 'error');
+                }
+            } catch (e) {
+                showToast('حدث خطأ', 'error');
+            }
+        }
+    </script>
 
     <%- include('partials/footer') %>

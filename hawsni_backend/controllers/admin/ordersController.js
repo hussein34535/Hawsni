@@ -71,6 +71,32 @@ class OrdersController {
             res.status(500).send('خطأ في تحديث حالة الطلب');
         }
     }
+
+    // Bulk update order status
+    async bulkUpdateStatus(req, res) {
+        try {
+            const { ids, status } = req.body;
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({ success: false, message: 'لا توجد طلبات محددة' });
+            }
+            if (!status) {
+                return res.status(400).json({ success: false, message: 'الحالة مطلوبة' });
+            }
+
+            const { error } = await supabase
+                .from('orders')
+                .update({ status })
+                .in('id', ids);
+
+            if (error) throw error;
+
+            res.json({ success: true, message: `تم تحديث ${ids.length} طلب` });
+        } catch (err) {
+            console.error('Error bulk updating orders:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
 }
 
 module.exports = new OrdersController();
+

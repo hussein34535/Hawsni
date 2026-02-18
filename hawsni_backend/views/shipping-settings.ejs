@@ -1,0 +1,156 @@
+<%- include('partials/header', { title: 'إعدادات الشحن' , pageTitle: 'إعدادات الشحن' , page: 'shipping' }) %>
+
+    <style>
+        .gov-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .gov-row input {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .gov-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+
+    <form method="POST" action="/shipping">
+        <!-- Global Settings -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-truck"></i> إعدادات الشحن العامة</h2>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-money-bill-wave" style="color: var(--success);"></i>
+                            سعر الشحن الافتراضي (ج.م)
+                        </label>
+                        <input type="number" name="delivery_cost" class="form-control"
+                            value="<%= settings.delivery_cost || 0 %>" min="0" step="0.5" placeholder="0 = شحن مجاني">
+                        <small class="text-muted">0 = شحن مجاني لجميع المحافظات</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-gift" style="color: var(--primary-color);"></i>
+                            حد الشحن المجاني (ج.م)
+                        </label>
+                        <input type="number" name="free_shipping_threshold" class="form-control"
+                            value="<%= settings.free_shipping_threshold || 0 %>" min="0" step="1"
+                            placeholder="0 = لا يوجد حد">
+                        <small class="text-muted">الطلبات فوق هذا المبلغ تحصل على شحن مجاني</small>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt" style="color: var(--warning);"></i>
+                            أقل أيام توصيل افتراضية
+                        </label>
+                        <input type="number" name="default_days_min" class="form-control"
+                            value="<%= settings.default_days_min || 3 %>" min="1" max="30">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-check" style="color: var(--warning);"></i>
+                            أكثر أيام توصيل افتراضية
+                        </label>
+                        <input type="number" name="default_days_max" class="form-control"
+                            value="<%= settings.default_days_max || 7 %>" min="1" max="30">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Per-Governorate Settings -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-map-marker-alt"></i> إعدادات المحافظات</h2>
+                <button type="button" onclick="addGovRow()" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-plus"></i> إضافة محافظة
+                </button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div
+                    style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 0.75rem; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: var(--medium-gray);">
+                    <span>المحافظة</span>
+                    <span>سعر الشحن (ج.م)</span>
+                    <span>أقل أيام</span>
+                    <span>أكثر أيام</span>
+                    <span></span>
+                </div>
+                <div id="govContainer">
+                    <% const govSettings=settings.governorate_settings || {}; %>
+                        <% if (Object.keys(govSettings).length===0) { %>
+                            <!-- Default empty row -->
+                            <div class="gov-row">
+                                <input type="text" name="gov_name[]" class="form-control" placeholder="مثال: القاهرة">
+                                <input type="number" name="gov_cost[]" class="form-control" placeholder="0" min="0"
+                                    step="0.5">
+                                <input type="number" name="gov_days_min[]" class="form-control" placeholder="1" min="1">
+                                <input type="number" name="gov_days_max[]" class="form-control" placeholder="3" min="1">
+                                <button type="button" onclick="removeRow(this)" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <% } else { %>
+                                <% Object.entries(govSettings).forEach(([name, cfg])=> { %>
+                                    <div class="gov-row">
+                                        <input type="text" name="gov_name[]" class="form-control" value="<%= name %>">
+                                        <input type="number" name="gov_cost[]" class="form-control"
+                                            value="<%= cfg.cost || 0 %>" min="0" step="0.5">
+                                        <input type="number" name="gov_days_min[]" class="form-control"
+                                            value="<%= cfg.days_min || 1 %>" min="1">
+                                        <input type="number" name="gov_days_max[]" class="form-control"
+                                            value="<%= cfg.days_max || 3 %>" min="1">
+                                        <button type="button" onclick="removeRow(this)" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <% }) %>
+                                        <% } %>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--medium-gray); margin-top: 1rem;">
+                    <i class="fas fa-info-circle"></i>
+                    المحافظات غير المذكورة تستخدم الإعدادات الافتراضية أعلاه
+                </p>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> حفظ الإعدادات
+            </button>
+        </div>
+    </form>
+
+    <script>
+        function addGovRow() {
+            const container = document.getElementById('govContainer');
+            const row = document.createElement('div');
+            row.className = 'gov-row';
+            row.innerHTML = `
+        <input type="text" name="gov_name[]" class="form-control" placeholder="مثال: الإسكندرية">
+        <input type="number" name="gov_cost[]" class="form-control" placeholder="0" min="0" step="0.5">
+        <input type="number" name="gov_days_min[]" class="form-control" placeholder="1" min="1">
+        <input type="number" name="gov_days_max[]" class="form-control" placeholder="3" min="1">
+        <button type="button" onclick="removeRow(this)" class="btn btn-danger btn-sm">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+            container.appendChild(row);
+        }
+
+        function removeRow(btn) {
+            btn.closest('.gov-row').remove();
+        }
+    </script>
+
+    <%- include('partials/footer') %>

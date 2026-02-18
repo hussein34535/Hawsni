@@ -31,6 +31,7 @@ const DashboardController = require('./controllers/admin/dashboardController');
 const ProductController = require('./controllers/api/productController');
 const CategoryController = require('./controllers/api/categoryController');
 const OrderController = require('./controllers/api/orderController');
+const ShippingController = require('./controllers/admin/shippingController');
 
 const app = express();
 
@@ -86,11 +87,19 @@ app.get('/dashboard', DashboardController.getDashboard);
 app.get('/products', ProductController.renderProductsPage);
 app.get('/products/new', ProductController.renderNewProductPage);
 app.post('/products', upload.any(), ProductController.createProductAdmin);
+// Bulk product actions (MUST be before /:id routes)
+app.post('/products/bulk-delete', ProductController.bulkDelete);
+app.post('/products/bulk-update', ProductController.bulkUpdate);
 app.get('/products/:id/edit', ProductController.renderEditProductPage);
 app.post('/products/:id', upload.any(), ProductController.updateProductAdmin);
 app.post('/products/:id/delete', ProductController.deleteProductAdmin);
-app.delete('/products/:id/delete', ProductController.deleteProductAdmin); // Handle actual DELETE method
-app.delete('/products/:id', ProductController.deleteProductAdmin); // RESTful fallback
+app.delete('/products/:id/delete', ProductController.deleteProductAdmin);
+app.delete('/products/:id', ProductController.deleteProductAdmin);
+
+// Shipping Settings (Admin + Public API)
+app.get('/shipping', ShippingController.index);
+app.post('/shipping', ShippingController.update);
+app.get('/api/shipping/settings', ShippingController.getSettings);
 
 // Image Management Routes
 app.get('/products/:id/images', ProductController.renderImageManagementPage);
