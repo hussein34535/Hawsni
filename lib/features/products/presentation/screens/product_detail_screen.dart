@@ -1126,38 +1126,79 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     }
 
                     return items.map((item) {
+                      // Check if item contains '=' to split key/value
+                      final parts = item.split('=');
+                      final hasKeyVal = parts.length > 1;
+                      final key = hasKeyVal ? parts[0].trim() : '';
+                      final val =
+                          hasKeyVal ? parts.sublist(1).join('=').trim() : item;
+
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 16),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF9F9F9),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFEEEEEE)),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
+                          border: Border.all(color: const Color(0xFFF0F0F0)),
                         ),
                         child: Row(
+                          mainAxisAlignment: hasKeyVal
+                              ? MainAxisAlignment.spaceBetween
+                              : MainAxisAlignment.start,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                            if (hasKeyVal) ...[
+                              // Key (e.g., "S", "M")
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color:
+                                      AppTheme.primaryColor.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  key,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.check_circle_outline_rounded,
-                                size: 16,
-                                color: AppTheme.primaryColor,
+                              // Dotted Line or Spacer
+                              Expanded(
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  height: 1,
+                                  color: Colors.grey.shade200,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
+                            ],
+
+                            // Value (e.g., "Chest 50cm")
+                            Flexible(
+                              fit: hasKeyVal ? FlexFit.loose : FlexFit.tight,
                               child: Text(
-                                item,
+                                val,
                                 style: GoogleFonts.cairo(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: hasKeyVal
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
                                   color: Colors.black87,
                                   height: 1.2,
                                 ),
+                                textAlign:
+                                    hasKeyVal ? TextAlign.end : TextAlign.start,
                               ),
                             ),
                           ],
