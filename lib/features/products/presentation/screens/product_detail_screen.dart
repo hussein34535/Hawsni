@@ -500,7 +500,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               Text(state.message, style: const TextStyle(color: Colors.red)));
     }
 
-    final currency = AppLocalizations.of(context)?.currency ?? 'EGP';
+    final currency = AppLocalizations.of(context)?.currencySymbol ?? 'EGP';
 
     // تم إزالة المارجن السالب من الـ Container لحل مشكلة الـ Assertion Failed في الويب
     Widget cardContent = Container(

@@ -4,6 +4,7 @@ import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class CartItemCard extends StatelessWidget {
   final CartItem item;
@@ -105,7 +106,7 @@ class CartItemCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              item.price,
+                              '${item.price} ${AppLocalizations.of(context)?.currencySymbol ?? 'EGP'}',
                               style: AppTheme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.primaryColor,

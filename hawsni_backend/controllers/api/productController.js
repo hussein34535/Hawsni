@@ -390,7 +390,20 @@ class ProductController {
                 size_guide: size_guide || ''
             }).eq('id', req.params.id);
 
-            res.redirect('/products');
+            // res.redirect('/products');
+            res.json({
+                success: true,
+                message: 'Debug Mode: Check sizes below',
+                receivedBody: {
+                    sizes: req.body.sizes,
+                    colors: req.body.colors
+                },
+                parsed: {
+                    sizesArray,
+                    colorsArray
+                },
+                files: req.files ? req.files.length : 0
+            });
         } catch (err) {
             console.error('❌ Server error:', err);
             res.status(500).send(`خطأ في السيرفر: ${err.message}`);

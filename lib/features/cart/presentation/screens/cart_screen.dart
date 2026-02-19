@@ -184,7 +184,7 @@ class CartScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                '\$${total.toStringAsFixed(2)}',
+                '${total.toStringAsFixed(2)} ${l10n.currencySymbol ?? 'EGP'}',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

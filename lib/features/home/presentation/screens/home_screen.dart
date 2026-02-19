@@ -387,11 +387,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Logo/Title - Centered
           Text(
-            'hwasi',
-            style: GoogleFonts.poppins(
-              fontSize: 22,
+            'Hawsni',
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 26,
               fontWeight: FontWeight.w900,
-              letterSpacing: 1.5,
+              letterSpacing: 1.2,
               color: AppTheme.primaryColor,
             ),
           ),
