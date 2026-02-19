@@ -376,7 +376,8 @@ class ProductController {
                 }
             }
 
-            await supabase.from('products').update({
+            // Perform Update
+            const { error: updateError } = await supabase.from('products').update({
                 name,
                 description,
                 price: parseFloat(price),
@@ -390,19 +391,23 @@ class ProductController {
                 size_guide: size_guide || ''
             }).eq('id', req.params.id);
 
+            if (updateError) throw updateError;
+
+            // Verify Persistence
+            const { data: updatedProduct } = await supabase.from('products').select('sizes, colors').eq('id', req.params.id).single();
+
             // res.redirect('/products');
             res.json({
                 success: true,
-                message: 'Debug Mode: Check sizes below',
-                receivedBody: {
-                    sizes: req.body.sizes,
-                    colors: req.body.colors
+                message: 'Debug Verification: Data updated in Database?',
+                sentToDb: {
+                    sizes: sizesArray.length > 0 ? sizesArray : null,
                 },
-                parsed: {
-                    sizesArray,
-                    colorsArray
+                readFromDb: {
+                    sizes: updatedProduct?.sizes,
+                    colors: updatedProduct?.colors
                 },
-                files: req.files ? req.files.length : 0
+                match: JSON.stringify(sizesArray) === JSON.stringify(updatedProduct?.sizes)
             });
         } catch (err) {
             console.error('❌ Server error:', err);
