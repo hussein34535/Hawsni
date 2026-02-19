@@ -26,6 +26,7 @@ import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
 import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
 import 'package:hwasi_app/features/reviews/data/services/review_service.dart';
 import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_screen.dart';
+import 'package:hwasi_app/features/products/presentation/widgets/full_screen_gallery.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -393,18 +394,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               itemCount: data.images.length,
               physics: const BouncingScrollPhysics(),
               onPageChanged: (i) => setState(() => _currentImageIndex = i),
-              itemBuilder: (_, i) => Hero(
-                tag: i == 0
-                    ? 'product_${widget.productId}_${widget.screenId}'
-                    : 'product_${widget.productId}_image_$i',
-                child: CachedNetworkImage(
-                  imageUrl: data.images[i],
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                  memCacheWidth: 800, // Optimize memory usage
-                  placeholder: (_, __) => Container(color: Colors.grey[100]),
-                  errorWidget: (_, __, ___) =>
-                      Container(color: Colors.grey[100]),
+              itemBuilder: (_, i) => GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FullScreenGallery(
+                        images: data.images,
+                        initialIndex: i,
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: i == 0
+                      ? 'product_${widget.productId}_${widget.screenId}'
+                      : 'product_${widget.productId}_image_$i',
+                  child: CachedNetworkImage(
+                    imageUrl: data.images[i],
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                    memCacheWidth: 800, // Optimize memory usage
+                    placeholder: (_, __) => Container(color: Colors.grey[100]),
+                    errorWidget: (_, __, ___) =>
+                        Container(color: Colors.grey[100]),
+                  ),
                 ),
               ),
             ),
@@ -429,18 +443,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             // Premium Image Indicator
             if (data.images.length > 1)
               Positioned(
-                bottom: 40,
+                bottom: 20, // Lower position
                 left: 0,
                 right: 0,
                 child: Center(
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withOpacity(0.3), // More transparent
                       borderRadius: BorderRadius.circular(100),
                       border: Border.all(
-                          color: Colors.white.withOpacity(0.15), width: 0.5),
+                          color: Colors.white.withOpacity(0.1), width: 0.5),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -452,9 +466,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeOutCubic,
                             margin: EdgeInsets.only(
-                                right: i < data.images.length - 1 ? 6 : 0),
-                            width: active ? 20 : 6,
-                            height: 6,
+                                right: i < data.images.length - 1 ? 4 : 0),
+                            width: active ? 16 : 4, // Smaller dots
+                            height: 4,
                             decoration: BoxDecoration(
                               color: active
                                   ? Colors.white
@@ -463,14 +477,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                             ),
                           );
                         }),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 8),
                         // Counter text
                         Text(
                           '${_currentImageIndex + 1}/${data.images.length}',
                           style: GoogleFonts.poppins(
                             color: Colors.white.withOpacity(0.8),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -957,16 +971,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     return GestureDetector(
       onTap: fn,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
           color: const Color(0xFF1A1A1A)
-              .withValues(alpha: 0.8), // Fast, premium dark
+              .withValues(alpha: 0.3), // More transparent & subtle
           shape: BoxShape.circle,
           border: Border.all(
-              color: Colors.white.withValues(alpha: 0.2), width: 0.5),
+              color: Colors.white.withValues(alpha: 0.1), width: 0.5),
         ),
-        child: Icon(icon, color: iconColor, size: 20),
+        child: Icon(icon, color: iconColor, size: 18),
       ),
     );
   }
@@ -1049,7 +1063,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.6,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
         decoration: const BoxDecoration(
           color: Colors.white,
