@@ -1103,13 +1103,68 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
-                child: Text(
-                  content,
-                  style: GoogleFonts.cairo(
-                    fontSize: 15,
-                    height: 1.8,
-                    color: Colors.black87,
-                  ),
+                child: Column(
+                  children: () {
+                    // Split content by comma or newline to separate measurements
+                    final items = content
+                        .split(RegExp(r'[,،\n]'))
+                        .map((e) => e.trim())
+                        .where((e) => e.isNotEmpty)
+                        .toList();
+
+                    if (items.isEmpty) {
+                      return [
+                        Text(
+                          content,
+                          style: GoogleFonts.cairo(
+                            fontSize: 15,
+                            height: 1.8,
+                            color: Colors.black87,
+                          ),
+                        )
+                      ];
+                    }
+
+                    return items.map((item) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9F9F9),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFEEEEEE)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.check_circle_outline_rounded,
+                                size: 16,
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                item,
+                                style: GoogleFonts.cairo(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList();
+                  }(),
                 ),
               ),
             ),
