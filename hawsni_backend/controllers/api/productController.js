@@ -232,11 +232,12 @@ class ProductController {
             }
 
             // Parse Sizes — support Arabic comma ، and English comma ,
+            // Parse Sizes — support Arabic comma ، and English comma ,
             let sizesArray = [];
             if (sizes) {
-                sizesArray = typeof sizes === 'string'
-                    ? sizes.split(/[,،]/).map(s => s.trim()).filter(s => s)
-                    : sizes;
+                // Ensure we handle both string input and array input (join first to handle mixed cases)
+                const sizesString = Array.isArray(sizes) ? sizes.join(',') : String(sizes);
+                sizesArray = sizesString.split(/[,،]/).map(s => s.trim()).filter(s => s);
             }
 
             // Parse Colors
@@ -332,9 +333,9 @@ class ProductController {
             let colorsArray = [];
 
             if (sizes) {
-                sizesArray = typeof sizes === 'string'
-                    ? sizes.split(/[,،]/).map(s => s.trim()).filter(s => s)
-                    : sizes;
+                // Ensure we handle both string input and array input (join first to handle mixed cases)
+                const sizesString = Array.isArray(sizes) ? sizes.join(',') : String(sizes);
+                sizesArray = sizesString.split(/[,،]/).map(s => s.trim()).filter(s => s);
             }
 
             if (colors) {

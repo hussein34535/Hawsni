@@ -7,11 +7,100 @@
             </h2>
         </div>
 
-        <div style="text-align: center; padding: 3rem; color: var(--medium-gray);">
-            <i class="fas fa-cog" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-            <p style="font-size: 1.1rem;">صفحة الإعدادات قيد التطوير</p>
-            <p style="font-size: 0.9rem; margin-top: 0.5rem;">سيتم إضافة إعدادات المتجر قريباً</p>
-        </div>
+        <form method="POST" action="/settings">
+            <!-- General Info -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-store"></i> معلومات المتجر</h2>
+                </div>
+                <div style="padding: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">اسم المتجر</label>
+                        <input type="text" name="store_name" class="form-control"
+                            value="<%= settings.store_name || 'Hawsni Store' %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">وصف المتجر</label>
+                        <textarea name="store_description" class="form-control"
+                            rows="3"><%= settings.store_description || '' %></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">رابط الشعار (URL)</label>
+                        <input type="url" name="logo_url" class="form-control" value="<%= settings.logo_url || '' %>"
+                            placeholder="https://example.com/logo.png">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-address-card"></i> معلومات الاتصال</h2>
+                </div>
+                <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <input type="email" name="contact_email" class="form-control"
+                            value="<%= settings.contact_email || '' %>">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">رقم الهاتف</label>
+                        <input type="tel" name="contact_phone" class="form-control"
+                            value="<%= settings.contact_phone || '' %>">
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label">العنوان</label>
+                        <input type="text" name="address" class="form-control" value="<%= settings.address || '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-share-alt"></i> روابط التواصل الاجتماعي</h2>
+                </div>
+                <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <% const social=settings.social_links || {}; %>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fab fa-facebook" style="color: #1877F2;"></i>
+                                Facebook</label>
+                            <input type="url" name="facebook" class="form-control" value="<%= social.facebook || '' %>">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fab fa-instagram" style="color: #E4405F;"></i>
+                                Instagram</label>
+                            <input type="url" name="instagram" class="form-control"
+                                value="<%= social.instagram || '' %>">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                                WhatsApp</label>
+                            <input type="text" name="whatsapp" class="form-control" value="<%= social.whatsapp || '' %>"
+                                placeholder="+20...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fab fa-tiktok" style="color: #000000;"></i>
+                                TikTok</label>
+                            <input type="url" name="tiktok" class="form-control" value="<%= social.tiktok || '' %>">
+                        </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> حفظ الإعدادات
+                </button>
+            </div>
+        </form>
     </div>
 
     <%- include('partials/footer') %>
