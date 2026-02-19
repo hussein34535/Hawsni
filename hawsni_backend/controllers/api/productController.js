@@ -394,21 +394,21 @@ class ProductController {
             if (updateError) throw updateError;
 
             // Verify Persistence
-            const { data: updatedProduct } = await supabase.from('products').select('sizes, colors').eq('id', req.params.id).single();
+            // const { data: updatedProduct } = await supabase.from('products').select('sizes, colors').eq('id', req.params.id).single();
 
-            // res.redirect('/products');
-            res.json({
-                success: true,
-                message: 'Debug Verification: Data updated in Database?',
-                sentToDb: {
-                    sizes: sizesArray.length > 0 ? sizesArray : null,
-                },
-                readFromDb: {
-                    sizes: updatedProduct?.sizes,
-                    colors: updatedProduct?.colors
-                },
-                match: JSON.stringify(sizesArray) === JSON.stringify(updatedProduct?.sizes)
-            });
+            res.redirect('/products');
+            // res.json({
+            //     success: true,
+            //     message: 'Debug Verification: Data updated in Database?',
+            //     sentToDb: {
+            //         sizes: sizesArray.length > 0 ? sizesArray : null,
+            //     },
+            //     readFromDb: {
+            //         sizes: updatedProduct?.sizes,
+            //         colors: updatedProduct?.colors
+            //     },
+            //     match: JSON.stringify(sizesArray) === JSON.stringify(updatedProduct?.sizes)
+            // });
         } catch (err) {
             console.error('❌ Server error:', err);
             res.status(500).send(`خطأ في السيرفر: ${err.message}`);
