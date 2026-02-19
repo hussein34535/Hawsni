@@ -23,15 +23,13 @@ import 'package:hwasi_app/features/address/data/services/address_service.dart';
 import 'package:hwasi_app/features/address/bloc/address_bloc.dart';
 import 'package:hwasi_app/features/address/bloc/address_event.dart';
 
-import 'package:google_fonts/google_fonts.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // On web: disable runtime font fetching — fonts are loaded via index.html
-  if (kIsWeb) {
-    GoogleFonts.config.allowRuntimeFetching = false;
-  }
+  // On web: runtime font fetching enabled to ensure fonts load without assets
+  // if (kIsWeb) {
+  //   GoogleFonts.config.allowRuntimeFetching = false;
+  // }
 
   // Initialize App Configuration - Using PRODUCTION server (Vercel)
   print('-------------------------------------------');
