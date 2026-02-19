@@ -102,6 +102,7 @@ class OrderSuccessScreen extends StatelessWidget {
                     style: GoogleFonts.cairo(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      height: 1.2, // Fix text clipping
                     ),
                   ),
                 ),

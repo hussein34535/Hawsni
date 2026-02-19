@@ -530,62 +530,53 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                       Icons.receipt_long,
                                     ),
                                     _buildOrderSummary(context, subtotal),
+                                    const SizedBox(height: 32),
+
+                                    // 6. Place Order Button (Scrollable, not sticky)
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        onPressed: () => _processCheckout(
+                                            state.items, subtotal),
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 18),
+                                          backgroundColor: Colors.black,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(16),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              AppLocalizations.of(context)!
+                                                  .placeOrder,
+                                              style: GoogleFonts.cairo(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                                height:
+                                                    1.2, // Fix text clipping
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            const Icon(
+                                              Icons.arrow_forward_rounded,
+                                              color: Colors.white,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                     const SizedBox(height: 40),
                                   ]),
                                 ),
                               ),
                             ],
-                          ),
-                        ),
-                        // Sticky Bottom Bar
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, -5),
-                              ),
-                            ],
-                          ),
-                          child: SafeArea(
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () =>
-                                    _processCheckout(state.items, subtotal),
-                                style: ElevatedButton.styleFrom(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 18),
-                                  backgroundColor:
-                                      Colors.black, // Premium Black
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      AppLocalizations.of(context)!.placeOrder,
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    const Icon(
-                                      Icons.arrow_forward_rounded,
-                                      color: Colors.white,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
                           ),
                         ),
                       ],
@@ -716,6 +707,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                     filled: true,
                     fillColor: Colors.grey[50],
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 12), // Fix label clipping
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -1115,6 +1108,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 'تطبيق',
                                 style: GoogleFonts.cairo(
                                   fontWeight: FontWeight.bold,
+                                  height: 1.2, // Fix clipping
                                 ),
                               ),
                       ),

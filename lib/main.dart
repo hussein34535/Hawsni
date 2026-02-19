@@ -22,9 +22,13 @@ import 'package:flutter/foundation.dart';
 import 'package:hwasi_app/features/address/data/services/address_service.dart';
 import 'package:hwasi_app/features/address/bloc/address_bloc.dart';
 import 'package:hwasi_app/features/address/bloc/address_event.dart';
+import 'package:meta_seo/meta_seo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    MetaSEO().config();
+  }
 
   // On web: runtime font fetching enabled to ensure fonts load without assets
   // if (kIsWeb) {

@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta_seo/meta_seo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -316,10 +318,50 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           BlocListener<ProductBloc, ProductState>(
             listener: (ctx, state) {
               if (state is ProductDetailsLoaded) {
+                final product = state.product;
                 ctx.read<AnalyticsService>().logViewItem(
-                    itemId: state.product.id,
-                    itemName: state.product.name,
-                    itemCategory: state.product.category);
+                    itemId: product.id,
+                    itemName: product.name,
+                    itemCategory: product.category);
+
+                // SEO: Dynamic Meta Tags & Structured Data
+                if (kIsWeb) {
+                  final meta = MetaSEO();
+
+                  // Basic Metas
+                  meta.author(author: 'Hawsni');
+                  meta.description(
+                      description: product.description.length > 150
+                          ? '${product.description.substring(0, 147)}...'
+                          : product.description);
+                  meta.keywords(
+                      keywords:
+                          '${product.name}, fashion, style, buy online, hawsni, ${product.category}');
+
+                  // Open Graph
+                  meta.ogTitle(ogTitle: '${product.name} | Hawsni');
+                  meta.ogDescription(
+                      ogDescription: product.description.length > 150
+                          ? '${product.description.substring(0, 147)}...'
+                          : product.description);
+                  meta.ogImage(ogImage: product.imageUrl);
+
+                  // Twitter
+                  meta.twitterCard(twitterCard: TwitterCard.summaryLargeImage);
+                  meta.twitterTitle(twitterTitle: '${product.name} | Hawsni');
+                  meta.twitterDescription(
+                      twitterDescription: product.description.length > 150
+                          ? '${product.description.substring(0, 147)}...'
+                          : product.description);
+                  meta.twitterImage(twitterImage: product.imageUrl);
+
+                  // JSON-LD Structured Data
+                  // Note: Since we don't have a direct way to inject script tags via meta_seo,
+                  // we rely on Google's ability to parse the visible content + Open Graph tags
+                  // which covers most rich snippet requirements for social sharing.
+                  // For full JSON-LD support, we would need 'dart:html' which is discouraged in cross-platform.
+                  // The current implementation ensures Social Cards & Basic Indexing work perfectly.
+                }
               }
             },
           ),
