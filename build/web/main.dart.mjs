@@ -89,7 +89,6 @@ class CompiledApp {
       _7: f => finalizeWrapper(f, function(x0) { return dartInstance.exports._7(f,arguments.length,x0) }),
       _8: f => finalizeWrapper(f, function(x0,x1) { return dartInstance.exports._8(f,arguments.length,x0,x1) }),
       _9: (o, a) => o + a,
-      _36: () => new Array(),
       _37: x0 => new Array(x0),
       _39: x0 => x0.length,
       _41: (x0,x1) => x0[x1],
@@ -114,7 +113,6 @@ class CompiledApp {
       _74: x0 => new Uint8Array(x0),
       _75: (x0,x1,x2) => x0.set(x1,x2),
       _76: (x0,x1) => x0.transferFromImageBitmap(x1),
-      _77: x0 => x0.arrayBuffer(),
       _78: f => finalizeWrapper(f, function(x0) { return dartInstance.exports._78(f,arguments.length,x0) }),
       _79: x0 => new window.FinalizationRegistry(x0),
       _80: (x0,x1,x2,x3) => x0.register(x1,x2,x3),
@@ -138,7 +136,6 @@ class CompiledApp {
       _125: (x0,x1) => x0.removeChild(x1),
       _203: x0 => x0.stopPropagation(),
       _204: x0 => x0.preventDefault(),
-      _205: (x0,x1,x2,x3) => x0.removeEventListener(x1,x2,x3),
       _206: (x0,x1,x2,x3) => x0.addEventListener(x1,x2,x3),
       _251: x0 => x0.unlock(),
       _252: x0 => x0.getReader(),
@@ -176,16 +173,13 @@ class CompiledApp {
       _284: (x0,x1) => x0.observe(x1),
       _285: x0 => x0.disconnect(),
       _286: (x0,x1) => x0.closest(x1),
-      _287: (x0,x1) => x0.push(x1),
       _696: () => globalThis.window.flutterConfiguration,
       _697: x0 => x0.assetBase,
       _703: x0 => x0.debugShowSemanticsNodes,
       _704: x0 => x0.hostElement,
       _705: x0 => x0.multiViewEnabled,
       _706: x0 => x0.nonce,
-      _707: x0 => x0.renderer,
       _708: x0 => x0.fontFallbackBaseUrl,
-      _710: () => globalThis.window.flutterWebRenderer,
       _712: x0 => x0.console,
       _713: x0 => x0.devicePixelRatio,
       _714: x0 => x0.document,
@@ -281,8 +275,6 @@ class CompiledApp {
       _873: (x0,x1) => { x0.width = x1 },
       _875: (x0,x1) => { x0.height = x1 },
       _878: (x0,x1) => x0.getContext(x1),
-      _937: x0 => x0.width,
-      _938: x0 => x0.height,
       _940: (x0,x1) => x0.fetch(x1),
       _941: x0 => x0.status,
       _942: x0 => x0.headers,
@@ -331,7 +323,6 @@ class CompiledApp {
       _1013: x0 => x0.state,
       _1016: (x0,x1) => x0.createObjectURL(x1),
       _1018: x0 => new Blob(x0),
-      _1019: (x0,x1) => new Blob(x0,x1),
       _1020: x0 => new MutationObserver(x0),
       _1021: (x0,x1,x2) => x0.observe(x1,x2),
       _1022: f => finalizeWrapper(f, function(x0,x1) { return dartInstance.exports._1022(f,arguments.length,x0,x1) }),
@@ -381,9 +372,6 @@ class CompiledApp {
       _1100: (x0,x1) => { x0.noValidate = x1 },
       _1101: (x0,x1) => { x0.method = x1 },
       _1102: (x0,x1) => { x0.action = x1 },
-      _1103: (x0,x1) => new OffscreenCanvas(x0,x1),
-      _1109: (x0,x1) => x0.getContext(x1),
-      _1111: x0 => x0.convertToBlob(),
       _1128: x0 => x0.orientation,
       _1129: x0 => x0.width,
       _1130: x0 => x0.height,
@@ -433,8 +421,6 @@ class CompiledApp {
       _1220: x0 => x0.selectedTrack,
       _1221: x0 => x0.repetitionCount,
       _1222: x0 => x0.frameCount,
-      _1261: () => globalThis.window.__flutterState,
-      _1262: x0 => { globalThis.window.__flutterState = x0 },
       _1270: (x0,x1) => x0.createElement(x1),
       _1276: (x0,x1,x2) => x0.addEventListener(x1,x2),
       _1283: (x0,x1) => x0.append(x1),
@@ -499,15 +485,15 @@ class CompiledApp {
       _1419: (x0,x1,x2) => x0.createScript(x1,x2),
       _1420: (x0,x1) => x0.appendChild(x1),
       _1421: f => finalizeWrapper(f, function(x0) { return dartInstance.exports._1421(f,arguments.length,x0) }),
-      _1424: Date.now,
-      _1426: s => new Date(s * 1000).getTimezoneOffset() * 60,
-      _1427: s => {
+      _1423: Date.now,
+      _1425: s => new Date(s * 1000).getTimezoneOffset() * 60,
+      _1426: s => {
         if (!/^\s*[+-]?(?:Infinity|NaN|(?:\.\d+|\d+(?:\.\d*)?)(?:[eE][+-]?\d+)?)\s*$/.test(s)) {
           return NaN;
         }
         return parseFloat(s);
       },
-      _1428: () => {
+      _1427: () => {
         let stackString = new Error().stack.toString();
         let frames = stackString.split('\n');
         let drop = 2;
@@ -516,27 +502,27 @@ class CompiledApp {
         }
         return frames.slice(drop).join('\n');
       },
-      _1429: () => typeof dartUseDateNowForTicks !== "undefined",
-      _1430: () => 1000 * performance.now(),
-      _1431: () => Date.now(),
-      _1432: () => {
+      _1428: () => typeof dartUseDateNowForTicks !== "undefined",
+      _1429: () => 1000 * performance.now(),
+      _1430: () => Date.now(),
+      _1431: () => {
         // On browsers return `globalThis.location.href`
         if (globalThis.location != null) {
           return globalThis.location.href;
         }
         return null;
       },
-      _1433: () => {
+      _1432: () => {
         return typeof process != "undefined" &&
                Object.prototype.toString.call(process) == "[object process]" &&
                process.platform == "win32"
       },
-      _1434: () => new WeakMap(),
-      _1435: (map, o) => map.get(o),
-      _1436: (map, o, v) => map.set(o, v),
-      _1437: x0 => new WeakRef(x0),
-      _1438: x0 => x0.deref(),
-      _1445: () => globalThis.WeakRef,
+      _1433: () => new WeakMap(),
+      _1434: (map, o) => map.get(o),
+      _1435: (map, o, v) => map.set(o, v),
+      _1436: x0 => new WeakRef(x0),
+      _1437: x0 => x0.deref(),
+      _1444: () => globalThis.WeakRef,
       _1448: s => JSON.stringify(s),
       _1449: s => printToConsole(s),
       _1450: (o, p, r) => o.replaceAll(p, () => r),
@@ -622,17 +608,6 @@ class CompiledApp {
       _1527: Function.prototype.call.bind(DataView.prototype.setFloat32),
       _1528: Function.prototype.call.bind(DataView.prototype.getFloat64),
       _1529: Function.prototype.call.bind(DataView.prototype.setFloat64),
-      _1531: () => globalThis.performance,
-      _1532: () => globalThis.JSON,
-      _1533: x0 => x0.measure,
-      _1534: x0 => x0.mark,
-      _1535: x0 => x0.clearMeasures,
-      _1536: x0 => x0.clearMarks,
-      _1537: (x0,x1,x2,x3) => x0.measure(x1,x2,x3),
-      _1538: (x0,x1,x2) => x0.mark(x1,x2),
-      _1539: x0 => x0.clearMeasures(),
-      _1540: x0 => x0.clearMarks(),
-      _1541: (x0,x1) => x0.parse(x1),
       _1542: (ms, c) =>
       setTimeout(() => dartInstance.exports.$invokeCallback(c),ms),
       _1543: (handle) => clearTimeout(handle),
@@ -822,7 +797,6 @@ class CompiledApp {
       _1676: Function.prototype.call.bind(BigInt.prototype.toString),
       _1677: Function.prototype.call.bind(Number.prototype.toString),
       _1678: (d, digits) => d.toFixed(digits),
-      _1681: (d, precision) => d.toPrecision(precision),
       _1682: () => globalThis.document,
       _1688: (x0,x1) => { x0.height = x1 },
       _1690: (x0,x1) => { x0.width = x1 },
