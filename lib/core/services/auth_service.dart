@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthService {
   static const String baseUrl = 'https://hwasibackend.vercel.app/api';
@@ -63,6 +64,7 @@ class AuthService {
 
         print('Login successful, token saved: $_token');
         print('User data saved: $_userData');
+        updateFcmToken(); // Sync FCM token
         _authStateController.add(true);
         return data;
       } else {
@@ -101,6 +103,7 @@ class AuthService {
           await prefs.setString('token', _token!);
           await prefs.setString('userData', json.encode(_userData));
           await prefs.remove('isGuest');
+          updateFcmToken(); // Sync FCM token
           _authStateController.add(true);
         }
         return data;
@@ -361,6 +364,25 @@ class AuthService {
       // If guest, we might want to emit true to authState?
       // Usually loadToken handles the initial state.
       // We can combine logic in loadToken.
+    }
+  }
+
+  static Future<void> updateFcmToken() async {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null && _token != null) {
+        await http.post(
+          Uri.parse('$baseUrl/users/fcm-token'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $_token',
+          },
+          body: json.encode({'fcmToken': token}),
+        );
+        print('FCM Token updated on server: $token');
+      }
+    } catch (e) {
+      print('Error updating FCM token: $e');
     }
   }
 }

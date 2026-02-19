@@ -70,6 +70,21 @@ class UserController {
         }
     }
 
+    async updateFcmToken(req, res) {
+        try {
+            const { fcmToken } = req.body;
+            if (!fcmToken) {
+                return res.status(400).json({ success: false, message: 'FCM Token is required' });
+            }
+            // Use updateProfile since it is generic
+            await UserService.updateProfile(req.user.id, { fcm_token: fcmToken });
+            res.json({ success: true, message: 'FCM Token updated' });
+        } catch (error) {
+            console.error('Update FCM Token Error:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
     // Admin Method
     async getAllUsers(req, res) {
         try {

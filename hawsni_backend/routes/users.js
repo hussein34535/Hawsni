@@ -25,4 +25,7 @@ router.put('/addresses/:addressId', protect, UserController.updateAddress);
 // Delete address
 router.delete('/addresses/:addressId', protect, UserController.deleteAddress);
 
+// Update FCM Token
+router.post('/fcm-token', protect, UserController.updateFcmToken);
+
 module.exports = router;
