@@ -298,6 +298,10 @@ class ProductController {
             const { name, description, price, discount, category_id, stock, is_featured, sizes, colors, size_guide } = req.body;
             console.log('🔄 UpdateProductAdmin Called for ID:', req.params.id);
             console.log('📂 Files received:', req.files ? req.files.length : 'None');
+            console.log('📦 Raw Sizes:', req.body.sizes);
+            console.log('📦 Raw Colors:', req.body.colors);
+            console.log('📦 Raw Sizes:', req.body.sizes);
+            console.log('📦 Raw Colors:', req.body.colors);
 
             const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
 
@@ -335,7 +339,9 @@ class ProductController {
             if (sizes) {
                 // Ensure we handle both string input and array input (join first to handle mixed cases)
                 const sizesString = Array.isArray(sizes) ? sizes.join(',') : String(sizes);
+                console.log('📏 Processing Sizes String:', sizesString);
                 sizesArray = sizesString.split(/[,،]/).map(s => s.trim()).filter(s => s);
+                console.log('📏 Parsed Sizes Array:', sizesArray);
             }
 
             if (colors) {
