@@ -1012,13 +1012,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           ),
 
           // Add To Cart Button
-          Builder(builder: (ctx) {
-            final cartState = ctx.watch<CartBloc>().state;
+          BlocBuilder<CartBloc, CartState>(builder: (ctx, cartState) {
             bool isAdded = false;
             if (cartState is CartLoaded) {
-              final itemId =
-                  '${widget.productId}${_selectedSize != null ? "_$_selectedSize" : ""}${_selectedColor != null ? "_$_selectedColor" : ""}';
-              isAdded = cartState.items.any((item) => item.id == itemId);
+              isAdded = cartState.items.any((item) =>
+                  item.productId == widget.productId &&
+                  item.size == _selectedSize &&
+                  item.color == _selectedColor);
             }
             final buttonText = isAdded ? 'اذهب للسلة 🛒' : addToCartStr;
             final buttonIcon = isAdded
@@ -1145,7 +1145,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         return GestureDetector(
           onTap: () {
             HapticFeedback.selectionClick();
-            setState(() => _selectedSize = isSel ? null : s);
+            setState(() {
+              _selectedSize = isSel ? null : s;
+            });
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
