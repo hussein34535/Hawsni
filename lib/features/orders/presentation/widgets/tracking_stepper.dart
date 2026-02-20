@@ -1,145 +1,239 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
-
-class TrackingStep {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final String status; // 'completed', 'current', 'pending'
-  final String? timestamp;
-
-  TrackingStep({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.status,
-    this.timestamp,
-  });
-}
+import 'package:google_fonts/google_fonts.dart';
 
 class TrackingStepper extends StatelessWidget {
-  final List<TrackingStep> steps;
+  final String status;
+  final String orderDate;
+  final String expectedDays;
 
-  const TrackingStepper({super.key, required this.steps});
+  const TrackingStepper({
+    super.key,
+    required this.status,
+    required this.orderDate,
+    this.expectedDays = '',
+  });
+
+  int _getStatusIndex(String status) {
+    switch (status.toLowerCase()) {
+      case 'معلق':
+      case 'pending':
+        return 0;
+      case 'تم التأكيد':
+      case 'confirmed':
+        return 1;
+      case 'جاري التجهيز':
+      case 'processing':
+        return 2;
+      case 'تم الشحن':
+      case 'shipped':
+        return 3;
+      case 'مكتمل':
+      case 'completed':
+      case 'تم التوصيل':
+      case 'delivered':
+        return 4;
+      default:
+        return 0; // default to pending if unknown
+    }
+  }
+
+  bool _isCancelled(String status) {
+    return status.toLowerCase() == 'ملغي' ||
+        status.toLowerCase() == 'cancelled';
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(steps.length, (index) {
-        final step = steps[index];
-        final isLast = index == steps.length - 1;
-        final isCompleted = step.status == 'completed';
-        final isCurrent = step.status == 'current';
+    bool isCancelled = _isCancelled(status);
+    int currentIndex = isCancelled ? -1 : _getStatusIndex(status);
 
-        return IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    final steps = [
+      {'title': 'تم استلام الطلب', 'icon': Icons.receipt_long},
+      {'title': 'تم التأكيد', 'icon': Icons.check_circle_outline},
+      {'title': 'جاري التجهيز', 'icon': Icons.inventory_2_outlined},
+      {'title': 'في الطريق إليك', 'icon': Icons.local_shipping_outlined},
+      {'title': 'تم التوصيل', 'icon': Icons.home_outlined},
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey[200]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Timeline line and dot
-              SizedBox(
-                width: 40,
-                child: Column(
-                  children: [
-                    // Top line (if not first)
-                    if (index > 0)
-                      Expanded(
-                        child: Container(
-                          width: 2,
-                          color: steps[index - 1].status == 'completed'
-                              ? AppTheme.primaryColor
-                              : Colors.grey[200],
-                        ),
-                      ),
-
-                    // Dot/Icon
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: isCompleted || isCurrent
-                            ? AppTheme.primaryColor
-                            : Colors.grey[100],
-                        shape: BoxShape.circle,
-                        border: isCurrent
-                            ? Border.all(
-                                color: AppTheme.primaryColor.withOpacity(0.3),
-                                width: 4)
-                            : null,
-                      ),
-                      child: Icon(
-                        isCompleted ? Icons.check : step.icon,
-                        size: 16,
-                        color: isCompleted || isCurrent
-                            ? Colors.white
-                            : Colors.grey[400],
-                      ),
-                    ),
-
-                    // Bottom line (if not last)
-                    if (!isLast)
-                      Expanded(
-                        child: Container(
-                          width: 2,
-                          color: isCompleted
-                              ? AppTheme.primaryColor
-                              : Colors.grey[200],
-                        ),
-                      ),
-                  ],
+              Text(
+                isCancelled ? 'الطلب ملغي' : 'تتبع حالة الطلب',
+                style: GoogleFonts.cairo(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isCancelled ? Colors.red : AppTheme.primaryColor,
                 ),
               ),
-              const SizedBox(width: 16),
-
-              // Content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 32.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment:
-                        MainAxisAlignment.center, // Center vertically with dot
+              if (!isCancelled && expectedDays.isNotEmpty) ...[
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
                     children: [
+                      const Icon(Icons.timer_outlined,
+                          size: 14, color: AppTheme.primaryColor),
+                      const SizedBox(width: 4),
                       Text(
-                        step.title,
+                        'توصيل خلال $expectedDays',
                         style: GoogleFonts.cairo(
-                          fontSize: 16,
-                          fontWeight: isCompleted || isCurrent
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                          color: isCompleted || isCurrent
-                              ? Colors.black
-                              : Colors.grey[500],
+                          fontSize: 12,
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        step.subtitle,
-                        style: GoogleFonts.cairo(
-                          fontSize: 13,
-                          color: Colors.grey[500],
-                          height: 1.2,
-                        ),
-                      ),
-                      if (step.timestamp != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          step.timestamp!,
-                          style: GoogleFonts.cairo(
-                            fontSize: 12,
-                            color: AppTheme.primaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),
-              ),
+              ],
             ],
           ),
-        );
-      }),
+          const SizedBox(height: 16),
+          Text(
+            'تاريخ الطلب: $orderDate',
+            style: GoogleFonts.cairo(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 24),
+          if (!isCancelled) ...[
+            Stack(
+              children: [
+                Positioned(
+                  left: 20,
+                  top: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 2,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: steps.length,
+                  itemBuilder: (context, index) {
+                    final step = steps[index];
+                    final isCompleted = currentIndex >= index;
+                    final isCurrent = currentIndex == index;
+
+                    return _buildStepItem(
+                      step['title'] as String,
+                      step['icon'] as IconData,
+                      isCompleted,
+                      isCurrent,
+                      isLast: index == steps.length - 1,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ] else ...[
+            Center(
+              child: Column(
+                children: [
+                  const Icon(Icons.cancel_outlined,
+                      size: 60, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    'عذراً، لقد تم إلغاء هذا الطلب.',
+                    style: GoogleFonts.cairo(
+                      fontSize: 16,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepItem(
+    String title,
+    IconData icon,
+    bool isCompleted,
+    bool isCurrent, {
+    required bool isLast,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isCompleted ? AppTheme.primaryColor : Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isCompleted ? AppTheme.primaryColor : Colors.grey[300]!,
+                width: 2,
+              ),
+              boxShadow: isCurrent
+                  ? [
+                      BoxShadow(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      )
+                    ]
+                  : null,
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: isCompleted ? Colors.white : Colors.grey[400],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Container(
+              height: 40,
+              alignment: Alignment.centerRight, // Adjust for RTL
+              child: Text(
+                title,
+                style: GoogleFonts.cairo(
+                  fontSize: 16,
+                  fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+                  color: isCompleted ? Colors.black87 : Colors.grey[500],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -250,71 +250,16 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
   Widget _buildTrackingTimeline() {
     final status = widget.order['status'] ?? 'Processing';
+    final createdAt = widget.order['created_at'] != null
+        ? DateTime.tryParse(widget.order['created_at'].toString())
+        : DateTime.now();
+    final orderDate = _formatDateTime(createdAt?.toIso8601String() ?? '');
 
-    // If we have real tracking events from API, build steps from them
-    if (_trackingEvents.isNotEmpty) {
-      final steps = _trackingEvents.map((event) {
-        return TrackingStep(
-          title: event['title'] ?? '',
-          subtitle: event['description'] ?? '',
-          icon: _getStepIcon(event['title'] ?? ''),
-          status: event['status'] ?? 'pending',
-          timestamp: _formatDateTime(event['timestamp']),
-        );
-      }).toList();
-      return TrackingStepper(steps: steps);
-    }
-
-    // Fallback: Build default steps from order status
-    final allStatuses = [
-      'Pending',
-      'Confirmed',
-      'Processing',
-      'Shipped',
-      'Delivered'
-    ];
-    final currentIndex = allStatuses.indexOf(status);
-
-    final defaultSteps = [
-      TrackingStep(
-        title: 'تم استلام الطلب',
-        subtitle: 'طلبك تم إرساله بنجاح',
-        icon: Icons.shopping_bag_outlined,
-        status: currentIndex >= 0 ? 'completed' : 'pending',
-      ),
-      TrackingStep(
-        title: 'تأكيد الطلب',
-        subtitle: 'تم تأكيد الطلب وجاري التجهيز',
-        icon: Icons.check_circle_outline,
-        status: currentIndex >= 1
-            ? (currentIndex == 1 ? 'current' : 'completed')
-            : 'pending',
-      ),
-      TrackingStep(
-        title: 'جاري التجهيز',
-        subtitle: 'يتم تجهيز طلبك للشحن',
-        icon: Icons.inventory_2_outlined,
-        status: currentIndex >= 2
-            ? (currentIndex == 2 ? 'current' : 'completed')
-            : 'pending',
-      ),
-      TrackingStep(
-        title: 'تم الشحن',
-        subtitle: 'طلبك في الطريق إليك',
-        icon: Icons.local_shipping_outlined,
-        status: currentIndex >= 3
-            ? (currentIndex == 3 ? 'current' : 'completed')
-            : 'pending',
-      ),
-      TrackingStep(
-        title: 'تم التوصيل',
-        subtitle: 'تم تسليم الطلب بنجاح 🎉',
-        icon: Icons.home_outlined,
-        status: currentIndex >= 4 ? 'completed' : 'pending',
-      ),
-    ];
-
-    return TrackingStepper(steps: defaultSteps);
+    return TrackingStepper(
+      status: status,
+      orderDate: orderDate,
+      expectedDays: '3-7 أيام', // Fallback
+    );
   }
 
   IconData _getStepIcon(String title) {

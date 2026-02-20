@@ -385,7 +385,20 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   void _showOrderDetails(BuildContext context, Map<String, dynamic> order) {
     final status = order['status'] ?? 'Processing';
-    final steps = _buildTrackingSteps(status);
+    final createdAt = order['created_at'] != null
+        ? DateTime.tryParse(order['created_at'].toString())
+        : DateTime.now();
+    final orderDate = _formatDate(createdAt ?? DateTime.now());
+
+    // Extract expected days from our helper method
+    final deliveryText = _getEstimatedDelivery(order);
+    // Parse the days from text like "متوقع الوصول: 3-7 أيام"
+    String expectedDays = '';
+    if (deliveryText.contains('التوصيل خلال')) {
+      expectedDays = deliveryText.replaceAll('التوصيل خلال ', '');
+    } else if (deliveryText.contains('متوقع الوصول: ')) {
+      expectedDays = deliveryText.replaceAll('متوقع الوصول: ', '');
+    }
 
     showModalBottomSheet(
       context: context,
@@ -481,7 +494,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       ),
 
                     // Tracking stepper
-                    TrackingStepper(steps: steps),
+                    TrackingStepper(
+                      status: status,
+                      orderDate: orderDate,
+                      expectedDays: expectedDays,
+                    ),
                     const SizedBox(height: 24),
                     const Divider(),
                     const SizedBox(height: 16),
@@ -565,44 +582,5 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
       ),
     );
-  }
-
-  List<TrackingStep> _buildTrackingSteps(String status) {
-    final statusOrder = ['Processing', 'Shipped', 'In Transit', 'Delivered'];
-    final currentIndex =
-        statusOrder.indexWhere((s) => s.toLowerCase() == status.toLowerCase());
-
-    return [
-      TrackingStep(
-        title: 'قيد المعالجة',
-        subtitle: 'تم استلام طلبك وجاري تجهيزه',
-        icon: Icons.receipt_long_outlined,
-        status: currentIndex >= 0
-            ? (currentIndex > 0 ? 'completed' : 'current')
-            : 'pending',
-      ),
-      TrackingStep(
-        title: 'تم الشحن',
-        subtitle: 'طلبك في طريقه إليك',
-        icon: Icons.local_shipping_outlined,
-        status: currentIndex >= 1
-            ? (currentIndex > 1 ? 'completed' : 'current')
-            : 'pending',
-      ),
-      TrackingStep(
-        title: 'في الطريق',
-        subtitle: 'الطلب مع مندوب التوصيل',
-        icon: Icons.delivery_dining_outlined,
-        status: currentIndex >= 2
-            ? (currentIndex > 2 ? 'completed' : 'current')
-            : 'pending',
-      ),
-      TrackingStep(
-        title: 'تم التوصيل',
-        subtitle: 'وصل طلبك بنجاح',
-        icon: Icons.check_circle_outline,
-        status: currentIndex >= 3 ? 'completed' : 'pending',
-      ),
-    ];
   }
 }
