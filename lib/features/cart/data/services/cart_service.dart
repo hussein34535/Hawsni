@@ -190,23 +190,31 @@ class CartService {
       final localItems = await _getLocalCart();
       if (localItems.isEmpty) return;
 
+      List<String> syncedItemIds = [];
+
       for (final item in localItems) {
-        // We explicitly call the API version by temporarily ignoring isGuest flag
-        // But since we call this AFTER login, isGuest is false!
-        // So calling addToCart directly will hit the API.
-        // We catch errors to continue syncing others.
         try {
           await addToCart(item.productId!, item.quantity,
               size: item.size, color: item.color);
+          syncedItemIds.add(item.id); // Track successful syncs
         } catch (e) {
           print('Failed to sync item ${item.name}: $e');
         }
       }
 
-      // Clear local cart after syncing
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_localCartKey);
-      print('Local cart synced and cleared.');
+      // Only remove successfully synced items from local storage
+      if (syncedItemIds.length == localItems.length) {
+        // All synced successfully
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_localCartKey);
+        print('Local cart fully synced and cleared.');
+      } else {
+        // Partial sync: remove only what was synced
+        for (final id in syncedItemIds) {
+          await _removeFromLocalCart(id);
+        }
+        print('Partial local cart synced. Failed items retained.');
+      }
     } catch (e) {
       print('Error syncing cart: $e');
     }

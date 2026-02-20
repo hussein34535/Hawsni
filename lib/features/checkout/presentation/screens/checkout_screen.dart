@@ -16,6 +16,7 @@ import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hwasi_app/core/services/coupon_service.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/features/checkout/presentation/screens/order_success_screen.dart';
 
 final List<String> egyptGovernorates = [
@@ -84,15 +85,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _selectedPaymentMethod =
       'Cash on Delivery'; // 'Cash on Delivery' or 'Online Card'
 
+  // Shipping State
+  Map<String, dynamic>? _shippingSettings;
+
   bool get _isGuest => AuthService.token == null;
 
   @override
   void initState() {
     super.initState();
+    _fetchShippingSettings();
     if (!_isGuest) {
       context.read<AddressBloc>().add(LoadAddresses());
     } else {
       _isAddingAddress = true; // Guests must enter address
+    }
+  }
+
+  Future<void> _fetchShippingSettings() async {
+    final settings = await ApiService.getShippingSettings();
+    if (mounted) {
+      setState(() {
+        _shippingSettings = settings;
+      });
     }
   }
 
@@ -134,10 +148,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       country: 'Egypt',
     );
 
-    context.read<AddressBloc>().add(AddAddress(newAddress));
+    if (!_isGuest) {
+      context.read<AddressBloc>().add(AddAddress(newAddress));
+    }
     setState(() {
       _isAddingAddress = false;
-      // Keep controllers populated
+      // Keep controllers populated for guest checkout
     });
   }
 
@@ -193,6 +209,43 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return subtotal * (_couponDiscount / 100);
     }
     return _couponDiscount; // fixed amount
+  }
+
+  // Shipping Calculation
+  Map<String, dynamic> _getShippingDetails(
+      String governorate, double subtotal) {
+    if (_shippingSettings == null) {
+      return {'cost': 0.0, 'days_min': 3, 'days_max': 7};
+    }
+
+    final freeThreshold =
+        (_shippingSettings!['free_shipping_threshold'] ?? 0).toDouble();
+    if (freeThreshold > 0 && subtotal >= freeThreshold) {
+      return {
+        'cost': 0.0,
+        'days_min': _shippingSettings!['default_days_min'] ?? 3,
+        'days_max': _shippingSettings!['default_days_max'] ?? 7,
+      };
+    }
+
+    final govSettings =
+        _shippingSettings!['governorate_settings'] as Map<String, dynamic>? ??
+            {};
+
+    if (governorate.isNotEmpty && govSettings.containsKey(governorate)) {
+      final custom = govSettings[governorate] as Map<String, dynamic>;
+      return {
+        'cost': (custom['cost'] ?? 0).toDouble(),
+        'days_min': custom['days_min'] ?? 3,
+        'days_max': custom['days_max'] ?? 7,
+      };
+    }
+
+    return {
+      'cost': (_shippingSettings!['delivery_cost'] ?? 0).toDouble(),
+      'days_min': _shippingSettings!['default_days_min'] ?? 3,
+      'days_max': _shippingSettings!['default_days_max'] ?? 7,
+    };
   }
 
   // Payment Method
@@ -531,16 +584,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     ),
                                     _buildOrderSummary(context, subtotal),
                                     const SizedBox(height: 32),
-
                                     // 6. Place Order Button (Scrollable, not sticky)
                                     SizedBox(
                                       width: double.infinity,
+                                      height:
+                                          60, // Fixed height to prevent squishing
                                       child: ElevatedButton(
                                         onPressed: () => _processCheckout(
                                             state.items, subtotal),
                                         style: ElevatedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 18),
                                           backgroundColor: Colors.black,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
@@ -559,8 +611,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.white,
-                                                height:
-                                                    1.2, // Fix text clipping
                                               ),
                                             ),
                                             const SizedBox(width: 12),
@@ -895,106 +945,49 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildPaymentMethodSelector(BuildContext context) {
-    return _buildPaymentOption(
-      context,
-      title: AppLocalizations.of(context)!.cashOnDelivery,
-      subtitle: AppLocalizations.of(context)!.payOnDeliverySubtitle,
-      icon: Icons.local_atm_outlined,
-      value: 'Cash on Delivery',
-    );
-  }
-
-  Widget _buildPaymentOption(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required String value,
-  }) {
-    final isSelected = _selectedPaymentMethod == value;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedPaymentMethod = value),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? Colors.black : Colors.grey[200]!,
-            width: isSelected ? 2 : 1,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child:
+                const Icon(Icons.money, color: AppTheme.primaryColor, size: 24),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isSelected ? 0.06 : 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Radio indicator
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? Colors.black : Colors.grey[400]!,
-                  width: 2,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.cashOnDelivery,
+                  style: GoogleFonts.cairo(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
-              ),
-              child: isSelected
-                  ? Center(
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: Colors.black,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 14),
-            // Icon
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: Colors.black87, size: 22),
-            ),
-            const SizedBox(width: 14),
-            // Text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.cairo(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Colors.black87,
-                    ),
+                Text(
+                  'الدفع عند استلام الطلب',
+                  style: GoogleFonts.cairo(
+                    color: AppTheme.textSecondary,
+                    fontSize: 13,
                   ),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.cairo(
-                      color: Colors.grey[500],
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          const Icon(Icons.check_circle, color: AppTheme.primaryColor),
+        ],
       ),
     );
   }
@@ -1165,8 +1158,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildOrderSummary(BuildContext context, double subtotal) {
+    final addressState = context.watch<AddressBloc>().state;
+    String currentGov = '';
+    if (!_isGuest &&
+        !_isAddingAddress &&
+        addressState.selectedAddress != null) {
+      currentGov = addressState.selectedAddress!.state;
+    } else {
+      currentGov = _stateController.text.trim();
+    }
+
+    final shippingDetails = _getShippingDetails(currentGov, subtotal);
+    final shipping = shippingDetails['cost'] as double;
+    final daysMin = shippingDetails['days_min'];
+    final daysMax = shippingDetails['days_max'];
+
     final discount = _calculateDiscount(subtotal);
-    const shipping = 100.0;
     final tax = subtotal * 0.05;
     final total = subtotal - discount + shipping + tax;
 
@@ -1200,7 +1207,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ],
           const SizedBox(height: 12),
           _buildSummaryRow(AppLocalizations.of(context)!.shipping,
-              '${shipping.toStringAsFixed(2)} EGP'),
+              shipping == 0 ? 'مجاني' : '${shipping.toStringAsFixed(2)} EGP'),
+          if (shipping > 0 || _shippingSettings != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.local_shipping_outlined,
+                      size: 14, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(
+                    'توصيل خلال $daysMin - $daysMax أيام عمل',
+                    style: GoogleFonts.cairo(
+                        color: Colors.grey[600], fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 12),
           _buildSummaryRow(
             AppLocalizations.of(context)!.tax,
@@ -1280,8 +1303,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 item.quantity),
       );
     }
+    final addressState = context.read<AddressBloc>().state;
+    String currentGov = '';
+    if (!_isGuest &&
+        !_isAddingAddress &&
+        addressState.selectedAddress != null) {
+      currentGov = addressState.selectedAddress!.state;
+    } else {
+      currentGov = _stateController.text.trim();
+    }
+
     final discount = _calculateDiscount(subtotal);
-    const shipping = 100.0;
+    final shippingDetails = _getShippingDetails(currentGov, subtotal);
+    final shipping = shippingDetails['cost'] as double;
     final tax = subtotal * 0.05;
     return subtotal - discount + shipping + tax;
   }

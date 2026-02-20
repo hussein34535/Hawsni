@@ -26,7 +26,7 @@ import 'package:meta_seo/meta_seo.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (kIsWeb) {
+  if (kIsWeb && !kIsWasm) {
     MetaSEO().config();
   }
 
@@ -80,9 +80,16 @@ void main() async {
               create: (context) => OrderBloc(OrderService()),
             ),
             BlocProvider(
-              create: (context) => AddressBloc(
-                addressService: RepositoryProvider.of<AddressService>(context),
-              )..add(LoadAddresses()),
+              create: (context) {
+                final bloc = AddressBloc(
+                  addressService:
+                      RepositoryProvider.of<AddressService>(context),
+                );
+                if (AuthService.token != null) {
+                  bloc.add(LoadAddresses());
+                }
+                return bloc;
+              },
             ),
           ],
           child: const App(),

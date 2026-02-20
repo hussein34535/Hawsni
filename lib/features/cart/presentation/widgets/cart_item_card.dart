@@ -5,6 +5,8 @@ import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 
 class CartItemCard extends StatelessWidget {
   final CartItem item;
@@ -62,10 +64,25 @@ class CartItemCard extends StatelessWidget {
                       width: 100,
                       height: 100,
                       color: AppTheme.scaffoldBackgroundColor,
-                      child: Image.network(
-                        item.imageUrl,
+                      child: CachedNetworkImage(
+                        imageUrl: item.imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
+                        memCacheWidth: 300,
+                        placeholder: (context, url) {
+                          if (item.blurHash != null &&
+                              item.blurHash!.isNotEmpty) {
+                            return BlurHash(
+                              hash: item.blurHash!,
+                              imageFit: BoxFit.cover,
+                            );
+                          }
+                          return const Icon(
+                            Icons.image_outlined,
+                            size: 32,
+                            color: AppTheme.textTertiary,
+                          );
+                        },
+                        errorWidget: (context, error, stackTrace) {
                           return const Icon(
                             Icons.image_outlined,
                             size: 32,

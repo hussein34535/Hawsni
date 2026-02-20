@@ -10,6 +10,7 @@ class WishlistItem {
   final String description;
   final double rating;
   final int reviewCount;
+  final String? blurHash;
 
   WishlistItem({
     required this.id,
@@ -19,6 +20,7 @@ class WishlistItem {
     required this.description,
     required this.rating,
     required this.reviewCount,
+    this.blurHash,
   });
 
   factory WishlistItem.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class WishlistItem {
       description: json['description'] ?? '',
       rating: (json['rating'] ?? 0.0).toDouble(),
       reviewCount: json['numReviews'] ?? json['reviewCount'] ?? 0,
+      blurHash: json['blur_hash'] as String?,
     );
   }
 }

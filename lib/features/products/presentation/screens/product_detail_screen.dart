@@ -31,6 +31,7 @@ import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_scree
 import 'package:hwasi_app/features/products/presentation/widgets/full_screen_gallery.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXTENSIONS (Safe Color Parsing)
@@ -76,6 +77,7 @@ class DisplayData {
   final List<String> sizes;
   final List<dynamic> colors;
   final String? sizeGuide;
+  final String? blurHash;
 
   DisplayData({
     required this.name,
@@ -88,6 +90,7 @@ class DisplayData {
     required this.sizes,
     required this.colors,
     this.sizeGuide,
+    this.blurHash,
   });
 }
 
@@ -105,6 +108,7 @@ class ProductDetailScreen extends StatefulWidget {
   final List<dynamic>? colors;
   final String productId;
   final String screenId;
+  final String? blurHash;
 
   const ProductDetailScreen({
     super.key,
@@ -118,6 +122,7 @@ class ProductDetailScreen extends StatefulWidget {
     this.colors,
     required this.productId,
     required this.screenId,
+    this.blurHash,
   });
 
   @override
@@ -130,6 +135,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   String? _selectedSize;
   String? _selectedColor;
   int _currentImageIndex = 0;
+
+  final GlobalKey _cartKey = GlobalKey();
+  final GlobalKey _imageKey = GlobalKey();
 
   late final PageController _pageController;
   late final AnimationController _cardEntry;
@@ -223,8 +231,108 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
     HapticFeedback.mediumImpact();
     _cartPop.forward(from: 0);
+
+    // Trigger parabolic animation
+    if (data.imageUrl.isNotEmpty) {
+      _runAddToCartAnimation(data.imageUrl);
+    }
+
     _toast(ctx, AppLocalizations.of(ctx)?.addedToCart ?? 'Added to Cart',
         isSuccess: true);
+  }
+
+  void _runAddToCartAnimation(String imageUrl) {
+    if (!mounted) return;
+
+    final RenderBox? cartBox =
+        _cartKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? imageBox =
+        _imageKey.currentContext?.findRenderObject() as RenderBox?;
+
+    if (cartBox == null || imageBox == null) return;
+
+    final cartPos = cartBox.localToGlobal(Offset.zero);
+    final imagePos = imageBox.localToGlobal(Offset.zero);
+
+    final startX = imagePos.dx + imageBox.size.width / 2 - 25;
+    final startY = imagePos.dy + imageBox.size.height / 2 - 25;
+
+    final endX = cartPos.dx + cartBox.size.width / 2 - 5;
+    final endY = cartPos.dy + cartBox.size.height / 2 - 5;
+
+    final controlPointX = startX + (endX - startX) / 2;
+    final controlPointY = min(startY, endY) - 150.0;
+
+    late OverlayEntry overlayEntry;
+
+    final controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 700));
+    final curvedAnimation =
+        CurvedAnimation(parent: controller, curve: Curves.easeInOutSine);
+
+    overlayEntry = OverlayEntry(builder: (context) {
+      return AnimatedBuilder(
+          animation: curvedAnimation,
+          builder: (context, child) {
+            final t = curvedAnimation.value;
+            final x = pow(1 - t, 2) * startX +
+                2 * (1 - t) * t * controlPointX +
+                pow(t, 2) * endX;
+            final y = pow(1 - t, 2) * startY +
+                2 * (1 - t) * t * controlPointY +
+                pow(t, 2) * endY;
+
+            final scale = 1.0 - (t * 0.8);
+            final opacity = t > 0.8 ? 1.0 - ((t - 0.8) * 5) : 1.0;
+
+            return Positioned(
+              left: x.toDouble(),
+              top: y.toDouble(),
+              child: Transform.scale(
+                scale: scale,
+                child: Opacity(
+                  opacity: opacity,
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration:
+                        BoxDecoration(shape: BoxShape.circle, boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.5),
+                        blurRadius: 15,
+                        spreadRadius: 2,
+                      )
+                    ]),
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) =>
+                            Container(color: AppTheme.primaryColor),
+                        errorWidget: (_, __, ___) =>
+                            Container(color: AppTheme.primaryColor),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          });
+    });
+
+    Overlay.of(context).insert(overlayEntry);
+    controller.forward().then((_) {
+      if (mounted) {
+        overlayEntry.remove();
+        controller.dispose();
+      }
+    });
+  }
+
+  void _goToCart(BuildContext ctx) {
+    Navigator.of(ctx).push(
+      MaterialPageRoute(builder: (_) => const CartScreen()),
+    );
   }
 
   void _toast(BuildContext ctx, String msg,
@@ -325,7 +433,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     itemCategory: product.category);
 
                 // SEO: Dynamic Meta Tags & Structured Data
-                if (kIsWeb) {
+                if (kIsWeb && !kIsWasm) {
                   final meta = MetaSEO();
 
                   // Basic Metas
@@ -361,6 +469,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   // which covers most rich snippet requirements for social sharing.
                   // For full JSON-LD support, we would need 'dart:html' which is discouraged in cross-platform.
                   // The current implementation ensures Social Cards & Basic Indexing work perfectly.
+                }
+
+                // Precache images for smooth swiping
+                final images = product.images ?? [];
+                if (images.length > 1) {
+                  precacheImage(CachedNetworkImageProvider(images[1]), ctx);
+                }
+                if (images.length > 2) {
+                  precacheImage(CachedNetworkImageProvider(images[2]), ctx);
                 }
               }
             },
@@ -432,6 +549,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           fit: StackFit.expand,
           children: [
             PageView.builder(
+              key: _imageKey,
               controller: _pageController,
               itemCount: data.images.length,
               physics: const BouncingScrollPhysics(),
@@ -457,7 +575,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
                     memCacheWidth: 800, // Optimize memory usage
-                    placeholder: (_, __) => Container(color: Colors.grey[100]),
+                    placeholder: (_, __) {
+                      if (data.blurHash != null && data.blurHash!.isNotEmpty) {
+                        return BlurHash(
+                          hash: data.blurHash!,
+                          imageFit: BoxFit.cover,
+                        );
+                      }
+                      return Container(color: Colors.grey[100]);
+                    },
                     errorWidget: (_, __, ___) =>
                         Container(color: Colors.grey[100]),
                   ),
@@ -758,25 +884,43 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           // Desktop specific Add To Cart Button
           if (isDesktop) ...[
             const SizedBox(height: 40),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton.icon(
-                onPressed: () => _addToCart(context, data),
-                icon: const Icon(Icons.shopping_bag_rounded),
-                label: Text(
-                    AppLocalizations.of(context)?.addToCart ?? 'إضافة للسلة',
-                    style: GoogleFonts.cairo(
-                        fontWeight: FontWeight.bold, fontSize: 18)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
+            Builder(builder: (ctx) {
+              final cartState = ctx.watch<CartBloc>().state;
+              bool isAdded = false;
+              if (cartState is CartLoaded) {
+                final itemId =
+                    '${widget.productId}${_selectedSize != null ? "_$_selectedSize" : ""}${_selectedColor != null ? "_$_selectedColor" : ""}';
+                isAdded = cartState.items.any((item) => item.id == itemId);
+              }
+              final buttonColor =
+                  isAdded ? Colors.green.shade800 : AppTheme.primaryColor;
+              final buttonText = isAdded
+                  ? 'اذهب للسلة 🛒'
+                  : (AppLocalizations.of(context)?.addToCart ?? 'إضافة للسلة');
+              final buttonIcon = isAdded
+                  ? Icons.arrow_forward_rounded
+                  : Icons.shopping_bag_rounded;
+
+              return SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      isAdded ? _goToCart(context) : _addToCart(context, data),
+                  icon: Icon(buttonIcon),
+                  label: Text(buttonText,
+                      style: GoogleFonts.cairo(
+                          fontWeight: FontWeight.bold, fontSize: 18)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: buttonColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    elevation: 0,
+                  ),
                 ),
-              ),
-            ),
+              );
+            }),
           ],
 
           const SizedBox(height: 40),
@@ -868,36 +1012,52 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           ),
 
           // Add To Cart Button
-          AnimatedBuilder(
-            animation: _cartPop,
-            builder: (_, child) {
-              final t = _cartPop.value;
-              final s = 1.0 + 0.05 * (t < 0.5 ? t * 2 : (1 - t) * 2);
-              return Transform.scale(scale: s, child: child);
-            },
-            child: GestureDetector(
-              onTap: () => _addToCart(context, data),
-              child: Container(
-                height: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 28),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(100)),
-                child: Row(
-                  children: [
-                    const Icon(Icons.shopping_bag_rounded,
-                        color: Colors.black, size: 20),
-                    const SizedBox(width: 8),
-                    Text(addToCartStr,
-                        style: GoogleFonts.cairo(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14)),
-                  ],
+          Builder(builder: (ctx) {
+            final cartState = ctx.watch<CartBloc>().state;
+            bool isAdded = false;
+            if (cartState is CartLoaded) {
+              final itemId =
+                  '${widget.productId}${_selectedSize != null ? "_$_selectedSize" : ""}${_selectedColor != null ? "_$_selectedColor" : ""}';
+              isAdded = cartState.items.any((item) => item.id == itemId);
+            }
+            final buttonText = isAdded ? 'اذهب للسلة 🛒' : addToCartStr;
+            final buttonIcon = isAdded
+                ? Icons.arrow_forward_rounded
+                : Icons.shopping_bag_rounded;
+            final buttonBgConfig =
+                isAdded ? Colors.green.shade50 : Colors.white;
+
+            return AnimatedBuilder(
+              animation: _cartPop,
+              builder: (_, child) {
+                final t = _cartPop.value;
+                final s = 1.0 + 0.05 * (t < 0.5 ? t * 2 : (1 - t) * 2);
+                return Transform.scale(scale: s, child: child);
+              },
+              child: GestureDetector(
+                onTap: () =>
+                    isAdded ? _goToCart(context) : _addToCart(context, data),
+                child: Container(
+                  height: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  decoration: BoxDecoration(
+                      color: buttonBgConfig,
+                      borderRadius: BorderRadius.circular(100)),
+                  child: Row(
+                    children: [
+                      Icon(buttonIcon, color: Colors.black, size: 20),
+                      const SizedBox(width: 8),
+                      Text(buttonText,
+                          style: GoogleFonts.cairo(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14)),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -1047,13 +1207,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               wishlist.removeFromWishlist(widget.productId);
             } else {
               wishlist.addToWishlist(WishlistItem(
-                  id: widget.productId,
-                  name: data.name,
-                  price: data.price,
-                  imageUrl: data.imageUrl.isNotEmpty ? data.imageUrl : '',
-                  description: data.description,
-                  rating: data.rating,
-                  reviewCount: data.reviewCount));
+                id: widget.productId,
+                name: data.name,
+                price: data.price,
+                imageUrl: data.imageUrl.isNotEmpty ? data.imageUrl : '',
+                description: data.description,
+                rating: data.rating,
+                reviewCount: data.reviewCount,
+                blurHash: data.blurHash,
+              ));
             }
           },
         );
@@ -1062,35 +1224,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   }
 
   Widget _cartIcon(BuildContext context) {
-    return BlocBuilder<CartBloc, CartState>(
-      builder: (ctx, state) {
-        final count = state is CartLoaded ? state.items.length : 0;
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            _glassIcon(
-                Icons.shopping_bag_outlined,
-                () => Navigator.push(ctx,
-                    MaterialPageRoute(builder: (_) => const CartScreen()))),
-            if (count > 0)
-              Positioned(
-                  right: -2,
-                  top: -2,
-                  child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                          color: AppTheme.primaryColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 1.5)),
-                      child: Text('$count',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              height: 1)))),
-          ],
-        );
-      },
+    return Container(
+      key: _cartKey,
+      child: BlocBuilder<CartBloc, CartState>(
+        builder: (ctx, state) {
+          final count = state is CartLoaded ? state.items.length : 0;
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              _glassIcon(
+                  Icons.shopping_bag_outlined,
+                  () => Navigator.push(ctx,
+                      MaterialPageRoute(builder: (_) => const CartScreen()))),
+              if (count > 0)
+                Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                            color: AppTheme.primaryColor,
+                            shape: BoxShape.circle,
+                            border:
+                                Border.all(color: Colors.white, width: 1.5)),
+                        child: Text('$count',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                height: 1)))),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -1367,6 +1533,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                               AspectRatio(
                                 aspectRatio: 3 / 4,
                                 child: PageView.builder(
+                                  key: _imageKey,
                                   controller: _pageController,
                                   itemCount: data.images.length,
                                   onPageChanged: (i) =>
@@ -1377,6 +1544,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       imageUrl: data.images[i],
                                       fit: BoxFit.cover,
                                       memCacheWidth: 800,
+                                      placeholder: (_, __) {
+                                        if (data.blurHash != null &&
+                                            data.blurHash!.isNotEmpty) {
+                                          return BlurHash(
+                                            hash: data.blurHash!,
+                                            imageFit: BoxFit.cover,
+                                          );
+                                        }
+                                        return Container(
+                                            color: Colors.grey[200]);
+                                      },
                                       errorWidget: (_, __, ___) =>
                                           Container(color: Colors.grey[200]),
                                     ),

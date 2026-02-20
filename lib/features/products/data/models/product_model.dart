@@ -13,6 +13,7 @@ class ProductModel {
   final List<dynamic>? colors;
   final List<String>? images;
   final String? sizeGuide;
+  final String? blurHash;
 
   ProductModel({
     required this.id,
@@ -29,6 +30,7 @@ class ProductModel {
     this.colors,
     this.images,
     this.sizeGuide,
+    this.blurHash,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,7 @@ class ProductModel {
           : null,
       images: json['images'] != null ? List<String>.from(json['images']) : null,
       sizeGuide: json['size_guide'] as String?,
+      blurHash: json['blur_hash'] as String?,
     );
   }
 
@@ -84,6 +87,7 @@ class ProductModel {
       if (colors != null) 'colors': colors,
       if (images != null) 'images': images,
       if (sizeGuide != null) 'size_guide': sizeGuide,
+      if (blurHash != null) 'blur_hash': blurHash,
     };
   }
 }

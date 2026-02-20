@@ -148,6 +148,7 @@ class AuthService {
         }
 
         const user = data.user;
+        const session = data.session;
 
         // 2. Fetch additional user details from 'users' table
         const { data: userProfile } = await supabase
@@ -159,7 +160,8 @@ class AuthService {
         const userName = userProfile ? userProfile.name : user.user_metadata.full_name;
         const userRole = userProfile ? userProfile.role : 'user';
 
-        const token = this.generateToken(user.id, user.email, userRole);
+        // Return the native Supabase access token so RLS works seamlessly in Flutter
+        const token = session.access_token;
 
         return {
             token,

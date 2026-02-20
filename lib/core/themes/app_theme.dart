@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Colors - VUMNIA Light Theme
@@ -60,43 +59,47 @@ class AppTheme {
       );
 
   // Text Styles
-  // Text Styles
-  static final TextTheme textTheme = GoogleFonts.cairoTextTheme(
-    const TextTheme(
-      displayLarge: TextStyle(
-          fontSize: 28, // Reduced from 36
-          fontWeight: FontWeight.bold,
-          color: primaryColor,
-          fontStyle: FontStyle.normal),
-      displayMedium: TextStyle(
-          fontSize: 24, // Reduced from 28
-          fontWeight: FontWeight.bold,
-          color: textPrimary,
-          fontStyle: FontStyle.normal),
-      displaySmall: TextStyle(
-          fontSize: 20, // Reduced from 24
-          fontWeight: FontWeight.w600,
-          color: textPrimary,
-          fontStyle: FontStyle.normal),
-      headlineMedium: TextStyle(
-          fontSize: 18, // Reduced from 20
-          fontWeight: FontWeight.w600,
-          color: textPrimary,
-          fontStyle: FontStyle.normal),
-      bodyLarge: TextStyle(
-          fontSize: 15, // Reduced from 16
-          color: textPrimary,
-          fontStyle: FontStyle.normal),
-      bodyMedium: TextStyle(
-          fontSize: 13, // Reduced from 14
-          color: textSecondary,
-          fontStyle: FontStyle.normal),
-      labelLarge: TextStyle(
-          fontSize: 13, // Reduced from 14
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          fontStyle: FontStyle.normal),
-    ),
+  static final TextTheme textTheme = const TextTheme(
+    displayLarge: TextStyle(
+        fontSize: 28, // Reduced from 36
+        fontWeight: FontWeight.bold,
+        color: primaryColor,
+        fontFamily: 'Cairo', // Use local font
+        fontStyle: FontStyle.normal),
+    displayMedium: TextStyle(
+        fontSize: 24, // Reduced from 28
+        fontWeight: FontWeight.bold,
+        color: textPrimary,
+        fontFamily: 'Cairo', // Use local font
+        fontStyle: FontStyle.normal),
+    displaySmall: TextStyle(
+        fontSize: 20, // Reduced from 24
+        fontWeight: FontWeight.w600,
+        color: textPrimary,
+        fontFamily: 'Cairo', // Use local font
+        fontStyle: FontStyle.normal),
+    headlineMedium: TextStyle(
+        fontSize: 18, // Reduced from 20
+        fontWeight: FontWeight.w600,
+        color: textPrimary,
+        fontFamily: 'Cairo', // Use local font
+        fontStyle: FontStyle.normal),
+    bodyLarge: TextStyle(
+        fontSize: 15, // Reduced from 16
+        color: textPrimary,
+        fontFamily: 'Cairo', // Use local font
+        fontStyle: FontStyle.normal),
+    bodyMedium: TextStyle(
+        fontSize: 13, // Reduced from 14
+        color: textSecondary,
+        fontFamily: 'Cairo', // Use local font
+        fontStyle: FontStyle.normal),
+    labelLarge: TextStyle(
+        fontSize: 13, // Reduced from 14
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+        fontFamily: 'Cairo', // Use local font
+        fontStyle: FontStyle.normal),
   );
 
   static final ThemeData lightTheme = ThemeData(

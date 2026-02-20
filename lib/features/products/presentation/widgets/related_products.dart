@@ -52,6 +52,7 @@ class RelatedProducts extends StatelessWidget {
                   colors: product.colors,
                   sizes: product.sizes,
                   images: product.images,
+                  blurHash: product.blurHash,
                 ),
               );
             },

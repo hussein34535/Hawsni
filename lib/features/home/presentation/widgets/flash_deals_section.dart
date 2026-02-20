@@ -193,6 +193,7 @@ class _FlashDealsSectionState extends State<FlashDealsSection> {
                   rating: product.rating,
                   reviewCount: product.reviewCount,
                   screenId: 'flash_deals',
+                  blurHash: product.blurHash,
                 ),
               );
             },

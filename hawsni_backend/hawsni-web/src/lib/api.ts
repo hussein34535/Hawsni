@@ -12,11 +12,16 @@ async function fetchApi<T>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('hwasi_token') : null;
+    let token = null;
+
+    // Check if we are in the browser environment
+    if (typeof window !== 'undefined') {
+        token = localStorage.getItem('hwasi_token');
+    }
 
     const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
     };
 

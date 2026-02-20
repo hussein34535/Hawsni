@@ -18,24 +18,31 @@ exports.protect = async (req, res, next) => {
     }
 
     try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Verify token with Supabase Auth (This guarantees it's a valid Supabase JWT)
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
 
-      // Check if user exists in Supabase
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', decoded.id)
-        .single();
-
-      if (error || !user) {
+      if (authError || !authUser) {
         return res.status(401).json({
           success: false,
-          message: 'User not found or not authorized'
+          message: 'Invalid or expired token'
         });
       }
 
-      req.user = user;
+      // Check if user exists in our users table and get their role/data
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (profileError || !userProfile) {
+        return res.status(401).json({
+          success: false,
+          message: 'User profile not found'
+        });
+      }
+
+      req.user = userProfile;
       next();
     } catch (err) {
       console.error('Auth Middleware Error:', err.message);
@@ -64,20 +71,22 @@ exports.protectOptional = async (req, res, next) => {
     }
 
     try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Verify token with Supabase Auth
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
 
-      // Check if user exists in Supabase
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', decoded.id)
-        .single();
+      if (!authError && authUser) {
+        // Fetch user profile
+        const { data: userProfile } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
 
-      if (!error && user) {
-        req.user = user;
+        if (userProfile) {
+          req.user = userProfile;
+        }
       }
-      // If error or no user, just continue without req.user (guest)
+      // If error or no user, drop to guest
       next();
     } catch (err) {
       // Token invalid, proceed as guest

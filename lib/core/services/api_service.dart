@@ -410,4 +410,18 @@ class ApiService {
       return false;
     }
   }
+
+  // Get Shipping Settings
+  static Future<Map<String, dynamic>?> getShippingSettings() async {
+    try {
+      final data = await get('/shipping/settings', includeAuth: false);
+      if (data['success'] == true) {
+        return data['settings'];
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching shipping settings: $e');
+      return null;
+    }
+  }
 }

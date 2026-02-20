@@ -49,10 +49,13 @@ class ProductController {
     async createProduct(req, res) {
         try {
             let imageUrls = [];
+            let blurHashes = [];
 
             if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                imageUrls = await Promise.all(uploadPromises);
+                const results = await Promise.all(uploadPromises);
+                imageUrls = results.map(r => r.url);
+                blurHashes = results.map(r => r.blurHash).filter(Boolean);
             }
 
             let sizes = [];
@@ -104,7 +107,8 @@ class ProductController {
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
                 sizes: sizes,
                 colors: colors,
-                images: imageUrls
+                images: imageUrls,
+                blur_hash: blurHashes.length > 0 ? blurHashes[0] : null
             };
 
             const product = await ProductService.createProduct(productData);
@@ -126,11 +130,18 @@ class ProductController {
             }
 
             let imageUrls = currentProduct.images || [];
+            let currentBlurHash = currentProduct.blur_hash;
 
             if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                const newImageUrls = await Promise.all(uploadPromises);
+                const results = await Promise.all(uploadPromises);
+
+                const newImageUrls = results.map(r => r.url);
                 imageUrls = [...imageUrls, ...newImageUrls];
+
+                if (results[0] && results[0].blurHash && !currentBlurHash) {
+                    currentBlurHash = results[0].blurHash;
+                }
             }
 
             let sizes = [];
@@ -154,7 +165,8 @@ class ProductController {
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
                 sizes: sizes,
                 colors: colors,
-                images: imageUrls
+                images: imageUrls,
+                blur_hash: currentBlurHash
             };
 
             const product = await ProductService.updateProduct(req.params.id, productData);
@@ -210,11 +222,15 @@ class ProductController {
             console.log('📦 CreateProductAdmin Called. Files:', req.files ? req.files.length : 'No files');
 
             let imageUrls = [];
+            let mainBlurHash = null;
             if (req.files && req.files.length > 0) {
                 try {
                     const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                    imageUrls = await Promise.all(uploadPromises);
-                    console.log('✅ All images uploaded via Cloudinary:', imageUrls);
+                    const results = await Promise.all(uploadPromises);
+                    imageUrls = results.map(r => r.url);
+                    const blurHashes = results.map(r => r.blurHash).filter(Boolean);
+                    if (blurHashes.length > 0) mainBlurHash = blurHashes[0];
+                    console.log('✅ All images uploaded via Cloudinary:', imageUrls, 'BlurHash:', mainBlurHash);
                 } catch (imgError) {
                     console.error('❌ Error uploading images to Cloudinary:', imgError);
                     return res.status(500).send(`خطأ في رفع الصور: ${imgError.message}`);
@@ -267,7 +283,8 @@ class ProductController {
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls,
-                size_guide: size_guide || ''
+                size_guide: size_guide || '',
+                blur_hash: mainBlurHash
             });
 
             if (error) {
@@ -303,7 +320,7 @@ class ProductController {
             console.log('📦 Raw Sizes:', req.body.sizes);
             console.log('📦 Raw Colors:', req.body.colors);
 
-            const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
+            const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors, blur_hash').eq('id', req.params.id).single();
 
             // Handle Retained Images (deletion/persistence)
             let imageUrls = [];
@@ -320,12 +337,19 @@ class ProductController {
                 imageUrls = currentProduct?.images || [];
             }
 
+            let currentBlurHash = currentProduct?.blur_hash;
+
             if (req.files && req.files.length > 0) {
                 try {
                     const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                    const newImageUrls = await Promise.all(uploadPromises);
+                    const results = await Promise.all(uploadPromises);
+                    const newImageUrls = results.map(r => r.url);
                     console.log('✅ New images uploaded:', newImageUrls);
                     imageUrls = [...imageUrls, ...newImageUrls];
+
+                    if (results[0] && results[0].blurHash && (!currentBlurHash || imageUrls.length === newImageUrls.length)) {
+                        currentBlurHash = results[0].blurHash;
+                    }
                 } catch (imgErr) {
                     console.error('❌ Check Cloudinary Error in Update:', imgErr);
                     return res.status(500).send(`خطأ في رفع الصور: ${imgErr.message}`);
@@ -388,7 +412,8 @@ class ProductController {
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls,
-                size_guide: size_guide || ''
+                size_guide: size_guide || '',
+                blur_hash: currentBlurHash
             }).eq('id', req.params.id);
 
             if (updateError) throw updateError;
@@ -457,8 +482,11 @@ class ProductController {
 
             if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                const newImageUrls = await Promise.all(uploadPromises);
+                const results = await Promise.all(uploadPromises);
+                const newImageUrls = results.map(r => r.url);
                 imageUrls = [...imageUrls, ...newImageUrls];
+
+                // Optional: update blur hash if it's empty, but generally safe to leave it
             }
 
             await supabase.from('products').update({ images: imageUrls }).eq('id', req.params.id);

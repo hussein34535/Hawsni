@@ -335,6 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     colors: product.colors,
                                     sizes: product.sizes,
                                     images: product.images,
+                                    blurHash: product.blurHash,
                                   ),
                                 );
                               },

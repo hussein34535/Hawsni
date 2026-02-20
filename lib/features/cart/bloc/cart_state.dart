@@ -9,6 +9,7 @@ class CartItem extends Equatable {
   final String? size;
   final String? color;
   final String? productId;
+  final String? blurHash;
 
   const CartItem({
     required this.id,
@@ -19,6 +20,7 @@ class CartItem extends Equatable {
     this.size,
     this.color,
     this.productId,
+    this.blurHash,
   });
 
   CartItem copyWith({
@@ -30,6 +32,7 @@ class CartItem extends Equatable {
     String? size,
     String? color,
     String? productId,
+    String? blurHash,
   }) {
     return CartItem(
       id: id ?? this.id,
@@ -40,12 +43,13 @@ class CartItem extends Equatable {
       size: size ?? this.size,
       color: color ?? this.color,
       productId: productId ?? this.productId,
+      blurHash: blurHash ?? this.blurHash,
     );
   }
 
   @override
   List<Object?> get props =>
-      [id, name, price, imageUrl, quantity, size, color, productId];
+      [id, name, price, imageUrl, quantity, size, color, productId, blurHash];
 
   // For Local Storage serialization
   Map<String, dynamic> toJson() {
@@ -58,6 +62,7 @@ class CartItem extends Equatable {
       'size': size,
       'color': color,
       'productId': productId,
+      'blurHash': blurHash,
     };
   }
 
@@ -71,6 +76,7 @@ class CartItem extends Equatable {
       size: json['size'],
       color: json['color'],
       productId: json['productId'],
+      blurHash: json['blurHash'] ?? json['blur_hash'],
     );
   }
 }
