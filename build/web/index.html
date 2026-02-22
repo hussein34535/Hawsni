@@ -108,6 +108,12 @@
   <!-- Performance Optimizations -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+
+  <!-- Preload core Flutter Web Engine instantly -->
+  <link rel="preload" href="main.dart.js" as="script">
+  <link rel="preload" href="flutter_bootstrap.js" as="script">
+
   <!-- Cairo: all weights for full Arabic support -->
   <link
     href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&display=block"
@@ -122,19 +128,28 @@
   </div>
 
   <!-- The Flutter bootstrapping script -->
-  <script src="flutter_bootstrap.js" async></script>
-
+  <script src="flutter.js" defer></script>
   <script>
-    // Remove loading indicator when Flutter app is ready
-    window.addEventListener('load', function (ev) {
+    // Remove loading indicator when Flutter app renders its first frame
+    window.addEventListener('flutter-first-frame', function () {
       const loader = document.getElementById('loading-indicator');
       if (loader) {
-        // Delayed removal to ensure user sees the brand
-        setTimeout(() => {
-          loader.style.opacity = '0';
-          setTimeout(() => loader.remove(), 400);
-        }, 1500); // 1.5s delay
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 400); // 400ms fade out transition
       }
+    });
+
+    window.addEventListener('load', function (ev) {
+      // Force engine load WITHOUT Service Workers for maximum instant-start speed
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: null
+      }).then(function (engineInitializer) {
+        return engineInitializer.initializeEngine({
+          useColorEmoji: true,
+        });
+      }).then(function (appRunner) {
+        return appRunner.runApp();
+      });
     });
   </script>
 </body>
