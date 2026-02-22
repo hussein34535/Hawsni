@@ -20,6 +20,7 @@ const reviewRoutes = require('./routes/reviews_supabase');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
 const bannerRoutes = require('./routes/banners');
+const seoRoutes = require('./routes/seo');
 // const paymentRoutes = require('./routes/api/payment');
 // app.use('/api/payment', paymentRoutes);
 const adminRoutes = require('./routes/admin'); // Admin routes (EJS)
@@ -76,6 +77,9 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 // app.use('/api/payment', paymentRoutes);
+
+// SEO Routes (served at root)
+app.use('/', seoRoutes);
 
 // Admin Routes (new layout system)
 app.use('/', adminRoutes);
