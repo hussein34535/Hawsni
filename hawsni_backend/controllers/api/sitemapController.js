@@ -42,7 +42,6 @@ class SitemapController {
             // 4. Add Product URLs
             if (products && products.length > 0) {
                 products.forEach(product => {
-                    // Using product ID, but if you have a slug field, slug is better for SEO
                     sitemap += `
     <url>
         <loc>${baseUrl}/product/${product.id}</loc>

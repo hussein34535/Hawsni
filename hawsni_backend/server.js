@@ -21,17 +21,11 @@ const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
 const bannerRoutes = require('./routes/banners');
 const seoRoutes = require('./routes/seo');
-// const paymentRoutes = require('./routes/api/payment');
-// app.use('/api/payment', paymentRoutes);
-const adminRoutes = require('./routes/admin'); // Admin routes (EJS)
-// ...
-// app.use('/api/admin', adminRoutes);
-const vtoRoutes = require('./routes/vto'); // Virtual Try-On routes
-// Import Controllers
+const vtoRoutes = require('./routes/vto');
+const adminRoutes = require('./routes/admin');
 const DashboardController = require('./controllers/admin/dashboardController');
 const ProductController = require('./controllers/api/productController');
 const CategoryController = require('./controllers/api/categoryController');
-const OrderController = require('./controllers/api/orderController');
 const ShippingController = require('./controllers/admin/shippingController');
 
 const app = express();
@@ -41,29 +35,13 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
-console.log('Debug: Initializing middleware...');
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  // Reflect origin or allow all for non-browser requests
-  res.setHeader('Access-Control-Allow-Origin', origin || '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  next();
-});
+app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(methodOverride('_method'));
-// Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
-console.log('Debug: Middleware initialized successfully.');
 
 // API Routes
-console.log('Debug: Registering API routes...');
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
@@ -76,48 +54,12 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
-// app.use('/api/payment', paymentRoutes);
 
 // SEO Routes (served at root)
 app.use('/', seoRoutes);
 
-// Admin Routes (new layout system)
+// Admin Routes
 app.use('/', adminRoutes);
-
-// Admin Dashboard Route (old - will be replaced)
-app.get('/dashboard', DashboardController.getDashboard);
-
-// Products Management (Admin)
-app.get('/products', ProductController.renderProductsPage);
-app.get('/products/new', ProductController.renderNewProductPage);
-app.post('/products', upload.any(), ProductController.createProductAdmin);
-// Bulk product actions (MUST be before /:id routes)
-app.post('/products/bulk-delete', ProductController.bulkDelete);
-app.post('/products/bulk-update', ProductController.bulkUpdate);
-app.get('/products/:id/edit', ProductController.renderEditProductPage);
-app.post('/products/:id', upload.any(), ProductController.updateProductAdmin);
-app.post('/products/:id/delete', ProductController.deleteProductAdmin);
-app.delete('/products/:id/delete', ProductController.deleteProductAdmin);
-app.delete('/products/:id', ProductController.deleteProductAdmin);
-
-// Shipping Settings (Admin + Public API)
-app.get('/shipping', ShippingController.index);
-app.post('/shipping', ShippingController.update);
-app.get('/api/shipping/settings', ShippingController.getSettings);
-
-// Image Management Routes
-app.get('/products/:id/images', ProductController.renderImageManagementPage);
-app.post('/products/:id/images', upload.array('images', 5), ProductController.uploadProductImages);
-app.post('/products/:id/images/reorder', ProductController.reorderProductImages);
-app.delete('/products/:id/images/:imageIndex', ProductController.deleteProductImage);
-
-// Categories Management (Admin)
-app.get('/categories', CategoryController.renderCategoriesPage);
-app.get('/categories/:id/edit', CategoryController.renderEditPage);
-app.post('/categories/reorder', CategoryController.reorderCategories);
-app.post('/categories', upload.single('image'), CategoryController.createCategoryAdmin);
-app.post('/categories/:id/delete', CategoryController.deleteCategoryAdmin);
-app.post('/categories/:id', upload.single('image'), CategoryController.updateCategoryAdmin);
 
 // Root redirect
 app.get('/', (req, res) => {
@@ -133,40 +75,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Test Supabase connection
-const testSupabaseConnection = async () => {
-  console.log('Debug: Starting Supabase connection test...');
-  try {
-    const { data, error } = await supabase.from('products').select('count').limit(1);
-    if (error && error.code !== 'PGRST116') { // PGRST116 = table doesn't exist yet
-      console.log('⚠️  Supabase connected but tables not created yet');
-      console.log('📝 Run the SQL schema to create tables');
-    } else {
-      console.log('✅ Supabase connected successfully');
-    }
-  } catch (err) {
-    console.log('⚠️  Supabase connection status unknown');
-  }
-  console.log('Debug: Supabase connection test completed.');
-};
-
 // Start server
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
-  const HOST = '0.0.0.0'; // Bind to all interfaces
-
-  app.listen(PORT, HOST, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📚 API Documentation: http://localhost:${PORT}/`);
-    console.log(`🌐 Server accessible on network at http://${HOST}:${PORT}/`);
-    console.log('Debug: Calling testSupabaseConnection...');
-    testSupabaseConnection();
   });
 }
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('Debug: Unhandled Promise Rejection:', err.stack);
-});
 
 module.exports = app;
