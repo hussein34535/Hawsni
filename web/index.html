@@ -136,6 +136,17 @@
   </div>
 
   <!-- The Flutter bootstrapping script -->
+  <script>
+    // Forcibly unregister any existing service workers to prevent interference
+    // which the logs show is causing massive 'canceled' fetch delays (37s+).
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 
   <script>
