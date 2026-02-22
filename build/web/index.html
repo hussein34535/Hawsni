@@ -27,7 +27,26 @@
     content="Discover premium fashion and lifestyle products at Hawsni. Shop the latest trends with fast delivery.">
   <meta property="twitter:image" content="icons/Icon-192.png">
 
-  <title>Hawsni</title <link rel="manifest" href="manifest.json">
+  <title>Hawsni</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    // 1. FORCED ZOMBIE KILLER: Unregister Service Workers & Wipe Caches
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) { registration.unregister(); }
+      });
+      // Monkey-patch to prevent any future registrations/timeouts
+      navigator.serviceWorker.register = function () {
+        return new Promise((r, reject) => reject('Service Workers disabled.'));
+      };
+    }
+    if ('caches' in window) {
+      caches.keys().then(function (names) {
+        for (let name of names) caches.delete(name);
+      });
+    }
+  </script>
 
   <style>
     /* Global fallback to prevent "tofu" squares before fonts load */
@@ -117,10 +136,15 @@
     href="https://www.gstatic.com/flutter-canvaskit/ddf47dd3ff96dbde6d9c614db0d7f019d7c7a2b7/chromium/canvaskit.wasm"
     as="fetch" crossorigin="anonymous">
 
-  <!-- Preload critical startup assets -->
-  <link rel="preload" href="assets/AssetManifest.bin.json" as="fetch" crossorigin="anonymous">
-  <link rel="preload" href="assets/FontManifest.json" as="fetch" crossorigin="anonymous">
+  <!-- Preload critical startup assets (Same-origin, no CORS) -->
+  <link rel="preload" href="assets/AssetManifest.bin.json" as="fetch">
+  <link rel="preload" href="assets/FontManifest.json" as="fetch">
   <link rel="preload" href="assets/assets/images/logo.png" as="image">
+
+  <!-- Preload Arabic Font to fix text layout lag -->
+  <link rel="preload"
+    href="https://fonts.gstatic.com/s/notosansarabic/v28/nwpxtLGrOAZMl5nJ_wfgRg3DrWFZWsnVBJ_sS6tlqHHFlhQ5l3sQWIHPqzCfyGyvvnCBFQLaig.woff2"
+    as="font" type="font/woff2" crossorigin="anonymous">
 
   <!-- Cairo: all weights for full Arabic support -->
   <link
@@ -148,10 +172,36 @@
       }
     });
 
-    // We can also hint the loader to skip service workers if we use the direct load API,
-    // but in Flutter 3.22+ flutter_bootstrap.js is designed to be the main entry point.
-    // The preload warning specifically mentioned flutter_bootstrap.js was not used
-    // because we were loading flutter.js instead.
+    // 2. Wipe ALL browser caches to clear the 37s delay "Zombie" data
+    if ('caches' in window) {
+      caches.keys().then(function (names) {
+        for (let name of names) caches.delete(name);
+      });
+    }
+
+    // 3. Remove loading indicator when Flutter app renders its first frame
+    window.addEventListener('flutter-first-frame', function () {
+      const loader = document.getElementById('loading-indicator');
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 400); // 400ms fade out transition
+      }
+    });
+
+    // 4. Initialize Flutter loader with EXPLICIT service worker disabling
+    window.addEventListener('load', function (ev) {
+      _flutter.loader.load({
+        serviceWorkerSettings: {
+          serviceWorkerVersion: null, // Total kill-switch for Service Workers
+        },
+        onEntrypointLoaded: async function (engineInitializer) {
+          const appRunner = await engineInitializer.initializeEngine({
+            useColorEmoji: true,
+          });
+          await appRunner.runApp();
+        }
+      });
+    });
   </script>
 </body>
 
