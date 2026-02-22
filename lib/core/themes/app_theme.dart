@@ -227,6 +227,6 @@ class AppTheme {
 class WebScrollBehavior extends ScrollBehavior {
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
-    return const BouncingScrollPhysics();
+    return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
   }
 }

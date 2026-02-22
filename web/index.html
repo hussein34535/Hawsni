@@ -49,22 +49,19 @@
   </script>
 
   <style>
-    /* Global fallback to prevent "tofu" squares before fonts load */
+    /* Global Reset */
     html,
     body {
-      background-color: #FAFAFA;
+      background-color: #FFFFFF;
       margin: 0;
       padding: 0;
       overflow: hidden;
       height: 100dvh;
-      /* Critical: Use dynamic viewport height for mobile responsiveness */
       width: 100%;
-      /* Critical: Use Cairo as primary for Arabic support globally */
-      font-family: 'Cairo', 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Cairo', sans-serif;
     }
 
-    /* CSS Loader - Shows immediately */
-    /* CSS Loader - Shows immediately */
+    /* Premium Splash Screen Container */
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -76,87 +73,101 @@
       top: 0;
       left: 0;
       z-index: 9999;
-      background-color: #FAFAFA;
-      transition: opacity 0.4s ease-in-out;
+      background-color: #FFFFFF;
+      transition: opacity 0.5s ease-in-out;
     }
 
-    .loader {
-      /* Optimized Simple Loader */
-      width: 50px;
-      height: 50px;
-      border: 3px solid #E0E0E0;
-      border-top: 3px solid #1B4D3E;
-      /* App Primary Color */
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    /* Animated Logo */
+    .splash-logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 40px;
+      object-fit: contain;
+      animation: logo-spin 3s infinite ease-in-out;
     }
 
-    @keyframes spin {
+    @keyframes logo-spin {
       0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    .loading-text {
-      display: block;
-      margin-top: 16px;
-      font-family: 'Cairo', sans-serif;
-      font-weight: 700;
-      font-size: 24px;
-      color: #1B4D3E;
-      animation: pulse 1.5s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 0.6;
+        transform: rotate(0deg) scale(1);
       }
 
       50% {
-        opacity: 1;
+        transform: rotate(180deg) scale(1.1);
       }
+
+      100% {
+        transform: rotate(360deg) scale(1);
+      }
+    }
+
+    /* HWASI Text */
+    .brand-name {
+      font-size: 56px;
+      font-weight: 800;
+      color: #1B4D3E;
+      /* Hawsni Green */
+      letter-spacing: 6px;
+      margin: 0;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fade-in-up 0.8s forwards ease-out 0.2s;
+    }
+
+    /* Subtitle */
+    .tagline {
+      font-size: 18px;
+      color: #757575;
+      letter-spacing: 1.5px;
+      margin-top: 12px;
+      opacity: 0;
+      animation: fade-in-up 0.8s forwards ease-out 0.5s;
+    }
+
+    @keyframes fade-in-up {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transition for the loader removal */
+    .loading-container.fade-out {
+      opacity: 0;
+      pointer-events: none;
     }
   </style>
 
   <!-- Performance Optimizations -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 
-  <!-- Preload core Flutter Web Engine instantly -->
+  <!-- Preload core Flutter Web Engine -->
   <link rel="preload" href="main.dart.js" as="script">
   <link rel="preload" href="flutter_bootstrap.js" as="script">
-  <link rel="preload"
-    href="https://www.gstatic.com/flutter-canvaskit/ddf47dd3ff96dbde6d9c614db0d7f019d7c7a2b7/chromium/canvaskit.wasm"
-    as="fetch" crossorigin="anonymous">
 
-  <!-- Preload critical startup assets (Same-origin, no CORS) -->
-  <link rel="preload" href="assets/AssetManifest.bin.json" as="fetch">
-  <link rel="preload" href="assets/FontManifest.json" as="fetch">
-  <link rel="preload" href="assets/assets/images/logo.png" as="image">
-
-  <!-- Preload Arabic Font to fix text layout lag -->
+  <!-- Preload Arabic Font to fix layout lag -->
   <link rel="preload"
     href="https://fonts.gstatic.com/s/notosansarabic/v28/nwpxtLGrOAZMl5nJ_wfgRg3DrWFZWsnVBJ_sS6tlqHHFlhQ5l3sQWIHPqzCfyGyvvnCBFQLaig.woff2"
     as="font" type="font/woff2" crossorigin="anonymous">
 
-  <!-- Cairo: all weights for full Arabic support -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&display=block"
+  <!-- Preload the Logo image used in splash -->
+  <link rel="preload" href="assets/assets/images/logo.png" as="image">
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet">
 </head>
 
 <body>
+  <!-- Custom Splash Screen -->
   <div id="loading-indicator" class="loading-container">
-    <!-- HWASI Logo/Text for Splah -->
-    <div class="loading-text" style="font-size: 32px; letter-spacing: 2px; margin-bottom: 20px;">HWASI</div>
-    <div class="loader"></div>
+    <img src="assets/assets/images/logo.png" alt="HWASI Logo" class="splash-logo">
+    <h1 class="brand-name">HWASI</h1>
+    <p class="tagline">Your Style, Your Way</p>
   </div>
 
   <!-- The Flutter bootstrapping script -->

@@ -59,7 +59,8 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children:
+            _screens.map((screen) => RepaintBoundary(child: screen)).toList(),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
