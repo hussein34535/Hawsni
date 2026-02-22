@@ -141,14 +141,16 @@
 
     window.addEventListener('load', function (ev) {
       // Force engine load WITHOUT Service Workers for maximum instant-start speed
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: null
-      }).then(function (engineInitializer) {
-        return engineInitializer.initializeEngine({
-          useColorEmoji: true,
-        });
-      }).then(function (appRunner) {
-        return appRunner.runApp();
+      _flutter.loader.load({
+        serviceWorkerSettings: {
+          serviceWorkerVersion: null // Disable offline SW
+        },
+        onEntrypointLoaded: async function (engineInitializer) {
+          let appRunner = await engineInitializer.initializeEngine({
+            useColorEmoji: true,
+          });
+          await appRunner.runApp();
+        }
       });
     });
   </script>
