@@ -31,11 +31,15 @@
   <link rel="manifest" href="manifest.json">
 
   <script>
-    // 1. FORCED ZOMBIE KILLER: Unregister Service Workers & Wipe Caches IMMEDIATELY in Head
+    // 1. FORCED ZOMBIE KILLER: Unregister Service Workers & Wipe Caches
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function (registrations) {
         for (let registration of registrations) { registration.unregister(); }
       });
+      // Monkey-patch to prevent any future registrations/timeouts
+      navigator.serviceWorker.register = function () {
+        return new Promise((r, reject) => reject('Service Workers disabled.'));
+      };
     }
     if ('caches' in window) {
       caches.keys().then(function (names) {
@@ -132,9 +136,9 @@
     href="https://www.gstatic.com/flutter-canvaskit/ddf47dd3ff96dbde6d9c614db0d7f019d7c7a2b7/chromium/canvaskit.wasm"
     as="fetch" crossorigin="anonymous">
 
-  <!-- Preload critical startup assets -->
-  <link rel="preload" href="assets/AssetManifest.bin.json" as="fetch" crossorigin="anonymous">
-  <link rel="preload" href="assets/FontManifest.json" as="fetch" crossorigin="anonymous">
+  <!-- Preload critical startup assets (Same-origin, no CORS) -->
+  <link rel="preload" href="assets/AssetManifest.bin.json" as="fetch">
+  <link rel="preload" href="assets/FontManifest.json" as="fetch">
   <link rel="preload" href="assets/assets/images/logo.png" as="image">
 
   <!-- Preload Arabic Font to fix text layout lag -->
