@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hwasibackend.vercel.app/sitemap.xml
+Sitemap: https://hwasi.com/sitemap.xml
