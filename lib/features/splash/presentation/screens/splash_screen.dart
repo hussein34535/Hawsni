@@ -19,7 +19,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   _navigateToHome() async {
-    await Future.delayed(const Duration(seconds: 3));
+    // Artificial delay reduced for faster user experience
+    await Future.delayed(const Duration(milliseconds: 500));
 
     final prefs = await SharedPreferences.getInstance();
 
