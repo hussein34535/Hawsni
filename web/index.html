@@ -112,8 +112,10 @@
 
   <!-- Preload core Flutter Web Engine instantly -->
   <link rel="preload" href="main.dart.js" as="script">
-  <link rel="preload" href="flutter.js" as="script">
   <link rel="preload" href="flutter_bootstrap.js" as="script">
+  <link rel="preload"
+    href="https://www.gstatic.com/flutter-canvaskit/ddf47dd3ff96dbde6d9c614db0d7f019d7c7a2b7/chromium/canvaskit.wasm"
+    as="fetch" crossorigin="anonymous">
 
   <!-- Cairo: all weights for full Arabic support -->
   <link
@@ -129,7 +131,8 @@
   </div>
 
   <!-- The Flutter bootstrapping script -->
-  <script src="flutter.js" defer></script>
+  <script src="flutter_bootstrap.js" async></script>
+
   <script>
     // Remove loading indicator when Flutter app renders its first frame
     window.addEventListener('flutter-first-frame', function () {
@@ -140,20 +143,10 @@
       }
     });
 
-    window.addEventListener('load', function (ev) {
-      // Force engine load WITHOUT Service Workers for maximum instant-start speed
-      _flutter.loader.load({
-        serviceWorkerSettings: {
-          serviceWorkerVersion: null // Disable offline SW
-        },
-        onEntrypointLoaded: async function (engineInitializer) {
-          let appRunner = await engineInitializer.initializeEngine({
-            useColorEmoji: true,
-          });
-          await appRunner.runApp();
-        }
-      });
-    });
+    // We can also hint the loader to skip service workers if we use the direct load API,
+    // but in Flutter 3.22+ flutter_bootstrap.js is designed to be the main entry point.
+    // The preload warning specifically mentioned flutter_bootstrap.js was not used
+    // because we were loading flutter.js instead.
   </script>
 </body>
 
