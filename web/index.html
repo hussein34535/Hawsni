@@ -27,7 +27,22 @@
     content="Discover premium fashion and lifestyle products at Hawsni. Shop the latest trends with fast delivery.">
   <meta property="twitter:image" content="icons/Icon-192.png">
 
-  <title>Hawsni</title <link rel="manifest" href="manifest.json">
+  <title>Hawsni</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    // 1. FORCED ZOMBIE KILLER: Unregister Service Workers & Wipe Caches IMMEDIATELY in Head
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let registration of registrations) { registration.unregister(); }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function (names) {
+        for (let name of names) caches.delete(name);
+      });
+    }
+  </script>
 
   <style>
     /* Global fallback to prevent "tofu" squares before fonts load */
@@ -112,7 +127,7 @@
 
   <!-- Preload core Flutter Web Engine instantly -->
   <link rel="preload" href="main.dart.js" as="script">
-  <link rel="preload" href="flutter.js" as="script">
+  <link rel="preload" href="flutter_bootstrap.js" as="script">
   <link rel="preload"
     href="https://www.gstatic.com/flutter-canvaskit/ddf47dd3ff96dbde6d9c614db0d7f019d7c7a2b7/chromium/canvaskit.wasm"
     as="fetch" crossorigin="anonymous">
@@ -121,6 +136,11 @@
   <link rel="preload" href="assets/AssetManifest.bin.json" as="fetch" crossorigin="anonymous">
   <link rel="preload" href="assets/FontManifest.json" as="fetch" crossorigin="anonymous">
   <link rel="preload" href="assets/assets/images/logo.png" as="image">
+
+  <!-- Preload Arabic Font to fix text layout lag -->
+  <link rel="preload"
+    href="https://fonts.gstatic.com/s/notosansarabic/v28/nwpxtLGrOAZMl5nJ_wfgRg3DrWFZWsnVBJ_sS6tlqHHFlhQ5l3sQWIHPqzCfyGyvvnCBFQLaig.woff2"
+    as="font" type="font/woff2" crossorigin="anonymous">
 
   <!-- Cairo: all weights for full Arabic support -->
   <link
@@ -136,16 +156,17 @@
   </div>
 
   <!-- The Flutter bootstrapping script -->
-  <script src="flutter.js" defer></script>
+  <script src="flutter_bootstrap.js" async></script>
+
   <script>
-    // 1. Forcibly unregister any existing service workers
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function (registrations) {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
+    // Remove loading indicator when Flutter app renders its first frame
+    window.addEventListener('flutter-first-frame', function () {
+      const loader = document.getElementById('loading-indicator');
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 400); // 400ms fade out transition
+      }
+    });
 
     // 2. Wipe ALL browser caches to clear the 37s delay "Zombie" data
     if ('caches' in window) {
