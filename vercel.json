@@ -3,6 +3,14 @@
     "cleanUrls": true,
     "rewrites": [
         {
+            "source": "/sitemap.xml",
+            "destination": "https://hawsni-backend.vercel.app/sitemap.xml"
+        },
+        {
+            "source": "/robots.txt",
+            "destination": "/robots.txt"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }
