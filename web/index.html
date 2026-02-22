@@ -117,6 +117,11 @@
     href="https://www.gstatic.com/flutter-canvaskit/ddf47dd3ff96dbde6d9c614db0d7f019d7c7a2b7/chromium/canvaskit.wasm"
     as="fetch" crossorigin="anonymous">
 
+  <!-- Preload critical startup assets -->
+  <link rel="preload" href="assets/AssetManifest.bin.json" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="assets/FontManifest.json" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="assets/assets/images/logo.png" as="image">
+
   <!-- Cairo: all weights for full Arabic support -->
   <link
     href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&display=block"
