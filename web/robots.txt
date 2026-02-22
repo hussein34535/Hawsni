@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hawsni-backend.vercel.app/sitemap.xml
+Sitemap: https://hwasibackend.vercel.app/sitemap.xml

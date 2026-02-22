@@ -4,7 +4,7 @@
     "rewrites": [
         {
             "source": "/sitemap.xml",
-            "destination": "https://hawsni-backend.vercel.app/sitemap.xml"
+            "destination": "https://hwasibackend.vercel.app/sitemap.xml"
         },
         {
             "source": "/robots.txt",
