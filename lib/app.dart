@@ -33,6 +33,7 @@ class _AppState extends State<App> {
               settingsProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
+          scrollBehavior: WebScrollBehavior(),
           routerConfig: AppRouter.router,
         );
       },

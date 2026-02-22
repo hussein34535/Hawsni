@@ -166,7 +166,7 @@ class _ProductCardState extends State<ProductCard> {
                             color: const Color(0xFFF5F5F5),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: kIsWeb
-                                ? null
+                                ? [] // Enforce empty shadows on web for better WebGL performance
                                 : [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.08),
@@ -196,13 +196,17 @@ class _ProductCardState extends State<ProductCard> {
                                     imageUrl:
                                         _selectedImageUrl ?? widget.imageUrl,
                                     fit: BoxFit.cover,
-                                    memCacheHeight: 600,
+                                    memCacheWidth:
+                                        400, // Explicit resolution constraint limits JS decoding time
+                                    memCacheHeight: 400,
                                     placeholder: (context, url) {
                                       if (widget.blurHash != null &&
                                           widget.blurHash!.isNotEmpty) {
-                                        return BlurHash(
-                                          hash: widget.blurHash!,
-                                          imageFit: BoxFit.cover,
+                                        return RepaintBoundary(
+                                          child: BlurHash(
+                                            hash: widget.blurHash!,
+                                            imageFit: BoxFit.cover,
+                                          ),
                                         );
                                       }
                                       return Container(

@@ -143,6 +143,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     scrollDirection: Axis.horizontal,
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 16),
+                                    addAutomaticKeepAlives: false,
+                                    addRepaintBoundaries: false,
                                     itemCount: state.categories.length,
                                     itemBuilder: (context, index) {
                                       final category = state.categories[index];
@@ -245,8 +247,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                                             .imageUrl!,
                                                                     fit: BoxFit
                                                                         .cover,
+                                                                    memCacheWidth:
+                                                                        200,
                                                                     memCacheHeight:
-                                                                        400,
+                                                                        200,
                                                                     placeholder: (context,
                                                                             url) =>
                                                                         Container(
@@ -344,6 +348,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   : _selectedFilter == 'Featured'
                                       ? state.featuredProducts.length
                                       : state.flashDeals.length,
+                              addAutomaticKeepAlives: false,
+                              addRepaintBoundaries: false,
                             ),
                           ),
                         ),

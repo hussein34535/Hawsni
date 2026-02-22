@@ -34,11 +34,15 @@ class CategoryGrid extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
         itemCount: categories.length,
         separatorBuilder: (context, index) => const SizedBox(width: 20),
         itemBuilder: (context, index) {
           final category = categories[index];
-          return _buildCategoryBubble(context, category);
+          return RepaintBoundary(
+            child: _buildCategoryBubble(context, category),
+          );
         },
       ),
     );
@@ -77,7 +81,8 @@ class CategoryGrid extends StatelessWidget {
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
-                              memCacheHeight: 400, // Better quality
+                              memCacheWidth: 200,
+                              memCacheHeight: 200, // Better quality
                               placeholder: (context, url) =>
                                   Container(color: Colors.transparent),
                               errorWidget: (context, url, error) =>
