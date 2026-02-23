@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Category } from '@/types';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface CategoryListProps {
     categories: Category[];
@@ -7,6 +8,8 @@ interface CategoryListProps {
 }
 
 export default function CategoryList({ categories, isLoading }: CategoryListProps) {
+    const { isRTL } = useLanguage();
+
     if (isLoading) {
         return (
             <div className="h-[120px] w-full flex items-center justify-center">
@@ -22,10 +25,10 @@ export default function CategoryList({ categories, isLoading }: CategoryListProp
                     <motion.div
                         key={cat._id}
                         whileHover={{ y: -2 }}
-                        className={`w-[100px] bg-white rounded-xl flex flex-col items-center justify-center cursor-pointer flex-shrink-0 mr-3 h-[100px] ${index === 0 ? 'ml-4' : ''}`}
-                        style={{
-                            boxShadow: '0 2px 8px rgba(156, 163, 175, 0.1)'
-                        }}
+                        className={`w-[100px] bg-white rounded-xl flex flex-col items-center justify-center cursor-pointer flex-shrink-0 h-[100px] shadow-[0_2px_8px_rgba(156,163,175,0.1)] ${isRTL
+                                ? (index === 0 ? 'mr-4 ml-3' : 'ml-3')
+                                : (index === 0 ? 'ml-4 mr-3' : 'mr-3')
+                            }`}
                     >
                         {/* Image Container */}
                         <div className="p-3 bg-blue-50 rounded-full mb-2">

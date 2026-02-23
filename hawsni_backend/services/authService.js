@@ -40,12 +40,21 @@ class AuthService {
             const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
             const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-            // Send OTP Email via Resend
+            // Send emails (OTP to user, Notification to admin)
             try {
                 await emailService.sendOtpEmail(email, name, otpCode);
+
+                // Admin Notification
+                emailService.sendAdminNotification(
+                    'New User Registered! 👤',
+                    `
+                    <p><strong>Name:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+                    `
+                ).catch(err => console.error('Admin registration notification failed:', err));
             } catch (emailError) {
-                console.error('Failed to send OTP email via Resend:', emailError);
-                // Continue registration even if email fails
+                console.error('Failed to send registration emails:', emailError);
             }
 
             // 3. Add or Update user profile in 'users' table

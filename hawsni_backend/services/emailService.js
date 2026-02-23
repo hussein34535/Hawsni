@@ -3,6 +3,7 @@ const fetch = require('node-fetch');
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_URL = 'https://api.resend.com/emails';
 const SENDER = 'Hwasi <noreply@hawsni.com>';
+const ADMIN_EMAIL = 'hussona4635@gmail.com';
 
 /**
  * Low-level Resend send helper.
@@ -161,9 +162,29 @@ async function sendOrderStatusEmail(toEmail, userName, orderId, status) {
     });
 }
 
+// ──────────────────────────────────────────────
+// 5. Admin Notification Email
+// ──────────────────────────────────────────────
+async function sendAdminNotification(subject, htmlContent) {
+    return _send({
+        to: ADMIN_EMAIL,
+        subject: `[ADMIN INFO] ${subject}`,
+        htmlContent: `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+            <h2 style="color: #10b981;">Hawsni Alert 🔔</h2>
+            <div style="font-size: 15px; color: #333; line-height: 1.6;">
+                ${htmlContent}
+            </div>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 12px; color: #999;">This is an automated notification from Hawsni System.</p>
+        </div>`
+    });
+}
+
 module.exports = {
     sendOtpEmail,
     sendPasswordResetEmail,
     sendOrderConfirmationEmail,
     sendOrderStatusEmail,
+    sendAdminNotification,
 };

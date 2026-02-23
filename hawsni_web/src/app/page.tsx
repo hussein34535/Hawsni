@@ -11,8 +11,10 @@ import { productService } from '@/services/productService';
 import { categoryService } from '@/services/categoryService';
 import { Category, Product, Banner } from '@/types';
 import apiClient from '@/lib/axios';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function HomePage() {
+  const { t, language, isRTL } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -49,7 +51,9 @@ export default function HomePage() {
             <Link href="/search" className="flex-1">
               <div className="h-[52px] bg-[#F5F5F5] rounded-[14px] flex items-center px-4">
                 <Search size={22} className="text-gray-500" />
-                <span className="ml-3 text-[15px] text-gray-500 font-medium">Search Products</span>
+                <span className={`${isRTL ? 'mr-3' : 'ml-3'} text-[15px] text-gray-500 font-medium`}>
+                  {t.common.search}
+                </span>
               </div>
             </Link>
 
@@ -71,8 +75,8 @@ export default function HomePage() {
         {/* Products Grid */}
         <section className="pt-4 pb-[100px]">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-black text-gray-900 tracking-tight">New Arrivals</h2>
-            <button className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">View All</button>
+            <h2 className="text-xl font-black text-gray-900 tracking-tight">{t.home.new_arrivals}</h2>
+            <button className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">{t.common.view_all}</button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6">

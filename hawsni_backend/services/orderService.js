@@ -63,7 +63,7 @@ class OrderService {
             order.items = orderItems;
         }
 
-        // Send order confirmation email (non-blocking)
+        // Send order confirmation email and admin notification (non-blocking)
         try {
             const { data: user } = await supabase
                 .from('users')
@@ -74,9 +74,20 @@ class OrderService {
             if (user && user.email) {
                 emailService.sendOrderConfirmationEmail(user.email, user.name || 'عميل', order)
                     .catch(err => console.error('Order confirmation email failed:', err));
+
+                // Admin Notification
+                emailService.sendAdminNotification(
+                    'New Order Received! 🛒',
+                    `
+                    <p><strong>Order ID:</strong> #${order.id.toUpperCase()}</p>
+                    <p><strong>Customer:</strong> ${user.name} (${user.email})</p>
+                    <p><strong>Total Amount:</strong> ${order.total_amount} EGP</p>
+                    <p>Check the admin dashboard for more details.</p>
+                    `
+                ).catch(err => console.error('Admin order notification failed:', err));
             }
         } catch (emailErr) {
-            console.error('Failed to fetch user for order email:', emailErr);
+            console.error('Failed to handle order emails:', emailErr);
         }
 
         return order;

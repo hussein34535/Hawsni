@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 
 import Navbar from "@/components/layout/Navbar";
 import BottomNav from "@/components/layout/BottomNav";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 export default function RootLayout({
   children,
@@ -26,12 +27,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cairo.variable} font-sans min-h-screen flex flex-col bg-[var(--color-bg-secondary)] pb-20 md:pb-0`}>
-        <Navbar />
-        <main className="flex-1 max-w-7xl mx-auto w-full pt-20">
-          {children}
-        </main>
-        <BottomNav />
+      <body className={`${cairo.variable} font-cairo min-h-screen flex flex-col bg-[var(--color-bg-secondary)] pb-20 md:pb-0`}>
+        <LanguageProvider>
+          <Navbar />
+          <main className="flex-1 max-w-7xl mx-auto w-full pt-20">
+            {children}
+          </main>
+          <BottomNav />
+        </LanguageProvider>
       </body>
     </html>
   );

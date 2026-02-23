@@ -4,16 +4,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Heart, ShoppingBag, User } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function BottomNav() {
     const pathname = usePathname();
+    const { t } = useLanguage();
     const itemCount = useCartStore((state) => state.getItemCount());
 
     const navItems = [
-        { href: '/', icon: Home, label: 'Home' },
-        { href: '/wishlist', icon: Heart, label: 'Wishlist' },
-        { href: '/cart', icon: ShoppingBag, label: 'Cart' },
-        { href: '/profile', icon: User, label: 'Profile' },
+        { href: '/', icon: Home, label: t.common.home },
+        { href: '/wishlist', icon: Heart, label: t.common.wishlist },
+        { href: '/cart', icon: ShoppingBag, label: t.common.cart },
+        { href: '/profile', icon: User, label: t.common.profile },
     ];
 
     return (

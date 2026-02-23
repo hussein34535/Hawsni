@@ -5,8 +5,10 @@ import { ShoppingBag, Bell, Search, User, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useCartStore } from '@/store/cartStore';
 import CartDrawer from '@/components/cart/CartDrawer';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Navbar() {
+    const { t, language } = useLanguage();
     const itemCount = useCartStore((state) => state.getItemCount());
     const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -27,7 +29,7 @@ export default function Navbar() {
                         </div>
 
                         {/* Centered Title */}
-                        <Link href="/" className="text-[26px] font-black text-[var(--color-brand-primary)] tracking-[1.2px]">
+                        <Link href="/" className={`${language === 'ar' ? 'font-arabic' : 'font-black'} text-[26px] font-black text-[var(--color-brand-primary)] tracking-[1.2px]`}>
                             Hawsni
                         </Link>
 
@@ -52,21 +54,21 @@ export default function Navbar() {
                         {/* Nav Items centered */}
                         <div className="flex items-center gap-8">
                             <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors">
-                                <span className="font-bold text-[16px]">Home</span>
+                                <span className="font-bold text-[16px]">{t.common.home}</span>
                             </Link>
 
                             {/* Will implement wishlist later */}
                             <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors">
-                                <span className="font-normal text-[16px]">Wishlist</span>
+                                <span className="font-normal text-[16px]">{t.common.wishlist}</span>
                             </button>
 
                             <button
                                 onClick={() => setIsCartOpen(true)}
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors relative"
                             >
-                                <span className="font-normal text-[16px]">Cart</span>
+                                <span className="font-normal text-[16px]">{t.common.cart}</span>
                                 {itemCount > 0 && (
-                                    <span className="ml-2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
+                                    <span className="mx-2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
                                         {itemCount}
                                     </span>
                                 )}

@@ -15,11 +15,10 @@ import {
     Bell,
     Languages,
     DollarSign,
-    Package
 } from 'lucide-react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import axios from '@/lib/axios';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Mock auth state (In real app, this would come from a store/context)
 const useAuth = () => {
@@ -51,6 +50,7 @@ const useAuth = () => {
 
 export default function ProfilePage() {
     const { user, isGuest, loading } = useAuth();
+    const { t, language, setLanguage, isRTL } = useLanguage();
     const router = useRouter();
 
     if (loading) {
@@ -61,8 +61,12 @@ export default function ProfilePage() {
         );
     }
 
+    const toggleLanguage = () => {
+        setLanguage(language === 'en' ? 'ar' : 'en');
+    };
+
     if (isGuest) {
-        return <GuestProfileView />;
+        return <GuestProfileView t={t} toggleLanguage={toggleLanguage} language={language} isRTL={isRTL} />;
     }
 
     return (
@@ -71,7 +75,7 @@ export default function ProfilePage() {
             <div className="relative">
                 <div className="bg-[var(--color-brand-primary)] h-[240px] rounded-b-[32px] pt-12 px-6">
                     <div className="flex justify-between items-center text-white">
-                        <h1 className="text-2xl font-bold">My Profile</h1>
+                        <h1 className="text-2xl font-bold">{t.profile.title}</h1>
                         <button className="p-2">
                             <Settings size={22} />
                         </button>
@@ -106,30 +110,35 @@ export default function ProfilePage() {
 
             {/* Menu Items */}
             <div className="px-6 space-y-6">
-                <MenuSection title="Account">
-                    <MenuItem icon={User} title="Profile Details" href="/profile/details" />
-                    <MenuItem icon={Lock} title="Change Password" href="/profile/change-password" />
-                    <MenuItem icon={Bell} title="Notifications" href="/profile/notifications" />
+                <MenuSection title={t.profile.sections.account} isRTL={isRTL}>
+                    <MenuItem icon={User} title={t.profile.items.profile_details} href="/profile/details" />
+                    <MenuItem icon={Lock} title={t.profile.items.change_password} href="/profile/change-password" />
+                    <MenuItem icon={Bell} title={t.profile.items.notifications} href="/profile/notifications" />
                 </MenuSection>
 
-                <MenuSection title="App Settings">
-                    <MenuItem icon={Languages} title="Language" subtitle="English" />
-                    <MenuItem icon={DollarSign} title="Currency" subtitle="USD ($)" />
+                <MenuSection title={t.profile.sections.app_settings} isRTL={isRTL}>
+                    <MenuItem
+                        icon={Languages}
+                        title={t.profile.items.language}
+                        subtitle={language === 'en' ? 'English' : 'العربية'}
+                        onClick={toggleLanguage}
+                    />
+                    <MenuItem icon={DollarSign} title={t.profile.items.currency} subtitle={language === 'ar' ? 'ج.م' : 'EGP'} />
                 </MenuSection>
 
-                <MenuSection title="My Activity">
-                    <MenuItem icon={ShoppingBag} title="My Orders" href="/orders" />
-                    <MenuItem icon={Heart} title="Wishlist" href="/wishlist" />
-                    <MenuItem icon={MapPin} title="Addresses" href="/profile/addresses" />
-                    <MenuItem icon={Ticket} title="My Coupons" href="/profile/coupons" />
+                <MenuSection title={t.profile.sections.activity} isRTL={isRTL}>
+                    <MenuItem icon={ShoppingBag} title={t.profile.items.my_orders} href="/orders" />
+                    <MenuItem icon={Heart} title={t.profile.items.wishlist} href="/wishlist" />
+                    <MenuItem icon={MapPin} title={t.profile.items.addresses} href="/profile/addresses" />
+                    <MenuItem icon={Ticket} title={t.profile.items.coupons} href="/profile/coupons" />
                 </MenuSection>
 
-                <MenuSection>
-                    <button className="w-full flex items-center gap-4 p-4 text-red-500 font-bold">
+                <MenuSection isRTL={isRTL}>
+                    <button className="w-full flex items-center gap-4 p-4 text-red-500 font-bold group">
                         <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
                             <LogOut size={20} />
                         </div>
-                        <span>Logout</span>
+                        <span>{t.profile.items.logout}</span>
                     </button>
                 </MenuSection>
             </div>
@@ -137,41 +146,47 @@ export default function ProfilePage() {
     );
 }
 
-function GuestProfileView() {
+function GuestProfileView({ t, toggleLanguage, language, isRTL }: any) {
     return (
         <div className="min-h-screen bg-[var(--color-bg-secondary)] flex flex-col items-center justify-center px-6">
             <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-[var(--shadow-soft)] mb-8">
                 <User size={64} className="text-[var(--color-brand-primary)]" />
             </div>
 
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome, Guest</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t.profile.welcome_guest}</h1>
             <p className="text-gray-500 text-center mb-10 max-w-[280px]">
-                Log in to access your profile, track orders, and manage your wishlist.
+                {t.profile.guest_desc}
             </p>
 
             <Link href="/login" className="w-full h-14 bg-[var(--color-brand-primary)] text-white rounded-full flex items-center justify-center font-bold text-[16px] shadow-lg shadow-emerald-900/10 mb-4 tracking-wide">
-                Login / Signup
+                {t.profile.login_signup}
             </Link>
 
             <Link href="/track-order" className="w-full h-14 border-2 border-[var(--color-brand-primary)] text-[var(--color-brand-primary)] rounded-full flex items-center justify-center font-bold text-[16px] tracking-wide mb-12">
-                Track Order
+                {t.profile.track_order}
             </Link>
 
             <div className="w-full space-y-6">
-                <p className="font-bold text-gray-900 ml-4">App Settings</p>
+                <p className={`font-bold text-gray-900 ${isRTL ? 'mr-4' : 'ml-4'}`}>{t.profile.sections.app_settings}</p>
                 <div className="bg-white rounded-[24px] shadow-[var(--shadow-soft)] overflow-hidden">
-                    <MenuItem icon={Languages} title="Language" subtitle="English" showArrow={true} />
-                    <MenuItem icon={DollarSign} title="Currency" subtitle="EGP (E£)" showArrow={true} isLast />
+                    <MenuItem
+                        icon={Languages}
+                        title={t.profile.items.language}
+                        subtitle={language === 'en' ? 'English' : 'العربية'}
+                        showArrow={true}
+                        onClick={toggleLanguage}
+                    />
+                    <MenuItem icon={DollarSign} title={t.profile.items.currency} subtitle={language === 'ar' ? 'ج.م' : 'EGP'} showArrow={true} isLast />
                 </div>
             </div>
         </div>
     );
 }
 
-function MenuSection({ title, children }: { title?: string, children: React.ReactNode }) {
+function MenuSection({ title, children, isRTL }: { title?: string, children: React.ReactNode, isRTL?: boolean }) {
     return (
         <div className="space-y-3">
-            {title && <h3 className="text-[17px] font-bold text-gray-900 ml-1">{title}</h3>}
+            {title && <h3 className={`text-[17px] font-bold text-gray-900 ${isRTL ? 'mr-1' : 'ml-1'}`}>{title}</h3>}
             <div className="bg-white rounded-[24px] shadow-[var(--shadow-soft)] overflow-hidden">
                 {children}
             </div>
@@ -179,25 +194,35 @@ function MenuSection({ title, children }: { title?: string, children: React.Reac
     );
 }
 
-function MenuItem({ icon: Icon, title, subtitle, href, showArrow = true, isLast = false }: any) {
-    const content = (
+function MenuItem({ icon: Icon, title, subtitle, href, onClick, showArrow = true, isLast = false }: any) {
+    const { isRTL } = useLanguage();
+
+    const Body = (
         <div className={`flex items-center justify-between p-4 ${!isLast ? 'border-b border-gray-50' : ''}`}>
             <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-[var(--color-brand-primary)]">
                     <Icon size={20} />
                 </div>
-                <div>
+                <div className="text-left rtl:text-right">
                     <p className="font-bold text-gray-900">{title}</p>
                     {subtitle && <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>}
                 </div>
             </div>
-            {showArrow && <ChevronRight size={16} className="text-gray-300" />}
+            {showArrow && (
+                <div className={isRTL ? 'rotate-180' : ''}>
+                    <ChevronRight size={16} className="text-gray-300" />
+                </div>
+            )}
         </div>
     );
 
     if (href) {
-        return <Link href={href}>{content}</Link>;
+        return <Link href={href} className="w-full block">{Body}</Link>;
     }
 
-    return <button className="w-full text-left">{content}</button>;
+    return (
+        <button onClick={onClick} className="w-full">
+            {Body}
+        </button>
+    );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Search, X, SlidersHorizontal, History, SearchX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,8 +8,23 @@ import ProductCard from '@/components/products/ProductCard';
 import axios from '@/lib/axios';
 import { Category, Product } from '@/types';
 
+import { useLanguage } from '@/context/LanguageContext';
+
 export default function SearchPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-secondary)]">
+                <div className="w-10 h-10 border-4 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
+            </div>
+        }>
+            <SearchContent />
+        </Suspense>
+    );
+}
+
+function SearchContent() {
     const router = useRouter();
+    const { t, language, isRTL } = useLanguage();
     const searchParams = useSearchParams();
     const initialQuery = searchParams.get('q') || '';
 
@@ -110,22 +125,22 @@ export default function SearchPage() {
         <div className="min-h-screen bg-[var(--color-bg-secondary)]">
             {/* Header (AppBar equivalent) */}
             <header className="sticky top-0 z-50 bg-white border-b border-gray-100 flex items-center px-4 h-16 gap-3">
-                <button onClick={() => router.back()} className="p-2 -ml-2 text-gray-900">
+                <button onClick={() => router.back()} className={`p-2 ${isRTL ? '-mr-2' : '-ml-2'} text-gray-900 ${isRTL ? 'rotate-180' : ''}`}>
                     <ArrowLeft size={24} />
                 </button>
 
-                <div className="flex-1 h-10 bg-gray-100 rounded-full flex items-center px-4 relative">
+                <div className="flex-1 h-10 bg-gray-100 rounded-full flex-row flex items-center px-4 relative">
                     <input
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        placeholder="Search Products..."
+                        placeholder={t.search.placeholder}
                         className="bg-transparent border-none outline-none w-full text-[15px] font-medium text-gray-900"
                         autoFocus
                     />
                     {query && (
-                        <button onClick={() => setQuery('')} className="ml-2 text-gray-500">
+                        <button onClick={() => setQuery('')} className={`${isRTL ? 'mr-2' : 'ml-2'} text-gray-500`}>
                             <X size={18} />
                         </button>
                     )}
@@ -150,19 +165,19 @@ export default function SearchPage() {
                             className="bg-white border-b border-gray-100 overflow-hidden"
                         >
                             <div className="p-4 space-y-6">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-lg font-bold">Filters</h3>
+                                <div className="flex justify-between items-center text-left rtl:text-right">
+                                    <h3 className="text-lg font-bold">{t.search.filters}</h3>
                                     <button onClick={clearFilters} className="text-[var(--color-brand-primary)] font-bold text-sm">
-                                        Clear All
+                                        {t.common.clear}
                                     </button>
                                 </div>
 
                                 {/* Category Filter */}
                                 <div>
-                                    <p className="font-semibold mb-3">Category</p>
+                                    <p className="font-semibold mb-3">{t.search.category}</p>
                                     <div className="flex flex-wrap gap-2">
                                         <FilterChip
-                                            label="All"
+                                            label={language === 'ar' ? 'الكل' : 'All'}
                                             isSelected={selectedCategory === null}
                                             onClick={() => setSelectedCategory(null)}
                                         />
@@ -179,7 +194,7 @@ export default function SearchPage() {
 
                                 {/* Price Filter */}
                                 <div>
-                                    <p className="font-semibold mb-3">Price Range</p>
+                                    <p className="font-semibold mb-3">{t.search.price_range}</p>
                                     <div className="space-y-4 px-2">
                                         <input
                                             type="range"
@@ -191,21 +206,21 @@ export default function SearchPage() {
                                             className="w-full accent-[var(--color-brand-primary)]"
                                         />
                                         <div className="flex justify-between text-xs font-bold text-gray-500">
-                                            <span>0 EGP</span>
-                                            <span>{maxPrice} EGP</span>
+                                            <span>0 {language === 'ar' ? 'ج.م' : 'EGP'}</span>
+                                            <span>{maxPrice} {language === 'ar' ? 'ج.م' : 'EGP'}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Sort Filter */}
                                 <div>
-                                    <p className="font-semibold mb-3">Sort By</p>
+                                    <p className="font-semibold mb-3">{t.search.sort_by}</p>
                                     <div className="flex flex-wrap gap-2">
                                         {[
-                                            { id: 'newest', label: 'Newest' },
-                                            { id: 'price_asc', label: 'Price: Low to High' },
-                                            { id: 'price_desc', label: 'Price: High to Low' },
-                                            { id: 'rating', label: 'Top Rated' }
+                                            { id: 'newest', label: t.search.sort_newest },
+                                            { id: 'price_asc', label: t.search.sort_price_asc },
+                                            { id: 'price_desc', label: t.search.sort_price_desc },
+                                            { id: 'rating', label: t.search.sort_rating }
                                         ].map((item) => (
                                             <FilterChip
                                                 key={item.id}
@@ -224,7 +239,7 @@ export default function SearchPage() {
                                     }}
                                     className="w-full py-3 bg-[var(--color-brand-primary)] text-white rounded-full font-bold shadow-lg shadow-emerald-900/10"
                                 >
-                                    Apply Filters
+                                    {t.common.apply}
                                 </button>
                             </div>
                         </motion.div>
@@ -255,7 +270,7 @@ export default function SearchPage() {
                         <div className="">
                             {searchHistory.length > 0 ? (
                                 <div className="space-y-4">
-                                    <h4 className="font-bold text-gray-500 text-sm">Recent Searches</h4>
+                                    <h4 className="font-bold text-gray-500 text-sm text-left rtl:text-right">{t.search.history}</h4>
                                     <div className="flex flex-col">
                                         {searchHistory.map((item, i) => (
                                             <div
@@ -270,7 +285,7 @@ export default function SearchPage() {
                                                     <History size={18} className="text-gray-400" />
                                                     <span className="text-gray-900 font-medium">{item}</span>
                                                 </div>
-                                                <button onClick={(e) => removeHistoryItem(e, item)} className="p-1 text-gray-400">
+                                                <button onClick={(e) => removeHistoryItem(e, item)} className={`p-1 text-gray-400 ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
                                                     <X size={16} />
                                                 </button>
                                             </div>
@@ -280,7 +295,7 @@ export default function SearchPage() {
                             ) : (
                                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                                     <Search size={64} strokeWidth={1} className="mb-4" />
-                                    <p className="font-medium">Discover what you're looking for</p>
+                                    <p className="font-medium text-center">{t.search.placeholder}</p>
                                 </div>
                             )}
                         </div>
@@ -288,7 +303,7 @@ export default function SearchPage() {
                         /* Empty State */
                         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                             <SearchX size={64} strokeWidth={1} className="mb-4" />
-                            <p className="font-medium">No results found for "{query}"</p>
+                            <p className="font-medium text-center">{t.search.no_results} "{query}"</p>
                         </div>
                     )}
                 </div>
@@ -297,13 +312,15 @@ export default function SearchPage() {
     );
 }
 
+
+
 function FilterChip({ label, isSelected, onClick }: { label: string, isSelected: boolean, onClick: () => void }) {
     return (
         <button
             onClick={onClick}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${isSelected
-                    ? 'bg-[var(--color-brand-primary)] text-white'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                ? 'bg-[var(--color-brand-primary)] text-white'
+                : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                 }`}
         >
             {label}
