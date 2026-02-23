@@ -85,8 +85,8 @@ class _HeroCarouselState extends State<HeroCarousel> {
               final imageUrl = banner['image_url'] as String?;
               final headingText = banner['heading_text'] as String?;
               final subheadingText = banner['subheading_text'] as String?;
-              final buttonText = banner['button_text'] as String? ??
-                  AppLocalizations.of(context)!.shopNow;
+              final buttonText = (banner['button_text'] as String?) ??
+                  (AppLocalizations.of(context)?.shopNow ?? 'Shop Now');
               final buttonLink = banner['button_link'] as String?;
               final buttonOpacity =
                   (banner['button_opacity'] as num?)?.toDouble() ?? 1.0;

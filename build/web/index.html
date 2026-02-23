@@ -40,7 +40,7 @@
       navigator.serviceWorker.register = function (script, options) {
         console.log('🚫 ServiceWorker registration blocked for speed & reliability');
         const scriptStr = (script instanceof URL) ? script.href : String(script);
-        return Promise.resolve({
+        const registrationMock = {
           active: {
             scriptURL: scriptStr,
             state: 'activated',
@@ -50,12 +50,19 @@
           },
           installing: null,
           waiting: null,
+          scope: '/',
+          update: () => Promise.resolve(registrationMock),
           unregister: () => Promise.resolve(true),
+          showNotification: () => Promise.resolve(),
+          getNotifications: () => Promise.resolve([]),
           addEventListener: () => { },
           removeEventListener: () => { },
           dispatchEvent: () => true
-        });
+        };
+        return Promise.resolve(registrationMock);
       };
+      navigator.serviceWorker.getRegistration = () => Promise.resolve(null);
+      navigator.serviceWorker.ready = new Promise(() => { }); // Never settles to prevent ready-loops
     }
     if ('caches' in window) {
       caches.keys().then(function (names) {

@@ -21,7 +21,8 @@ class CartService {
             id: item['id'].toString(), // Cart Item ID
             name: product['name'],
             price: product['price'].toString(),
-            imageUrl: (product['images'] as List).isNotEmpty
+            imageUrl: (product['images'] != null &&
+                    (product['images'] as List).isNotEmpty)
                 ? product['images'][0]
                 : '',
             quantity: item['quantity'],
@@ -55,7 +56,8 @@ class CartService {
             productId: productId,
             name: product['name'],
             price: product['price'].toString(),
-            imageUrl: (product['images'] as List).isNotEmpty
+            imageUrl: (product['images'] != null &&
+                    (product['images'] as List).isNotEmpty)
                 ? product['images'][0]
                 : '',
             quantity: quantity,
@@ -86,7 +88,8 @@ class CartService {
             id: item['id'].toString(),
             name: product['name'],
             price: product['price'].toString(),
-            imageUrl: (product['images'] as List).isNotEmpty
+            imageUrl: (product['images'] != null &&
+                    (product['images'] as List).isNotEmpty)
                 ? product['images'][0]
                 : '',
             quantity: item['quantity'],
@@ -120,7 +123,8 @@ class CartService {
             id: item['id'].toString(),
             name: product['name'],
             price: product['price'].toString(),
-            imageUrl: (product['images'] as List).isNotEmpty
+            imageUrl: (product['images'] != null &&
+                    (product['images'] as List).isNotEmpty)
                 ? product['images'][0]
                 : '',
             quantity: item['quantity'],
@@ -152,7 +156,8 @@ class CartService {
             id: item['id'].toString(),
             name: product['name'],
             price: product['price'].toString(),
-            imageUrl: (product['images'] as List).isNotEmpty
+            imageUrl: (product['images'] != null &&
+                    (product['images'] as List).isNotEmpty)
                 ? product['images'][0]
                 : '',
             quantity: item['quantity'],

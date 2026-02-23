@@ -55,7 +55,9 @@ class _MainScreenState extends State<MainScreen> {
       );
     }
 
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -182,7 +184,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildDesktopHeader(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return const SizedBox.shrink();
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
