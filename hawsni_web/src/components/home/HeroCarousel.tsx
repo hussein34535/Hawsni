@@ -21,7 +21,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
 
     if (isLoading || banners.length === 0) {
         return (
-            <div className="relative w-full aspect-[21/9] min-h-[300px] md:min-h-[450px] overflow-hidden rounded-[2rem] bg-gray-200 animate-pulse" />
+            <div className="relative w-full h-[160px] md:h-[280px] lg:h-[400px] overflow-hidden rounded-2xl bg-gray-200 animate-pulse" />
         );
     }
 
@@ -33,7 +33,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
     const bannerBtnText = banner.buttonText || 'Shop Now';
 
     return (
-        <div className="relative w-full aspect-[21/9] min-h-[300px] md:min-h-[450px] overflow-hidden rounded-[2rem] shadow-2xl shadow-black/5 bg-gray-100">
+        <div className="relative w-full h-[160px] md:h-[280px] lg:h-[400px] overflow-hidden rounded-2xl bg-gray-100">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={banner.id}
@@ -50,16 +50,16 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                         className="w-full h-full object-cover"
                     />
 
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    {/* Subtle bottom-weighted gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
 
-                    {/* Content */}
-                    <div className="absolute inset-0 p-8 md:p-16 flex flex-col justify-end items-start text-white">
+                    {/* Content - Magazine style (bottom-left) */}
+                    <div className="absolute inset-0 p-8 flex flex-col justify-end items-start text-white">
                         <motion.span
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="text-xs md:text-sm font-bold tracking-[0.2em] uppercase mb-4 text-white/80"
+                            className="text-[10px] md:text-[14px] font-semibold tracking-[1.5px] md:tracking-[2px] uppercase mb-2 md:mb-3 text-white"
                         >
                             {bannerHeading}
                         </motion.span>
@@ -68,7 +68,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}
-                            className="text-3xl md:text-6xl font-black mb-8 max-w-2xl leading-[1.1]"
+                            className="text-[28px] md:text-[42px] font-black mb-5 md:mb-8 leading-[1.1] tracking-[-0.5px] max-w-2xl"
                         >
                             {bannerSubheading}
                         </motion.h2>
@@ -79,21 +79,20 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                             transition={{ delay: 0.7 }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="px-8 py-4 bg-[var(--color-brand-primary)] text-white rounded-full font-bold flex items-center gap-3 shadow-xl shadow-emerald-950/20"
+                            className="px-8 py-4 md:px-8 md:py-4 bg-[var(--color-brand-primary)] text-white rounded-[30px] font-bold text-[14px] tracking-[0.5px] shadow-none"
                         >
-                            <span>{bannerBtnText}</span>
-                            <ArrowRight size={20} />
+                            {bannerBtnText}
                         </motion.button>
                     </div>
                 </motion.div>
             </AnimatePresence>
 
-            {/* Indicators */}
-            <div className="absolute bottom-8 left-8 md:left-16 flex gap-3">
+            {/* Page Indicator */}
+            <div className="absolute bottom-6 left-8 flex gap-2">
                 {banners.map((_, i) => (
                     <div
                         key={i}
-                        className={`h-1.5 transition-all duration-500 rounded-full ${i === index ? 'w-8 bg-white' : 'w-1.5 bg-white/40'}`}
+                        className={`h-[6px] transition-all duration-300 rounded-full ${i === index ? 'w-6 bg-white' : 'w-[6px] bg-white/50'}`}
                     />
                 ))}
             </div>

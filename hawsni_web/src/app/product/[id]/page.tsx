@@ -16,7 +16,6 @@ import {
     Sparkles,
     Info
 } from 'lucide-react';
-import Navbar from '@/components/layout/Navbar';
 import { useCartStore } from '@/store/cartStore';
 import { productService } from '@/services/productService';
 import { Product } from '@/types';
@@ -86,8 +85,7 @@ export default function ProductPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-white">
-                <Navbar />
+            <div className="w-full bg-white">
                 <div className="max-w-7xl mx-auto pt-32 px-4 flex justify-center items-center h-[60vh]">
                     <div className="h-12 w-12 border-4 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
                 </div>
@@ -97,8 +95,7 @@ export default function ProductPage() {
 
     if (!product) {
         return (
-            <div className="min-h-screen bg-white">
-                <Navbar />
+            <div className="w-full bg-white">
                 <div className="max-w-7xl mx-auto pt-32 px-4 text-center">
                     <h2 className="text-2xl font-bold">Product not found</h2>
                     <button onClick={() => router.back()} className="mt-4 text-[var(--color-brand-primary)] font-bold">Go Back</button>
@@ -109,8 +106,7 @@ export default function ProductPage() {
 
 
     return (
-        <div className="min-h-screen bg-white">
-            <Navbar />
+        <div className="w-full bg-white">
 
             {/* Mobile Back Button & Actions */}
             <div className="fixed top-0 left-0 right-0 z-[60] p-4 flex justify-between items-center md:hidden">

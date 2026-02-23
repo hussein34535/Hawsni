@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   },
 };
 
+import Navbar from "@/components/layout/Navbar";
+import BottomNav from "@/components/layout/BottomNav";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,11 +26,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cairo.variable} font-sans min-h-screen flex flex-col`}>
-        {/* Navigation Bar will go here */}
-        <main className="flex-1">
+      <body className={`${cairo.variable} font-sans min-h-screen flex flex-col bg-[var(--color-bg-secondary)] pb-20 md:pb-0`}>
+        <Navbar />
+        <main className="flex-1 max-w-7xl mx-auto w-full pt-20">
           {children}
         </main>
+        <BottomNav />
       </body>
     </html>
   );

@@ -3,18 +3,39 @@
 @theme {
   --font-sans: var(--font-cairo), sans-serif;
 
+  /* Colors */
   --color-brand-primary: #1B4D3E;
-  /* Hawsni Green */
-  --color-brand-secondary: #0A261D;
+  /* Emerald Green */
   --color-brand-accent: #D4AF37;
-  /* Premium Gold */
+  /* Gold */
 
   --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F8F9FA;
+  /* surfaceColor */
+  --color-bg-secondary: #FAFAFA;
+  /* scaffoldBackgroundColor */
+  --color-bg-tertiary: #F5F5F5;
+  /* secondaryColor */
 
-  --color-text-primary: #111827;
-  --color-text-secondary: #4B5563;
-  --color-text-tertiary: #9CA3AF;
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #757575;
+  --color-text-tertiary: #BDBDBD;
+
+  --color-border-light: #EEEEEE;
+  /* borderColor / dividerColor */
+
+  --color-error: #CF6679;
+  --color-success: #03DAC6;
+
+  /* Shadows */
+  --shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.12);
+  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+  /* Border Radius */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
 }
 
 @layer base {

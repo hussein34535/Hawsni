@@ -5,7 +5,6 @@ import { ShoppingBag, ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
-import Navbar from '@/components/layout/Navbar';
 import CartItemCard from '@/components/cart/CartItemCard';
 
 export default function CartPage() {
@@ -14,10 +13,8 @@ export default function CartPage() {
     const total = getTotal();
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg-secondary)]">
-            <Navbar />
-
-            <main className="max-w-7xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 pb-32">
+        <div className="w-full">
+            <div className="px-4 sm:px-6 lg:px-8 pb-32">
                 <div className="flex items-center gap-4 mb-8">
                     <button onClick={() => router.back()} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-900">
                         <ArrowLeft size={20} />
@@ -92,7 +89,7 @@ export default function CartPage() {
                         </div>
                     )}
                 </div>
-            </main>
+            </div>
         </div>
     );
 }

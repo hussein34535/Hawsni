@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
-import Navbar from '@/components/layout/Navbar';
 
 type CheckoutStep = 'address' | 'shipping' | 'payment';
 
@@ -68,10 +67,8 @@ export default function CheckoutPage() {
     if (items.length === 0 && !isProcessing) return null;
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg-secondary)]">
-            <Navbar />
-
-            <main className="max-w-7xl mx-auto pt-24 px-4 sm:px-6 lg:px-8 pb-32">
+        <div className="w-full">
+            <div className="px-4 sm:px-6 lg:px-8 pb-32">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                     {/* Main Content */}
@@ -197,7 +194,7 @@ export default function CheckoutPage() {
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     );
 }

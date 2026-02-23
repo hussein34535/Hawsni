@@ -19,9 +19,9 @@ export default function ProductCard({ id, name, price, imageUrl, colors = [], ra
     const [isFavorite, setIsFavorite] = useState(false);
 
     return (
-        <div className="group flex flex-col gap-3">
+        <div className="group flex flex-col cursor-pointer" onClick={() => window.location.href = `/product/${id}`}>
             {/* Image Container */}
-            <div className="relative aspect-square bg-[#F5F5F5] rounded-3xl overflow-hidden cursor-pointer">
+            <div className="relative aspect-square bg-[#F5F5F5] rounded-2xl overflow-hidden mb-2">
                 <AnimatePresence mode="wait">
                     <motion.img
                         key={selectedImage}
@@ -35,55 +35,58 @@ export default function ProductCard({ id, name, price, imageUrl, colors = [], ra
                     />
                 </AnimatePresence>
 
-                {/* Favorite Button */}
+                {/* Favorite Button Overlay (Like Flutter) */}
                 <button
                     onClick={(e) => { e.stopPropagation(); setIsFavorite(!isFavorite); }}
-                    className="absolute top-4 right-4 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg shadow-black/5 hover:bg-white transition-colors"
+                    className="absolute top-2 right-2 w-[28px] h-[28px] bg-white/90 rounded-full flex items-center justify-center shadow-[0_0_4px_rgba(0,0,0,0.1)] hover:scale-110 transition-transform"
                 >
                     <Heart
-                        size={18}
-                        className={`transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
+                        size={16}
+                        className={isFavorite ? 'fill-[var(--color-brand-primary)] text-[var(--color-brand-primary)]' : 'text-gray-400'}
                     />
                 </button>
 
-                {/* Badges Placeholder */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                    {rating > 4.5 && (
-                        <div className="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full flex items-center gap-1 shadow-sm">
-                            <Star size={12} className="fill-amber-400 text-amber-400" />
-                            <span className="text-[10px] font-bold text-gray-800">{rating}</span>
-                        </div>
-                    )}
-                </div>
             </div>
 
-            {/* Info Section */}
-            <div className="flex flex-col gap-1.5 px-1 pb-4">
-                <h4 className="text-[15px] font-bold text-gray-900 truncate tracking-tight">{name}</h4>
+            {/* Details Section */}
+            <div className="flex flex-col px-2 pb-2">
+                {/* 1. Product Name */}
+                <h4 className="text-[14px] font-bold text-[#1A1A1A] truncate leading-[1.2] mb-1">
+                    {name}
+                </h4>
 
-                {/* Colors Row */}
+                {/* 2. Interactive Colors */}
                 {colors.length > 0 && (
-                    <div className="flex gap-2.5 my-1">
-                        {colors.map((c, i) => (
-                            <button
-                                key={i}
-                                onClick={() => {
-                                    setSelectedColor(c.color);
-                                    if (c.image) setSelectedImage(c.image);
-                                }}
-                                style={{ backgroundColor: c.color }}
-                                className={`w-4 h-4 rounded-full border-2 transition-all ${selectedColor === c.color ? 'border-[var(--color-brand-primary)] scale-125' : 'border-white shadow-sm'
-                                    }`}
-                            />
-                        ))}
+                    <div className="flex mb-1">
+                        {colors.slice(0, 5).map((c, i) => {
+                            const isSelected = selectedColor === c.color;
+                            return (
+                                <button
+                                    key={i}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedColor(c.color);
+                                        if (c.image) setSelectedImage(c.image);
+                                    }}
+                                    style={{ backgroundColor: c.color }}
+                                    className={`w-[14px] h-[14px] rounded-full mr-[6px] transition-all border ${isSelected
+                                        ? 'border-[var(--color-brand-primary)] border-[1.5px] shadow-[0_0_4px_rgba(27,77,62,0.3)]'
+                                        : 'border-gray-300 border-[0.5px]'
+                                        }`}
+                                />
+                            );
+                        })}
                     </div>
                 )}
 
-                <div className="flex items-baseline gap-1.5">
-                    <span className="text-lg font-black text-[var(--color-brand-primary)]">
+                {/* 3. Price */}
+                <div className="flex items-end gap-1">
+                    <span className="text-[15px] font-bold text-[var(--color-brand-primary)] leading-none">
                         {price.toLocaleString()}
                     </span>
-                    <span className="text-xs font-bold text-[var(--color-brand-primary)] opacity-60">EGP</span>
+                    <span className="text-[10px] font-semibold text-[var(--color-brand-primary)] leading-none mb-[2px]">
+                        EGP
+                    </span>
                 </div>
             </div>
         </div>

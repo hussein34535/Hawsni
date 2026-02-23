@@ -9,45 +9,37 @@ interface CategoryListProps {
 export default function CategoryList({ categories, isLoading }: CategoryListProps) {
     if (isLoading) {
         return (
-            <section className="py-8">
-                <div className="flex gap-6 overflow-x-auto px-4 pb-4 no-scrollbar">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="flex flex-col items-center gap-3 min-w-[80px] animate-pulse">
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-200 rounded-full" />
-                            <div className="w-12 h-3 bg-gray-200 rounded" />
-                        </div>
-                    ))}
-                </div>
-            </section>
+            <div className="h-[120px] w-full flex items-center justify-center">
+                <div className="h-8 w-8 border-4 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
+            </div>
         );
     }
 
     return (
-        <section className="py-8">
-            <div className="flex items-center gap-3 px-4 mb-6">
-                <h3 className="text-xl font-bold text-gray-900 tracking-tight">Shop by Category</h3>
-                <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center">
-                    <span className="text-amber-500 text-xs">✨</span>
-                </div>
-            </div>
-
-            <div className="flex gap-6 overflow-x-auto px-4 pb-4 no-scrollbar">
-                {categories.map((cat) => (
+        <div className="h-[120px] w-full mt-4 mb-4">
+            <div className="flex overflow-x-auto h-full scrollbar-none items-center">
+                {categories.map((cat, index) => (
                     <motion.div
                         key={cat._id}
-                        whileHover={{ y: -5 }}
-                        className="flex flex-col items-center gap-3 min-w-[80px]"
+                        whileHover={{ y: -2 }}
+                        className={`w-[100px] bg-white rounded-xl flex flex-col items-center justify-center cursor-pointer flex-shrink-0 mr-3 h-[100px] ${index === 0 ? 'ml-4' : ''}`}
+                        style={{
+                            boxShadow: '0 2px 8px rgba(156, 163, 175, 0.1)'
+                        }}
                     >
-                        <div className="relative p-[3px] rounded-full bg-gradient-to-tr from-[var(--color-brand-primary)] to-[var(--color-brand-accent)] shadow-lg shadow-emerald-900/10 transition-transform active:scale-95 cursor-pointer">
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center overflow-hidden p-3 underline-offset-4">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={cat.image} alt={cat.name} className="w-full h-full object-contain" />
-                            </div>
+                        {/* Image Container */}
+                        <div className="p-3 bg-blue-50 rounded-full mb-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={cat.image} alt={cat.name} className="w-10 h-10 object-cover rounded-full" />
                         </div>
-                        <span className="text-xs md:text-sm font-semibold text-gray-700">{cat.name}</span>
+
+                        {/* Category Name */}
+                        <span className="text-[14px] font-medium text-gray-900 text-center px-1 truncate w-full">
+                            {cat.name}
+                        </span>
                     </motion.div>
                 ))}
             </div>
-        </section>
+        </div>
     );
 }
