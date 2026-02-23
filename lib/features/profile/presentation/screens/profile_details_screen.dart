@@ -204,7 +204,8 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     const SizedBox(height: 40),
                     _buildTextField(
                       controller: _nameController,
-                      label: AppLocalizations.of(context)!.fullName,
+                      label:
+                          AppLocalizations.of(context)?.fullName ?? 'Full Name',
                       icon: Icons.person_outline,
                       enabled: _isEditing,
                       validator: (value) =>
@@ -213,14 +214,16 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     const SizedBox(height: 20),
                     _buildTextField(
                       controller: _emailController,
-                      label: AppLocalizations.of(context)!.emailAddressLabel,
+                      label: AppLocalizations.of(context)?.emailAddressLabel ??
+                          'Email Address',
                       icon: Icons.email_outlined,
                       enabled: false,
                     ),
                     const SizedBox(height: 20),
                     _buildTextField(
                       controller: _phoneController,
-                      label: AppLocalizations.of(context)!.phoneNumber,
+                      label: AppLocalizations.of(context)?.phoneNumber ??
+                          'Phone Number',
                       icon: Icons.phone_outlined,
                       enabled: _isEditing,
                       keyboardType: TextInputType.phone,
@@ -231,7 +234,8 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     const SizedBox(height: 20),
                     _buildTextField(
                       controller: _dateOfBirthController,
-                      label: AppLocalizations.of(context)!.dateOfBirth,
+                      label: AppLocalizations.of(context)?.dateOfBirth ??
+                          'Date of Birth',
                       icon: Icons.calendar_today_outlined,
                       enabled: _isEditing,
                       readOnly: true,

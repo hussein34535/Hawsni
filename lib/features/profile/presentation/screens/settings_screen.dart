@@ -48,7 +48,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsIsland([
                 _buildSwitchTile(
                   icon: Icons.notifications_outlined,
-                  title: AppLocalizations.of(context)!.enableNotifications,
+                  title: AppLocalizations.of(context)?.enableNotifications ??
+                      'Enable Notifications',
                   value: _notificationsEnabled,
                   onChanged: (val) =>
                       setState(() => _notificationsEnabled = val),
@@ -56,14 +57,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildDivider(),
                 _buildSwitchTile(
                   icon: Icons.email_outlined,
-                  title: AppLocalizations.of(context)!.emailNotifications,
+                  title: AppLocalizations.of(context)?.emailNotifications ??
+                      'Email Notifications',
                   value: _emailNotifications,
                   onChanged: (val) => setState(() => _emailNotifications = val),
                 ),
                 _buildDivider(),
                 _buildSwitchTile(
                   icon: Icons.message_outlined,
-                  title: AppLocalizations.of(context)!.pushNotifications,
+                  title: AppLocalizations.of(context)?.pushNotifications ??
+                      'Push Notifications',
                   value: _pushNotifications,
                   onChanged: (val) => setState(() => _pushNotifications = val),
                 ),
@@ -73,7 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsIsland([
                 _buildListTile(
                   icon: Icons.language,
-                  title: AppLocalizations.of(context)!.language,
+                  title: AppLocalizations.of(context)?.language ?? 'Language',
                   subtitle:
                       settingsProvider.language == 'en' ? 'English' : 'العربية',
                   onTap: () => _showLanguageDialog(context, settingsProvider),
@@ -81,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildDivider(),
                 _buildListTile(
                   icon: Icons.attach_money,
-                  title: AppLocalizations.of(context)!.currency,
+                  title: AppLocalizations.of(context)?.currency ?? 'Currency',
                   subtitle: _getCurrencyName(settingsProvider.currency),
                   onTap: () => _showCurrencyDialog(context, settingsProvider),
                 ),
@@ -91,7 +94,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsIsland([
                 _buildListTile(
                   icon: Icons.lock_outline,
-                  title: AppLocalizations.of(context)!.changePassword,
+                  title: AppLocalizations.of(context)?.changePassword ??
+                      'Change Password',
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -103,7 +107,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildDivider(),
                 _buildListTile(
                   icon: Icons.location_on_outlined,
-                  title: AppLocalizations.of(context)!.shippingAddress,
+                  title: AppLocalizations.of(context)?.shippingAddress ??
+                      'Shipping Address',
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -118,7 +123,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsIsland([
                 _buildListTile(
                   icon: Icons.info_outline,
-                  title: AppLocalizations.of(context)!.aboutApp,
+                  title: AppLocalizations.of(context)?.aboutApp ?? 'About App',
                   onTap: () {
                     showAboutDialog(
                       context: context,
@@ -137,7 +142,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildDivider(),
                 _buildListTile(
                   icon: Icons.privacy_tip_outlined,
-                  title: AppLocalizations.of(context)!.privacyPolicy,
+                  title: AppLocalizations.of(context)?.privacyPolicy ??
+                      'Privacy Policy',
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(

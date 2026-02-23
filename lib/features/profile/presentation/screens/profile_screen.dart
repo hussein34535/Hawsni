@@ -57,7 +57,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null)
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     if (ResponsiveLayout.isDesktop(context)) {
       return _buildDesktopLayout(context, l10n);
@@ -466,7 +468,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _handleLogout(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -570,7 +573,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showLanguageDialog(
       BuildContext context, SettingsProvider settingsProvider) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -602,7 +606,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showCurrencyDialog(
       BuildContext context, SettingsProvider settingsProvider) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
+    if (l10n == null) return;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

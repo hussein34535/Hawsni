@@ -43,21 +43,24 @@ class _NotificationsSettingsScreenState
             children: [
               _buildSwitchTile(
                 icon: Icons.notifications_active_outlined,
-                title: AppLocalizations.of(context)!.enableNotifications,
+                title: AppLocalizations.of(context)?.enableNotifications ??
+                    'Enable Notifications',
                 value: _notificationsEnabled,
                 onChanged: (val) => setState(() => _notificationsEnabled = val),
               ),
               _buildDivider(),
               _buildSwitchTile(
                 icon: Icons.email_outlined,
-                title: AppLocalizations.of(context)!.emailNotifications,
+                title: AppLocalizations.of(context)?.emailNotifications ??
+                    'Email Notifications',
                 value: _emailNotifications,
                 onChanged: (val) => setState(() => _emailNotifications = val),
               ),
               _buildDivider(),
               _buildSwitchTile(
                 icon: Icons.message_outlined,
-                title: AppLocalizations.of(context)!.pushNotifications,
+                title: AppLocalizations.of(context)?.pushNotifications ??
+                    'Push Notifications',
                 value: _pushNotifications,
                 onChanged: (val) => setState(() => _pushNotifications = val),
               ),

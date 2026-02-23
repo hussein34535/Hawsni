@@ -46,7 +46,7 @@ class ReviewsSection extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(AppLocalizations.of(context)!.reviews,
+                Text(AppLocalizations.of(context)?.reviews ?? 'Reviews',
                     style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -63,12 +63,15 @@ class ReviewsSection extends StatelessWidget {
                       onPressed: () => _showAddReviewDialog(context),
                       icon: const Icon(Icons.edit,
                           size: 16, color: AppTheme.primaryColor),
-                      label: Text(AppLocalizations.of(context)!.writeReview,
+                      label: Text(
+                          AppLocalizations.of(context)?.writeReview ??
+                              'Write Review',
                           style: const TextStyle(color: AppTheme.primaryColor)),
                     )
                   else
                     Text(
-                      AppLocalizations.of(context)!.youSuccessfullyReviewed,
+                      AppLocalizations.of(context)?.youSuccessfullyReviewed ??
+                          'تتم مراجعتك بنجاح',
                       style: const TextStyle(
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.w500,
@@ -79,7 +82,9 @@ class ReviewsSection extends StatelessWidget {
                     onPressed: () => _showAddReviewDialog(context),
                     icon: const Icon(Icons.edit,
                         size: 16, color: AppTheme.primaryColor),
-                    label: Text(AppLocalizations.of(context)!.writeReview,
+                    label: Text(
+                        AppLocalizations.of(context)?.writeReview ??
+                            'Write Review',
                         style: const TextStyle(color: AppTheme.primaryColor)),
                   ),
                 ],
@@ -95,7 +100,9 @@ class ReviewsSection extends StatelessWidget {
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: Text(AppLocalizations.of(context)!.noReviewsYet,
+                    child: Text(
+                        AppLocalizations.of(context)?.noReviewsYet ??
+                            'لا توجد مراجعات بعد',
                         style: const TextStyle(color: AppTheme.textSecondary)),
                   ),
                 )
@@ -181,19 +188,21 @@ class ReviewsSection extends StatelessWidget {
                                     showDialog(
                                       context: context,
                                       builder: (context) => AlertDialog(
-                                        title: Text(
-                                            AppLocalizations.of(context)!
-                                                .deleteReview),
+                                        title: Text(AppLocalizations.of(context)
+                                                ?.deleteReview ??
+                                            'Delete Review'),
                                         content: Text(
-                                            AppLocalizations.of(context)!
-                                                .areYouSureDeleteReview),
+                                            AppLocalizations.of(context)
+                                                    ?.areYouSureDeleteReview ??
+                                                'هل أنت متأكد من الحذف؟'),
                                         actions: [
                                           TextButton(
                                             onPressed: () =>
                                                 Navigator.pop(context),
                                             child: Text(
-                                                AppLocalizations.of(context)!
-                                                    .cancel),
+                                                AppLocalizations.of(context)
+                                                        ?.cancel ??
+                                                    'Cancel'),
                                           ),
                                           TextButton(
                                             onPressed: () {
@@ -204,8 +213,9 @@ class ReviewsSection extends StatelessWidget {
                                                       productId: productId));
                                             },
                                             child: Text(
-                                                AppLocalizations.of(context)!
-                                                    .delete,
+                                                AppLocalizations.of(context)
+                                                        ?.delete ??
+                                                    'Delete',
                                                 style: const TextStyle(
                                                     color: Colors.red)),
                                           ),
@@ -253,7 +263,8 @@ class ReviewsSection extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.all(16.0),
                                     child: Text(
-                                        AppLocalizations.of(context)!.reviews,
+                                        AppLocalizations.of(context)?.reviews ??
+                                            'Reviews',
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 18)),
@@ -309,7 +320,7 @@ class ReviewsSection extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Text(
-                          '${AppLocalizations.of(context)!.viewAll} (${state.reviews.length})',
+                          '${AppLocalizations.of(context)?.viewAll ?? "عرض الكل"} (${state.reviews.length})',
                           style: const TextStyle(
                               color: AppTheme.primaryColor,
                               fontWeight: FontWeight.bold),
