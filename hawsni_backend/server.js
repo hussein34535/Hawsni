@@ -23,12 +23,12 @@ const bannerRoutes = require('./routes/banners');
 const seoRoutes = require('./routes/seo');
 const vtoRoutes = require('./routes/vto');
 const adminRoutes = require('./routes/admin');
-const DashboardController = require('./controllers/admin/dashboardController');
-const ProductController = require('./controllers/api/productController');
-const CategoryController = require('./controllers/api/categoryController');
-const ShippingController = require('./controllers/admin/shippingController');
+const seoMiddleware = require('./middleware/seoMiddleware');
 
 const app = express();
+
+// SEO Middleware for bot/crawler interception
+app.use(seoMiddleware);
 
 // View engine setup
 app.set('view engine', 'ejs');

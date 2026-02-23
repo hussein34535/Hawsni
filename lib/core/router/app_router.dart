@@ -37,7 +37,10 @@ class AppRouter {
       GoRoute(
         path: '/product/:id',
         builder: (context, state) {
-          final productId = state.pathParameters['id']!;
+          final productId = state.pathParameters['id'] ?? '';
+          if (productId.isEmpty) {
+            return const MainScreen(); // Fallback for invalid route
+          }
           // Pass the ID to the screen. The screen needs to handle fetching by ID if product object isn't passed.
           // For deep linking, we typically only have the ID.
           // We can pass 'extra' if we have the full product object from internal navigation.

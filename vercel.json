@@ -4,14 +4,36 @@
     "rewrites": [
         {
             "source": "/sitemap.xml",
-            "destination": "/api/sitemap"
+            "destination": "https://hwasibackend.vercel.app/sitemap.xml"
         },
         {
             "source": "/robots.txt",
-            "destination": "/api/robots"
+            "destination": "https://hwasibackend.vercel.app/robots.txt"
         },
         {
-            "source": "/((?!api/).*)",
+            "source": "/product/:id",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "User-Agent",
+                    "value": ".*(googlebot|bingbot|facebot|facebookexternalhit|twitterbot|whatsapp).*"
+                }
+            ],
+            "destination": "https://hwasibackend.vercel.app/product/:id"
+        },
+        {
+            "source": "/category/:id",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "User-Agent",
+                    "value": ".*(googlebot|bingbot|facebot|facebookexternalhit|twitterbot|whatsapp).*"
+                }
+            ],
+            "destination": "https://hwasibackend.vercel.app/category/:id"
+        },
+        {
+            "source": "/((?!api/|sitemap.xml|robots.txt).*)",
             "destination": "/index.html"
         }
     ],

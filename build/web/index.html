@@ -10,10 +10,11 @@
   <meta name="description" content="Hawsni - Premium Fashion & Lifestyle Shopping">
   <meta name="keywords" content="fashion, shopping, clothes, style, hawsni, egypt, ecommerce">
   <meta name="author" content="Hawsni">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://hwasibackend.vercel.app/">
+  <meta property="og:url" content="https://hwasi.com/">
   <meta property="og:title" content="Hawsni - Your Style, Your Way">
   <meta property="og:description"
     content="Discover premium fashion and lifestyle products at Hawsni. Shop the latest trends with fast delivery.">
@@ -21,7 +22,7 @@
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://hwasibackend.vercel.app/">
+  <meta property="twitter:url" content="https://hwasi.com/">
   <meta property="twitter:title" content="Hawsni - Your Style, Your Way">
   <meta property="twitter:description"
     content="Discover premium fashion and lifestyle products at Hawsni. Shop the latest trends with fast delivery.">
@@ -36,19 +37,23 @@
       navigator.serviceWorker.getRegistrations().then(function (registrations) {
         for (let registration of registrations) { registration.unregister(); }
       });
-      // Better monkey-patch to avoid "scriptURL" undefined errors in flutter_bootstrap.js
-      const originalRegister = navigator.serviceWorker.register;
       navigator.serviceWorker.register = function (script, options) {
         console.log('🚫 ServiceWorker registration blocked for speed & reliability');
-        return new Promise((resolve) => {
-          // Return a mock registration that won't crash the loader
-          resolve({
-            unregister: () => Promise.resolve(true),
-            active: { scriptURL: script },
-            installing: null,
-            waiting: null,
-            addEventListener: () => { }
-          });
+        const scriptStr = (script instanceof URL) ? script.href : String(script);
+        return Promise.resolve({
+          active: {
+            scriptURL: scriptStr,
+            state: 'activated',
+            addEventListener: () => { },
+            removeEventListener: () => { },
+            postMessage: () => { }
+          },
+          installing: null,
+          waiting: null,
+          unregister: () => Promise.resolve(true),
+          addEventListener: () => { },
+          removeEventListener: () => { },
+          dispatchEvent: () => true
         });
       };
     }
@@ -204,7 +209,7 @@
         },
         onEntrypointLoaded: async function (engineInitializer) {
           const appRunner = await engineInitializer.initializeEngine({
-            useColorEmoji: true,
+            useColorEmoji: false, // Sometimes emoji loading triggers skwasm paths
             renderer: "canvaskit", // Force stable canvaskit to avoid skwasm/wasm boundary crashes
           });
           await appRunner.runApp();

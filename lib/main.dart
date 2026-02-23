@@ -28,7 +28,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
-  if (kIsWeb && !kIsWasm) {
+  if (kIsWeb) {
     MetaSEO().config();
   }
 
