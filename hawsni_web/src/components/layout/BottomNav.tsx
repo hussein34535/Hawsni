@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Heart, ShoppingBag, User } from 'lucide-react';
+import { Home, Heart, ShoppingBag, User, Bell } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -15,6 +15,7 @@ export default function BottomNav() {
         { href: '/', icon: Home, label: t.common.home },
         { href: '/wishlist', icon: Heart, label: t.common.wishlist },
         { href: '/cart', icon: ShoppingBag, label: t.common.cart },
+        { href: '/notifications', icon: Bell, label: t.notifications?.title || 'Notifications' },
         { href: '/profile', icon: User, label: t.common.profile },
     ];
 
@@ -43,7 +44,7 @@ export default function BottomNav() {
                             )}
 
                             {/* Cart Badge */}
-                            {item.label === 'Cart' && itemCount > 0 && (
+                            {item.href === '/cart' && itemCount > 0 && (
                                 <span className="absolute top-2 right-[25%] w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white">
                                     {itemCount}
                                 </span>

@@ -82,6 +82,27 @@ export const en = {
         empty: "No coupons available.",
         copy: "Copy Code",
         expiry: "Expires on",
+    },
+    product: {
+        new_arrival: "New Arrival",
+        low_stock: "Limited quantity! Only {count} left",
+        vto_banner: "Try this item now",
+        vto_desc: "See how it looks on you with AI",
+        size_guide: "Size Guide",
+        add_to_cart: "Add to Cart",
+        buy_now: "Buy Now",
+        description: "Details",
+        colors: "Colors",
+        sizes: "Sizes",
+        quantity: "Quantity",
+        added_to_cart: "Added to cart successfully",
+    },
+    notifications: {
+        title: "Notifications",
+        empty: "No notifications yet",
+        empty_desc: "Notifications about offers and orders will appear here",
+        mark_all_read: "Mark all as read",
+        clear_all: "Clear all",
     }
 };
 

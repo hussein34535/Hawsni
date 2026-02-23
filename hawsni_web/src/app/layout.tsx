@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 
 import Navbar from "@/components/layout/Navbar";
 import BottomNav from "@/components/layout/BottomNav";
+import ToastContainer from "@/components/layout/ToastContainer";
 import { LanguageProvider } from "@/context/LanguageContext";
 
 export default function RootLayout({
@@ -40,6 +41,7 @@ export default function RootLayout({
             {children}
           </main>
           <BottomNav />
+          <ToastContainer />
         </LanguageProvider>
       </body>
     </html>

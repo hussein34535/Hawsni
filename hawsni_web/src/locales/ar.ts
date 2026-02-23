@@ -84,5 +84,26 @@ export const ar: LocaleType = {
         empty: "لا يوجد كوبونات متاحة حالياً.",
         copy: "نسخ الكود",
         expiry: "ينتهي في",
+    },
+    product: {
+        new_arrival: "وصل حديثاً",
+        low_stock: "الكمية محدودة! باق {count} قطع فقط",
+        vto_banner: "جرب هذه القطعة الآن",
+        vto_desc: "شاهد كيف تبدو عليك بالذكاء الاصطناعي",
+        size_guide: "دليل المقاسات",
+        add_to_cart: "إضافة للسلة",
+        buy_now: "اشتري الآن",
+        description: "التفاصيل",
+        colors: "اللون",
+        sizes: "المقاس",
+        quantity: "الكمية",
+        added_to_cart: "تمت الإضافة إلى السلة بنجاح",
+    },
+    notifications: {
+        title: "الإشعارات",
+        empty: "لا توجد إشعارات حالياً",
+        empty_desc: "ستظهر هنا إشعارات العروض ووصول طلباتك",
+        mark_all_read: "تحديد الكل كمقروء",
+        clear_all: "مسح الكل",
     }
 };
