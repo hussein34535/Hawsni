@@ -77,10 +77,12 @@ export default function CartPage() {
                                     </div>
                                 </div>
 
-                                <button className="w-full py-5 bg-[var(--color-brand-primary)] text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 hover:bg-[var(--color-brand-secondary)] transition-colors mt-2">
-                                    <span>Checkout</span>
-                                    <ArrowRight size={20} />
-                                </button>
+                                <Link href="/checkout">
+                                    <button className="w-full py-5 bg-[var(--color-brand-primary)] text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 hover:bg-[var(--color-brand-secondary)] transition-colors mt-2">
+                                        <span>Checkout</span>
+                                        <ArrowRight size={20} />
+                                    </button>
+                                </Link>
 
                                 <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                     <Check size={12} className="text-emerald-500" />
