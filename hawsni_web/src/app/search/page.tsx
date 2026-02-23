@@ -95,7 +95,7 @@ function SearchContent() {
 
         try {
             const params: any = {
-                q: term,
+                search: term,
                 minPrice,
                 maxPrice,
                 sortBy
@@ -103,7 +103,7 @@ function SearchContent() {
             if (selectedCategory) params.category = selectedCategory;
 
             const { data } = await axios.get('/products/search', { params });
-            setSearchResults(data);
+            setSearchResults(data.products || []);
         } catch (error) {
             console.error('Error searching products:', error);
             setSearchResults([]);

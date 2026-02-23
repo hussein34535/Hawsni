@@ -4,16 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, MapPin, Plus, Trash2, Edit2, Check } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import axios from '@/lib/axios';
+import { addressService, Address } from '@/services/addressService';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface Address {
-    _id: string;
-    label: string;
-    street: string;
-    city: string;
-    isDefault: boolean;
-}
 
 export default function AddressesPage() {
     const { t, isRTL, language } = useLanguage();
@@ -24,15 +16,10 @@ export default function AddressesPage() {
     useEffect(() => {
         const fetchAddresses = async () => {
             try {
-                const { data } = await axios.get('/auth/addresses');
-                setAddresses(data || []);
+                const data = await addressService.getAddresses();
+                setAddresses(data.addresses || []);
             } catch (error) {
                 console.error('Failed to fetch addresses:', error);
-                // Mock data for demo if fetch fails
-                setAddresses([
-                    { _id: '1', label: 'Home', street: '123 Main St', city: 'Cairo', isDefault: true },
-                    { _id: '2', label: 'Work', street: '456 Office Rd', city: 'Giza', isDefault: false },
-                ]);
             } finally {
                 setIsLoading(false);
             }
@@ -43,7 +30,7 @@ export default function AddressesPage() {
     const handleDelete = async (id: string) => {
         if (confirm(t.addresses.delete_confirm)) {
             try {
-                await axios.delete(`/auth/addresses/${id}`);
+                await addressService.deleteAddress(id);
                 setAddresses(addresses.filter(a => a._id !== id));
             } catch (error) {
                 console.error('Action failed:', error);
@@ -82,7 +69,7 @@ export default function AddressesPage() {
                                         </div>
                                         <div className="flex-1 text-left rtl:text-right">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <h3 className="font-bold text-gray-900">{addr.label}</h3>
+                                                <h3 className="font-bold text-gray-900 capitalize">{addr.type}</h3>
                                                 {addr.isDefault && (
                                                     <span className="bg-emerald-50 text-[var(--color-brand-primary)] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                                                         {t.addresses.default}

@@ -87,7 +87,7 @@ export default function HomePage() {
             ) : (
               products.map((product) => (
                 <ProductCard
-                  key={product._id}
+                  key={product._id || (product as any).id}
                   product={product}
                 />
               ))

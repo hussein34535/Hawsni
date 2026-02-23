@@ -9,6 +9,7 @@ import {
     Truck,
     CreditCard,
     CheckCircle2,
+    Check,
     ChevronRight,
     Home,
     Briefcase,
@@ -19,28 +20,49 @@ import { useCartStore } from '@/store/cartStore';
 
 type CheckoutStep = 'address' | 'shipping' | 'payment';
 
+import { addressService, Address } from '@/services/addressService';
+import { checkoutService, OrderData } from '@/services/checkoutService';
+
 export default function CheckoutPage() {
     const router = useRouter();
-    const { items, getTotal } = useCartStore();
+    const { items, getTotal, clearCart } = useCartStore();
     const [currentStep, setCurrentStep] = useState<CheckoutStep>('address');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [addresses, setAddresses] = useState<Address[]>([]);
+    const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
-    // Redirect if cart is empty
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            try {
+                const data = await addressService.getAddresses();
+                const addrs = data.addresses || [];
+                setAddresses(addrs);
+                if (addrs.length > 0) {
+                    const defaultAddr = addrs.find(a => a.isDefault) || addrs[0];
+                    setSelectedAddressId(defaultAddr._id);
+                }
+            } catch (error) {
+                console.error('Failed to load addresses:', error);
+            }
+        };
+        fetchAddresses();
+    }, []);
+
+    const subtotal = getTotal();
+    const shippingFee = 50; // Keep static for now or fetch from API if available
+    const total = subtotal + shippingFee;
+
     useEffect(() => {
         if (items.length === 0 && !isProcessing) {
             router.push('/cart');
         }
-    }, [items, router]);
+    }, [items, router, isProcessing]);
 
     const steps: { id: CheckoutStep; label: string; icon: any }[] = [
         { id: 'address', label: 'Address', icon: MapPin },
         { id: 'shipping', label: 'Shipping', icon: Truck },
         { id: 'payment', label: 'Payment', icon: CreditCard },
     ];
-
-    const subtotal = getTotal();
-    const shippingFee = 50; // Mock shipping fee
-    const total = subtotal + shippingFee;
 
     const handleNextStep = () => {
         if (currentStep === 'address') setCurrentStep('shipping');
@@ -54,14 +76,40 @@ export default function CheckoutPage() {
     };
 
     const handlePlaceOrder = async () => {
+        if (!selectedAddressId) {
+            alert('Please select a shipping address');
+            setCurrentStep('address');
+            return;
+        }
+
         setIsProcessing(true);
-        // Mock order processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setIsProcessing(false);
-        // Redirect to success or order confirmation
-        alert('Order placed successfully! (Mock)');
-        // useCartStore.getState().clearCart();
-        // router.push('/profile/orders');
+        try {
+            const orderData: OrderData = {
+                items: items.map(item => ({
+                    productId: item.productId || (item as any)._id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    size: item.size || undefined,
+                    color: item.color || undefined,
+                    imageUrl: item.imageUrl
+                })),
+                shippingAddress: selectedAddressId,
+                paymentMethod: 'cod',
+                totalAmount: total,
+                shippingFee: shippingFee
+            };
+
+            const result = await checkoutService.placeOrder(orderData);
+            if (result.success) {
+                clearCart();
+                router.push('/profile/orders');
+            }
+        } catch (error: any) {
+            alert(error || 'Failed to place order. Please try again.');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     if (items.length === 0 && !isProcessing) return null;
@@ -131,7 +179,14 @@ export default function CheckoutPage() {
                                 exit={{ opacity: 0, y: -10 }}
                                 className="min-h-[400px]"
                             >
-                                {currentStep === 'address' && <AddressStep onNext={handleNextStep} />}
+                                {currentStep === 'address' && (
+                                    <AddressStep
+                                        onNext={handleNextStep}
+                                        addresses={addresses}
+                                        selectedId={selectedAddressId}
+                                        onSelect={setSelectedAddressId}
+                                    />
+                                )}
                                 {currentStep === 'shipping' && <ShippingStep onNext={handleNextStep} />}
                                 {currentStep === 'payment' && <PaymentStep onPlaceOrder={handlePlaceOrder} isProcessing={isProcessing} />}
                             </motion.div>
@@ -200,58 +255,99 @@ export default function CheckoutPage() {
 }
 
 // Sub-components as placeholders for now
-function AddressStep({ onNext }: { onNext: () => void }) {
+function AddressStep({
+    onNext,
+    addresses,
+    selectedId,
+    onSelect
+}: {
+    onNext: () => void,
+    addresses: Address[],
+    selectedId: string | null,
+    onSelect: (id: string) => void
+}) {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center px-2">
                 <h3 className="font-bold text-gray-900">Select Shipping Address</h3>
-                <button className="flex items-center gap-2 text-[var(--color-brand-primary)] font-bold text-sm">
+                <button
+                    onClick={() => window.location.href = '/profile/addresses'}
+                    className="flex items-center gap-2 text-[var(--color-brand-primary)] font-bold text-sm"
+                >
                     <Plus size={18} />
-                    <span>Add New</span>
+                    <span>Manage</span>
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Mock Addresses */}
-                <div className="bg-white p-6 rounded-[2rem] border-2 border-[var(--color-brand-primary)] shadow-md relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4">
-                        <div className="w-6 h-6 bg-[var(--color-brand-primary)] text-white rounded-full flex items-center justify-center">
-                            <MapPin size={14} />
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-[var(--color-brand-primary)]">
-                            <Home size={22} />
-                        </div>
-                        <div>
-                            <h4 className="font-black text-gray-900 uppercase text-xs tracking-wider mb-2">Home</h4>
-                            <p className="text-sm font-bold text-gray-500 leading-relaxed">
-                                123 Street Name, Area City<br />
-                                Cairo, Egypt
-                            </p>
-                        </div>
-                    </div>
+            {addresses.length === 0 ? (
+                <div className="bg-white p-10 rounded-[2rem] text-center border-2 border-dashed border-gray-100">
+                    <MapPin size={40} className="mx-auto text-gray-200 mb-4" />
+                    <p className="text-gray-500 font-bold mb-4">No addresses saved yet</p>
+                    <button
+                        onClick={() => window.location.href = '/profile/addresses'}
+                        className="px-6 py-2 bg-[var(--color-brand-primary)] text-white rounded-full font-bold text-sm"
+                    >
+                        Add Address
+                    </button>
                 </div>
-
-                <div className="bg-white p-6 rounded-[2rem] border-2 border-transparent hover:border-gray-100 transition-all cursor-pointer">
-                    <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
-                            <Briefcase size={22} />
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {addresses.map((addr) => (
+                        <div
+                            key={addr._id}
+                            onClick={() => onSelect(addr._id)}
+                            className={`
+                                cursor-pointer bg-white p-6 rounded-[2rem] border-2 transition-all relative overflow-hidden group
+                                ${selectedId === addr._id ? 'border-[var(--color-brand-primary)] shadow-md' : 'border-transparent hover:border-gray-100'}
+                            `}
+                        >
+                            {selectedId === addr._id && (
+                                <div className="absolute top-0 right-0 p-4">
+                                    <div className="w-6 h-6 bg-[var(--color-brand-primary)] text-white rounded-full flex items-center justify-center">
+                                        <Check size={14} />
+                                    </div>
+                                </div>
+                            )}
+                            <div className="flex items-start gap-4">
+                                <div className={`
+                                    w-12 h-12 rounded-2xl flex items-center justify-center transition-colors
+                                    ${selectedId === addr._id ? 'bg-emerald-50 text-[var(--color-brand-primary)]' : 'bg-gray-50 text-gray-400'}
+                                `}>
+                                    {addr.type === 'home' ? <Home size={22} /> : <Briefcase size={22} />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className={`
+                                        font-black uppercase text-xs tracking-wider mb-2
+                                        ${selectedId === addr._id ? 'text-gray-900' : 'text-gray-400'}
+                                    `}>
+                                        {addr.type}
+                                    </h4>
+                                    <p className={`
+                                        text-sm font-bold leading-relaxed truncate
+                                        ${selectedId === addr._id ? 'text-gray-500' : 'text-gray-400'}
+                                    `}>
+                                        {addr.street}
+                                    </p>
+                                    <p className={`
+                                        text-sm font-bold leading-relaxed
+                                        ${selectedId === addr._id ? 'text-gray-400' : 'text-gray-300'}
+                                    `}>
+                                        {addr.city}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <h4 className="font-black text-gray-400 uppercase text-xs tracking-wider mb-2">Office</h4>
-                            <p className="text-sm font-bold text-gray-400 leading-relaxed">
-                                456 Business Road, Tech Park<br />
-                                New Cairo, Egypt
-                            </p>
-                        </div>
-                    </div>
+                    ))}
                 </div>
-            </div>
+            )}
 
             <button
                 onClick={onNext}
-                className="w-full mt-4 py-5 bg-gray-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-black/10 hover:bg-black transition-all"
+                disabled={!selectedId}
+                className={`
+                    w-full mt-4 py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition-all
+                    ${selectedId ? 'bg-gray-900 text-white shadow-black/10 hover:bg-black' : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'}
+                `}
             >
                 <span>Continue to Shipping</span>
                 <ArrowRight size={20} />

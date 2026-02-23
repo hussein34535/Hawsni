@@ -41,7 +41,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
         <div className="relative w-full h-[160px] md:h-[280px] lg:h-[400px] overflow-hidden rounded-2xl bg-gray-100">
             <AnimatePresence mode="wait">
                 <motion.div
-                    key={banner.id}
+                    key={banner._id || banner.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}

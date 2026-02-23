@@ -31,16 +31,22 @@ export default function ProductCard({ product }: ProductCardProps) {
             {/* Image Container */}
             <div className="relative aspect-square bg-[#F5F5F5] rounded-2xl overflow-hidden mb-2">
                 <AnimatePresence mode="wait">
-                    <motion.img
-                        key={selectedImage}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        src={selectedImage}
-                        alt={name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
+                    {selectedImage ? (
+                        <motion.img
+                            key={selectedImage}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            src={selectedImage}
+                            alt={name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                            <span className="text-xs">No Image</span>
+                        </div>
+                    )}
                 </AnimatePresence>
 
                 {/* Favorite Button Overlay (Like Flutter) */}
@@ -90,7 +96,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {/* 3. Price */}
                 <div className="flex items-end gap-1">
                     <span className="text-[15px] font-bold text-[var(--color-brand-primary)] leading-none">
-                        {price.toLocaleString()}
+                        {price.toLocaleString('en-US')}
                     </span>
                     <span className="text-[10px] font-semibold text-[var(--color-brand-primary)] leading-none mb-[2px]">
                         EGP

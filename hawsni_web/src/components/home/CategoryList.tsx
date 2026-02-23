@@ -39,7 +39,7 @@ export default function CategoryList({ categories, isLoading }: CategoryListProp
             <div className="flex overflow-x-auto h-full scrollbar-none items-center">
                 {categories.map((cat, index) => (
                     <motion.div
-                        key={cat._id}
+                        key={cat._id || (cat as any).id}
                         whileHover={{ y: -2 }}
                         className={`w-[100px] bg-white rounded-xl flex flex-col items-center justify-center cursor-pointer flex-shrink-0 h-[100px] shadow-[0_2px_8px_rgba(156,163,175,0.1)] ${isRTL
                             ? (index === 0 ? 'mr-4 ml-3' : 'ml-3')
@@ -49,7 +49,13 @@ export default function CategoryList({ categories, isLoading }: CategoryListProp
                         {/* Image Container */}
                         <div className="p-3 bg-blue-50 rounded-full mb-2">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={cat.image} alt={cat.name} className="w-10 h-10 object-cover rounded-full" />
+                            {cat.image ? (
+                                <img src={cat.image} alt={cat.name} className="w-10 h-10 object-cover rounded-full" />
+                            ) : (
+                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <span className="text-[10px] text-gray-400">?</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Category Name */}

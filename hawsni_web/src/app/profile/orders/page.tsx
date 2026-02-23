@@ -21,14 +21,21 @@ export default function OrdersPage() {
     const router = useRouter();
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [isGuest, setIsGuest] = useState(false);
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
                 const { data } = await axios.get('/orders/my-orders');
                 setOrders(data || []);
-            } catch (error) {
-                console.error('Failed to fetch orders:', error);
+            } catch (err: any) {
+                console.error('Failed to fetch orders:', err);
+                if (err.response?.status === 401) {
+                    setIsGuest(true);
+                } else {
+                    setError('Failed to load orders. Please try again later.');
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -73,6 +80,35 @@ export default function OrdersPage() {
                     <div className="flex flex-col items-center justify-center py-20">
                         <div className="w-10 h-10 border-4 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
                     </div>
+                ) : isGuest ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-400 text-center">
+                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-[var(--shadow-soft)] mb-6">
+                            <ShoppingBag size={40} strokeWidth={1.5} />
+                        </div>
+                        <p className="font-bold text-gray-900 mb-2 text-lg">
+                            {language === 'ar' ? 'يرجى تسجيل الدخول' : 'Please Login'}
+                        </p>
+                        <p className="font-medium text-sm max-w-[240px] mb-8">
+                            {language === 'ar' ? 'يجب تسجيل الدخول لمشاهدة طلباتك السابقة' : 'You need to login to see your order history'}
+                        </p>
+                        <button
+                            onClick={() => router.push('/profile')}
+                            className="bg-[var(--color-brand-primary)] text-white px-8 py-3 rounded-full font-bold shadow-lg"
+                        >
+                            {language === 'ar' ? 'تسجيل الدخول' : 'Login Now'}
+                        </button>
+                    </div>
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-red-500 text-center">
+                        <XCircle size={40} strokeWidth={1.5} className="mb-4" />
+                        <p className="font-bold mb-6">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="text-[var(--color-brand-primary)] font-bold"
+                        >
+                            {language === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
+                        </button>
+                    </div>
                 ) : orders.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                         <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-[var(--shadow-soft)] mb-6">
@@ -104,8 +140,8 @@ export default function OrdersPage() {
                                         </p>
                                     </div>
                                     <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-tight ${order.status === 'delivered' ? 'bg-emerald-50 text-emerald-600' :
-                                            order.status === 'cancelled' ? 'bg-red-50 text-red-600' :
-                                                'bg-amber-50 text-amber-600'
+                                        order.status === 'cancelled' ? 'bg-red-50 text-red-600' :
+                                            'bg-amber-50 text-amber-600'
                                         }`}>
                                         {getStatusIcon(order.status)}
                                         {getStatusText(order.status)}

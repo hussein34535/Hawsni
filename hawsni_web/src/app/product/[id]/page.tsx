@@ -184,7 +184,7 @@ export default function ProductPage() {
                             </div>
                             <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-2">{product.name}</h1>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-2xl md:text-3xl font-black text-[var(--color-brand-primary)]">{product.price.toLocaleString()}</span>
+                                <span className="text-2xl md:text-3xl font-black text-[var(--color-brand-primary)]">{product.price.toLocaleString('en-US')}</span>
                                 <span className="text-sm font-bold text-gray-400">EGP</span>
                             </div>
                         </div>

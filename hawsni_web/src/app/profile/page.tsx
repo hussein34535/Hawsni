@@ -27,16 +27,22 @@ const useAuth = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Simple check for token or similar
         const checkAuth = async () => {
             try {
                 const token = localStorage.getItem('token');
                 if (token) {
-                    const { data } = await axios.get('/auth/me');
-                    setUser(data);
-                    setIsGuest(false);
+                    const { data } = await axios.get('/users/profile');
+                    if (data.success) {
+                        setUser(data.user);
+                        setIsGuest(false);
+                    } else {
+                        setIsGuest(true);
+                    }
+                } else {
+                    setIsGuest(true);
                 }
             } catch (error) {
+                console.error('Auth check failed:', error);
                 setIsGuest(true);
             } finally {
                 setLoading(false);
