@@ -1,6 +1,7 @@
 export interface Category {
     _id: string;
     name: string;
+    name_ar?: string;
     image: string;
 }
 
@@ -10,10 +11,15 @@ export interface Banner {
     imageUrl?: string;
     image?: string;
     heading?: string;
+    heading_ar?: string;
     title?: string;
+    title_ar?: string;
     subheading?: string;
+    subheading_ar?: string;
     description?: string;
+    description_ar?: string;
     buttonText?: string;
+    buttonText_ar?: string;
 }
 
 export interface Product {

@@ -8,7 +8,10 @@ interface HeroCarouselProps {
     isLoading?: boolean;
 }
 
+import { useLanguage } from '@/context/LanguageContext';
+
 export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) {
+    const { language, isRTL } = useLanguage();
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
@@ -28,9 +31,11 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
 
     const banner = banners[index];
     const bannerImage = banner.imageUrl || banner.image;
-    const bannerHeading = banner.heading || banner.title || 'New Arrival';
-    const bannerSubheading = banner.subheading || banner.description || 'Check out our latest collection';
-    const bannerBtnText = banner.buttonText || 'Shop Now';
+
+    // Translation logic with fallbacks
+    const h = language === 'ar' ? (banner.heading_ar || banner.heading || 'وصل حديثاً') : (banner.heading || banner.title || 'New Arrival');
+    const s = language === 'ar' ? (banner.subheading_ar || banner.description_ar || banner.subheading || banner.description || 'تصفح أحدث تشكيلاتنا') : (banner.subheading || banner.description || 'Check out our latest collection');
+    const b = language === 'ar' ? (banner.buttonText_ar || 'تسوق الآن') : (banner.buttonText || 'Shop Now');
 
     return (
         <div className="relative w-full h-[160px] md:h-[280px] lg:h-[400px] overflow-hidden rounded-2xl bg-gray-100">
@@ -46,22 +51,22 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src={bannerImage}
-                        alt={bannerSubheading}
+                        alt={s}
                         className="w-full h-full object-cover"
                     />
 
                     {/* Subtle bottom-weighted gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
 
-                    {/* Content - Magazine style (bottom-left) */}
-                    <div className="absolute inset-0 p-8 flex flex-col justify-end items-start text-white">
+                    {/* Content - Magazine style (bottom-left or bottom-right for RTL) */}
+                    <div className={`absolute inset-0 p-8 flex flex-col justify-end ${isRTL ? 'items-end text-right' : 'items-start text-left'} text-white`}>
                         <motion.span
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                             className="text-[10px] md:text-[14px] font-semibold tracking-[1.5px] md:tracking-[2px] uppercase mb-2 md:mb-3 text-white"
                         >
-                            {bannerHeading}
+                            {h}
                         </motion.span>
 
                         <motion.h2
@@ -70,7 +75,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                             transition={{ delay: 0.5 }}
                             className="text-[28px] md:text-[42px] font-black mb-5 md:mb-8 leading-[1.1] tracking-[-0.5px] max-w-2xl"
                         >
-                            {bannerSubheading}
+                            {s}
                         </motion.h2>
 
                         <motion.button
@@ -81,7 +86,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                             whileTap={{ scale: 0.95 }}
                             className="px-8 py-4 md:px-8 md:py-4 bg-[var(--color-brand-primary)] text-white rounded-[30px] font-bold text-[14px] tracking-[0.5px] shadow-none"
                         >
-                            {bannerBtnText}
+                            {b}
                         </motion.button>
                     </div>
                 </motion.div>

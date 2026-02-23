@@ -8,7 +8,23 @@ interface CategoryListProps {
 }
 
 export default function CategoryList({ categories, isLoading }: CategoryListProps) {
-    const { isRTL } = useLanguage();
+    const { language, isRTL } = useLanguage();
+
+    const getTranslatedName = (cat: Category) => {
+        if (language === 'ar') {
+            if (cat.name_ar) return cat.name_ar;
+            const mapping: Record<string, string> = {
+                'Men': 'رجالي',
+                'Women': 'حريمي',
+                'Kids': 'أطفال',
+                'Home': 'منزل',
+                'Electronics': 'إلكترونيات',
+                'Accessories': 'إكسسوارات'
+            };
+            return mapping[cat.name] || cat.name;
+        }
+        return cat.name;
+    };
 
     if (isLoading) {
         return (
@@ -26,8 +42,8 @@ export default function CategoryList({ categories, isLoading }: CategoryListProp
                         key={cat._id}
                         whileHover={{ y: -2 }}
                         className={`w-[100px] bg-white rounded-xl flex flex-col items-center justify-center cursor-pointer flex-shrink-0 h-[100px] shadow-[0_2px_8px_rgba(156,163,175,0.1)] ${isRTL
-                                ? (index === 0 ? 'mr-4 ml-3' : 'ml-3')
-                                : (index === 0 ? 'ml-4 mr-3' : 'mr-3')
+                            ? (index === 0 ? 'mr-4 ml-3' : 'ml-3')
+                            : (index === 0 ? 'ml-4 mr-3' : 'mr-3')
                             }`}
                     >
                         {/* Image Container */}
@@ -38,7 +54,7 @@ export default function CategoryList({ categories, isLoading }: CategoryListProp
 
                         {/* Category Name */}
                         <span className="text-[14px] font-medium text-gray-900 text-center px-1 truncate w-full">
-                            {cat.name}
+                            {getTranslatedName(cat)}
                         </span>
                     </motion.div>
                 ))}
