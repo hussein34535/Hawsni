@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-cairo), sans-serif;
+
+  --color-brand-primary: #1B4D3E;
+  /* Hawsni Green */
+  --color-brand-secondary: #0A261D;
+  --color-brand-accent: #D4AF37;
+  /* Premium Gold */
+
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F8F9FA;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #4B5563;
+  --color-text-tertiary: #9CA3AF;
+}
+
+@layer base {
+
+  html,
+  body {
+    @apply bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] antialiased;
+    direction: ltr;
+    /* Can be toggled for Arabic */
+  }
+}
