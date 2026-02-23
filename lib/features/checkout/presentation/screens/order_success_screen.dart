@@ -37,8 +37,9 @@ class OrderSuccessScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               Text(
-                AppLocalizations.of(context)!.success,
-                style: TextStyle(fontFamily: 'Cairo',
+                'تم استلام طلبك بنجاح!',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -47,13 +48,41 @@ class OrderSuccessScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                AppLocalizations.of(context)!.orderConfirmationMessage,
-                style: TextStyle(fontFamily: 'Cairo',
+                'شكراً لثقتك بنا. نحن نعمل الآن على تجهيز طلبك وسيصلك في أسرع وقت ممكن. فريق خدمة العملاء سيتواصل معك قريباً لتأكيد التفاصيل.',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
                   fontSize: 16,
                   color: Colors.grey[600],
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.support_agent,
+                        color: AppTheme.primaryColor),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'لا تقلق، نحن معك في كل خطوة حتى يصل الطلب لباب منزلك.',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 13,
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 48),
@@ -99,7 +128,8 @@ class OrderSuccessScreen extends StatelessWidget {
                   ),
                   child: Text(
                     AppLocalizations.of(context)!.startShopping,
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       height: 1.2, // Fix text clipping
@@ -121,14 +151,16 @@ class OrderSuccessScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontFamily: 'Cairo',
+          style: TextStyle(
+            fontFamily: 'Cairo',
             color: Colors.grey[600],
             fontSize: 14,
           ),
         ),
         Text(
           value,
-          style: TextStyle(fontFamily: 'Cairo',
+          style: TextStyle(
+            fontFamily: 'Cairo',
             color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 16,

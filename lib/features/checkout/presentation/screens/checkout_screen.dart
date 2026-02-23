@@ -286,18 +286,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     if (_isAddingAddress && (!_isGuest)) {
-      // If adding address, user must save it first (or we auto-save?)
-      // Better to force save for consistency
-      if (_streetController.text.isNotEmpty) {
+      if (_streetController.text.isNotEmpty &&
+          _cityController.text.isNotEmpty &&
+          _stateController.text.isNotEmpty) {
         _saveAddress();
-        // Return and ask user to click Place Order again?
-        // Or await the saving? Awaiting bloc is tricky here.
-        // Let's ask user to click place order again after saving.
-        return;
+        // Continue but with the current fields as selectedAddress
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.fillAddressDetails),
+          const SnackBar(
+            content: Text(
+                'برجاء ملء جميع بيانات العنوان (الشارع، المدينة، المحافظة)'),
             backgroundColor: AppTheme.errorColor,
           ),
         );
@@ -471,7 +469,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 ),
                                 title: Text(
                                   AppLocalizations.of(context)!.checkout,
-                                  style: TextStyle(fontFamily: 'Cairo',
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
@@ -537,7 +536,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                               context,
                                             )!
                                                 .addNewAddress,
-                                            style: TextStyle(fontFamily: 'Cairo',
+                                            style: TextStyle(
+                                              fontFamily: 'Cairo',
                                               color: AppTheme.primaryColor,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -607,7 +607,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                             Text(
                                               AppLocalizations.of(context)!
                                                   .placeOrder,
-                                              style: TextStyle(fontFamily: 'Cairo',
+                                              style: TextStyle(
+                                                fontFamily: 'Cairo',
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.white,
@@ -648,7 +649,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: TextStyle(fontFamily: 'Cairo',
+            style: TextStyle(
+              fontFamily: 'Cairo',
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
@@ -719,7 +721,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
                 AppLocalizations.of(context)!.addNewAddress,
-                style: TextStyle(fontFamily: 'Cairo',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -731,69 +734,63 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             icon: Icons.home_outlined,
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _cityController,
-                  label: AppLocalizations.of(context)!.city,
-                  icon: Icons.location_city,
+          _buildTextField(
+            controller: _cityController,
+            label: AppLocalizations.of(context)!.city,
+            icon: Icons.location_city,
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            value: _stateController.text.isNotEmpty &&
+                    egyptGovernorates.contains(_stateController.text)
+                ? _stateController.text
+                : null,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context)!.state,
+              labelStyle:
+                  TextStyle(fontFamily: 'Cairo', color: Colors.grey[600]),
+              prefixIcon: Icon(
+                Icons.map,
+                color: AppTheme.primaryColor.withValues(alpha: 0.7),
+              ),
+              filled: true,
+              fillColor: Colors.grey[50],
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 16, horizontal: 12), // Fix label clipping
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[200]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppTheme.primaryColor,
+                  width: 1.5,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: _stateController.text.isNotEmpty &&
-                          egyptGovernorates.contains(_stateController.text)
-                      ? _stateController.text
-                      : null,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: AppLocalizations.of(context)!.state,
-                    labelStyle: TextStyle(fontFamily: 'Cairo',color: Colors.grey[600]),
-                    prefixIcon: Icon(
-                      Icons.map,
-                      color: AppTheme.primaryColor.withValues(alpha: 0.7),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[50],
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 12), // Fix label clipping
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey[200]!),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppTheme.primaryColor,
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                  items: egyptGovernorates.map((String gov) {
-                    return DropdownMenuItem<String>(
-                      value: gov,
-                      child: Text(gov,
-                          style: TextStyle(fontFamily: 'Cairo',fontSize: 14),
-                          overflow: TextOverflow.ellipsis),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _stateController.text = newValue ?? '';
-                    });
-                  },
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Required' : null,
-                  icon: const Icon(Icons.keyboard_arrow_down),
-                ),
-              ),
-            ],
+            ),
+            items: egyptGovernorates.map((String gov) {
+              return DropdownMenuItem<String>(
+                value: gov,
+                child: Text(gov,
+                    style: TextStyle(fontFamily: 'Cairo', fontSize: 14),
+                    overflow: TextOverflow.ellipsis),
+              );
+            }).toList(),
+            onChanged: (String? newValue) {
+              setState(() {
+                _stateController.text = newValue ?? '';
+              });
+            },
+            validator: (value) => value == null || value.isEmpty
+                ? 'يعتبر هذا الحقل مطلوبا'
+                : null,
+            icon: const Icon(Icons.keyboard_arrow_down),
           ),
           const SizedBox(height: 16),
           if (!_isGuest)
@@ -811,7 +808,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 child: Text(
                   AppLocalizations.of(context)!.saveAddress,
-                  style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontFamily: 'Cairo', fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -871,7 +869,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     children: [
                       Text(
                         address.title,
-                        style: TextStyle(fontFamily: 'Cairo',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
                         ),
@@ -879,7 +878,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       const SizedBox(height: 4),
                       Text(
                         '${address.addressLine1}, ${address.city}, ${address.state}',
-                        style: TextStyle(fontFamily: 'Cairo',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
                           color: AppTheme.textSecondary,
                           fontSize: 14,
                         ),
@@ -915,10 +915,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
-      style: TextStyle(fontFamily: 'Cairo',fontSize: 16),
+      style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(fontFamily: 'Cairo',color: Colors.grey[600]),
+        labelStyle: TextStyle(fontFamily: 'Cairo', color: Colors.grey[600]),
         prefixIcon: Icon(
           icon,
           color: AppTheme.primaryColor.withValues(alpha: 0.7),
@@ -970,7 +970,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.cashOnDelivery,
-                  style: TextStyle(fontFamily: 'Cairo',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: AppTheme.textPrimary,
@@ -978,7 +979,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 Text(
                   'الدفع عند استلام الطلب',
-                  style: TextStyle(fontFamily: 'Cairo',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
                     color: AppTheme.textSecondary,
                     fontSize: 13,
                   ),
@@ -1021,10 +1023,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   controller: _couponController,
                   enabled: !_isCouponApplied,
                   textDirection: TextDirection.ltr,
-                  style: TextStyle(fontFamily: 'Cairo',fontSize: 16),
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
                   decoration: InputDecoration(
                     hintText: 'أدخل كود الخصم',
-                    hintStyle: TextStyle(fontFamily: 'Cairo',
+                    hintStyle: TextStyle(
+                      fontFamily: 'Cairo',
                       color: Colors.grey[400],
                       fontSize: 14,
                     ),
@@ -1067,7 +1070,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         icon: const Icon(Icons.close, size: 18),
                         label: Text(
                           'إزالة',
-                          style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontFamily: 'Cairo', fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red[50],
@@ -1099,7 +1103,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               )
                             : Text(
                                 'تطبيق',
-                                style: TextStyle(fontFamily: 'Cairo',
+                                style: TextStyle(
+                                  fontFamily: 'Cairo',
                                   fontWeight: FontWeight.bold,
                                   height: 1.2, // Fix clipping
                                 ),
@@ -1116,7 +1121,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 const SizedBox(width: 6),
                 Text(
                   _couponError!,
-                  style: TextStyle(fontFamily: 'Cairo',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
                     color: Colors.red,
                     fontSize: 13,
                   ),
@@ -1141,7 +1147,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       _couponType == 'percentage'
                           ? 'تم تطبيق خصم ${_couponDiscount.toStringAsFixed(0)}%'
                           : 'تم تطبيق خصم ${_couponDiscount.toStringAsFixed(2)} EGP',
-                      style: TextStyle(fontFamily: 'Cairo',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
                         color: Colors.green[700],
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -1174,8 +1181,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final daysMax = shippingDetails['days_max'];
 
     final discount = _calculateDiscount(subtotal);
-    final tax = subtotal * 0.05;
-    final total = subtotal - discount + shipping + tax;
+    final total = subtotal - discount + shipping;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -1218,17 +1224,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const SizedBox(width: 4),
                   Text(
                     'توصيل خلال $daysMin - $daysMax أيام عمل',
-                    style: TextStyle(fontFamily: 'Cairo',
-                        color: Colors.grey[600], fontSize: 12),
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: Colors.grey[600],
+                        fontSize: 12),
                   ),
                 ],
               ),
             ),
-          const SizedBox(height: 12),
-          _buildSummaryRow(
-            AppLocalizations.of(context)!.tax,
-            '${tax.toStringAsFixed(2)} EGP',
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Divider(color: Colors.grey[200]),
@@ -1250,7 +1253,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(fontFamily: 'Cairo',
+          style: TextStyle(
+            fontFamily: 'Cairo',
             color: isDiscount
                 ? Colors.green[700]
                 : isTotal
@@ -1262,7 +1266,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         Text(
           value,
-          style: TextStyle(fontFamily: 'Cairo',
+          style: TextStyle(
+            fontFamily: 'Cairo',
             color: isDiscount
                 ? Colors.green[700]
                 : isTotal
@@ -1316,7 +1321,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final discount = _calculateDiscount(subtotal);
     final shippingDetails = _getShippingDetails(currentGov, subtotal);
     final shipping = shippingDetails['cost'] as double;
-    final tax = subtotal * 0.05;
-    return subtotal - discount + shipping + tax;
+    return subtotal - discount + shipping;
   }
 }
