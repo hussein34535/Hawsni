@@ -22,15 +22,13 @@ import 'package:flutter/foundation.dart';
 import 'package:hwasi_app/features/address/data/services/address_service.dart';
 import 'package:hwasi_app/features/address/bloc/address_bloc.dart';
 import 'package:hwasi_app/features/address/bloc/address_event.dart';
-import 'package:meta_seo/meta_seo.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
-  if (kIsWeb) {
-    MetaSEO().config();
-  }
+  // MetaSEO is disabled because it currently crashes Flutter WASM builds due to dart:html dependency.
+  // SEO is instead handled by the backend middleware for bots.
 
   // On web: runtime font fetching enabled to ensure fonts load without assets
   // Removed GoogleFonts configuration as it causes CanvasKit Typeface BindingError
