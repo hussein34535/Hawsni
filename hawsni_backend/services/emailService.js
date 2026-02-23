@@ -1,37 +1,36 @@
 const fetch = require('node-fetch');
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const SENDER = { name: 'Hwasi', email: 'hwasi.service@gmail.com' };
-const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_URL = 'https://api.resend.com/emails';
+const SENDER = 'Hwasi <noreply@hawsni.com>';
 
 /**
- * Low-level Brevo send helper.
+ * Low-level Resend send helper.
  * @param {Object} opts – { to, subject, htmlContent }
  */
 async function _send({ to, subject, htmlContent }) {
-    const res = await fetch(BREVO_URL, {
+    const res = await fetch(RESEND_URL, {
         method: 'POST',
         headers: {
-            'accept': 'application/json',
-            'api-key': BREVO_API_KEY,
-            'content-type': 'application/json',
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            sender: SENDER,
-            to: [{ email: to }],
+            from: SENDER,
+            to: [to],
             subject,
-            htmlContent,
+            html: htmlContent,
         }),
     });
 
     if (!res.ok) {
         const body = await res.text();
-        console.error('❌ Brevo email error:', res.status, body);
-        throw new Error(`Brevo error ${res.status}: ${body}`);
+        console.error('❌ Resend email error:', res.status, body);
+        throw new Error(`Resend error ${res.status}: ${body}`);
     }
 
     const data = await res.json();
-    console.log(`✅ Email sent to ${to} — messageId: ${data.messageId}`);
+    console.log(`✅ Email sent to ${to} — id: ${data.id}`);
     return data;
 }
 

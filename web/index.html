@@ -36,11 +36,19 @@
       navigator.serviceWorker.getRegistrations().then(function (registrations) {
         for (let registration of registrations) { registration.unregister(); }
       });
-      // Monkey-patch to suppress registrations silently without throwing exceptions in console
-      navigator.serviceWorker.register = function () {
+      // Better monkey-patch to avoid "scriptURL" undefined errors in flutter_bootstrap.js
+      const originalRegister = navigator.serviceWorker.register;
+      navigator.serviceWorker.register = function (script, options) {
+        console.log('🚫 ServiceWorker registration blocked for speed & reliability');
         return new Promise((resolve) => {
-          // Resolve without doing anything to avoid "Exception" logs in flutter_bootstrap.js
-          resolve({ unregister: () => Promise.resolve(true) });
+          // Return a mock registration that won't crash the loader
+          resolve({
+            unregister: () => Promise.resolve(true),
+            active: { scriptURL: script },
+            installing: null,
+            waiting: null,
+            addEventListener: () => { }
+          });
         });
       };
     }
@@ -54,7 +62,7 @@
   <style>
     @font-face {
       font-family: 'Cairo';
-      src: url('assets/fonts/Cairo.ttf') format('truetype');
+      src: url('assets/assets/fonts/Cairo.ttf') format('truetype');
     }
 
     /* Global Reset */
@@ -188,12 +196,16 @@
 
 
 
-    // 4. Initialize Flutter loader with EXPLICIT service worker disabling
+    // 4. Initialize Flutter loader with EXPLICIT service worker disabling & renderer stabilization
     window.addEventListener('load', function (ev) {
       _flutter.loader.load({
+        serviceWorkerSettings: {
+          serviceWorkerVersion: null,
+        },
         onEntrypointLoaded: async function (engineInitializer) {
           const appRunner = await engineInitializer.initializeEngine({
             useColorEmoji: true,
+            renderer: "canvaskit", // Force stable canvaskit to avoid skwasm/wasm boundary crashes
           });
           await appRunner.runApp();
         }

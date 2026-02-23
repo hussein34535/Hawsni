@@ -40,11 +40,11 @@ class AuthService {
             const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
             const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-            // Send OTP Email via Brevo
+            // Send OTP Email via Resend
             try {
                 await emailService.sendOtpEmail(email, name, otpCode);
             } catch (emailError) {
-                console.error('Failed to send OTP email via Brevo:', emailError);
+                console.error('Failed to send OTP email via Resend:', emailError);
                 // Continue registration even if email fails
             }
 
@@ -192,7 +192,7 @@ class AuthService {
             throw new Error(dbError.message);
         }
 
-        // Send reset email via Brevo
+        // Send reset email via Resend
         try {
             await emailService.sendPasswordResetEmail(email, resetCode);
         } catch (emailError) {
