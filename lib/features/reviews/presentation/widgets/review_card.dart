@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class ReviewCard extends StatelessWidget {
   final String userName;
@@ -54,7 +54,7 @@ class ReviewCard extends StatelessWidget {
                 backgroundColor: _avatarColor(userName),
                 child: Text(
                   userName.isNotEmpty ? userName[0].toUpperCase() : '?',
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -69,14 +69,14 @@ class ReviewCard extends StatelessWidget {
                   children: [
                     Text(
                       userName,
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
                     ),
                     Text(
                       date,
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(fontFamily: 'Cairo',
                         color: Colors.grey[500],
                         fontSize: 11,
                       ),
@@ -102,7 +102,7 @@ class ReviewCard extends StatelessWidget {
           // Comment
           Text(
             comment,
-            style: GoogleFonts.cairo(
+            style: TextStyle(fontFamily: 'Cairo',
               fontSize: 14,
               height: 1.6,
               color: Colors.grey[800],
@@ -147,7 +147,7 @@ class ReviewCard extends StatelessWidget {
             children: [
               Text(
                 'هل كان هذا مفيداً؟',
-                style: GoogleFonts.cairo(
+                style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 12,
                   color: Colors.grey[500],
                 ),
@@ -251,7 +251,7 @@ class _VoteButton extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 '$count',
-                style: GoogleFonts.poppins(
+                style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 12,
                   color: Colors.grey[600],
                 ),

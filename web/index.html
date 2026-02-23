@@ -188,9 +188,6 @@
     // 4. Initialize Flutter loader with EXPLICIT service worker disabling
     window.addEventListener('load', function (ev) {
       _flutter.loader.load({
-        serviceWorkerSettings: {
-          serviceWorkerVersion: null, // Total kill-switch for Service Workers
-        },
         onEntrypointLoaded: async function (engineInitializer) {
           const appRunner = await engineInitializer.initializeEngine({
             useColorEmoji: true,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
@@ -38,7 +38,7 @@ class OrderSuccessScreen extends StatelessWidget {
 
               Text(
                 AppLocalizations.of(context)!.success,
-                style: GoogleFonts.cairo(
+                style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
@@ -48,7 +48,7 @@ class OrderSuccessScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 AppLocalizations.of(context)!.orderConfirmationMessage,
-                style: GoogleFonts.cairo(
+                style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 16,
                   color: Colors.grey[600],
                   height: 1.5,
@@ -99,7 +99,7 @@ class OrderSuccessScreen extends StatelessWidget {
                   ),
                   child: Text(
                     AppLocalizations.of(context)!.startShopping,
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       height: 1.2, // Fix text clipping
@@ -121,14 +121,14 @@ class OrderSuccessScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: GoogleFonts.cairo(
+          style: TextStyle(fontFamily: 'Cairo',
             color: Colors.grey[600],
             fontSize: 14,
           ),
         ),
         Text(
           value,
-          style: GoogleFonts.cairo(
+          style: TextStyle(fontFamily: 'Cairo',
             color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 16,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:provider/provider.dart';
 import 'package:hwasi_app/core/providers/settings_provider.dart';
 import 'package:hwasi_app/core/services/app_settings_service.dart';
@@ -71,7 +71,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
 
                 Text(
                   'Select Language',
-                  style: GoogleFonts.playfairDisplay(
+                  style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 32,
                     fontWeight: FontWeight.w900,
                     color: Colors.black,
@@ -82,7 +82,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
 
                 Text(
                   'اختر اللغة',
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
@@ -112,7 +112,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                     ),
                     child: Text(
                       _selectedLanguage == 'ar' ? 'استمرار' : 'Continue',
-                      style: GoogleFonts.poppins(
+                      style: TextStyle(fontFamily: 'Cairo',
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -165,7 +165,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
               child: Center(
                 child: Text(
                   language['code']!.toUpperCase(),
-                  style: GoogleFonts.poppins(
+                  style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: isSelected ? Colors.white : Colors.black,
@@ -180,7 +180,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 children: [
                   Text(
                     language['name']!,
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.black,
@@ -188,7 +188,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                   ),
                   Text(
                     language['nativeName']!,
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 14,
                       color: Colors.black54,
                     ),

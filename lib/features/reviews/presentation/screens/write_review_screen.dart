@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
@@ -87,7 +87,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('يرجى اختيار التقييم', style: GoogleFonts.cairo()),
+          content: Text('يرجى اختيار التقييم', style: TextStyle(fontFamily: 'Cairo',)),
           backgroundColor: Colors.orange,
         ),
       );
@@ -97,7 +97,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
     if (_commentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('يرجى كتابة تقييمك', style: GoogleFonts.cairo()),
+          content: Text('يرجى كتابة تقييمك', style: TextStyle(fontFamily: 'Cairo',)),
           backgroundColor: Colors.orange,
         ),
       );
@@ -118,7 +118,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content:
-                  Text('تم إرسال التقييم بنجاح ✅', style: GoogleFonts.cairo()),
+                  Text('تم إرسال التقييم بنجاح ✅', style: TextStyle(fontFamily: 'Cairo',)),
               backgroundColor: Colors.green,
             ),
           );
@@ -128,7 +128,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('فشل إرسال التقييم', style: GoogleFonts.cairo()),
+              content: Text('فشل إرسال التقييم', style: TextStyle(fontFamily: 'Cairo',)),
               backgroundColor: Colors.red,
             ),
           );
@@ -138,7 +138,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('خطأ: ${e.toString()}', style: GoogleFonts.cairo()),
+            content: Text('خطأ: ${e.toString()}', style: TextStyle(fontFamily: 'Cairo',)),
             backgroundColor: Colors.red,
           ),
         );
@@ -161,7 +161,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       appBar: AppBar(
         title: Text(
           'كتابة تقييم',
-          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+          style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -202,7 +202,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                   Expanded(
                     child: Text(
                       widget.productName,
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(fontFamily: 'Cairo',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
@@ -217,7 +217,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
             // Rating section
             Text(
               'تقييمك',
-              style: GoogleFonts.cairo(
+              style: TextStyle(fontFamily: 'Cairo',
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -269,7 +269,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     _ratingLabel(_rating),
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 14,
                       color: Colors.amber[700],
                       fontWeight: FontWeight.w600,
@@ -282,7 +282,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
             // Comment section
             Text(
               'رأيك',
-              style: GoogleFonts.cairo(
+              style: TextStyle(fontFamily: 'Cairo',
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -302,10 +302,10 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               child: TextField(
                 controller: _commentController,
                 maxLines: 5,
-                style: GoogleFonts.cairo(fontSize: 14),
+                style: TextStyle(fontFamily: 'Cairo',fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'شاركنا رأيك عن المنتج...',
-                  hintStyle: GoogleFonts.cairo(color: Colors.grey[400]),
+                  hintStyle: TextStyle(fontFamily: 'Cairo',color: Colors.grey[400]),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: BorderSide(color: Colors.grey[200]!),
@@ -329,7 +329,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               children: [
                 Text(
                   'أضف صور',
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -337,7 +337,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                 const SizedBox(width: 8),
                 Text(
                   '(${_selectedImages.length}/5)',
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 14,
                     color: Colors.grey[500],
                   ),
@@ -412,7 +412,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                             const SizedBox(height: 4),
                             Text(
                               'أضف صورة',
-                              style: GoogleFonts.cairo(
+                              style: TextStyle(fontFamily: 'Cairo',
                                 fontSize: 11,
                                 color: Colors.grey[500],
                               ),
@@ -451,7 +451,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                       )
                     : Text(
                         'إرسال التقييم',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -480,7 +480,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
             children: [
               Text(
                 'اختر مصدر الصورة',
-                style: GoogleFonts.cairo(
+                style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -488,7 +488,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: Text('المعرض', style: GoogleFonts.cairo()),
+                title: Text('المعرض', style: TextStyle(fontFamily: 'Cairo',)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImages();
@@ -496,7 +496,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt_outlined),
-                title: Text('الكاميرا', style: GoogleFonts.cairo()),
+                title: Text('الكاميرا', style: TextStyle(fontFamily: 'Cairo',)),
                 onTap: () {
                   Navigator.pop(context);
                   _takePhoto();

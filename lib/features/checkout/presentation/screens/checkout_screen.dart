@@ -14,7 +14,7 @@ import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:hwasi_app/core/services/coupon_service.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/features/checkout/presentation/screens/order_success_screen.dart';
@@ -471,7 +471,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 ),
                                 title: Text(
                                   AppLocalizations.of(context)!.checkout,
-                                  style: GoogleFonts.cairo(
+                                  style: TextStyle(fontFamily: 'Cairo',
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
@@ -537,7 +537,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                               context,
                                             )!
                                                 .addNewAddress,
-                                            style: GoogleFonts.cairo(
+                                            style: TextStyle(fontFamily: 'Cairo',
                                               color: AppTheme.primaryColor,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -607,7 +607,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                             Text(
                                               AppLocalizations.of(context)!
                                                   .placeOrder,
-                                              style: GoogleFonts.cairo(
+                                              style: TextStyle(fontFamily: 'Cairo',
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.white,
@@ -648,7 +648,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: GoogleFonts.cairo(
+            style: TextStyle(fontFamily: 'Cairo',
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppTheme.textPrimary,
@@ -719,7 +719,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
                 AppLocalizations.of(context)!.addNewAddress,
-                style: GoogleFonts.cairo(
+                style: TextStyle(fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -750,7 +750,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: AppLocalizations.of(context)!.state,
-                    labelStyle: GoogleFonts.cairo(color: Colors.grey[600]),
+                    labelStyle: TextStyle(fontFamily: 'Cairo',color: Colors.grey[600]),
                     prefixIcon: Icon(
                       Icons.map,
                       color: AppTheme.primaryColor.withValues(alpha: 0.7),
@@ -779,7 +779,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     return DropdownMenuItem<String>(
                       value: gov,
                       child: Text(gov,
-                          style: GoogleFonts.cairo(fontSize: 14),
+                          style: TextStyle(fontFamily: 'Cairo',fontSize: 14),
                           overflow: TextOverflow.ellipsis),
                     );
                   }).toList(),
@@ -811,7 +811,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 child: Text(
                   AppLocalizations.of(context)!.saveAddress,
-                  style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+                  style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -871,7 +871,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     children: [
                       Text(
                         address.title,
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
                         ),
@@ -879,7 +879,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       const SizedBox(height: 4),
                       Text(
                         '${address.addressLine1}, ${address.city}, ${address.state}',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                           color: AppTheme.textSecondary,
                           fontSize: 14,
                         ),
@@ -915,10 +915,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
-      style: GoogleFonts.cairo(fontSize: 16),
+      style: TextStyle(fontFamily: 'Cairo',fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.cairo(color: Colors.grey[600]),
+        labelStyle: TextStyle(fontFamily: 'Cairo',color: Colors.grey[600]),
         prefixIcon: Icon(
           icon,
           color: AppTheme.primaryColor.withValues(alpha: 0.7),
@@ -970,7 +970,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.cashOnDelivery,
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: AppTheme.textPrimary,
@@ -978,7 +978,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 Text(
                   'الدفع عند استلام الطلب',
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                     color: AppTheme.textSecondary,
                     fontSize: 13,
                   ),
@@ -1021,10 +1021,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   controller: _couponController,
                   enabled: !_isCouponApplied,
                   textDirection: TextDirection.ltr,
-                  style: GoogleFonts.poppins(fontSize: 16),
+                  style: TextStyle(fontFamily: 'Cairo',fontSize: 16),
                   decoration: InputDecoration(
                     hintText: 'أدخل كود الخصم',
-                    hintStyle: GoogleFonts.cairo(
+                    hintStyle: TextStyle(fontFamily: 'Cairo',
                       color: Colors.grey[400],
                       fontSize: 14,
                     ),
@@ -1067,7 +1067,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         icon: const Icon(Icons.close, size: 18),
                         label: Text(
                           'إزالة',
-                          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red[50],
@@ -1099,7 +1099,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               )
                             : Text(
                                 'تطبيق',
-                                style: GoogleFonts.cairo(
+                                style: TextStyle(fontFamily: 'Cairo',
                                   fontWeight: FontWeight.bold,
                                   height: 1.2, // Fix clipping
                                 ),
@@ -1116,7 +1116,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 const SizedBox(width: 6),
                 Text(
                   _couponError!,
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                     color: Colors.red,
                     fontSize: 13,
                   ),
@@ -1141,7 +1141,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       _couponType == 'percentage'
                           ? 'تم تطبيق خصم ${_couponDiscount.toStringAsFixed(0)}%'
                           : 'تم تطبيق خصم ${_couponDiscount.toStringAsFixed(2)} EGP',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(fontFamily: 'Cairo',
                         color: Colors.green[700],
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -1218,7 +1218,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const SizedBox(width: 4),
                   Text(
                     'توصيل خلال $daysMin - $daysMax أيام عمل',
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                         color: Colors.grey[600], fontSize: 12),
                   ),
                 ],
@@ -1250,7 +1250,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       children: [
         Text(
           label,
-          style: GoogleFonts.cairo(
+          style: TextStyle(fontFamily: 'Cairo',
             color: isDiscount
                 ? Colors.green[700]
                 : isTotal
@@ -1262,7 +1262,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
         Text(
           value,
-          style: GoogleFonts.poppins(
+          style: TextStyle(fontFamily: 'Cairo',
             color: isDiscount
                 ? Colors.green[700]
                 : isTotal

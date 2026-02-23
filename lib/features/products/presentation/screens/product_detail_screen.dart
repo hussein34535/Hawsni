@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:meta_seo/meta_seo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:hwasi_app/core/services/analytics_service.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:hwasi_app/core/services/wishlist_service.dart';
@@ -345,7 +345,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           const SizedBox(width: 12),
           Expanded(
               child: Text(msg,
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                       color: Colors.white, fontWeight: FontWeight.w700))),
         ],
       ),
@@ -603,7 +603,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                    Colors.black.withOpacity(0.35),
+                    Colors.black.withValues(alpha: 0.35),
                     Colors.transparent
                   ]))),
             ),
@@ -619,10 +619,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3), // More transparent
+                      color: Colors.black.withValues(alpha: 0.3), // More transparent
                       borderRadius: BorderRadius.circular(100),
                       border: Border.all(
-                          color: Colors.white.withOpacity(0.1), width: 0.5),
+                          color: Colors.white.withValues(alpha: 0.1), width: 0.5),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -640,7 +640,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                             decoration: BoxDecoration(
                               color: active
                                   ? Colors.white
-                                  : Colors.white.withOpacity(0.35),
+                                  : Colors.white.withValues(alpha: 0.35),
                               borderRadius: BorderRadius.circular(100),
                             ),
                           );
@@ -649,8 +649,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         // Counter text
                         Text(
                           '${_currentImageIndex + 1}/${data.images.length}',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white.withOpacity(0.8),
+                          style: TextStyle(fontFamily: 'Cairo',
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
                             letterSpacing: 0.5,
@@ -692,7 +692,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             ? BorderRadius.circular(24)
             : const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: isDesktop
-            ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20)]
+            ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20)]
             : [
                 BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -706,14 +706,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         children: [
           // ── Title & Price (Big Brand Style) ──
           Text(data.name,
-              style: GoogleFonts.cairo(
+              style: TextStyle(fontFamily: 'Cairo',
                   fontSize: isDesktop ? 32 : 26,
                   fontWeight: FontWeight.w900,
                   height: 1.2,
                   color: Colors.black87)),
           const SizedBox(height: 8),
           Text('${data.price} $currency',
-              style: GoogleFonts.poppins(
+              style: TextStyle(fontFamily: 'Cairo',
                 fontSize: isDesktop ? 26 : 22,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primaryColor,
@@ -755,10 +755,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                         Text('جرب هذه القطعة الآن',
-                            style: GoogleFonts.cairo(
+                            style: TextStyle(fontFamily: 'Cairo',
                                 fontWeight: FontWeight.bold, fontSize: 14)),
                         Text('شاهد كيف تبدو عليك بالذكاء الاصطناعي',
-                            style: GoogleFonts.cairo(
+                            style: TextStyle(fontFamily: 'Cairo',
                                 fontSize: 12, color: Colors.black54))
                       ])),
                 ],
@@ -770,7 +770,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           // Colors
           if (data.colors.isNotEmpty) ...[
             Text('اللون',
-                style: GoogleFonts.cairo(
+                style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87)),
@@ -785,7 +785,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('المقاس',
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87)),
@@ -798,7 +798,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           size: 16, color: AppTheme.primaryColor),
                       const SizedBox(width: 4),
                       Text('دليل المقاسات',
-                          style: GoogleFonts.cairo(
+                          style: TextStyle(fontFamily: 'Cairo',
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.primaryColor,
@@ -829,7 +829,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   const SizedBox(width: 12),
                   Expanded(
                       child: Text('الكمية محدودة! باقِ $_stockCount قطع فقط',
-                          style: GoogleFonts.cairo(
+                          style: TextStyle(fontFamily: 'Cairo',
                               color: Colors.orange.shade800,
                               fontWeight: FontWeight.bold,
                               fontSize: 13))),
@@ -844,7 +844,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('الكمية',
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87)),
@@ -867,7 +867,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         width: 32,
                         child: Text('$_quantity',
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
+                            style: TextStyle(fontFamily: 'Cairo',
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16))),
@@ -909,7 +909,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       isAdded ? _goToCart(context) : _addToCart(context, data),
                   icon: Icon(buttonIcon),
                   label: Text(buttonText,
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(fontFamily: 'Cairo',
                           fontWeight: FontWeight.bold, fontSize: 18)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
@@ -927,13 +927,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
           // Description
           Text('التفاصيل',
-              style: GoogleFonts.cairo(
+              style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87)),
           const SizedBox(height: 12),
           Text(data.description,
-              style: GoogleFonts.cairo(
+              style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 15,
                   height: 1.8,
                   color: Colors.black87,
@@ -999,10 +999,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               children: [
                 if (_quantity > 1)
                   Text('$_quantity × ${data.price} $currency',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(fontFamily: 'Cairo',
                           fontSize: 10, color: Colors.white54, height: 1)),
                 Text('$formattedTotal $currency',
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(fontFamily: 'Cairo',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -1048,7 +1048,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       Icon(buttonIcon, color: Colors.black, size: 20),
                       const SizedBox(width: 8),
                       Text(buttonText,
-                          style: GoogleFonts.cairo(
+                          style: TextStyle(fontFamily: 'Cairo',
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
                               fontSize: 14)),
@@ -1159,7 +1159,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     color: isSel ? Colors.black : Colors.grey.shade300,
                     width: 1.5)),
             child: Text(s,
-                style: GoogleFonts.poppins(
+                style: TextStyle(fontFamily: 'Cairo',
                     color: isSel ? Colors.white : Colors.black,
                     fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
                     fontSize: 14)),
@@ -1300,7 +1300,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryColor.withOpacity(0.1),
+                      color: AppTheme.primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(Icons.straighten_rounded,
@@ -1309,7 +1309,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text('دليل المقاسات',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87)),
@@ -1340,7 +1340,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       return [
                         Text(
                           content,
-                          style: GoogleFonts.cairo(
+                          style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 15,
                             height: 1.8,
                             color: Colors.black87,
@@ -1385,12 +1385,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                     horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
                                   color:
-                                      AppTheme.primaryColor.withOpacity(0.08),
+                                      AppTheme.primaryColor.withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   key,
-                                  style: GoogleFonts.poppins(
+                                  style: TextStyle(fontFamily: 'Cairo',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: AppTheme.primaryColor,
@@ -1413,7 +1413,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                               fit: hasKeyVal ? FlexFit.loose : FlexFit.tight,
                               child: Text(
                                 val,
-                                style: GoogleFonts.cairo(
+                                style: TextStyle(fontFamily: 'Cairo',
                                   fontSize: 16,
                                   fontWeight: hasKeyVal
                                       ? FontWeight.w600
@@ -1450,7 +1450,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     elevation: 0,
                   ),
                   child: Text('حسناً',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(fontFamily: 'Cairo',
                           fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
@@ -1469,11 +1469,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
             AppLocalizations.of(ctx)?.sessionExpired ?? 'Session Expired',
-            style: GoogleFonts.cairo(fontWeight: FontWeight.bold)),
+            style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold)),
         content: Text(
             AppLocalizations.of(ctx)?.sessionExpiredMessage ??
                 'Please login again.',
-            style: GoogleFonts.cairo()),
+            style: TextStyle(fontFamily: 'Cairo',)),
         actions: [
           TextButton(
               onPressed: () {
@@ -1482,7 +1482,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     MaterialPageRoute(builder: (_) => const LoginScreen()));
               },
               child: Text(AppLocalizations.of(ctx)?.ok ?? 'OK',
-                  style: GoogleFonts.cairo(
+                  style: TextStyle(fontFamily: 'Cairo',
                       fontWeight: FontWeight.bold, color: Colors.black)))
         ],
       ),
@@ -1583,12 +1583,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                         decoration: BoxDecoration(
                                             color: active
                                                 ? Colors.black
-                                                : Colors.black.withOpacity(0.3),
+                                                : Colors.black.withValues(alpha: 0.3),
                                             borderRadius:
                                                 BorderRadius.circular(4),
                                             border: Border.all(
                                                 color: Colors.white
-                                                    .withOpacity(0.5))),
+                                                    .withValues(alpha: 0.5))),
                                       );
                                     }),
                                   ),

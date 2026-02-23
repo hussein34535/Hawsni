@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
@@ -169,7 +169,7 @@ class _ProductCardState extends State<ProductCard> {
                                 ? [] // Enforce empty shadows on web for better WebGL performance
                                 : [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.08),
+                                      color: Colors.black.withValues(alpha: 0.08),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -242,11 +242,11 @@ class _ProductCardState extends State<ProductCard> {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
+                                      color: Colors.black.withValues(alpha: 0.1),
                                       blurRadius: 4,
                                     ),
                                   ],
@@ -279,7 +279,7 @@ class _ProductCardState extends State<ProductCard> {
                           widget.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.cairo(
+                          style: TextStyle(fontFamily: 'Cairo',
                             // Ensure nice Arabic font
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -405,7 +405,7 @@ class _ProductCardState extends State<ProductCard> {
                                   children: [
                                     TextSpan(
                                       text: widget.price.split('.')[0],
-                                      style: GoogleFonts.poppins(
+                                      style: TextStyle(fontFamily: 'Cairo',
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.primaryColor,
@@ -415,7 +415,7 @@ class _ProductCardState extends State<ProductCard> {
                                     TextSpan(
                                       text: AppLocalizations.of(context)!
                                           .currencySymbol,
-                                      style: GoogleFonts.poppins(
+                                      style: TextStyle(fontFamily: 'Cairo',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.primaryColor,

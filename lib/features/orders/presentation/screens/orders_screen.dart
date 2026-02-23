@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/features/orders/bloc/order_bloc.dart';
@@ -30,7 +30,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       appBar: AppBar(
         title: Text(
           'طلباتي',
-          style: GoogleFonts.cairo(
+          style: TextStyle(fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
             color: AppTheme.textPrimary,
             fontSize: 20,
@@ -104,13 +104,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(AppLocalizations.of(context)!.noOrdersYet,
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.textPrimary)),
                     const SizedBox(height: 8),
                     Text(AppLocalizations.of(context)!.startShoppingToSeeOrders,
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 16, color: AppTheme.textSecondary)),
                     const SizedBox(height: 32),
                     ElevatedButton(
@@ -219,7 +219,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       children: [
                         Text(
                           'طلب #$orderId',
-                          style: GoogleFonts.cairo(
+                          style: TextStyle(fontFamily: 'Cairo',
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary),
@@ -227,7 +227,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         if (createdAt != null)
                           Text(
                             _formatDate(createdAt),
-                            style: GoogleFonts.cairo(
+                            style: TextStyle(fontFamily: 'Cairo',
                                 fontSize: 12, color: AppTheme.textSecondary),
                           ),
                       ],
@@ -238,7 +238,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     children: [
                       Text(
                         '${total.toStringAsFixed(0)} ج.م',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87),
@@ -267,7 +267,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     const SizedBox(width: 8),
                     Text(
                       _getEstimatedDelivery(order),
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(fontFamily: 'Cairo',
                           fontSize: 13,
                           color: Colors.blue[700],
                           fontWeight: FontWeight.w600),
@@ -288,13 +288,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.itemsCount(items.length),
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                         color: AppTheme.textSecondary, fontSize: 13),
                   ),
                   Row(
                     children: [
                       Text('تتبع الطلب',
-                          style: GoogleFonts.cairo(
+                          style: TextStyle(fontFamily: 'Cairo',
                               fontSize: 13,
                               color: AppTheme.primaryColor,
                               fontWeight: FontWeight.w600)),
@@ -378,7 +378,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(label,
-          style: GoogleFonts.cairo(
+          style: TextStyle(fontFamily: 'Cairo',
               fontSize: 11, fontWeight: FontWeight.bold, color: color)),
     );
   }
@@ -430,7 +430,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   children: [
                     // Title
                     Text('تتبع الطلب',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87),
@@ -438,7 +438,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     const SizedBox(height: 4),
                     Text(
                         'رقم الطلب: #${order['id']?.toString().substring(0, 8) ?? 'N/A'}',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 13, color: Colors.grey[500]),
                         textAlign: TextAlign.center),
                     const SizedBox(height: 24),
@@ -476,12 +476,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('موعد التوصيل المتوقع',
-                                      style: GoogleFonts.cairo(
+                                      style: TextStyle(fontFamily: 'Cairo',
                                           fontSize: 12,
                                           color: Colors.grey[500])),
                                   Text(
                                     _getEstimatedDelivery(order),
-                                    style: GoogleFonts.cairo(
+                                    style: TextStyle(fontFamily: 'Cairo',
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.blue[700]),
@@ -505,7 +505,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
                     // Order items
                     Text('المنتجات',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87)),
@@ -532,14 +532,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(item['name'] ?? 'منتج',
-                                          style: GoogleFonts.cairo(
+                                          style: TextStyle(fontFamily: 'Cairo',
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                               color: AppTheme.textPrimary)),
                                       Text(
                                           AppLocalizations.of(context)!
                                               .quantityAbbr(item['quantity']),
-                                          style: GoogleFonts.cairo(
+                                          style: TextStyle(fontFamily: 'Cairo',
                                               color: AppTheme.textSecondary,
                                               fontSize: 13)),
                                     ],
@@ -547,7 +547,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 ),
                                 Text(
                                     '${((item['price'] as num?) ?? 0).toStringAsFixed(0)} ج.م',
-                                    style: GoogleFonts.cairo(
+                                    style: TextStyle(fontFamily: 'Cairo',
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87)),
@@ -562,13 +562,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('الإجمالي',
-                            style: GoogleFonts.cairo(
+                            style: TextStyle(fontFamily: 'Cairo',
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87)),
                         Text(
                             '${(order['total'] ?? order['subtotal'] ?? 0).toStringAsFixed(0)} ج.م',
-                            style: GoogleFonts.cairo(
+                            style: TextStyle(fontFamily: 'Cairo',
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black)),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:share_plus/share_plus.dart';
 import 'package:hwasi_app/core/services/wishlist_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
@@ -28,7 +28,7 @@ class WishlistScreen extends StatelessWidget {
               count > 0
                   ? '${l10n.emptyWishlist.split(' ').first} ($count)'
                   : l10n.emptyWishlist.split(' ').first,
-              style: GoogleFonts.cairo(
+              style: TextStyle(fontFamily: 'Cairo',
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
                 fontSize: 20,
@@ -101,7 +101,7 @@ class WishlistScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   Text(
                     l10n.emptyWishlist,
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
@@ -110,7 +110,7 @@ class WishlistScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     l10n.saveItemsForLater,
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 15,
                       color: AppTheme.textSecondary,
                     ),
@@ -155,7 +155,7 @@ class WishlistScreen extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'حذف',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                           color: Colors.red[400],
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
@@ -170,7 +170,7 @@ class WishlistScreen extends StatelessWidget {
                     SnackBar(
                       content: Text(
                         'تم حذف ${item.name} من قائمة الأمنيات',
-                        style: GoogleFonts.cairo(),
+                        style: TextStyle(fontFamily: 'Cairo',),
                       ),
                       backgroundColor: Colors.black87,
                       behavior: SnackBarBehavior.floating,
@@ -221,7 +221,7 @@ class WishlistScreen extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   'تم نقل ${item.name} إلى السلة 🛒',
-                                  style: GoogleFonts.cairo(),
+                                  style: TextStyle(fontFamily: 'Cairo',),
                                 ),
                                 backgroundColor: Colors.green[700],
                                 behavior: SnackBarBehavior.floating,
@@ -235,7 +235,7 @@ class WishlistScreen extends StatelessWidget {
                               size: 16),
                           label: Text(
                             'أضف للسلة',
-                            style: GoogleFonts.cairo(
+                            style: TextStyle(fontFamily: 'Cairo',
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),

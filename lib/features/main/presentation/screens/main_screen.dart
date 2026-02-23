@@ -228,7 +228,7 @@ class _MainScreenState extends State<MainScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _currentIndex == 3
-                    ? AppTheme.primaryColor.withOpacity(0.1)
+                    ? AppTheme.primaryColor.withValues(alpha: 0.1)
                     : Colors.transparent,
               ),
               child: Icon(

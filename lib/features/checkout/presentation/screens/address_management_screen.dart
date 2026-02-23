@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:hwasi_app/features/checkout/models/address.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
@@ -84,14 +84,14 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                     content: Text('تم إضافة العنوان بنجاح',
-                        style: GoogleFonts.cairo(color: Colors.white)),
+                        style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.successColor),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                     content: Text('فشل إضافة العنوان',
-                        style: GoogleFonts.cairo(color: Colors.white)),
+                        style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.errorColor),
               );
             }
@@ -143,14 +143,14 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                     content: Text('تم تعديل العنوان بنجاح',
-                        style: GoogleFonts.cairo(color: Colors.white)),
+                        style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.successColor),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                     content: Text('فشل تعديل العنوان',
-                        style: GoogleFonts.cairo(color: Colors.white)),
+                        style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.errorColor),
               );
             }
@@ -331,17 +331,17 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
               context: context,
               builder: (ctx) => AlertDialog(
                 title: Text('حذف العنوان',
-                    style: GoogleFonts.cairo(fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold)),
                 content: Text('هل أنت متأكد من حذف هذا العنوان؟',
-                    style: GoogleFonts.cairo()),
+                    style: TextStyle(fontFamily: 'Cairo',)),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: Text('إلغاء', style: GoogleFonts.cairo())),
+                      child: Text('إلغاء', style: TextStyle(fontFamily: 'Cairo',))),
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, true),
                     child: Text('حذف',
-                        style: GoogleFonts.cairo(color: Colors.red)),
+                        style: TextStyle(fontFamily: 'Cairo',color: Colors.red)),
                   ),
                 ],
               ),
@@ -381,7 +381,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                           Row(
                             children: [
                               Text(address.title,
-                                  style: GoogleFonts.cairo(
+                                  style: TextStyle(fontFamily: 'Cairo',
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.textPrimary)),
@@ -396,7 +396,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text('الافتراضي',
-                                      style: GoogleFonts.cairo(
+                                      style: TextStyle(fontFamily: 'Cairo',
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                           color: AppTheme.primaryColor)),
@@ -406,7 +406,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(address.fullName,
-                              style: GoogleFonts.cairo(
+                              style: TextStyle(fontFamily: 'Cairo',
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   color: AppTheme.textSecondary)),
@@ -423,14 +423,14 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                     '${address.address}, ${address.city}, ${address.country}',
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                         fontSize: 14, color: AppTheme.textSecondary)),
               ),
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(address.phone,
-                    style: GoogleFonts.poppins(
+                    style: TextStyle(fontFamily: 'Cairo',
                         fontSize: 14, color: AppTheme.textSecondary)),
               ),
               const Divider(height: 24, color: AppTheme.dividerColor),
@@ -445,7 +445,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                           size: 18, color: AppTheme.primaryColor),
                       label: Text('تعديل',
                           style:
-                              GoogleFonts.cairo(color: AppTheme.primaryColor)),
+                              TextStyle(fontFamily: 'Cairo',color: AppTheme.primaryColor)),
                     ),
                     const SizedBox(width: 8),
                     TextButton.icon(
@@ -453,7 +453,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                       icon: const Icon(Icons.delete_outline,
                           size: 18, color: AppTheme.errorColor),
                       label: Text('حذف',
-                          style: GoogleFonts.cairo(color: AppTheme.errorColor)),
+                          style: TextStyle(fontFamily: 'Cairo',color: AppTheme.errorColor)),
                     ),
                   ],
                 ),

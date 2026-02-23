@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class TrackingStepper extends StatelessWidget {
   final String status;
@@ -78,7 +78,7 @@ class TrackingStepper extends StatelessWidget {
             children: [
               Text(
                 isCancelled ? 'الطلب ملغي' : 'تتبع حالة الطلب',
-                style: GoogleFonts.cairo(
+                style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: isCancelled ? Colors.red : AppTheme.primaryColor,
@@ -99,7 +99,7 @@ class TrackingStepper extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         'توصيل خلال $expectedDays',
-                        style: GoogleFonts.cairo(
+                        style: TextStyle(fontFamily: 'Cairo',
                           fontSize: 12,
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.bold,
@@ -114,7 +114,7 @@ class TrackingStepper extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             'تاريخ الطلب: $orderDate',
-            style: GoogleFonts.cairo(
+            style: TextStyle(fontFamily: 'Cairo',
               fontSize: 14,
               color: Colors.grey[600],
             ),
@@ -164,7 +164,7 @@ class TrackingStepper extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     'عذراً، لقد تم إلغاء هذا الطلب.',
-                    style: GoogleFonts.cairo(
+                    style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 16,
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
@@ -224,7 +224,7 @@ class TrackingStepper extends StatelessWidget {
               alignment: Alignment.centerRight, // Adjust for RTL
               child: Text(
                 title,
-                style: GoogleFonts.cairo(
+                style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 16,
                   fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
                   color: isCompleted ? Colors.black87 : Colors.grey[500],

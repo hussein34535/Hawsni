@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/features/home/bloc/home_bloc.dart';
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         Text(
                           state.message,
-                          style: GoogleFonts.cairo(
+                          style: TextStyle(fontFamily: 'Cairo',
                             color: Colors.black87,
                             fontSize: 16,
                           ),
@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: [
                                     Text(
                                       'Shop by Category', // If this is translated, it will use Cairo
-                                      style: GoogleFonts.cairo(
+                                      style: TextStyle(fontFamily: 'Cairo',
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87,
@@ -278,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 textAlign: TextAlign.center,
-                                                style: GoogleFonts.cairo(
+                                                style: TextStyle(fontFamily: 'Cairo',
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.black87,
@@ -398,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Logo/Title - Centered
           Text(
             'Hawsni',
-            style: GoogleFonts.playfairDisplay(
+            style: TextStyle(fontFamily: 'Cairo',
               fontSize: 26,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.2,
@@ -463,7 +463,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 12),
                     Text(
                       'Search Products',
-                      style: GoogleFonts.cairo(
+                      style: TextStyle(fontFamily: 'Cairo',
                         color: Colors.grey[600],
                         fontSize: 15,
                       ),

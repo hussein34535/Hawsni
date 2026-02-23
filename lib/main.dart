@@ -33,9 +33,8 @@ void main() async {
   }
 
   // On web: runtime font fetching enabled to ensure fonts load without assets
-  // if (kIsWeb) {
-  //   GoogleFonts.config.allowRuntimeFetching = false;
-  // }
+  // Removed GoogleFonts configuration as it causes CanvasKit Typeface BindingError
+  // We rely on the native font-family definition 'Cairo' which is also preloaded in index.html
 
   // Initialize App Configuration - Using PRODUCTION server (Vercel)
   print('-------------------------------------------');

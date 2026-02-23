@@ -2517,7 +2517,6 @@ file_selector_platform_interface
 file_selector_windows
 flutter_plugin_android_lifecycle
 go_router
-google_fonts
 image_picker_for_web
 image_picker_macos
 image_picker_platform_interface
