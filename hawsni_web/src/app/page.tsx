@@ -25,7 +25,7 @@ export default function HomePage() {
       try {
         const [catData, prodData, bannerData] = await Promise.all([
           categoryService.getCategories(),
-          productService.getFeaturedProducts(),
+          productService.getProducts(),
           apiClient.get('/banners')
         ]);
 

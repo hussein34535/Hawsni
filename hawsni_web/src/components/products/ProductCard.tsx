@@ -13,7 +13,15 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
     const _id = product._id || (product as any).id;
     const { name, price, images, colors = [] } = product;
-    const imageUrl = images[0];
+    const formatImageUrl = (url: string) => {
+        if (!url) return '';
+        if (url.startsWith('http')) return url;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
+        const baseUrl = apiUrl.replace(/\/api$/, '');
+        return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+    };
+
+    const imageUrl = formatImageUrl(images[0]);
     const [selectedImage, setSelectedImage] = useState(imageUrl);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
@@ -66,7 +74,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setSelectedColor(c.color);
-                                        if (c.image) setSelectedImage(c.image);
+                                        if (c.image) setSelectedImage(formatImageUrl(c.image));
                                     }}
                                     style={{ backgroundColor: c.color }}
                                     className={`w-[14px] h-[14px] rounded-full mr-[6px] transition-all border ${isSelected

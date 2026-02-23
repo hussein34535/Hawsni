@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const apiClient = axios.create({
-    baseURL: 'https://hwasibackend.vercel.app/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api',
     headers: {
         'Content-Type': 'application/json',
     },
