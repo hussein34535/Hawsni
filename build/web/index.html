@@ -32,43 +32,61 @@
   <link rel="manifest" href="manifest.json">
 
   <script>
-    // 1. FORCED ZOMBIE KILLER: Unregister Service Workers & Wipe Caches
+    // ============================================================
+    // 1. SERVICE WORKER KILLER - Block SW registration completely
+    // ============================================================
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function (registrations) {
-        for (let registration of registrations) { registration.unregister(); }
+        for (let reg of registrations) { reg.unregister(); }
       });
-      navigator.serviceWorker.register = function (script, options) {
-        console.log('🚫 ServiceWorker registration blocked for speed & reliability');
+      const _swMock = function (script, options) {
         const scriptStr = (script instanceof URL) ? script.href : String(script);
-        const registrationMock = {
-          active: {
-            scriptURL: scriptStr,
-            state: 'activated',
-            addEventListener: () => { },
-            removeEventListener: () => { },
-            postMessage: () => { }
-          },
-          installing: null,
-          waiting: null,
-          scope: '/',
-          update: () => Promise.resolve(registrationMock),
+        const reg = {
+          active: { scriptURL: scriptStr, state: 'activated', addEventListener: () => { }, removeEventListener: () => { }, postMessage: () => { } },
+          installing: null, waiting: null, scope: '/',
+          update: () => Promise.resolve(reg),
           unregister: () => Promise.resolve(true),
           showNotification: () => Promise.resolve(),
           getNotifications: () => Promise.resolve([]),
-          addEventListener: () => { },
-          removeEventListener: () => { },
-          dispatchEvent: () => true
+          addEventListener: () => { }, removeEventListener: () => { }, dispatchEvent: () => true
         };
-        return Promise.resolve(registrationMock);
+        return Promise.resolve(reg);
       };
-      navigator.serviceWorker.getRegistration = () => Promise.resolve(null);
-      navigator.serviceWorker.ready = new Promise(() => { }); // Never settles to prevent ready-loops
+      navigator.serviceWorker.register = _swMock;
+      navigator.serviceWorker.getRegistration = () => Promise.resolve(undefined);
+      Object.defineProperty(navigator.serviceWorker, 'ready', { get: () => new Promise(() => { }), configurable: true });
     }
     if ('caches' in window) {
-      caches.keys().then(function (names) {
-        for (let name of names) caches.delete(name);
-      });
+      caches.keys().then(names => names.forEach(n => caches.delete(n)));
     }
+
+    // ============================================================
+    // 2. CANVASKIT ENFORCER
+    //    Intercepts _flutter.loader before flutter_bootstrap.js
+    //    sets it, wrapping the load() call to inject canvaskit.
+    //    This prevents skwasm from being selected even if the
+    //    browser supports WasmGC.
+    // ============================================================
+    window._flutter = window._flutter || {};
+    let _flutterLoaderRef = null;
+    Object.defineProperty(window._flutter, 'loader', {
+      get: function () { return _flutterLoaderRef; },
+      set: function (loader) {
+        const _origLoad = loader.load.bind(loader);
+        loader.load = function (options) {
+          console.log('✅ Forcing CanvasKit renderer (skwasm disabled)');
+          const patched = Object.assign({}, options || {}, {
+            config: Object.assign({}, (options || {}).config || {}, {
+              renderer: 'canvaskit',
+              useColorEmoji: false,
+            })
+          });
+          return _origLoad(patched);
+        };
+        _flutterLoaderRef = loader;
+      },
+      configurable: true
+    });
   </script>
 
   <style>
@@ -193,35 +211,17 @@
     <p class="tagline">Your Style, Your Way</p>
   </div>
 
-  <!-- The Flutter bootstrapping script -->
+  <!-- The Flutter bootstrapping script - runs its own loader.load() inside -->
   <script src="flutter_bootstrap.js" async></script>
 
   <script>
-    // Remove loading indicator when Flutter app renders its first frame
+    // Remove loading indicator when Flutter renders the first frame
     window.addEventListener('flutter-first-frame', function () {
       const loader = document.getElementById('loading-indicator');
       if (loader) {
         loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 400); // 400ms fade out transition
+        setTimeout(() => loader.remove(), 400);
       }
-    });
-
-
-
-    // 4. Initialize Flutter loader with EXPLICIT service worker disabling & renderer stabilization
-    window.addEventListener('load', function (ev) {
-      _flutter.loader.load({
-        serviceWorkerSettings: {
-          serviceWorkerVersion: null,
-        },
-        onEntrypointLoaded: async function (engineInitializer) {
-          const appRunner = await engineInitializer.initializeEngine({
-            useColorEmoji: false, // Sometimes emoji loading triggers skwasm paths
-            renderer: "canvaskit", // Force stable canvaskit to avoid skwasm/wasm boundary crashes
-          });
-          await appRunner.runApp();
-        }
-      });
     });
   </script>
 </body>
