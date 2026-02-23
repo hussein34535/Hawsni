@@ -23,6 +23,7 @@ const bannerRoutes = require('./routes/banners');
 const seoRoutes = require('./routes/seo');
 const vtoRoutes = require('./routes/vto');
 const adminRoutes = require('./routes/admin');
+const shippingRoutes = require('./routes/shipping');
 const seoMiddleware = require('./middleware/seoMiddleware');
 
 const app = express();
@@ -60,6 +61,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/shipping', shippingRoutes);
 
 // SEO Routes (served at root)
 app.use('/', seoRoutes);

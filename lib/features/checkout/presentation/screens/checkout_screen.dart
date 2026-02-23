@@ -128,7 +128,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _phoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.fillAddressDetails),
+          content: Text(AppLocalizations.of(context)?.fillAddressDetails ??
+              'برجاء ملء بيانات العنوان'),
           backgroundColor: Colors.red,
         ),
       );
@@ -267,7 +268,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         if (addressState.addresses.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.pleaseAddAddress),
+              content: Text(AppLocalizations.of(context)?.pleaseAddAddress ??
+                  'برجاء إضافة عنوان الشحن'),
               backgroundColor: AppTheme.errorColor,
             ),
           );
