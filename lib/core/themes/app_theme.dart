@@ -117,6 +117,7 @@ class AppTheme {
       onSurface: textPrimary,
     ),
     textTheme: textTheme,
+    fontFamily: 'Cairo', // Set Cairo as the default global font
     appBarTheme: const AppBarTheme(
       backgroundColor: scaffoldBackgroundColor,
       elevation: 0,

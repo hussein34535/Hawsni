@@ -58,6 +58,12 @@ void main() async {
     await NotificationService().init();
   }
 
+  // Catch and log uncaught errors to prevent black screen
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    print('FLUTTER ERROR: ${details.exception}');
+  };
+
   runApp(
     MultiProvider(
       providers: [
