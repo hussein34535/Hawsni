@@ -4,22 +4,21 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Star } from 'lucide-react';
 
+import { Product } from '@/types';
+
 interface ProductCardProps {
-    id: string;
-    name: string;
-    price: number;
-    imageUrl: string;
-    colors?: { color: string; image?: string }[];
-    rating?: number;
+    product: Product;
 }
 
-export default function ProductCard({ id, name, price, imageUrl, colors = [], rating = 4.8 }: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
+    const { _id, name, price, images, colors = [] } = product;
+    const imageUrl = images[0];
     const [selectedImage, setSelectedImage] = useState(imageUrl);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
 
     return (
-        <div className="group flex flex-col cursor-pointer" onClick={() => window.location.href = `/product/${id}`}>
+        <div className="group flex flex-col cursor-pointer" onClick={() => window.location.href = `/product/${_id}`}>
             {/* Image Container */}
             <div className="relative aspect-square bg-[#F5F5F5] rounded-2xl overflow-hidden mb-2">
                 <AnimatePresence mode="wait">

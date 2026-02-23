@@ -58,9 +58,9 @@ export default function Navbar() {
                             </Link>
 
                             {/* Will implement wishlist later */}
-                            <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors">
+                            <Link href="/wishlist" className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors">
                                 <span className="font-normal text-[16px]">{t.common.wishlist}</span>
-                            </button>
+                            </Link>
 
                             <button
                                 onClick={() => setIsCartOpen(true)}
