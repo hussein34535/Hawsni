@@ -60,5 +60,29 @@ export const ar: LocaleType = {
         empty: "سلتك فارغة",
         checkout: "إتمام الشراء",
         total: "الإجمالي",
+    },
+    orders: {
+        title: "طلباتي",
+        empty: "لم تقم بأي طلبات بعد.",
+        order_id: "رقم الطلب",
+        date: "التاريخ",
+        total: "الإجمالي",
+        status: "الحالة",
+        view_details: "عرض التفاصيل",
+        track: "تتبع الطلب",
+        reorder: "إعادة طلب",
+    },
+    addresses: {
+        title: "عناوين الشحن",
+        add_new: "إضافة عنوان جديد",
+        empty: "لا يوجد عناوين مسجلة.",
+        default: "العنوان الافتراضي",
+        delete_confirm: "هل أنت متأكد من حذف هذا العنوان؟",
+    },
+    coupons: {
+        title: "كوبوناتي",
+        empty: "لا يوجد كوبونات متاحة حالياً.",
+        copy: "نسخ الكود",
+        expiry: "ينتهي في",
     }
 };

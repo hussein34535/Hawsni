@@ -127,7 +127,7 @@ export default function ProfilePage() {
                 </MenuSection>
 
                 <MenuSection title={t.profile.sections.activity} isRTL={isRTL}>
-                    <MenuItem icon={ShoppingBag} title={t.profile.items.my_orders} href="/orders" />
+                    <MenuItem icon={ShoppingBag} title={t.profile.items.my_orders} href="/profile/orders" />
                     <MenuItem icon={Heart} title={t.profile.items.wishlist} href="/wishlist" />
                     <MenuItem icon={MapPin} title={t.profile.items.addresses} href="/profile/addresses" />
                     <MenuItem icon={Ticket} title={t.profile.items.coupons} href="/profile/coupons" />

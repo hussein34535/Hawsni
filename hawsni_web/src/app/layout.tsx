@@ -9,10 +9,16 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  title: "Hawsni | Premium Fashion",
-  description: "Discover premium fashion and lifestyle products at Hawsni.",
+  title: 'Hawsni | Premium Fashion & Style in Egypt',
+  description: 'Shop the latest fashion trends at Hawsni. Premium quality, local craftsmanship, and unique styles delivered to your doorstep in Egypt.',
+  keywords: 'fashion, Egypt, style, clothing, premium, Hawsni, ecommerce',
   icons: {
     icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: 'Hawsni | Premium Fashion & Style',
+    description: 'Discover the ultimate fashion destination in Egypt. Shop unique collections at Hawsni.',
+    images: ['/logo.png'],
   },
 };
 

@@ -58,6 +58,30 @@ export const en = {
         empty: "Your cart is empty",
         checkout: "Checkout",
         total: "Total",
+    },
+    orders: {
+        title: "My Orders",
+        empty: "You haven't placed any orders yet.",
+        order_id: "Order ID",
+        date: "Date",
+        total: "Total",
+        status: "Status",
+        view_details: "View Details",
+        track: "Track Order",
+        reorder: "Reorder",
+    },
+    addresses: {
+        title: "My Addresses",
+        add_new: "Add New Address",
+        empty: "No addresses saved.",
+        default: "Default Address",
+        delete_confirm: "Are you sure you want to delete this address?",
+    },
+    coupons: {
+        title: "My Coupons",
+        empty: "No coupons available.",
+        copy: "Copy Code",
+        expiry: "Expires on",
     }
 };
 
