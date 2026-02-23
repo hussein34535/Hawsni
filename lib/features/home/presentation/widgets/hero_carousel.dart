@@ -103,14 +103,17 @@ class _HeroCarouselState extends State<HeroCarousel> {
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: double.infinity,
+                            filterQuality: FilterQuality.none,
                             errorBuilder: (context, error, stackTrace) =>
                                 Container(color: Colors.grey[100]),
                           )
                         : CachedNetworkImage(
                             imageUrl: imageUrl,
                             fit: BoxFit.cover,
-                            memCacheWidth: 800,
-                            memCacheHeight: 400,
+                            memCacheWidth:
+                                1000, // Quality/Performance balance for large banners
+                            memCacheHeight: 500,
+                            filterQuality: FilterQuality.none,
                             placeholder: (context, url) =>
                                 Container(color: Colors.white),
                             errorWidget: (context, url, error) =>

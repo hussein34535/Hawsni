@@ -36,9 +36,12 @@
       navigator.serviceWorker.getRegistrations().then(function (registrations) {
         for (let registration of registrations) { registration.unregister(); }
       });
-      // Monkey-patch to prevent any future registrations/timeouts
+      // Monkey-patch to suppress registrations silently without throwing exceptions in console
       navigator.serviceWorker.register = function () {
-        return new Promise((r, reject) => reject('Service Workers disabled.'));
+        return new Promise((resolve) => {
+          // Resolve without doing anything to avoid "Exception" logs in flutter_bootstrap.js
+          resolve({ unregister: () => Promise.resolve(true) });
+        });
       };
     }
     if ('caches' in window) {
@@ -150,10 +153,7 @@
   <link rel="preload" href="main.dart.js" as="script">
   <link rel="preload" href="flutter_bootstrap.js" as="script">
 
-  <!-- Preload Arabic Font to fix layout lag -->
-  <link rel="preload"
-    href="https://fonts.gstatic.com/s/notosansarabic/v28/nwpxtLGrOAZMl5nJ_wfgRg3DrWFZWsnVBJ_sS6tlqHHFlhQ5l3sQWIHPqzCfyGyvvnCBFQLaig.woff2"
-    as="font" type="font/woff2" crossorigin="anonymous">
+
 
   <!-- Preload the Logo image used in splash -->
   <link rel="preload" href="assets/assets/images/logo.png" as="image">
@@ -183,21 +183,7 @@
       }
     });
 
-    // 2. Wipe ALL browser caches to clear the 37s delay "Zombie" data
-    if ('caches' in window) {
-      caches.keys().then(function (names) {
-        for (let name of names) caches.delete(name);
-      });
-    }
 
-    // 3. Remove loading indicator when Flutter app renders its first frame
-    window.addEventListener('flutter-first-frame', function () {
-      const loader = document.getElementById('loading-indicator');
-      if (loader) {
-        loader.style.opacity = '0';
-        setTimeout(() => loader.remove(), 400); // 400ms fade out transition
-      }
-    });
 
     // 4. Initialize Flutter loader with EXPLICIT service worker disabling
     window.addEventListener('load', function (ev) {

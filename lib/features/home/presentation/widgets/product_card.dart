@@ -183,6 +183,8 @@ class _ProductCardState extends State<ProductCard> {
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                     height: double.infinity,
+                                    filterQuality: FilterQuality
+                                        .none, // High performance scaling
                                     errorBuilder:
                                         (context, error, stackTrace) => Center(
                                       child: Icon(
@@ -197,8 +199,9 @@ class _ProductCardState extends State<ProductCard> {
                                         _selectedImageUrl ?? widget.imageUrl,
                                     fit: BoxFit.cover,
                                     memCacheWidth:
-                                        400, // Explicit resolution constraint limits JS decoding time
-                                    memCacheHeight: 400,
+                                        350, // Strict memory constraint
+                                    memCacheHeight: 350,
+                                    filterQuality: FilterQuality.none,
                                     placeholder: (context, url) {
                                       if (widget.blurHash != null &&
                                           widget.blurHash!.isNotEmpty) {

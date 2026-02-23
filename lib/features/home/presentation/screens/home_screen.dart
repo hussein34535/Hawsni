@@ -83,7 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: AppTheme.primaryColor,
                     child: CustomScrollView(
                       controller: _scrollController,
-                      physics: const ClampingScrollPhysics(),
+                      physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics()),
+                      cacheExtent:
+                          1500, // Pre-renders roughly 2-3 viewports of content to prevent white gaps
                       slivers: [
                         // Modern Clean AppBar (Mobile/Tablet only)
                         if (!ResponsiveLayout.isDesktop(context))

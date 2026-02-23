@@ -7,7 +7,11 @@
             "destination": "/api/sitemap"
         },
         {
-            "source": "/(.*)",
+            "source": "/robots.txt",
+            "destination": "/api/robots"
+        },
+        {
+            "source": "/((?!api/).*)",
             "destination": "/index.html"
         }
     ],
