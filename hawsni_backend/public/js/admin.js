@@ -203,10 +203,23 @@ async function toggleActive(url, currentStatus) {
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
 
-    if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', () => {
+    if (menuToggle && sidebar && overlay) {
+        function toggleMenu() {
             sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Close on link click (for mobile SPA-like feel if needed)
+        sidebar.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) toggleMenu();
+            });
         });
     }
 });
