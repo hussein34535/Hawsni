@@ -3,6 +3,11 @@ const router = express.Router();
 const ProductController = require('../controllers/api/productController');
 const upload = require('../middleware/upload');
 
+// @route   GET /api/products/search
+// @desc    Search products
+// @access  Public
+router.get('/search', ProductController.getProducts);
+
 // @route   GET /api/products
 // @desc    Get all products
 // @access  Public

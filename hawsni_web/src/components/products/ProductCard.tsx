@@ -11,7 +11,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-    const { _id, name, price, images, colors = [] } = product;
+    const _id = product._id || (product as any).id;
+    const { name, price, images, colors = [] } = product;
     const imageUrl = images[0];
     const [selectedImage, setSelectedImage] = useState(imageUrl);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
