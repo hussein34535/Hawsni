@@ -82,8 +82,14 @@ class OrderService {
 
             // Fallback to shipping address email (for guest checkout)
             if (!customerEmail && orderData.shipping_address) {
-                customerEmail = orderData.shipping_address.email;
-                customerName = orderData.shipping_address.name || customerName;
+                let shipping = orderData.shipping_address;
+                if (typeof shipping === 'string') {
+                    try { shipping = JSON.parse(shipping); } catch (e) { }
+                }
+                if (shipping) {
+                    customerEmail = shipping.email || customerEmail;
+                    customerName = shipping.name || customerName;
+                }
             }
 
             if (customerEmail) {
@@ -95,7 +101,7 @@ class OrderService {
             emailService.sendAdminNotification(
                 'New Order Received! 🛒',
                 `
-                <p><strong>Order ID:</strong> #${order.id.toUpperCase()}</p>
+                <p><strong>Order ID:</strong> #${String(order.id).toUpperCase()}</p>
                 <p><strong>Customer:</strong> ${customerName} (${customerEmail || 'Guest'})</p>
                 <p><strong>Total Amount:</strong> ${order.total || order.total_amount || '—'} EGP</p>
                 <p>Check the admin dashboard for more details.</p>

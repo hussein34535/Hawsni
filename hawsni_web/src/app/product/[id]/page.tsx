@@ -344,7 +344,7 @@ export default function ProductPage() {
                             {product.colors && product.colors.length > 0 && (
                                 <div>
                                     <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
-                                    <div className={`flex gap-4 overflow-x-auto pb-2 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                                    <div className={`flex gap-4 overflow-x-auto pb-4 pt-2 px-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                                         {parseColors(product.colors).map((c, i) => (
                                             <button
                                                 key={`${c.color}-${i}`}
@@ -355,9 +355,9 @@ export default function ProductPage() {
                                                     }
                                                 }}
                                                 className={`
-                                                    w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 p-1 border-2 
+                                                    w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 p-1 border-2 
                                                     ${selectedColor === c.color
-                                                        ? 'border-[var(--color-brand-primary)] scale-110 shadow-lg shadow-[var(--color-brand-primary)]/10'
+                                                        ? 'border-[var(--color-brand-primary)] scale-110 shadow-lg shadow-[var(--color-brand-primary)]/20'
                                                         : 'border-transparent bg-gray-50 hover:bg-gray-100'}
                                                 `}
                                             >

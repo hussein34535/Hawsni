@@ -19,7 +19,7 @@ export default function BottomNav() {
     ];
 
     // Hide BottomNav on product detail to match Flutter app behavior
-    if (pathname.includes('/product/')) return null;
+    if (pathname.includes('/product/') || pathname.includes('/checkout')) return null;
 
     return (
         <div className="md:hidden fixed bottom-0 w-full bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)] border-t border-gray-100 z-50">
