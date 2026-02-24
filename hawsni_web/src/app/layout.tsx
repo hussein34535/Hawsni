@@ -15,10 +15,24 @@ export const metadata: Metadata = {
   keywords: 'fashion, Egypt, style, clothing, premium, Hawsni, ecommerce',
   icons: {
     icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     title: 'Hawsni | Premium Fashion & Style',
     description: 'Discover the ultimate fashion destination in Egypt. Shop unique collections at Hawsni.',
+    images: [
+      {
+        url: '/logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'Hawsni Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Hawsni | Premium Fashion',
+    description: 'Premium Fashion & Style in Egypt',
     images: ['/logo.png'],
   },
 };
