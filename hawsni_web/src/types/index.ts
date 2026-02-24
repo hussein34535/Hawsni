@@ -9,16 +9,20 @@ export interface Banner {
     id?: string;
     _id?: string;
     imageUrl?: string;
+    image_url?: string;
     image?: string;
     heading?: string;
+    heading_text?: string;
     heading_ar?: string;
     title?: string;
     title_ar?: string;
     subheading?: string;
+    subheading_text?: string;
     subheading_ar?: string;
     description?: string;
     description_ar?: string;
     buttonText?: string;
+    button_text?: string;
     buttonText_ar?: string;
 }
 

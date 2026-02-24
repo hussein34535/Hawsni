@@ -194,6 +194,15 @@ export default function ProductPage() {
         showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
     };
 
+    const handleFavoriteClick = () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast(isRTL ? 'يرجى تسجيل الدخول أولاً لإضافة المنتج للمفضلة' : 'Please login first to add to wishlist', 'error');
+            return;
+        }
+        setIsFavorite(!isFavorite);
+    };
+
     if (isLoading) {
         return (
             <div className="w-full bg-[#FAFAFA] min-h-screen flex justify-center items-center">
@@ -224,7 +233,7 @@ export default function ProductPage() {
                 </button>
                 <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-2 pointer-events-auto`}>
                     <button
-                        onClick={() => setIsFavorite(!isFavorite)}
+                        onClick={handleFavoriteClick}
                         className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-95 transition-transform"
                     >
                         <Heart size={20} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'} />

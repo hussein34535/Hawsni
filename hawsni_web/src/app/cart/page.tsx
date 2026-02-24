@@ -31,7 +31,7 @@ export default function CartPage() {
                 <div className="w-12" /> {/* Placeholder for balance */}
             </div>
 
-            <div className="px-4 pb-40 text-right" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="px-4 pb-[160px] text-right" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="max-w-2xl mx-auto flex flex-col gap-3">
                     <AnimatePresence mode="popLayout">
                         {items.length > 0 ? (
@@ -65,7 +65,7 @@ export default function CartPage() {
 
             {/* Bottom Fixed Summary (Image 1) */}
             {items.length > 0 && (
-                <div className="fixed bottom-0 left-0 w-full bg-white rounded-t-[2rem] p-6 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40">
+                <div className="fixed bottom-16 md:bottom-0 left-0 w-full bg-white rounded-t-[2rem] p-6 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40">
                     <div className="max-w-2xl mx-auto">
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-gray-400 font-bold text-base">{isRTL ? 'المجموع' : 'Subtotal'}</span>

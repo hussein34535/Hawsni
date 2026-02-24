@@ -30,12 +30,12 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
 
 
     const banner = banners[index];
-    const bannerImage = banner.imageUrl || banner.image;
+    const bannerImage = banner.image_url || banner.imageUrl || banner.image;
 
     // Translation logic with fallbacks
-    const h = language === 'ar' ? (banner.heading_ar || banner.heading || 'وصل حديثاً') : (banner.heading || banner.title || 'New Arrival');
-    const s = language === 'ar' ? (banner.subheading_ar || banner.description_ar || banner.subheading || banner.description || 'تصفح أحدث تشكيلاتنا') : (banner.subheading || banner.description || 'Check out our latest collection');
-    const b = language === 'ar' ? (banner.buttonText_ar || 'تسوق الآن') : (banner.buttonText || 'Shop Now');
+    const h = language === 'ar' ? (banner.heading_ar || banner.heading_text || 'وصل حديثاً') : (banner.heading_text || banner.heading || banner.title || 'New Arrival');
+    const s = language === 'ar' ? (banner.subheading_ar || banner.description_ar || banner.subheading_text || 'تصفح أحدث تشكيلاتنا') : (banner.subheading_text || banner.subheading || banner.description || 'Check out our latest collection');
+    const b = language === 'ar' ? (banner.buttonText_ar || banner.button_text || 'تسوق الآن') : (banner.button_text || banner.buttonText || 'Shop Now');
 
     return (
         <div className="relative w-full h-[160px] md:h-[280px] lg:h-[400px] overflow-hidden rounded-2xl bg-gray-100">

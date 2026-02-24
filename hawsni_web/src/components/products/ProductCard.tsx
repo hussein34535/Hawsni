@@ -114,16 +114,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     )}
                 </AnimatePresence>
 
-                {/* Favorite Button Overlay (Like Flutter) */}
-                <button
-                    onClick={(e) => { e.stopPropagation(); setIsFavorite(!isFavorite); }}
-                    className="absolute top-2 right-2 w-[28px] h-[28px] bg-white/90 rounded-full flex items-center justify-center shadow-[0_0_4px_rgba(0,0,0,0.1)] hover:scale-110 transition-transform"
-                >
-                    <Heart
-                        size={16}
-                        className={isFavorite ? 'fill-[var(--color-brand-primary)] text-[var(--color-brand-primary)]' : 'text-gray-400'}
-                    />
-                </button>
+                {/* Favorite Button removed from Product Card as requested */}
 
             </div>
 
@@ -145,10 +136,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setSelectedColor(c.color);
-                                        if (c.image) setSelectedImage(formatImageUrl(c.image));
+                                        if (c.image) {
+                                            setSelectedImage(formatImageUrl(c.image));
+                                        } else if (c.imageIndex !== undefined && images[c.imageIndex]) {
+                                            setSelectedImage(formatImageUrl(images[c.imageIndex]));
+                                        }
                                     }}
                                     style={{ backgroundColor: formatColor(c.color) }}
-                                    className={`w-[14px] h-[14px] rounded-full mr-[6px] transition-all border ${isSelected
+                                    className={`w-5 h-5 rounded-full mr-1.5 transition-all border ${isSelected
                                         ? 'border-[var(--color-brand-primary)] border-[1.5px] shadow-[0_0_4px_rgba(27,77,62,0.3)]'
                                         : 'border-gray-300 border-[0.5px]'
                                         }`}
