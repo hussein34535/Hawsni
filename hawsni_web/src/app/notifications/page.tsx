@@ -27,32 +27,7 @@ interface Notification {
 export default function NotificationsPage() {
     const { t, isRTL } = useLanguage();
     const router = useRouter();
-    const [notifications, setNotifications] = useState<Notification[]>([
-        {
-            id: '1',
-            title: '🎉 Welcome to Hawsni!',
-            message: 'Discover our new winter collection. Exclusive discounts inside!',
-            time: '2 mins ago',
-            isRead: false,
-            type: 'promo'
-        },
-        {
-            id: '2',
-            title: 'Order Confirmed',
-            message: 'Your order #HW12345 has been confirmed and is being prepared.',
-            time: '1 hour ago',
-            isRead: false,
-            type: 'order'
-        },
-        {
-            id: '3',
-            title: 'Special Offer',
-            message: 'Get 20% off on your next purchase with code: HWASI20',
-            time: '5 hours ago',
-            isRead: true,
-            type: 'promo'
-        }
-    ]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
 
     const markAllAsRead = () => {
         setNotifications(notifications.map(n => ({ ...n, isRead: true })));

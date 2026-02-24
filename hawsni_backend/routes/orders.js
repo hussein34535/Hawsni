@@ -6,8 +6,8 @@ const { protect, protectOptional } = require('../middleware/auth');
 // Get user orders
 router.get('/', protect, OrderController.getUserOrders);
 
-// Get order by ID
-router.get('/:id', protect, OrderController.getOrder);
+// Get order by ID (Optional protection to allow guests to view their order history/success page)
+router.get('/:id', protectOptional, OrderController.getOrder);
 
 // Create order
 router.post('/', protectOptional, OrderController.createOrder);

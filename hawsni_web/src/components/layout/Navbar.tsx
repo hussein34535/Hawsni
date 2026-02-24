@@ -28,7 +28,7 @@ export default function Navbar() {
                         <div className="w-10 h-10 flex items-center justify-center">
                             <Link href="/">
                                 <div className="w-10 h-10 bg-[var(--color-brand-primary)] rounded-xl flex items-center justify-center shadow-[var(--shadow-soft)]">
-                                    <span className="text-white font-bold text-xl">H</span>
+                                    <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain p-1" />
                                 </div>
                             </Link>
                         </div>
@@ -52,7 +52,7 @@ export default function Navbar() {
                         {/* Logo */}
                         <Link href="/">
                             <div className="w-12 h-12 bg-[var(--color-brand-primary)] rounded-xl flex items-center justify-center shadow-[var(--shadow-soft)]">
-                                <span className="text-white font-bold text-2xl">H</span>
+                                <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain p-1" />
                             </div>
                         </Link>
 
