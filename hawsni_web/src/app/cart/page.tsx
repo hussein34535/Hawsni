@@ -31,8 +31,8 @@ export default function CartPage() {
                 <div className="w-12" /> {/* Placeholder for balance */}
             </div>
 
-            <div className="px-6 pb-40">
-                <div className="max-w-2xl mx-auto flex flex-col gap-4">
+            <div className="px-4 pb-40 text-right" dir={isRTL ? 'rtl' : 'ltr'}>
+                <div className="max-w-2xl mx-auto flex flex-col gap-3">
                     <AnimatePresence mode="popLayout">
                         {items.length > 0 ? (
                             items.map((item) => <CartItemCard key={item.id} item={item} />)
@@ -65,18 +65,18 @@ export default function CartPage() {
 
             {/* Bottom Fixed Summary (Image 1) */}
             {items.length > 0 && (
-                <div className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3rem] p-8 shadow-[0_-20px_40px_rgba(0,0,0,0.05)] z-40">
+                <div className="fixed bottom-0 left-0 w-full bg-white rounded-t-[2rem] p-6 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40">
                     <div className="max-w-2xl mx-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <span className="text-gray-400 font-bold text-lg">{isRTL ? 'المجموع' : 'Subtotal'}</span>
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-gray-400 font-bold text-base">{isRTL ? 'المجموع' : 'Subtotal'}</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-3xl font-black text-gray-900">{total.toLocaleString()}</span>
-                                <span className="text-sm font-bold text-gray-400 uppercase">{isRTL ? 'ج.م' : 'EGP'}</span>
+                                <span className="text-2xl font-black text-gray-900">{total.toLocaleString()}</span>
+                                <span className="text-xs font-bold text-gray-400 uppercase">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </div>
                         </div>
 
                         <Link href="/checkout">
-                            <button className="w-full py-6 bg-[#0E4435] text-white rounded-[1.8rem] font-black text-xl shadow-2xl shadow-emerald-900/20 active:scale-[0.98] transition-all flex items-center justify-center">
+                            <button className="w-full py-4 bg-[#0E4435] text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-900/10 active:scale-[0.98] transition-all flex items-center justify-center">
                                 <span>{isRTL ? 'إتمام الشراء' : 'Checkout'}</span>
                             </button>
                         </Link>

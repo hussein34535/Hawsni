@@ -66,64 +66,64 @@ export default function OrdersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg-secondary)] pb-24">
+        <div className="min-h-screen bg-[var(--color-bg-secondary)] pb-24 text-right font-cairo" dir={isRTL ? 'rtl' : 'ltr'}>
             {/* AppBar */}
-            <header className="sticky top-0 z-50 bg-white border-b border-gray-100 flex items-center px-4 h-16 gap-3">
+            <header className="sticky top-0 z-50 bg-white border-b border-gray-100 flex items-center px-4 h-14 gap-3">
                 <button onClick={() => router.back()} className={`p-2 ${isRTL ? 'rotate-180' : ''}`}>
-                    <ArrowLeft size={24} />
+                    <ArrowLeft size={22} />
                 </button>
-                <h1 className="text-lg font-bold text-gray-900">{t.orders.title}</h1>
+                <h1 className="text-base font-bold text-gray-900">{t.orders.title}</h1>
             </header>
 
-            <main className="p-4 sm:p-6 max-w-2xl mx-auto">
+            <main className="p-3 sm:p-4 max-w-2xl mx-auto">
                 {isLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <div className="w-10 h-10 border-4 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
+                    <div className="flex flex-col items-center justify-center py-10">
+                        <div className="w-8 h-8 border-3 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
                     </div>
                 ) : isGuest ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-gray-400 text-center">
-                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-[var(--shadow-soft)] mb-6">
-                            <ShoppingBag size={40} strokeWidth={1.5} />
+                    <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-center">
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-[var(--shadow-soft)] mb-4">
+                            <ShoppingBag size={32} strokeWidth={1.5} />
                         </div>
-                        <p className="font-bold text-gray-900 mb-2 text-lg">
+                        <p className="font-bold text-gray-900 mb-1 text-base">
                             {language === 'ar' ? 'يرجى تسجيل الدخول' : 'Please Login'}
                         </p>
-                        <p className="font-medium text-sm max-w-[240px] mb-8">
+                        <p className="font-medium text-xs max-w-[200px] mb-6">
                             {language === 'ar' ? 'يجب تسجيل الدخول لمشاهدة طلباتك السابقة' : 'You need to login to see your order history'}
                         </p>
                         <button
                             onClick={() => router.push('/profile')}
-                            className="bg-[var(--color-brand-primary)] text-white px-8 py-3 rounded-full font-bold shadow-lg"
+                            className="bg-[var(--color-brand-primary)] text-white px-6 py-2.5 rounded-full font-bold shadow-md text-sm"
                         >
                             {language === 'ar' ? 'تسجيل الدخول' : 'Login Now'}
                         </button>
                     </div>
                 ) : error ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-red-500 text-center">
-                        <XCircle size={40} strokeWidth={1.5} className="mb-4" />
-                        <p className="font-bold mb-6">{error}</p>
+                    <div className="flex flex-col items-center justify-center py-10 text-red-500 text-center">
+                        <XCircle size={32} strokeWidth={1.5} className="mb-3" />
+                        <p className="font-bold mb-4 text-sm">{error}</p>
                         <button
                             onClick={() => window.location.reload()}
-                            className="text-[var(--color-brand-primary)] font-bold"
+                            className="text-[var(--color-brand-primary)] font-bold text-sm"
                         >
                             {language === 'ar' ? 'إعادة المحاولة' : 'Try Again'}
                         </button>
                     </div>
                 ) : orders.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-[var(--shadow-soft)] mb-6">
-                            <ShoppingBag size={40} strokeWidth={1.5} />
+                    <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-[var(--shadow-soft)] mb-4">
+                            <ShoppingBag size={32} strokeWidth={1.5} />
                         </div>
-                        <p className="font-medium text-center">{t.orders.empty}</p>
+                        <p className="font-medium text-center text-sm">{t.orders.empty}</p>
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         {orders.map((order) => (
                             <motion.div
                                 key={order._id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white rounded-[24px] p-5 shadow-[var(--shadow-soft)] border border-gray-50 group hover:border-[var(--color-brand-primary)] transition-colors cursor-pointer"
+                                className="bg-white rounded-3xl p-4 shadow-sm border border-gray-50 group hover:border-[var(--color-brand-primary)] transition-colors cursor-pointer"
                                 onClick={() => router.push(`/profile/orders/${order._id}`)}
                             >
                                 <div className="flex justify-between items-start mb-4">

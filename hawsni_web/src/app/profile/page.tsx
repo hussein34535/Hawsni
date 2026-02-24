@@ -75,19 +75,19 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-[var(--color-bg-secondary)] pb-24">
             {/* Header with Curve */}
             <div className="relative">
-                <div className="bg-[var(--color-brand-primary)] h-[240px] rounded-b-[32px] pt-12 px-6">
+                <div className="bg-[var(--color-brand-primary)] h-[200px] rounded-b-[24px] pt-10 px-6">
                     <div className="flex justify-between items-center text-white">
-                        <h1 className="text-2xl font-bold">{t.profile.title}</h1>
+                        <h1 className="text-xl font-bold">{t.profile.title}</h1>
                         <button className="p-2">
-                            <Settings size={22} />
+                            <Settings size={20} />
                         </button>
                     </div>
                 </div>
 
                 {/* Floating Profile Card */}
-                <div className="absolute top-[120px] left-6 right-6">
-                    <div className="bg-white rounded-[24px] p-6 shadow-[var(--shadow-floating)] flex items-center gap-4">
-                        <div className="w-[72px] h-[72px] rounded-full border-2 border-[var(--color-brand-primary)] p-0.5">
+                <div className="absolute top-[100px] left-6 right-6">
+                    <div className="bg-white rounded-3xl p-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex items-center gap-4">
+                        <div className="w-[60px] h-[60px] rounded-full border-2 border-[var(--color-brand-primary)] p-0.5">
                             <div className="w-full h-full bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
                                 {user?.avatar_url ? (
                                     <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
@@ -130,6 +130,7 @@ export default function ProfilePage() {
 
                 <MenuSection title={t.profile.sections.activity} isRTL={isRTL}>
                     <MenuItem icon={ShoppingBag} title={t.profile.items.my_orders} href="/profile/orders" />
+                    <MenuItem icon={MapPin} title={isRTL ? 'تتبع الطلب' : 'Track Order'} href="/track-order" />
                     <MenuItem icon={Heart} title={t.profile.items.wishlist} href="/wishlist" />
                     <MenuItem icon={MapPin} title={t.profile.items.addresses} href="/profile/addresses" />
                     <MenuItem icon={Ticket} title={t.profile.items.coupons} href="/profile/coupons" />
@@ -200,7 +201,7 @@ function MenuItem({ icon: Icon, title, subtitle, href, onClick, showArrow = true
     const { isRTL } = useLanguage();
 
     const Body = (
-        <div className={`flex items-center justify-between p-4 ${!isLast ? 'border-b border-gray-50' : ''}`}>
+        <div className={`flex items-center justify-between p-3 ${!isLast ? 'border-b border-gray-50' : ''}`}>
             <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-[var(--color-brand-primary)]">
                     <Icon size={20} />

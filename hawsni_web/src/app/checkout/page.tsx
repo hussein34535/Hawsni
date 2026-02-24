@@ -150,7 +150,7 @@ export default function CheckoutPage() {
                 shippingAddress: isAuthenticated
                     ? selectedAddressId!
                     : `${guestInfo.street}, ${guestInfo.city}, ${selectedGov}`,
-                paymentMethod: 'cod',
+                paymentMethod: 'Cash on Delivery',
                 subtotal,
                 shippingFee,
                 discount: couponDiscount,
@@ -178,24 +178,24 @@ export default function CheckoutPage() {
     if (items.length === 0 && !isProcessing) return null;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] pb-24 text-right" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-[#FAFAFA] pb-24 text-right font-cairo" dir={isRTL ? 'rtl' : 'ltr'}>
             {/* Sticky Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <button
                         onClick={() => router.back()}
-                        className="w-12 h-12 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-95"
+                        className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-95"
                     >
-                        {isRTL ? <ArrowRight className="w-6 h-6 text-gray-900" /> : <ArrowLeft className="w-6 h-6 text-gray-900" />}
+                        {isRTL ? <ArrowRight className="w-5 h-5 text-gray-900" /> : <ArrowLeft className="w-5 h-5 text-gray-900" />}
                     </button>
-                    <h1 className="text-xl font-black text-gray-900 font-cairo">
+                    <h1 className="text-lg font-black text-gray-900">
                         {isRTL ? 'إتمام الشراء' : 'Checkout'}
                     </h1>
-                    <div className="w-12"></div>
+                    <div className="w-10"></div>
                 </div>
             </header>
 
-            <main className="max-w-5xl mx-auto p-6 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <main className="max-w-5xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                 {/* Details Column */}
                 <div className="lg:col-span-7 space-y-10">
@@ -209,7 +209,7 @@ export default function CheckoutPage() {
                                     {isRTL ? 'بيانات العميل' : 'Guest Information'}
                                 </h2>
                             </div>
-                            <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 space-y-4">
+                            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-3">
                                 <input
                                     type="text" value={guestInfo.name}
                                     onChange={e => setGuestInfo({ ...guestInfo, name: e.target.value })}

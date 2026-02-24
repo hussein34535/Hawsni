@@ -15,10 +15,10 @@ export default function CartItemCard({ item }: { item: CartItem }) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-50 flex items-center gap-4 relative"
+            className="bg-white p-3 rounded-2xl shadow-sm border border-gray-50 flex items-center gap-3 relative"
         >
             {/* Image (Right in RTL, Left in LTR) */}
-            <div className={`w-24 h-24 rounded-[1.5rem] overflow-hidden flex-shrink-0 bg-gray-50 ${isRTL ? 'order-2' : 'order-1'}`}>
+            <div className={`w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-50 ${isRTL ? 'order-2' : 'order-1'}`}>
                 <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
             </div>
 
