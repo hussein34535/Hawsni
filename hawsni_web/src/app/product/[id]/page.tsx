@@ -123,25 +123,25 @@ export default function ProductPage() {
         <div className="w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20">
 
             {/* Header / AppBar - Transparent Overlay (Matches Flutter exactly) */}
-            <div className="fixed top-0 left-0 right-0 z-[60] p-4 flex justify-between items-center bg-gradient-to-b from-black/30 to-transparent pointer-events-none h-32">
+            <div className="fixed top-0 left-0 right-0 z-[60] p-4 flex justify-between items-center bg-gradient-to-b from-black/20 to-transparent pointer-events-none h-24">
                 <button
                     onClick={() => router.back()}
-                    className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-90 transition-transform"
+                    className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-95 transition-transform"
                 >
-                    <ArrowLeft size={24} className="text-white" />
+                    <ArrowLeft size={20} className="text-white" />
                 </button>
-                <div className="flex gap-3 pointer-events-auto">
+                <div className="flex gap-2 pointer-events-auto">
                     <button
                         onClick={() => setIsFavorite(!isFavorite)}
-                        className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-90 transition-transform"
+                        className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-95 transition-transform"
                     >
-                        <Heart size={24} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'} />
+                        <Heart size={20} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'} />
                     </button>
                     <button
                         onClick={() => router.push('/cart')}
-                        className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-90 transition-transform relative"
+                        className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-95 transition-transform relative"
                     >
-                        <ShoppingBag size={24} className="text-white" />
+                        <ShoppingBag size={20} className="text-white" />
                     </button>
                 </div>
             </div>
@@ -188,21 +188,21 @@ export default function ProductPage() {
                     </div>
 
                     {/* Right: Info Section */}
-                    <div className="p-6 md:p-12">
+                    <div className="p-6 md:p-10">
                         {/* Title and Rating */}
-                        <div className="flex flex-col gap-3 mb-10">
+                        <div className="flex flex-col gap-2 mb-8">
                             <div className="flex items-center justify-between">
-                                <h1 className="text-4xl font-black text-gray-900 font-cairo leading-tight">{product.name}</h1>
+                                <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight">{product.name}</h1>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="flex text-amber-400">
-                                    {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+                                    {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
                                 </div>
-                                <span className="text-xs text-gray-400 font-bold">(120 {isRTL ? 'تقييم' : 'Reviews'})</span>
+                                <span className="text-[10px] text-gray-400 font-bold">(120 {isRTL ? 'تقييم' : 'Reviews'})</span>
                             </div>
-                            <div className="flex items-baseline gap-2 text-[var(--color-brand-primary)] font-black text-3xl mt-2">
+                            <div className="flex items-baseline gap-2 text-[var(--color-brand-primary)] font-black text-2xl mt-1">
                                 <span>{product.price.toLocaleString('en-US')}</span>
-                                <span className="text-sm uppercase font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
+                                <span className="text-xs uppercase font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </div>
                         </div>
 
@@ -210,38 +210,38 @@ export default function ProductPage() {
                         <motion.div
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setIsVTOOpen(true)}
-                            className="mb-10 p-5 rounded-[32px] bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative"
+                            className="mb-8 p-4 rounded-[24px] bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative"
                         >
-                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
-                            <div className="flex items-center gap-5 relative z-10">
-                                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/10 border border-purple-50">
-                                    <Flame size={28} className="text-purple-600 animate-pulse" />
+                            <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl" />
+                            <div className="flex items-center gap-4 relative z-10">
+                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/5 border border-purple-50">
+                                    <Flame size={24} className="text-purple-600" />
                                 </div>
                                 <div>
-                                    <h4 className="font-black text-gray-900 font-cairo text-lg">{t.product?.vto_banner || (isRTL ? 'جرب القطعة دي دلوقتي' : 'Try this piece now')}</h4>
-                                    <p className="text-[12px] text-gray-500 font-bold font-cairo">{t.product?.vto_desc || (isRTL ? 'شوف شكلها عليك بالذكاء الاصطناعي' : 'See how it looks on you with AI')}</p>
+                                    <h4 className="font-black text-gray-900 font-cairo text-base">{t.product?.vto_banner || (isRTL ? 'جرب القطعة دي دلوقتي' : 'Try this piece now')}</h4>
+                                    <p className="text-[11px] text-gray-400 font-bold font-cairo">{t.product?.vto_desc || (isRTL ? 'شوف شكلها عليك بالذكاء الاصطناعي' : 'See how it looks on you with AI')}</p>
                                 </div>
                             </div>
-                            <ChevronRight size={24} className="text-purple-400 group-hover:translate-x-1 transition-transform" />
+                            <ChevronRight size={20} className="text-purple-300 group-hover:translate-x-1 transition-transform" />
                         </motion.div>
 
-                        <div className="space-y-12">
+                        <div className="space-y-10">
                             {/* Color Selection */}
                             {product.colors && product.colors.length > 0 && (
                                 <div>
-                                    <h3 className="text-lg font-black text-gray-900 mb-5 font-cairo">{t.product?.colors || 'Colors'}</h3>
-                                    <div className="flex gap-5">
+                                    <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
+                                    <div className="flex gap-4">
                                         {product.colors.map((c) => (
                                             <button
                                                 key={c.color}
                                                 onClick={() => setSelectedColor(c.color)}
-                                                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all p-1.5 border-2 ${selectedColor === c.color ? 'border-[var(--color-brand-primary)] scale-110 shadow-xl' : 'border-transparent bg-gray-50'}`}
+                                                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all p-1.5 border-2 ${selectedColor === c.color ? 'border-[var(--color-brand-primary)] scale-105 shadow-lg' : 'border-transparent bg-gray-50'}`}
                                             >
                                                 <div
                                                     style={{ backgroundColor: c.color }}
-                                                    className="w-full h-full rounded-xl flex items-center justify-center shadow-inner"
+                                                    className="w-full h-full rounded-lg flex items-center justify-center shadow-inner"
                                                 >
-                                                    {selectedColor === c.color && <Check size={20} className="text-white mix-blend-difference" />}
+                                                    {selectedColor === c.color && <Check size={16} className="text-white mix-blend-difference" />}
                                                 </div>
                                             </button>
                                         ))}
@@ -252,22 +252,22 @@ export default function ProductPage() {
                             {/* Size Selection */}
                             {product.sizes && product.sizes.length > 0 && (
                                 <div>
-                                    <div className="flex justify-between items-center mb-5">
-                                        <h3 className="text-lg font-black text-gray-900 font-cairo">{t.product?.sizes || 'Sizes'}</h3>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.sizes || 'Sizes'}</h3>
                                         <button
                                             onClick={() => setIsSizeGuideOpen(true)}
-                                            className="text-sm font-black text-[var(--color-brand-primary)] flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)]/5 hover:bg-[var(--color-brand-primary)]/10 transition-colors"
+                                            className="text-[11px] font-black text-[var(--color-brand-primary)] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)]/5 hover:bg-[var(--color-brand-primary)]/10 transition-colors"
                                         >
-                                            <Ruler size={16} />
+                                            <Ruler size={14} />
                                             <span>{t.product?.size_guide || (isRTL ? 'دليل المقاسات' : 'Size Guide')}</span>
                                         </button>
                                     </div>
-                                    <div className="flex flex-wrap gap-4">
+                                    <div className="flex flex-wrap gap-3">
                                         {product.sizes.map((s) => (
                                             <button
                                                 key={s}
                                                 onClick={() => setSelectedSize(s)}
-                                                className={`min-w-[4.5rem] h-16 px-5 rounded-[20px] border-2 font-black text-lg transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-xl scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
+                                                className={`min-w-[4rem] h-12 px-4 rounded-[16px] border-2 font-black text-base transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-100'}`}
                                             >
                                                 {s}
                                             </button>
@@ -277,44 +277,44 @@ export default function ProductPage() {
                             )}
 
                             {/* Stock Alert */}
-                            <div className="p-5 rounded-[24px] bg-amber-50 border border-amber-100/50 flex items-center gap-4">
-                                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                            <div className="p-4 rounded-[20px] bg-amber-50 border border-amber-100/50 flex items-center gap-3">
+                                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
                                     <motion.div
-                                        animate={{ scale: [1, 1.2, 1] }}
+                                        animate={{ scale: [1, 1.1, 1] }}
                                         transition={{ duration: 1.5, repeat: Infinity }}
                                     >
-                                        <Flame size={20} className="text-amber-500 fill-amber-500" />
+                                        <Flame size={16} className="text-amber-500 fill-amber-500" />
                                     </motion.div>
                                 </div>
-                                <span className="text-sm font-black text-amber-900 font-cairo">
+                                <span className="text-xs font-black text-amber-900 font-cairo">
                                     {t.product?.low_stock?.replace('{count}', stockCount.toString()) || (isRTL ? `الكمية محدودة! باق ${stockCount} قطع فقط` : `Limited Stock! Only ${stockCount} left`)}
                                 </span>
                             </div>
 
                             {/* Quantity & Actions */}
-                            <div className="flex flex-col gap-6">
-                                <h3 className="text-lg font-black text-gray-900 font-cairo">{t.product?.quantity || 'Quantity'}</h3>
-                                <div className="flex items-center bg-gray-50 rounded-[20px] p-1.5 w-fit border border-gray-100">
+                            <div className="flex flex-col gap-4">
+                                <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.quantity || 'Quantity'}</h3>
+                                <div className="flex items-center bg-gray-50 rounded-[16px] p-1 w-fit border border-gray-100">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="w-12 h-12 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-white rounded-xl shadow-sm"
+                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-white rounded-xl shadow-sm"
                                     >
-                                        <Minus size={20} strokeWidth={3} />
+                                        <Minus size={16} strokeWidth={3} />
                                     </button>
-                                    <span className="w-14 text-center font-black text-xl text-gray-900">{quantity}</span>
+                                    <span className="w-12 text-center font-black text-lg text-gray-900">{quantity}</span>
                                     <button
                                         onClick={() => setQuantity(quantity + 1)}
-                                        className="w-12 h-12 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-white rounded-xl shadow-sm"
+                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-white rounded-xl shadow-sm"
                                     >
-                                        <Plus size={20} strokeWidth={3} />
+                                        <Plus size={16} strokeWidth={3} />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Description */}
-                            <div className="pt-10 border-t border-gray-100">
-                                <h3 className="text-lg font-black text-gray-900 mb-5 font-cairo">{t.product?.description || 'Details'}</h3>
-                                <p className="text-gray-500 leading-relaxed font-bold font-cairo text-base opacity-80">
+                            <div className="pt-8 border-t border-gray-100">
+                                <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.description || 'Details'}</h3>
+                                <p className="text-gray-500 leading-relaxed font-bold font-cairo text-sm opacity-70">
                                     {product.description}
                                 </p>
                             </div>
@@ -329,29 +329,29 @@ export default function ProductPage() {
             </main>
 
             {/* FLOATING CAPSULE FOOTER (Matches Flutter _buildGlassActionPill) */}
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[94%] max-w-xl z-50">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="bg-gray-950 p-2 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-between border border-white/10"
+                    className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] flex items-center justify-between border border-white/10"
                 >
-                    <div className="px-8">
-                        <span className="text-2xl font-black text-white font-cairo">
+                    <div className="px-6">
+                        <span className="text-xl font-black text-white font-cairo">
                             {product.price.toLocaleString()}
-                            <span className="text-xs ml-1 opacity-60">{isRTL ? 'ج.م' : 'EGP'}</span>
+                            <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                         </span>
                     </div>
 
                     <button
                         onClick={handleAddToCart}
                         className={`
-                            flex items-center gap-3 px-10 py-5 rounded-[2rem] font-black text-lg transition-all active:scale-95
+                            flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95
                             ${!selectedSize
                                 ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                : 'bg-white text-gray-950 shadow-xl hover:bg-gray-100'}
+                                : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
                         `}
                     >
-                        <ShoppingBag size={22} />
+                        <ShoppingBag size={18} />
                         <span className="font-cairo">{t.product?.add_to_cart || 'Add to Cart'}</span>
                     </button>
                 </motion.div>
