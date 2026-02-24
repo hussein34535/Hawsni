@@ -2,27 +2,31 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import {
     ArrowLeft,
     ShoppingBag,
     Heart,
-    Share2,
     Star,
     Minus,
     Plus,
     Check,
     ChevronRight,
-    Flame, // Changed Sparkles to Flame
+    Flame,
     Info,
-    Ruler
+    Ruler,
+    X,
+    Camera,
+    Image as ImageIcon
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useToastStore } from '@/store/toastStore';
-import { X, CheckCircle2, AlertCircle, Info as LucideInfo, Check as LucideCheck } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { useLanguage } from '@/context/LanguageContext';
 import { Product } from '@/types';
+import ReviewsSection from '@/components/product/ReviewsSection';
+import SizeGuideModal from '@/components/product/SizeGuideModal';
+import VirtualTryOnModal from '@/components/product/VirtualTryOnModal';
 
 export default function ProductPage() {
     const params = useParams();
@@ -38,6 +42,9 @@ export default function ProductPage() {
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+    const [isVTOOpen, setIsVTOOpen] = useState(false);
+
     const addItem = useCartStore((state) => state.addItem);
 
     // Stock simulation
@@ -63,8 +70,16 @@ export default function ProductPage() {
         if (productId) fetchProduct();
     }, [productId]);
 
-    // For the flying animation
-    const [flyIcon, setFlyIcon] = useState<{ x: number, y: number } | null>(null);
+    // Swipable Gallery Logic
+    const dragX = useMotionValue(0);
+    const onDragEnd = () => {
+        const x = dragX.get();
+        if (x <= -50 && selectedImage < (product?.images?.length || 1) - 1) {
+            setSelectedImage((v) => v + 1);
+        } else if (x >= 50 && selectedImage > 0) {
+            setSelectedImage((v) => v - 1);
+        }
+    };
 
     const handleAddToCart = (e: React.MouseEvent) => {
         if (!product) return;
@@ -73,10 +88,6 @@ export default function ProductPage() {
             return;
         }
 
-        // Save the click position for animation
-        setFlyIcon({ x: e.clientX, y: e.clientY });
-
-        // Dispatch to Zustand Cart Store
         addItem({
             id: `${product._id}_${selectedSize}_${selectedColor || 'default'}`,
             productId: product._id,
@@ -88,11 +99,7 @@ export default function ProductPage() {
             color: selectedColor || undefined
         });
 
-        // Show toast
         showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
-
-        // Reset fly icon after animation
-        setTimeout(() => setFlyIcon(null), 1000);
     };
 
     if (isLoading) {
@@ -113,25 +120,28 @@ export default function ProductPage() {
     }
 
     return (
-        <div className="w-full bg-[#FAFAFA] min-h-screen">
+        <div className="w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20">
 
-            {/* Header / AppBar - Transparent to Overlay on Image */}
-            <div className="fixed top-0 left-0 right-0 z-[60] p-4 flex justify-between items-center bg-gradient-to-b from-black/20 to-transparent pointer-events-none">
+            {/* Header / AppBar - Transparent Overlay (Matches Flutter exactly) */}
+            <div className="fixed top-0 left-0 right-0 z-[60] p-4 flex justify-between items-center bg-gradient-to-b from-black/30 to-transparent pointer-events-none h-32">
                 <button
                     onClick={() => router.back()}
-                    className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center shadow-lg border border-white/30 pointer-events-auto"
+                    className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-90 transition-transform"
                 >
-                    <ArrowLeft size={20} className="text-white" />
+                    <ArrowLeft size={24} className="text-white" />
                 </button>
-                <div className="flex gap-2 pointer-events-auto">
-                    <button className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center shadow-lg border border-white/30">
-                        <Share2 size={20} className="text-white" />
-                    </button>
+                <div className="flex gap-3 pointer-events-auto">
                     <button
                         onClick={() => setIsFavorite(!isFavorite)}
-                        className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center shadow-lg border border-white/30"
+                        className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-90 transition-transform"
                     >
-                        <Heart size={20} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'} />
+                        <Heart size={24} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'} />
+                    </button>
+                    <button
+                        onClick={() => router.push('/cart')}
+                        className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-90 transition-transform relative"
+                    >
+                        <ShoppingBag size={24} className="text-white" />
                     </button>
                 </div>
             </div>
@@ -139,78 +149,99 @@ export default function ProductPage() {
             <main className="max-w-7xl mx-auto pb-40">
                 <div className="grid grid-cols-1 lg:grid-cols-2">
 
-                    {/* Left: Image Gallery (Sliver) */}
-                    <div className="relative aspect-[4/5] bg-gray-200 overflow-hidden lg:rounded-b-[3rem]">
-                        <AnimatePresence mode="wait">
-                            <motion.img
-                                key={selectedImage}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.6 }}
-                                src={product.images[selectedImage]}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                            />
-                        </AnimatePresence>
+                    {/* Left: Swipable Image Gallery */}
+                    <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden lg:rounded-b-[4rem] group">
+                        <motion.div
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            style={{ x: dragX }}
+                            onDragEnd={onDragEnd}
+                            className="w-full h-full flex"
+                        >
+                            <AnimatePresence mode="wait">
+                                <motion.img
+                                    key={selectedImage}
+                                    initial={{ opacity: 0, x: dragX.get() > 0 ? -100 : 100 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: dragX.get() > 0 ? 100 : -100 }}
+                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                    src={product.images[selectedImage]}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover select-none pointer-events-none"
+                                />
+                            </AnimatePresence>
+                        </motion.div>
 
                         {/* Custom Dots Pagination */}
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/30 backdrop-blur-md rounded-full">
-                            <span className="text-[10px] text-white font-bold mr-1">
-                                {selectedImage + 1}/{product.images.length}
+                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-black/20 backdrop-blur-xl rounded-full">
+                            <span className="text-[10px] text-white font-black mr-2 tracking-widest">
+                                {selectedImage + 1} / {product.images.length}
                             </span>
                             {product.images.map((_, i) => (
-                                <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === selectedImage ? 'w-4 bg-white' : 'w-1.5 bg-white/50'}`} />
+                                <button
+                                    key={i}
+                                    onClick={() => setSelectedImage(i)}
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${i === selectedImage ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`}
+                                />
                             ))}
                         </div>
                     </div>
 
                     {/* Right: Info Section */}
-                    <div className="p-6 md:p-10">
+                    <div className="p-6 md:p-12">
                         {/* Title and Rating */}
-                        <div className="flex flex-col gap-2 mb-8">
+                        <div className="flex flex-col gap-3 mb-10">
                             <div className="flex items-center justify-between">
-                                <h1 className="text-3xl font-black text-gray-900">{product.name}</h1>
+                                <h1 className="text-4xl font-black text-gray-900 font-cairo leading-tight">{product.name}</h1>
                             </div>
-                            <div className="flex items-center gap-1 text-[var(--color-brand-primary)] font-bold text-xl">
+                            <div className="flex items-center gap-2">
+                                <div className="flex text-amber-400">
+                                    {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+                                </div>
+                                <span className="text-xs text-gray-400 font-bold">(120 {isRTL ? 'تقييم' : 'Reviews'})</span>
+                            </div>
+                            <div className="flex items-baseline gap-2 text-[var(--color-brand-primary)] font-black text-3xl mt-2">
                                 <span>{product.price.toLocaleString('en-US')}</span>
-                                <span className="text-sm uppercase">{isRTL ? 'ج.م' : 'EGP'}</span>
+                                <span className="text-sm uppercase font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </div>
                         </div>
 
                         {/* VTO Banner (Try with AI) */}
                         <motion.div
                             whileTap={{ scale: 0.98 }}
-                            className="mb-8 p-4 rounded-3xl bg-purple-50 border border-purple-100 flex items-center justify-between cursor-pointer group"
+                            onClick={() => setIsVTOOpen(true)}
+                            className="mb-10 p-5 rounded-[32px] bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative"
                         >
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                                    <Flame size={24} className="text-white" />
+                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
+                            <div className="flex items-center gap-5 relative z-10">
+                                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/10 border border-purple-50">
+                                    <Flame size={28} className="text-purple-600 animate-pulse" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-gray-900">{t.product?.vto_banner || 'Try this piece now'}</h4>
-                                    <p className="text-[11px] text-gray-500">{t.product?.vto_desc || 'See how it looks on you with AI'}</p>
+                                    <h4 className="font-black text-gray-900 font-cairo text-lg">{t.product?.vto_banner || (isRTL ? 'جرب القطعة دي دلوقتي' : 'Try this piece now')}</h4>
+                                    <p className="text-[12px] text-gray-500 font-bold font-cairo">{t.product?.vto_desc || (isRTL ? 'شوف شكلها عليك بالذكاء الاصطناعي' : 'See how it looks on you with AI')}</p>
                                 </div>
                             </div>
-                            <ChevronRight size={20} className="text-purple-300 group-hover:translate-x-1 transition-transform" />
+                            <ChevronRight size={24} className="text-purple-400 group-hover:translate-x-1 transition-transform" />
                         </motion.div>
 
-                        <div className="space-y-10">
+                        <div className="space-y-12">
                             {/* Color Selection */}
                             {product.colors && product.colors.length > 0 && (
                                 <div>
-                                    <h3 className="text-base font-bold text-gray-900 mb-4">{t.product?.colors || 'Colors'}</h3>
-                                    <div className="flex gap-4">
+                                    <h3 className="text-lg font-black text-gray-900 mb-5 font-cairo">{t.product?.colors || 'Colors'}</h3>
+                                    <div className="flex gap-5">
                                         {product.colors.map((c) => (
                                             <button
                                                 key={c.color}
                                                 onClick={() => setSelectedColor(c.color)}
-                                                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all p-1 border-2 ${selectedColor === c.color ? 'border-[var(--color-brand-primary)] scale-110 shadow-lg' : 'border-transparent bg-gray-100'}`}
+                                                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all p-1.5 border-2 ${selectedColor === c.color ? 'border-[var(--color-brand-primary)] scale-110 shadow-xl' : 'border-transparent bg-gray-50'}`}
                                             >
                                                 <div
                                                     style={{ backgroundColor: c.color }}
-                                                    className="w-full h-full rounded-full flex items-center justify-center"
+                                                    className="w-full h-full rounded-xl flex items-center justify-center shadow-inner"
                                                 >
-                                                    {selectedColor === c.color && <Check size={18} className="text-white mix-blend-difference" />}
+                                                    {selectedColor === c.color && <Check size={20} className="text-white mix-blend-difference" />}
                                                 </div>
                                             </button>
                                         ))}
@@ -221,19 +252,22 @@ export default function ProductPage() {
                             {/* Size Selection */}
                             {product.sizes && product.sizes.length > 0 && (
                                 <div>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-base font-bold text-gray-900">{t.product?.sizes || 'Sizes'}</h3>
-                                        <button className="text-sm font-bold text-[var(--color-brand-primary)] flex items-center gap-1.5 opacity-80 decoration-2 underline-offset-4 hover:underline">
+                                    <div className="flex justify-between items-center mb-5">
+                                        <h3 className="text-lg font-black text-gray-900 font-cairo">{t.product?.sizes || 'Sizes'}</h3>
+                                        <button
+                                            onClick={() => setIsSizeGuideOpen(true)}
+                                            className="text-sm font-black text-[var(--color-brand-primary)] flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)]/5 hover:bg-[var(--color-brand-primary)]/10 transition-colors"
+                                        >
                                             <Ruler size={16} />
-                                            <span>{t.product?.size_guide || 'Size Guide'}</span>
+                                            <span>{t.product?.size_guide || (isRTL ? 'دليل المقاسات' : 'Size Guide')}</span>
                                         </button>
                                     </div>
-                                    <div className="flex flex-wrap gap-3">
+                                    <div className="flex flex-wrap gap-4">
                                         {product.sizes.map((s) => (
                                             <button
                                                 key={s}
                                                 onClick={() => setSelectedSize(s)}
-                                                className={`min-w-[4rem] h-14 px-4 rounded-2xl border-2 font-black transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md' : 'border-gray-100 bg-white text-gray-400'}`}
+                                                className={`min-w-[4.5rem] h-16 px-5 rounded-[20px] border-2 font-black text-lg transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-xl scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
                                             >
                                                 {s}
                                             </button>
@@ -243,34 +277,34 @@ export default function ProductPage() {
                             )}
 
                             {/* Stock Alert */}
-                            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex items-center gap-3">
-                                <div className="text-amber-500">
+                            <div className="p-5 rounded-[24px] bg-amber-50 border border-amber-100/50 flex items-center gap-4">
+                                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
                                     <motion.div
                                         animate={{ scale: [1, 1.2, 1] }}
                                         transition={{ duration: 1.5, repeat: Infinity }}
                                     >
-                                        <Flame size={20} className="fill-amber-500" /> {/* Changed Sparkles to Flame */}
+                                        <Flame size={20} className="text-amber-500 fill-amber-500" />
                                     </motion.div>
                                 </div>
-                                <span className="text-sm font-bold text-amber-900">
-                                    {isRTL ? `الكمية محدودة! باق ${stockCount} قطع فقط` : `Limited Stock! Only ${stockCount} left`}
+                                <span className="text-sm font-black text-amber-900 font-cairo">
+                                    {t.product?.low_stock?.replace('{count}', stockCount.toString()) || (isRTL ? `الكمية محدودة! باق ${stockCount} قطع فقط` : `Limited Stock! Only ${stockCount} left`)}
                                 </span>
                             </div>
 
-                            {/* Quantity */}
-                            <div className="flex items-center gap-6">
-                                <h3 className="text-base font-bold text-gray-900">{t.product?.quantity || 'Quantity'}</h3>
-                                <div className="flex items-center bg-white rounded-2xl p-1 border border-gray-100 shadow-sm">
+                            {/* Quantity & Actions */}
+                            <div className="flex flex-col gap-6">
+                                <h3 className="text-lg font-black text-gray-900 font-cairo">{t.product?.quantity || 'Quantity'}</h3>
+                                <div className="flex items-center bg-gray-50 rounded-[20px] p-1.5 w-fit border border-gray-100">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors"
+                                        className="w-12 h-12 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-white rounded-xl shadow-sm"
                                     >
                                         <Minus size={20} strokeWidth={3} />
                                     </button>
-                                    <span className="w-12 text-center font-black text-lg text-gray-900">{quantity}</span>
+                                    <span className="w-14 text-center font-black text-xl text-gray-900">{quantity}</span>
                                     <button
                                         onClick={() => setQuantity(quantity + 1)}
-                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-colors"
+                                        className="w-12 h-12 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-white rounded-xl shadow-sm"
                                     >
                                         <Plus size={20} strokeWidth={3} />
                                     </button>
@@ -278,70 +312,65 @@ export default function ProductPage() {
                             </div>
 
                             {/* Description */}
-                            <div className="pt-8 border-t border-gray-100">
-                                <h3 className="text-base font-bold text-gray-900 mb-4">{t.product?.description || 'Details'}</h3>
-                                <p className="text-gray-500 leading-relaxed font-medium">
+                            <div className="pt-10 border-t border-gray-100">
+                                <h3 className="text-lg font-black text-gray-900 mb-5 font-cairo">{t.product?.description || 'Details'}</h3>
+                                <p className="text-gray-500 leading-relaxed font-bold font-cairo text-base opacity-80">
                                     {product.description}
                                 </p>
+                            </div>
+
+                            {/* Reviews Section Integration */}
+                            <div className="pt-10 border-t border-gray-100">
+                                <ReviewsSection productId={productId} />
                             </div>
                         </div>
                     </div>
                 </div>
             </main>
 
-            {/* FLOATING CAPSULE FOOTER (Black Bar) */}
-            {/* FLOATING CAPSULE FOOTER (Black Bar) - REFINED */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
+            {/* FLOATING CAPSULE FOOTER (Matches Flutter _buildGlassActionPill) */}
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[94%] max-w-xl z-50">
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="bg-gray-950/95 backdrop-blur-xl p-2.5 rounded-[2rem] shadow-2xl flex items-center justify-between border border-white/5"
+                    className="bg-gray-950 p-2 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center justify-between border border-white/10"
                 >
-                    {/* Price Side */}
-                    <div className="px-6">
-                        <span className="text-xl font-black text-white">{product.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
+                    <div className="px-8">
+                        <span className="text-2xl font-black text-white font-cairo">
+                            {product.price.toLocaleString()}
+                            <span className="text-xs ml-1 opacity-60">{isRTL ? 'ج.م' : 'EGP'}</span>
+                        </span>
                     </div>
 
-                    {/* Add to Cart Button (White Capsule) */}
                     <button
                         onClick={handleAddToCart}
-                        disabled={!selectedSize}
                         className={`
-                            flex items-center gap-3 px-8 py-4 rounded-[1.5rem] font-black transition-all active:scale-95
+                            flex items-center gap-3 px-10 py-5 rounded-[2rem] font-black text-lg transition-all active:scale-95
                             ${!selectedSize
                                 ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                : 'bg-white text-gray-950 shadow-xl shadow-black/20 hover:bg-gray-100'}
+                                : 'bg-white text-gray-950 shadow-xl hover:bg-gray-100'}
                         `}
                     >
-                        <ShoppingBag size={20} />
-                        <span>{t.product?.add_to_cart || 'Add to Cart'}</span>
+                        <ShoppingBag size={22} />
+                        <span className="font-cairo">{t.product?.add_to_cart || 'Add to Cart'}</span>
                     </button>
                 </motion.div>
             </div>
 
-            {/* Parabolic Fly to Cart Animation Overlay */}
-            <AnimatePresence>
-                {flyIcon && (
-                    <motion.div
-                        initial={{
-                            left: flyIcon.x - 20,
-                            top: flyIcon.y - 20,
-                            scale: 1,
-                            opacity: 1
-                        }}
-                        animate={{
-                            left: typeof window !== 'undefined' ? window.innerWidth - 80 : 0,
-                            top: [flyIcon.y - 20, flyIcon.y - 200, 40], // Parabolic arc
-                            scale: 0.2,
-                            opacity: [1, 1, 0]
-                        }}
-                        transition={{ duration: 0.8, times: [0, 0.4, 1], ease: "easeInOut" }}
-                        className="fixed z-[100] w-12 h-12 bg-[var(--color-brand-primary)] rounded-full border-4 border-white shadow-2xl flex items-center justify-center pointer-events-none"
-                    >
-                        <ShoppingBag size={20} className="text-white" />
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* Size Guide Bottom Sheet Modal */}
+            <SizeGuideModal
+                isOpen={isSizeGuideOpen}
+                onClose={() => setIsSizeGuideOpen(false)}
+                sizeGuide={product.size_guide}
+            />
+
+            {/* AI Virtual Try-On Modal */}
+            <VirtualTryOnModal
+                isOpen={isVTOOpen}
+                onClose={() => setIsVTOOpen(false)}
+                productImageUrl={product.images[0]}
+                productId={productId}
+            />
         </div>
     );
 }

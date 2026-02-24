@@ -34,4 +34,5 @@ export interface Product {
     sizes?: string[];
     rating?: number;
     reviews?: number;
+    size_guide?: string;
 }

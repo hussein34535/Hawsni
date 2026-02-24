@@ -3,14 +3,19 @@
 import { useState } from 'react';
 import { ShoppingBag, Bell, Search, User, Menu } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import CartDrawer from '@/components/cart/CartDrawer';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function Navbar() {
+    const pathname = usePathname();
     const { t, language } = useLanguage();
     const itemCount = useCartStore((state) => state.getItemCount());
     const [isCartOpen, setIsCartOpen] = useState(false);
+
+    // Hide Navbar on product detail pages to match Flutter app behavior
+    if (pathname.includes('/product/')) return null;
 
     return (
         <>

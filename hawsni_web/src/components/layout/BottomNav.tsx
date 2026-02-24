@@ -18,6 +18,9 @@ export default function BottomNav() {
         { href: '/profile', icon: User, label: t.common.profile },
     ];
 
+    // Hide BottomNav on product detail pages to match Flutter app behavior
+    if (pathname.includes('/product/')) return null;
+
     return (
         <div className="md:hidden fixed bottom-0 w-full bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.05)] border-t border-gray-100 z-50">
             <div className="flex justify-around items-center h-16 px-2">
