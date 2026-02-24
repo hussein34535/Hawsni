@@ -65,10 +65,10 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                 <div className="space-y-4">
                     {reviews.map((review, idx) => (
                         <motion.div
+                            key={review._id || idx}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.1 }}
-                            key={review._id}
                             className="bg-white border border-gray-100 p-5 rounded-[20px] shadow-sm relative group"
                         >
                             <div className="flex items-start gap-4">

@@ -27,8 +27,8 @@ export default function Navbar() {
                         {/* Logo */}
                         <div className="w-10 h-10 flex items-center justify-center">
                             <Link href="/">
-                                <div className="w-10 h-10 bg-[var(--color-brand-primary)] rounded-xl flex items-center justify-center shadow-[var(--shadow-soft)]">
-                                    <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain p-1" />
+                                <div className="w-10 h-10 flex items-center justify-center">
+                                    <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain" />
                                 </div>
                             </Link>
                         </div>
@@ -51,8 +51,8 @@ export default function Navbar() {
                     <div className="hidden md:flex items-center justify-between">
                         {/* Logo */}
                         <Link href="/">
-                            <div className="w-12 h-12 bg-[var(--color-brand-primary)] rounded-xl flex items-center justify-center shadow-[var(--shadow-soft)]">
-                                <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain p-1" />
+                            <div className="w-12 h-12 flex items-center justify-center">
+                                <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain" />
                             </div>
                         </Link>
 

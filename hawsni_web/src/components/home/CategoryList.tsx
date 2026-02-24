@@ -1,3 +1,4 @@
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Category } from '@/types';
 import { useLanguage } from '@/context/LanguageContext';
@@ -9,6 +10,7 @@ interface CategoryListProps {
 
 export default function CategoryList({ categories, isLoading }: CategoryListProps) {
     const { language, isRTL } = useLanguage();
+    const router = useRouter();
 
     const getTranslatedName = (cat: Category) => {
         if (language === 'ar') {
@@ -35,31 +37,32 @@ export default function CategoryList({ categories, isLoading }: CategoryListProp
     }
 
     return (
-        <div className="h-[120px] w-full mt-4 mb-4">
+        <div className="h-[130px] w-full mt-4 mb-4">
             <div className="flex overflow-x-auto h-full scrollbar-none items-center">
                 {categories.map((cat, index) => (
                     <motion.div
                         key={cat._id || (cat as any).id}
-                        whileHover={{ y: -2 }}
-                        className={`w-[100px] bg-white rounded-xl flex flex-col items-center justify-center cursor-pointer flex-shrink-0 h-[100px] shadow-[0_2px_8px_rgba(156,163,175,0.1)] ${isRTL
+                        whileHover={{ y: -5, scale: 1.02 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => router.push(`/search?category=${encodeURIComponent(cat.name)}`)}
+                        className={`w-[90px] bg-white rounded-2xl flex flex-col items-center justify-center cursor-pointer flex-shrink-0 h-[105px] border border-gray-100 shadow-sm hover:shadow-md transition-all ${isRTL
                             ? (index === 0 ? 'mr-4 ml-3' : 'ml-3')
                             : (index === 0 ? 'ml-4 mr-3' : 'mr-3')
                             }`}
                     >
                         {/* Image Container */}
-                        <div className="p-3 bg-blue-50 rounded-full mb-2">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <div className="w-14 h-14 bg-gray-50 rounded-full mb-3 overflow-hidden border border-gray-100 p-1 flex mt-2">
                             {cat.image ? (
-                                <img src={cat.image} alt={cat.name} className="w-10 h-10 object-cover rounded-full" />
+                                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover rounded-full" />
                             ) : (
-                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <span className="text-[10px] text-gray-400">?</span>
+                                <div className="w-full h-full bg-gray-100 rounded-full flex items-center justify-center">
+                                    <span className="text-xs text-gray-400">?</span>
                                 </div>
                             )}
                         </div>
 
                         {/* Category Name */}
-                        <span className="text-[14px] font-medium text-gray-900 text-center px-1 truncate w-full">
+                        <span className="text-[12px] font-bold text-gray-800 text-center px-1 truncate w-full mb-1">
                             {getTranslatedName(cat)}
                         </span>
                     </motion.div>

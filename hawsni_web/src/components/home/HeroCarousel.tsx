@@ -55,40 +55,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                         className="w-full h-full object-cover"
                     />
 
-                    {/* Subtle bottom-weighted gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-
-                    {/* Content - Magazine style (bottom-left or bottom-right for RTL) */}
-                    <div className={`absolute inset-0 p-8 flex flex-col justify-end ${isRTL ? 'items-end text-right' : 'items-start text-left'} text-white`}>
-                        <motion.span
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="text-[10px] md:text-[14px] font-semibold tracking-[1.5px] md:tracking-[2px] uppercase mb-2 md:mb-3 text-white"
-                        >
-                            {h}
-                        </motion.span>
-
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                            className="text-[28px] md:text-[42px] font-black mb-5 md:mb-8 leading-[1.1] tracking-[-0.5px] max-w-2xl"
-                        >
-                            {s}
-                        </motion.h2>
-
-                        <motion.button
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.7 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="px-8 py-4 md:px-8 md:py-4 bg-[var(--color-brand-primary)] text-white rounded-[30px] font-bold text-[14px] tracking-[0.5px] shadow-none"
-                        >
-                            {b}
-                        </motion.button>
-                    </div>
+                    {/* The text content overlay has been removed per user request */}
                 </motion.div>
             </AnimatePresence>
 
