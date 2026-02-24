@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_URL = 'https://api.resend.com/emails';
-const SENDER = 'Hwasi <noreply@hawsni.com>';
+const SENDER = 'Hawsni <noreply@hwasi.com>';
 const ADMIN_EMAIL = 'hussona4635@gmail.com';
 
 /**
