@@ -75,10 +75,17 @@ export default function ProfilePage() {
         <div className="min-h-screen bg-[var(--color-bg-secondary)] pb-24">
             {/* Header with Curve */}
             <div className="relative">
-                <div className="bg-[var(--color-brand-primary)] h-[200px] rounded-b-[24px] pt-10 px-6">
-                    <div className="flex justify-between items-center text-white">
-                        <h1 className="text-xl font-bold">{t.profile.title}</h1>
-                        <button className="p-2">
+                <div className="bg-[var(--color-brand-primary)] h-[220px] rounded-b-[40px] pt-10 px-6 relative overflow-hidden">
+                    {/* Background Logo Pattern */}
+                    <img
+                        src="/logo.png"
+                        alt=""
+                        className="absolute -right-10 -bottom-10 w-48 h-48 opacity-10 rotate-12 pointer-events-none"
+                    />
+
+                    <div className="flex justify-between items-center text-white relative z-10">
+                        <h1 className="text-2xl font-black font-cairo tracking-tight">{t.profile.title}</h1>
+                        <button className="w-10 h-10 bg-white/10 rounded-xl backdrop-blur-md flex items-center justify-center">
                             <Settings size={20} />
                         </button>
                     </div>
@@ -137,11 +144,14 @@ export default function ProfilePage() {
                 </MenuSection>
 
                 <MenuSection isRTL={isRTL}>
-                    <button className="w-full flex items-center gap-4 p-4 text-red-500 font-bold group">
-                        <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
+                    <button
+                        onClick={() => authService.logout()}
+                        className="w-full flex items-center gap-4 p-4 text-red-500 font-bold group hover:bg-red-50 transition-colors"
+                    >
+                        <div className="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center group-hover:bg-red-100 transition-colors">
                             <LogOut size={20} />
                         </div>
-                        <span>{t.profile.items.logout}</span>
+                        <span className="font-cairo">{t.profile.items.logout}</span>
                     </button>
                 </MenuSection>
             </div>
@@ -152,8 +162,8 @@ export default function ProfilePage() {
 function GuestProfileView({ t, toggleLanguage, language, isRTL }: any) {
     return (
         <div className="min-h-screen bg-[var(--color-bg-secondary)] flex flex-col items-center justify-center px-6">
-            <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-[var(--shadow-soft)] mb-8">
-                <User size={64} className="text-[var(--color-brand-primary)]" />
+            <div className="w-40 h-40 bg-white rounded-full flex items-center justify-center shadow-[0_15px_40px_rgba(0,0,0,0.06)] mb-8 p-6">
+                <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain" />
             </div>
 
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{t.profile.welcome_guest}</h1>

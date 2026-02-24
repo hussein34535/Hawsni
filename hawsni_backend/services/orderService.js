@@ -175,7 +175,57 @@ class OrderService {
             .single();
 
         if (error) throw error;
-        return data;
+    }
+
+    async linkGuestOrders(userId, email, phone) {
+        console.log(`🔍 Linking guest orders for User: ${userId}, Email: ${email}, Phone: ${phone}`);
+
+        try {
+            // Find orders where user_id is null AND (shipping_address->email = email OR shipping_address->phone = phone)
+            // Note: shipping_address is a JSONB column
+
+            let query = supabase
+                .from('orders')
+                .update({ user_id: userId })
+                .is('user_id', null);
+
+            // Using or condition for email or phone match in JSONB
+            // We need to be careful with syntax for JSONB matching in Supabase JS client
+            // Alternative: Fetch first, then update by IDs if complex queries are tricky
+
+            const { data: ordersToLink, error: fetchError } = await supabase
+                .from('orders')
+                .select('id, shipping_address')
+                .is('user_id', null);
+
+            if (fetchError) throw fetchError;
+
+            const idsToUpdate = ordersToLink
+                .filter(order => {
+                    const addr = order.shipping_address || {};
+                    const matchEmail = email && addr.email && addr.email.toLowerCase() === email.toLowerCase();
+                    const matchPhone = phone && addr.phone && addr.phone.toString() === phone.toString();
+                    return matchEmail || matchPhone;
+                })
+                .map(order => order.id);
+
+            if (idsToUpdate.length > 0) {
+                const { error: updateError } = await supabase
+                    .from('orders')
+                    .update({ user_id: userId })
+                    .in('id', idsToUpdate);
+
+                if (updateError) throw updateError;
+                console.log(`✅ Linked ${idsToUpdate.length} orders to user ${userId}`);
+                return idsToUpdate.length;
+            }
+
+            return 0;
+        } catch (error) {
+            console.error('❌ Failed to link guest orders:', error);
+            // Non-critical failure, don't block the main auth flow
+            return 0;
+        }
     }
 }
 

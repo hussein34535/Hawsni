@@ -44,6 +44,6 @@
   body {
     @apply bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] antialiased;
     direction: ltr;
-    /* Can be toggled for Arabic */
+    touch-action: pan-x pan-y;
   }
 }

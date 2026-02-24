@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cairo } from "next/font/google";
 import "./globals.css";
 
@@ -14,8 +14,9 @@ export const metadata: Metadata = {
   description: 'Shop the latest fashion trends at Hawsni. Premium quality, local craftsmanship, and unique styles delivered to your doorstep in Egypt.',
   keywords: 'fashion, Egypt, style, clothing, premium, Hawsni, ecommerce',
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: "/logo.png",
+    apple: "/logo.png",
+    shortcut: "/logo.png",
   },
   openGraph: {
     title: 'Hawsni | Premium Fashion & Style',
@@ -37,11 +38,12 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport = {
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: 'cover',
 };
 
 import Navbar from "@/components/layout/Navbar";

@@ -8,12 +8,11 @@ import axios from '@/lib/axios';
 import { motion } from 'framer-motion';
 
 interface Order {
-    _id: string;
-    orderId: string;
-    createdAt: string;
-    totalAmount: number;
-    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-    items: any[];
+    id: string;
+    created_at: string;
+    total: number;
+    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'Processing';
+    order_items: any[];
 }
 
 export default function OrdersPage() {
@@ -34,24 +33,29 @@ export default function OrdersPage() {
             }
 
             try {
-                const { data } = await axios.get('/orders/my-orders');
-                setOrders(data || []);
+                const { data } = await axios.get('/orders');
+                if (data.success) {
+                    setOrders(data.orders || []);
+                } else {
+                    setOrders([]);
+                }
             } catch (err: any) {
                 console.error('Failed to fetch orders:', err);
                 if (err.response?.status === 401) {
                     setIsGuest(true);
                 } else {
-                    setError('Failed to load orders. Please try again later.');
+                    setError(isRTL ? 'فشل تحميل الطلبات. حاول مرة أخرى.' : 'Failed to load orders. Please try again later.');
                 }
             } finally {
                 setIsLoading(false);
             }
         };
         fetchOrders();
-    }, []);
+    }, [isRTL]);
 
     const getStatusIcon = (status: string) => {
-        switch (status) {
+        const lowerStatus = status.toLowerCase();
+        switch (lowerStatus) {
             case 'pending': return <Clock size={18} className="text-amber-500" />;
             case 'processing': return <Package size={18} className="text-blue-500" />;
             case 'shipped': return <Package size={18} className="text-indigo-500" />;
@@ -62,6 +66,7 @@ export default function OrdersPage() {
     };
 
     const getStatusText = (status: string) => {
+        const lowerStatus = status.toLowerCase();
         const statuses: any = {
             'pending': language === 'ar' ? 'قيد الانتظار' : 'Pending',
             'processing': language === 'ar' ? 'جاري التنفيذ' : 'Processing',
@@ -69,7 +74,7 @@ export default function OrdersPage() {
             'delivered': language === 'ar' ? 'تم التوصيل' : 'Delivered',
             'cancelled': language === 'ar' ? 'ملغي' : 'Cancelled',
         };
-        return statuses[status] || status;
+        return statuses[lowerStatus] || status;
     };
 
     return (
@@ -127,28 +132,28 @@ export default function OrdersPage() {
                     <div className="space-y-3">
                         {orders.map((order) => (
                             <motion.div
-                                key={order._id}
+                                key={order.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="bg-white rounded-3xl p-4 shadow-sm border border-gray-50 group hover:border-[var(--color-brand-primary)] transition-colors cursor-pointer"
-                                onClick={() => router.push(`/profile/orders/${order._id}`)}
+                                onClick={() => router.push(`/profile/orders/${order.id}`)}
                             >
                                 <div className="flex justify-between items-start mb-4">
-                                    <div>
+                                    <div className="text-right">
                                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                                            {t.orders.order_id}: #{order.orderId || order._id.slice(-8).toUpperCase()}
+                                            {t.orders.order_id}: #{order.id.slice(-8).toUpperCase()}
                                         </p>
                                         <p className="text-sm font-medium text-gray-400">
-                                            {new Date(order.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
+                                            {new Date(order.created_at).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
                                                 year: 'numeric',
                                                 month: 'long',
                                                 day: 'numeric'
                                             })}
                                         </p>
                                     </div>
-                                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-tight ${order.status === 'delivered' ? 'bg-emerald-50 text-emerald-600' :
-                                        order.status === 'cancelled' ? 'bg-red-50 text-red-600' :
-                                            'bg-amber-50 text-amber-600'
+                                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight ${order.status.toLowerCase() === 'delivered' ? 'bg-emerald-50 text-emerald-600' :
+                                            order.status.toLowerCase() === 'cancelled' ? 'bg-red-50 text-red-600' :
+                                                'bg-amber-50 text-amber-600'
                                         }`}>
                                         {getStatusIcon(order.status)}
                                         {getStatusText(order.status)}
@@ -156,10 +161,10 @@ export default function OrdersPage() {
                                 </div>
 
                                 <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                                    <div>
-                                        <p className="text-xs text-gray-400 mb-0.5">{t.orders.total}</p>
+                                    <div className="text-right">
+                                        <p className="text-[10px] text-gray-400 font-bold mb-0.5">{t.orders.total}</p>
                                         <p className="text-lg font-black text-gray-900">
-                                            {order.totalAmount} {language === 'ar' ? 'ج.م' : 'EGP'}
+                                            {order.total} {language === 'ar' ? 'ج.م' : 'EGP'}
                                         </p>
                                     </div>
                                     <div className={`p-2 group-hover:bg-emerald-50 rounded-full transition-colors ${isRTL ? 'rotate-180' : ''}`}>

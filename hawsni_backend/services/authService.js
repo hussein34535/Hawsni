@@ -1,6 +1,7 @@
 const supabase = require('../config/supabase');
 const jwt = require('jsonwebtoken');
 const emailService = require('./emailService');
+const OrderService = require('./orderService');
 
 class AuthService {
     constructor() {
@@ -129,6 +130,10 @@ class AuthService {
             throw new Error('Failed to verify user');
         }
 
+        // Link guest orders asynchronously
+        OrderService.linkGuestOrders(user.id, user.email, user.phone)
+            .catch(err => console.error('Error linking orders after verifyOtp:', err));
+
         // 4. Generate Token
         const token = this.generateToken(user.id, user.email, user.role);
 
@@ -144,6 +149,7 @@ class AuthService {
             }
         };
     }
+
 
     async login(email, password) {
         // 1. Sign in with Supabase
@@ -168,6 +174,11 @@ class AuthService {
 
         const userName = userProfile ? userProfile.name : user.user_metadata.full_name;
         const userRole = userProfile ? userProfile.role : 'user';
+        const userPhone = userProfile ? userProfile.phone : user.user_metadata.phone;
+
+        // Link guest orders asynchronously
+        OrderService.linkGuestOrders(user.id, user.email, userPhone)
+            .catch(err => console.error('Error linking orders after login:', err));
 
         // Return the native Supabase access token so RLS works seamlessly in Flutter
         const token = session.access_token;

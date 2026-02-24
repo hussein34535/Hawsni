@@ -94,9 +94,31 @@ export default function ProfileDetailsPage() {
                                 <User size={48} className="text-gray-300" />
                             )}
                         </div>
-                        <button className="absolute bottom-1 right-1 w-10 h-10 bg-[var(--color-brand-primary)] text-white rounded-full flex items-center justify-center border-4 border-white shadow-md hover:scale-110 active:scale-90 transition-transform">
+                        <label className="absolute bottom-1 right-1 w-10 h-10 bg-[var(--color-brand-primary)] text-white rounded-full flex items-center justify-center border-4 border-white shadow-md hover:scale-110 active:scale-90 transition-transform cursor-pointer">
                             <Camera size={18} />
-                        </button>
+                            <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        try {
+                                            setIsSaving(true);
+                                            const res = await authService.uploadAvatar(file);
+                                            if (res.success) {
+                                                setUserData({ ...userData, avatar_url: res.user.avatar_url });
+                                                showToast(isRTL ? 'تم تحديث الصورة بنجاح' : 'Avatar updated successfully', 'success');
+                                            }
+                                        } catch (error: any) {
+                                            showToast(error || 'Upload failed', 'error');
+                                        } finally {
+                                            setIsSaving(false);
+                                        }
+                                    }
+                                }}
+                            />
+                        </label>
                     </div>
                 </motion.div>
 

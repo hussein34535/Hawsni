@@ -62,5 +62,26 @@ export const authService = {
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to update profile';
         }
+    },
+
+    uploadAvatar: async (file: File): Promise<any> => {
+        try {
+            const formData = new FormData();
+            formData.append('avatar', file);
+            const response = await apiClient.post('/users/profile/avatar', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to upload avatar';
+        }
+    },
+
+    logout: async (): Promise<void> => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
     }
 };
