@@ -123,14 +123,14 @@ export default function ProductPage() {
         <div className="w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20">
 
             {/* Header / AppBar - Transparent Overlay (Matches Flutter exactly) */}
-            <div className="fixed top-0 left-0 right-0 z-[60] p-4 flex justify-between items-center bg-gradient-to-b from-black/20 to-transparent pointer-events-none h-24">
+            <div className="fixed top-0 left-0 right-0 z-[60] p-4 flex justify-between items-start bg-gradient-to-b from-black/20 to-transparent pointer-events-none h-32 pt-10">
                 <button
                     onClick={() => router.back()}
-                    className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-95 transition-transform"
+                    className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-95 transition-transform mt-2"
                 >
                     <ArrowLeft size={20} className="text-white" />
                 </button>
-                <div className="flex gap-2 pointer-events-auto">
+                <div className="flex gap-2 pointer-events-auto mt-2">
                     <button
                         onClick={() => setIsFavorite(!isFavorite)}
                         className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-95 transition-transform"
@@ -291,8 +291,8 @@ export default function ProductPage() {
                                 </span>
                             </div>
 
-                            {/* Quantity & Actions */}
-                            <div className="flex flex-col gap-4">
+                            {/* Quantity & Actions - Moved to bottom capsule area for better reachability */}
+                            <div className="hidden lg:flex flex-col gap-4">
                                 <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.quantity || 'Quantity'}</h3>
                                 <div className="flex items-center bg-gray-50 rounded-[16px] p-1 w-fit border border-gray-100">
                                     <button
@@ -335,9 +335,24 @@ export default function ProductPage() {
                     animate={{ y: 0, opacity: 1 }}
                     className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] flex items-center justify-between border border-white/10"
                 >
-                    <div className="px-6">
-                        <span className="text-xl font-black text-white font-cairo">
-                            {product.price.toLocaleString()}
+                    <div className="flex flex-col px-6">
+                        <div className="flex items-center gap-2 mb-0.5">
+                            <button
+                                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                className="text-white/40 hover:text-white"
+                            >
+                                <Minus size={14} />
+                            </button>
+                            <span className="text-white font-black text-sm w-4 text-center">{quantity}</span>
+                            <button
+                                onClick={() => setQuantity(quantity + 1)}
+                                className="text-white/40 hover:text-white"
+                            >
+                                <Plus size={14} />
+                            </button>
+                        </div>
+                        <span className="text-lg font-black text-white font-cairo">
+                            {(product.price * quantity).toLocaleString()}
                             <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                         </span>
                     </div>
@@ -345,14 +360,22 @@ export default function ProductPage() {
                     <button
                         onClick={handleAddToCart}
                         className={`
-                            flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95
+                            flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
                             ${!selectedSize
                                 ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
                                 : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
                         `}
                     >
-                        <ShoppingBag size={18} />
-                        <span className="font-cairo">{t.product?.add_to_cart || 'Add to Cart'}</span>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={addItem.toString()} // Just to trigger animation on re-render if needed, but better to use a local state for feedback
+                                initial={{ y: 0 }}
+                                className="flex items-center gap-2"
+                            >
+                                <ShoppingBag size={18} />
+                                <span className="font-cairo">{t.product?.add_to_cart || 'Add to Cart'}</span>
+                            </motion.div>
+                        </AnimatePresence>
                     </button>
                 </motion.div>
             </div>
