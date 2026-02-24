@@ -113,7 +113,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                     >
                         {/* Header */}
                         <div className="px-6 py-4 flex items-center justify-between border-b border-gray-50">
-                            <h3 className="text-xl font-black text-gray-900 font-cairo">
+                            <h3 className="text-lg font-black text-gray-900 font-cairo">
                                 {t.product?.vto_title || 'AI Virtual Try-On'}
                             </h3>
                             <button onClick={onClose} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
@@ -129,8 +129,8 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                                     <div className="grid grid-cols-3 gap-4 mb-8">
                                         {[1, 2, 3].map((step) => (
                                             <div key={step} className="flex flex-col items-center gap-2">
-                                                <div className="w-16 h-16 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center">
-                                                    <img src={`/images/vto_step_${step}.png`} alt={`Step ${step}`} className="w-12 h-12 object-contain" />
+                                                <div className="w-12 h-12 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center">
+                                                    <img src={`/images/vto_step_${step}.png`} alt={`Step ${step}`} className="w-8 h-8 object-contain" />
                                                 </div>
                                                 <span className="text-[10px] font-bold text-gray-400 font-cairo">
                                                     {(t.product as any)[`vto_step${step}`]}
@@ -141,16 +141,16 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
 
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="w-full aspect-[4/5] max-w-[280px] bg-gray-50 rounded-[32px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-4 hover:border-[var(--color-brand-primary)] transition-colors group mx-auto"
+                                        className="w-full aspect-[4/5] max-w-[240px] bg-gray-50 rounded-[24px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 hover:border-[var(--color-brand-primary)] transition-colors group mx-auto"
                                     >
-                                        <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[var(--color-brand-primary)]">
-                                            <Camera size={32} />
+                                        <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[var(--color-brand-primary)]">
+                                            <Camera size={24} />
                                         </div>
-                                        <p className="font-black text-gray-400 font-cairo text-lg">{t.product?.vto_upload}</p>
+                                        <p className="font-black text-gray-400 font-cairo text-base">{t.product?.vto_upload}</p>
                                     </button>
                                 </div>
                             ) : (
-                                <div className="relative w-full aspect-[3/4] max-w-[320px] bg-gray-100 rounded-[32px] overflow-hidden shadow-xl">
+                                <div className="relative w-full aspect-[3/4] max-w-[280px] bg-gray-100 rounded-[24px] overflow-hidden shadow-xl">
                                     <AnimatePresence mode="wait">
                                         <motion.img
                                             key={resultImageUrl || userImage}
@@ -161,13 +161,11 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                                         />
                                     </AnimatePresence>
 
-                                    {(status === 'uploading' || status === 'processing') && (
-                                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-6 text-center">
-                                            <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mb-6" />
-                                            <Sparkles className="text-purple-400 mb-2 animate-pulse" />
-                                            <p className="font-black text-lg font-cairo">{t.product?.vto_processing}</p>
-                                        </div>
-                                    )}
+                                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-6 text-center">
+                                        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
+                                        <Sparkles className="text-purple-400 mb-2 animate-pulse size-5" />
+                                        <p className="font-black text-base font-cairo">{t.product?.vto_processing}</p>
+                                    </div>
 
                                     {status === 'failed' && (
                                         <div className="absolute inset-0 bg-red-500/10 backdrop-blur-sm flex flex-col items-center justify-center text-red-600 p-6 text-center">
@@ -181,29 +179,28 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
 
                         {/* Footer Actions */}
                         <div className="p-6 bg-gray-50 border-t border-gray-100">
-                            {status === 'succeeded' ? (
-                                <div className="flex gap-4">
-                                    <button
-                                        onClick={reset}
-                                        className="flex-1 h-14 bg-white border border-gray-200 rounded-2xl font-black font-cairo text-gray-900 flex items-center justify-center gap-2"
-                                    >
-                                        <RefreshCw size={20} />
-                                        {t.product?.vto_try_another}
-                                    </button>
-                                    <button
-                                        className="h-14 w-14 bg-[var(--color-brand-primary)] text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95"
-                                    >
-                                        <Share2 size={24} />
-                                    </button>
-                                </div>
-                            ) : (
+                            <div className="flex gap-3">
                                 <button
-                                    disabled={!userImage || status === 'processing' || status === 'uploading'}
-                                    onClick={status === 'failed' ? reset : (userImage ? startTryOnFlow : () => fileInputRef.current?.click())}
-                                    className="w-full h-14 bg-gray-950 text-white rounded-2xl font-black text-lg shadow-xl font-cairo disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={reset}
+                                    className="flex-1 h-12 bg-white border border-gray-200 rounded-xl font-black font-cairo text-gray-900 flex items-center justify-center gap-2 text-sm"
                                 >
-                                    {status === 'failed' ? (isRTL ? 'إعادة المحاولة' : 'Retry') : (userImage ? t.product?.vto_button : t.product?.vto_upload)}
+                                    <RefreshCw size={18} />
+                                    {t.product?.vto_try_another}
                                 </button>
+                                <button
+                                    className="h-12 w-12 bg-[var(--color-brand-primary)] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95"
+                                >
+                                    <Share2 size={20} />
+                                </button>
+                            </div>
+                            ) : (
+                            <button
+                                disabled={!userImage || status === 'processing' || status === 'uploading'}
+                                onClick={status === 'failed' ? reset : (userImage ? startTryOnFlow : () => fileInputRef.current?.click())}
+                                className="w-full h-12 bg-gray-950 text-white rounded-xl font-black text-base shadow-xl font-cairo disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {status === 'failed' ? (isRTL ? 'إعادة المحاولة' : 'Retry') : (userImage ? t.product?.vto_button : t.product?.vto_upload)}
+                            </button>
                             )}
                         </div>
 
