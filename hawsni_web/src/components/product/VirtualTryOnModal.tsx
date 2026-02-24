@@ -179,28 +179,29 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
 
                         {/* Footer Actions */}
                         <div className="p-6 bg-gray-50 border-t border-gray-100">
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={reset}
-                                    className="flex-1 h-12 bg-white border border-gray-200 rounded-xl font-black font-cairo text-gray-900 flex items-center justify-center gap-2 text-sm"
-                                >
-                                    <RefreshCw size={18} />
-                                    {t.product?.vto_try_another}
-                                </button>
-                                <button
-                                    className="h-12 w-12 bg-[var(--color-brand-primary)] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95"
-                                >
-                                    <Share2 size={20} />
-                                </button>
-                            </div>
+                            {status === 'succeeded' ? (
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={reset}
+                                        className="flex-1 h-12 bg-white border border-gray-200 rounded-xl font-black font-cairo text-gray-900 flex items-center justify-center gap-2 text-sm"
+                                    >
+                                        <RefreshCw size={18} />
+                                        {t.product?.vto_try_another}
+                                    </button>
+                                    <button
+                                        className="h-12 w-12 bg-[var(--color-brand-primary)] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95"
+                                    >
+                                        <Share2 size={20} />
+                                    </button>
+                                </div>
                             ) : (
-                            <button
-                                disabled={!userImage || status === 'processing' || status === 'uploading'}
-                                onClick={status === 'failed' ? reset : (userImage ? startTryOnFlow : () => fileInputRef.current?.click())}
-                                className="w-full h-12 bg-gray-950 text-white rounded-xl font-black text-base shadow-xl font-cairo disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {status === 'failed' ? (isRTL ? 'إعادة المحاولة' : 'Retry') : (userImage ? t.product?.vto_button : t.product?.vto_upload)}
-                            </button>
+                                <button
+                                    disabled={!userImage || status === 'processing' || status === 'uploading'}
+                                    onClick={status === 'failed' ? reset : (userImage ? startTryOnFlow : () => fileInputRef.current?.click())}
+                                    className="w-full h-12 bg-gray-950 text-white rounded-xl font-black text-base shadow-xl font-cairo disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {status === 'failed' ? (isRTL ? 'إعادة المحاولة' : 'Retry') : (userImage ? t.product?.vto_button : t.product?.vto_upload)}
+                                </button>
                             )}
                         </div>
 
