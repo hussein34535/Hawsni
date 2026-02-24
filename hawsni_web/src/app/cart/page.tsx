@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ArrowLeft, ArrowRight, Check, Flower2 } from 'lucide-react';
 import Link from 'next/link';

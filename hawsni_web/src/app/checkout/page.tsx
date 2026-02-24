@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
+import { useLanguage } from '@/context/LanguageContext';
 
 type CheckoutStep = 'address' | 'shipping' | 'payment';
 
@@ -26,6 +27,7 @@ import { checkoutService, OrderData } from '@/services/checkoutService';
 export default function CheckoutPage() {
     const router = useRouter();
     const { items, getTotal, clearCart } = useCartStore();
+    const { isRTL, t } = useLanguage();
     const [currentStep, setCurrentStep] = useState<CheckoutStep>('address');
     const [isProcessing, setIsProcessing] = useState(false);
     const [addresses, setAddresses] = useState<Address[]>([]);
@@ -115,21 +117,23 @@ export default function CheckoutPage() {
     if (items.length === 0 && !isProcessing) return null;
 
     return (
-        <div className="w-full">
-            <div className="px-4 sm:px-6 lg:px-8 pb-32">
+        <div className="w-full min-h-screen bg-[#FAFAFA]">
+            <div className="px-4 sm:px-6 lg:px-8 pb-40">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                     {/* Main Content */}
                     <div className="lg:col-span-8">
                         {/* Header & Back Button */}
-                        <div className="flex items-center gap-4 mb-8">
+                        <div className="flex items-center gap-4 mb-8 mt-6">
                             <button
                                 onClick={handlePrevStep}
                                 className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-900 hover:bg-gray-50 transition-colors"
                             >
-                                <ArrowLeft size={20} />
+                                <ArrowLeft size={20} className={isRTL ? 'rotate-180' : ''} />
                             </button>
-                            <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight">Checkout</h1>
+                            <h1 className="text-2xl font-black text-gray-900 font-cairo">
+                                {isRTL ? 'إتمام الشراء' : 'Checkout'}
+                            </h1>
                         </div>
 
                         {/* Custom Stepper */}
@@ -161,9 +165,9 @@ export default function CheckoutPage() {
                                         </div>
                                         <span className={`
                                             text-[10px] font-black uppercase tracking-widest mt-3 transition-colors duration-300
-                                            ${isActive ? 'text-gray-900' : 'text-gray-400'}
+                                            ${isActive ? 'text-gray-900' : 'text-gray-400 font-cairo'}
                                         `}>
-                                            {step.label}
+                                            {isRTL ? (step.id === 'address' ? 'العنوان' : step.id === 'shipping' ? 'الشحن' : 'الدفع') : step.label}
                                         </span>
                                     </div>
                                 );
@@ -177,18 +181,17 @@ export default function CheckoutPage() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="min-h-[400px]"
+                                className="min-h-[300px]"
                             >
                                 {currentStep === 'address' && (
                                     <AddressStep
-                                        onNext={handleNextStep}
                                         addresses={addresses}
                                         selectedId={selectedAddressId}
                                         onSelect={setSelectedAddressId}
                                     />
                                 )}
-                                {currentStep === 'shipping' && <ShippingStep onNext={handleNextStep} />}
-                                {currentStep === 'payment' && <PaymentStep onPlaceOrder={handlePlaceOrder} isProcessing={isProcessing} />}
+                                {currentStep === 'shipping' && <ShippingStep />}
+                                {currentStep === 'payment' && <PaymentStep />}
                             </motion.div>
                         </AnimatePresence>
                     </div>
@@ -197,21 +200,23 @@ export default function CheckoutPage() {
                     <div className="lg:col-span-4">
                         <div className="lg:sticky lg:top-24 space-y-6">
                             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-black/5">
-                                <h2 className="text-xl font-black text-gray-900 uppercase mb-6 tracking-tight">Order Summary</h2>
+                                <h2 className="text-xl font-black text-gray-900 uppercase mb-6 tracking-tight font-cairo">
+                                    {isRTL ? 'ملخص الطلب' : 'Order Summary'}
+                                </h2>
 
                                 <div className="space-y-4 mb-8">
                                     {items.map((item) => (
-                                        <div key={item.id} className="flex gap-4">
+                                        <div key={item.id} className={`flex gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                             <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100">
                                                 <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="font-bold text-gray-900 text-sm truncate">{item.name}</h4>
                                                 <p className="text-[10px] font-bold text-gray-400 uppercase mt-1">
-                                                    Qty {item.quantity} • {item.size} • {item.color}
+                                                    {item.quantity} x {item.size} • {item.color}
                                                 </p>
                                                 <p className="text-sm font-black text-[var(--color-brand-primary)] mt-1">
-                                                    {(item.price * item.quantity).toLocaleString()} EGP
+                                                    {(item.price * item.quantity).toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}
                                                 </p>
                                             </div>
                                         </div>
@@ -220,74 +225,120 @@ export default function CheckoutPage() {
 
                                 <div className="h-px bg-gray-50 mb-6" />
 
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center text-gray-500 font-medium">
-                                        <span>Subtotal</span>
-                                        <span>{subtotal.toLocaleString()} EGP</span>
+                                <div className="space-y-3 font-cairo text-sm font-bold">
+                                    <div className="flex justify-between items-center text-gray-400">
+                                        <span>{isRTL ? 'المجموع الفرعي' : 'Subtotal'}</span>
+                                        <span className="text-gray-900">{subtotal.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-gray-500 font-medium">
-                                        <span>Shipping</span>
-                                        <span>{shippingFee.toLocaleString()} EGP</span>
+                                    <div className="flex justify-between items-center text-gray-400">
+                                        <span>{isRTL ? 'الشحن' : 'Shipping'}</span>
+                                        <span className="text-gray-900">{shippingFee.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-gray-900 font-black text-xl pt-2">
-                                        <span>Total</span>
-                                        <span className="text-[var(--color-brand-primary)]">{total.toLocaleString()} EGP</span>
+                                    <div className="flex justify-between items-center text-gray-900 font-black text-xl pt-2 border-t border-gray-50">
+                                        <span>{isRTL ? 'الإجمالي' : 'Total'}</span>
+                                        <span className="text-[#0E4435]">{total.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Trust Badge */}
-                            <div className="bg-emerald-50 rounded-3xl p-6 flex items-center gap-4 text-emerald-900">
+                            <div className={`bg-emerald-50 rounded-3xl p-6 flex items-center gap-4 text-emerald-900 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm">
                                     <CheckCircle2 size={24} />
                                 </div>
                                 <div>
-                                    <p className="font-black uppercase text-[10px] tracking-widest text-emerald-600 mb-1">Guaranteed</p>
-                                    <p className="font-bold text-sm">Secure & Private Checkout</p>
+                                    <p className="font-black uppercase text-[10px] tracking-widest text-emerald-600 mb-1">{isRTL ? 'مضمونة' : 'Guaranteed'}</p>
+                                    <p className="font-bold text-sm">{isRTL ? 'دفع آمن وخصوصية تامة' : 'Secure & Private Checkout'}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Fixed Bottom Action Bar */}
+            <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 p-6 z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                <div className="max-w-2xl mx-auto">
+                    {currentStep === 'address' && (
+                        <button
+                            onClick={handleNextStep}
+                            disabled={!selectedAddressId}
+                            className={`
+                                w-full py-5 rounded-[1.8rem] font-black text-lg flex items-center justify-center gap-3 transition-all
+                                ${selectedAddressId ? 'bg-black text-white shadow-xl shadow-black/10' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}
+                            `}
+                        >
+                            <span>{isRTL ? 'المتابعة للشحن' : 'Continue to Shipping'}</span>
+                            <ArrowRight size={20} className={isRTL ? 'rotate-180' : ''} />
+                        </button>
+                    )}
+                    {currentStep === 'shipping' && (
+                        <button
+                            onClick={handleNextStep}
+                            className="w-full py-5 bg-black text-white rounded-[1.8rem] font-black text-lg flex items-center justify-center gap-3 shadow-xl transition-all"
+                        >
+                            <span>{isRTL ? 'المتابعة للدفع' : 'Continue to Payment'}</span>
+                            <ArrowRight size={20} className={isRTL ? 'rotate-180' : ''} />
+                        </button>
+                    )}
+                    {currentStep === 'payment' && (
+                        <button
+                            onClick={handlePlaceOrder}
+                            disabled={isProcessing}
+                            className={`
+                                w-full py-5 bg-[#0E4435] text-white rounded-[1.8rem] font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 transition-all
+                                ${isProcessing ? 'opacity-70 cursor-wait' : 'hover:scale-[1.01] active:scale-[0.98]'}
+                            `}
+                        >
+                            {isProcessing ? (
+                                <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <>
+                                    <span>{isRTL ? 'إتمام الطلب' : 'Place Order'}</span>
+                                    <CheckCircle2 size={20} />
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
 
-// Sub-components as placeholders for now
+// Sub-components
 function AddressStep({
-    onNext,
     addresses,
     selectedId,
     onSelect
 }: {
-    onNext: () => void,
     addresses: Address[],
     selectedId: string | null,
     onSelect: (id: string) => void
 }) {
+    const { isRTL } = useLanguage();
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center px-2">
-                <h3 className="font-bold text-gray-900">Select Shipping Address</h3>
+            <div className={`flex justify-between items-center px-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <h3 className="font-bold text-gray-900 font-cairo">{isRTL ? 'اختر عنوان الشحن' : 'Select Shipping Address'}</h3>
                 <button
                     onClick={() => window.location.href = '/profile/addresses'}
-                    className="flex items-center gap-2 text-[var(--color-brand-primary)] font-bold text-sm"
+                    className="flex items-center gap-2 text-[#0E4435] font-bold text-sm"
                 >
                     <Plus size={18} />
-                    <span>Manage</span>
+                    <span>{isRTL ? 'إدارة' : 'Manage'}</span>
                 </button>
             </div>
 
             {addresses.length === 0 ? (
                 <div className="bg-white p-10 rounded-[2rem] text-center border-2 border-dashed border-gray-100">
                     <MapPin size={40} className="mx-auto text-gray-200 mb-4" />
-                    <p className="text-gray-500 font-bold mb-4">No addresses saved yet</p>
+                    <p className="text-gray-500 font-bold mb-4 font-cairo">{isRTL ? 'لا توجد عناوين مسجلة' : 'No addresses saved yet'}</p>
                     <button
                         onClick={() => window.location.href = '/profile/addresses'}
-                        className="px-6 py-2 bg-[var(--color-brand-primary)] text-white rounded-full font-bold text-sm"
+                        className="px-6 py-2 bg-black text-white rounded-full font-bold text-sm"
                     >
-                        Add Address
+                        {isRTL ? 'إضافة عنوان' : 'Add Address'}
                     </button>
                 </div>
             ) : (
@@ -298,29 +349,29 @@ function AddressStep({
                             onClick={() => onSelect(addr._id)}
                             className={`
                                 cursor-pointer bg-white p-6 rounded-[2rem] border-2 transition-all relative overflow-hidden group
-                                ${selectedId === addr._id ? 'border-[var(--color-brand-primary)] shadow-md' : 'border-transparent hover:border-gray-100'}
+                                ${selectedId === addr._id ? 'border-[#0E4435] shadow-md' : 'border-transparent hover:border-gray-100'}
                             `}
                         >
                             {selectedId === addr._id && (
-                                <div className="absolute top-0 right-0 p-4">
-                                    <div className="w-6 h-6 bg-[var(--color-brand-primary)] text-white rounded-full flex items-center justify-center">
+                                <div className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} p-4`}>
+                                    <div className="w-6 h-6 bg-[#0E4435] text-white rounded-full flex items-center justify-center">
                                         <Check size={14} />
                                     </div>
                                 </div>
                             )}
-                            <div className="flex items-start gap-4">
+                            <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                                 <div className={`
                                     w-12 h-12 rounded-2xl flex items-center justify-center transition-colors
-                                    ${selectedId === addr._id ? 'bg-emerald-50 text-[var(--color-brand-primary)]' : 'bg-gray-50 text-gray-400'}
+                                    ${selectedId === addr._id ? 'bg-emerald-50 text-[#0E4435]' : 'bg-gray-50 text-gray-400'}
                                 `}>
                                     {addr.type === 'home' ? <Home size={22} /> : <Briefcase size={22} />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h4 className={`
-                                        font-black uppercase text-xs tracking-wider mb-2
+                                        font-black uppercase text-[10px] tracking-wider mb-2
                                         ${selectedId === addr._id ? 'text-gray-900' : 'text-gray-400'}
                                     `}>
-                                        {addr.type}
+                                        {isRTL ? (addr.type === 'home' ? 'منزل' : 'عمل') : addr.type}
                                     </h4>
                                     <p className={`
                                         text-sm font-bold leading-relaxed truncate
@@ -340,109 +391,77 @@ function AddressStep({
                     ))}
                 </div>
             )}
-
-            <button
-                onClick={onNext}
-                disabled={!selectedId}
-                className={`
-                    w-full mt-4 py-5 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition-all
-                    ${selectedId ? 'bg-gray-900 text-white shadow-black/10 hover:bg-black' : 'bg-gray-100 text-gray-300 cursor-not-allowed shadow-none'}
-                `}
-            >
-                <span>Continue to Shipping</span>
-                <ArrowRight size={20} />
-            </button>
         </div>
     );
 }
 
-function ShippingStep({ onNext }: { onNext: () => void }) {
+function ShippingStep() {
+    const { isRTL } = useLanguage();
     return (
         <div className="space-y-6">
-            <h3 className="font-bold text-gray-900 px-2">Delivery Method</h3>
+            <h3 className={`font-bold text-gray-900 px-2 font-cairo ${isRTL ? 'text-right' : ''}`}>
+                {isRTL ? 'طريقة الشحن' : 'Delivery Method'}
+            </h3>
 
             <div className="space-y-4">
-                <div className="bg-white p-6 rounded-[2.5rem] border-2 border-[var(--color-brand-primary)] shadow-md flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-[var(--color-brand-primary)]">
+                <div className={`bg-white p-6 rounded-[2.5rem] border-2 border-[#0E4435] shadow-md flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                        <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-[#0E4435]">
                             <Truck size={22} />
                         </div>
                         <div>
-                            <h4 className="font-bold text-gray-900">Standard Delivery</h4>
-                            <p className="text-xs font-medium text-gray-500">2-4 Business Days</p>
+                            <h4 className="font-bold text-gray-900">{isRTL ? 'شحن قياسي' : 'Standard Delivery'}</h4>
+                            <p className="text-xs font-medium text-gray-500">{isRTL ? '2-4 أيام عمل' : '2-4 Business Days'}</p>
                         </div>
                     </div>
-                    <span className="font-black text-gray-900">50 EGP</span>
+                    <span className="font-black text-gray-900">50 {isRTL ? 'ج.م' : 'EGP'}</span>
                 </div>
 
-                <div className="bg-white p-6 rounded-[2.5rem] border-2 border-transparent hover:border-gray-100 flex items-center justify-between opacity-50 cursor-not-allowed">
-                    <div className="flex items-center gap-4">
+                <div className={`bg-white p-6 rounded-[2.5rem] border-2 border-transparent hover:border-gray-100 flex items-center justify-between opacity-50 cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
                         <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
                             <Truck size={22} />
                         </div>
                         <div>
-                            <h4 className="font-bold text-gray-400">Express Delivery</h4>
-                            <p className="text-xs font-medium text-gray-400">Next Day Delivery</p>
+                            <h4 className="font-bold text-gray-400">{isRTL ? 'شحن سريع' : 'Express Delivery'}</h4>
+                            <p className="text-xs font-medium text-gray-400">{isRTL ? 'توصيل في اليوم التالي' : 'Next Day Delivery'}</p>
                         </div>
                     </div>
-                    <span className="font-black text-gray-400">100 EGP</span>
+                    <span className="font-black text-gray-400">100 {isRTL ? 'ج.م' : 'EGP'}</span>
                 </div>
             </div>
-
-            <button
-                onClick={onNext}
-                className="w-full mt-4 py-5 bg-gray-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl"
-            >
-                <span>Continue to Payment</span>
-                <ArrowRight size={20} />
-            </button>
         </div>
     );
 }
 
-function PaymentStep({ onPlaceOrder, isProcessing }: { onPlaceOrder: () => void, isProcessing: boolean }) {
+function PaymentStep() {
+    const { isRTL } = useLanguage();
     return (
         <div className="space-y-6">
-            <h3 className="font-bold text-gray-900 px-2">Payment Method</h3>
+            <h3 className={`font-bold text-gray-900 px-2 font-cairo ${isRTL ? 'text-right' : ''}`}>
+                {isRTL ? 'طريقة الدفع' : 'Payment Method'}
+            </h3>
 
-            <div className="bg-white p-6 rounded-[2.5rem] border-2 border-[var(--color-brand-primary)] shadow-md flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-[var(--color-brand-primary)]">
+            <div className={`bg-white p-6 rounded-[2.5rem] border-2 border-[#0E4435] shadow-md flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-[#0E4435]">
                         <Plus size={22} />
                     </div>
                     <div>
-                        <h4 className="font-bold text-gray-900">Cash on Delivery</h4>
-                        <p className="text-xs font-medium text-gray-500">Pay when you receive your order</p>
+                        <h4 className="font-bold text-gray-900">{isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}</h4>
+                        <p className="text-xs font-medium text-gray-500">{isRTL ? 'ادفع عند استلام طلبك' : 'Pay when you receive your order'}</p>
                     </div>
                 </div>
-                <div className="w-6 h-6 border-4 border-[var(--color-brand-primary)] rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-[var(--color-brand-primary)] rounded-full" />
+                <div className="w-6 h-6 border-4 border-[#0E4435] rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-[#0E4435] rounded-full" />
                 </div>
             </div>
 
             <div className="bg-gray-50 p-6 rounded-3xl border border-dashed border-gray-200 text-center">
-                <p className="text-sm font-bold text-gray-500 italic">
-                    "Card payments are coming soon. For now, we only support COD."
+                <p className="text-sm font-bold text-gray-500 italic font-cairo">
+                    {isRTL ? '"الدفع بالبطاقة قريباً. حالياً ندعم الدفع عند الاستلام فقط."' : '"Card payments are coming soon. For now, we only support COD."'}
                 </p>
             </div>
-
-            <button
-                onClick={onPlaceOrder}
-                disabled={isProcessing}
-                className={`
-                    w-full mt-4 py-5 bg-[var(--color-brand-primary)] text-white rounded-[2rem] font-bold flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 transition-all
-                    ${isProcessing ? 'opacity-70 cursor-wait' : 'hover:scale-[1.02] active:scale-98'}
-                `}
-            >
-                {isProcessing ? (
-                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                    <>
-                        <span>Place Order</span>
-                        <CheckCircle2 size={20} />
-                    </>
-                )}
-            </button>
         </div>
     );
 }

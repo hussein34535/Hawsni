@@ -15,7 +15,6 @@ export default function BottomNav() {
         { href: '/', icon: Home, label: t.common.home },
         { href: '/wishlist', icon: Heart, label: t.common.wishlist },
         { href: '/cart', icon: ShoppingBag, label: t.common.cart },
-        { href: '/notifications', icon: Bell, label: t.notifications?.title || 'Notifications' },
         { href: '/profile', icon: User, label: t.common.profile },
     ];
 
