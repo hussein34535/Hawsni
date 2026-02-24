@@ -40,5 +40,14 @@ export const checkoutService = {
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to place order';
         }
+    },
+
+    getOrder: async (id: string): Promise<{ success: boolean; order: any }> => {
+        try {
+            const response = await apiClient.get(`/orders/${id}`);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to load order';
+        }
     }
 };

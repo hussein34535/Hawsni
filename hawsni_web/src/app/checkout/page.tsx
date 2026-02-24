@@ -48,6 +48,8 @@ export default function CheckoutPage() {
     const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
     const [shippingSettings, setShippingSettings] = useState<any>(null);
     const [selectedGov, setSelectedGov] = useState('');
+    const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
+    const [newAddress, setNewAddress] = useState<{ street: string; city: string; type: 'home' | 'office' | 'other' }>({ street: '', city: '', type: 'home' });
 
     // Guest Info
     const [guestInfo, setGuestInfo] = useState({ name: '', phone: '', email: '', street: '', city: '' });
@@ -75,6 +77,9 @@ export default function CheckoutPage() {
                         const defaultAddr = addrs.find(a => a.isDefault) || addrs[0];
                         setSelectedAddressId(defaultAddr._id);
                         setSelectedGov(defaultAddr.state || '');
+                        setIsAddingNewAddress(false);
+                    } else {
+                        setIsAddingNewAddress(true);
                     }
                 }
             } catch (error) {
@@ -131,13 +136,34 @@ export default function CheckoutPage() {
             alert(isRTL ? 'يرجى إكمال جميع البيانات' : 'Please complete all fields');
             return;
         }
-        if (isAuthenticated && !selectedAddressId) {
+        if (isAuthenticated && !selectedAddressId && !isAddingNewAddress) {
             alert(isRTL ? 'يرجى اختيار عنوان' : 'Please select an address');
+            return;
+        }
+        if (isAuthenticated && isAddingNewAddress && (!newAddress.street || !newAddress.city || !selectedGov)) {
+            alert(isRTL ? 'يرجى إكمال بيانات العنوان الجديد' : 'Please complete new address details');
             return;
         }
 
         setIsProcessing(true);
         try {
+            let addressId = selectedAddressId;
+
+            // If user is logged in and entered a new address, save it first
+            if (isAuthenticated && isAddingNewAddress) {
+                const saveAddrRes = await addressService.addAddress({
+                    street: newAddress.street,
+                    city: newAddress.city,
+                    state: selectedGov,
+                    country: 'Egypt',
+                    type: newAddress.type,
+                    isDefault: addresses.length === 0
+                });
+                if (saveAddrRes.success) {
+                    addressId = saveAddrRes.address._id;
+                }
+            }
+
             const orderData: OrderData = {
                 items: items.map(item => ({
                     product: item.productId || (item as any)._id,
@@ -148,7 +174,7 @@ export default function CheckoutPage() {
                     color: item.color || undefined
                 })),
                 shippingAddress: isAuthenticated
-                    ? selectedAddressId!
+                    ? addressId!
                     : `${guestInfo.street}, ${guestInfo.city}, ${selectedGov}`,
                 paymentMethod: 'Cash on Delivery',
                 subtotal,
@@ -166,7 +192,7 @@ export default function CheckoutPage() {
             const result = await checkoutService.placeOrder(orderData);
             if (result.success) {
                 clearCart();
-                router.push('/profile/orders');
+                router.push(`/order-success/${result.order.id || result.order._id}`);
             }
         } catch (error: any) {
             alert(error || 'Failed to place order');
@@ -246,10 +272,14 @@ export default function CheckoutPage() {
                                     {addresses.map((addr) => (
                                         <div
                                             key={addr._id}
-                                            onClick={() => { setSelectedAddressId(addr._id); setSelectedGov(addr.state || ''); }}
+                                            onClick={() => {
+                                                setSelectedAddressId(addr._id);
+                                                setSelectedGov(addr.state || '');
+                                                setIsAddingNewAddress(false);
+                                            }}
                                             className={`
                                                 cursor-pointer p-6 rounded-3xl border-2 transition-all relative flex items-center gap-4
-                                                ${selectedAddressId === addr._id ? 'border-[#0E4435] bg-emerald-50/20' : 'border-transparent bg-gray-50 hover:bg-gray-100'}
+                                                ${selectedAddressId === addr._id && !isAddingNewAddress ? 'border-[#0E4435] bg-emerald-50/20' : 'border-transparent bg-gray-50 hover:bg-gray-100'}
                                             `}
                                         >
                                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[#0E4435] shadow-sm">
@@ -261,11 +291,14 @@ export default function CheckoutPage() {
                                                 </h4>
                                                 <p className="text-sm font-bold text-gray-900 truncate">{addr.street}</p>
                                             </div>
-                                            {selectedAddressId === addr._id && <CheckCircle2 className="text-[#0E4435]" size={20} />}
+                                            {selectedAddressId === addr._id && !isAddingNewAddress && <CheckCircle2 className="text-[#0E4435]" size={20} />}
                                         </div>
                                     ))}
-                                    <button onClick={() => router.push('/profile/addresses')} className="bg-gray-50 p-6 rounded-3xl border-2 border-dashed border-gray-200 flex items-center justify-center gap-2 text-gray-400 hover:text-[#0E4435] hover:border-[#0E4435]/20 transition-all">
-                                        <Plus size={20} /> <span className="font-bold text-sm">{isRTL ? 'إضافة عنوان' : 'Add New'}</span>
+                                    <button
+                                        onClick={() => setIsAddingNewAddress(true)}
+                                        className={`p-6 rounded-3xl border-2 transition-all flex items-center justify-center gap-2 hover:bg-gray-100 ${isAddingNewAddress ? 'border-[#0E4435] bg-emerald-50/20 text-[#0E4435]' : 'border-dashed border-gray-200 text-gray-400'}`}
+                                    >
+                                        <Plus size={20} /> <span className="font-bold text-sm">{isRTL ? 'إضافة عنوان جديد' : 'Add New Address'}</span>
                                     </button>
                                 </div>
                             ) : (
@@ -292,6 +325,49 @@ export default function CheckoutPage() {
                                         </select>
                                     </div>
                                 </div>
+                            )}
+
+                            {/* New Address Form for Authenticated Users */}
+                            {isAuthenticated && isAddingNewAddress && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    className="pt-6 mt-6 border-t border-gray-100 space-y-4"
+                                >
+                                    <input
+                                        type="text" value={newAddress.street}
+                                        onChange={e => setNewAddress({ ...newAddress, street: e.target.value })}
+                                        placeholder={isRTL ? 'اسم الشارع / رقم العقار الجديد' : 'New Street Address'}
+                                        className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
+                                    />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input
+                                            type="text" value={newAddress.city}
+                                            onChange={e => setNewAddress({ ...newAddress, city: e.target.value })}
+                                            placeholder={isRTL ? 'المدينة' : 'City'}
+                                            className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
+                                        />
+                                        <select
+                                            value={selectedGov} onChange={e => setSelectedGov(e.target.value)}
+                                            className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
+                                        >
+                                            <option value="">{isRTL ? 'اختر المحافظة' : 'Select Governorate'}</option>
+                                            {egyptGovernorates.map(gov => <option key={gov} value={gov}>{gov}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {(['home', 'office', 'other'] as const).map((type) => (
+                                            <button
+                                                key={type}
+                                                type="button"
+                                                onClick={() => setNewAddress({ ...newAddress, type })}
+                                                className={`flex-1 py-3 rounded-xl font-bold text-xs capitalize ${newAddress.type === type ? 'bg-[#0E4435] text-white' : 'bg-gray-50 text-gray-400'}`}
+                                            >
+                                                {isRTL ? (type === 'home' ? 'منزل' : type === 'office' ? 'مكتب' : 'آخر') : type}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
                             )}
                         </div>
                     </section>

@@ -1,26 +1,63 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Receipt, Package, Truck, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+    ArrowLeft,
+    ArrowRight,
+    Receipt,
+    Package,
+    Truck,
+    CheckCircle2,
+    Calendar,
+    MapPin,
+    AlertCircle
+} from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { checkoutService } from '@/services/checkoutService';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TrackOrderPage() {
-    const { isRTL, t } = useLanguage();
+    const { isRTL } = useLanguage();
     const router = useRouter();
-    const [orderId, setOrderId] = useState('');
+    const searchParams = useSearchParams();
+    const [orderId, setOrderId] = useState(searchParams.get('id') || '');
     const [isTracking, setIsTracking] = useState(false);
+    const [order, setOrder] = useState<any>(null);
+    const [error, setError] = useState('');
 
-    const handleTrack = () => {
-        if (!orderId) return;
+    const handleTrack = async (idToTrack?: string) => {
+        const id = idToTrack || orderId;
+        if (!id) return;
+
         setIsTracking(true);
-        // Realistic simulation: In a real app, you'd fetch order status here
-        setTimeout(() => {
-            // Redirect to a specific order status page if found
-            // For now, we'll keep it simple or show a message
-            alert(isRTL ? 'جاري البحث عن الطلب...' : 'Finding your order...');
+        setError('');
+        setOrder(null);
+
+        try {
+            const res = await checkoutService.getOrder(id.replace('#', ''));
+            if (res.success) {
+                setOrder(res.order);
+            } else {
+                setError(isRTL ? 'الطلب غير موجود' : 'Order not found');
+            }
+        } catch (err: any) {
+            setError(isRTL ? 'حدث خطأ في البحث' : 'Failed to track order');
+        } finally {
             setIsTracking(false);
-        }, 1500);
+        }
+    };
+
+    useEffect(() => {
+        const id = searchParams.get('id');
+        if (id) {
+            handleTrack(id);
+        }
+    }, [searchParams]);
+
+    const getStatusIndex = (status: string) => {
+        const statuses = ['Processing', 'Shipped', 'Delivered'];
+        return statuses.indexOf(status);
     };
 
     return (
@@ -40,21 +77,20 @@ export default function TrackOrderPage() {
                 </div>
             </header>
 
-            <main className="max-w-xl mx-auto p-6 flex flex-col items-center justify-center mt-10">
-                <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-[#0E4435] mb-8">
-                    <Package size={40} />
-                </div>
-
-                <div className="text-center mb-10 text-right">
+            <main className="max-w-2xl mx-auto p-6 mt-10">
+                <div className="flex flex-col items-center mb-10">
+                    <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-[#0E4435] mb-6">
+                        <Package size={40} />
+                    </div>
                     <h2 className="text-2xl font-black text-gray-900 mb-2">
-                        {isRTL ? 'أدخل رقم الطلب' : 'Enter Order ID'}
+                        {isRTL ? 'أين شحنتك؟' : 'Where is your package?'}
                     </h2>
-                    <p className="text-gray-500 font-bold opacity-60">
-                        {isRTL ? 'ستجده في رسالة تأكيد الطلب التي وصلت إليك' : 'You can find it in your order confirmation message'}
+                    <p className="text-gray-500 font-bold opacity-60 text-center">
+                        {isRTL ? 'أدخل رقم الطلب لمتابعة حالة التوصيل الحالية' : 'Enter your order ID to see current delivery status'}
                     </p>
                 </div>
 
-                <div className="w-full space-y-4">
+                <div className="w-full space-y-4 mb-12">
                     <div className="relative">
                         <div className={`absolute inset-y-0 ${isRTL ? 'right-4' : 'left-4'} flex items-center pointer-events-none`}>
                             <Receipt className="w-5 h-5 text-gray-300" />
@@ -64,47 +100,88 @@ export default function TrackOrderPage() {
                             value={orderId}
                             onChange={(e) => setOrderId(e.target.value)}
                             placeholder={isRTL ? 'رقم الطلب (مثلاً: #12345)' : 'Order ID (e.g. #12345)'}
-                            className={`w-full ${isRTL ? 'pr-12' : 'pl-12'} py-4 bg-white rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-[#0E4435] outline-none font-black text-lg text-center`}
+                            className={`w-full ${isRTL ? 'pr-12' : 'pl-12'} py-5 bg-white rounded-[1.5rem] border-none shadow-sm focus:ring-2 focus:ring-[#0E4435] outline-none font-black text-lg text-center`}
                         />
                     </div>
 
                     <button
-                        onClick={handleTrack}
+                        onClick={() => handleTrack()}
                         disabled={!orderId || isTracking}
-                        className={`w-full py-4 bg-[#0E4435] text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-950/10 transition-all ${(!orderId || isTracking) ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 hover:bg-[#0b352a]'}`}
+                        className={`w-full py-5 bg-[#0E4435] text-white rounded-[1.5rem] font-black text-lg shadow-xl shadow-emerald-950/20 transition-all ${(!orderId || isTracking) ? 'opacity-50 cursor-not-allowed' : 'active:scale-95 hover:bg-[#0b352a]'}`}
                     >
                         {isTracking ? <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto" /> : (isRTL ? 'تتبع الآن' : 'Track Now')}
                     </button>
+
+                    {error && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-red-50 text-red-600 p-4 rounded-xl flex items-center justify-center gap-2 text-sm font-bold"
+                        >
+                            <AlertCircle size={18} />
+                            {error}
+                        </motion.div>
+                    )}
                 </div>
 
-                <div className="mt-16 w-full space-y-6">
-                    {/* Steps simulation (Visual only) */}
-                    <div className="flex items-center gap-4 opacity-30 grayscale pointer-events-none">
-                        <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-[#0E4435]">
-                            <Package size={20} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-black text-gray-900 text-sm">{isRTL ? 'تم تأكيد الطلب' : 'Order Confirmed'}</p>
-                        </div>
-                        <CheckCircle2 size={18} className="text-[#0E4435]" />
-                    </div>
-                    <div className="flex items-center gap-4 opacity-30 grayscale pointer-events-none">
-                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
-                            <Package size={20} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-black text-gray-900 text-sm">{isRTL ? 'جاري التجهيز' : 'Processing'}</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4 opacity-30 grayscale pointer-events-none">
-                        <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600">
-                            <Truck size={20} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="font-black text-gray-900 text-sm">{isRTL ? 'في الطريق إليك' : 'Out for Delivery'}</p>
-                        </div>
-                    </div>
-                </div>
+                {/* Tracking Results */}
+                <AnimatePresence>
+                    {order && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl shadow-black/[0.02]"
+                        >
+                            <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-50 text-right">
+                                <div>
+                                    <h3 className="font-black text-gray-900 text-lg">#{order.id?.toUpperCase()}</h3>
+                                    <p className="text-xs text-gray-400 font-bold mt-1">
+                                        {isRTL ? 'تم الطلب في:' : 'Ordered on:'} {new Date(order.created_at).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US')}
+                                    </p>
+                                </div>
+                                <div className="bg-emerald-50 px-4 py-2 rounded-2xl">
+                                    <span className="text-[#0E4435] font-black text-xs">{isRTL ? 'نشط' : 'Active'}</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-10 relative">
+                                {/* Journey Line */}
+                                <div className={`absolute ${isRTL ? 'right-5' : 'left-5'} top-2 bottom-2 w-0.5 bg-gray-100 z-0`}></div>
+
+                                {[
+                                    { key: 'Processing', label: isRTL ? 'تم استقبال الطلب' : 'Order Received', desc: isRTL ? 'جاري تجهيز طلبك في مستودعاتنا' : 'We are preparing your order in our warehouse', icon: Package, color: 'emerald' },
+                                    { key: 'Shipped', label: isRTL ? 'في الطريق' : 'In Transit', desc: isRTL ? 'طلبك مع مندوب الشحن الآن' : 'Your order is on the way with delivery partner', icon: Truck, color: 'blue' },
+                                    { key: 'Delivered', label: isRTL ? 'تم التوصيل' : 'Delivered', desc: isRTL ? 'تم تسليم الشحنة بنجاح' : 'Package has been delivered successfully', icon: CheckCircle2, color: 'emerald' }
+                                ].map((step, idx) => {
+                                    const currentIndex = getStatusIndex(order.status);
+                                    const isCompleted = idx <= currentIndex;
+                                    const isActive = idx === currentIndex;
+
+                                    return (
+                                        <div key={idx} className={`relative z-10 flex gap-6 ${isCompleted ? 'opacity-100' : 'opacity-30'}`}>
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-4 border-white shadow-sm ${isCompleted ? 'bg-[#0E4435] text-white' : 'bg-gray-100 text-gray-400'}`}>
+                                                <step.icon size={18} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className={`font-black text-sm ${isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>{step.label}</h4>
+                                                    {isActive && (
+                                                        <span className="text-[10px] bg-emerald-100 text-[#0E4435] px-2 py-0.5 rounded-full font-black animate-pulse">
+                                                            {isRTL ? 'الحالة الحالية' : 'Current Status'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-[11px] text-gray-400 font-bold mt-1 leading-relaxed">
+                                                    {step.desc}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </main>
         </div>
     );

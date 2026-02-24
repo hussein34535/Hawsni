@@ -346,7 +346,7 @@ export default function ProductPage() {
                                                     }
                                                 }}
                                                 className={`
-                                                    min-w-[3.5rem] h-14 rounded-2xl flex items-center justify-center transition-all duration-300 p-1 border-2 
+                                                    w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 p-1 border-2 
                                                     ${selectedColor === c.color
                                                         ? 'border-[var(--color-brand-primary)] scale-110 shadow-lg shadow-[var(--color-brand-primary)]/10'
                                                         : 'border-transparent bg-gray-50 hover:bg-gray-100'}
@@ -359,7 +359,7 @@ export default function ProductPage() {
                                                         backgroundSize: 'cover',
                                                         backgroundPosition: 'center'
                                                     }}
-                                                    className="w-full h-full rounded-[14px] flex items-center justify-center shadow-inner overflow-hidden relative"
+                                                    className="w-full h-full rounded-full flex items-center justify-center shadow-inner overflow-hidden relative"
                                                 >
                                                     {selectedColor === c.color && (
                                                         <div className="absolute inset-0 bg-black/10 flex items-center justify-center backdrop-blur-[1px]">
