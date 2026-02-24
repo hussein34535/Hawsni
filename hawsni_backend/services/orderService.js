@@ -65,27 +65,43 @@ class OrderService {
 
         // Send order confirmation email and admin notification (non-blocking)
         try {
-            const { data: user } = await supabase
-                .from('users')
-                .select('email, name')
-                .eq('id', orderData.user_id)
-                .single();
+            let customerEmail = null;
+            let customerName = 'عميل';
 
-            if (user && user.email) {
-                emailService.sendOrderConfirmationEmail(user.email, user.name || 'عميل', order)
-                    .catch(err => console.error('Order confirmation email failed:', err));
-
-                // Admin Notification
-                emailService.sendAdminNotification(
-                    'New Order Received! 🛒',
-                    `
-                    <p><strong>Order ID:</strong> #${order.id.toUpperCase()}</p>
-                    <p><strong>Customer:</strong> ${user.name} (${user.email})</p>
-                    <p><strong>Total Amount:</strong> ${order.total_amount} EGP</p>
-                    <p>Check the admin dashboard for more details.</p>
-                    `
-                ).catch(err => console.error('Admin order notification failed:', err));
+            if (orderData.user_id) {
+                const { data: user } = await supabase
+                    .from('users')
+                    .select('email, name')
+                    .eq('id', orderData.user_id)
+                    .single();
+                if (user) {
+                    customerEmail = user.email;
+                    customerName = user.name || customerName;
+                }
             }
+
+            // Fallback to shipping address email (for guest checkout)
+            if (!customerEmail && orderData.shipping_address) {
+                customerEmail = orderData.shipping_address.email;
+                customerName = orderData.shipping_address.name || customerName;
+            }
+
+            if (customerEmail) {
+                emailService.sendOrderConfirmationEmail(customerEmail, customerName, order)
+                    .catch(err => console.error('Order confirmation email failed:', err));
+            }
+
+            // Always send Admin Notification
+            emailService.sendAdminNotification(
+                'New Order Received! 🛒',
+                `
+                <p><strong>Order ID:</strong> #${order.id.toUpperCase()}</p>
+                <p><strong>Customer:</strong> ${customerName} (${customerEmail || 'Guest'})</p>
+                <p><strong>Total Amount:</strong> ${order.total || order.total_amount || '—'} EGP</p>
+                <p>Check the admin dashboard for more details.</p>
+                `
+            ).catch(err => console.error('Admin order notification failed:', err));
+
         } catch (emailErr) {
             console.error('Failed to handle order emails:', emailErr);
         }
@@ -112,19 +128,34 @@ class OrderService {
         try {
             const { data: order } = await supabase
                 .from('orders')
-                .select('user_id')
+                .select('user_id, shipping_address')
                 .eq('id', id)
                 .single();
 
             if (order) {
-                const { data: user } = await supabase
-                    .from('users')
-                    .select('email, name')
-                    .eq('id', order.user_id)
-                    .single();
+                let customerEmail = null;
+                let customerName = 'عميل';
 
-                if (user && user.email) {
-                    emailService.sendOrderStatusEmail(user.email, user.name || 'عميل', id, status)
+                if (order.user_id) {
+                    const { data: user } = await supabase
+                        .from('users')
+                        .select('email, name')
+                        .eq('id', order.user_id)
+                        .single();
+                    if (user) {
+                        customerEmail = user.email;
+                        customerName = user.name || customerName;
+                    }
+                }
+
+                // Guest fallback
+                if (!customerEmail && order.shipping_address) {
+                    customerEmail = order.shipping_address.email;
+                    customerName = order.shipping_address.name || customerName;
+                }
+
+                if (customerEmail) {
+                    emailService.sendOrderStatusEmail(customerEmail, customerName, id, status)
                         .catch(err => console.error('Order status email failed:', err));
                 }
             }
