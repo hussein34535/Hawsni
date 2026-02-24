@@ -17,10 +17,10 @@ import {
     DollarSign,
 } from 'lucide-react';
 import Link from 'next/link';
-import axios from '@/lib/axios';
+import { authService } from '@/services/authService';
 import { useLanguage } from '@/context/LanguageContext';
 
-// Mock auth state (In real app, this would come from a store/context)
+// Standardized Auth Hook
 const useAuth = () => {
     const [user, setUser] = useState<any>(null);
     const [isGuest, setIsGuest] = useState(true);
@@ -29,17 +29,13 @@ const useAuth = () => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
                 if (token) {
-                    const { data } = await axios.get('/users/profile');
+                    const data = await authService.getProfile();
                     if (data.success) {
                         setUser(data.user);
                         setIsGuest(false);
-                    } else {
-                        setIsGuest(true);
                     }
-                } else {
-                    setIsGuest(true);
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);

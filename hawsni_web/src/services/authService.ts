@@ -44,5 +44,23 @@ export const authService = {
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to reset password';
         }
+    },
+
+    getProfile: async (): Promise<any> => {
+        try {
+            const response = await apiClient.get('/users/profile');
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to fetch profile';
+        }
+    },
+
+    updateProfile: async (userData: any): Promise<any> => {
+        try {
+            const response = await apiClient.put('/users/profile', userData);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to update profile';
+        }
     }
 };
