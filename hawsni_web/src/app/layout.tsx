@@ -9,6 +9,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'Hawsni | Premium Fashion & Style in Egypt',
   description: 'Shop the latest fashion trends at Hawsni. Premium quality, local craftsmanship, and unique styles delivered to your doorstep in Egypt.',
   keywords: 'fashion, Egypt, style, clothing, premium, Hawsni, ecommerce',

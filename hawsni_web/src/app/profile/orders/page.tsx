@@ -26,6 +26,13 @@ export default function OrdersPage() {
 
     useEffect(() => {
         const fetchOrders = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setIsGuest(true);
+                setIsLoading(false);
+                return;
+            }
+
             try {
                 const { data } = await axios.get('/orders/my-orders');
                 setOrders(data || []);

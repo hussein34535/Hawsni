@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import {
     ArrowLeft,
+    ArrowRight,
     ShoppingBag,
     Heart,
     Star,
@@ -28,6 +29,82 @@ import ReviewsSection from '@/components/product/ReviewsSection';
 import SizeGuideModal from '@/components/product/SizeGuideModal';
 import VirtualTryOnModal from '@/components/product/VirtualTryOnModal';
 
+const formatImageUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
+    const baseUrl = apiUrl.replace(/\/api$/, '');
+    return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+};
+
+const COLOR_MAP: Record<string, string> = {
+    // English
+    'red': '#FF0000',
+    'blue': '#0000FF',
+    'green': '#008000',
+    'black': '#000000',
+    'white': '#FFFFFF',
+    'grey': '#808080',
+    'gray': '#808080',
+    'yellow': '#FFFF00',
+    'orange': '#FFA500',
+    'purple': '#800080',
+    'pink': '#FFC0CB',
+    'brown': '#A52A2A',
+    'teal': '#008080',
+    'navy': '#000080',
+    'maroon': '#800000',
+    'beige': '#F5F5DC',
+    // Arabic
+    'أحمر': '#FF0000',
+    'أزرق': '#0000FF',
+    'أخضر': '#008000',
+    'أسود': '#000000',
+    'أبيض': '#FFFFFF',
+    'رمادي': '#808080',
+    'أصفر': '#FFFF00',
+    'برتقالي': '#FFA500',
+    'بنفسجي': '#800080',
+    'وردي': '#FFC0CB',
+    'بني': '#A52A2A',
+    'تركواز': '#008080',
+    'كحلي': '#000080',
+    'نبيتي': '#800000',
+    'بيج': '#F5F5DC',
+    'سماوي': '#87CEEB',
+    'رصاصي': '#D3D3D3',
+    'زيتي': '#556B2F'
+};
+
+const formatColor = (color: string) => {
+    if (!color) return 'transparent';
+    const normalized = color.toLowerCase().trim();
+    if (COLOR_MAP[normalized]) return COLOR_MAP[normalized];
+    if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') || /^[a-fA-F0-9]{6}$/.test(color)) {
+        return color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') ? color : `#${color}`;
+    }
+    return '#808080'; // Fallback to grey
+};
+
+const parseColors = (colors: any[] | undefined) => {
+    if (!colors) return [];
+    return colors.map(c => {
+        if (typeof c === 'string') {
+            try {
+                // Remove any leading/trailing potential quotes or braces that might survive a dirty API response
+                const cleaned = c.trim();
+                if (cleaned.startsWith('{')) {
+                    return JSON.parse(cleaned);
+                }
+                return { color: cleaned };
+            } catch (e) {
+                return { color: c };
+            }
+        }
+        return c;
+    });
+};
+
 export default function ProductPage() {
     const params = useParams();
     const router = useRouter();
@@ -45,7 +122,13 @@ export default function ProductPage() {
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
     const [isVTOOpen, setIsVTOOpen] = useState(false);
 
+    const items = useCartStore((state) => state.items);
     const addItem = useCartStore((state) => state.addItem);
+    const getItemCount = useCartStore((state) => state.getItemCount);
+
+    // Derived state: check if current selection is in cart
+    const currentItemId = product ? `${product._id}_${selectedSize}_${selectedColor || 'default'}` : null;
+    const isInCart = items.some((item) => item.id === currentItemId);
 
     // Stock simulation
     const [stockCount] = useState(Math.floor(Math.random() * 5) + 2);
@@ -56,8 +139,9 @@ export default function ProductPage() {
                 const data = await productService.getProductById(productId);
                 if (data.success) {
                     setProduct(data.product);
-                    if (data.product.colors && data.product.colors.length > 0) {
-                        setSelectedColor(data.product.colors[0].color);
+                    const parsed = parseColors(data.product.colors);
+                    if (parsed.length > 0) {
+                        setSelectedColor(parsed[0].color);
                     }
                 }
             } catch (error) {
@@ -74,11 +158,19 @@ export default function ProductPage() {
     const dragX = useMotionValue(0);
     const onDragEnd = () => {
         const x = dragX.get();
-        if (x <= -50 && selectedImage < (product?.images?.length || 1) - 1) {
+        const imagesCount = product?.images?.length || 1;
+
+        // Logical RTL Swipe: 
+        // Swipe Left (x < 0) -> Show image on the left (Next image in sequence: v + 1)
+        // Swipe Right (x > 0) -> Show image on the right (Previous image in sequence: v - 1)
+        if (x <= -50 && selectedImage < imagesCount - 1) {
             setSelectedImage((v) => v + 1);
         } else if (x >= 50 && selectedImage > 0) {
             setSelectedImage((v) => v - 1);
         }
+
+        // Reset dragX to center the image
+        dragX.set(0);
     };
 
     const handleAddToCart = (e: React.MouseEvent) => {
@@ -120,17 +212,17 @@ export default function ProductPage() {
     }
 
     return (
-        <div className="w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20">
+        <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
 
             {/* Header / AppBar - Transparent Overlay (Matches Flutter exactly) */}
-            <div className="fixed top-0 left-0 right-0 z-[60] p-4 flex justify-between items-start bg-gradient-to-b from-black/20 to-transparent pointer-events-none h-32 pt-10">
+            <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/20 to-transparent pointer-events-none h-32 pt-6`}>
                 <button
                     onClick={() => router.back()}
-                    className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-95 transition-transform mt-2"
+                    className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-95 transition-transform"
                 >
-                    <ArrowLeft size={20} className="text-white" />
+                    {isRTL ? <ArrowRight size={20} className="text-white" /> : <ArrowLeft size={20} className="text-white" />}
                 </button>
-                <div className="flex gap-2 pointer-events-auto mt-2">
+                <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-2 pointer-events-auto`}>
                     <button
                         onClick={() => setIsFavorite(!isFavorite)}
                         className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-95 transition-transform"
@@ -142,6 +234,11 @@ export default function ProductPage() {
                         className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-95 transition-transform relative"
                     >
                         <ShoppingBag size={20} className="text-white" />
+                        {getItemCount() > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-[var(--color-brand-primary)] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-black/10 shadow-lg">
+                                {getItemCount()}
+                            </span>
+                        )}
                     </button>
                 </div>
             </div>
@@ -149,46 +246,52 @@ export default function ProductPage() {
             <main className="max-w-7xl mx-auto pb-40">
                 <div className="grid grid-cols-1 lg:grid-cols-2">
 
-                    {/* Left: Swipable Image Gallery */}
+                    {/* Left: Swipable Image Gallery (Smooth Horizontal Slider) */}
                     <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden lg:rounded-b-[4rem] group">
                         <motion.div
                             drag="x"
                             dragConstraints={{ left: 0, right: 0 }}
                             style={{ x: dragX }}
                             onDragEnd={onDragEnd}
+                            animate={{
+                                x: -(selectedImage * 100) + "%"
+                            }}
+                            transition={{
+                                type: 'spring',
+                                damping: 40,
+                                stiffness: 400,
+                                mass: 0.8
+                            }}
                             className="w-full h-full flex"
                         >
-                            <AnimatePresence mode="wait">
-                                <motion.img
-                                    key={selectedImage}
-                                    initial={{ opacity: 0, x: dragX.get() > 0 ? -100 : 100 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: dragX.get() > 0 ? 100 : -100 }}
-                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                                    src={product.images[selectedImage]}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover select-none pointer-events-none"
-                                />
-                            </AnimatePresence>
+                            {product.images.map((img, i) => (
+                                <div key={`img-${i}`} className="min-w-full h-full relative">
+                                    <img
+                                        src={img}
+                                        alt={`${product.name} - ${i + 1}`}
+                                        className="w-full h-full object-cover select-none pointer-events-none"
+                                    />
+                                </div>
+                            ))}
                         </motion.div>
 
-                        {/* Custom Dots Pagination */}
-                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 bg-black/20 backdrop-blur-xl rounded-full">
-                            <span className="text-[10px] text-white font-black mr-2 tracking-widest">
+                        {/* Custom Dots Pagination - Smaller and more subtle */}
+                        <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/5`} dir="ltr">
+                            <span className="text-[9px] text-white/60 font-bold mr-1.5 tracking-tighter">
                                 {selectedImage + 1} / {product.images.length}
                             </span>
                             {product.images.map((_, i) => (
                                 <button
-                                    key={i}
+                                    key={`dot-${i}`}
                                     onClick={() => setSelectedImage(i)}
-                                    className={`h-1.5 rounded-full transition-all duration-300 ${i === selectedImage ? 'w-5 bg-white' : 'w-1.5 bg-white/40'}`}
+                                    className={`h-1 rounded-full transition-all duration-500 ${i === selectedImage ? 'w-3 bg-white/80' : 'w-1 bg-white/20 hover:bg-white/40'}`}
                                 />
                             ))}
                         </div>
                     </div>
 
                     {/* Right: Info Section */}
-                    <div className="p-6 md:p-10">
+                    <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
                         {/* Title and Rating */}
                         <div className="flex flex-col gap-2 mb-8">
                             <div className="flex items-center justify-between">
@@ -210,10 +313,10 @@ export default function ProductPage() {
                         <motion.div
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setIsVTOOpen(true)}
-                            className="mb-8 p-4 rounded-[24px] bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative"
+                            className={`mb-8 p-4 rounded-3xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
                         >
                             <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl" />
-                            <div className="flex items-center gap-4 relative z-10">
+                            <div className={`flex items-center gap-4 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row text-right'}`}>
                                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/5 border border-purple-50">
                                     <Flame size={24} className="text-purple-600" />
                                 </div>
@@ -222,7 +325,9 @@ export default function ProductPage() {
                                     <p className="text-[11px] text-gray-400 font-bold font-cairo">{t.product?.vto_desc || (isRTL ? 'شوف شكلها عليك بالذكاء الاصطناعي' : 'See how it looks on you with AI')}</p>
                                 </div>
                             </div>
-                            <ChevronRight size={20} className="text-purple-300 group-hover:translate-x-1 transition-transform" />
+                            <div className={isRTL ? 'rotate-180' : ''}>
+                                <ChevronRight size={20} className="text-purple-300 group-hover:translate-x-1 transition-transform" />
+                            </div>
                         </motion.div>
 
                         <div className="space-y-10">
@@ -230,18 +335,37 @@ export default function ProductPage() {
                             {product.colors && product.colors.length > 0 && (
                                 <div>
                                     <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
-                                    <div className="flex gap-4">
-                                        {product.colors.map((c) => (
+                                    <div className={`flex gap-4 overflow-x-auto pb-2 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                                        {parseColors(product.colors).map((c, i) => (
                                             <button
-                                                key={c.color}
-                                                onClick={() => setSelectedColor(c.color)}
-                                                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all p-1.5 border-2 ${selectedColor === c.color ? 'border-[var(--color-brand-primary)] scale-105 shadow-lg' : 'border-transparent bg-gray-50'}`}
+                                                key={`${c.color}-${i}`}
+                                                onClick={() => {
+                                                    setSelectedColor(c.color);
+                                                    if (c.imageIndex !== undefined && c.imageIndex !== null) {
+                                                        setSelectedImage(c.imageIndex);
+                                                    }
+                                                }}
+                                                className={`
+                                                    min-w-[3.5rem] h-14 rounded-2xl flex items-center justify-center transition-all duration-300 p-1 border-2 
+                                                    ${selectedColor === c.color
+                                                        ? 'border-[var(--color-brand-primary)] scale-110 shadow-lg shadow-[var(--color-brand-primary)]/10'
+                                                        : 'border-transparent bg-gray-50 hover:bg-gray-100'}
+                                                `}
                                             >
                                                 <div
-                                                    style={{ backgroundColor: c.color }}
-                                                    className="w-full h-full rounded-lg flex items-center justify-center shadow-inner"
+                                                    style={{
+                                                        backgroundColor: formatColor(c.color),
+                                                        backgroundImage: c.image ? `url(${formatImageUrl(c.image)})` : 'none',
+                                                        backgroundSize: 'cover',
+                                                        backgroundPosition: 'center'
+                                                    }}
+                                                    className="w-full h-full rounded-[14px] flex items-center justify-center shadow-inner overflow-hidden relative"
                                                 >
-                                                    {selectedColor === c.color && <Check size={16} className="text-white mix-blend-difference" />}
+                                                    {selectedColor === c.color && (
+                                                        <div className="absolute inset-0 bg-black/10 flex items-center justify-center backdrop-blur-[1px]">
+                                                            <Check size={18} className="text-white drop-shadow-md" />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </button>
                                         ))}
@@ -263,9 +387,9 @@ export default function ProductPage() {
                                         </button>
                                     </div>
                                     <div className="flex flex-wrap gap-3">
-                                        {product.sizes.map((s) => (
+                                        {product.sizes.map((s, i) => (
                                             <button
-                                                key={s}
+                                                key={`${s}-${i}`}
                                                 onClick={() => setSelectedSize(s)}
                                                 className={`min-w-[4rem] h-12 px-4 rounded-[16px] border-2 font-black text-base transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-100'}`}
                                             >
@@ -291,20 +415,20 @@ export default function ProductPage() {
                                 </span>
                             </div>
 
-                            {/* Quantity & Actions - Moved to bottom capsule area for better reachability */}
-                            <div className="hidden lg:flex flex-col gap-4">
+                            {/* Quantity & Actions - Visible on all screens now */}
+                            <div className="flex flex-col gap-4">
                                 <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.quantity || 'Quantity'}</h3>
-                                <div className="flex items-center bg-gray-50 rounded-[16px] p-1 w-fit border border-gray-100">
+                                <div className="flex items-center bg-white rounded-[16px] p-1 w-fit border border-gray-100 shadow-sm">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-white rounded-xl shadow-sm"
+                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-gray-50 rounded-xl"
                                     >
                                         <Minus size={16} strokeWidth={3} />
                                     </button>
                                     <span className="w-12 text-center font-black text-lg text-gray-900">{quantity}</span>
                                     <button
                                         onClick={() => setQuantity(quantity + 1)}
-                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-white rounded-xl shadow-sm"
+                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-gray-50 rounded-xl"
                                     >
                                         <Plus size={16} strokeWidth={3} />
                                     </button>
@@ -336,21 +460,27 @@ export default function ProductPage() {
                     className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] flex items-center justify-between border border-white/10"
                 >
                     <div className="flex flex-col px-6">
-                        <div className="flex items-center gap-2 mb-0.5">
-                            <button
-                                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                className="text-white/40 hover:text-white"
+                        {quantity > 1 && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                className="flex items-center gap-2 mb-0.5"
                             >
-                                <Minus size={14} />
-                            </button>
-                            <span className="text-white font-black text-sm w-4 text-center">{quantity}</span>
-                            <button
-                                onClick={() => setQuantity(quantity + 1)}
-                                className="text-white/40 hover:text-white"
-                            >
-                                <Plus size={14} />
-                            </button>
-                        </div>
+                                <button
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    className="text-white/40 hover:text-white"
+                                >
+                                    <Minus size={14} />
+                                </button>
+                                <span className="text-white font-black text-sm w-4 text-center">{quantity}</span>
+                                <button
+                                    onClick={() => setQuantity(quantity + 1)}
+                                    className="text-white/40 hover:text-white"
+                                >
+                                    <Plus size={14} />
+                                </button>
+                            </motion.div>
+                        )}
                         <span className="text-lg font-black text-white font-cairo">
                             {(product.price * quantity).toLocaleString()}
                             <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
@@ -358,22 +488,30 @@ export default function ProductPage() {
                     </div>
 
                     <button
-                        onClick={handleAddToCart}
+                        onClick={isInCart ? () => router.push('/cart') : handleAddToCart}
                         className={`
                             flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
                             ${!selectedSize
                                 ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
+                                : isInCart
+                                    ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'
+                                    : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
                         `}
                     >
                         <AnimatePresence mode="wait">
                             <motion.div
-                                key={addItem.toString()} // Just to trigger animation on re-render if needed, but better to use a local state for feedback
-                                initial={{ y: 0 }}
+                                key={isInCart ? 'go_to_cart' : 'add_to_cart'}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
                                 className="flex items-center gap-2"
                             >
                                 <ShoppingBag size={18} />
-                                <span className="font-cairo">{t.product?.add_to_cart || 'Add to Cart'}</span>
+                                <span className="font-cairo">
+                                    {isInCart
+                                        ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
+                                        : (t.product?.add_to_cart || 'Add to Cart')}
+                                </span>
                             </motion.div>
                         </AnimatePresence>
                     </button>

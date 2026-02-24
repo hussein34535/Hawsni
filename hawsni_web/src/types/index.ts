@@ -30,7 +30,7 @@ export interface Product {
     images: string[];
     category: string | Category;
     isFeatured: boolean;
-    colors?: { color: string; image: string }[];
+    colors?: any[];
     sizes?: string[];
     rating?: number;
     reviews?: number;

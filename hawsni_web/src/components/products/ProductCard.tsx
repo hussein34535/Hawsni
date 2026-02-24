@@ -21,6 +21,71 @@ export default function ProductCard({ product }: ProductCardProps) {
         return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
     };
 
+    const COLOR_MAP: Record<string, string> = {
+        // English
+        'red': '#FF0000',
+        'blue': '#0000FF',
+        'green': '#008000',
+        'black': '#000000',
+        'white': '#FFFFFF',
+        'grey': '#808080',
+        'gray': '#808080',
+        'yellow': '#FFFF00',
+        'orange': '#FFA500',
+        'purple': '#800080',
+        'pink': '#FFC0CB',
+        'brown': '#A52A2A',
+        'teal': '#008080',
+        'navy': '#000080',
+        'maroon': '#800000',
+        'beige': '#F5F5DC',
+        // Arabic
+        'أحمر': '#FF0000',
+        'أزرق': '#0000FF',
+        'أخضر': '#008000',
+        'أسود': '#000000',
+        'أبيض': '#FFFFFF',
+        'رمادي': '#808080',
+        'أصفر': '#FFFF00',
+        'برتقالي': '#FFA500',
+        'بنفسجي': '#800080',
+        'وردي': '#FFC0CB',
+        'بني': '#A52A2A',
+        'تركواز': '#008080',
+        'كحلي': '#000080',
+        'نبيتي': '#800000',
+        'بيج': '#F5F5DC',
+        'سماوي': '#87CEEB',
+        'رصاصي': '#D3D3D3',
+        'زيتي': '#556B2F'
+    };
+
+    const formatColor = (color: string) => {
+        if (!color) return 'transparent';
+        const normalized = color.toLowerCase().trim();
+        if (COLOR_MAP[normalized]) return COLOR_MAP[normalized];
+        if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') || /^[a-fA-F0-9]{6}$/.test(color)) {
+            return color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') ? color : `#${color}`;
+        }
+        return '#808080'; // Fallback to grey
+    };
+
+    const parseColors = (colors: any[] | undefined) => {
+        if (!colors) return [];
+        return colors.map(c => {
+            if (typeof c === 'string') {
+                try {
+                    const cleaned = c.trim();
+                    if (cleaned.startsWith('{')) return JSON.parse(cleaned);
+                    return { color: cleaned };
+                } catch (e) {
+                    return { color: c };
+                }
+            }
+            return c;
+        });
+    };
+
     const imageUrl = formatImageUrl(images[0]);
     const [selectedImage, setSelectedImage] = useState(imageUrl);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -72,7 +137,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {/* 2. Interactive Colors */}
                 {colors.length > 0 && (
                     <div className="flex mb-1">
-                        {colors.slice(0, 5).map((c, i) => {
+                        {parseColors(colors).slice(0, 5).map((c, i) => {
                             const isSelected = selectedColor === c.color;
                             return (
                                 <button
@@ -82,7 +147,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                         setSelectedColor(c.color);
                                         if (c.image) setSelectedImage(formatImageUrl(c.image));
                                     }}
-                                    style={{ backgroundColor: c.color }}
+                                    style={{ backgroundColor: formatColor(c.color) }}
                                     className={`w-[14px] h-[14px] rounded-full mr-[6px] transition-all border ${isSelected
                                         ? 'border-[var(--color-brand-primary)] border-[1.5px] shadow-[0_0_4px_rgba(27,77,62,0.3)]'
                                         : 'border-gray-300 border-[0.5px]'
