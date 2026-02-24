@@ -36,42 +36,42 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     }
 
     return (
-        <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-black text-gray-900 font-cairo">
-                {t.product?.reviews || (isRTL ? 'الآراء والتقييمات' : 'Reviews & Ratings')}
-            </h3>
-            <div className="flex items-center gap-2">
-                <span className="text-xl font-black text-gray-900">4.8</span>
-                <div className="flex text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} fill={i < 4 ? 'currentColor' : 'none'} />
-                    ))}
+        <section className="mt-8">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-black text-gray-900 font-cairo">
+                    {t.product?.reviews || (isRTL ? 'الآراء والتقييمات' : 'Reviews & Ratings')}
+                </h3>
+                <div className="flex items-center gap-2">
+                    <span className="text-xl font-black text-gray-900">4.8</span>
+                    <div className="flex text-amber-400">
+                        {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={14} fill={i < 4 ? 'currentColor' : 'none'} />
+                        ))}
+                    </div>
                 </div>
             </div>
-        </div>
 
-            {
-        reviews.length === 0 ? (
-            <div className="bg-gray-50 rounded-[24px] p-10 flex flex-col items-center text-center opacity-60">
-                <MessageSquare size={48} className="text-gray-300 mb-4" />
-                <p className="font-bold text-gray-500 font-cairo">
-                    {isRTL ? 'لا توجد تقييمات بعد' : 'No reviews yet'}
-                </p>
-                <p className="text-xs text-gray-400 mt-1 font-cairo">
-                    {isRTL ? 'كن أول من يعبر عن رأيه!' : 'Be the first to share your thoughts!'}
-                </p>
-            </div>
-        ) : (
-        <div className="space-y-6">
-            {reviews.map((review, idx) => (
+            {reviews.length === 0 ? (
+                <div className="bg-gray-50 rounded-[24px] p-8 flex flex-col items-center text-center opacity-60">
+                    <MessageSquare size={40} className="text-gray-300 mb-3" />
+                    <p className="font-bold text-gray-500 font-cairo text-sm">
+                        {isRTL ? 'لا توجد تقييمات بعد' : 'No reviews yet'}
+                    </p>
+                    <p className="text-[10px] text-gray-400 mt-1 font-cairo">
+                        {isRTL ? 'كن أول من يعبر عن رأيه!' : 'Be the first to share your thoughts!'}
+                    </p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {reviews.map((review, idx) => (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.1 }}
                             key={review._id}
-                        <div className="bg-white border border-gray-100 p-5 rounded-[20px] shadow-sm relative group"
+                            className="bg-white border border-gray-100 p-5 rounded-[20px] shadow-sm relative group"
                         >
-                            <div className="flex items-start gap-3">
+                            <div className="flex items-start gap-4">
                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center border-2 border-white shadow-sm">
                                     {review.user.avatar_url ? (
                                         <img src={review.user.avatar_url} alt={review.user.name} className="w-full h-full object-cover" />
@@ -81,14 +81,14 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between mb-1">
-                                        <h4 className="font-bold text-gray-900 font-cairo">{review.user.name}</h4>
+                                        <h4 className="font-bold text-gray-900 font-cairo text-sm">{review.user.name}</h4>
                                         <div className="flex gap-0.5 text-amber-400">
                                             {[...Array(5)].map((_, i) => (
-                                                <Star key={i} size={12} fill={i < review.rating ? 'currentColor' : 'none'} />
+                                                <Star key={i} size={10} fill={i < review.rating ? 'currentColor' : 'none'} />
                                             ))}
                                         </div>
                                     </div>
-                                    <span className="text-[10px] text-gray-400 font-medium font-cairo mb-3 block">
+                                    <span className="text-[10px] text-gray-400 font-medium font-cairo mb-2 block">
                                         {new Date(review.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
                                             year: 'numeric',
                                             month: 'long',
@@ -101,10 +101,9 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                 </div>
                             </div>
                         </motion.div>
-            ))}
-        </div>
-    )
-    }
-        </section >
+                    ))}
+                </div>
+            )}
+        </section>
     );
 }

@@ -39,7 +39,7 @@ export default function SizeGuideModal({ isOpen, onClose, sizeGuide }: SizeGuide
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[32px] z-[101] max-h-[90vh] overflow-hidden flex flex-col"
+                        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[32px] z-[101] max-h-[85vh] overflow-hidden flex flex-col"
                     >
                         {/* Drag Handle */}
                         <div className="flex justify-center pt-3 pb-1">
@@ -52,7 +52,7 @@ export default function SizeGuideModal({ isOpen, onClose, sizeGuide }: SizeGuide
                                 <div className="w-10 h-10 bg-[var(--color-brand-primary)]/10 rounded-xl flex items-center justify-center">
                                     <Ruler size={20} className="text-[var(--color-brand-primary)]" />
                                 </div>
-                                <h3 className="text-xl font-black text-gray-900 font-cairo">
+                                <h3 className="text-lg font-black text-gray-900 font-cairo">
                                     {t.product?.size_guide || (isRTL ? 'دليل المقاسات' : 'Size Guide')}
                                 </h3>
                             </div>
@@ -78,7 +78,7 @@ export default function SizeGuideModal({ isOpen, onClose, sizeGuide }: SizeGuide
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: idx * 0.05 }}
                                         key={idx}
-                                        className="bg-white border border-gray-100 p-5 rounded-[20px] shadow-sm flex items-center justify-between"
+                                        className="bg-white border border-gray-100 p-4 rounded-[16px] shadow-sm flex items-center justify-between"
                                     >
                                         {hasKeyVal ? (
                                             <>
@@ -88,7 +88,7 @@ export default function SizeGuideModal({ isOpen, onClose, sizeGuide }: SizeGuide
                                                     </div>
                                                     <div className={`h-px w-10 bg-gray-100 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                                                 </div>
-                                                <span className="font-bold text-gray-700 font-cairo text-[16px]">
+                                                <span className="font-bold text-gray-700 font-cairo text-sm">
                                                     {val}
                                                 </span>
                                             </>
@@ -103,10 +103,10 @@ export default function SizeGuideModal({ isOpen, onClose, sizeGuide }: SizeGuide
                         </div>
 
                         {/* Footer Action */}
-                        <div className="p-6 pt-2">
+                        <div className="p-6 pt-0">
                             <button
                                 onClick={onClose}
-                                className="w-full h-14 bg-gray-950 text-white rounded-2xl font-black text-lg shadow-xl shadow-black/10 hover:bg-gray-800 transition-all font-cairo active:scale-95"
+                                className="w-full h-12 bg-gray-950 text-white rounded-2xl font-black text-base shadow-xl shadow-black/10 hover:bg-gray-800 transition-all font-cairo active:scale-95"
                             >
                                 {isRTL ? 'فهمت' : 'Got it'}
                             </button>
