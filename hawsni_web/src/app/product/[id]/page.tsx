@@ -13,12 +13,13 @@ import {
     Plus,
     Check,
     ChevronRight,
-    Sparkles,
+    Flame, // Changed Sparkles to Flame
     Info,
     Ruler
 } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useToastStore } from '@/store/toastStore';
+import { X, CheckCircle2, AlertCircle, Info as LucideInfo, Check as LucideCheck } from 'lucide-react';
 import { productService } from '@/services/productService';
 import { useLanguage } from '@/context/LanguageContext';
 import { Product } from '@/types';
@@ -183,7 +184,7 @@ export default function ProductPage() {
                         >
                             <div className="flex items-center gap-4">
                                 <div className="w-12 h-12 bg-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                                    <Sparkles size={24} className="text-white" />
+                                    <Flame size={24} className="text-white" />
                                 </div>
                                 <div>
                                     <h4 className="font-bold text-gray-900">{t.product?.vto_banner || 'Try this piece now'}</h4>
@@ -248,7 +249,7 @@ export default function ProductPage() {
                                         animate={{ scale: [1, 1.2, 1] }}
                                         transition={{ duration: 1.5, repeat: Infinity }}
                                     >
-                                        <Sparkles size={20} className="fill-amber-500" />
+                                        <Flame size={20} className="fill-amber-500" /> {/* Changed Sparkles to Flame */}
                                     </motion.div>
                                 </div>
                                 <span className="text-sm font-bold text-amber-900">
@@ -289,25 +290,30 @@ export default function ProductPage() {
             </main>
 
             {/* FLOATING CAPSULE FOOTER (Black Bar) */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-50">
+            {/* FLOATING CAPSULE FOOTER (Black Bar) - REFINED */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="bg-gray-900/95 backdrop-blur-xl rounded-full p-2 flex items-center justify-between shadow-2xl border border-white/10"
+                    className="bg-gray-950/95 backdrop-blur-xl p-2.5 rounded-[2rem] shadow-2xl flex items-center justify-between border border-white/5"
                 >
-                    <div className="flex flex-col px-8">
-                        <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">{isRTL ? 'الإجمالي' : 'Total'}</span>
-                        <div className="flex items-baseline gap-1 text-white">
-                            <span className="text-xl font-black">{(product.price * quantity).toLocaleString('en-US')}</span>
-                            <span className="text-[10px] font-bold opacity-60">{isRTL ? 'ج.م' : 'EGP'}</span>
-                        </div>
+                    {/* Price Side */}
+                    <div className="px-6">
+                        <span className="text-xl font-black text-white">{product.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
                     </div>
 
+                    {/* Add to Cart Button (White Capsule) */}
                     <button
                         onClick={handleAddToCart}
-                        className="bg-white text-gray-900 px-8 py-4 rounded-full font-black text-sm flex items-center gap-3 hover:bg-gray-100 transition-colors active:scale-95"
+                        disabled={!selectedSize}
+                        className={`
+                            flex items-center gap-3 px-8 py-4 rounded-[1.5rem] font-black transition-all active:scale-95
+                            ${!selectedSize
+                                ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                : 'bg-white text-gray-950 shadow-xl shadow-black/20 hover:bg-gray-100'}
+                        `}
                     >
-                        <ShoppingBag size={18} strokeWidth={3} />
+                        <ShoppingBag size={20} />
                         <span>{t.product?.add_to_cart || 'Add to Cart'}</span>
                     </button>
                 </motion.div>

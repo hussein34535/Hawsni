@@ -1,95 +1,85 @@
-'use client';
-
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, ArrowRight, Check, Flower2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import CartItemCard from '@/components/cart/CartItemCard';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function CartPage() {
     const router = useRouter();
     const { items, getTotal } = useCartStore();
+    const { isRTL, t } = useLanguage();
     const total = getTotal();
 
     return (
-        <div className="w-full">
-            <div className="px-4 sm:px-6 lg:px-8 pb-32">
-                <div className="flex items-center gap-4 mb-8">
-                    <button onClick={() => router.back()} className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-gray-900">
-                        <ArrowLeft size={20} />
-                    </button>
-                    <h1 className="text-2xl font-black text-gray-900 uppercase">Shopping Bag</h1>
-                </div>
+        <div className="w-full min-h-screen bg-[#FAFAFA]">
+            {/* Header */}
+            <div className="sticky top-0 z-30 bg-[#FAFAFA]/80 backdrop-blur-md px-6 py-6 flex items-center justify-between">
+                <button
+                    onClick={() => router.back()}
+                    className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-gray-900 active:scale-95 transition-all"
+                >
+                    {isRTL ? <ArrowRight size={24} /> : <ArrowLeft size={24} />}
+                </button>
+                <h1 className="text-xl font-black text-gray-900 font-cairo">
+                    {isRTL ? 'حقيبة التسوق' : 'Shopping Bag'}
+                </h1>
+                <div className="w-12" /> {/* Placeholder for balance */}
+            </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    {/* Cart Items List */}
-                    <div className="lg:col-span-8 flex flex-col gap-4">
-                        <AnimatePresence mode="popLayout">
-                            {items.length > 0 ? (
-                                items.map((item) => <CartItemCard key={item.id} item={item} />)
-                            ) : (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="bg-white rounded-[2.5rem] p-12 flex flex-col items-center text-center shadow-sm"
-                                >
-                                    <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 text-[var(--color-brand-primary)]">
-                                        <ShoppingBag size={48} />
-                                    </div>
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Your bag is empty</h2>
-                                    <p className="text-gray-500 mb-8 max-w-xs">Looks like you haven&apos;t added any style to your bag yet.</p>
-                                    <Link
-                                        href="/"
-                                        className="px-8 py-4 bg-[var(--color-brand-primary)] text-white rounded-full font-bold shadow-xl shadow-emerald-950/20"
-                                    >
-                                        Start Exploring
-                                    </Link>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                    {/* Summary Card */}
-                    {items.length > 0 && (
-                        <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
+            <div className="px-6 pb-40">
+                <div className="max-w-2xl mx-auto flex flex-col gap-4">
+                    <AnimatePresence mode="popLayout">
+                        {items.length > 0 ? (
+                            items.map((item) => <CartItemCard key={item.id} item={item} />)
+                        ) : (
                             <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-black/5 flex flex-col gap-6"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-20 flex flex-col items-center text-center"
                             >
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center text-gray-500 font-medium">
-                                        <span>Subtotal</span>
-                                        <span>{total.toLocaleString()} EGP</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-gray-500 font-medium">
-                                        <span>Shipping</span>
-                                        <span className="text-emerald-500 font-bold uppercase text-xs">Free</span>
-                                    </div>
-                                    <div className="h-px bg-gray-100 my-2" />
-                                    <div className="flex justify-between items-center text-gray-900 font-black text-xl">
-                                        <span>Total</span>
-                                        <span className="text-[var(--color-brand-primary)]">{total.toLocaleString()} EGP</span>
-                                    </div>
+                                <div className="w-32 h-32 flex items-center justify-center mb-8">
+                                    <Flower2 size={80} className="text-[#0E4435]" />
                                 </div>
-
-                                <Link href="/checkout">
-                                    <button className="w-full py-5 bg-[var(--color-brand-primary)] text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 hover:bg-[var(--color-brand-secondary)] transition-colors mt-2">
-                                        <span>Checkout</span>
-                                        <ArrowRight size={20} />
-                                    </button>
+                                <h2 className="text-2xl font-black text-gray-900 mb-2 font-cairo">
+                                    {isRTL ? 'حقيبتك فارغة' : 'Your bag is empty'}
+                                </h2>
+                                <p className="text-gray-500 mb-10 max-w-xs font-bold opacity-60">
+                                    {isRTL ? 'يبدو أنك لم تضف أي قطعة لمجموعتك بعد' : 'Looks like you haven\'t added any style to your bag yet.'}
+                                </p>
+                                <Link
+                                    href="/"
+                                    className="px-10 py-5 bg-[#0E4435] text-white rounded-[2rem] font-black shadow-2xl shadow-emerald-950/20 active:scale-95 transition-all"
+                                >
+                                    {isRTL ? 'استكشف الآن' : 'Start Exploring'}
                                 </Link>
-
-                                <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                                    <Check size={12} className="text-emerald-500" />
-                                    <span>Secure SSL Checkout</span>
-                                </div>
                             </motion.div>
-                        </div>
-                    )}
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
+
+            {/* Bottom Fixed Summary (Image 1) */}
+            {items.length > 0 && (
+                <div className="fixed bottom-0 left-0 w-full bg-white rounded-t-[3rem] p-8 shadow-[0_-20px_40px_rgba(0,0,0,0.05)] z-40">
+                    <div className="max-w-2xl mx-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <span className="text-gray-400 font-bold text-lg">{isRTL ? 'المجموع' : 'Subtotal'}</span>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-3xl font-black text-gray-900">{total.toLocaleString()}</span>
+                                <span className="text-sm font-bold text-gray-400 uppercase">{isRTL ? 'ج.م' : 'EGP'}</span>
+                            </div>
+                        </div>
+
+                        <Link href="/checkout">
+                            <button className="w-full py-6 bg-[#0E4435] text-white rounded-[1.8rem] font-black text-xl shadow-2xl shadow-emerald-900/20 active:scale-[0.98] transition-all flex items-center justify-center">
+                                <span>{isRTL ? 'إتمام الشراء' : 'Checkout'}</span>
+                            </button>
+                        </Link>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -2,7 +2,7 @@
 
 import { useToastStore } from '@/store/toastStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { AlertCircle, Info, Check } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function ToastContainer() {
@@ -15,30 +15,26 @@ export default function ToastContainer() {
                 {toasts.map((toast) => (
                     <motion.div
                         key={toast.id}
-                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                        initial={{ opacity: 0, y: 50, scale: 0.9, filter: 'blur(10px)' }}
+                        animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, y: 20, scale: 0.95, filter: 'blur(10px)' }}
                         className={`
-                            flex items-center gap-3 p-4 rounded-2xl shadow-2xl backdrop-blur-md border
-                            ${toast.type === 'success' ? 'bg-[#1B4D3E] text-white border-[#1B4D3E]/20' :
+                            flex items-center justify-between gap-3 p-4 rounded-[1.5rem] shadow-2xl backdrop-blur-md border
+                            ${toast.type === 'success' ? 'bg-[#0E4435] text-white border-white/10' :
                                 toast.type === 'error' ? 'bg-red-600 text-white border-red-500/20' :
                                     'bg-gray-900 text-white border-gray-800'}
                         `}
                     >
-                        {toast.type === 'success' && <CheckCircle2 size={20} />}
-                        {toast.type === 'error' && <AlertCircle size={20} />}
-                        {toast.type === 'info' && <Info size={20} />}
-
-                        <p className="flex-1 font-bold text-sm">
-                            {toast.message}
-                        </p>
-
-                        <button
-                            onClick={() => removeToast(toast.id)}
-                            className="p-1 hover:bg-white/10 rounded-full"
-                        >
-                            <X size={16} />
-                        </button>
+                        <div className="flex items-center gap-3 flex-1">
+                            {toast.type === 'success' && (
+                                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                                    <Check size={14} className="text-white" />
+                                </div>
+                            )}
+                            {toast.type === 'error' && <AlertCircle size={20} />}
+                            {toast.type === 'info' && <Info size={20} />}
+                            <span className="text-sm font-bold font-cairo letter-spacing-tight">{toast.message}</span>
+                        </div>
                     </motion.div>
                 ))}
             </AnimatePresence>
