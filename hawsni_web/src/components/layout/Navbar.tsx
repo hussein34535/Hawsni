@@ -10,7 +10,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 export default function Navbar() {
     const pathname = usePathname();
-    const { t, language } = useLanguage();
+    const { t, language, isRTL } = useLanguage();
     const itemCount = useCartStore((state) => state.getItemCount());
     const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -19,7 +19,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="fixed top-0 w-full bg-white z-50 border-b border-gray-100">
+            <nav className="fixed top-0 w-full bg-white z-50 border-b border-gray-100" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="max-w-7xl mx-auto px-4 py-3">
 
                     {/* --- MOBILE NAVBAR (Matches _buildAppBar from Flutter) --- */}

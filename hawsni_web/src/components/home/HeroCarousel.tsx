@@ -60,14 +60,16 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
             </AnimatePresence>
 
             {/* Page Indicator */}
-            <div className="absolute bottom-6 left-8 flex gap-2">
-                {banners.map((_, i) => (
-                    <div
-                        key={i}
-                        className={`h-[6px] transition-all duration-300 rounded-full ${i === index ? 'w-6 bg-white' : 'w-[6px] bg-white/50'}`}
-                    />
-                ))}
-            </div>
+            {banners.length > 1 && (
+                <div className="absolute bottom-6 left-8 flex gap-2">
+                    {banners.map((_, i) => (
+                        <div
+                            key={i}
+                            className={`h-[6px] transition-all duration-300 rounded-full ${i === index ? 'w-6 bg-white' : 'w-[6px] bg-white/50'}`}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
