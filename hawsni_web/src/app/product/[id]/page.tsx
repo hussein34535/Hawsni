@@ -544,7 +544,7 @@ export default function ProductPage() {
             <VirtualTryOnModal
                 isOpen={isVTOOpen}
                 onClose={() => setIsVTOOpen(false)}
-                productImageUrl={product.images[0]}
+                productImages={product.images}
                 productId={productId}
             />
         </div>

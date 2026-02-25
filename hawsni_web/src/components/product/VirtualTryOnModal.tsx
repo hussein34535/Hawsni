@@ -1,26 +1,55 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Camera, Image as ImageIcon, Sparkles, RefreshCw, Share2, ZoomIn, AlertCircle } from 'lucide-react';
+import { X, Camera, Image as ImageIcon, Sparkles, RefreshCw, Share2, AlertCircle, Check, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import { vtoService } from '@/services/vtoService';
 
+const GUEST_DAILY_LIMIT = 1;
+const USER_DAILY_LIMIT = 10;
+
+const getVtoUsageKey = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return `vto_usage_${today}`;
+};
+
+const getUsageCount = (): number => {
+    try {
+        return parseInt(localStorage.getItem(getVtoUsageKey()) || '0', 10);
+    } catch { return 0; }
+};
+
+const incrementUsage = () => {
+    try {
+        const key = getVtoUsageKey();
+        const current = parseInt(localStorage.getItem(key) || '0', 10);
+        localStorage.setItem(key, String(current + 1));
+    } catch { }
+};
+
+const isLoggedIn = (): boolean => {
+    try { return !!localStorage.getItem('token'); }
+    catch { return false; }
+};
+
 interface VirtualTryOnModalProps {
     isOpen: boolean;
     onClose: () => void;
-    productImageUrl: string;
+    productImages: string[];
     productId: string;
 }
 
 type VtoStatus = 'idle' | 'uploading' | 'processing' | 'succeeded' | 'failed';
 
-export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, productId }: VirtualTryOnModalProps) {
+export default function VirtualTryOnModal({ isOpen, onClose, productImages, productId }: VirtualTryOnModalProps) {
     const { t, isRTL } = useLanguage();
     const [status, setStatus] = useState<VtoStatus>('idle');
     const [userImage, setUserImage] = useState<string | null>(null);
     const [resultImageUrl, setResultImageUrl] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
+    const [selectedGarment, setSelectedGarment] = useState(0);
+    const [showLimitReached, setShowLimitReached] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -77,13 +106,25 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
     const startTryOnFlow = async () => {
         if (!userImage) return;
 
+        // Check daily limit
+        const usage = getUsageCount();
+        const logged = isLoggedIn();
+        const limit = logged ? USER_DAILY_LIMIT : GUEST_DAILY_LIMIT;
+
+        if (usage >= limit) {
+            setShowLimitReached(true);
+            return;
+        }
+
         setStatus('uploading');
         setErrorMessage('');
 
         try {
-            const response = await vtoService.startTryOn(userImage, productImageUrl);
+            const garmentUrl = productImages[selectedGarment];
+            const response = await vtoService.startTryOn(userImage, garmentUrl);
             const predictionId = response.id;
 
+            incrementUsage();
             setStatus('processing');
             pollStatus(predictionId);
         } catch (error: any) {
@@ -149,15 +190,49 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
 
                         {/* Content Area */}
                         <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center min-h-[400px]">
-                            {status === 'idle' && !userImage ? (
-                                <div className="text-center space-y-8 w-full">
-                                    <div className="grid grid-cols-3 gap-4 mb-8">
+                            {showLimitReached ? (
+                                <div className="text-center space-y-6 w-full max-w-[300px]">
+                                    <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto">
+                                        <AlertCircle size={36} className="text-amber-500" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h4 className="text-lg font-black text-gray-900 font-cairo">
+                                            {isRTL ? 'وصلت للحد اليومي' : 'Daily limit reached'}
+                                        </h4>
+                                        <p className="text-sm text-gray-500 font-cairo leading-relaxed">
+                                            {!isLoggedIn()
+                                                ? (isRTL ? 'الزوار مسموح لهم بتجربة واحدة في اليوم. سجّل حساب مجاني للحصول على 10 تجارب يومياً!' : 'Guests get 1 free try per day. Create an account to get 10 daily tries!')
+                                                : (isRTL ? 'وصلت لعدد 10 تجارب اليوم. عُد غداً لتجارب جديدة!' : "You've used all 10 tries today. Come back tomorrow!")
+                                            }
+                                        </p>
+                                    </div>
+                                    {!isLoggedIn() ? (
+                                        <button
+                                            onClick={() => { onClose(); window.location.href = '/auth'; }}
+                                            className="w-full h-12 bg-[var(--color-brand-primary)] text-white rounded-xl font-black text-base shadow-xl font-cairo flex items-center justify-center gap-2"
+                                        >
+                                            <UserPlus size={20} />
+                                            {isRTL ? 'إنشاء حساب مجاني' : 'Create free account'}
+                                        </button>
+                                    ) : (
+                                        <button
+                                            onClick={onClose}
+                                            className="w-full h-12 bg-gray-200 text-gray-700 rounded-xl font-black text-base font-cairo"
+                                        >
+                                            {isRTL ? 'حسناً' : 'OK'}
+                                        </button>
+                                    )}
+                                </div>
+                            ) : status === 'idle' && !userImage ? (
+                                <div className="text-center space-y-6 w-full">
+                                    {/* Steps */}
+                                    <div className="grid grid-cols-3 gap-4 mb-4">
                                         <div className="flex flex-col items-center gap-2 text-center">
                                             <div className="w-12 h-12 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-center text-[#0E4435]">
                                                 <Camera size={22} className="opacity-80" />
                                             </div>
                                             <span className="text-[10px] font-bold text-gray-400 font-cairo">
-                                                {isRTL ? 'التقط صورة' : 'Take a photo'}
+                                                {isRTL ? 'اختر اللون' : 'Pick color'}
                                             </span>
                                         </div>
                                         <div className="flex flex-col items-center gap-2 text-center">
@@ -165,7 +240,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                                                 <Sparkles size={22} className="opacity-80" />
                                             </div>
                                             <span className="text-[10px] font-bold text-gray-400 font-cairo">
-                                                {isRTL ? 'الذكاء الاصطناعي يخلق صورتك' : 'AI Processing'}
+                                                {isRTL ? 'ارفع صورتك' : 'Upload photo'}
                                             </span>
                                         </div>
                                         <div className="flex flex-col items-center gap-2 text-center">
@@ -173,11 +248,42 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                                                 <ImageIcon size={22} className="opacity-80" />
                                             </div>
                                             <span className="text-[10px] font-bold text-gray-400 font-cairo">
-                                                {isRTL ? 'تخيل مظهرك' : 'See results'}
+                                                {isRTL ? 'شاهد النتيجة' : 'See results'}
                                             </span>
                                         </div>
                                     </div>
 
+                                    {/* Garment Image Selector */}
+                                    {productImages.length > 1 && (
+                                        <div className="space-y-2">
+                                            <p className="text-xs font-bold text-gray-500 font-cairo">
+                                                {isRTL ? 'اختر صورة المنتج:' : 'Select product image:'}
+                                            </p>
+                                            <div className="flex gap-2 justify-center flex-wrap">
+                                                {productImages.map((img, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        onClick={() => setSelectedGarment(idx)}
+                                                        className={`relative w-16 h-20 rounded-xl overflow-hidden border-2 transition-all ${selectedGarment === idx
+                                                            ? 'border-[var(--color-brand-primary)] shadow-lg scale-105'
+                                                            : 'border-gray-200 opacity-60 hover:opacity-100'
+                                                            }`}
+                                                    >
+                                                        <img src={img} alt={`Option ${idx + 1}`} className="w-full h-full object-cover" />
+                                                        {selectedGarment === idx && (
+                                                            <div className="absolute inset-0 bg-[var(--color-brand-primary)]/20 flex items-center justify-center">
+                                                                <div className="w-5 h-5 bg-[var(--color-brand-primary)] rounded-full flex items-center justify-center">
+                                                                    <Check size={12} className="text-white" />
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Upload Button */}
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
                                         className="w-full aspect-[4/5] max-w-[240px] bg-gray-50 rounded-[24px] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 hover:border-[var(--color-brand-primary)] transition-colors group mx-auto"
@@ -185,35 +291,56 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                                         <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[var(--color-brand-primary)]">
                                             <Camera size={24} />
                                         </div>
-                                        <p className="font-black text-gray-400 font-cairo text-base">{t.product?.vto_upload}</p>
+                                        <p className="font-black text-gray-400 font-cairo text-base">{t.product?.vto_upload || (isRTL ? 'ارفع صورتك' : 'Upload your photo')}</p>
                                     </button>
                                 </div>
                             ) : (
-                                <div className="relative w-full aspect-[3/4] max-w-[280px] bg-gray-100 rounded-[24px] overflow-hidden shadow-xl">
-                                    <AnimatePresence mode="wait">
-                                        <motion.img
-                                            key={resultImageUrl || userImage}
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            src={resultImageUrl || userImage || ''}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </AnimatePresence>
-
-                                    {(status === 'uploading' || status === 'processing') && (
-                                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-6 text-center">
-                                            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
-                                            <Sparkles className="text-purple-400 mb-2 animate-pulse size-5" />
-                                            <p className="font-black text-base font-cairo">{t.product?.vto_processing}</p>
+                                <div className="w-full flex flex-col items-center gap-4">
+                                    {/* Selected garment preview (small) */}
+                                    {!resultImageUrl && (
+                                        <div className="flex items-center gap-3 bg-gray-50 rounded-2xl p-3 w-full max-w-[280px]">
+                                            <img src={productImages[selectedGarment]} alt="Garment" className="w-12 h-14 rounded-xl object-cover border border-gray-200" />
+                                            <div className="flex-1">
+                                                <p className="text-xs font-bold text-gray-500 font-cairo">{isRTL ? 'المنتج المختار' : 'Selected garment'}</p>
+                                                {productImages.length > 1 && (
+                                                    <button
+                                                        onClick={() => { reset(); }}
+                                                        className="text-[10px] text-[var(--color-brand-primary)] font-bold font-cairo"
+                                                    >
+                                                        {isRTL ? 'تغيير' : 'Change'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
 
-                                    {status === 'failed' && (
-                                        <div className="absolute inset-0 bg-red-500/10 backdrop-blur-sm flex flex-col items-center justify-center text-red-600 p-6 text-center">
-                                            <AlertCircle size={48} className="mb-4" />
-                                            <p className="font-black font-cairo">{errorMessage}</p>
-                                        </div>
-                                    )}
+                                    {/* User/Result Image */}
+                                    <div className="relative w-full aspect-[3/4] max-w-[280px] bg-gray-100 rounded-[24px] overflow-hidden shadow-xl">
+                                        <AnimatePresence mode="wait">
+                                            <motion.img
+                                                key={resultImageUrl || userImage}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                src={resultImageUrl || userImage || ''}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </AnimatePresence>
+
+                                        {(status === 'uploading' || status === 'processing') && (
+                                            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-6 text-center">
+                                                <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
+                                                <Sparkles className="text-purple-400 mb-2 animate-pulse size-5" />
+                                                <p className="font-black text-base font-cairo">{t.product?.vto_processing || (isRTL ? 'جاري المعالجة...' : 'Processing...')}</p>
+                                            </div>
+                                        )}
+
+                                        {status === 'failed' && (
+                                            <div className="absolute inset-0 bg-red-500/10 backdrop-blur-sm flex flex-col items-center justify-center text-red-600 p-6 text-center">
+                                                <AlertCircle size={48} className="mb-4" />
+                                                <p className="font-black font-cairo">{errorMessage}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -227,7 +354,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                                         className="flex-1 h-12 bg-white border border-gray-200 rounded-xl font-black font-cairo text-gray-900 flex items-center justify-center gap-2 text-sm"
                                     >
                                         <RefreshCw size={18} />
-                                        {t.product?.vto_try_another}
+                                        {t.product?.vto_try_another || (isRTL ? 'جرب مرة ثانية' : 'Try another')}
                                     </button>
                                     <button
                                         className="h-12 w-12 bg-[var(--color-brand-primary)] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95"
@@ -241,7 +368,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                                     onClick={status === 'failed' ? reset : (userImage ? startTryOnFlow : () => fileInputRef.current?.click())}
                                     className="w-full h-12 bg-gray-950 text-white rounded-xl font-black text-base shadow-xl font-cairo disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {status === 'failed' ? (isRTL ? 'إعادة المحاولة' : 'Retry') : (userImage ? t.product?.vto_button : t.product?.vto_upload)}
+                                    {status === 'failed' ? (isRTL ? 'إعادة المحاولة' : 'Retry') : (userImage ? (t.product?.vto_button || (isRTL ? 'ابدأ التجربة' : 'Start Try-On')) : (t.product?.vto_upload || (isRTL ? 'ارفع صورتك' : 'Upload photo')))}
                                 </button>
                             )}
                         </div>
