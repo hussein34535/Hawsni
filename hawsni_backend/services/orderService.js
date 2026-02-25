@@ -34,7 +34,7 @@ class OrderService {
         return data;
     }
 
-    async createOrder(orderData, items) {
+    async createOrder(orderData, items, guestInfo = {}) {
         // 1. Create Order
         const { data: order, error: orderError } = await supabase
             .from('orders')
@@ -65,8 +65,8 @@ class OrderService {
 
         // Send order confirmation email and admin notification (non-blocking)
         try {
-            let customerEmail = null;
-            let customerName = 'عميل';
+            let customerEmail = guestInfo.guestEmail || null;
+            let customerName = guestInfo.guestName || 'عميل';
 
             if (orderData.user_id) {
                 const { data: user } = await supabase

@@ -39,7 +39,7 @@ class OrderController {
 
     async createOrder(req, res) {
         try {
-            const { items, shippingAddress, paymentMethod, subtotal, discount, couponCode } = req.body;
+            const { items, shippingAddress, paymentMethod, subtotal, discount, couponCode, guestName, guestEmail, guestPhone } = req.body;
 
             const shippingFee = 5.00;
             const total = subtotal + shippingFee - discount;
@@ -56,7 +56,8 @@ class OrderController {
                 status: 'Processing'
             };
 
-            const order = await OrderService.createOrder(orderData, items);
+            const guestInfo = { guestName, guestEmail, guestPhone };
+            const order = await OrderService.createOrder(orderData, items, guestInfo);
 
             res.status(201).json({ success: true, order });
         } catch (error) {
