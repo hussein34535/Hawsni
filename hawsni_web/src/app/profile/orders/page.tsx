@@ -136,12 +136,12 @@ export default function OrdersPage() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="bg-white rounded-3xl p-4 shadow-sm border border-gray-50 group hover:border-[var(--color-brand-primary)] transition-colors cursor-pointer"
-                                onClick={() => router.push(`/profile/orders/${order.id}`)}
+                                onClick={() => router.push(`/track-order?id=${order.id}`)}
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="text-right">
                                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
-                                            {t.orders.order_id}: #{order.id.slice(-8).toUpperCase()}
+                                            {t.orders.order_id}: #{order.id.substring(0, 8).toUpperCase()}
                                         </p>
                                         <p className="text-sm font-medium text-gray-400">
                                             {new Date(order.created_at).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
@@ -152,8 +152,8 @@ export default function OrdersPage() {
                                         </p>
                                     </div>
                                     <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight ${order.status.toLowerCase() === 'delivered' ? 'bg-emerald-50 text-emerald-600' :
-                                            order.status.toLowerCase() === 'cancelled' ? 'bg-red-50 text-red-600' :
-                                                'bg-amber-50 text-amber-600'
+                                        order.status.toLowerCase() === 'cancelled' ? 'bg-red-50 text-red-600' :
+                                            'bg-amber-50 text-amber-600'
                                         }`}>
                                         {getStatusIcon(order.status)}
                                         {getStatusText(order.status)}

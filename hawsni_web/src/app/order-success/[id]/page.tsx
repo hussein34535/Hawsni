@@ -105,8 +105,8 @@ export default function OrderSuccessPage() {
                         className="text-gray-500 font-bold"
                     >
                         {isRTL
-                            ? `تم استلام طلبك رقم #${order.id?.toUpperCase()} بنجاح. سنرسل لك إشعاراً بمجرد شحنه.`
-                            : `Order #${order.id?.toUpperCase()} received successfully. We'll notify you once it's shipped.`}
+                            ? `تم استلام طلبك رقم #${order.id?.toUpperCase().substring(0, 8)} بنجاح. سنرسل لك إشعاراً بمجرد شحنه.`
+                            : `Order #${order.id?.toUpperCase().substring(0, 8)} received successfully. We'll notify you once it's shipped.`}
                     </motion.p>
                 </div>
 

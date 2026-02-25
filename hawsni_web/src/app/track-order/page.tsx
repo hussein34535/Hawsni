@@ -134,7 +134,16 @@ export default function TrackOrderPage() {
                         >
                             <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-50 text-right">
                                 <div>
-                                    <h3 className="font-black text-gray-900 text-lg">#{order.id?.toUpperCase()}</h3>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-gray-400 font-bold">#{order.id?.toUpperCase().substring(0, 8)}</span>
+                                        <button
+                                            onClick={() => navigator.clipboard.writeText(order.id)}
+                                            title="نسخ المعرف الكامل"
+                                            className="text-gray-300 hover:text-[#0E4435] transition-colors"
+                                        >
+                                            <Receipt size={14} />
+                                        </button>
+                                    </div>
                                     <p className="text-xs text-gray-400 font-bold mt-1">
                                         {isRTL ? 'تم الطلب في:' : 'Ordered on:'} {new Date(order.created_at).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US')}
                                     </p>
