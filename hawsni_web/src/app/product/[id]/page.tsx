@@ -20,14 +20,17 @@ import {
     Camera,
     Image as ImageIcon
 } from 'lucide-react';
+import Image from 'next/image';
 import { useCartStore } from '@/store/cartStore';
 import { useToastStore } from '@/store/toastStore';
 import { productService } from '@/services/productService';
 import { useLanguage } from '@/context/LanguageContext';
 import { Product } from '@/types';
-import ReviewsSection from '@/components/product/ReviewsSection';
-import SizeGuideModal from '@/components/product/SizeGuideModal';
-import VirtualTryOnModal from '@/components/product/VirtualTryOnModal';
+import dynamic from 'next/dynamic';
+
+const ReviewsSection = dynamic(() => import('@/components/product/ReviewsSection'), { ssr: false });
+const SizeGuideModal = dynamic(() => import('@/components/product/SizeGuideModal'), { ssr: false });
+const VirtualTryOnModal = dynamic(() => import('@/components/product/VirtualTryOnModal'), { ssr: false });
 
 const formatImageUrl = (url: string) => {
     if (!url) return '';
@@ -275,10 +278,13 @@ export default function ProductPage() {
                         >
                             {product.images.map((img, i) => (
                                 <div key={`img-${i}`} className="min-w-full h-full relative">
-                                    <img
-                                        src={img}
+                                    <Image
+                                        src={formatImageUrl(img)}
                                         alt={`${product.name} - ${i + 1}`}
-                                        className="w-full h-full object-cover select-none pointer-events-none"
+                                        fill
+                                        priority={i === 0}
+                                        sizes="(max-width: 1024px) 100vw, 50vw"
+                                        className="object-cover select-none pointer-events-none"
                                     />
                                 </div>
                             ))}

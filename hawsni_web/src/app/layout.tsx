@@ -9,33 +9,40 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  title: 'Hawsni | Premium Fashion & Style in Egypt',
-  description: 'Shop the latest fashion trends at Hawsni. Premium quality, local craftsmanship, and unique styles delivered to your doorstep in Egypt.',
-  keywords: 'fashion, Egypt, style, clothing, premium, Hawsni, ecommerce',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://hawsni.com'),
+  title: 'Hawsni | Hwasi - Premium Fashion & Style in Egypt | هَوَسي للأزياء',
+  description: 'Shop the latest fashion trends at Hawsni (Hwasi - هَوَسي). Premium quality, local craftsmanship, and unique styles delivered to your doorstep in Egypt. اكتشف أحدث صيحات الموضة مع هَوَسي.',
+  keywords: 'hwasi, Hwasi, هَوَسي, الهَوَسي, Hawsni, hawsni, fashion, Egypt, style, clothing, premium, ecommerce, ملابس, أزياء, تسوق, مصر',
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
     shortcut: "/logo.png",
   },
   openGraph: {
-    title: 'Hawsni | Premium Fashion & Style',
-    description: 'Discover the ultimate fashion destination in Egypt. Shop unique collections at Hawsni.',
+    title: 'Hawsni | Hwasi - Premium Fashion & Style | هَوَسي',
+    description: 'Discover the ultimate fashion destination in Egypt. Shop unique collections at Hawsni (Hwasi - هَوَسي).',
+    url: 'https://hawsni.com',
+    siteName: 'Hawsni - Hwasi',
     images: [
       {
         url: '/logo.png',
         width: 1200,
         height: 630,
-        alt: 'Hawsni Logo',
+        alt: 'Hawsni Logo - Hwasi',
       },
     ],
+    locale: 'ar_EG',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hawsni | Premium Fashion',
-    description: 'Premium Fashion & Style in Egypt',
+    title: 'Hawsni | Hwasi - Premium Fashion | هَوَسي',
+    description: 'Premium Fashion & Style in Egypt. Shop at Hawsni (Hwasi).',
     images: ['/logo.png'],
   },
+  alternates: {
+    canonical: 'https://hawsni.com',
+  }
 };
 
 export const viewport: Viewport = {

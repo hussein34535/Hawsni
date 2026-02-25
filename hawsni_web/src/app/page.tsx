@@ -5,13 +5,22 @@ import Link from 'next/link';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import HeroCarousel from '@/components/home/HeroCarousel';
 
-import CategoryList from '@/components/home/CategoryList';
-import ProductCard from '@/components/products/ProductCard';
+import dynamic from 'next/dynamic';
 import { productService } from '@/services/productService';
 import { categoryService } from '@/services/categoryService';
 import { Category, Product, Banner } from '@/types';
 import apiClient from '@/lib/axios';
 import { useLanguage } from '@/context/LanguageContext';
+
+const CategoryList = dynamic(() => import('@/components/home/CategoryList'), {
+  loading: () => <div className="h-24 bg-gray-100 animate-pulse rounded-xl my-4"></div>,
+  ssr: true
+});
+
+const ProductCard = dynamic(() => import('@/components/products/ProductCard'), {
+  loading: () => <div className="aspect-[0.68] bg-gray-200 rounded-3xl animate-pulse"></div>,
+  ssr: true
+});
 
 export default function HomePage() {
   const { t, language, isRTL } = useLanguage();

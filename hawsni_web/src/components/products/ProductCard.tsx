@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Star } from 'lucide-react';
+import Image from 'next/image';
 
 import { Product } from '@/types';
 
@@ -97,16 +98,23 @@ export default function ProductCard({ product }: ProductCardProps) {
             <div className="relative aspect-square bg-[#F5F5F5] rounded-2xl overflow-hidden mb-2">
                 <AnimatePresence mode="wait">
                     {selectedImage ? (
-                        <motion.img
+                        <motion.div
                             key={selectedImage}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.3 }}
-                            src={selectedImage}
-                            alt={name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
+                            className="relative w-full h-full"
+                        >
+                            <Image
+                                src={selectedImage || '/logo.png'}
+                                alt={name || 'Product'}
+                                fill
+                                loading="lazy"
+                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                        </motion.div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
                             <span className="text-xs">No Image</span>

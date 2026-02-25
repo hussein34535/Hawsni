@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import { Banner } from '@/types';
 
 interface HeroCarouselProps {
@@ -30,7 +31,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
 
 
     const banner = banners[index];
-    const bannerImage = banner.image_url || banner.imageUrl || banner.image;
+    const bannerImage = banner.image_url || banner.imageUrl || banner.image || '/logo.png';
 
     // Translation logic with fallbacks
     const h = language === 'ar' ? (banner.heading_ar || banner.heading_text || 'وصل حديثاً') : (banner.heading_text || banner.heading || banner.title || 'New Arrival');
@@ -48,11 +49,14 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                     transition={{ duration: 1 }}
                     className="absolute inset-0"
                 >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                         src={bannerImage}
                         alt={s}
-                        className="w-full h-full object-cover"
+                        fill
+                        priority={index === 0}
+                        quality={85}
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
                     />
 
                     {/* The text content overlay has been removed per user request */}
