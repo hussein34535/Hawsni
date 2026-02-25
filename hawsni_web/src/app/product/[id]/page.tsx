@@ -544,7 +544,9 @@ export default function ProductPage() {
             <VirtualTryOnModal
                 isOpen={isVTOOpen}
                 onClose={() => setIsVTOOpen(false)}
-                productImages={product.images}
+                productImages={parseColors(product.colors)
+                    .map(c => (c.imageIndex !== undefined && c.imageIndex !== null) ? product.images[c.imageIndex] : null)
+                    .filter((img): img is string => !!img)}
                 productId={productId}
             />
         </div>

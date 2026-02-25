@@ -17,6 +17,7 @@ class SettingsController {
                 contact_phone: '',
                 address: '',
                 currency: 'EGP',
+                meta_pixel_id: '',
                 social_links: {
                     facebook: '',
                     instagram: '',
@@ -58,7 +59,8 @@ class SettingsController {
                 facebook,
                 instagram,
                 whatsapp,
-                tiktok
+                tiktok,
+                meta_pixel_id
             } = req.body;
 
             const settingsData = {
@@ -75,6 +77,7 @@ class SettingsController {
                     whatsapp,
                     tiktok
                 },
+                meta_pixel_id,
                 updated_at: new Date().toISOString()
             };
 

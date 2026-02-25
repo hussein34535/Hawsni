@@ -95,6 +95,25 @@
                 </div>
             </div>
 
+            <!-- Marketing & Tracking -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-chart-line"></i> التسويق والتتبع</h2>
+                </div>
+                <div style="padding: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fab fa-facebook-f" style="color: #1877F2;"></i> Meta Pixel ID
+                        </label>
+                        <input type="text" name="meta_pixel_id" class="form-control"
+                            value="<%= settings.meta_pixel_id || '' %>" placeholder="مثال: 123456789012345">
+                        <small style="color: #666; margin-top: 0.5rem; display: block;">
+                            تستخدم Meta Pixel لتتبع التحويلات وتحسين الحملات الإعلانية على فيسبوك وإنستجرام.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
             <div style="display: flex; justify-content: flex-end;">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> حفظ الإعدادات

@@ -56,6 +56,7 @@ export const viewport: Viewport = {
 import Navbar from "@/components/layout/Navbar";
 import BottomNav from "@/components/layout/BottomNav";
 import ToastContainer from "@/components/layout/ToastContainer";
+import FacebookPixel from "@/components/analytics/FacebookPixel";
 import { LanguageProvider } from "@/context/LanguageContext";
 
 export default function RootLayout({
@@ -73,6 +74,7 @@ export default function RootLayout({
           </main>
           <BottomNav />
           <ToastContainer />
+          <FacebookPixel />
         </LanguageProvider>
       </body>
     </html>

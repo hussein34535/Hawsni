@@ -13,6 +13,16 @@ const scraperController = require('../controllers/admin/scraperController');
 const ProductController = require('../controllers/api/productController');
 const shippingController = require('../controllers/admin/shippingController');
 const settingsController = require('../controllers/admin/settingsController');
+const adminAuthController = require('../controllers/admin/adminAuthController');
+const { adminProtect } = require('../middleware/adminAuth');
+
+// Auth Routes (Public for Admin)
+router.get('/admin/login', adminAuthController.renderLogin);
+router.post('/admin/login', adminAuthController.login);
+router.get('/admin/logout', adminAuthController.logout);
+
+// Apply protection to all following routes
+router.use(adminProtect);
 
 // Dashboard
 router.get('/dashboard', dashboardController.getDashboard);

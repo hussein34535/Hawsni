@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const cookies = require('cookie-parser');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const supabase = require('./config/supabase');
 const upload = require('./middleware/upload');
 const methodOverride = require('method-override');
@@ -24,12 +27,31 @@ const seoRoutes = require('./routes/seo');
 const vtoRoutes = require('./routes/vto');
 const adminRoutes = require('./routes/admin');
 const shippingRoutes = require('./routes/shipping');
+const publicSettingsRoutes = require('./routes/publicSettings');
 const seoMiddleware = require('./middleware/seoMiddleware');
 
 const app = express();
 
 // SEO Middleware for bot/crawler interception
 app.use(seoMiddleware);
+app.use(cookies());
+
+// Security Middlewares
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabled for SSR/EJS compatibility, can be tuned later
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please try again later.' }
+});
+
+// Apply rate limiter to all api routes
+app.use('/api/', limiter);
 
 // View engine setup
 app.set('view engine', 'ejs');
@@ -49,7 +71,7 @@ const corsOptions = {
     'https://www.hawsni.com',
     'https://hwasi.com',
     'https://www.hwasi.com'
-  ],
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -60,25 +82,26 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API Routes
+// General API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/coupons', couponRoutes);
-app.use('/api/banners', bannerRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/vto', vtoRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/shipping', shippingRoutes);
+app.use('/api/banners', bannerRoutes);
+app.use('/api/vto', vtoRoutes);
+app.use('/api/settings', publicSettingsRoutes);
 
 // SEO Routes (served at root)
 app.use('/', seoRoutes);
 
-// Admin Routes
+// Admin / Dashboard Routes
+app.use('/api/admin', adminRoutes);
 app.use('/', adminRoutes);
 
 // Root redirect

@@ -2,8 +2,8 @@ const fetch = require('node-fetch');
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_URL = 'https://api.resend.com/emails';
-const SENDER = 'Hawsni <noreply@hwasi.com>';
-const ADMIN_EMAIL = 'hussona4635@gmail.com';
+const SENDER = process.env.SENDER_EMAIL || 'Hawsni <noreply@hwasi.com>';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hussona4635@gmail.com';
 
 /**
  * Low-level Resend send helper.
