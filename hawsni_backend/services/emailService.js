@@ -2,7 +2,8 @@ const fetch = require('node-fetch');
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_URL = 'https://api.resend.com/emails';
-const SENDER = 'Hawsni <noreply@hwasi.com>';
+// Fallback to Resend's default onboarding email since hwasi.com is unverified
+const SENDER = 'Hawsni <onboarding@resend.dev>';
 const ADMIN_EMAIL = 'hussona4635@gmail.com';
 
 /**
@@ -10,6 +11,16 @@ const ADMIN_EMAIL = 'hussona4635@gmail.com';
  * @param {Object} opts – { to, subject, htmlContent }
  */
 async function _send({ to, subject, htmlContent }) {
+    // Sanitize the 'to' email: remove spaces and non-ASCII characters that cause 422 Error
+    const sanitizedTo = typeof to === 'string'
+        ? to.replace(/[^\x00-\x7F]/g, "").replace(/\s/g, "")
+        : to;
+
+    if (!sanitizedTo) {
+        console.error('❌ Resend email error: Invalid or empty email address provided');
+        return null;
+    }
+
     const res = await fetch(RESEND_URL, {
         method: 'POST',
         headers: {
@@ -18,7 +29,7 @@ async function _send({ to, subject, htmlContent }) {
         },
         body: JSON.stringify({
             from: SENDER,
-            to: [to],
+            to: [sanitizedTo],
             subject,
             html: htmlContent,
         }),
@@ -31,7 +42,7 @@ async function _send({ to, subject, htmlContent }) {
     }
 
     const data = await res.json();
-    console.log(`✅ Email sent to ${to} — id: ${data.id}`);
+    console.log(`✅ Email sent to ${sanitizedTo} — id: ${data.id}`);
     return data;
 }
 
