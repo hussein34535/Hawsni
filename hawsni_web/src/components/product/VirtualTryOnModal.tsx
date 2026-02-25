@@ -30,21 +30,47 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
         };
     }, []);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const compressImage = (file: File, maxDimension = 1024, quality = 0.7): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const img = new window.Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                let { width, height } = img;
+                if (width > maxDimension || height > maxDimension) {
+                    const ratio = Math.min(maxDimension / width, maxDimension / height);
+                    width = Math.round(width * ratio);
+                    height = Math.round(height * ratio);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) { reject('Canvas not supported'); return; }
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.onerror = () => reject('Failed to load image');
+            img.src = url;
+        });
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             if (file.size > 10 * 1024 * 1024) {
                 setErrorMessage(isRTL ? 'الصورة كبيرة جداً، يرجى اختيار صورة أقل من 10 ميجا' : 'Image too large, please select under 10MB');
                 return;
             }
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setUserImage(event.target?.result as string);
+            try {
+                const compressed = await compressImage(file);
+                setUserImage(compressed);
                 setStatus('idle');
                 setResultImageUrl(null);
                 setErrorMessage('');
-            };
-            reader.readAsDataURL(file);
+            } catch {
+                setErrorMessage(isRTL ? 'فشل تحميل الصورة' : 'Failed to load image');
+            }
         }
     };
 
@@ -125,18 +151,31 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                         <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center min-h-[400px]">
                             {status === 'idle' && !userImage ? (
                                 <div className="text-center space-y-8 w-full">
-                                    {/* Steps logic like Flutter */}
                                     <div className="grid grid-cols-3 gap-4 mb-8">
-                                        {[1, 2, 3].map((step) => (
-                                            <div key={step} className="flex flex-col items-center gap-2">
-                                                <div className="w-12 h-12 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center">
-                                                    <img src={`/images/vto_step_${step}.png`} alt={`Step ${step}`} className="w-8 h-8 object-contain" />
-                                                </div>
-                                                <span className="text-[10px] font-bold text-gray-400 font-cairo">
-                                                    {(t.product as any)[`vto_step${step}`]}
-                                                </span>
+                                        <div className="flex flex-col items-center gap-2 text-center">
+                                            <div className="w-12 h-12 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-center text-[#0E4435]">
+                                                <Camera size={22} className="opacity-80" />
                                             </div>
-                                        ))}
+                                            <span className="text-[10px] font-bold text-gray-400 font-cairo">
+                                                {isRTL ? 'التقط صورة' : 'Take a photo'}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-2 text-center">
+                                            <div className="w-12 h-12 bg-blue-50 rounded-xl border border-blue-100 flex items-center justify-center text-blue-600">
+                                                <Sparkles size={22} className="opacity-80" />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-gray-400 font-cairo">
+                                                {isRTL ? 'الذكاء الاصطناعي يخلق صورتك' : 'AI Processing'}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-2 text-center">
+                                            <div className="w-12 h-12 bg-purple-50 rounded-xl border border-purple-100 flex items-center justify-center text-purple-600">
+                                                <ImageIcon size={22} className="opacity-80" />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-gray-400 font-cairo">
+                                                {isRTL ? 'تخيل مظهرك' : 'See results'}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <button
@@ -161,11 +200,13 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImageUrl, pr
                                         />
                                     </AnimatePresence>
 
-                                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-6 text-center">
-                                        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
-                                        <Sparkles className="text-purple-400 mb-2 animate-pulse size-5" />
-                                        <p className="font-black text-base font-cairo">{t.product?.vto_processing}</p>
-                                    </div>
+                                    {(status === 'uploading' || status === 'processing') && (
+                                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-6 text-center">
+                                            <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
+                                            <Sparkles className="text-purple-400 mb-2 animate-pulse size-5" />
+                                            <p className="font-black text-base font-cairo">{t.product?.vto_processing}</p>
+                                        </div>
+                                    )}
 
                                     {status === 'failed' && (
                                         <div className="absolute inset-0 bg-red-500/10 backdrop-blur-sm flex flex-col items-center justify-center text-red-600 p-6 text-center">
