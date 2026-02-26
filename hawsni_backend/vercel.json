@@ -7,7 +7,9 @@
             "config": {
                 "includeFiles": [
                     "views/**",
-                    "public/**"
+                    "public/css/**",
+                    "public/js/**",
+                    "public/robots.txt"
                 ]
             }
         }

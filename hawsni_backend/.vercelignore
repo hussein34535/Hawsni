@@ -1,0 +1,2 @@
+# Ignore uploaded files (they live in Cloudinary, not in the serverless function)
+public/uploads/
