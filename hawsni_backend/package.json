@@ -19,8 +19,6 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.81.1",
     "bcryptjs": "^2.4.3",
-    "blurhash": "^2.0.5",
-    "canvas": "^3.2.1",
     "cheerio": "^1.2.0",
     "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
@@ -33,7 +31,6 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "method-override": "^3.0.0",
-    "mongoose": "^8.0.0",
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^2.7.0",
     "pg": "^8.16.3",
