@@ -153,14 +153,17 @@ class AuthService {
 
     async login(email, password) {
         // 1. Sign in with Supabase
+        console.log(`[API LOGIN] Attempting login for: ${email}`);
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password
         });
 
         if (error) {
+            console.error(`[API LOGIN ERROR] Failed for ${email}: ${error.message} | Status: ${error.status}`);
             throw new Error('Invalid credentials');
         }
+        console.log(`[API LOGIN SUCCESS] Logged in as: ${data.user.id} (${data.user.email})`);
 
         const user = data.user;
         const session = data.session;
