@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase');
+const { supabaseAuth } = require('../config/supabase');
 const jwt = require('jsonwebtoken');
 const emailService = require('./emailService');
 const OrderService = require('./orderService');
@@ -154,7 +155,7 @@ class AuthService {
     async login(email, password) {
         // 1. Sign in with Supabase
         console.log(`[API LOGIN] Attempting login for: ${email}`);
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabaseAuth.auth.signInWithPassword({
             email,
             password
         });
@@ -279,7 +280,7 @@ class AuthService {
         }
 
         // 2. Verify old password by attempting to sign in
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabaseAuth.auth.signInWithPassword({
             email: user.email,
             password: oldPassword
         });

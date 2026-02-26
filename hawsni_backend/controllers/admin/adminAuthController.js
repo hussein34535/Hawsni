@@ -1,4 +1,5 @@
 const supabase = require('../../config/supabase');
+const { supabaseAuth } = require('../../config/supabase');
 
 class AdminAuthController {
     // Show login page
@@ -16,7 +17,7 @@ class AdminAuthController {
             console.log(`[ADMIN LOGIN] Attempting login for: ${email}`);
 
             // 1. Sign in with Supabase
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabaseAuth.auth.signInWithPassword({
                 email,
                 password
             });

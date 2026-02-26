@@ -12,8 +12,7 @@ if (!supabaseUrl || !supabaseKey) {
   console.error('Please add SUPABASE_URL and SUPABASE_ANON_KEY');
 }
 
-// Use service role key for admin operations (bypasses RLS)
-// Explicitly pass node-fetch to avoid Node 18+ native fetch issues with IPv6
+// Service Role client — for admin ops (bypasses RLS, updateUserById, etc.)
 const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseKey, {
   auth: {
     persistSession: false,
@@ -24,4 +23,16 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseKey, {
   },
 });
 
+// Anon Key client — for user authentication (signInWithPassword)
+const supabaseAuth = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+  global: {
+    fetch: fetch,
+  },
+});
+
 module.exports = supabase;
+module.exports.supabaseAuth = supabaseAuth;
