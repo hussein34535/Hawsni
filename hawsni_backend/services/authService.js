@@ -127,6 +127,9 @@ class AuthService {
             })
             .eq('id', user.id);
 
+        // Also confirm email in Supabase Auth (so signInWithPassword works)
+        await supabase.auth.admin.updateUserById(user.id, { email_confirm: true });
+
         if (updateError) {
             throw new Error('Failed to verify user');
         }
