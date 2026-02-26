@@ -29,11 +29,17 @@ class AdminAuthController {
             // 2. Check if user is Admin in profiles table
             const { data: profile, error: profileError } = await supabase
                 .from('users')
-                .select('role')
+                .select('role, email')
                 .eq('id', user.id)
                 .single();
 
+            console.log('--- Admin Login Attempt ---');
+            console.log('User ID:', user.id);
+            console.log('Profile found:', profile);
+            console.log('Profile error:', profileError);
+
             if (profileError || !profile || profile.role !== 'admin') {
+                console.warn(`Access denied for user ${user.email}. Role: ${profile?.role}`);
                 return res.render('admin-login', { error: 'عذراً، ليس لديك صلاحيات المسؤول.' });
             }
 
