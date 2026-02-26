@@ -13,6 +13,7 @@ class AdminAuthController {
     async login(req, res) {
         try {
             const { email, password } = req.body;
+            console.log(`[ADMIN LOGIN] Attempting login for: ${email}`);
 
             // 1. Sign in with Supabase
             const { data, error } = await supabase.auth.signInWithPassword({
@@ -21,6 +22,7 @@ class AdminAuthController {
             });
 
             if (error) {
+                console.error(`[ADMIN LOGIN ERROR] Invalid credentials for ${email}: ${error.message}`);
                 return res.render('admin-login', { error: 'بيانات الدخول غير صحيحة.' });
             }
 

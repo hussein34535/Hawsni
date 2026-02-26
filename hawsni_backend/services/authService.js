@@ -241,14 +241,18 @@ class AuthService {
         }
 
         // 3. Update password in Supabase Auth
-        const { error: updateError } = await supabase.auth.admin.updateUserById(
+        console.log(`[RESET] Attempting to update password for UserID: ${user.id} (${user.email})`);
+        const { data: authUpdate, error: updateError } = await supabase.auth.admin.updateUserById(
             user.id,
             { password: newPassword }
         );
 
         if (updateError) {
+            console.error(`[RESET ERROR] Failed to update Auth password: ${updateError.message}`);
             throw new Error(updateError.message);
         }
+
+        console.log(`[RESET SUCCESS] Auth password updated for ${user.email}`);
 
         // 4. Clear reset code
         await supabase
