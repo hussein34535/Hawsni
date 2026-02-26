@@ -49,13 +49,19 @@ class ProductController {
     async createProduct(req, res) {
         try {
             let imageUrls = [];
-            let blurHashes = [];
 
-            if (req.files && req.files.length > 0) {
+            // Priority 1: Direct URLs from Cloudinary (Direct Upload)
+            if (req.body.image_urls) {
+                const urls = typeof req.body.image_urls === 'string'
+                    ? JSON.parse(req.body.image_urls)
+                    : req.body.image_urls;
+                imageUrls = Array.isArray(urls) ? urls : [urls];
+            }
+            // Priority 2: Traditional file upload via Multer (fallback)
+            else if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                 const results = await Promise.all(uploadPromises);
                 imageUrls = results.map(r => r.url);
-                blurHashes = results.map(r => r.blurHash).filter(Boolean);
             }
 
             let sizes = [];
@@ -107,8 +113,7 @@ class ProductController {
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
                 sizes: sizes,
                 colors: colors,
-                images: imageUrls,
-                blur_hash: blurHashes.length > 0 ? blurHashes[0] : null
+                images: imageUrls
             };
 
             const product = await ProductService.createProduct(productData);
@@ -130,18 +135,21 @@ class ProductController {
             }
 
             let imageUrls = currentProduct.images || [];
-            let currentBlurHash = currentProduct.blur_hash;
 
-            if (req.files && req.files.length > 0) {
+            // Priority 1: Direct URLs from Cloudinary (Direct Upload)
+            if (req.body.image_urls) {
+                const urls = typeof req.body.image_urls === 'string'
+                    ? JSON.parse(req.body.image_urls)
+                    : req.body.image_urls;
+                const newUrls = Array.isArray(urls) ? urls : [urls];
+                imageUrls = [...imageUrls, ...newUrls];
+            }
+            // Priority 2: Traditional file upload via Multer (fallback)
+            else if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                 const results = await Promise.all(uploadPromises);
-
                 const newImageUrls = results.map(r => r.url);
                 imageUrls = [...imageUrls, ...newImageUrls];
-
-                if (results[0] && results[0].blurHash && !currentBlurHash) {
-                    currentBlurHash = results[0].blurHash;
-                }
             }
 
             let sizes = [];
@@ -165,8 +173,7 @@ class ProductController {
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
                 sizes: sizes,
                 colors: colors,
-                images: imageUrls,
-                blur_hash: currentBlurHash
+                images: imageUrls
             };
 
             const product = await ProductService.updateProduct(req.params.id, productData);
@@ -222,15 +229,22 @@ class ProductController {
             console.log('📦 CreateProductAdmin Called. Files:', req.files ? req.files.length : 'No files');
 
             let imageUrls = [];
-            let mainBlurHash = null;
-            if (req.files && req.files.length > 0) {
+
+            // Priority 1: Direct URLs from Cloudinary
+            if (req.body.image_urls) {
+                const urls = typeof req.body.image_urls === 'string'
+                    ? JSON.parse(req.body.image_urls)
+                    : req.body.image_urls;
+                imageUrls = Array.isArray(urls) ? urls : [urls];
+                console.log('✅ Direct upload URLs received:', imageUrls);
+            }
+            // Priority 2: Traditional Multer upload (fallback)
+            else if (req.files && req.files.length > 0) {
                 try {
                     const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                     const results = await Promise.all(uploadPromises);
                     imageUrls = results.map(r => r.url);
-                    const blurHashes = results.map(r => r.blurHash).filter(Boolean);
-                    if (blurHashes.length > 0) mainBlurHash = blurHashes[0];
-                    console.log('✅ All images uploaded via Cloudinary:', imageUrls, 'BlurHash:', mainBlurHash);
+                    console.log('✅ All images uploaded via Cloudinary:', imageUrls);
                 } catch (imgError) {
                     console.error('❌ Error uploading images to Cloudinary:', imgError);
                     return res.status(500).send(`خطأ في رفع الصور: ${imgError.message}`);
@@ -283,8 +297,7 @@ class ProductController {
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls,
-                size_guide: size_guide || '',
-                blur_hash: mainBlurHash
+                size_guide: size_guide || ''
             });
 
             if (error) {

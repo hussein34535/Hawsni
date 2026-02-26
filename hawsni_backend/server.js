@@ -29,6 +29,7 @@ const adminRoutes = require('./routes/admin');
 const shippingRoutes = require('./routes/shipping');
 const publicSettingsRoutes = require('./routes/publicSettings');
 const seoMiddleware = require('./middleware/seoMiddleware');
+const cloudinaryRoutes = require('./routes/cloudinary');
 
 const app = express();
 
@@ -99,6 +100,7 @@ app.use('/api/shipping', shippingRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/vto', vtoRoutes);
 app.use('/api/settings', publicSettingsRoutes);
+app.use('/api/cloudinary', cloudinaryRoutes);
 
 // SEO Routes (served at root)
 app.use('/', seoRoutes);
