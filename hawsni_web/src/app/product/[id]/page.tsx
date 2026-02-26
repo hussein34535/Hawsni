@@ -157,22 +157,21 @@ export default function ProductPage() {
         if (productId) fetchProduct();
     }, [productId]);
 
+    // Safe images array (null-safe)
+    const safeImages = Array.isArray(product?.images) ? product.images : [];
+
     // Swipable Gallery Logic
     const dragX = useMotionValue(0);
     const onDragEnd = () => {
         const x = dragX.get();
-        const imagesCount = product?.images?.length || 1;
+        const imagesCount = safeImages.length || 1;
 
-        // Logical RTL Swipe: 
-        // Swipe Left (x < 0) -> Show image on the left (Next image in sequence: v + 1)
-        // Swipe Right (x > 0) -> Show image on the right (Previous image in sequence: v - 1)
         if (x <= -50 && selectedImage < imagesCount - 1) {
             setSelectedImage((v) => v + 1);
         } else if (x >= 50 && selectedImage > 0) {
             setSelectedImage((v) => v - 1);
         }
 
-        // Reset dragX to center the image
         dragX.set(0);
     };
 
@@ -188,7 +187,7 @@ export default function ProductPage() {
             productId: product._id,
             name: product.name,
             price: product.price,
-            imageUrl: product.images[0],
+            imageUrl: safeImages[0] || '',
             quantity: quantity,
             size: selectedSize,
             color: selectedColor || undefined
@@ -276,7 +275,7 @@ export default function ProductPage() {
                             }}
                             className="w-full h-full flex"
                         >
-                            {product.images.map((img, i) => (
+                            {safeImages.map((img, i) => (
                                 <div key={`img-${i}`} className="min-w-full h-full relative">
                                     <Image
                                         src={formatImageUrl(img)}
@@ -291,18 +290,20 @@ export default function ProductPage() {
                         </motion.div>
 
                         {/* Custom Dots Pagination - Smaller and more subtle */}
-                        <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/5`} dir="ltr">
-                            <span className="text-[9px] text-white/60 font-bold mr-1.5 tracking-tighter">
-                                {selectedImage + 1} / {product.images.length}
-                            </span>
-                            {product.images.map((_, i) => (
-                                <button
-                                    key={`dot-${i}`}
-                                    onClick={() => setSelectedImage(i)}
-                                    className={`h-1 rounded-full transition-all duration-500 ${i === selectedImage ? 'w-3 bg-white/80' : 'w-1 bg-white/20 hover:bg-white/40'}`}
-                                />
-                            ))}
-                        </div>
+                        {safeImages.length > 1 && (
+                            <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/5`} dir="ltr">
+                                <span className="text-[9px] text-white/60 font-bold mr-1.5 tracking-tighter">
+                                    {selectedImage + 1} / {safeImages.length}
+                                </span>
+                                {safeImages.map((_, i) => (
+                                    <button
+                                        key={`dot-${i}`}
+                                        onClick={() => setSelectedImage(i)}
+                                        className={`h-1 rounded-full transition-all duration-500 ${i === selectedImage ? 'w-3 bg-white/80' : 'w-1 bg-white/20 hover:bg-white/40'}`}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Right: Info Section */}
@@ -545,7 +546,7 @@ export default function ProductPage() {
                 isOpen={isVTOOpen}
                 onClose={() => setIsVTOOpen(false)}
                 productImages={parseColors(product.colors)
-                    .map(c => (c.imageIndex !== undefined && c.imageIndex !== null) ? product.images[c.imageIndex] : null)
+                    .map(c => (c.imageIndex !== undefined && c.imageIndex !== null) ? safeImages[c.imageIndex] : null)
                     .filter((img): img is string => !!img)}
                 productId={productId}
             />

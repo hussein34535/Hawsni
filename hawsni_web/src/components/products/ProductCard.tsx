@@ -13,7 +13,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
     const _id = product._id || (product as any).id;
-    const { name, price, images, colors = [] } = product;
+    const { name, price, images = [], colors = [] } = product;
     const formatImageUrl = (url: string) => {
         if (!url) return '';
         if (url.startsWith('http')) return url;
@@ -87,7 +87,8 @@ export default function ProductCard({ product }: ProductCardProps) {
         });
     };
 
-    const imageUrl = formatImageUrl(images[0]);
+    const safeImages = Array.isArray(images) ? images : [];
+    const imageUrl = safeImages.length > 0 ? formatImageUrl(safeImages[0]) : '';
     const [selectedImage, setSelectedImage] = useState(imageUrl);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
