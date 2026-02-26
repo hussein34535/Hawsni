@@ -1,4 +1,5 @@
 const supabase = require('../../config/supabase');
+const { uploadToSupabase } = require('../../utils/fileUpload');
 
 class BannersController {
     // List all banners
@@ -33,28 +34,14 @@ class BannersController {
             } = req.body;
             let finalImageUrl = image_url;
 
-            // If file was uploaded, upload to Supabase Storage
-            if (req.file) {
-                const fileName = `banner-${Date.now()}-${req.file.originalname}`;
-
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('banners')
-                    .upload(fileName, req.file.buffer, {
-                        contentType: req.file.mimetype,
-                        cacheControl: '3600'
-                    });
-
-                if (uploadError) {
-                    console.error('Upload error:', uploadError);
-                    throw uploadError;
-                }
-
-                // Get public URL
-                const { data: { publicUrl } } = supabase.storage
-                    .from('banners')
-                    .getPublicUrl(fileName);
-
-                finalImageUrl = publicUrl;
+            // Priority 1: Direct Upload URL from Cloudinary
+            if (req.body.banner_image_url && req.body.banner_image_url.trim()) {
+                finalImageUrl = req.body.banner_image_url.trim();
+            }
+            // Priority 2: File upload via Multer (fallback - uploads to Cloudinary)
+            else if (req.file) {
+                const result = await uploadToSupabase(req.file, 'banners');
+                finalImageUrl = result.url;
             }
 
             // Validate we have an image URL
@@ -133,28 +120,14 @@ class BannersController {
             } = req.body;
             let finalImageUrl = image_url;
 
-            // If file was uploaded, upload to Supabase Storage
-            if (req.file) {
-                const fileName = `banner-${Date.now()}-${req.file.originalname}`;
-
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('banners')
-                    .upload(fileName, req.file.buffer, {
-                        contentType: req.file.mimetype,
-                        cacheControl: '3600'
-                    });
-
-                if (uploadError) {
-                    console.error('Upload error:', uploadError);
-                    throw uploadError;
-                }
-
-                // Get public URL
-                const { data: { publicUrl } } = supabase.storage
-                    .from('banners')
-                    .getPublicUrl(fileName);
-
-                finalImageUrl = publicUrl;
+            // Priority 1: Direct Upload URL from Cloudinary
+            if (req.body.banner_image_url && req.body.banner_image_url.trim()) {
+                finalImageUrl = req.body.banner_image_url.trim();
+            }
+            // Priority 2: File upload via Multer (fallback - uploads to Cloudinary)
+            else if (req.file) {
+                const result = await uploadToSupabase(req.file, 'banners');
+                finalImageUrl = result.url;
             }
 
             // Validate we have an image URL

@@ -118,7 +118,7 @@
         </div>
 
         <form action="/products<%= product ? '/' + product.id : '' %>" method="POST" enctype="multipart/form-data"
-            onsubmit="return validateForm('productForm')" id="productForm">
+            onsubmit="return handleProductSubmit(event)" id="productForm">
 
             <% if (product) { %>
                 <input type="hidden" name="_method" value="PUT">
@@ -251,8 +251,8 @@
                             <input type="file" id="imageAdder" multiple accept="image/*" style="display: none;"
                                 onchange="handleFileSelect(this)">
 
-                            <!-- Used for SUBMITTING files in the form -->
-                            <input type="file" name="images" id="mainFileInput" multiple style="display: none;">
+                            <!-- Direct Upload URLs (sent to server instead of files) -->
+                            <input type="hidden" name="image_urls" id="directUploadUrls">
 
                             <div class="form-group">
                                 <label class="form-label">الصور (سحب وإفلات لترتيب الصور)</label>
@@ -493,32 +493,85 @@
         }
 
         function updateInputs() {
-            // A. File Input
-            const dataTransfer = new DataTransfer();
-            imageState.forEach(img => {
-                if (img.type === 'file' && img.file) {
-                    dataTransfer.items.add(img.file);
-                }
-            });
-            document.getElementById('mainFileInput').files = dataTransfer.files;
-
-            // B. JSON Input (Scraped + Existing sorted?)
-            // We generally only send scraped URLs in this input. 
-            // Existing images are on server. If we reorder existing images, we might need a separate "reorder" logic
-            // OR we just send ALL URLs back if the backend supports receiving "existing URLs" to rebuild the list.
-            // Assuming for now we just send scraped URLs.
-            // LIMITATION: Reordering existing images might not persist if backend relies on specific update logic.
-            // BUT: If the main use case is "New Product", all URLs are "Scraped" (new).
+            // A. Scraped URLs
             const scrapedUrls = imageState
-                .filter(img => img.type === 'scraped') // Only scraped for this input
+                .filter(img => img.type === 'scraped')
                 .map(img => img.url);
             document.getElementById('scrapedImagesInput').value = JSON.stringify(scrapedUrls);
 
-            // C. Retained Existing Images
+            // B. Retained Existing Images
             const retainedUrls = imageState
                 .filter(img => img.type === 'existing')
                 .map(img => img.url);
             document.getElementById('retainedImagesInput').value = JSON.stringify(retainedUrls);
+        }
+
+        // === Direct Cloudinary Upload on Submit ===
+        async function handleProductSubmit(e) {
+            e.preventDefault();
+            if (!validateForm('productForm')) return false;
+
+            const form = document.getElementById('productForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع الصور...';
+
+            try {
+                // 1. Get files to upload
+                const filesToUpload = imageState.filter(img => img.type === 'file' && img.file);
+                const uploadedUrls = [];
+
+                if (filesToUpload.length > 0) {
+                    // 2. Get Cloudinary signature from backend
+                    const signRes = await fetch('/api/cloudinary/sign?folder=products');
+                    const signData = await signRes.json();
+
+                    // 3. Upload each file directly to Cloudinary
+                    for (let i = 0; i < filesToUpload.length; i++) {
+                        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> رفع صورة ${i + 1}/${filesToUpload.length}...`;
+
+                        const formData = new FormData();
+                        formData.append('file', filesToUpload[i].file);
+                        formData.append('api_key', signData.api_key);
+                        formData.append('timestamp', signData.timestamp);
+                        formData.append('signature', signData.signature);
+                        formData.append('folder', signData.folder);
+                        formData.append('transformation', 'q_auto:good,f_auto,w_1200,c_limit');
+
+                        const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const cloudData = await cloudRes.json();
+                        if (cloudData.secure_url) {
+                            uploadedUrls.push(cloudData.secure_url);
+                        } else {
+                            throw new Error(cloudData.error?.message || 'فشل رفع الصورة');
+                        }
+                    }
+                }
+
+                // 4. Add scraped URLs
+                const scrapedUrls = imageState.filter(img => img.type === 'scraped').map(img => img.url);
+                const allNewUrls = [...uploadedUrls, ...scrapedUrls];
+
+                // 5. Set direct upload URLs in hidden input
+                document.getElementById('directUploadUrls').value = JSON.stringify(allNewUrls);
+
+                // 6. Clear scraped images input (already included in directUploadUrls)
+                document.getElementById('scrapedImagesInput').value = '[]';
+
+                // 7. Submit form normally (without files, only data + URLs)
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                form.submit();
+            } catch (err) {
+                console.error('Upload error:', err);
+                alert('خطأ في رفع الصور: ' + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+            return false;
         }
 
         // === Color Picker Logic (Adapted) ===
