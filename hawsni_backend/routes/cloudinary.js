@@ -21,8 +21,7 @@ router.get('/sign', (req, res) => {
         const signature = cloudinary.utils.api_sign_request(
             {
                 timestamp,
-                folder,
-                transformation: 'q_auto:good,f_auto,w_1200,c_limit'
+                folder
             },
             process.env.CLOUDINARY_SECRET || process.env.CLOUDINARY_API_SECRET
         );

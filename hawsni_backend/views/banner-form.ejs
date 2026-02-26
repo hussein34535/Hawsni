@@ -410,6 +410,47 @@
             updateBlur();
         });
 
+        // === Compress image to max 4MB ===
+        function compressImage(file, maxSizeMB = 4) {
+            return new Promise((resolve) => {
+                const maxSize = maxSizeMB * 1024 * 1024;
+                if (file.size <= maxSize) { resolve(file); return; }
+
+                const img = new window.Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    let w = img.width, h = img.height;
+                    let quality = 0.8;
+
+                    const maxDim = 2000;
+                    if (w > maxDim || h > maxDim) {
+                        const ratio = Math.min(maxDim / w, maxDim / h);
+                        w = Math.round(w * ratio);
+                        h = Math.round(h * ratio);
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+                    (function tryCompress() {
+                        canvas.toBlob((blob) => {
+                            if (blob.size <= maxSize || quality <= 0.3) {
+                                resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                            } else {
+                                quality -= 0.1;
+                                canvas.toBlob((b2) => {
+                                    resolve(new File([b2], file.name, { type: 'image/jpeg' }));
+                                }, 'image/jpeg', quality);
+                            }
+                        }, 'image/jpeg', quality);
+                    })();
+                };
+                img.src = url;
+            });
+        }
+
         // === Direct Cloudinary Upload for Banners ===
         async function handleBannerSubmit(e) {
             e.preventDefault();
@@ -425,19 +466,26 @@
 
             if (uploadRadio && uploadRadio.checked && fileInput && fileInput.files.length > 0) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع الصورة...';
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تجهيز الصورة...';
 
                 try {
+                    // Compress if over 4MB
+                    let fileToUpload = fileInput.files[0];
+                    if (fileToUpload.size > 4 * 1024 * 1024) {
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري ضغط الصورة...';
+                        fileToUpload = await compressImage(fileToUpload);
+                    }
+
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع الصورة...';
                     const signRes = await fetch('/api/cloudinary/sign?folder=banners');
                     const signData = await signRes.json();
 
                     const formData = new FormData();
-                    formData.append('file', fileInput.files[0]);
+                    formData.append('file', fileToUpload);
                     formData.append('api_key', signData.api_key);
                     formData.append('timestamp', signData.timestamp);
                     formData.append('signature', signData.signature);
                     formData.append('folder', signData.folder);
-                    formData.append('transformation', 'q_auto:good,f_auto,w_1200,c_limit');
 
                     const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`, {
                         method: 'POST',
