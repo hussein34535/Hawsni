@@ -32,6 +32,9 @@ const seoMiddleware = require('./middleware/seoMiddleware');
 
 const app = express();
 
+// Required for rate limiting on Vercel
+app.set('trust proxy', 1);
+
 // SEO Middleware for bot/crawler interception
 app.use(seoMiddleware);
 app.use(cookies());
