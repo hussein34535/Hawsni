@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'hawsni.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'hwasibackend.vercel.app',
       }
     ],
   },
