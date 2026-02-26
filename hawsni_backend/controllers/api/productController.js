@@ -333,7 +333,7 @@ class ProductController {
             console.log('📦 Raw Sizes:', req.body.sizes);
             console.log('📦 Raw Colors:', req.body.colors);
 
-            const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors, blur_hash').eq('id', req.params.id).single();
+            const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
 
             // Handle Retained Images (deletion/persistence)
             let imageUrls = [];
@@ -346,23 +346,26 @@ class ProductController {
                     imageUrls = [];
                 }
             } else {
-                // Fallback: keep all existing if field missing (shouldn't happen with updated form)
                 imageUrls = currentProduct?.images || [];
             }
 
-            let currentBlurHash = currentProduct?.blur_hash;
-
-            if (req.files && req.files.length > 0) {
+            // Priority 1: Direct URLs from Cloudinary
+            if (req.body.image_urls) {
+                const urls = typeof req.body.image_urls === 'string'
+                    ? JSON.parse(req.body.image_urls)
+                    : req.body.image_urls;
+                const newUrls = Array.isArray(urls) ? urls : [urls];
+                imageUrls = [...imageUrls, ...newUrls];
+                console.log('✅ Direct upload URLs received:', newUrls);
+            }
+            // Priority 2: Traditional Multer upload (fallback)
+            else if (req.files && req.files.length > 0) {
                 try {
                     const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                     const results = await Promise.all(uploadPromises);
                     const newImageUrls = results.map(r => r.url);
                     console.log('✅ New images uploaded:', newImageUrls);
                     imageUrls = [...imageUrls, ...newImageUrls];
-
-                    if (results[0] && results[0].blurHash && (!currentBlurHash || imageUrls.length === newImageUrls.length)) {
-                        currentBlurHash = results[0].blurHash;
-                    }
                 } catch (imgErr) {
                     console.error('❌ Check Cloudinary Error in Update:', imgErr);
                     return res.status(500).send(`خطأ في رفع الصور: ${imgErr.message}`);
@@ -425,8 +428,7 @@ class ProductController {
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls,
-                size_guide: size_guide || '',
-                blur_hash: currentBlurHash
+                size_guide: size_guide || ''
             }).eq('id', req.params.id);
 
             if (updateError) throw updateError;
