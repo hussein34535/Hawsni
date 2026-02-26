@@ -13,7 +13,9 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
     const _id = product._id || (product as any).id;
-    const { name, price, images = [], colors = [] } = product;
+    const { name, price } = product;
+    const images = product.images ?? [];
+    const colors = product.colors ?? [];
     const formatImageUrl = (url: string) => {
         if (!url) return '';
         if (url.startsWith('http')) return url;
