@@ -244,11 +244,11 @@ class AuthService {
             throw new Error('Reset code has expired');
         }
 
-        // 3. Update password in Supabase Auth
+        // 3. Update password in Supabase Auth + confirm email (user proved ownership via code)
         console.log(`[RESET] Attempting to update password for UserID: ${user.id} (${user.email})`);
         const { data: authUpdate, error: updateError } = await supabase.auth.admin.updateUserById(
             user.id,
-            { password: newPassword }
+            { password: newPassword, email_confirm: true }
         );
 
         if (updateError) {
