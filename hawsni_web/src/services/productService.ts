@@ -9,7 +9,10 @@ export const productService = {
                 endpoint += `?category=${categoryId}`;
             }
             const response = await apiClient.get(endpoint);
-            return response.data;
+            return {
+                success: response.data?.success || false,
+                products: Array.isArray(response.data?.products) ? response.data.products : []
+            };
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to load products';
         }

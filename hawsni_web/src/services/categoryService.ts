@@ -15,16 +15,17 @@ export const categoryService = {
     getCategories: async (): Promise<{ success: boolean; categories: Category[] }> => {
         try {
             const response = await apiClient.get('/categories');
-            if (response.data.success) {
+            const cats = response.data?.categories || [];
+            if (response.data?.success && Array.isArray(cats)) {
                 return {
                     ...response.data,
-                    categories: response.data.categories.map((cat: any) => ({
+                    categories: cats.map((cat: any) => ({
                         ...cat,
                         image: formatImageUrl(cat.image)
                     }))
                 };
             }
-            return response.data;
+            return { success: false, categories: [] };
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to load categories';
         }

@@ -32,15 +32,22 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catData, prodData, bannerData] = await Promise.all([
+        const [catData, prodData, bannerData] = await Promise.allSettled([
           categoryService.getCategories(),
           productService.getProducts(),
           apiClient.get('/banners')
         ]);
 
-        setCategories(catData.categories || []);
-        setProducts(prodData.products || []);
-        setBanners(Array.isArray(bannerData.data) ? bannerData.data : (bannerData.data.banners || []));
+        if (catData.status === 'fulfilled') {
+          setCategories(catData.value?.categories || []);
+        }
+        if (prodData.status === 'fulfilled') {
+          setProducts(prodData.value?.products || []);
+        }
+        if (bannerData.status === 'fulfilled') {
+          const bd = bannerData.value?.data;
+          setBanners(Array.isArray(bd) ? bd : (bd?.banners || []));
+        }
       } catch (error) {
         console.error('Failed to fetch home data:', error);
       } finally {
