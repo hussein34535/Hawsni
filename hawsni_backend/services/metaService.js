@@ -1,4 +1,4 @@
-const axios = require('axios');
+const fetch = require('node-fetch');
 const supabase = require('../config/supabase');
 
 class MetaService {
@@ -45,11 +45,17 @@ class MetaService {
                 access_token: this.accessToken
             };
 
-            const response = await axios.post(this.apiUrl, eventData);
-            console.log('✅ Meta CAPI Purchase event sent:', response.data);
-            return response.data;
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            });
+
+            const result = await response.json();
+            console.log('✅ Meta CAPI Purchase event sent:', result);
+            return result;
         } catch (error) {
-            console.error('❌ Meta CAPI Error:', error.response?.data || error.message);
+            console.error('❌ Meta CAPI Error:', error.message);
         }
     }
 
