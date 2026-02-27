@@ -22,7 +22,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.
 const FacebookPixelEvents = () => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const [pixelId, setPixelId] = useState<string | null>(null);
+    // Default to the provided ID
+    const [pixelId, setPixelId] = useState<string | null>('917878230740262');
 
     // 1. Fetch Pixel ID from Backend Settings
     useEffect(() => {
