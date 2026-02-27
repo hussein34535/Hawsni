@@ -57,6 +57,12 @@ class _AppState extends State<App> {
           darkTheme: AppTheme.darkTheme,
           scrollBehavior: WebScrollBehavior(),
           routerConfig: AppRouter.router,
+          builder: (context, child) {
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: child!,
+            );
+          },
         );
       },
     );
