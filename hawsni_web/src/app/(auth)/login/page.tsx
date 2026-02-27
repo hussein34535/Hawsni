@@ -26,6 +26,9 @@ export default function LoginPage() {
             const data = await authService.login(email, password);
             if (data.success) {
                 setUser(data.user, data.token);
+                if (data.refresh_token) {
+                    localStorage.setItem('refresh_token', data.refresh_token);
+                }
                 router.push('/');
             } else {
                 setError(data.message || 'Login failed');

@@ -92,6 +92,20 @@ class AuthController {
             res.status(400).json({ success: false, message: error.message });
         }
     }
+
+    async refresh(req, res) {
+        try {
+            const { refresh_token } = req.body;
+            if (!refresh_token) {
+                return res.status(400).json({ success: false, message: 'Refresh token is required' });
+            }
+            const result = await AuthService.refreshToken(refresh_token);
+            res.json({ success: true, ...result });
+        } catch (error) {
+            console.error('Refresh Token Error:', error);
+            res.status(401).json({ success: false, message: error.message });
+        }
+    }
 }
 
 module.exports = new AuthController();

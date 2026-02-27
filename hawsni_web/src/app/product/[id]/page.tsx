@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, TouchEvent as ReactTouchEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft,
     ArrowRight,
@@ -146,6 +146,11 @@ export default function ProductPage() {
                     if (parsed.length > 0) {
                         setSelectedColor(parsed[0].color);
                     }
+                    // Auto-select size if only one
+                    const sizes = data.product.sizes ?? [];
+                    if (sizes.length === 1) {
+                        setSelectedSize(sizes[0]);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to fetch product:', error);
@@ -160,20 +165,36 @@ export default function ProductPage() {
     // Safe images array (null-safe)
     const safeImages = Array.isArray(product?.images) ? product.images : [];
 
-    // Swipable Gallery Logic
-    const dragX = useMotionValue(0);
-    const onDragEnd = () => {
-        const x = dragX.get();
-        const imagesCount = safeImages.length || 1;
+    // Touch-based image swipe
+    const touchStartX = useRef(0);
+    const touchDeltaX = useRef(0);
+    const galleryRef = useRef<HTMLDivElement>(null);
+    const isSwiping = useRef(false);
 
-        if (x <= -50 && selectedImage < imagesCount - 1) {
-            setSelectedImage((v) => v + 1);
-        } else if (x >= 50 && selectedImage > 0) {
-            setSelectedImage((v) => v - 1);
+    const handleTouchStart = useCallback((e: ReactTouchEvent) => {
+        touchStartX.current = e.touches[0].clientX;
+        touchDeltaX.current = 0;
+        isSwiping.current = true;
+    }, []);
+
+    const handleTouchMove = useCallback((e: ReactTouchEvent) => {
+        if (!isSwiping.current) return;
+        touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+    }, []);
+
+    const handleTouchEnd = useCallback(() => {
+        if (!isSwiping.current) return;
+        isSwiping.current = false;
+        const threshold = 50;
+        const count = safeImages.length || 1;
+
+        if (touchDeltaX.current < -threshold && selectedImage < count - 1) {
+            setSelectedImage(prev => prev + 1);
+        } else if (touchDeltaX.current > threshold && selectedImage > 0) {
+            setSelectedImage(prev => prev - 1);
         }
-
-        dragX.set(0);
-    };
+        touchDeltaX.current = 0;
+    }, [safeImages.length, selectedImage]);
 
     const handleAddToCart = (e: React.MouseEvent) => {
         if (!product) return;
@@ -257,26 +278,20 @@ export default function ProductPage() {
             <main className="max-w-7xl mx-auto pb-40">
                 <div className="grid grid-cols-1 lg:grid-cols-2">
 
-                    {/* Left: Swipable Image Gallery (Smooth Horizontal Slider) */}
-                    <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden lg:rounded-b-[4rem] group">
-                        <motion.div
-                            drag="x"
-                            dragConstraints={{ left: 0, right: 0 }}
-                            style={{ x: dragX }}
-                            onDragEnd={onDragEnd}
-                            animate={{
-                                x: -(selectedImage * 100) + "%"
-                            }}
-                            transition={{
-                                type: 'spring',
-                                damping: 40,
-                                stiffness: 400,
-                                mass: 0.8
-                            }}
-                            className="w-full h-full flex"
+                    {/* Left: Image Gallery with Touch Swipe */}
+                    <div
+                        ref={galleryRef}
+                        className="relative aspect-[4/5] bg-gray-100 overflow-hidden lg:rounded-b-[4rem] group"
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        <div
+                            className="w-full h-full flex transition-transform duration-300 ease-out"
+                            style={{ transform: `translateX(-${selectedImage * 100}%)` }}
                         >
                             {safeImages.map((img, i) => (
-                                <div key={`img-${i}`} className="min-w-full h-full relative">
+                                <div key={`img-${i}`} className="min-w-full h-full relative flex-shrink-0">
                                     <Image
                                         src={formatImageUrl(img)}
                                         alt={`${product.name} - ${i + 1}`}
@@ -287,7 +302,25 @@ export default function ProductPage() {
                                     />
                                 </div>
                             ))}
-                        </motion.div>
+                        </div>
+
+                        {/* Arrow buttons for desktop */}
+                        {safeImages.length > 1 && selectedImage > 0 && (
+                            <button
+                                onClick={() => setSelectedImage(prev => prev - 1)}
+                                className="hidden lg:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 backdrop-blur-md rounded-full items-center justify-center shadow-lg hover:bg-white transition-colors z-10"
+                            >
+                                <ArrowLeft size={18} />
+                            </button>
+                        )}
+                        {safeImages.length > 1 && selectedImage < safeImages.length - 1 && (
+                            <button
+                                onClick={() => setSelectedImage(prev => prev + 1)}
+                                className="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 backdrop-blur-md rounded-full items-center justify-center shadow-lg hover:bg-white transition-colors z-10"
+                            >
+                                <ArrowRight size={18} />
+                            </button>
+                        )}
 
                         {/* Custom Dots Pagination - Smaller and more subtle */}
                         {safeImages.length > 1 && (

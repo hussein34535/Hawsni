@@ -192,6 +192,7 @@ class AuthService {
 
         return {
             token,
+            refresh_token: session.refresh_token,
             user: {
                 id: user.id,
                 name: userName,
@@ -303,6 +304,21 @@ class AuthService {
         }
 
         return { success: true, message: 'Password changed successfully' };
+    }
+
+    async refreshToken(refreshToken) {
+        const { data, error } = await supabaseAuth.auth.refreshSession({
+            refresh_token: refreshToken
+        });
+
+        if (error || !data.session) {
+            throw new Error('Failed to refresh token');
+        }
+
+        return {
+            token: data.session.access_token,
+            refresh_token: data.session.refresh_token
+        };
     }
 }
 

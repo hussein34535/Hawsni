@@ -19,22 +19,31 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, settingsProvider, child) {
-        return MaterialApp.router(
-          title: 'HWASI',
-          locale: Locale(settingsProvider.language),
-          localizationsDelegates: [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          themeMode:
-              settingsProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          scrollBehavior: WebScrollBehavior(),
-          routerConfig: AppRouter.router,
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: MaterialApp.router(
+            title: 'HWASI',
+            locale: Locale(settingsProvider.language),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            themeMode:
+                settingsProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            scrollBehavior: WebScrollBehavior(),
+            routerConfig: AppRouter.router,
+            builder: (context, child) {
+              return Directionality(
+                textDirection: TextDirection.ltr,
+                child: child!,
+              );
+            },
+          ),
         );
       },
     );
