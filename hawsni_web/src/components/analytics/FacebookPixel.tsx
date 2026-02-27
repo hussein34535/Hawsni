@@ -11,6 +11,12 @@ declare global {
     }
 }
 
+export const trackEvent = (eventName: string, options?: any) => {
+    if (typeof window !== "undefined" && window.fbq) {
+        window.fbq("track", eventName, options);
+    }
+};
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
 
 const FacebookPixelEvents = () => {

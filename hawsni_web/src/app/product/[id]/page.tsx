@@ -25,6 +25,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useToastStore } from '@/store/toastStore';
 import { productService } from '@/services/productService';
 import { useLanguage } from '@/context/LanguageContext';
+import { trackEvent } from '@/components/analytics/FacebookPixel';
 import { Product } from '@/types';
 import dynamic from 'next/dynamic';
 
@@ -147,6 +148,15 @@ export default function ProductPage() {
                     if (sizes.length === 1) {
                         setSelectedSize(sizes[0]);
                     }
+
+                    // Track ViewContent
+                    trackEvent('ViewContent', {
+                        content_name: data.product.name,
+                        content_ids: [data.product._id],
+                        content_type: 'product',
+                        value: data.product.price,
+                        currency: 'EGP'
+                    });
                 }
             } catch (error) {
                 console.error('Failed to fetch product:', error);
@@ -213,6 +223,16 @@ export default function ProductPage() {
             quantity: quantity,
             size: selectedSize,
             color: selectedColor || undefined
+        });
+
+        // Track AddToCart
+        trackEvent('AddToCart', {
+            content_name: product.name,
+            content_ids: [product._id],
+            content_type: 'product',
+            value: product.price,
+            currency: 'EGP',
+            num_items: quantity
         });
 
         showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');

@@ -1,5 +1,6 @@
 const supabase = require('../config/supabase');
 const emailService = require('./emailService');
+const metaService = require('./metaService');
 
 class OrderService {
     async getAllOrders() {
@@ -119,6 +120,20 @@ class OrderService {
                 items: order.items || items,
                 shippingAddress: orderData.shipping_address
             }).catch(err => console.error('Admin order notification failed:', err));
+
+            // Track Purchase with Meta Conversions API (CAPI) 📊
+            let shipping = orderData.shipping_address;
+            if (typeof shipping === 'string') {
+                try { shipping = JSON.parse(shipping); } catch (e) { }
+            }
+
+            metaService.trackPurchase(order, {
+                email: customerEmail,
+                phone: shipping?.phone,
+                name: customerName,
+                ip: guestInfo.ipAddress, // Ensure this is passed from controller
+                userAgent: guestInfo.userAgent
+            }).catch(err => console.error('Meta CAPI Purchase tracking failed:', err));
 
         } catch (emailErr) {
             console.error('Failed to handle order emails:', emailErr);

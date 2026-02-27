@@ -56,7 +56,13 @@ class OrderController {
                 status: 'Processing'
             };
 
-            const guestInfo = { guestName, guestEmail, guestPhone };
+            const guestInfo = {
+                guestName,
+                guestEmail,
+                guestPhone,
+                ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+                userAgent: req.headers['user-agent']
+            };
             const order = await OrderService.createOrder(orderData, items, guestInfo);
 
             res.status(201).json({ success: true, order });
