@@ -104,18 +104,23 @@ export default function CheckoutPage() {
     const subtotal = getTotal();
 
     const calculateShipping = () => {
-        if (!shippingSettings) return 50;
+        if (!shippingSettings) return { cost: 50, min: 3, max: 7 };
         const threshold = shippingSettings.free_shipping_threshold || 0;
-        if (threshold > 0 && subtotal >= threshold) return 0;
 
         const govSettings = shippingSettings.governorate_settings || {};
-        if (selectedGov && govSettings[selectedGov]) {
-            return govSettings[selectedGov].cost || 0;
-        }
-        return shippingSettings.delivery_cost || 50;
+        const currentGov = selectedGov && govSettings[selectedGov] ? govSettings[selectedGov] : null;
+
+        const cost = (threshold > 0 && subtotal >= threshold)
+            ? 0
+            : (currentGov ? currentGov.cost : (shippingSettings.delivery_cost || 50));
+
+        const min = currentGov ? currentGov.days_min : (shippingSettings.default_days_min || 3);
+        const max = currentGov ? currentGov.days_max : (shippingSettings.default_days_max || 7);
+
+        return { cost, min, max };
     };
 
-    const shippingFee = calculateShipping();
+    const { cost: shippingFee, min: deliveryMin, max: deliveryMax } = calculateShipping();
     const total = subtotal - couponDiscount + shippingFee;
 
     const handleApplyCoupon = async () => {
@@ -474,9 +479,16 @@ export default function CheckoutPage() {
                             )}
                             <div className="flex justify-between items-center text-gray-400">
                                 <span>{isRTL ? 'الشحن' : 'Shipping'}</span>
-                                <span className="text-gray-900">
-                                    {shippingFee === 0 ? (isRTL ? 'مجاني' : 'Free') : `${shippingFee.toLocaleString()} ${isRTL ? 'ج.م' : 'EGP'}`}
-                                </span>
+                                <div className="text-left">
+                                    <span className="text-gray-900 block">
+                                        {shippingFee === 0 ? (isRTL ? 'مجاني' : 'Free') : `${shippingFee.toLocaleString()} ${isRTL ? 'ج.م' : 'EGP'}`}
+                                    </span>
+                                    {selectedGov && (
+                                        <span className="text-[10px] text-[#0E4435] font-bold">
+                                            {isRTL ? `توصيل خلال ${deliveryMin}-${deliveryMax} أيام` : `Delivery in ${deliveryMin}-${deliveryMax} days`}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                             <div className="pt-6 border-t border-gray-50 mt-6 flex justify-between items-center">
                                 <span className="text-lg font-black text-gray-900">{isRTL ? 'الإجمالي' : 'Total'}</span>
