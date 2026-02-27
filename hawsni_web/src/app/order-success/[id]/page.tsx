@@ -76,7 +76,7 @@ export default function OrderSuccessPage() {
     const maxDays = govSettings?.days_max || shippingSettings?.default_days_max || 5;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] pb-20 font-cairo" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-[#FAFAFA] pb-20 font-cairo" dir="ltr">
             <main className="max-w-2xl mx-auto px-6 pt-12">
 
                 {/* Header Section */}

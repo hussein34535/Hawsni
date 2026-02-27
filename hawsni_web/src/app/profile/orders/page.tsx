@@ -78,7 +78,7 @@ export default function OrdersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg-secondary)] pb-24 text-right font-cairo" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-[var(--color-bg-secondary)] pb-24 text-right font-cairo" dir="ltr">
             {/* AppBar */}
             <header className="sticky top-0 z-50 bg-white border-b border-gray-100 flex items-center px-4 h-14 gap-3">
                 <button onClick={() => router.back()} className={`p-2 ${isRTL ? 'rotate-180' : ''}`}>

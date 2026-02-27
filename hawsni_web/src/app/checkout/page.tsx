@@ -204,7 +204,7 @@ export default function CheckoutPage() {
     if (items.length === 0 && !isProcessing) return null;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] pb-24 text-right font-cairo" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-[#FAFAFA] pb-24 text-right font-cairo" dir="ltr">
             {/* Sticky Header */}
             <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">

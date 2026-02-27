@@ -111,16 +111,14 @@ class OrderService {
                     .catch(err => console.error('Order confirmation email failed:', err));
             }
 
-            // Always send Admin Notification
-            emailService.sendAdminNotification(
-                'New Order Received! 🛒',
-                `
-                <p><strong>Order ID:</strong> #${String(order.id).toUpperCase()}</p>
-                <p><strong>Customer:</strong> ${customerName} (${customerEmail || 'Guest'})</p>
-                <p><strong>Total Amount:</strong> ${order.total || order.total_amount || '—'} EGP</p>
-                <p>Check the admin dashboard for more details.</p>
-                `
-            ).catch(err => console.error('Admin order notification failed:', err));
+            // Always send Ka-Ching Admin Notification 💰
+            emailService.sendNewOrderAdminEmail({
+                order,
+                customerName,
+                customerEmail,
+                items: order.items || items,
+                shippingAddress: orderData.shipping_address
+            }).catch(err => console.error('Admin order notification failed:', err));
 
         } catch (emailErr) {
             console.error('Failed to handle order emails:', emailErr);

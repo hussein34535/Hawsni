@@ -31,7 +31,7 @@ export default function CartPage() {
                 <div className="w-12" /> {/* Placeholder for balance */}
             </div>
 
-            <div className="px-4 pb-[160px] text-right" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="px-4 pb-[160px] text-right" dir="ltr">
                 <div className="max-w-2xl mx-auto flex flex-col gap-3">
                     <AnimatePresence mode="popLayout">
                         {items.length > 0 ? (

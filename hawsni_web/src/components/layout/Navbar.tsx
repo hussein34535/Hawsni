@@ -19,7 +19,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="fixed top-0 w-full bg-white z-50 border-b border-gray-100" dir={isRTL ? 'rtl' : 'ltr'}>
+            <nav className="fixed top-0 w-full bg-white z-50 border-b border-gray-100" dir="ltr">
                 <div className="max-w-7xl mx-auto px-4 py-3">
 
                     {/* --- MOBILE NAVBAR (Matches _buildAppBar from Flutter) --- */}

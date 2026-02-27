@@ -41,7 +41,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     const t = language === 'ar' ? ar : en;
-    const isRTL = false; // Always LTR layout, even for Arabic
+    const isRTL = language === 'ar'; // Used for text/translations only, NOT for layout direction
 
     useEffect(() => {
         document.documentElement.dir = 'ltr'; // Always LTR
@@ -52,7 +52,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     return (
         <LanguageContext.Provider value={{ language, t, setLanguage, isRTL }}>
-            <div className={isRTL ? 'font-arabic' : 'font-sans'}>
+            <div className={language === 'ar' ? 'font-arabic' : 'font-sans'}>
                 {children}
             </div>
         </LanguageContext.Provider>
