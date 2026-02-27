@@ -199,6 +199,11 @@ export default function ProductPage() {
             return;
         }
 
+        if (product.colors && product.colors.length > 0 && !selectedColor) {
+            showToast(isRTL ? 'يرجى اختيار اللون' : 'Please select a color', 'error');
+            return;
+        }
+
         addItem({
             id: `${product._id}_${selectedSize}_${selectedColor || 'default'}`,
             productId: product._id,
@@ -538,7 +543,7 @@ export default function ProductPage() {
                         onClick={isInCart ? () => router.push('/cart') : handleAddToCart}
                         className={`
                             flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
-                            ${!selectedSize
+                            ${(!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
                                 ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
                                 : isInCart
                                     ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'

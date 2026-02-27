@@ -108,7 +108,8 @@ class ProductController {
                 description: req.body.description,
                 price: parseFloat(req.body.price),
                 discount: parseInt(req.body.discount) || 0,
-                category_id: req.body.category_id || null,
+                category_id: null, // Legacy field
+                category_ids: req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []),
                 stock: parseInt(req.body.stock) || 0,
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
                 sizes: sizes,
@@ -168,7 +169,8 @@ class ProductController {
                 description: req.body.description,
                 price: parseFloat(req.body.price),
                 discount: parseInt(req.body.discount) || 0,
-                category_id: req.body.category_id || null,
+                category_id: null, // Legacy field
+                category_ids: req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []),
                 stock: parseInt(req.body.stock) || 0,
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
                 sizes: sizes,
@@ -291,7 +293,8 @@ class ProductController {
                 description,
                 price: parseFloat(price),
                 discount: parseInt(discount) || 0,
-                category_id: category_id || null,
+                // category_id: category_id || null, // Skip legacy field in insert for consistency
+                category_ids: req.body.category_ids || (category_id ? [category_id] : []),
                 stock: parseInt(stock) || 0,
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
@@ -314,8 +317,20 @@ class ProductController {
 
     async renderEditProductPage(req, res) {
         try {
-            const { data: product } = await supabase.from('products').select('*').eq('id', req.params.id).single();
+            const { data: product } = await supabase
+                .from('products')
+                .select('*, product_category_links(category_id)')
+                .eq('id', req.params.id)
+                .single();
             const { data: categories } = await supabase.from('categories').select('*');
+
+            // Map linked categories to a simple array of IDs for easier use in EJS
+            if (product && product.product_category_links) {
+                product.category_ids = product.product_category_links.map(link => link.category_id);
+            } else {
+                product.category_ids = [];
+            }
+
             res.render('product-form', { product, categories: categories || [] });
         } catch (error) {
             console.error('Error rendering edit product form:', error);
@@ -422,7 +437,8 @@ class ProductController {
                 description,
                 price: parseFloat(price),
                 discount: parseInt(discount) || 0,
-                category_id: category_id || null,
+                // category_id: category_id || null, // Skip legacy field in update for consistency
+                category_ids: req.body.category_ids || (category_id ? [category_id] : []),
                 stock: parseInt(stock) || 0,
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,

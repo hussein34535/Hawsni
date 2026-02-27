@@ -141,16 +141,25 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">التصنيف</label>
-                                <select name="category_id" class="form-control">
-                                    <option value="">اختر التصنيف</option>
+                                <label class="form-label">الأقسام (اختر قسماً أو أكثر)</label>
+                                <div
+                                    style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; background: #fff;">
                                     <% categories.forEach(cat=> { %>
-                                        <option value="<%= cat.id %>" <%=product && product.category_id===cat.id
-                                            ? 'selected' : '' %>>
-                                            <%= cat.name %>
-                                        </option>
+                                        <div class="form-check" style="margin-bottom: 5px;">
+                                            <label
+                                                style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                                <input type="checkbox" name="category_ids[]" value="<%= cat.id %>"
+                                                    <%=(product && product.category_ids &&
+                                                    product.category_ids.includes(cat.id)) ? 'checked' : '' %>>
+                                                <span>
+                                                    <%= cat.name %>
+                                                </span>
+                                            </label>
+                                        </div>
                                         <% }) %>
-                                </select>
+                                </div>
+                                <small class="text-muted">يمكنك ربط المنتج بأكثر من قسم ليظهر في نتائج البحث
+                                    المختلفة.</small>
                             </div>
 
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">

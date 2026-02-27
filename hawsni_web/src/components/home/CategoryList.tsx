@@ -44,7 +44,7 @@ export default function CategoryList({ categories, isLoading }: CategoryListProp
                         key={cat._id || (cat as any).id}
                         whileHover={{ y: -5, scale: 1.02 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => router.push(`/search?category=${encodeURIComponent(cat.name)}`)}
+                        onClick={() => router.push(`/search?category=${encodeURIComponent(cat._id || (cat as any).id)}`)}
                         className={`w-[90px] bg-white rounded-2xl flex flex-col items-center justify-center cursor-pointer flex-shrink-0 h-[105px] border border-gray-100 shadow-sm hover:shadow-md transition-all ${isRTL
                             ? (index === 0 ? 'mr-4 ml-3' : 'ml-3')
                             : (index === 0 ? 'ml-4 mr-3' : 'mr-3')

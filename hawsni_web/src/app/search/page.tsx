@@ -27,6 +27,7 @@ function SearchContent() {
     const { t, language, isRTL } = useLanguage();
     const searchParams = useSearchParams();
     const initialQuery = searchParams.get('q') || '';
+    const initialCategory = searchParams.get('category') || null;
 
     const [query, setQuery] = useState(initialQuery);
     const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -37,7 +38,7 @@ function SearchContent() {
 
     // Filter states
     const [categories, setCategories] = useState<Category[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory);
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(5000);
     const [sortBy, setSortBy] = useState('newest');
@@ -45,8 +46,8 @@ function SearchContent() {
     useEffect(() => {
         loadSearchHistory();
         loadCategories();
-        if (initialQuery) {
-            handleSearch(initialQuery);
+        if (initialQuery || initialCategory) {
+            handleSearch(initialQuery, initialCategory);
         }
     }, []);
 
@@ -86,8 +87,8 @@ function SearchContent() {
         }
     };
 
-    const handleSearch = async (term: string = query) => {
-        if (!term.trim() && !selectedCategory) return;
+    const handleSearch = async (term: string = query, catId: string | null = selectedCategory) => {
+        if (!term.trim() && !catId) return;
 
         setIsLoading(true);
         setSuggestions([]);
@@ -100,7 +101,7 @@ function SearchContent() {
                 maxPrice,
                 sortBy
             };
-            if (selectedCategory) params.category = selectedCategory;
+            if (catId) params.category = catId;
 
             const { data } = await axios.get('/products/search', { params });
             setSearchResults(data.products || []);

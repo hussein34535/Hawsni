@@ -4,11 +4,19 @@ class ProductService {
     async getAllProducts(filters = {}, sort = null) {
         let query = supabase
             .from('products')
-            .select('*, categories(name)')
+            .select('*, product_category_links(category_id, categories(name))')
             .eq('is_active', true);
 
         if (filters.category) {
-            query = query.eq('category_id', filters.category);
+            // Find products linked to this category in the join table
+            const { data: linkedProducts, error: linkError } = await supabase
+                .from('product_category_links')
+                .select('product_id')
+                .eq('category_id', filters.category);
+
+            if (linkError) throw linkError;
+            const productIds = linkedProducts.map(lp => lp.product_id);
+            query = query.in('id', productIds);
         }
 
         if (filters.search) {
@@ -36,7 +44,7 @@ class ProductService {
     async getFeaturedProducts(limit = 10) {
         const { data, error } = await supabase
             .from('products')
-            .select('*, categories(name)')
+            .select('*, product_category_links(category_id, categories(name))')
             .eq('is_featured', true)
             .eq('is_active', true)
             .limit(limit);
@@ -48,7 +56,7 @@ class ProductService {
     async getProductById(id) {
         const { data, error } = await supabase
             .from('products')
-            .select('*, categories(name)')
+            .select('*, product_category_links(category_id, categories(name))')
             .eq('id', id)
             .single();
 
@@ -57,26 +65,67 @@ class ProductService {
     }
 
     async createProduct(productData) {
-        const { data, error } = await supabase
+        const { category_ids, ...restOfData } = productData;
+
+        const { data: product, error } = await supabase
             .from('products')
-            .insert(productData)
+            .insert(restOfData)
             .select()
             .single();
 
         if (error) throw error;
-        return data;
+
+        if (category_ids && Array.isArray(category_ids) && category_ids.length > 0) {
+            const links = category_ids.map(catId => ({
+                product_id: product.id,
+                category_id: catId
+            }));
+            const { error: linkError } = await supabase
+                .from('product_category_links')
+                .insert(links);
+
+            if (linkError) throw linkError;
+        }
+
+        return product;
     }
 
     async updateProduct(id, productData) {
-        const { data, error } = await supabase
+        const { category_ids, ...restOfData } = productData;
+
+        const { data: product, error } = await supabase
             .from('products')
-            .update(productData)
+            .update(restOfData)
             .eq('id', id)
             .select()
             .single();
 
         if (error) throw error;
-        return data;
+
+        if (category_ids && Array.isArray(category_ids)) {
+            // Remove old links
+            const { error: deleteError } = await supabase
+                .from('product_category_links')
+                .delete()
+                .eq('product_id', id);
+
+            if (deleteError) throw deleteError;
+
+            // Add new links
+            if (category_ids.length > 0) {
+                const links = category_ids.map(catId => ({
+                    product_id: id,
+                    category_id: catId
+                }));
+                const { error: linkError } = await supabase
+                    .from('product_category_links')
+                    .insert(links);
+
+                if (linkError) throw linkError;
+            }
+        }
+
+        return product;
     }
 
     async deleteProduct(id) {
