@@ -35,6 +35,20 @@ class OrderService {
     }
 
     async createOrder(orderData, items, guestInfo = {}) {
+        // Generate unique 6-digit order number
+        let orderNumber;
+        let isUnique = false;
+        while (!isUnique) {
+            orderNumber = Math.floor(100000 + Math.random() * 900000).toString();
+            const { data: existing } = await supabase
+                .from('orders')
+                .select('id')
+                .eq('order_number', orderNumber)
+                .single();
+            if (!existing) isUnique = true;
+        }
+        orderData.order_number = orderNumber;
+
         // 1. Create Order
         const { data: order, error: orderError } = await supabase
             .from('orders')

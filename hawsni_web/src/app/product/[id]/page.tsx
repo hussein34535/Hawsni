@@ -142,10 +142,6 @@ export default function ProductPage() {
                 const data = await productService.getProductById(productId);
                 if (data.success) {
                     setProduct(data.product);
-                    const parsed = parseColors(data.product.colors);
-                    if (parsed.length > 0) {
-                        setSelectedColor(parsed[0].color);
-                    }
                     // Auto-select size if only one
                     const sizes = data.product.sizes ?? [];
                     if (sizes.length === 1) {
@@ -392,6 +388,8 @@ export default function ProductPage() {
                                                     setSelectedColor(c.color);
                                                     if (c.imageIndex !== undefined && c.imageIndex !== null) {
                                                         setSelectedImage(c.imageIndex);
+                                                        // Scroll to gallery
+                                                        galleryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                                                     }
                                                 }}
                                                 className={`
