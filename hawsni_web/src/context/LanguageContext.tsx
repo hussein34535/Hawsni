@@ -41,12 +41,12 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     const t = language === 'ar' ? ar : en;
-    const isRTL = language === 'ar';
+    const isRTL = false; // Always LTR layout, even for Arabic
 
     useEffect(() => {
-        document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+        document.documentElement.dir = 'ltr'; // Always LTR
         document.documentElement.lang = language;
-    }, [language, isRTL]);
+    }, [language]);
 
     if (!mounted) return null;
 

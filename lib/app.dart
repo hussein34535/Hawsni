@@ -7,27 +7,35 @@ import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/router/app_router.dart';
 
-/// Forces LTR direction even for Arabic locale
-class _LTRWidgetsLocalizations extends DefaultWidgetsLocalizations {
+// ── Force LTR globally ──────────────────────────────────────────
+// Override the WidgetsLocalizations to always return LTR
+// This prevents Flutter from flipping the entire layout for Arabic.
+
+class _ForceLTRWidgetsLocalizations extends DefaultWidgetsLocalizations {
+  const _ForceLTRWidgetsLocalizations();
+
   @override
   TextDirection get textDirection => TextDirection.ltr;
 }
 
-class _LTRWidgetsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  const _LTRWidgetsDelegate();
+class _ForceLTRWidgetsDelegate
+    extends LocalizationsDelegate<WidgetsLocalizations> {
+  const _ForceLTRWidgetsDelegate();
 
   @override
   bool isSupported(Locale locale) => true;
 
   @override
   Future<WidgetsLocalizations> load(Locale locale) async =>
-      _LTRWidgetsLocalizations();
+      const _ForceLTRWidgetsLocalizations();
 
   @override
   bool shouldReload(
           covariant LocalizationsDelegate<WidgetsLocalizations> old) =>
       false;
 }
+
+// ─────────────────────────────────────────────────────────────────
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -46,8 +54,10 @@ class _AppState extends State<App> {
           locale: Locale(settingsProvider.language),
           localizationsDelegates: [
             AppLocalizations.delegate,
+            // IMPORTANT: our LTR delegate MUST come BEFORE the globals
+            // so it wins the resolution for WidgetsLocalizations
+            const _ForceLTRWidgetsDelegate(),
             GlobalMaterialLocalizations.delegate,
-            const _LTRWidgetsDelegate(), // Force LTR layout
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: AppLocalizations.supportedLocales,
@@ -58,6 +68,7 @@ class _AppState extends State<App> {
           scrollBehavior: WebScrollBehavior(),
           routerConfig: AppRouter.router,
           builder: (context, child) {
+            // Belt-and-suspenders: also force the direction in the builder
             return Directionality(
               textDirection: TextDirection.ltr,
               child: child!,
