@@ -59,7 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         Text(
                           state.message,
-                          style: TextStyle(fontFamily: 'Cairo',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
                             color: Colors.black87,
                             fontSize: 16,
                           ),
@@ -127,7 +128,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: [
                                     Text(
                                       'Shop by Category', // If this is translated, it will use Cairo
-                                      style: TextStyle(fontFamily: 'Cairo',
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87,
@@ -278,7 +280,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(fontFamily: 'Cairo',
+                                                style: TextStyle(
+                                                  fontFamily: 'Cairo',
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,
                                                   color: Colors.black87,
@@ -397,8 +400,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Logo/Title - Centered
           Text(
-            'Hawsni',
-            style: TextStyle(fontFamily: 'Cairo',
+            'Hwasi',
+            style: TextStyle(
+              fontFamily: 'Cairo',
               fontSize: 26,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.2,
@@ -463,7 +467,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 12),
                     Text(
                       'Search Products',
-                      style: TextStyle(fontFamily: 'Cairo',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
                         color: Colors.grey[600],
                         fontSize: 15,
                       ),

@@ -163,7 +163,7 @@ function GuestProfileView({ t, toggleLanguage, language, isRTL }: any) {
     return (
         <div className="min-h-screen bg-[var(--color-bg-secondary)] flex flex-col items-center justify-center px-6">
             <div className="w-40 h-40 bg-white rounded-full flex items-center justify-center shadow-[0_15px_40px_rgba(0,0,0,0.06)] mb-8 p-6">
-                <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain" />
+                <img src="/logo.png" alt="Hwasi Logo" className="w-full h-full object-contain" />
             </div>
 
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{t.profile.welcome_guest}</h1>

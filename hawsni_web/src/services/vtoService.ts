@@ -9,7 +9,8 @@ export const vtoService = {
             });
             return response.data;
         } catch (error: any) {
-            throw error.response?.data?.message || 'Failed to start AI Try-On';
+            const detail = error.response?.data?.details || error.response?.data?.error || error.message;
+            throw typeof detail === 'object' ? JSON.stringify(detail) : detail;
         }
     },
 
@@ -18,7 +19,8 @@ export const vtoService = {
             const response = await apiClient.get(`/vto/status/${id}`);
             return response.data;
         } catch (error: any) {
-            throw error.response?.data?.message || 'Failed to check AI status';
+            const detail = error.response?.data?.details || error.response?.data?.error || error.message;
+            throw typeof detail === 'object' ? JSON.stringify(detail) : detail;
         }
     }
 };

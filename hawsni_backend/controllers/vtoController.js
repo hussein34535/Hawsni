@@ -32,7 +32,7 @@ exports.startTryOn = async (req, res) => {
                     garm_img: garment_image,
                     garment_des: description || "clothing",
                     crop: false,
-                    steps: 50,
+                    steps: 30,
                     category: "upper_body"
                 },
             }),
@@ -41,8 +41,14 @@ exports.startTryOn = async (req, res) => {
         const responseBody = await response.json();
 
         if (response.status !== 201) {
-            console.error("Replicate API Error:", response.status, JSON.stringify(responseBody));
-            return res.status(response.status).json({ error: "Failed to start generation", details: responseBody });
+            console.error("Replicate API Error Details:", {
+                status: response.status,
+                body: responseBody
+            });
+            return res.status(response.status).json({
+                error: "Replicate service rejected the request",
+                details: responseBody
+            });
         }
 
         res.json(responseBody);

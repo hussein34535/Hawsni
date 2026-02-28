@@ -28,14 +28,14 @@ export default function Navbar() {
                         <div className="w-10 h-10 flex items-center justify-center">
                             <Link href="/">
                                 <div className="w-10 h-10 flex items-center justify-center">
-                                    <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain" />
+                                    <img src="/logo.png" alt="Hwasi Logo" className="w-full h-full object-contain" />
                                 </div>
                             </Link>
                         </div>
 
                         {/* Centered Title */}
                         <Link href="/" className={`${language === 'ar' ? 'font-arabic' : 'font-black'} text-[26px] font-black text-[var(--color-brand-primary)] tracking-[1.2px]`}>
-                            Hawsni
+                            Hwasi
                         </Link>
 
                         {/* Notification Icon */}
