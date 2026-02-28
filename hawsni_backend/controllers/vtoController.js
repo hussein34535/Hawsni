@@ -18,12 +18,12 @@ exports.startTryOn = async (req, res) => {
         }
 
         // --- Quality Optimization Logic ---
-        // 1. Dynamic Category Detection
+        // 1. Enhanced Dynamic Category & Prompt Logic
         let category = "upper_body";
         const desc = (description || "").toLowerCase();
 
-        const lowerBodyKeywords = ["pants", "trousers", "jeans", "skirt", "shorts", "بنطلون", "جيب"];
-        const fullBodyKeywords = ["dress", "abaya", "kaftan", "onesie", "jumpsuit", "بيجاما", "بيجامة", "سالوبيت", "سلوبيت", "فستان", "عباية"];
+        const lowerBodyKeywords = ["pants", "trousers", "jeans", "skirt", "shorts", "بنطلون", "جيب", "طقم سفلي"];
+        const fullBodyKeywords = ["dress", "abaya", "kaftan", "onesie", "jumpsuit", "بيجاما", "بيجامة", "سالوبيت", "سلوبيت", "فستان", "عباية", "جلباب", "لانجري"];
 
         if (lowerBodyKeywords.some(k => desc.includes(k))) {
             category = "lower_body";
@@ -31,10 +31,22 @@ exports.startTryOn = async (req, res) => {
             category = "dresses";
         }
 
-        // 2. Comprehensive Negative Prompt
-        const negativePrompt = "low quality, bad anatomy, distorted, deformed, unrelated objects, bare limbs where garment should be, missing sleeves, messy background, extra limbs, fingers disfigured, text, font, branding, logos, watermark, letters, signature, graphics on chest";
+        // 2. Specialized Prompt Engineering
+        let refinedPrompt = (description || "fashionable clothing");
 
-        console.log(`VTO Request: category=${category}, desc=${description || 'none'}`);
+        // Add specific details for character items/onesies
+        if (desc.includes("stitch") || desc.includes("onesie")) {
+            refinedPrompt += ", full body blue character onesie jumpsuit, long sleeves, soft plush fabric, detailed stitch character hood, complete outfit";
+        } else if (desc.includes("hoodie") || desc.includes("سويت شيرت")) {
+            refinedPrompt += ", premium heavy cotton hoodie, long sleeves, ribbed cuffs";
+        }
+
+        refinedPrompt += ", high quality, highly detailed fabric, realistic textures, 8k resolution, cinematic lighting";
+
+        // 3. Ultra-Strong Negative Prompt to eliminate hallucinations & bare arms
+        const negativePrompt = "low quality, bad anatomy, distorted, deformed, unrelated objects, bare limbs where garment should be, missing sleeves, short sleeves on long sleeve items, messy background, extra limbs, fingers disfigured, text, font, branding, logos, watermark, letters, signature, graphics on chest, blurry, low-res, out of focus, duplicate items";
+
+        console.log(`VTO Request: category=${category}, model_input_prompt="${refinedPrompt}"`);
 
         const response = await fetch("https://api.replicate.com/v1/predictions", {
             method: "POST",
@@ -47,12 +59,12 @@ exports.startTryOn = async (req, res) => {
                 input: {
                     human_img: human_image,
                     garm_img: garment_image,
-                    garment_des: (description || "clothing piece") + ", high quality, highly detailed fabric",
+                    garment_des: refinedPrompt,
                     crop: false,
-                    steps: 40, // Max limit for this model is 40
+                    steps: 40,
                     category: category,
                     negative_prompt: negativePrompt,
-                    guidance_scale: 3.0 // Higher guidance for better alignment
+                    guidance_scale: 3.5 // Higher guidance for strict prompt adherence
                 },
             }),
         });
