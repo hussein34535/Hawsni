@@ -11,14 +11,14 @@ import { useAuthStore } from '@/store/authStore';
 function VerifyEmailForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { setUser } = useAuthStore();
+    const { setUser, user } = useAuthStore();
 
     const [code, setCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
 
-    const email = searchParams.get('email') || '';
+    const email = searchParams.get('email') || user?.email || '';
 
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,10 +31,11 @@ function VerifyEmailForm() {
             const data = await authService.verifyOtp(email, code);
             if (data.success) {
                 setIsSuccess(true);
+                // Update user state to reflect verified status
                 setUser(data.user, data.token);
                 setTimeout(() => {
                     router.push('/');
-                }, 2000);
+                }, 1500);
             } else {
                 setError(data.message || 'كود غير صحيح');
             }

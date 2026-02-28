@@ -18,17 +18,22 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-    user: null,
+    user: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null,
     token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
     isLoading: true,
     setUser: (user, token) => {
         if (token) localStorage.setItem('token', token);
         else if (token === null) localStorage.removeItem('token');
+
+        if (user) localStorage.setItem('user', JSON.stringify(user));
+        else if (user === null) localStorage.removeItem('user');
+
         set({ user, token: token ?? null, isLoading: false });
     },
     setLoading: (isLoading) => set({ isLoading }),
     logout: () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         set({ user: null, token: null });
     },
 }));

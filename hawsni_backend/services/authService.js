@@ -83,10 +83,21 @@ class AuthService {
                 throw new Error(`Database Error: ${profileError.message}`);
             }
 
-            // 4. Return success with verification requirement
+            // 4. Generate Token for Auto-Login 🚀 (but still require OTP)
+            const token = this.generateToken(user.id, email, 'user');
+
             console.log(`[OTP SENT] OTP for ${email}: ${otpCode}`);
 
             return {
+                token,
+                user: {
+                    id: user.id,
+                    name: name,
+                    email: email,
+                    role: 'user',
+                    phone: phone,
+                    is_email_verified: false
+                },
                 requireOtp: true,
                 email: email,
                 message: 'تم إنشاء الحساب بنجاح. يرجى تأكيد البريد الإلكتروني بالكود المرسل.'

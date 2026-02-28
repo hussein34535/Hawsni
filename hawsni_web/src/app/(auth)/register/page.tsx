@@ -31,7 +31,8 @@ export default function RegisterPage() {
 
             const data = await authService.register({ name, email, phone, password });
             if (data.success) {
-                // Redirect to OTP verification instead of home
+                // Auto-login (unverified) and redirect to OTP verification
+                setUser(data.user, data.token);
                 router.push(`/verify-email?email=${encodeURIComponent(email)}`);
             } else {
                 setError(data.message || 'فشل إنشاء الحساب');
