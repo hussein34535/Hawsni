@@ -98,7 +98,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
         ),
       ),
       body: _isLoading
-          ? Center(child: SpinningLoader())
+          ? const Center(child: SpinningLoader())
           : _hasError
               ? _buildErrorState()
               : _coupons.isEmpty

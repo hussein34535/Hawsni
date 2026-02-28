@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
@@ -28,7 +27,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? _userProfile;
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   void initState() {
@@ -58,8 +57,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    if (l10n == null)
+    if (l10n == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     if (ResponsiveLayout.isDesktop(context)) {
       return _buildDesktopLayout(context, l10n);

@@ -345,7 +345,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           const SizedBox(width: 12),
           Expanded(
               child: Text(msg,
-                  style: TextStyle(fontFamily: 'Cairo',
+                  style: const TextStyle(fontFamily: 'Cairo',
                       color: Colors.white, fontWeight: FontWeight.w700))),
         ],
       ),
@@ -750,7 +750,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       child: const Icon(Icons.auto_awesome_rounded,
                           color: Colors.white, size: 18)),
                   const SizedBox(width: 16),
-                  Expanded(
+                  const Expanded(
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -769,7 +769,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
           // Colors
           if (data.colors.isNotEmpty) ...[
-            Text('اللون',
+            const Text('اللون',
                 style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -784,19 +784,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('المقاس',
+                const Text('المقاس',
                     style: TextStyle(fontFamily: 'Cairo',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87)),
                 GestureDetector(
                   onTap: () => _showSizeGuidePopup(context, data.sizeGuide),
-                  child: Row(
+                  child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.straighten_rounded,
+                      Icon(Icons.straighten_rounded,
                           size: 16, color: AppTheme.primaryColor),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Text('دليل المقاسات',
                           style: TextStyle(fontFamily: 'Cairo',
                               fontSize: 13,
@@ -843,7 +843,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('الكمية',
+              const Text('الكمية',
                   style: TextStyle(fontFamily: 'Cairo',
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
@@ -867,7 +867,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         width: 32,
                         child: Text('$_quantity',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontFamily: 'Cairo',
+                            style: const TextStyle(fontFamily: 'Cairo',
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16))),
@@ -909,7 +909,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       isAdded ? _goToCart(context) : _addToCart(context, data),
                   icon: Icon(buttonIcon),
                   label: Text(buttonText,
-                      style: TextStyle(fontFamily: 'Cairo',
+                      style: const TextStyle(fontFamily: 'Cairo',
                           fontWeight: FontWeight.bold, fontSize: 18)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
@@ -926,14 +926,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           const SizedBox(height: 40),
 
           // Description
-          Text('التفاصيل',
+          const Text('التفاصيل',
               style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87)),
           const SizedBox(height: 12),
           Text(data.description,
-              style: TextStyle(fontFamily: 'Cairo',
+              style: const TextStyle(fontFamily: 'Cairo',
                   fontSize: 15,
                   height: 1.8,
                   color: Colors.black87,
@@ -999,10 +999,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               children: [
                 if (_quantity > 1)
                   Text('$_quantity × ${data.price} $currency',
-                      style: TextStyle(fontFamily: 'Cairo',
+                      style: const TextStyle(fontFamily: 'Cairo',
                           fontSize: 10, color: Colors.white54, height: 1)),
                 Text('$formattedTotal $currency',
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(fontFamily: 'Cairo',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -1048,7 +1048,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       Icon(buttonIcon, color: Colors.black, size: 20),
                       const SizedBox(width: 8),
                       Text(buttonText,
-                          style: TextStyle(fontFamily: 'Cairo',
+                          style: const TextStyle(fontFamily: 'Cairo',
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
                               fontSize: 14)),
@@ -1307,7 +1307,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         color: AppTheme.primaryColor, size: 22),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
+                  const Expanded(
                     child: Text('دليل المقاسات',
                         style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 20,
@@ -1340,7 +1340,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       return [
                         Text(
                           content,
-                          style: TextStyle(fontFamily: 'Cairo',
+                          style: const TextStyle(fontFamily: 'Cairo',
                             fontSize: 15,
                             height: 1.8,
                             color: Colors.black87,
@@ -1390,7 +1390,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                 ),
                                 child: Text(
                                   key,
-                                  style: TextStyle(fontFamily: 'Cairo',
+                                  style: const TextStyle(fontFamily: 'Cairo',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: AppTheme.primaryColor,
@@ -1449,7 +1449,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     ),
                     elevation: 0,
                   ),
-                  child: Text('حسناً',
+                  child: const Text('حسناً',
                       style: TextStyle(fontFamily: 'Cairo',
                           fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
@@ -1469,11 +1469,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
             AppLocalizations.of(ctx)?.sessionExpired ?? 'Session Expired',
-            style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold)),
+            style: const TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold)),
         content: Text(
             AppLocalizations.of(ctx)?.sessionExpiredMessage ??
                 'Please login again.',
-            style: TextStyle(fontFamily: 'Cairo',)),
+            style: const TextStyle(fontFamily: 'Cairo',)),
         actions: [
           TextButton(
               onPressed: () {
@@ -1482,7 +1482,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     MaterialPageRoute(builder: (_) => const LoginScreen()));
               },
               child: Text(AppLocalizations.of(ctx)?.ok ?? 'OK',
-                  style: TextStyle(fontFamily: 'Cairo',
+                  style: const TextStyle(fontFamily: 'Cairo',
                       fontWeight: FontWeight.bold, color: Colors.black)))
         ],
       ),

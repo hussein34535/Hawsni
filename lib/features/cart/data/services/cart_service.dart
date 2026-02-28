@@ -3,6 +3,7 @@ import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 class CartService {
   static const String _localCartKey = 'local_cart';
@@ -34,7 +35,7 @@ class CartService {
       }
       return [];
     } catch (e) {
-      print('Error fetching cart: $e');
+      debugPrint('Error fetching cart: $e');
       return [];
     }
   }
@@ -67,7 +68,7 @@ class CartService {
           return _addToLocalCart(newItem);
         }
       } catch (e) {
-        print('Error fetching product for local cart: $e');
+        debugPrint('Error fetching product for local cart: $e');
       }
       return _getLocalCart();
     }
@@ -101,7 +102,7 @@ class CartService {
       }
       return [];
     } catch (e) {
-      print('Error adding to cart: $e');
+      debugPrint('Error adding to cart: $e');
       rethrow;
     }
   }
@@ -136,7 +137,7 @@ class CartService {
       }
       return [];
     } catch (e) {
-      print('Error updating cart item: $e');
+      debugPrint('Error updating cart item: $e');
       rethrow;
     }
   }
@@ -169,7 +170,7 @@ class CartService {
       }
       return [];
     } catch (e) {
-      print('Error removing from cart: $e');
+      debugPrint('Error removing from cart: $e');
       rethrow;
     }
   }
@@ -183,7 +184,7 @@ class CartService {
     try {
       await ApiService.delete('/cart');
     } catch (e) {
-      print('Error clearing cart: $e');
+      debugPrint('Error clearing cart: $e');
       rethrow;
     }
   }
@@ -191,7 +192,7 @@ class CartService {
   // --- Sync Guest Cart to Account ---
   Future<void> syncLocalCartToApi() async {
     try {
-      print('Syncing local cart to API...');
+      debugPrint('Syncing local cart to API...');
       final localItems = await _getLocalCart();
       if (localItems.isEmpty) return;
 
@@ -203,7 +204,7 @@ class CartService {
               size: item.size, color: item.color);
           syncedItemIds.add(item.id); // Track successful syncs
         } catch (e) {
-          print('Failed to sync item ${item.name}: $e');
+          debugPrint('Failed to sync item ${item.name}: $e');
         }
       }
 
@@ -212,16 +213,16 @@ class CartService {
         // All synced successfully
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove(_localCartKey);
-        print('Local cart fully synced and cleared.');
+        debugPrint('Local cart fully synced and cleared.');
       } else {
         // Partial sync: remove only what was synced
         for (final id in syncedItemIds) {
           await _removeFromLocalCart(id);
         }
-        print('Partial local cart synced. Failed items retained.');
+        debugPrint('Partial local cart synced. Failed items retained.');
       }
     } catch (e) {
-      print('Error syncing cart: $e');
+      debugPrint('Error syncing cart: $e');
     }
   }
 

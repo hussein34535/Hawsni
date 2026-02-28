@@ -94,7 +94,7 @@ class _NotificationsSettingsScreenState
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: AppTheme.primaryColor,
+        activeThumbColor: AppTheme.primaryColor,
         activeTrackColor: AppTheme.primaryColor.withValues(alpha: 0.3),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

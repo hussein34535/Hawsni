@@ -22,7 +22,7 @@ class ProductService {
       }
     } catch (e) {
       print('Error fetching products: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -37,7 +37,7 @@ class ProductService {
       }
     } catch (e) {
       print('Error fetching product: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -53,7 +53,7 @@ class ProductService {
       }
     } catch (e) {
       print('Error fetching featured products: $e');
-      throw e;
+      rethrow;
     }
   }
 }

@@ -54,7 +54,7 @@ class ReviewCard extends StatelessWidget {
                 backgroundColor: _avatarColor(userName),
                 child: Text(
                   userName.isNotEmpty ? userName[0].toUpperCase() : '?',
-                  style: TextStyle(fontFamily: 'Cairo',
+                  style: const TextStyle(fontFamily: 'Cairo',
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -69,7 +69,7 @@ class ReviewCard extends StatelessWidget {
                   children: [
                     Text(
                       userName,
-                      style: TextStyle(fontFamily: 'Cairo',
+                      style: const TextStyle(fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),

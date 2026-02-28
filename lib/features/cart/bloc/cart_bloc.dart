@@ -133,7 +133,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         final currentState = state as CartLoaded;
         final cartItem = currentState.items.firstWhere(
             (item) => item.id == event.itemId,
-            orElse: () => CartItem(
+            orElse: () => const CartItem(
                 id: '',
                 productId: '',
                 name: '',
@@ -160,7 +160,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
           if (success) {
             add(RemoveFromCart(event.itemId));
           } else {
-            emit(CartError('Failed to save item to wishlist'));
+            emit(const CartError('Failed to save item to wishlist'));
             // Re-emit loaded state to clear error after a bit or handle differently
             // For now, reload cart to reset state
             add(CartStarted());

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:share_plus/share_plus.dart';
 import 'package:hwasi_app/core/services/wishlist_service.dart';
@@ -28,7 +27,7 @@ class WishlistScreen extends StatelessWidget {
               count > 0
                   ? '${l10n.emptyWishlist.split(' ').first} ($count)'
                   : l10n.emptyWishlist.split(' ').first,
-              style: TextStyle(fontFamily: 'Cairo',
+              style: const TextStyle(fontFamily: 'Cairo',
                 fontWeight: FontWeight.bold,
                 color: AppTheme.textPrimary,
                 fontSize: 20,
@@ -101,7 +100,7 @@ class WishlistScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   Text(
                     l10n.emptyWishlist,
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(fontFamily: 'Cairo',
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.textPrimary,
@@ -110,7 +109,7 @@ class WishlistScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     l10n.saveItemsForLater,
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(fontFamily: 'Cairo',
                       fontSize: 15,
                       color: AppTheme.textSecondary,
                     ),
@@ -170,7 +169,7 @@ class WishlistScreen extends StatelessWidget {
                     SnackBar(
                       content: Text(
                         'تم حذف ${item.name} من قائمة الأمنيات',
-                        style: TextStyle(fontFamily: 'Cairo',),
+                        style: const TextStyle(fontFamily: 'Cairo',),
                       ),
                       backgroundColor: Colors.black87,
                       behavior: SnackBarBehavior.floating,
@@ -221,7 +220,7 @@ class WishlistScreen extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   'تم نقل ${item.name} إلى السلة 🛒',
-                                  style: TextStyle(fontFamily: 'Cairo',),
+                                  style: const TextStyle(fontFamily: 'Cairo',),
                                 ),
                                 backgroundColor: Colors.green[700],
                                 behavior: SnackBarBehavior.floating,
@@ -233,7 +232,7 @@ class WishlistScreen extends StatelessWidget {
                           },
                           icon: const Icon(Icons.shopping_cart_outlined,
                               size: 16),
-                          label: Text(
+                          label: const Text(
                             'أضف للسلة',
                             style: TextStyle(fontFamily: 'Cairo',
                               fontWeight: FontWeight.bold,

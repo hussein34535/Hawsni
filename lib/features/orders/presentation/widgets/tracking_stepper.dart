@@ -99,7 +99,7 @@ class TrackingStepper extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         'توصيل خلال $expectedDays',
-                        style: TextStyle(fontFamily: 'Cairo',
+                        style: const TextStyle(fontFamily: 'Cairo',
                           fontSize: 12,
                           color: AppTheme.primaryColor,
                           fontWeight: FontWeight.bold,
@@ -156,12 +156,12 @@ class TrackingStepper extends StatelessWidget {
               ],
             ),
           ] else ...[
-            Center(
+            const Center(
               child: Column(
                 children: [
-                  const Icon(Icons.cancel_outlined,
+                  Icon(Icons.cancel_outlined,
                       size: 60, color: Colors.red),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Text(
                     'عذراً، لقد تم إلغاء هذا الطلب.',
                     style: TextStyle(fontFamily: 'Cairo',

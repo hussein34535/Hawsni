@@ -38,18 +38,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: AppTheme.surfaceColor, // Pure white
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Emerald loader
-            const SpinningLoader(
+            SpinningLoader(
               size: 80,
               color: AppTheme.primaryColor,
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
             // Bold brand name
             Text(
               'HWASI',
@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 letterSpacing: 2,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             // Simple tagline
             Text(
               'Your Style, Your Way',

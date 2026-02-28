@@ -80,7 +80,9 @@ class _SearchScreenState extends State<SearchScreen> {
     if (searchTerm.isEmpty &&
         _selectedCategory == null &&
         _minPrice == 0 &&
-        _maxPrice == 1000) return;
+        _maxPrice == 1000) {
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -91,8 +93,9 @@ class _SearchScreenState extends State<SearchScreen> {
       // Build query parameters
       final queryParams = <String, String>{};
       if (searchTerm.isNotEmpty) queryParams['q'] = searchTerm;
-      if (_selectedCategory != null)
+      if (_selectedCategory != null) {
         queryParams['category'] = _selectedCategory!;
+      }
       queryParams['minPrice'] = _minPrice.toString();
       queryParams['maxPrice'] = _maxPrice.toString();
       queryParams['sortBy'] = _sortBy;
@@ -296,7 +299,7 @@ class _SearchScreenState extends State<SearchScreen> {
             children: [
               Text(
                 AppLocalizations.of(context)!.filters,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -307,7 +310,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 onPressed: _clearFilters,
                 child: Text(
                   AppLocalizations.of(context)!.clearAll,
-                  style: TextStyle(color: AppTheme.primaryColor),
+                  style: const TextStyle(color: AppTheme.primaryColor),
                 ),
               ),
             ],
@@ -316,7 +319,7 @@ class _SearchScreenState extends State<SearchScreen> {
           if (_categories.isNotEmpty) ...[
             Text(
               AppLocalizations.of(context)!.category,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
@@ -349,7 +352,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ],
           Text(
             AppLocalizations.of(context)!.priceRange,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textPrimary,
               fontWeight: FontWeight.w500,
             ),
@@ -381,7 +384,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           const SizedBox(height: 16),
           // Sort By
-          Text(
+          const Text(
             'ترتيب حسب',
             style: TextStyle(
               color: AppTheme.textPrimary,
@@ -421,7 +424,7 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               child: Text(
                 AppLocalizations.of(context)!.applyFilters,
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),

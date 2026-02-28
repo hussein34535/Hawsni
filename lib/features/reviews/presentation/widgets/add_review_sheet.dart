@@ -115,7 +115,7 @@ class _AddReviewSheetState extends State<AddReviewSheet>
                           parent: _controller, curve: Curves.easeOut)),
               child: Text(
                 AppLocalizations.of(context)!.howWasYourExperience,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,

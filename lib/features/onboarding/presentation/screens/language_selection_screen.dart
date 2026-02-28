@@ -69,7 +69,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                Text(
+                const Text(
                   'Select Language',
                   style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 32,
@@ -80,7 +80,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
 
                 const SizedBox(height: 8),
 
-                Text(
+                const Text(
                   'اختر اللغة',
                   style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 24,
@@ -112,7 +112,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                     ),
                     child: Text(
                       _selectedLanguage == 'ar' ? 'استمرار' : 'Continue',
-                      style: TextStyle(fontFamily: 'Cairo',
+                      style: const TextStyle(fontFamily: 'Cairo',
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -180,7 +180,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 children: [
                   Text(
                     language['name']!,
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(fontFamily: 'Cairo',
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.black,
@@ -188,7 +188,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                   ),
                   Text(
                     language['nativeName']!,
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(fontFamily: 'Cairo',
                       fontSize: 14,
                       color: Colors.black54,
                     ),

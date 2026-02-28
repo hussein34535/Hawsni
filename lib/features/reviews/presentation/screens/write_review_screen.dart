@@ -86,7 +86,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
   Future<void> _submitReview() async {
     if (_rating == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('يرجى اختيار التقييم', style: TextStyle(fontFamily: 'Cairo',)),
           backgroundColor: Colors.orange,
         ),
@@ -96,7 +96,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
 
     if (_commentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('يرجى كتابة تقييمك', style: TextStyle(fontFamily: 'Cairo',)),
           backgroundColor: Colors.orange,
         ),
@@ -116,7 +116,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       if (review != null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content:
                   Text('تم إرسال التقييم بنجاح ✅', style: TextStyle(fontFamily: 'Cairo',)),
               backgroundColor: Colors.green,
@@ -127,7 +127,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('فشل إرسال التقييم', style: TextStyle(fontFamily: 'Cairo',)),
               backgroundColor: Colors.red,
             ),
@@ -138,7 +138,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('خطأ: ${e.toString()}', style: TextStyle(fontFamily: 'Cairo',)),
+            content: Text('خطأ: ${e.toString()}', style: const TextStyle(fontFamily: 'Cairo',)),
             backgroundColor: Colors.red,
           ),
         );
@@ -159,7 +159,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'كتابة تقييم',
           style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold),
         ),
@@ -202,7 +202,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                   Expanded(
                     child: Text(
                       widget.productName,
-                      style: TextStyle(fontFamily: 'Cairo',
+                      style: const TextStyle(fontFamily: 'Cairo',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
@@ -215,7 +215,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
             const SizedBox(height: 28),
 
             // Rating section
-            Text(
+            const Text(
               'تقييمك',
               style: TextStyle(fontFamily: 'Cairo',
                 fontSize: 18,
@@ -280,7 +280,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
             const SizedBox(height: 28),
 
             // Comment section
-            Text(
+            const Text(
               'رأيك',
               style: TextStyle(fontFamily: 'Cairo',
                 fontSize: 18,
@@ -302,7 +302,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               child: TextField(
                 controller: _commentController,
                 maxLines: 5,
-                style: TextStyle(fontFamily: 'Cairo',fontSize: 14),
+                style: const TextStyle(fontFamily: 'Cairo',fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'شاركنا رأيك عن المنتج...',
                   hintStyle: TextStyle(fontFamily: 'Cairo',color: Colors.grey[400]),
@@ -327,7 +327,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
             // Photo section
             Row(
               children: [
-                Text(
+                const Text(
                   'أضف صور',
                   style: TextStyle(fontFamily: 'Cairo',
                     fontSize: 18,
@@ -449,7 +449,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                           strokeWidth: 2,
                         ),
                       )
-                    : Text(
+                    : const Text(
                         'إرسال التقييم',
                         style: TextStyle(fontFamily: 'Cairo',
                           fontSize: 16,
@@ -478,7 +478,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'اختر مصدر الصورة',
                 style: TextStyle(fontFamily: 'Cairo',
                   fontSize: 16,
@@ -488,7 +488,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: Text('المعرض', style: TextStyle(fontFamily: 'Cairo',)),
+                title: const Text('المعرض', style: TextStyle(fontFamily: 'Cairo',)),
                 onTap: () {
                   Navigator.pop(context);
                   _pickImages();
@@ -496,7 +496,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt_outlined),
-                title: Text('الكاميرا', style: TextStyle(fontFamily: 'Cairo',)),
+                title: const Text('الكاميرا', style: TextStyle(fontFamily: 'Cairo',)),
                 onTap: () {
                   Navigator.pop(context);
                   _takePhoto();

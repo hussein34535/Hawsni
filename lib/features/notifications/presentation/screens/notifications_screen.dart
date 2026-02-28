@@ -218,7 +218,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         children: [
           Expanded(
             child: _isLoading
-                ? Center(child: SpinningLoader())
+                ? const Center(child: SpinningLoader())
                 : _notifications.isEmpty
                     ? Center(
                         child: Column(

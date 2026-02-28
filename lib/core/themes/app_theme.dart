@@ -59,7 +59,7 @@ class AppTheme {
       );
 
   // Text Styles
-  static final TextTheme textTheme = const TextTheme(
+  static const TextTheme textTheme = TextTheme(
     displayLarge: TextStyle(
         fontSize: 28, // Reduced from 36
         fontWeight: FontWeight.bold,

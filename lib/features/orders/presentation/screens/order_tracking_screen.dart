@@ -264,16 +264,21 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
   IconData _getStepIcon(String title) {
     final lower = title.toLowerCase();
-    if (lower.contains('order') || lower.contains('طلب'))
+    if (lower.contains('order') || lower.contains('طلب')) {
       return Icons.shopping_bag_outlined;
-    if (lower.contains('confirm') || lower.contains('تأكيد'))
+    }
+    if (lower.contains('confirm') || lower.contains('تأكيد')) {
       return Icons.check_circle_outline;
-    if (lower.contains('process') || lower.contains('تجهيز'))
+    }
+    if (lower.contains('process') || lower.contains('تجهيز')) {
       return Icons.inventory_2_outlined;
-    if (lower.contains('ship') || lower.contains('شحن'))
+    }
+    if (lower.contains('ship') || lower.contains('شحن')) {
       return Icons.local_shipping_outlined;
-    if (lower.contains('deliver') || lower.contains('توصيل'))
+    }
+    if (lower.contains('deliver') || lower.contains('توصيل')) {
       return Icons.home_outlined;
+    }
     return Icons.circle_outlined;
   }
 

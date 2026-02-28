@@ -36,7 +36,7 @@ class OrderSuccessScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
-              Text(
+              const Text(
                 'تم استلام طلبك بنجاح!',
                 style: TextStyle(
                   fontFamily: 'Cairo',
@@ -65,11 +65,11 @@ class OrderSuccessScreen extends StatelessWidget {
                   color: AppTheme.primaryColor.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
-                    const Icon(Icons.support_agent,
+                    Icon(Icons.support_agent,
                         color: AppTheme.primaryColor),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'لا تقلق، نحن معك في كل خطوة حتى يصل الطلب لباب منزلك.',
@@ -128,7 +128,7 @@ class OrderSuccessScreen extends StatelessWidget {
                   ),
                   child: Text(
                     AppLocalizations.of(context)!.startShopping,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -159,7 +159,7 @@ class OrderSuccessScreen extends StatelessWidget {
         ),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Cairo',
             color: Colors.black,
             fontWeight: FontWeight.bold,

@@ -52,11 +52,11 @@ class _AppState extends State<App> {
         return MaterialApp.router(
           title: 'HWASI',
           locale: Locale(settingsProvider.language),
-          localizationsDelegates: [
+          localizationsDelegates: const [
             AppLocalizations.delegate,
             // IMPORTANT: our LTR delegate MUST come BEFORE the globals
             // so it wins the resolution for WidgetsLocalizations
-            const _ForceLTRWidgetsDelegate(),
+            _ForceLTRWidgetsDelegate(),
             GlobalMaterialLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],

@@ -28,8 +28,9 @@ class AddressService {
 
   Future<AddressModel> updateAddress(AddressModel address) async {
     try {
-      if (address.id == null)
+      if (address.id == null) {
         throw Exception('Address ID is required for update');
+      }
 
       final json = address.toJson();
       json.remove('id');

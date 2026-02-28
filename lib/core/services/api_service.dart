@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:hwasi_app/core/config/app_config.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
@@ -51,7 +52,7 @@ class ApiService {
             'Failed to load data: ${response.body}', response.statusCode);
       }
     } catch (e) {
-      print('Error in GET $endpoint: $e');
+      debugPrint('Error in GET $endpoint: $e');
       rethrow;
     }
   }
@@ -73,7 +74,7 @@ class ApiService {
             'Failed to post data: ${response.body}', response.statusCode);
       }
     } catch (e) {
-      print('Error in POST $endpoint: $e');
+      debugPrint('Error in POST $endpoint: $e');
       rethrow;
     }
   }
@@ -95,7 +96,7 @@ class ApiService {
             'Failed to put data: ${response.body}', response.statusCode);
       }
     } catch (e) {
-      print('Error in PUT $endpoint: $e');
+      debugPrint('Error in PUT $endpoint: $e');
       rethrow;
     }
   }
@@ -116,7 +117,7 @@ class ApiService {
             'Failed to delete data: ${response.body}', response.statusCode);
       }
     } catch (e) {
-      print('Error in DELETE $endpoint: $e');
+      debugPrint('Error in DELETE $endpoint: $e');
       rethrow;
     }
   }
@@ -131,7 +132,7 @@ class ApiService {
       final data = await get(endpoint, includeAuth: false);
       return data['products'] ?? [];
     } catch (e) {
-      print('Error fetching products: $e');
+      debugPrint('Error fetching products: $e');
       return [];
     }
   }
@@ -142,7 +143,7 @@ class ApiService {
       final data = await get('/products/$id', includeAuth: false);
       return data['product'];
     } catch (e) {
-      print('Error fetching product: $e');
+      debugPrint('Error fetching product: $e');
       return null;
     }
   }
@@ -153,7 +154,7 @@ class ApiService {
       final data = await get('/categories', includeAuth: false);
       return data['categories'] ?? [];
     } catch (e) {
-      print('Error fetching categories: $e');
+      debugPrint('Error fetching categories: $e');
       return [];
     }
   }
@@ -164,7 +165,7 @@ class ApiService {
       final data = await get('/products?search=$query', includeAuth: false);
       return data['products'] ?? [];
     } catch (e) {
-      print('Error searching products: $e');
+      debugPrint('Error searching products: $e');
       return [];
     }
   }
@@ -217,7 +218,7 @@ class ApiService {
       final data = await get(endpoint, includeAuth: false);
       return data['products'] ?? [];
     } catch (e) {
-      print('Error searching products with filters: $e');
+      debugPrint('Error searching products with filters: $e');
       return [];
     }
   }
@@ -230,7 +231,7 @@ class ApiService {
           includeAuth: AuthService.token != null);
       return data;
     } catch (e) {
-      print('Error creating order: $e');
+      debugPrint('Error creating order: $e');
       return null;
     }
   }
@@ -241,7 +242,7 @@ class ApiService {
       final data = await get('/orders', includeAuth: true);
       return data['orders'] ?? [];
     } catch (e) {
-      print('Error fetching orders: $e');
+      debugPrint('Error fetching orders: $e');
       return [];
     }
   }
@@ -252,7 +253,7 @@ class ApiService {
       final data = await get('/reviews/product/$productId', includeAuth: false);
       return data['reviews'] ?? [];
     } catch (e) {
-      print('Error fetching reviews: $e');
+      debugPrint('Error fetching reviews: $e');
       return [];
     }
   }
@@ -274,7 +275,7 @@ class ApiService {
           includeAuth: true);
       return data['review'];
     } catch (e) {
-      print('Error creating review: $e');
+      debugPrint('Error creating review: $e');
       return null;
     }
   }
@@ -286,7 +287,7 @@ class ApiService {
           includeAuth: AuthService.token != null);
       return data['tracking'];
     } catch (e) {
-      print('Error fetching tracking info: $e');
+      debugPrint('Error fetching tracking info: $e');
       return null;
     }
   }
@@ -297,7 +298,7 @@ class ApiService {
       final data = await get('/banners', includeAuth: false);
       return data is List ? data : (data['banners'] ?? []);
     } catch (e) {
-      print('Error fetching banners: $e');
+      debugPrint('Error fetching banners: $e');
       return [];
     }
   }
@@ -310,7 +311,7 @@ class ApiService {
       final data = await get('/users/profile', includeAuth: true);
       return data['user'];
     } catch (e) {
-      print('Error fetching profile: $e');
+      debugPrint('Error fetching profile: $e');
       return null;
     }
   }
@@ -322,7 +323,7 @@ class ApiService {
           includeAuth: true);
       return true;
     } catch (e) {
-      print('Error updating profile: $e');
+      debugPrint('Error updating profile: $e');
       return false;
     }
   }
@@ -333,7 +334,7 @@ class ApiService {
       final data = await get('/users/addresses', includeAuth: true);
       return data['addresses'] ?? [];
     } catch (e) {
-      print('Error fetching addresses: $e');
+      debugPrint('Error fetching addresses: $e');
       return [];
     }
   }
@@ -346,7 +347,7 @@ class ApiService {
           await post('/users/addresses', addressData, includeAuth: true);
       return data['address'];
     } catch (e) {
-      print('Error adding address: $e');
+      debugPrint('Error adding address: $e');
       return null;
     }
   }
@@ -359,7 +360,7 @@ class ApiService {
           includeAuth: true);
       return data['address'];
     } catch (e) {
-      print('Error updating address: $e');
+      debugPrint('Error updating address: $e');
       return null;
     }
   }
@@ -370,7 +371,7 @@ class ApiService {
       await delete('/users/addresses/$addressId', includeAuth: true);
       return true;
     } catch (e) {
-      print('Error deleting address: $e');
+      debugPrint('Error deleting address: $e');
       return false;
     }
   }
@@ -384,7 +385,7 @@ class ApiService {
       }
       return [];
     } catch (e) {
-      print('Error fetching wishlist: $e');
+      debugPrint('Error fetching wishlist: $e');
       return [];
     }
   }
@@ -395,7 +396,7 @@ class ApiService {
       await post('/wishlist/products/$productId', {}, includeAuth: true);
       return true;
     } catch (e) {
-      print('Error adding to wishlist: $e');
+      debugPrint('Error adding to wishlist: $e');
       return false;
     }
   }
@@ -406,7 +407,7 @@ class ApiService {
       await delete('/wishlist/products/$productId', includeAuth: true);
       return true;
     } catch (e) {
-      print('Error removing from wishlist: $e');
+      debugPrint('Error removing from wishlist: $e');
       return false;
     }
   }
@@ -420,7 +421,7 @@ class ApiService {
       }
       return null;
     } catch (e) {
-      print('Error fetching shipping settings: $e');
+      debugPrint('Error fetching shipping settings: $e');
       return null;
     }
   }

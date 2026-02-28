@@ -25,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
-  String _selectedFilter = 'All';
+  final String _selectedFilter = 'All';
 
   @override
   void dispose() {
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16),
                         Text(
                           state.message,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Cairo',
                             color: Colors.black87,
                             fontSize: 16,
@@ -121,9 +121,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Padding(
+                              const Padding(
                                 padding:
-                                    const EdgeInsets.fromLTRB(20, 24, 20, 12),
+                                    EdgeInsets.fromLTRB(20, 24, 20, 12),
                                 child: Row(
                                   children: [
                                     Text(
@@ -135,8 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         color: Colors.black87,
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    const Icon(Icons.auto_awesome,
+                                    SizedBox(width: 8),
+                                    Icon(Icons.auto_awesome,
                                         color: AppTheme.accentColor, size: 24),
                                   ],
                                 ),
@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 textAlign: TextAlign.center,
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   fontFamily: 'Cairo',
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,
@@ -399,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // Logo/Title - Centered
-          Text(
+          const Text(
             'Hwasi',
             style: TextStyle(
               fontFamily: 'Cairo',

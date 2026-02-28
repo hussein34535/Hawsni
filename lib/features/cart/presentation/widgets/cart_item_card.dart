@@ -183,7 +183,7 @@ class CartItemCard extends StatelessWidget {
             ),
 
             // Ticket Notches (Left and Right)
-            Positioned(
+            const Positioned(
               left: -10,
               top: 60,
               child: CircleAvatar(
@@ -191,7 +191,7 @@ class CartItemCard extends StatelessWidget {
                 backgroundColor: AppTheme.scaffoldBackgroundColor,
               ),
             ),
-            Positioned(
+            const Positioned(
               right: -10,
               top: 60,
               child: CircleAvatar(

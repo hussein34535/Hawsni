@@ -251,7 +251,7 @@ class _ProductCardState extends State<ProductCard> {
                                     ),
                                   ],
                                 ),
-                                child: Center(
+                                child: const Center(
                                   child: Icon(
                                     Icons.favorite,
                                     size: 16,
@@ -279,7 +279,7 @@ class _ProductCardState extends State<ProductCard> {
                           widget.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontFamily: 'Cairo',
+                          style: const TextStyle(fontFamily: 'Cairo',
                             // Ensure nice Arabic font
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -300,10 +300,12 @@ class _ProductCardState extends State<ProductCard> {
                                 String? variantImage;
                                 if (c is Map) {
                                   colorCode = c['color']?.toString() ?? '';
-                                  if (c.containsKey('image'))
+                                  if (c.containsKey('image')) {
                                     variantImage = c['image']?.toString();
-                                  if (c.containsKey('imageIndex'))
+                                  }
+                                  if (c.containsKey('imageIndex')) {
                                     variantImage = c['imageIndex']?.toString();
+                                  }
                                 } else if (c is String) {
                                   if (c.trim().startsWith('{')) {
                                     try {
@@ -321,8 +323,9 @@ class _ProductCardState extends State<ProductCard> {
                                           final indexMatch = RegExp(
                                                   r'"imageIndex"\s*:\s*(\d+)')
                                               .firstMatch(c);
-                                          if (indexMatch != null)
+                                          if (indexMatch != null) {
                                             variantImage = indexMatch.group(1);
+                                          }
                                         }
                                       } else {
                                         colorCode = c;
@@ -405,7 +408,7 @@ class _ProductCardState extends State<ProductCard> {
                                   children: [
                                     TextSpan(
                                       text: widget.price.split('.')[0],
-                                      style: TextStyle(fontFamily: 'Cairo',
+                                      style: const TextStyle(fontFamily: 'Cairo',
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.primaryColor,
@@ -415,7 +418,7 @@ class _ProductCardState extends State<ProductCard> {
                                     TextSpan(
                                       text: AppLocalizations.of(context)!
                                           .currencySymbol,
-                                      style: TextStyle(fontFamily: 'Cairo',
+                                      style: const TextStyle(fontFamily: 'Cairo',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.primaryColor,

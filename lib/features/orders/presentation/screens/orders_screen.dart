@@ -28,7 +28,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'طلباتي',
           style: TextStyle(fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
@@ -104,13 +104,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(AppLocalizations.of(context)!.noOrdersYet,
-                        style: TextStyle(fontFamily: 'Cairo',
+                        style: const TextStyle(fontFamily: 'Cairo',
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.textPrimary)),
                     const SizedBox(height: 8),
                     Text(AppLocalizations.of(context)!.startShoppingToSeeOrders,
-                        style: TextStyle(fontFamily: 'Cairo',
+                        style: const TextStyle(fontFamily: 'Cairo',
                             fontSize: 16, color: AppTheme.textSecondary)),
                     const SizedBox(height: 32),
                     ElevatedButton(
@@ -219,7 +219,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       children: [
                         Text(
                           'طلب #$orderId',
-                          style: TextStyle(fontFamily: 'Cairo',
+                          style: const TextStyle(fontFamily: 'Cairo',
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                               color: AppTheme.textPrimary),
@@ -227,7 +227,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                         if (createdAt != null)
                           Text(
                             _formatDate(createdAt),
-                            style: TextStyle(fontFamily: 'Cairo',
+                            style: const TextStyle(fontFamily: 'Cairo',
                                 fontSize: 12, color: AppTheme.textSecondary),
                           ),
                       ],
@@ -238,7 +238,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     children: [
                       Text(
                         '${total.toStringAsFixed(0)} ج.م',
-                        style: TextStyle(fontFamily: 'Cairo',
+                        style: const TextStyle(fontFamily: 'Cairo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87),
@@ -288,18 +288,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 children: [
                   Text(
                     AppLocalizations.of(context)!.itemsCount(items.length),
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(fontFamily: 'Cairo',
                         color: AppTheme.textSecondary, fontSize: 13),
                   ),
-                  Row(
+                  const Row(
                     children: [
                       Text('تتبع الطلب',
                           style: TextStyle(fontFamily: 'Cairo',
                               fontSize: 13,
                               color: AppTheme.primaryColor,
                               fontWeight: FontWeight.w600)),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.arrow_forward_ios,
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_ios,
                           size: 12, color: AppTheme.primaryColor),
                     ],
                   ),
@@ -429,7 +429,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   padding: const EdgeInsets.all(24),
                   children: [
                     // Title
-                    Text('تتبع الطلب',
+                    const Text('تتبع الطلب',
                         style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -504,7 +504,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     const SizedBox(height: 16),
 
                     // Order items
-                    Text('المنتجات',
+                    const Text('المنتجات',
                         style: TextStyle(fontFamily: 'Cairo',
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -532,14 +532,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(item['name'] ?? 'منتج',
-                                          style: TextStyle(fontFamily: 'Cairo',
+                                          style: const TextStyle(fontFamily: 'Cairo',
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                               color: AppTheme.textPrimary)),
                                       Text(
                                           AppLocalizations.of(context)!
                                               .quantityAbbr(item['quantity']),
-                                          style: TextStyle(fontFamily: 'Cairo',
+                                          style: const TextStyle(fontFamily: 'Cairo',
                                               color: AppTheme.textSecondary,
                                               fontSize: 13)),
                                     ],
@@ -547,7 +547,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                 ),
                                 Text(
                                     '${((item['price'] as num?) ?? 0).toStringAsFixed(0)} ج.م',
-                                    style: TextStyle(fontFamily: 'Cairo',
+                                    style: const TextStyle(fontFamily: 'Cairo',
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black87)),
@@ -561,14 +561,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('الإجمالي',
+                        const Text('الإجمالي',
                             style: TextStyle(fontFamily: 'Cairo',
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87)),
                         Text(
                             '${(order['total'] ?? order['subtotal'] ?? 0).toStringAsFixed(0)} ج.م',
-                            style: TextStyle(fontFamily: 'Cairo',
+                            style: const TextStyle(fontFamily: 'Cairo',
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black)),

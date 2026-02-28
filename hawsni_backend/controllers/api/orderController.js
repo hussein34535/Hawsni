@@ -41,12 +41,25 @@ class OrderController {
         try {
             const { items, shippingAddress, paymentMethod, subtotal, discount, couponCode, guestName, guestEmail, guestPhone } = req.body;
 
-            const shippingFee = 5.00;
-            const total = subtotal + shippingFee - discount;
+            let finalShippingAddress = shippingAddress;
+            if (typeof shippingAddress === 'string') {
+                try {
+                    finalShippingAddress = JSON.parse(shippingAddress);
+                } catch (e) {
+                    finalShippingAddress = { address: shippingAddress };
+                }
+            } else if (!shippingAddress) {
+                finalShippingAddress = {};
+            }
+
+            // Ensure name and phone are stored in the address object for guest/one-time use
+            if (guestName) finalShippingAddress.name = guestName;
+            if (guestPhone) finalShippingAddress.phone = guestPhone;
+            if (guestEmail) finalShippingAddress.email = guestEmail;
 
             const orderData = {
                 user_id: req.user ? req.user.id : null,
-                shipping_address: shippingAddress,
+                shipping_address: finalShippingAddress,
                 payment_method: paymentMethod,
                 subtotal: subtotal,
                 shipping_fee: shippingFee,
@@ -57,9 +70,9 @@ class OrderController {
             };
 
             const guestInfo = {
-                guestName,
-                guestEmail,
-                guestPhone,
+                guestName: guestName || finalShippingAddress.name,
+                guestEmail: guestEmail || finalShippingAddress.email,
+                guestPhone: guestPhone || finalShippingAddress.phone,
                 ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress,
                 userAgent: req.headers['user-agent']
             };

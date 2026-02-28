@@ -82,7 +82,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String? _couponError;
 
   // Payment State
-  String _selectedPaymentMethod =
+  final String _selectedPaymentMethod =
       'Cash on Delivery'; // 'Cash on Delivery' or 'Online Card'
 
   // Shipping State
@@ -332,15 +332,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    // Construct Address String
-    String fullAddress;
+    // Construct Structured Address
+    Map<String, dynamic> shippingAddress;
     if (_isGuest || _isAddingAddress) {
-      fullAddress =
-          '${_streetController.text}, ${_cityController.text}, ${_stateController.text}';
+      shippingAddress = {
+        'name':
+            _isGuest ? _nameController.text : (AuthService.userName ?? 'User'),
+        'phone': _isGuest
+            ? _phoneController.text
+            : (AuthService.userData?['phone'] ?? _phoneController.text),
+        'street': _streetController.text,
+        'city': _cityController.text,
+        'state': _stateController.text,
+        'address':
+            '${_streetController.text}, ${_cityController.text}, ${_stateController.text}',
+      };
     } else {
       if (selectedAddress != null) {
-        fullAddress =
-            '${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state}';
+        shippingAddress = {
+          'name': selectedAddress.name,
+          'phone': selectedAddress.phone,
+          'street': selectedAddress.addressLine1,
+          'city': selectedAddress.city,
+          'state': selectedAddress.state,
+          'address':
+              '${selectedAddress.addressLine1}, ${selectedAddress.city}, ${selectedAddress.state}',
+        };
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -353,18 +370,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     // Payment Processing - Cash Only for now
-    _submitOrder(cartItems, subtotal, fullAddress, 'Cash on Delivery');
+    _submitOrder(cartItems, subtotal, shippingAddress, 'Cash on Delivery');
   }
 
   void _submitOrder(
     List<CartItem> cartItems,
     double subtotal,
-    String fullAddress,
+    dynamic shippingAddress,
     String paymentMethod,
   ) {
     final discount = _calculateDiscount(subtotal);
     final orderData = {
-      'shippingAddress': fullAddress,
+      'shippingAddress': shippingAddress,
       'paymentMethod': paymentMethod,
       'subtotal': subtotal,
       'discount': discount,
@@ -471,7 +488,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 ),
                                 title: Text(
                                   AppLocalizations.of(context)!.checkout,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontFamily: 'Cairo',
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
@@ -538,7 +555,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                               context,
                                             )!
                                                 .addNewAddress,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               fontFamily: 'Cairo',
                                               color: AppTheme.primaryColor,
                                               fontWeight: FontWeight.bold,
@@ -609,7 +626,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                             Text(
                                               AppLocalizations.of(context)!
                                                   .placeOrder,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 fontFamily: 'Cairo',
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold,
@@ -651,7 +668,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           const SizedBox(width: 8),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Cairo',
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -723,7 +740,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               padding: const EdgeInsets.only(bottom: 16),
               child: Text(
                 AppLocalizations.of(context)!.addNewAddress,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -743,7 +760,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _stateController.text.isNotEmpty &&
+            initialValue: _stateController.text.isNotEmpty &&
                     egyptGovernorates.contains(_stateController.text)
                 ? _stateController.text
                 : null,
@@ -780,7 +797,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               return DropdownMenuItem<String>(
                 value: gov,
                 child: Text(gov,
-                    style: TextStyle(fontFamily: 'Cairo', fontSize: 14),
+                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 14),
                     overflow: TextOverflow.ellipsis),
               );
             }).toList(),
@@ -810,7 +827,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 child: Text(
                   AppLocalizations.of(context)!.saveAddress,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontFamily: 'Cairo', fontWeight: FontWeight.bold),
                 ),
               ),
@@ -871,7 +888,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     children: [
                       Text(
                         address.title,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.bold,
                           color: AppTheme.textPrimary,
@@ -880,7 +897,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       const SizedBox(height: 4),
                       Text(
                         '${address.addressLine1}, ${address.city}, ${address.state}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'Cairo',
                           color: AppTheme.textSecondary,
                           fontSize: 14,
@@ -917,7 +934,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
-      style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
+      style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(fontFamily: 'Cairo', color: Colors.grey[600]),
@@ -972,14 +989,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               children: [
                 Text(
                   AppLocalizations.of(context)!.cashOnDelivery,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: AppTheme.textPrimary,
                   ),
                 ),
-                Text(
+                const Text(
                   'الدفع عند استلام الطلب',
                   style: TextStyle(
                     fontFamily: 'Cairo',
@@ -1025,7 +1042,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   controller: _couponController,
                   enabled: !_isCouponApplied,
                   textDirection: TextDirection.ltr,
-                  style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
                   decoration: InputDecoration(
                     hintText: 'أدخل كود الخصم',
                     hintStyle: TextStyle(
@@ -1070,7 +1087,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ? ElevatedButton.icon(
                         onPressed: _removeCoupon,
                         icon: const Icon(Icons.close, size: 18),
-                        label: Text(
+                        label: const Text(
                           'إزالة',
                           style: TextStyle(
                               fontFamily: 'Cairo', fontWeight: FontWeight.bold),
@@ -1103,7 +1120,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : Text(
+                            : const Text(
                                 'تطبيق',
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
@@ -1123,7 +1140,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 const SizedBox(width: 6),
                 Text(
                   _couponError!,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Cairo',
                     color: Colors.red,
                     fontSize: 13,

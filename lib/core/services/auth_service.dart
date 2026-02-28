@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -62,8 +63,8 @@ class AuthService {
         await prefs.setString('userData', json.encode(_userData));
         await prefs.remove('isGuest'); // Remove guest persistence
 
-        print('Login successful, token saved: $_token');
-        print('User data saved: $_userData');
+        debugPrint('Login successful, token saved: $_token');
+        debugPrint('User data saved: $_userData');
         updateFcmToken(); // Sync FCM token
         _authStateController.add(true);
         return data;
@@ -72,7 +73,7 @@ class AuthService {
         throw Exception(errorData['message'] ?? 'Login failed');
       }
     } catch (e) {
-      print('Error logging in: $e');
+      debugPrint('Error logging in: $e');
       rethrow; // Rethrow to let UI handle it
     }
   }
@@ -112,7 +113,7 @@ class AuthService {
         throw Exception(errorData['message'] ?? 'Registration failed');
       }
     } catch (e) {
-      print('Error registering: $e');
+      debugPrint('Error registering: $e');
       rethrow; // Rethrow to let UI handle it
     }
   }
@@ -148,7 +149,7 @@ class AuthService {
         throw Exception(errorData['message'] ?? 'OTP verification failed');
       }
     } catch (e) {
-      print('Error verifying OTP: $e');
+      debugPrint('Error verifying OTP: $e');
       rethrow;
     }
   }
@@ -167,13 +168,13 @@ class AuthService {
       final data = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        print('Password reset email sent successfully');
+        debugPrint('Password reset email sent successfully');
         return data;
       } else {
         throw Exception(data['message'] ?? 'Failed to send reset email');
       }
     } catch (e) {
-      print('Error sending password reset email: $e');
+      debugPrint('Error sending password reset email: $e');
       return null;
     }
   }
@@ -215,7 +216,7 @@ class AuthService {
         throw Exception(errorData['message'] ?? 'Failed to upload image');
       }
     } catch (e) {
-      print('Error uploading profile picture: $e');
+      debugPrint('Error uploading profile picture: $e');
       return null;
     }
   }
@@ -236,13 +237,13 @@ class AuthService {
       final data = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        print('Password reset successfully');
+        debugPrint('Password reset successfully');
         return data;
       } else {
         throw Exception(data['message'] ?? 'Failed to reset password');
       }
     } catch (e) {
-      print('Error resetting password: $e');
+      debugPrint('Error resetting password: $e');
       return null;
     }
   }
@@ -266,13 +267,13 @@ class AuthService {
       final data = json.decode(response.body);
 
       if (response.statusCode == 200) {
-        print('Password changed successfully');
+        debugPrint('Password changed successfully');
         return data;
       } else {
         throw Exception(data['message'] ?? 'Failed to change password');
       }
     } catch (e) {
-      print('Error changing password: $e');
+      debugPrint('Error changing password: $e');
       rethrow;
     }
   }
@@ -290,7 +291,7 @@ class AuthService {
     await prefs.remove('userData');
     await prefs.setBool('isGuest', true); // Persist guest mode
 
-    print('User logged out, switched to guest mode');
+    debugPrint('User logged out, switched to guest mode');
     _authStateController
         .add(false); // Notify app of logout (optional, depending on nav)
     // Actually, if we switch to guest, maybe we should emit true?
@@ -310,18 +311,18 @@ class AuthService {
       try {
         _userData = json.decode(userDataString);
       } catch (e) {
-        print('Error decoding user data: $e');
+        debugPrint('Error decoding user data: $e');
         _userData = null;
       }
     }
 
-    print('Token loaded from storage: $_token');
-    print('User data loaded from storage: $_userData');
-    print('Guest Mode: $_isGuest');
+    debugPrint('Token loaded from storage: $_token');
+    debugPrint('User data loaded from storage: $_userData');
+    debugPrint('Guest Mode: $_isGuest');
 
     // Auth is true if we have a token OR we are a guest
     if (_token == null && !_isGuest) {
-      print('No token found, defaulting to Guest Mode');
+      debugPrint('No token found, defaulting to Guest Mode');
       _isGuest = true;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isGuest', true);
@@ -332,7 +333,7 @@ class AuthService {
 
   // Check if user is authenticated
   static bool isAuthenticated() {
-    print('Checking authentication status: ${_token != null}');
+    debugPrint('Checking authentication status: ${_token != null}');
     return _token != null;
   }
 
@@ -353,14 +354,14 @@ class AuthService {
 
     _authStateController
         .add(true); // Treat as "logged in" for navigation purposes
-    print('Guest login successful');
+    debugPrint('Guest login successful');
   }
 
   static Future<void> loadGuestStatus() async {
     final prefs = await SharedPreferences.getInstance();
     _isGuest = prefs.getBool('isGuest') ?? false;
     if (_isGuest) {
-      print('Guest session loaded');
+      debugPrint('Guest session loaded');
       // If guest, we might want to emit true to authState?
       // Usually loadToken handles the initial state.
       // We can combine logic in loadToken.
@@ -379,10 +380,10 @@ class AuthService {
           },
           body: json.encode({'fcmToken': token}),
         );
-        print('FCM Token updated on server: $token');
+        debugPrint('FCM Token updated on server: $token');
       }
     } catch (e) {
-      print('Error updating FCM token: $e');
+      debugPrint('Error updating FCM token: $e');
     }
   }
 }

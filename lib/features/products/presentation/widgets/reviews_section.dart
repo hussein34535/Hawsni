@@ -92,7 +92,7 @@ class ReviewsSection extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             if (state is ReviewLoading)
-              Center(
+              const Center(
                   child:
                       CircularProgressIndicator(color: AppTheme.primaryColor))
             else if (state is ReviewLoaded)
@@ -142,7 +142,7 @@ class ReviewsSection extends StatelessWidget {
                                           ? review.userName
                                           : 'U')[0]
                                       .toUpperCase(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       color: AppTheme.primaryColor,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -156,13 +156,13 @@ class ReviewsSection extends StatelessWidget {
                                         review.userName.isNotEmpty
                                             ? review.userName
                                             : 'User',
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: AppTheme.textPrimary)),
                                     Text(
                                       DateFormat('MMM d, yyyy')
                                           .format(review.createdAt),
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           color: AppTheme.textSecondary,
                                           fontSize: 12),
                                     ),
@@ -230,7 +230,7 @@ class ReviewsSection extends StatelessWidget {
                           Text(review.comment,
                               maxLines: 3,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
+                              style: const TextStyle(
                                   color: AppTheme.textPrimary, height: 1.5)),
                         ],
                       ),

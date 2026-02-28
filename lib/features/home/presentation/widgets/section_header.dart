@@ -36,7 +36,7 @@ class SectionHeader extends StatelessWidget {
                 foregroundColor: AppTheme.primaryColor,
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               ),
-              child: Row(
+              child: const Row(
                 children: [
                   Text(
                     'View All',
@@ -46,7 +46,7 @@ class SectionHeader extends StatelessWidget {
                       color: AppTheme.primaryColor,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4),
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 14,

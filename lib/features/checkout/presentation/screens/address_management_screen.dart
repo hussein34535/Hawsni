@@ -82,14 +82,14 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
             if (result != null) {
               _loadAddresses();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+                const SnackBar(
                     content: Text('تم إضافة العنوان بنجاح',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.successColor),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+                const SnackBar(
                     content: Text('فشل إضافة العنوان',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.errorColor),
@@ -141,14 +141,14 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
             if (result != null) {
               _loadAddresses();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+                const SnackBar(
                     content: Text('تم تعديل العنوان بنجاح',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.successColor),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+                const SnackBar(
                     content: Text('فشل تعديل العنوان',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.errorColor),
@@ -204,8 +204,8 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
     return Scaffold(
       backgroundColor: AppTheme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text('Shipping Addresses',
-            style: const TextStyle(
+        title: const Text('Shipping Addresses',
+            style: TextStyle(
                 fontWeight: FontWeight.bold, color: AppTheme.textPrimary)),
         centerTitle: true,
         backgroundColor: AppTheme.scaffoldBackgroundColor,
@@ -330,17 +330,17 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
         return await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: Text('حذف العنوان',
+                title: const Text('حذف العنوان',
                     style: TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold)),
-                content: Text('هل أنت متأكد من حذف هذا العنوان؟',
+                content: const Text('هل أنت متأكد من حذف هذا العنوان؟',
                     style: TextStyle(fontFamily: 'Cairo',)),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: Text('إلغاء', style: TextStyle(fontFamily: 'Cairo',))),
+                      child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo',))),
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: Text('حذف',
+                    child: const Text('حذف',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.red)),
                   ),
                 ],
@@ -381,7 +381,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                           Row(
                             children: [
                               Text(address.title,
-                                  style: TextStyle(fontFamily: 'Cairo',
+                                  style: const TextStyle(fontFamily: 'Cairo',
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       color: AppTheme.textPrimary)),
@@ -395,7 +395,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                                         .withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text('الافتراضي',
+                                  child: const Text('الافتراضي',
                                       style: TextStyle(fontFamily: 'Cairo',
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
@@ -406,7 +406,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(address.fullName,
-                              style: TextStyle(fontFamily: 'Cairo',
+                              style: const TextStyle(fontFamily: 'Cairo',
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   color: AppTheme.textSecondary)),
@@ -423,14 +423,14 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                     '${address.address}, ${address.city}, ${address.country}',
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(fontFamily: 'Cairo',
                         fontSize: 14, color: AppTheme.textSecondary)),
               ),
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(address.phone,
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(fontFamily: 'Cairo',
                         fontSize: 14, color: AppTheme.textSecondary)),
               ),
               const Divider(height: 24, color: AppTheme.dividerColor),
@@ -443,7 +443,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                       onPressed: () => _editAddress(address),
                       icon: const Icon(Icons.edit_outlined,
                           size: 18, color: AppTheme.primaryColor),
-                      label: Text('تعديل',
+                      label: const Text('تعديل',
                           style:
                               TextStyle(fontFamily: 'Cairo',color: AppTheme.primaryColor)),
                     ),
@@ -452,7 +452,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                       onPressed: () => _deleteAddress(address),
                       icon: const Icon(Icons.delete_outline,
                           size: 18, color: AppTheme.errorColor),
-                      label: Text('حذف',
+                      label: const Text('حذف',
                           style: TextStyle(fontFamily: 'Cairo',color: AppTheme.errorColor)),
                     ),
                   ],
