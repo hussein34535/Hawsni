@@ -40,6 +40,7 @@
                                     style="width:16px;height:16px;cursor:pointer;">
                             </th>
                             <th>المنتج</th>
+                            <th>العميل</th>
                             <th>رقم الطلب</th>
                             <th>المبلغ</th>
                             <th>الحالة</th>
@@ -77,6 +78,24 @@
                                                             <% } %>
                                                     </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <% let customer={}; try { customer=(typeof order.shipping_address==='string' ) ?
+                                        JSON.parse(order.shipping_address) : order.shipping_address; } catch (e) {
+                                        customer={ name: 'غير معروف' , phone: '-' }; } %>
+                                        <div style="font-size: 0.9rem;">
+                                            <strong>
+                                                <%= customer.name || 'عميل' %>
+                                            </strong><br>
+                                            <small>
+                                                <%= customer.phone || '' %>
+                                            </small><br>
+                                            <small
+                                                style="color: var(--medium-gray); display: block; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                                title="<%= customer.address %>">
+                                                <%= customer.address || '' %>
+                                            </small>
+                                        </div>
                                 </td>
                                 <td>
                                     <span style="font-weight: 600; color: var(--dark-gray);">

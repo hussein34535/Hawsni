@@ -121,15 +121,18 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
 
         try {
             const garmentUrl = productImages[selectedGarment];
+            console.log('🚀 Starting VTO:', { garmentUrl, userImageSize: userImage.length });
             const response = await vtoService.startTryOn(userImage, garmentUrl);
             const predictionId = response.id;
+            console.log('✅ VTO Started, Prediction ID:', predictionId);
 
             incrementUsage();
             setStatus('processing');
             pollStatus(predictionId);
         } catch (error: any) {
+            console.error('❌ VTO Start Error:', error);
             setStatus('failed');
-            setErrorMessage(error.toString());
+            setErrorMessage(error.toString() || (isRTL ? 'فشل بدء الخدمة الذكية' : 'Failed to start AI service'));
         }
     };
 
