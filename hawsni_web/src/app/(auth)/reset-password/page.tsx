@@ -26,7 +26,7 @@ function ResetPasswordForm() {
         setError('');
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            setError('كلمات المرور غير متطابقة');
             setIsLoading(false);
             return;
         }
@@ -38,14 +38,14 @@ function ResetPasswordForm() {
                 router.push('/login');
             }, 3000);
         } catch (err: any) {
-            setError(typeof err === 'string' ? err : (err.message || 'Failed to reset password'));
+            setError(typeof err === 'string' ? err : (err.message || 'فشل إعادة تعيين كلمة المرور'));
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="w-full max-w-md p-8 bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 relative z-10">
+        <div className="w-full max-w-md p-8 bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 relative z-10" dir="rtl">
             <div className="text-center mb-10">
                 <motion.div
                     initial={{ scale: 0.8 }}
@@ -55,9 +55,9 @@ function ResetPasswordForm() {
                 >
                     <KeyRound className="text-white w-8 h-8" />
                 </motion.div>
-                <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">Reset Password</h1>
+                <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">إعادة تعيين كلمة المرور</h1>
                 <p className="text-[var(--color-text-secondary)]">
-                    Enter the code sent to <span className="text-[var(--color-brand-primary)] font-medium">{email}</span> and your new password.
+                    أدخل الكود المرسل إلى <span className="text-[var(--color-brand-primary)] font-medium" dir="ltr">{email}</span> وكلمة المرور الجديدة.
                 </p>
             </div>
 
@@ -67,7 +67,7 @@ function ResetPasswordForm() {
                     animate={{ opacity: 1, height: 'auto' }}
                     className="mb-6 p-4 bg-red-50 rounded-xl flex items-center text-red-600 border border-red-100"
                 >
-                    <XCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+                    <XCircle className="w-5 h-5 ml-3 flex-shrink-0" />
                     <span className="text-sm font-medium">{error}</span>
                 </motion.div>
             )}
@@ -81,16 +81,16 @@ function ResetPasswordForm() {
                     <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
                         <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900">Success!</h2>
+                    <h2 className="text-xl font-bold text-gray-900">تم بنجاح!</h2>
                     <p className="text-[var(--color-text-secondary)]">
-                        Your password has been reset successfully.
+                        تمت إعادة تعيين كلمة المرور الخاصة بك بنجاح.
                     </p>
-                    <p className="text-sm text-emerald-600 font-medium">Redirecting to login...</p>
+                    <p className="text-sm text-emerald-600 font-medium">جاري التحويل لصفحة الدخول...</p>
                 </motion.div>
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-1">
-                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">Verification Code</label>
+                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">كود التحقق</label>
                         <input
                             type="text"
                             value={code}
@@ -103,9 +103,9 @@ function ResetPasswordForm() {
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">New Password</label>
+                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">كلمة المرور الجديدة</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                             </div>
                             <input
@@ -114,16 +114,16 @@ function ResetPasswordForm() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 minLength={6}
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
+                                className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
                                 placeholder="••••••••"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">Confirm New Password</label>
+                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">تأكيد كلمة المرور</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                             </div>
                             <input
@@ -131,7 +131,7 @@ function ResetPasswordForm() {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
+                                className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -148,8 +148,8 @@ function ResetPasswordForm() {
                             <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                             <>
-                                <span>Update Password</span>
-                                <ArrowRight className="w-5 h-5 ml-2" />
+                                <span>تحديث كلمة المرور</span>
+                                <ArrowRight className="w-5 h-5 mr-2 rotate-180" />
                             </>
                         )}
                     </motion.button>
@@ -158,7 +158,7 @@ function ResetPasswordForm() {
 
             <div className="mt-8 text-center">
                 <Link href="/login" className="text-sm font-semibold text-[var(--color-text-secondary)] hover:text-gray-900 transition-colors">
-                    Wait, I remember my password!
+                    تذكرت كلمة المرور؟ عد للدخول
                 </Link>
             </div>
         </div>

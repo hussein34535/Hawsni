@@ -41,7 +41,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-secondary)] relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-secondary)] relative overflow-hidden" dir="rtl">
             {/* Background Decorative Elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--color-brand-primary)] opacity-10 blur-[100px] rounded-full" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-[var(--color-brand-accent)] opacity-10 blur-[100px] rounded-full" />
@@ -61,8 +61,8 @@ export default function LoginPage() {
                     >
                         <span className="text-white text-2xl font-bold tracking-wider">H</span>
                     </motion.div>
-                    <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">Welcome Back</h1>
-                    <p className="text-[var(--color-text-secondary)]">Sign in to continue your style journey</p>
+                    <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">مرحباً بك مجدداً</h1>
+                    <p className="text-[var(--color-text-secondary)]">سجل دخولك لتكمل رحلتك في عالم الأناقة</p>
                 </div>
 
                 {error && (
@@ -71,16 +71,16 @@ export default function LoginPage() {
                         animate={{ opacity: 1, height: 'auto' }}
                         className="mb-6 p-4 bg-red-50 rounded-xl flex items-center text-red-600 border border-red-100"
                     >
-                        <XCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+                        <XCircle className="w-5 h-5 ml-3 flex-shrink-0" />
                         <span className="text-sm font-medium">{error}</span>
                     </motion.div>
                 )}
 
                 <form onSubmit={handleLogin} className="space-y-6">
                     <div className="space-y-1">
-                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">Email Address</label>
+                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">البريد الإلكتروني</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                             </div>
                             <input
@@ -88,21 +88,21 @@ export default function LoginPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
-                                placeholder="hello@hawsni.com"
+                                className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
+                                placeholder="example@hawsni.com"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <div className="flex items-center justify-between ml-1">
-                            <label className="text-sm font-semibold text-[var(--color-text-secondary)]">Password</label>
-                            <Link href="/forgot-password" className="text-sm font-medium text-[var(--color-brand-primary)] hover:text-[var(--color-brand-secondary)] transition-colors">
-                                Forgot password?
+                        <div className="flex items-center justify-between mr-1">
+                            <label className="text-sm font-semibold text-[var(--color-text-secondary)]">كلمة المرور</label>
+                            <Link href="/forgot-password" title="forgot-password" className="text-sm font-medium text-[var(--color-brand-primary)] hover:text-[var(--color-brand-secondary)] transition-colors">
+                                نسيت كلمة المرور؟
                             </Link>
                         </div>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                             </div>
                             <input
@@ -110,7 +110,7 @@ export default function LoginPage() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
+                                className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -127,23 +127,23 @@ export default function LoginPage() {
                             <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                             <>
-                                <span>Sign In</span>
-                                <ArrowRight className="w-5 h-5 ml-2" />
+                                <span>تسجيل الدخول</span>
+                                <ArrowRight className="w-5 h-5 mr-2 rotate-180" />
                             </>
                         )}
                     </motion.button>
                 </form>
 
                 <p className="mt-8 text-center text-[var(--color-text-secondary)]">
-                    Don't have an account?{' '}
-                    <Link href="/register" className="font-semibold text-[var(--color-brand-primary)] hover:underline">
-                        Create one
+                    ليس لديك حساب؟{' '}
+                    <Link href="/register" title="register" className="font-semibold text-[var(--color-brand-primary)] hover:underline">
+                        أنشئ حساباً جديداً
                     </Link>
                 </p>
 
                 <div className="mt-6 flex items-center justify-center">
-                    <Link href="/" className="text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors">
-                        Continue as Guest
+                    <Link href="/" title="guest" className="text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors">
+                        المتابعة كضيف
                     </Link>
                 </div>
             </motion.div>

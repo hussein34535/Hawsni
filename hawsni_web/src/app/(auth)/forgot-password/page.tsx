@@ -28,14 +28,14 @@ export default function ForgotPasswordPage() {
                 router.push(`/reset-password?email=${encodeURIComponent(email)}`);
             }, 3000);
         } catch (err: any) {
-            setError(typeof err === 'string' ? err : (err.message || 'Failed to send reset code'));
+            setError(typeof err === 'string' ? err : (err.message || 'فشل إرسال كود استعادة كلمة المرور'));
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-secondary)] relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-secondary)] relative overflow-hidden" dir="rtl">
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--color-brand-primary)] opacity-10 blur-[100px] rounded-full" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-[var(--color-brand-accent)] opacity-10 blur-[100px] rounded-full" />
 
@@ -54,8 +54,8 @@ export default function ForgotPasswordPage() {
                     >
                         <LockKeyhole className="text-white w-8 h-8" />
                     </motion.div>
-                    <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">Forgot Password?</h1>
-                    <p className="text-[var(--color-text-secondary)]">No worries! Enter your email to receive a reset code.</p>
+                    <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">نسيت كلمة المرور؟</h1>
+                    <p className="text-[var(--color-text-secondary)]">لا تقلق! أدخل بريدك الإلكتروني لتلقي كود الاستعادة.</p>
                 </div>
 
                 {error && (
@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
                         animate={{ opacity: 1, height: 'auto' }}
                         className="mb-6 p-4 bg-red-50 rounded-xl flex items-center text-red-600 border border-red-100"
                     >
-                        <XCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+                        <XCircle className="w-5 h-5 ml-3 flex-shrink-0" />
                         <span className="text-sm font-medium">{error}</span>
                     </motion.div>
                 )}
@@ -78,18 +78,18 @@ export default function ForgotPasswordPage() {
                         <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
                             <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">Check Your Email</h2>
+                        <h2 className="text-xl font-bold text-gray-900">تحقق من بريدك الإلكتروني</h2>
                         <p className="text-[var(--color-text-secondary)]">
-                            We've sent a 6-digit verification code to <strong>{email}</strong>.
+                            لقد أرسلنا كود التحقق المكون من 6 أرقام إلى <strong>{email}</strong>.
                         </p>
-                        <p className="text-sm text-emerald-600 font-medium">Redirecting to reset page...</p>
+                        <p className="text-sm text-emerald-600 font-medium">جاري التحويل لصفحة التغيير...</p>
                     </motion.div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-1">
-                            <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">Email Address</label>
+                            <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">البريد الإلكتروني</label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                     <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                                 </div>
                                 <input
@@ -97,8 +97,8 @@ export default function ForgotPasswordPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
-                                    placeholder="hello@hawsni.com"
+                                    className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
+                                    placeholder="example@hawsni.com"
                                 />
                             </div>
                         </div>
@@ -114,8 +114,8 @@ export default function ForgotPasswordPage() {
                                 <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    <span>Send Reset Code</span>
-                                    <ArrowRight className="w-5 h-5 ml-2" />
+                                    <span>إرسال كود الاستعادة</span>
+                                    <ArrowRight className="w-5 h-5 mr-2 rotate-180" />
                                 </>
                             )}
                         </motion.button>
@@ -124,7 +124,7 @@ export default function ForgotPasswordPage() {
 
                 <div className="mt-8 text-center">
                     <Link href="/login" className="text-sm font-semibold text-[var(--color-brand-primary)] hover:underline">
-                        Back to Login
+                        العودة لتسجيل الدخول
                     </Link>
                 </div>
             </motion.div>

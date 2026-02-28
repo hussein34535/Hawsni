@@ -31,21 +31,20 @@ export default function RegisterPage() {
 
             const data = await authService.register({ name, email, phone, password });
             if (data.success) {
-                setUser(data.user, data.token);
-                // In a real app, we might redirect to OTP verification here
-                router.push('/');
+                // Redirect to OTP verification instead of home
+                router.push(`/verify-email?email=${encodeURIComponent(email)}`);
             } else {
-                setError(data.message || 'Registration failed');
+                setError(data.message || 'فشل إنشاء الحساب');
             }
         } catch (err: any) {
-            setError(typeof err === 'string' ? err : (err.message || 'Failed to register'));
+            setError(typeof err === 'string' ? err : (err.message || 'حدث خطأ أثناء التسجيل'));
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-secondary)] relative overflow-hidden py-10">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-secondary)] relative overflow-hidden py-10" dir="rtl">
             {/* Background Decorative Elements */}
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--color-brand-primary)] opacity-10 blur-[100px] rounded-full" />
             <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-[var(--color-brand-accent)] opacity-10 blur-[100px] rounded-full" />
@@ -65,8 +64,8 @@ export default function RegisterPage() {
                     >
                         <span className="text-white text-2xl font-bold tracking-wider">H</span>
                     </motion.div>
-                    <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">Create Account</h1>
-                    <p className="text-[var(--color-text-secondary)]">Join Hawsni and discover premium fashion</p>
+                    <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">إنشاء حساب جديد</h1>
+                    <p className="text-[var(--color-text-secondary)]">انضم إلى حوسني واكتشف عالم الأناقة</p>
                 </div>
 
                 {error && (
@@ -75,16 +74,16 @@ export default function RegisterPage() {
                         animate={{ opacity: 1, height: 'auto' }}
                         className="mb-6 p-4 bg-red-50 rounded-xl flex items-center text-red-600 border border-red-100"
                     >
-                        <XCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+                        <XCircle className="w-5 h-5 ml-3 flex-shrink-0" />
                         <span className="text-sm font-medium">{error}</span>
                     </motion.div>
                 )}
 
                 <form onSubmit={handleRegister} className="space-y-5">
                     <div className="space-y-1">
-                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">Full Name</label>
+                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">الاسم الكامل</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <UserIcon className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                             </div>
                             <input
@@ -92,16 +91,16 @@ export default function RegisterPage() {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
-                                placeholder="John Doe"
+                                className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
+                                placeholder="الاسم الأول والأخير"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">Email Address</label>
+                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">البريد الإلكتروني</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                             </div>
                             <input
@@ -109,16 +108,16 @@ export default function RegisterPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
-                                placeholder="hello@hawsni.com"
+                                className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
+                                placeholder="example@hawsni.com"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">Phone Number</label>
+                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">رقم الهاتف</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <Phone className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                             </div>
                             <input
@@ -126,16 +125,16 @@ export default function RegisterPage() {
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 required
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
-                                placeholder="+20 100 000 0000"
+                                className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
+                                placeholder="+20 123 456 7890"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] ml-1">Password</label>
+                        <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">كلمة المرور</label>
                         <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                 <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
                             </div>
                             <input
@@ -144,7 +143,7 @@ export default function RegisterPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 minLength={6}
-                                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all"
+                                className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -161,17 +160,17 @@ export default function RegisterPage() {
                             <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
                             <>
-                                <span>Create Account</span>
-                                <ArrowRight className="w-5 h-5 ml-2" />
+                                <span>إنشاء الحساب</span>
+                                <ArrowRight className="w-5 h-5 mr-2 rotate-180" />
                             </>
                         )}
                     </motion.button>
                 </form>
 
                 <p className="mt-8 text-center text-[var(--color-text-secondary)]">
-                    Already have an account?{' '}
+                    لديك حساب بالفعل؟{' '}
                     <Link href="/login" className="font-semibold text-[var(--color-brand-primary)] hover:underline">
-                        Sign in
+                        تسجيل الدخول
                     </Link>
                 </p>
             </motion.div>
