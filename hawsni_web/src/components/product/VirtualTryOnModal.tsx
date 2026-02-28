@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Camera, Image as ImageIcon, Sparkles, RefreshCw, Share2, AlertCircle, Check, UserPlus } from 'lucide-react';
+import { X, Camera, Image as ImageIcon, Sparkles, RefreshCw, Share2, AlertCircle, Check, UserPlus, Maximize2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
 import { vtoService } from '@/services/vtoService';
@@ -53,11 +53,32 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+    const [showFullscreen, setShowFullscreen] = useState(false);
+
     useEffect(() => {
         return () => {
             if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
         };
     }, []);
+
+    const handleDownload = async () => {
+        if (!resultImageUrl) return;
+        try {
+            const response = await fetch(resultImageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `hawsni-vto-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download failed:', error);
+            alert(isRTL ? 'فشل تحميل الصورة' : 'Failed to download image');
+        }
+    };
 
     const compressImage = (file: File, maxDimension = 1024, quality = 0.7): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -318,7 +339,10 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
                                     )}
 
                                     {/* User/Result Image */}
-                                    <div className="relative w-full aspect-[3/4] max-w-[240px] bg-gray-100 rounded-[20px] overflow-hidden shadow-lg border border-gray-50">
+                                    <div
+                                        onClick={() => resultImageUrl && setShowFullscreen(true)}
+                                        className={`relative w-full aspect-[3/4] max-w-[240px] bg-gray-100 rounded-[20px] overflow-hidden shadow-lg border border-gray-50 ${resultImageUrl ? 'cursor-zoom-in' : ''}`}
+                                    >
                                         <AnimatePresence mode="wait">
                                             <motion.img
                                                 key={resultImageUrl || userImage}
@@ -328,6 +352,14 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
                                                 className="w-full h-full object-cover"
                                             />
                                         </AnimatePresence>
+
+                                        {resultImageUrl && (
+                                            <div className="absolute top-3 right-3 flex gap-2">
+                                                <div className="w-8 h-8 bg-black/40 backdrop-blur-md rounded-lg flex items-center justify-center text-white">
+                                                    <Maximize2 size={16} />
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {(status === 'uploading' || status === 'processing') && (
                                             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white p-4 text-center">
@@ -360,9 +392,11 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
                                         {t.product?.vto_try_another || (isRTL ? 'جرب مرة ثانية' : 'Try another')}
                                     </button>
                                     <button
-                                        className="h-11 w-11 bg-[var(--color-brand-primary)] text-white rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                                        onClick={handleDownload}
+                                        className="h-11 px-4 bg-[var(--color-brand-primary)] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform font-black font-cairo text-xs"
                                     >
-                                        <Share2 size={18} />
+                                        <Download size={18} />
+                                        {isRTL ? 'تحميل' : 'Save'}
                                     </button>
                                 </div>
                             ) : (
@@ -384,6 +418,48 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
                             className="hidden"
                         />
                     </motion.div>
+
+                    {/* Fullscreen Viewer Overlay */}
+                    <AnimatePresence>
+                        {showFullscreen && resultImageUrl && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 bg-black/95 z-[200] flex flex-col items-center justify-center p-4 md:p-10"
+                            >
+                                <button
+                                    onClick={() => setShowFullscreen(false)}
+                                    className="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full flex items-center justify-center text-white transition-colors z-[210]"
+                                >
+                                    <X size={24} />
+                                </button>
+
+                                <div className="absolute top-6 left-6 flex gap-3 z-[210]">
+                                    <button
+                                        onClick={handleDownload}
+                                        className="h-12 px-6 bg-[var(--color-brand-primary)] text-white rounded-2xl flex items-center justify-center gap-2 shadow-xl font-black font-cairo"
+                                    >
+                                        <Download size={20} />
+                                        {isRTL ? 'تحميل الصورة' : 'Download Image'}
+                                    </button>
+                                </div>
+
+                                <motion.div
+                                    initial={{ scale: 0.9, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0.9, opacity: 0 }}
+                                    className="relative w-full h-full max-w-4xl flex items-center justify-center"
+                                >
+                                    <img
+                                        src={resultImageUrl}
+                                        alt="Fullscreen Result"
+                                        className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+                                    />
+                                </motion.div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </>
             )}
         </AnimatePresence>
