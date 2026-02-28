@@ -33,10 +33,12 @@ class OrdersController {
                         order.product_image = firstProduct?.images?.[0] || null;
                         order.product_name = firstProduct?.name || 'منتج';
                         order.items_count = items.length;
+                        order.items = items; // Attach full items list
                     } else {
                         order.product_image = null;
                         order.product_name = 'منتج';
                         order.items_count = 0;
+                        order.items = [];
                     }
 
                     return order;

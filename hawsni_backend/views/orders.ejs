@@ -1,20 +1,50 @@
 <%- include('partials/header', { title: 'إدارة الطلبات' , pageTitle: 'الطلبات' , page: 'orders' }) %>
 
+    <!-- Summary Stats -->
+    <div class="stats-grid">
+        <% const totalRevenue=orders.reduce((acc, o)=> acc + parseFloat(o.total || 0), 0);
+            const pendingOrders = orders.filter(o => o.status === 'Processing').length;
+            const completedOrders = orders.filter(o => o.status === 'Delivered').length;
+            %>
+            <div class="stat-card primary">
+                <div class="stat-header">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-label">إجمالي المبيعات</div>
+                </div>
+                <div class="stat-value">
+                    <%= totalRevenue.toLocaleString() %> ج.م
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-header">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-label">طلبات قيد المعالجة</div>
+                </div>
+                <div class="stat-value">
+                    <%= pendingOrders %>
+                </div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-label">طلبات مكتملة</div>
+                </div>
+                <div class="stat-value">
+                    <%= completedOrders %>
+                </div>
+            </div>
+    </div>
+
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">
-                <i class="fas fa-shopping-cart"></i> جميع الطلبات
+                <i class="fas fa-list-ul"></i> قائمة الطلبات الحالية
             </h2>
-        </div>
 
-        <% if (orders && orders.length> 0) { %>
-            <!-- Bulk Action Bar -->
-            <div id="bulkBar"
-                style="display:none; background: #f0f4ff; border: 1px solid #c7d7ff; border-radius: 10px; padding: 0.75rem 1.25rem; margin-bottom: 1rem; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                <span id="selectedCount" style="font-weight: 600; color: #3b5bdb;">0 محدد</span>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                    <select id="bulkStatusSelect" class="form-control"
-                        style="width: auto; padding: 0.3rem 0.75rem; font-size: 0.85rem;">
+            <div id="bulkBar" style="display:none; align-items: center; gap: 1rem;">
+                <span id="selectedCount" class="badge badge-info" style="font-size: 0.9rem;">0 محدد</span>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <select id="bulkStatusSelect" class="form-control" style="width: auto; height: 38px;">
                         <option value="">-- تغيير الحالة --</option>
                         <option value="Processing">قيد المعالجة</option>
                         <option value="Shipped">تم الشحن</option>
@@ -22,22 +52,19 @@
                         <option value="Delivered">تم التوصيل</option>
                         <option value="Cancelled">ملغي</option>
                     </select>
-                    <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm">
-                        <i class="fas fa-check"></i> تطبيق الحالة
-                    </button>
-                    <button onclick="clearSelection()" class="btn btn-sm" style="background:#e9ecef; color:#555;">
-                        <i class="fas fa-times"></i> إلغاء التحديد
-                    </button>
+                    <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm">تطبيق</button>
+                    <button onclick="clearSelection()" class="btn btn-secondary btn-sm">إلغاء</button>
                 </div>
             </div>
+        </div>
 
+        <% if (orders && orders.length> 0) { %>
             <div class="table-responsive">
-                <table>
+                <table class="modern-table">
                     <thead>
                         <tr>
                             <th style="width:40px;">
-                                <input type="checkbox" id="selectAll" onchange="toggleAll(this)"
-                                    style="width:16px;height:16px;cursor:pointer;">
+                                <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
                             </th>
                             <th>المنتج</th>
                             <th>العميل</th>
@@ -45,117 +72,238 @@
                             <th>المبلغ</th>
                             <th>الحالة</th>
                             <th>التاريخ</th>
-                            <th>تغيير الحالة</th>
+                            <th style="width: 150px;">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% orders.forEach(order=> { %>
-                            <tr id="row-<%= order.id %>">
-                                <td>
-                                    <input type="checkbox" class="order-checkbox" value="<%= order.id %>"
-                                        onchange="updateBulkBar()" style="width:16px;height:16px;cursor:pointer;">
-                                </td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <% if (order.product_image) { %>
-                                            <img src="<%= order.product_image %>" alt="<%= order.product_name %>"
-                                                style="width: 60px; height: 60px; border-radius: var(--radius-md); object-fit: cover; border: 2px solid var(--light-gray);">
-                                            <% } else { %>
-                                                <div
-                                                    style="width: 60px; height: 60px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%); display: flex; align-items: center; justify-content: center;">
-                                                    <i class="fas fa-shopping-bag"
-                                                        style="color: var(--dark); opacity: 0.3; font-size: 1.5rem;"></i>
-                                                </div>
-                                                <% } %>
-                                                    <div>
-                                                        <div style="font-weight: 600; color: var(--dark-gray);">
-                                                            <%= order.product_name %>
-                                                        </div>
-                                                        <% if (order.items_count> 1) { %>
-                                                            <small style="color: var(--medium-gray);">
-                                                                + <%= order.items_count - 1 %> منتجات أخرى
-                                                            </small>
-                                                            <% } %>
+                            <% let cName='غير معروف' ; let cPhone='-' ; let cAddr='بدون عنوان' ; if (order.users) {
+                                cName=order.users.name || cName; cPhone=order.users.phone || cPhone; } let
+                                ship=order.shipping_address; if (typeof ship==='string' && ship.trim().startsWith('{'))
+                                { try { ship=JSON.parse(ship); } catch (e) { } } if (typeof ship==='object' && ship
+                                !==null) { cName=ship.name || ship.guestName || cName; cPhone=ship.phone ||
+                                ship.guestPhone || cPhone; cAddr=ship.address || ship.shippingAddress || cAddr; } else
+                                if (typeof ship==='string' && ship.trim() !=='' ) { cAddr=ship; } const
+                                sMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'In Transit' : 'info'
+                                , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; const sClass=sMap[order.status]
+                                || 'warning' ; %>
+                                <tr id="row-<%= order.id %>" class="order-row"
+                                    onclick="showOrderDetails('<%= order.id %>')">
+                                    <td onclick="event.stopPropagation()">
+                                        <input type="checkbox" class="order-checkbox" value="<%= order.id %>"
+                                            onchange="updateBulkBar()">
+                                    </td>
+                                    <td>
+                                        <div class="product-cell">
+                                            <% if (order.product_image) { %>
+                                                <img src="<%= order.product_image %>" class="product-img-lg">
+                                                <% } else { %>
+                                                    <div class="product-img-placeholder"><i class="fas fa-box"></i>
                                                     </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <% let cName='غير معروف' ; let cPhone='-' ; let cAddr='بدون عنوان' ; if
-                                        (order.users) { cName=order.users.name || cName; cPhone=order.users.phone ||
-                                        cPhone; } let ship=order.shipping_address; if (typeof ship==='string' &&
-                                        ship.trim().startsWith('{')) { try { ship=JSON.parse(ship); } catch (e) { } } if
-                                        (typeof ship==='object' && ship !==null) { cName=ship.name || ship.guestName ||
-                                        cName; cPhone=ship.phone || ship.guestPhone || cPhone; cAddr=ship.address ||
-                                        ship.shippingAddress || cAddr; } else if (typeof ship==='string' && ship.trim()
-                                        !=='' ) { cAddr=ship; } %>
-                                        <div style="font-size: 0.9rem;">
-                                            <strong>
-                                                <%= cName %>
-                                            </strong><br>
-                                            <small>
-                                                <%= cPhone %>
-                                            </small><br>
-                                            <small
-                                                style="color: var(--medium-gray); display: block; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                                                title="<%= cAddr %>">
-                                                <%= cAddr %>
-                                            </small>
+                                                    <% } %>
+                                                        <div>
+                                                            <div class="product-title">
+                                                                <%= order.product_name %>
+                                                            </div>
+                                                            <% if (order.items_count> 1) { %>
+                                                                <div class="product-count">+ <%= order.items_count - 1
+                                                                        %> منتجات أخرى</div>
+                                                                <% } %>
+                                                        </div>
                                         </div>
-                                </td>
-                                <td>
-                                    <span style="font-weight: 600; color: var(--dark-gray);">
-                                        #<%= order.id.substring(0, 8) %>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span style="font-weight: 700; color: var(--success); font-size: 1.1rem;">
-                                        <%= parseFloat(order.total).toFixed(2) %> ج.م
-                                    </span>
-                                </td>
-                                <td>
-                                    <% const sMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'In Transit'
-                                        : 'info' , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; const
-                                        sClass=sMap[order.status] || 'warning' ; %>
-                                        <span class="badge badge-<%= sClass %>" id="status-badge-<%= order.id %>">
+                                    </td>
+                                    <td>
+                                        <div class="customer-cell">
+                                            <div class="avatar-small">
+                                                <%= cName.charAt(0) %>
+                                            </div>
+                                            <div>
+                                                <div class="customer-name">
+                                                    <%= cName %>
+                                                </div>
+                                                <div class="customer-phone">
+                                                    <%= cPhone %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="order-id">#<%= order.id.substring(0, 8) %></span></td>
+                                    <td><span class="order-amount">
+                                            <%= parseFloat(order.total).toFixed(2) %> ج.م
+                                        </span></td>
+                                    <td>
+                                        <span class="badge badge-<%= sClass %>">
                                             <%= order.status || 'Processing' %>
                                         </span>
-                                </td>
-                                <td>
-                                    <%= new Date(order.created_at).toLocaleDateString('ar-EG', { year: 'numeric' ,
-                                        month: 'long' , day: 'numeric' }) %>
-                                </td>
-                                <td>
-                                    <form method="POST" action="/orders/<%= order.id %>/status">
-                                        <select name="status" class="form-control"
-                                            style="width: auto; padding: 0.3rem 0.5rem; font-size: 0.85rem;"
-                                            onchange="this.form.submit()">
-                                            <option value="Processing" <%=order.status==='Processing' ? 'selected' : ''
-                                                %>>قيد المعالجة</option>
-                                            <option value="Shipped" <%=order.status==='Shipped' ? 'selected' : '' %>>تم
-                                                الشحن</option>
-                                            <option value="In Transit" <%=order.status==='In Transit' ? 'selected' : ''
-                                                %>>في الطريق</option>
-                                            <option value="Delivered" <%=order.status==='Delivered' ? 'selected' : '' %>
-                                                >تم التوصيل</option>
-                                            <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected' : '' %>
-                                                >ملغي</option>
-                                        </select>
-                                    </form>
-                                </td>
-                            </tr>
-                            <% }) %>
+                                    </td>
+                                    <td>
+                                        <div class="date-cell">
+                                            <%= new Date(order.created_at).toLocaleDateString('ar-EG', { day: 'numeric'
+                                                , month: 'short' }) %>
+                                                <span>
+                                                    <%= new Date(order.created_at).getFullYear() %>
+                                                </span>
+                                        </div>
+                                    </td>
+                                    <td onclick="event.stopPropagation()">
+                                        <div class="action-cell">
+                                            <form method="POST" action="/orders/<%= order.id %>/status">
+                                                <select name="status" class="status-select select-<%= sClass %>"
+                                                    onchange="this.form.submit()">
+                                                    <option value="Processing" <%=order.status==='Processing'
+                                                        ? 'selected' : '' %>>Processing</option>
+                                                    <option value="Shipped" <%=order.status==='Shipped' ? 'selected'
+                                                        : '' %>>Shipped</option>
+                                                    <option value="In Transit" <%=order.status==='In Transit'
+                                                        ? 'selected' : '' %>>In Transit</option>
+                                                    <option value="Delivered" <%=order.status==='Delivered' ? 'selected'
+                                                        : '' %>>Delivered</option>
+                                                    <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected'
+                                                        : '' %>>Cancelled</option>
+                                                </select>
+                                            </form>
+                                            <button class="btn-icon" onclick="showOrderDetails('<%= order.id %>')">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
                     </tbody>
                 </table>
             </div>
             <% } else { %>
-                <div class="text-center" style="padding: 3rem; color: var(--medium-gray);">
-                    <i class="fas fa-shopping-cart" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-                    <p style="font-size: 1.1rem;">لا توجد طلبات حتى الآن</p>
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>لا توجد طلبات حتى الآن</p>
                 </div>
                 <% } %>
     </div>
 
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalOrderId" class="modal-title"></h3>
+                    <p id="modalOrderDate" class="modal-subtitle"></p>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <!-- Left: Items -->
+                    <div class="modal-section">
+                        <h4 class="section-title"><i class="fas fa-box-open"></i> محتويات الطلب</h4>
+                        <div id="modalItemsList" class="modal-items-list">
+                            <!-- Items populated via JS -->
+                        </div>
+                        <div class="order-total-card">
+                            <span>الإجمالي</span>
+                            <span id="modalTotal" class="total-price"></span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Info -->
+                    <div class="modal-section">
+                        <h4 class="section-title"><i class="fas fa-user-circle"></i> بيانات العميل</h4>
+                        <div class="info-card">
+                            <div class="info-item">
+                                <label>الاسم</label>
+                                <p id="modalCustomerName"></p>
+                            </div>
+                            <div class="info-item">
+                                <label>رقم الهاتف</label>
+                                <p id="modalCustomerPhone"></p>
+                            </div>
+                        </div>
+
+                        <h4 class="section-title" style="margin-top: 2rem;"><i class="fas fa-map-marker-alt"></i> عنوان
+                            التوصيل</h4>
+                        <div class="info-card shipping">
+                            <p id="modalAddress"></p>
+                            <button class="btn-copy" onclick="copyAddress()">
+                                <i class="fas fa-copy"></i> نسخ العنوان
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        const ordersData = <% - JSON.stringify(orders) %>;
+
+        function showOrderDetails(orderId) {
+            const order = ordersData.find(o => o.id === orderId);
+            if (!order) return;
+
+            // Header
+            document.getElementById('modalOrderId').textContent = 'طلب رقم #' + order.id.substring(0, 8);
+            document.getElementById('modalOrderDate').textContent = new Date(order.created_at).toLocaleString('ar-EG');
+
+            // Customer Info
+            let cName = order.users?.name || 'غير معروف';
+            let cPhone = order.users?.phone || '-';
+            let cAddr = 'بدون عنوان';
+
+            let ship = order.shipping_address;
+            if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                try { ship = JSON.parse(ship); } catch (e) { }
+            }
+
+            if (typeof ship === 'object' && ship !== null) {
+                cName = ship.name || ship.guestName || cName;
+                cPhone = ship.phone || ship.guestPhone || cPhone;
+                cAddr = ship.address || ship.shippingAddress || cAddr;
+            } else if (typeof ship === 'string' && ship.trim() !== '') {
+                cAddr = ship;
+            }
+
+            document.getElementById('modalCustomerName').textContent = cName;
+            document.getElementById('modalCustomerPhone').textContent = cPhone;
+            document.getElementById('modalAddress').textContent = cAddr;
+
+            // Items List
+            const itemsList = document.getElementById('modalItemsList');
+            itemsList.innerHTML = '';
+
+            (order.items || []).forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'modal-item-row';
+                itemDiv.innerHTML = `
+                    <div class="item-info">
+                        <img src="${item.products?.images?.[0] || ''}" class="item-img">
+                        <div>
+                            <div class="item-name">${item.products?.name || 'منتج'}</div>
+                            <div class="item-meta">الكمية: ${item.quantity} | السعر: ${parseFloat(item.price).toFixed(2)} ج.م</div>
+                        </div>
+                    </div>
+                    <div class="item-subtotal">${(item.quantity * item.price).toFixed(2)} ج.م</div>
+                `;
+                itemsList.appendChild(itemDiv);
+            });
+
+            document.getElementById('modalTotal').textContent = parseFloat(order.total).toFixed(2) + ' ج.م';
+
+            document.getElementById('orderModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function copyAddress() {
+            const addr = document.getElementById('modalAddress').textContent;
+            navigator.clipboard.writeText(addr);
+            showToast('تم نسخ العنوان بنجاح');
+        }
+
+        // Bulk Actions
         function getSelectedIds() {
             return [...document.querySelectorAll('.order-checkbox:checked')].map(cb => cb.value);
         }
@@ -165,10 +313,6 @@
             const bar = document.getElementById('bulkBar');
             document.getElementById('selectedCount').textContent = ids.length + ' محدد';
             bar.style.display = ids.length > 0 ? 'flex' : 'none';
-            document.getElementById('selectAll').indeterminate =
-                ids.length > 0 && ids.length < document.querySelectorAll('.order-checkbox').length;
-            document.getElementById('selectAll').checked =
-                ids.length === document.querySelectorAll('.order-checkbox').length;
         }
 
         function toggleAll(cb) {
@@ -176,17 +320,10 @@
             updateBulkBar();
         }
 
-        function clearSelection() {
-            document.querySelectorAll('.order-checkbox').forEach(c => c.checked = false);
-            document.getElementById('selectAll').checked = false;
-            updateBulkBar();
-        }
-
         async function bulkChangeStatus() {
             const ids = getSelectedIds();
             const status = document.getElementById('bulkStatusSelect').value;
-            if (!ids.length) return showToast('اختر طلبات أولاً', 'error');
-            if (!status) return showToast('اختر حالة', 'error');
+            if (!ids.length || !status) return;
 
             try {
                 const res = await fetch('/orders/bulk-status', {
@@ -196,15 +333,496 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(`تم تحديث ${ids.length} طلب بنجاح`, 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    showToast(data.message || 'فشل التحديث', 'error');
+                    window.location.reload();
                 }
-            } catch (e) {
-                showToast('حدث خطأ', 'error');
-            }
+            } catch (e) { }
+        }
+
+        // Close modal on click outside
+        window.onclick = (event) => {
+            const modal = document.getElementById('orderModal');
+            if (event.target == modal) closeModal();
         }
     </script>
+
+    <style>
+        .modern-table {
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin-top: -8px;
+            border: none;
+        }
+
+        .modern-table tr {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
+        }
+
+        .order-row {
+            cursor: pointer;
+        }
+
+        .order-row:hover {
+            transform: scale(1.005);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            background: var(--white) !important;
+        }
+
+        .order-row td {
+            background: var(--white);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px;
+        }
+
+        .order-row td:first-child {
+            border-right: 1px solid var(--border-color);
+            border-radius: 0 12px 12px 0;
+        }
+
+        .order-row td:last-child {
+            border-left: 1px solid var(--border-color);
+            border-radius: 12px 0 0 12px;
+        }
+
+        .product-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-img-lg {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+
+        .product-img-placeholder {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .product-title {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .product-count {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .customer-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: #e0e7ff;
+            color: #4338ca;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+        }
+
+        .customer-name {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .customer-phone {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .order-id {
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: var(--primary-light);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .order-amount {
+            font-weight: 800;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        .date-cell {
+            display: flex;
+            flex-direction: column;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--medium-gray);
+        }
+
+        .date-cell span {
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        .action-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-select {
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .status-select.select-warning {
+            color: #92400e;
+        }
+
+        .status-select.select-info {
+            color: #1e40af;
+        }
+
+        .status-select.select-success {
+            color: #065f46;
+        }
+
+        .status-select.select-danger {
+            color: #991b1b;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--light-gray);
+            color: var(--medium-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-icon:hover {
+            background: var(--dark);
+            color: var(--white);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--white);
+            width: 90%;
+            max-width: 900px;
+            border-radius: 24px;
+            padding: 0;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #fafafa;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .modal-subtitle {
+            color: var(--medium-gray);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .modal-close {
+            font-size: 2rem;
+            border: none;
+            background: transparent;
+            color: var(--medium-gray);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 32px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+            opacity: 0.8;
+        }
+
+        .modal-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .item-name {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .item-meta {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .item-subtotal {
+            font-weight: 800;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .order-total-card {
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--dark);
+            color: var(--white);
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .total-price {
+            color: #fbbf24;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .info-item {
+            margin-bottom: 12px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .info-item p {
+            font-weight: 800;
+            color: var(--dark);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .info-card.shipping {
+            position: relative;
+            padding-bottom: 50px;
+        }
+
+        .info-card.shipping p {
+            font-weight: 600;
+            line-height: 1.5;
+            color: var(--dark-gray);
+        }
+
+        .btn-copy {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            border: none;
+            background: var(--white);
+            color: var(--primary-color);
+            font-weight: 800;
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-copy:hover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .empty-state {
+            padding: 60px;
+            text-align: center;
+            color: var(--medium-gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            opacity: 0.2;
+            margin-bottom: 20px;
+        }
+
+        .empty-state p {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin-top: 20px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modern-table thead {
+                display: none;
+            }
+
+            .modern-table tr {
+                display: block;
+                margin-bottom: 16px;
+                border-radius: 16px;
+                border: 1px solid var(--border-color);
+                overflow: hidden;
+            }
+
+            .modern-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: none;
+                padding: 12px 16px;
+            }
+
+            .modern-table td:first-child,
+            .modern-table td:last-child {
+                border: none;
+                border-radius: 0;
+            }
+
+            .modern-table td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: var(--medium-gray);
+                font-size: 0.8rem;
+            }
+
+            .modern-table td:first-child {
+                background: #fafafa;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+    </style>
 
     <%- include('partials/footer') %>

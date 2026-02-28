@@ -641,3 +641,35 @@ tr:hover {
         /* 1 column on very small */
     }
 }
+
+/* Toast Notifications */
+#toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 9999;
+}
+
+.toast {
+    background: var(--dark);
+    color: var(--white);
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
