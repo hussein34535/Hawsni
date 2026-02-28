@@ -21,14 +21,18 @@ exports.startTryOn = async (req, res) => {
         // 1. Dynamic Category Detection
         let category = "upper_body";
         const desc = (description || "").toLowerCase();
-        if (desc.includes("pants") || desc.includes("trousers") || desc.includes("jeans") || desc.includes("skirt") || desc.includes("shorts")) {
+
+        const lowerBodyKeywords = ["pants", "trousers", "jeans", "skirt", "shorts", "بنطلون", "جيب"];
+        const fullBodyKeywords = ["dress", "abaya", "kaftan", "onesie", "jumpsuit", "بيجاما", "بيجامة", "سالوبيت", "سلوبيت", "فستان", "عباية"];
+
+        if (lowerBodyKeywords.some(k => desc.includes(k))) {
             category = "lower_body";
-        } else if (desc.includes("dress") || desc.includes("abaya") || desc.includes("kaftan")) {
+        } else if (fullBodyKeywords.some(k => desc.includes(k))) {
             category = "dresses";
         }
 
         // 2. Comprehensive Negative Prompt
-        const negativePrompt = "low quality, bad anatomy, distorted, deformed, unrelated objects, bare limbs where garment should be, missing sleeves, messy background, extra limbs, fingers disfigured";
+        const negativePrompt = "low quality, bad anatomy, distorted, deformed, unrelated objects, bare limbs where garment should be, missing sleeves, messy background, extra limbs, fingers disfigured, text, font, branding, logos, watermark, letters, signature, graphics on chest";
 
         console.log(`VTO Request: category=${category}, desc=${description || 'none'}`);
 
@@ -43,12 +47,12 @@ exports.startTryOn = async (req, res) => {
                 input: {
                     human_img: human_image,
                     garm_img: garment_image,
-                    garment_des: description || "clothing piece, high quality",
+                    garment_des: (description || "clothing piece") + ", high quality, highly detailed fabric",
                     crop: false,
-                    steps: 40,
+                    steps: 50, // Increased for better detail
                     category: category,
                     negative_prompt: negativePrompt,
-                    guidance_scale: 2.5 // Slightly higher guidance for better prompt adherence
+                    guidance_scale: 3.0 // Higher guidance for better alignment
                 },
             }),
         });
