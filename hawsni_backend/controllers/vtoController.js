@@ -49,7 +49,7 @@ exports.startTryOn = async (req, res) => {
                     garm_img: garment_image,
                     garment_des: (description || "clothing piece") + ", high quality, highly detailed fabric",
                     crop: false,
-                    steps: 50, // Increased for better detail
+                    steps: 40, // Max limit for this model is 40
                     category: category,
                     negative_prompt: negativePrompt,
                     guidance_scale: 3.0 // Higher guidance for better alignment
