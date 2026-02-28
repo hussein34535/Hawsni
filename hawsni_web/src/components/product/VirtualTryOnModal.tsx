@@ -211,7 +211,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
                                     </div>
                                     {!isLoggedIn() ? (
                                         <button
-                                            onClick={() => { onClose(); window.location.href = '/auth'; }}
+                                            onClick={() => { onClose(); window.location.href = '/register'; }}
                                             className="w-full h-11 bg-[var(--color-brand-primary)] text-white rounded-xl font-black text-sm shadow-lg font-cairo flex items-center justify-center gap-2"
                                         >
                                             <UserPlus size={18} />

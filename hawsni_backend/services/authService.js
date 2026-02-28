@@ -83,13 +83,22 @@ class AuthService {
                 throw new Error(`Database Error: ${profileError.message}`);
             }
 
+            // 4. Generate Token for Auto-Login 🚀
+            const token = this.generateToken(user.id, email, 'user');
+
             console.log(`[OTP SENT] OTP for ${email}: ${otpCode}`);
 
             return {
+                token,
+                user: {
+                    id: user.id,
+                    name: name,
+                    email: email,
+                    role: 'user',
+                    phone: phone
+                },
                 requireOtp: true,
-                email: email,
-                phone: phone,
-                message: 'Please verify your email address'
+                message: 'Account created and logged in. Please verify your email later.'
             };
         }
 

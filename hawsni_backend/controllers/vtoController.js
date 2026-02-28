@@ -32,7 +32,7 @@ exports.startTryOn = async (req, res) => {
                     garm_img: garment_image,
                     garment_des: description || "clothing",
                     crop: false,
-                    steps: 30,
+                    steps: 40,
                     category: "upper_body"
                 },
             }),
