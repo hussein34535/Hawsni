@@ -29,7 +29,8 @@ class ReviewService {
             }
             return {
                 ...review,
-                user: { name: userName, id: review.user_id }
+                _id: review.id, // Map review ID to _id
+                user: { name: userName, _id: review.user_id } // Map user ID to _id
             };
         }));
 
