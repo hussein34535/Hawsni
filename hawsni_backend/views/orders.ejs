@@ -80,29 +80,25 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <% let customerName='غير معروف' ; let customerPhone='-' ; let
-                                        displayAddress='بدون عنوان' ; // 1. Try to get from joined users table if
-                                        (order.users) { customerName=order.users.name || customerName;
-                                        customerPhone=order.users.phone || customerPhone; } // 2. Try to get or override
-                                        from shipping_address let shipping=order.shipping_address; if (typeof
-                                        shipping==='string' && shipping.trim().startsWith('{')) { try {
-                                        shipping=JSON.parse(shipping); } catch (e) { } } if (typeof shipping==='object'
-                                        && shipping !==null) { customerName=shipping.name || shipping.guestName ||
-                                        customerName; customerPhone=shipping.phone || shipping.guestPhone ||
-                                        customerPhone; displayAddress=shipping.address || shipping.shippingAddress ||
-                                        displayAddress; } else if (typeof shipping==='string' && shipping.trim() !=='' )
-                                        { displayAddress=shipping; } %>
+                                    <% let cName='غير معروف' ; let cPhone='-' ; let cAddr='بدون عنوان' ; if
+                                        (order.users) { cName=order.users.name || cName; cPhone=order.users.phone ||
+                                        cPhone; } let ship=order.shipping_address; if (typeof ship==='string' &&
+                                        ship.trim().startsWith('{')) { try { ship=JSON.parse(ship); } catch (e) { } } if
+                                        (typeof ship==='object' && ship !==null) { cName=ship.name || ship.guestName ||
+                                        cName; cPhone=ship.phone || ship.guestPhone || cPhone; cAddr=ship.address ||
+                                        ship.shippingAddress || cAddr; } else if (typeof ship==='string' && ship.trim()
+                                        !=='' ) { cAddr=ship; } %>
                                         <div style="font-size: 0.9rem;">
                                             <strong>
-                                                <%= customerName %>
+                                                <%= cName %>
                                             </strong><br>
                                             <small>
-                                                <%= customerPhone %>
+                                                <%= cPhone %>
                                             </small><br>
                                             <small
                                                 style="color: var(--medium-gray); display: block; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                                                title="<%= displayAddress %>">
-                                                <%= displayAddress %>
+                                                title="<%= cAddr %>">
+                                                <%= cAddr %>
                                             </small>
                                         </div>
                                 </td>
@@ -117,10 +113,10 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <% const statusMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'In Transit'
+                                    <% const sMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'In Transit'
                                         : 'info' , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; const
-                                        statusClass=statusMap[order.status] || 'warning' ; %>
-                                        <span class="badge badge-<%= statusClass %>" id="status-badge-<%= order.id %>">
+                                        sClass=sMap[order.status] || 'warning' ; %>
+                                        <span class="badge badge-<%= sClass %>" id="status-badge-<%= order.id %>">
                                             <%= order.status || 'Processing' %>
                                         </span>
                                 </td>
