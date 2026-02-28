@@ -204,10 +204,17 @@ class ProductController {
     // Admin UI Methods
     async renderProductsPage(req, res) {
         try {
-            // Use the same logic as the original server.js to include category names
-            const { data: products } = await supabase.from('products').select('*, categories(name)');
+            // Specify the explicit relationship to avoid ambiguity errors (PGRST201)
+            const { data: products } = await supabase.from('products').select('*, categories!products_category_id_fkey(name)');
+
+            // Map the joined category name to the field expected by the view (category_name)
+            const mappedProducts = (products || []).map(p => ({
+                ...p,
+                category_name: p.categories?.name
+            }));
+
             const { data: categories } = await supabase.from('categories').select('*');
-            res.render('products', { products: products || [], categories: categories || [] });
+            res.render('products', { products: mappedProducts, categories: categories || [] });
         } catch (error) {
             console.error('Error rendering products:', error);
             res.status(500).send(`خطأ في عرض المنتجات: ${error.message}`);

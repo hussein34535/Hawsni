@@ -605,9 +605,13 @@ export default function ProductPage() {
             <VirtualTryOnModal
                 isOpen={isVTOOpen}
                 onClose={() => setIsVTOOpen(false)}
-                productImages={parseColors(product.colors)
-                    .map(c => (c.imageIndex !== undefined && c.imageIndex !== null) ? safeImages[c.imageIndex] : null)
-                    .filter((img): img is string => !!img)}
+                productImages={parseColors(product.colors).length > 0
+                    ? parseColors(product.colors).map(c =>
+                        (c.imageIndex !== undefined && c.imageIndex !== null && safeImages[c.imageIndex])
+                            ? safeImages[c.imageIndex]
+                            : safeImages[0]
+                    ).filter((img): img is string => !!img)
+                    : safeImages}
                 productId={productId}
                 productName={product.name}
             />
