@@ -605,6 +605,7 @@ export default function ProductPage() {
                     .map(c => (c.imageIndex !== undefined && c.imageIndex !== null) ? safeImages[c.imageIndex] : null)
                     .filter((img): img is string => !!img)}
                 productId={productId}
+                productName={product.name}
             />
         </div>
     );

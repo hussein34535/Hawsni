@@ -1,11 +1,12 @@
 import apiClient from '@/lib/axios';
 
 export const vtoService = {
-    startTryOn: async (humanImageUrl: string, garmentImageUrl: string): Promise<{ id: string }> => {
+    startTryOn: async (humanImageUrl: string, garmentImageUrl: string, description?: string): Promise<{ id: string }> => {
         try {
             const response = await apiClient.post('/vto/try-on', {
                 human_image: humanImageUrl,
-                garment_image: garmentImageUrl
+                garment_image: garmentImageUrl,
+                description: description
             });
             return response.data;
         } catch (error: any) {

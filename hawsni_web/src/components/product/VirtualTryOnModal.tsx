@@ -38,11 +38,12 @@ interface VirtualTryOnModalProps {
     onClose: () => void;
     productImages: string[];
     productId: string;
+    productName?: string;
 }
 
 type VtoStatus = 'idle' | 'uploading' | 'processing' | 'succeeded' | 'failed';
 
-export default function VirtualTryOnModal({ isOpen, onClose, productImages, productId }: VirtualTryOnModalProps) {
+export default function VirtualTryOnModal({ isOpen, onClose, productImages, productId, productName }: VirtualTryOnModalProps) {
     const { t, isRTL } = useLanguage();
     const [status, setStatus] = useState<VtoStatus>('idle');
     const [userImage, setUserImage] = useState<string | null>(null);
@@ -142,8 +143,8 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
 
         try {
             const garmentUrl = productImages[selectedGarment];
-            console.log('🚀 Starting VTO:', { garmentUrl, userImageSize: userImage.length });
-            const response = await vtoService.startTryOn(userImage, garmentUrl);
+            console.log('🚀 Starting VTO:', { garmentUrl, userImageSize: userImage.length, name: productName });
+            const response = await vtoService.startTryOn(userImage, garmentUrl, productName);
             const predictionId = response.id;
             console.log('✅ VTO Started, Prediction ID:', predictionId);
 

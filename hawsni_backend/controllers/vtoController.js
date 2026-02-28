@@ -17,7 +17,20 @@ exports.startTryOn = async (req, res) => {
             return res.status(400).json({ error: 'Missing human_image or garment_image' });
         }
 
-        console.log(`VTO Request: human_image length=${human_image.length}, garment_image length=${garment_image.length}`);
+        // --- Quality Optimization Logic ---
+        // 1. Dynamic Category Detection
+        let category = "upper_body";
+        const desc = (description || "").toLowerCase();
+        if (desc.includes("pants") || desc.includes("trousers") || desc.includes("jeans") || desc.includes("skirt") || desc.includes("shorts")) {
+            category = "lower_body";
+        } else if (desc.includes("dress") || desc.includes("abaya") || desc.includes("kaftan")) {
+            category = "dresses";
+        }
+
+        // 2. Comprehensive Negative Prompt
+        const negativePrompt = "low quality, bad anatomy, distorted, deformed, unrelated objects, bare limbs where garment should be, missing sleeves, messy background, extra limbs, fingers disfigured";
+
+        console.log(`VTO Request: category=${category}, desc=${description || 'none'}`);
 
         const response = await fetch("https://api.replicate.com/v1/predictions", {
             method: "POST",
@@ -30,10 +43,12 @@ exports.startTryOn = async (req, res) => {
                 input: {
                     human_img: human_image,
                     garm_img: garment_image,
-                    garment_des: description || "clothing",
+                    garment_des: description || "clothing piece, high quality",
                     crop: false,
                     steps: 40,
-                    category: "upper_body"
+                    category: category,
+                    negative_prompt: negativePrompt,
+                    guidance_scale: 2.5 // Slightly higher guidance for better prompt adherence
                 },
             }),
         });
