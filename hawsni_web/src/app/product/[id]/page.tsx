@@ -369,9 +369,13 @@ export default function ProductPage() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="flex text-amber-400">
-                                    {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star key={i} size={12} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} />
+                                    ))}
                                 </div>
-                                <span className="text-[10px] text-gray-400 font-bold">(120 {isRTL ? 'تقييم' : 'Reviews'})</span>
+                                <span className="text-[10px] text-gray-400 font-bold">
+                                    ({(product as any).num_reviews || 0} {isRTL ? 'تقييم' : 'Reviews'})
+                                </span>
                             </div>
                             <div className="flex items-baseline gap-2 text-[var(--color-brand-primary)] font-black text-2xl mt-1">
                                 <span>{product.price.toLocaleString('en-US')}</span>
