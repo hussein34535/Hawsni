@@ -7,7 +7,7 @@ class OrdersController {
             // Fetch orders
             const { data: orders, error: ordersError } = await supabase
                 .from('orders')
-                .select('*')
+                .select('*, users(name, phone)')
                 .order('created_at', { ascending: false });
 
             if (ordersError) throw ordersError;

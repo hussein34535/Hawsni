@@ -80,20 +80,29 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <% let customer={}; try { customer=(typeof order.shipping_address==='string' ) ?
-                                        JSON.parse(order.shipping_address) : order.shipping_address; } catch (e) {
-                                        customer={ name: 'غير معروف' , phone: '-' }; } %>
+                                    <% let customerName='غير معروف' ; let customerPhone='-' ; let
+                                        displayAddress='بدون عنوان' ; // 1. Try to get from joined users table if
+                                        (order.users) { customerName=order.users.name || customerName;
+                                        customerPhone=order.users.phone || customerPhone; } // 2. Try to get or override
+                                        from shipping_address let shipping=order.shipping_address; if (typeof
+                                        shipping==='string' && shipping.trim().startsWith('{')) { try {
+                                        shipping=JSON.parse(shipping); } catch (e) { } } if (typeof shipping==='object'
+                                        && shipping !==null) { customerName=shipping.name || shipping.guestName ||
+                                        customerName; customerPhone=shipping.phone || shipping.guestPhone ||
+                                        customerPhone; displayAddress=shipping.address || shipping.shippingAddress ||
+                                        displayAddress; } else if (typeof shipping==='string' ) {
+                                        displayAddress=shipping; } %>
                                         <div style="font-size: 0.9rem;">
                                             <strong>
-                                                <%= customer.name || 'عميل' %>
+                                                <%= customerName %>
                                             </strong><br>
                                             <small>
-                                                <%= customer.phone || '' %>
+                                                <%= customerPhone %>
                                             </small><br>
                                             <small
                                                 style="color: var(--medium-gray); display: block; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
-                                                title="<%= customer.address %>">
-                                                <%= customer.address || '' %>
+                                                title="<%= displayAddress %>">
+                                                <%= displayAddress %>
                                             </small>
                                         </div>
                                 </td>

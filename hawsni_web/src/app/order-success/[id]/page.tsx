@@ -44,9 +44,9 @@ export default function OrderSuccessPage() {
     }, [id]);
 
     const formatImageUrl = (url: string) => {
-        if (!url) return '/placeholder.png';
+        if (!url || typeof url !== 'string') return '/placeholder.png';
         if (url.startsWith('http')) return url;
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hawsni.com/api';
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hwasi.com/api';
         return `${baseUrl.replace('/api', '')}/uploads/${url.split('/').pop()}`;
     };
 
