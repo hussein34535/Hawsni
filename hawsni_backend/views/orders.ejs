@@ -90,8 +90,8 @@
                                         && shipping !==null) { customerName=shipping.name || shipping.guestName ||
                                         customerName; customerPhone=shipping.phone || shipping.guestPhone ||
                                         customerPhone; displayAddress=shipping.address || shipping.shippingAddress ||
-                                        displayAddress; } else if (typeof shipping==='string' ) {
-                                        displayAddress=shipping; } %>
+                                        displayAddress; } else if (typeof shipping==='string' && shipping.trim() !=='' )
+                                        { displayAddress=shipping; } %>
                                         <div style="font-size: 0.9rem;">
                                             <strong>
                                                 <%= customerName %>
