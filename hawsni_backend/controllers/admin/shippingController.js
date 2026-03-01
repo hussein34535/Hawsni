@@ -4,10 +4,13 @@ class ShippingController {
     // Render shipping settings page
     async index(req, res) {
         try {
-            const { data: settings } = await supabase
+            const { data: settingsArray } = await supabase
                 .from('shipping_settings')
                 .select('*')
-                .single();
+                .order('updated_at', { ascending: false })
+                .limit(1);
+
+            const settings = settingsArray && settingsArray.length > 0 ? settingsArray[0] : null;
 
             const defaultSettings = {
                 delivery_cost: 0,
@@ -39,10 +42,13 @@ class ShippingController {
     // Public JSON API for Flutter
     async getSettings(req, res) {
         try {
-            const { data: settings } = await supabase
+            const { data: settingsArray } = await supabase
                 .from('shipping_settings')
                 .select('*')
-                .single();
+                .order('updated_at', { ascending: false })
+                .limit(1);
+
+            const settings = settingsArray && settingsArray.length > 0 ? settingsArray[0] : null;
 
             res.json({
                 success: true,
@@ -110,10 +116,13 @@ class ShippingController {
             };
 
             // Upsert (insert or update the single settings row)
-            const { data: existing } = await supabase
+            const { data: existingArray } = await supabase
                 .from('shipping_settings')
                 .select('id')
-                .single();
+                .order('updated_at', { ascending: false })
+                .limit(1);
+
+            const existing = existingArray && existingArray.length > 0 ? existingArray[0] : null;
 
             if (existing) {
                 await supabase
