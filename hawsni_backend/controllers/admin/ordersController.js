@@ -108,6 +108,65 @@ class OrdersController {
             res.status(500).json({ success: false, message: err.message });
         }
     }
+
+    // Delete a single order
+    async deleteOrder(req, res) {
+        try {
+            const { id } = req.params;
+
+            // Delete order items first (or rely on Cascade)
+            const { error: itemsError } = await supabase
+                .from('order_items')
+                .delete()
+                .eq('order_id', id);
+
+            if (itemsError) throw itemsError;
+
+            // Delete order
+            const { error: orderError } = await supabase
+                .from('orders')
+                .delete()
+                .eq('id', id);
+
+            if (orderError) throw orderError;
+
+            res.redirect('/orders');
+        } catch (err) {
+            console.error('Error deleting order:', err);
+            res.status(500).send('خطأ في حذف الطلب');
+        }
+    }
+
+    // Bulk delete orders
+    async bulkDelete(req, res) {
+        try {
+            const { ids } = req.body;
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                return res.status(400).json({ success: false, message: 'لا توجد طلبات محددة' });
+            }
+
+            // Delete order items first
+            const { error: itemsError } = await supabase
+                .from('order_items')
+                .delete()
+                .in('order_id', ids);
+
+            if (itemsError) throw itemsError;
+
+            // Delete orders
+            const { error: ordersError } = await supabase
+                .from('orders')
+                .delete()
+                .in('id', ids);
+
+            if (ordersError) throw ordersError;
+
+            res.json({ success: true, message: `تم حذف ${ids.length} طلب` });
+        } catch (err) {
+            console.error('Error bulk deleting orders:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
 }
 
 module.exports = new OrdersController();

@@ -53,6 +53,8 @@
                         <option value="Cancelled">ملغي</option>
                     </select>
                     <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm">تطبيق</button>
+                    <button onclick="bulkDelete()" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> حذف
+                        المحدد</button>
                     <button onclick="clearSelection()" class="btn btn-secondary btn-sm">إلغاء</button>
                 </div>
             </div>
@@ -162,6 +164,10 @@
                                                         : '' %>>Cancelled</option>
                                                 </select>
                                             </form>
+                                            <button class="btn-icon text-danger"
+                                                onclick="deleteOrder('<%= order.id %>')" title="حذف الطلب">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
                                             <button class="btn-icon" onclick="showOrderDetails('<%= order.id %>')">
                                                 <i class="fas fa-chevron-left"></i>
                                             </button>
@@ -427,6 +433,40 @@
                     window.location.reload();
                 }
             } catch (e) { }
+        }
+
+        async function bulkDelete() {
+            const ids = getSelectedIds();
+            if (!ids.length) return;
+
+            if (!confirm(`تحذير: هل أنت متأكد من حذف ${ids.length} طلب نهائياً؟ لا يمكن التراجع عن هذه الخطوة.`)) return;
+
+            try {
+                const res = await fetch('/orders/bulk-delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('خطأ: ' + data.message);
+                }
+            } catch (e) {
+                console.error(e);
+                alert('حدث خطأ أثناء الحذف');
+            }
+        }
+
+        async function deleteOrder(orderId) {
+            if (!confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟')) return;
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/orders/${orderId}/delete`;
+            document.body.appendChild(form);
+            form.submit();
         }
 
         // Close modal on click outside

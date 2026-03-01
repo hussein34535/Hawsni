@@ -44,7 +44,9 @@ router.get('/users', usersController.index);
 // Orders Routes
 router.get('/orders', ordersController.index);
 router.post('/orders/:id/status', ordersController.updateStatus);
+router.post('/orders/:id/delete', ordersController.deleteOrder);
 router.post('/orders/bulk-status', ordersController.bulkUpdateStatus);
+router.post('/orders/bulk-delete', ordersController.bulkDelete);
 
 // Category Controller
 const CategoryController = require('../controllers/api/categoryController');
