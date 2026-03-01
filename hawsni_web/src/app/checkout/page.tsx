@@ -162,6 +162,20 @@ export default function CheckoutPage() {
             return;
         }
 
+        // Egyptian Phone validation
+        const phoneToValidate = isAuthenticated && !isAddingNewAddress
+            ? (addresses.find(a => a._id === selectedAddressId)?.phone || guestInfo.phone)
+            : guestInfo.phone;
+
+        // Clean and test phone against Egyptian format starting with 01
+        const phoneCleaner = phoneToValidate ? phoneToValidate.replace(/[\s\-+]/g, '') : '';
+        const phoneRegex = /^2?(010|011|012|015)\d{8}$/;
+
+        if (!phoneRegex.test(phoneCleaner) && !isAuthenticated) {
+            alert(isRTL ? 'يرجى إدخال رقم هاتف مصري صحيح (مثال: 01012345678)' : 'Please enter a valid Egyptian phone number (e.g. 01012345678)');
+            return;
+        }
+
         setIsProcessing(true);
         try {
             let addressId = selectedAddressId;

@@ -324,8 +324,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (_isGuest &&
         (_nameController.text.isEmpty || _phoneController.text.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill your contact information'),
+        SnackBar(
+          content: Text(isRtl
+              ? 'برجاء ملء بيانات التواصل'
+              : 'Please fill your contact information'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+      return;
+    }
+
+    // Egyptian Phone Validation
+    String phoneToValidate = '';
+    if (_isGuest || _isAddingAddress) {
+      phoneToValidate = _isGuest
+          ? _phoneController.text
+          : (AuthService.userData?['phone'] ?? _phoneController.text);
+    } else if (selectedAddress != null) {
+      phoneToValidate = selectedAddress.phone;
+    }
+
+    // Clean spaces and symbols
+    String cleanPhone = phoneToValidate.replaceAll(RegExp(r'[\s\-+]'), '');
+    final phoneRegExp = RegExp(r'^2?(010|011|012|015)\d{8}$');
+
+    if (!phoneRegExp.hasMatch(cleanPhone) && AuthService.token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isRtl
+              ? 'يرجى إدخال رقم هاتف مصري صحيح (مثال: 01012345678)'
+              : 'Please enter a valid Egyptian phone number (e.g. 01012345678)'),
           backgroundColor: AppTheme.errorColor,
         ),
       );
