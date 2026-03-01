@@ -62,10 +62,10 @@ class OrderController {
                 shipping_address: finalShippingAddress,
                 payment_method: paymentMethod,
                 subtotal: subtotal,
-                shipping_fee: shippingFee,
-                discount: discount,
+                shipping_fee: req.body.shippingFee || 0,
+                discount: discount || 0,
                 coupon_code: couponCode,
-                total: total,
+                total: req.body.total || Math.max(0, subtotal - (discount || 0) + (req.body.shippingFee || 0)),
                 status: 'Processing'
             };
 

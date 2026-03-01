@@ -384,6 +384,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       'shippingAddress': shippingAddress,
       'paymentMethod': paymentMethod,
       'subtotal': subtotal,
+      'shippingFee':
+          _calculateTotal() - (subtotal - discount), // Pass explicitly
+      'total': _calculateTotal(), // Pass explicitly
       'discount': discount,
       'couponCode': _couponCode,
       'guestName': _isGuest
