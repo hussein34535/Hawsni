@@ -404,7 +404,7 @@
         function copyAddress() {
             const addr = document.getElementById('modalAddress').textContent;
             navigator.clipboard.writeText(addr);
-            showToast('تم نسخ العنوان بنجاح');
+            alert('تم نسخ العنوان بنجاح');
         }
 
         // Bulk Actions
@@ -462,8 +462,8 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('تم الحذف بنجاح');
-                    setTimeout(() => window.location.reload(), 1000);
+                    alert('تم الحذف بنجاح');
+                    setTimeout(() => window.location.reload(), 200);
                 } else {
                     alert('خطأ من الخادم: ' + (data.message || 'غير معروف'));
                     if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف'; deleteBtn.disabled = false; }
@@ -484,8 +484,8 @@
                     method: 'POST',
                 });
                 if (res.ok) {
-                    showToast('تم حذف الطلب بنجاح');
-                    setTimeout(() => window.location.reload(), 1000);
+                    alert('تم حذف الطلب بنجاح');
+                    setTimeout(() => window.location.reload(), 200);
                 } else {
                     alert('فشل الحذف. يرجى مراجعة سجلات الخادم.');
                 }
