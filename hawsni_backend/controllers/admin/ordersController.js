@@ -15,6 +15,15 @@ class OrdersController {
             // For each order, fetch order items with product details
             const ordersWithProducts = await Promise.all(
                 (orders || []).map(async (order) => {
+                    // Pre-parse shipping_address if it's a JSON string
+                    if (typeof order.shipping_address === 'string' && order.shipping_address.trim().startsWith('{')) {
+                        try {
+                            order.shipping_address = JSON.parse(order.shipping_address);
+                        } catch (e) {
+                            console.error('Error parsing shipping_address:', e);
+                        }
+                    }
+
                     const { data: items, error: itemsError } = await supabase
                         .from('order_items')
                         .select(`
@@ -22,18 +31,19 @@ class OrdersController {
                             products (
                                 id,
                                 name,
-                                images
+                                images,
+                                price
                             )
                         `)
                         .eq('order_id', order.id);
 
                     if (!itemsError && items && items.length > 0) {
-                        // Get the first product image for the order
+                        // Get the first product image for the order thumbnail
                         const firstProduct = items[0].products;
                         order.product_image = firstProduct?.images?.[0] || null;
                         order.product_name = firstProduct?.name || 'منتج';
                         order.items_count = items.length;
-                        order.items = items; // Attach full items list
+                        order.items = items;
                     } else {
                         order.product_image = null;
                         order.product_name = 'منتج';

@@ -184,48 +184,94 @@
     <div id="orderModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <div>
-                    <h3 id="modalOrderId" class="modal-title"></h3>
+                <div class="header-main">
+                    <div class="header-id-group">
+                        <span class="header-badge">طلب جديد</span>
+                        <h3 id="modalOrderId" class="modal-title"></h3>
+                    </div>
                     <p id="modalOrderDate" class="modal-subtitle"></p>
                 </div>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <div class="header-actions">
+                    <div id="modalStatusBadge" class="badge"></div>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
             </div>
 
             <div class="modal-body">
                 <div class="modal-grid">
-                    <!-- Left: Items -->
-                    <div class="modal-section">
-                        <h4 class="section-title"><i class="fas fa-box-open"></i> محتويات الطلب</h4>
-                        <div id="modalItemsList" class="modal-items-list">
-                            <!-- Items populated via JS -->
+                    <!-- Left Column: Products & Payment -->
+                    <div class="column-main">
+                        <div class="detail-section">
+                            <h4 class="section-title"><i class="fas fa-shopping-bag"></i> منتجات الطلب</h4>
+                            <div id="modalItemsList" class="items-container">
+                                <!-- Populated by JS -->
+                            </div>
                         </div>
-                        <div class="order-total-card">
-                            <span>الإجمالي</span>
-                            <span id="modalTotal" class="total-price"></span>
+
+                        <div class="detail-section payment-summary">
+                            <h4 class="section-title"><i class="fas fa-receipt"></i> ملخص الدفع</h4>
+                            <div class="payment-grid">
+                                <div class="payment-item">
+                                    <span>المجموع الفرعي:</span>
+                                    <span id="modalSubtotal"></span>
+                                </div>
+                                <div id="discountRow" class="payment-item discount">
+                                    <span>الخصم (كوبون):</span>
+                                    <span id="modalDiscount"></span>
+                                </div>
+                                <div class="payment-item total">
+                                    <span>الإجمالي القديم:</span>
+                                    <span id="modalTotalAmount"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Right: Info -->
-                    <div class="modal-section">
-                        <h4 class="section-title"><i class="fas fa-user-circle"></i> بيانات العميل</h4>
-                        <div class="info-card">
-                            <div class="info-item">
-                                <label>الاسم</label>
-                                <p id="modalCustomerName"></p>
-                            </div>
-                            <div class="info-item">
-                                <label>رقم الهاتف</label>
-                                <p id="modalCustomerPhone"></p>
+                    <!-- Right Column: Customer & Shipping -->
+                    <div class="column-side">
+                        <div class="detail-section customer-info">
+                            <h4 class="section-title"><i class="fas fa-user"></i> بيانات العميل</h4>
+                            <div class="profile-card">
+                                <div id="modalAvatar" class="profile-avatar"></div>
+                                <div class="profile-details">
+                                    <h5 id="modalCustomerName"></h5>
+                                    <p id="modalCustomerPhone"></p>
+                                    <p id="modalCustomerEmail" class="email-text"></p>
+                                </div>
                             </div>
                         </div>
 
-                        <h4 class="section-title" style="margin-top: 2rem;"><i class="fas fa-map-marker-alt"></i> عنوان
-                            التوصيل</h4>
-                        <div class="info-card shipping">
-                            <p id="modalAddress"></p>
-                            <button class="btn-copy" onclick="copyAddress()">
-                                <i class="fas fa-copy"></i> نسخ العنوان
-                            </button>
+                        <div class="detail-section shipping-info">
+                            <h4 class="section-title"><i class="fas fa-map-marked-alt"></i> تفاصيل الشحن</h4>
+                            <div class="address-card">
+                                <div class="address-item">
+                                    <label>المحافظة:</label>
+                                    <p id="shipState"></p>
+                                </div>
+                                <div class="address-item">
+                                    <label>المدينة:</label>
+                                    <p id="shipCity"></p>
+                                </div>
+                                <div class="address-item">
+                                    <label>العنوان:</label>
+                                    <p id="shipStreet"></p>
+                                </div>
+                                <div class="address-full">
+                                    <label>العنوان بالكامل:</label>
+                                    <p id="modalAddressFull"></p>
+                                </div>
+                                <button class="btn-copy-address" onclick="copyAddress()">
+                                    <i class="fas fa-copy"></i> نسخ العنوان الكامل
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4 class="section-title"><i class="fas fa-credit-card"></i> طريقة الدفع</h4>
+                            <div class="method-card">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span id="modalPaymentMethod">الدفع عند الاستلام</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -242,53 +288,96 @@
             const order = ordersData.find(o => o.id === orderId);
             if (!order) return;
 
-            // Header
+            // Update Header & Badge
             document.getElementById('modalOrderId').textContent = 'طلب رقم #' + order.id.substring(0, 8);
-            document.getElementById('modalOrderDate').textContent = new Date(order.created_at).toLocaleString('ar-EG');
+            document.getElementById('modalOrderDate').textContent = new Date(order.created_at).toLocaleString('ar-EG', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
 
-            // Customer Info
-            let cName = order.users?.name || 'غير معروف';
-            let cPhone = order.users?.phone || '-';
-            let cAddr = 'بدون عنوان';
+            const statusBadge = document.getElementById('modalStatusBadge');
+            statusBadge.textContent = order.status || 'Processing';
+            statusBadge.className = 'badge badge-' + (sMap[order.status] || 'warning');
 
+            // Customer Details logic
+            let cName = 'غير معروف';
+            let cPhone = '-';
+            let cEmail = 'لا يوجد إيميل';
             let ship = order.shipping_address;
-            if (typeof ship === 'string' && ship.trim().startsWith('{')) {
-                try { ship = JSON.parse(ship); } catch (e) { }
+
+            // Try to extract from linked user first
+            if (order.users) {
+                cName = order.users.name || cName;
+                cPhone = order.users.phone || cPhone;
             }
 
-            if (typeof ship === 'object' && ship !== null) {
+            // Override with structured shipping address if available
+            if (ship && typeof ship === 'object') {
                 cName = ship.name || ship.guestName || cName;
                 cPhone = ship.phone || ship.guestPhone || cPhone;
-                cAddr = ship.address || ship.shippingAddress || cAddr;
-            } else if (typeof ship === 'string' && ship.trim() !== '') {
-                cAddr = ship;
+                cEmail = ship.email || ship.guestEmail || cEmail;
+
+                document.getElementById('shipState').textContent = ship.state || '-';
+                document.getElementById('shipCity').textContent = ship.city || '-';
+                document.getElementById('shipStreet').textContent = ship.street || ship.address || '-';
+                document.getElementById('modalAddressFull').textContent = ship.address || '-';
+            } else {
+                document.getElementById('shipState').textContent = '-';
+                document.getElementById('shipCity').textContent = '-';
+                document.getElementById('shipStreet').textContent = '-';
+                document.getElementById('modalAddressFull').textContent = ship || 'لا يوجد عنوان';
             }
 
             document.getElementById('modalCustomerName').textContent = cName;
             document.getElementById('modalCustomerPhone').textContent = cPhone;
-            document.getElementById('modalAddress').textContent = cAddr;
+            document.getElementById('modalCustomerEmail').textContent = cEmail;
+            document.getElementById('modalAvatar').textContent = cName.charAt(0).toUpperCase();
+            document.getElementById('modalPaymentMethod').textContent = order.payment_method || 'Cash on Delivery';
 
-            // Items List
+            // Items List Overhaul
             const itemsList = document.getElementById('modalItemsList');
             itemsList.innerHTML = '';
 
             (order.items || []).forEach(item => {
+                const p = item.products || {};
+                const img = (p.images && p.images.length > 0) ? p.images[0] : '';
+
                 const itemDiv = document.createElement('div');
-                itemDiv.className = 'modal-item-row';
+                itemDiv.className = 'premium-item-row';
                 itemDiv.innerHTML = `
+                    <div class="item-visual">
+                        <img src="${img}" onerror="this.src='/images/placeholder.png'" class="item-img-detailed">
+                    </div>
                     <div class="item-info">
-                        <img src="${item.products?.images?.[0] || ''}" class="item-img">
-                        <div>
-                            <div class="item-name">${item.products?.name || 'منتج'}</div>
-                            <div class="item-meta">الكمية: ${item.quantity} | السعر: ${parseFloat(item.price).toFixed(2)} ج.م</div>
+                        <div class="item-name-row">
+                            <span class="item-main-name">${p.name || 'منتج غير معروف'}</span>
+                            <span class="item-qty">x${item.quantity}</span>
+                        </div>
+                        <div class="item-specs">
+                            ${item.size ? `<span class="spec-tag">المقاس: ${item.size}</span>` : ''}
+                            ${item.color ? `<span class="spec-tag">اللون: ${item.color}</span>` : ''}
                         </div>
                     </div>
-                    <div class="item-subtotal">${(item.quantity * item.price).toFixed(2)} ج.م</div>
+                    <div class="item-price-col">
+                        <div class="unit-price">${parseFloat(item.price).toFixed(2)} ج.م</div>
+                        <div class="total-line">${(item.quantity * item.price).toFixed(2)} ج.م</div>
+                    </div>
                 `;
                 itemsList.appendChild(itemDiv);
             });
 
-            document.getElementById('modalTotal').textContent = parseFloat(order.total).toFixed(2) + ' ج.م';
+            // Financials
+            const subtotal = (order.items || []).reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            document.getElementById('modalSubtotal').textContent = subtotal.toFixed(2) + ' ج.م';
+
+            const discount = order.discount || 0;
+            if (discount > 0) {
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('modalDiscount').textContent = '-' + parseFloat(discount).toFixed(2) + ' ج.م';
+            } else {
+                document.getElementById('discountRow').style.display = 'none';
+            }
+
+            document.getElementById('modalTotalAmount').textContent = parseFloat(order.total).toFixed(2) + ' ج.م';
 
             document.getElementById('orderModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -374,7 +463,7 @@
             background: var(--white);
             border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
-            padding: 16px;
+            padding: 20px 16px;
         }
 
         .order-row td:first-child {
@@ -492,13 +581,20 @@
         }
 
         .status-select {
-            border: none;
-            background: transparent;
+            border: 1px solid var(--border-color);
+            background: #fff;
             font-weight: 700;
             font-size: 0.8rem;
             cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            min-width: 120px;
+            transition: all 0.2s;
+        }
+
+        .status-select:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
         }
 
         .status-select.select-warning {
@@ -561,16 +657,17 @@
 
         .modal-content {
             background: var(--white);
-            width: 90%;
-            max-width: 900px;
-            border-radius: 24px;
+            width: 95%;
+            max-width: 1100px;
+            border-radius: 28px;
             padding: 0;
             overflow: hidden;
-            transform: translateY(20px);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            max-height: 90vh;
+            transform: translateY(30px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 92vh;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
         .modal.active .modal-content {
@@ -578,26 +675,50 @@
         }
 
         .modal-header {
-            padding: 24px 32px;
+            padding: 28px 40px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            background: #fafafa;
+            align-items: center;
+            background: #ffffff;
+        }
+
+        .header-id-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .header-badge {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
         }
 
         .modal-title {
-            font-size: 1.5rem;
-            font-weight: 800;
+            font-size: 1.6rem;
+            font-weight: 900;
             color: var(--dark);
             margin: 0;
+            letter-spacing: -0.5px;
         }
 
         .modal-subtitle {
             color: var(--medium-gray);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            margin-top: 4px;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
         .modal-close {
@@ -610,150 +731,313 @@
         }
 
         .modal-body {
-            padding: 32px;
+            padding: 0;
             overflow-y: auto;
+            background: #fcfcfc;
         }
 
         .modal-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 32px;
+            grid-template-columns: 1.4fr 1fr;
+            min-height: 500px;
+        }
+
+        .column-main {
+            padding: 40px;
+            border-left: 1px solid var(--border-color);
+            background: white;
+        }
+
+        .column-side {
+            padding: 40px;
+            background: #f8fafc;
+        }
+
+        .detail-section {
+            margin-bottom: 40px;
+        }
+
+        .detail-section:last-child {
+            margin-bottom: 0;
         }
 
         .section-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 800;
             color: var(--dark);
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .section-title i {
             color: var(--primary-color);
-            opacity: 0.8;
+            width: 24px;
         }
 
-        .modal-item-row {
+        /* Items List */
+        .items-container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .premium-item-row {
+            display: flex;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px dashed var(--border-color);
+            gap: 20px;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all 0.2s;
+        }
+
+        .premium-item-row:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .item-visual {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid #eee;
+        }
+
+        .item-img-detailed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .item-info {
+            flex-grow: 1;
+        }
+
+        .item-name-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .item-main-name {
+            font-weight: 800;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .item-qty {
+            font-weight: 800;
+            color: var(--primary-color);
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .item-specs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .spec-tag {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            background: #f1f5f9;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .item-price-col {
+            text-align: left;
+            min-width: 100px;
+        }
+
+        .unit-price {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .total-line {
+            font-weight: 900;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        /* Payment Summary */
+        .payment-grid {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        .payment-item.discount {
+            color: #ef4444;
+        }
+
+        .payment-item.total {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px dashed var(--border-color);
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--dark);
+        }
+
+        /* Profile Card */
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #4f46e5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+
+        .profile-details h5 {
+            margin: 0 0 4px 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .profile-details p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .email-text {
+            color: var(--primary-color) !important;
+            text-decoration: underline;
+            margin-top: 2px !important;
+        }
+
+        /* Address Card */
+        .address-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .address-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .address-item label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--medium-gray);
+            font-weight: 800;
+        }
+
+        .address-item p {
+            margin: 0;
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .address-full {
+            margin-top: 8px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .address-full label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--medium-gray);
+            font-weight: 800;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .address-full p {
+            margin: 0;
+            font-weight: 600;
+            line-height: 1.6;
+            color: var(--dark-gray);
+        }
+
+        .btn-copy-address {
+            margin-top: 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-copy-address:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Method Card */
+        .method-card {
+            padding: 20px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 16px;
+            color: #065f46;
+            font-weight: 800;
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .item-img {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .item-name {
-            font-weight: 700;
-            color: var(--dark);
-            font-size: 0.9rem;
-        }
-
-        .item-meta {
-            font-size: 0.75rem;
-            color: var(--medium-gray);
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .item-subtotal {
-            font-weight: 800;
-            color: var(--dark);
-            font-size: 0.95rem;
-        }
-
-        .order-total-card {
-            margin-top: 24px;
-            padding: 20px;
-            background: var(--dark);
-            color: var(--white);
-            border-radius: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 800;
-            font-size: 1.1rem;
-        }
-
-        .total-price {
-            color: #fbbf24;
-        }
-
-        .info-card {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .info-item {
-            margin-bottom: 12px;
-        }
-
-        .info-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .info-item label {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--medium-gray);
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .info-item p {
-            font-weight: 800;
-            color: var(--dark);
-            font-size: 0.95rem;
-            margin: 0;
-        }
-
-        .info-card.shipping {
-            position: relative;
-            padding-bottom: 50px;
-        }
-
-        .info-card.shipping p {
-            font-weight: 600;
-            line-height: 1.5;
-            color: var(--dark-gray);
-        }
-
-        .btn-copy {
-            position: absolute;
-            bottom: 12px;
-            right: 12px;
-            border: none;
-            background: var(--white);
-            color: var(--primary-color);
-            font-weight: 800;
-            font-size: 0.75rem;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-copy:hover {
-            background: var(--primary-color);
-            color: var(--white);
+        .method-card i {
+            font-size: 1.25rem;
         }
 
         .empty-state {
