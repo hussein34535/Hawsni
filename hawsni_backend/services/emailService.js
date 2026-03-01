@@ -114,17 +114,24 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
     const total = order.total_amount || order.total || 0;
     const items = order.order_items || order.items || [];
 
-    const itemsHtml = items.map(item => `
+    const itemsHtml = items.map(item => {
+        const itemName = item.name || (item.products && item.products.name) || '—';
+        const itemImage = item.image_url || item.imageUrl || (item.products && item.products.images && item.products.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?';
+        return `
         <tr>
-            <td style="padding: 14px 0; border-bottom: 1px solid #f0f0f0;">
-                <span style="font-weight: 800; color: #1a1a1a; font-size: 14px;">${item.name || (item.products && item.products.name) || '—'}</span>
+            <td style="padding: 14px 0; border-bottom: 1px solid #f0f0f0; width: 60px;">
+                <img src="${itemImage}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover; border: 1px solid #eee;" alt="${itemName}">
+            </td>
+            <td style="padding: 14px 10px; border-bottom: 1px solid #f0f0f0;">
+                <span style="font-weight: 800; color: #1a1a1a; font-size: 14px;">${itemName}</span>
                 <br><span style="color: #999; font-size: 11px;">المقاس: ${item.size || 'عادي'} | الكمية: ${item.quantity}${item.color ? ' | اللون: ' + item.color : ''}</span>
             </td>
             <td style="padding: 14px 0; border-bottom: 1px solid #f0f0f0; text-align: left; font-weight: 900; color: #0E4435; font-size: 14px; white-space: nowrap;">
                 ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
             </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 
     return _send({
         to: toEmail,
@@ -375,17 +382,24 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     const dateStr = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     // Build items rows
-    const itemsHtml = (items || []).map(item => `
+    const itemsHtml = (items || []).map(item => {
+        const itemName = item.name || '—';
+        const itemImage = item.image_url || item.imageUrl || (item.products && item.products.images && item.products.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?';
+        return `
         <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5;">
-                <span style="font-weight: 800; color: #1a1a1a; font-size: 14px;">${item.name || '—'}</span>
+            <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; width: 50px;">
+                <img src="${itemImage}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;" alt="${itemName}">
+            </td>
+            <td style="padding: 12px 10px; border-bottom: 1px solid #f5f5f5;">
+                <span style="font-weight: 800; color: #1a1a1a; font-size: 14px;">${itemName}</span>
                 <br><span style="color: #999; font-size: 11px;">الكمية: ${item.quantity} ${item.size ? '| المقاس: ' + item.size : ''} ${item.color ? '| اللون: ' + item.color : ''}</span>
             </td>
             <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; text-align: left; font-weight: 900; color: #0E4435; font-size: 14px; white-space: nowrap;">
                 ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
             </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 
     // Parse shipping address
     let address = shippingAddress;
@@ -396,15 +410,15 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
 
     return _send({
         to: ADMIN_EMAIL,
-        subject: `💰 طلب جديد #${orderNumber} — ${Number(total).toLocaleString()} ج.م — Ka-Ching!`,
+        subject: `💰 طلب جديد #${orderNumber} — ${Number(total).toLocaleString()} ج.م`,
         htmlContent: `
         <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #e8e8e8; box-shadow: 0 20px 60px rgba(0,0,0,0.08);">
             
-            <!-- Header: Ka-Ching Banner -->
+            <!-- Header: Banner -->
             <div style="background: linear-gradient(135deg, #0E4435 0%, #1a6b54 50%, #0E4435 100%); padding: 40px 30px; text-align: center; position: relative;">
-                <div style="font-size: 50px; margin-bottom: 8px;">💰</div>
-                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px;">Ka-Ching!</h1>
-                <p style="color: rgba(255,255,255,0.7); margin: 8px 0 0 0; font-size: 14px; font-weight: 600;">طلب جديد وصلك الآن</p>
+                <div style="font-size: 50px; margin-bottom: 8px;">🛒</div>
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px;">طلب جديد!</h1>
+                <p style="color: rgba(255,255,255,0.7); margin: 8px 0 0 0; font-size: 14px; font-weight: 600;">لديك طلب جديد ينتظر المراجعة</p>
             </div>
 
             <!-- Big Money Amount -->

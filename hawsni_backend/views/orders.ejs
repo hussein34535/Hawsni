@@ -444,9 +444,15 @@
 
         async function bulkDelete() {
             const ids = getSelectedIds();
-            if (!ids.length) return;
+            if (!ids.length) {
+                alert('الرجاء تحديد طلب واحد على الأقل للحذف.');
+                return;
+            }
 
             if (!confirm(`تحذير: هل أنت متأكد من حذف ${ids.length} طلب نهائياً؟ لا يمكن التراجع عن هذه الخطوة.`)) return;
+
+            const deleteBtn = document.querySelector('button[onclick="bulkDelete()"]');
+            if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...'; deleteBtn.disabled = true; }
 
             try {
                 const res = await fetch('/orders/bulk-delete', {
@@ -456,24 +462,37 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    window.location.reload();
+                    showToast('تم الحذف بنجاح');
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
-                    alert('خطأ: ' + data.message);
+                    alert('خطأ من الخادم: ' + (data.message || 'غير معروف'));
+                    if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف'; deleteBtn.disabled = false; }
                 }
             } catch (e) {
-                console.error(e);
-                alert('حدث خطأ أثناء الحذف');
+                console.error('Fetch error:', e);
+                alert('حدث خطأ في الاتصال أثناء الحذف');
+                if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف'; deleteBtn.disabled = false; }
             }
         }
 
         async function deleteOrder(orderId) {
+            console.log('Attempting delete for:', orderId);
             if (!confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟')) return;
 
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/orders/${orderId}/delete`;
-            document.body.appendChild(form);
-            form.submit();
+            try {
+                const res = await fetch(`/orders/${orderId}/delete`, {
+                    method: 'POST',
+                });
+                if (res.ok) {
+                    showToast('تم حذف الطلب بنجاح');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    alert('فشل الحذف. يرجى مراجعة سجلات الخادم.');
+                }
+            } catch (err) {
+                console.error('Network error during deleteOrder:', err);
+                alert('حدث خطأ في الاتصال بالخادم');
+            }
         }
 
         // Close modal on click outside
