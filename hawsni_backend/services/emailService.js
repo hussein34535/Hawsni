@@ -417,7 +417,7 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
             <!-- Header: Banner -->
             <div style="background: linear-gradient(135deg, #0E4435 0%, #1a6b54 50%, #0E4435 100%); padding: 40px 30px; text-align: center; position: relative;">
                 <div style="font-size: 50px; margin-bottom: 8px;">🛒</div>
-                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px;">طلب جديد!</h1>
+                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px;">طلب من ${customerName || 'عميل'}!</h1>
                 <p style="color: rgba(255,255,255,0.7); margin: 8px 0 0 0; font-size: 14px; font-weight: 600;">لديك طلب جديد ينتظر المراجعة</p>
             </div>
 
