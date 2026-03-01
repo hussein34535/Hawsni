@@ -117,7 +117,7 @@
                                     <td>
                                         <div class="customer-cell">
                                             <div class="avatar-small">
-                                                <%= cName.charAt(0) %>
+                                                <%= cName==='غير معروف' ? '?' : cName.charAt(0) %>
                                             </div>
                                             <div>
                                                 <div class="customer-name">
@@ -289,6 +289,13 @@
 
     <script>
         const ordersData = JSON.parse(document.getElementById('orders-data-store').dataset.orders);
+        const sMap = {
+            'Processing': 'warning',
+            'Shipped': 'info',
+            'In Transit': 'info',
+            'Delivered': 'success',
+            'Cancelled': 'danger'
+        };
 
         function showOrderDetails(orderId) {
             const order = ordersData.find(o => o.id === orderId);
@@ -336,7 +343,7 @@
             document.getElementById('modalCustomerName').textContent = cName;
             document.getElementById('modalCustomerPhone').textContent = cPhone;
             document.getElementById('modalCustomerEmail').textContent = cEmail;
-            document.getElementById('modalAvatar').textContent = cName.charAt(0).toUpperCase();
+            document.getElementById('modalAvatar').textContent = cName === 'غير معروف' ? '?' : cName.charAt(0).toUpperCase();
             document.getElementById('modalPaymentMethod').textContent = order.payment_method || 'Cash on Delivery';
 
             // Items List Overhaul

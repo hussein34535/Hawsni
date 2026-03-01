@@ -386,11 +386,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       'subtotal': subtotal,
       'discount': discount,
       'couponCode': _couponCode,
-      if (_isGuest) ...{
-        'guestName': _nameController.text,
-        'guestPhone': _phoneController.text,
-        'guestEmail': '',
-      },
+      'guestName': _isGuest
+          ? _nameController.text
+          : (AuthService.userName ?? AuthService.userData?['name'] ?? ''),
+      'guestPhone': _isGuest
+          ? _phoneController.text
+          : (AuthService.userData?['phone'] ?? ''),
+      'guestEmail': AuthService.userData?['email'] ?? '',
     };
 
     final items = cartItems
