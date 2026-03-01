@@ -358,7 +358,7 @@
                 itemDiv.className = 'premium-item-row';
                 itemDiv.innerHTML = `
                     <div class="item-visual">
-                        <img src="${img}" onerror="this.src='/images/placeholder.png'" class="item-img-detailed">
+                        <img src="${img}" onerror="this.onerror=null; this.src='https://placehold.co/150x150/eeeeee/999999?text=?';" class="item-img-detailed">
                     </div>
                     <div class="item-info">
                         <div class="item-name-row">
