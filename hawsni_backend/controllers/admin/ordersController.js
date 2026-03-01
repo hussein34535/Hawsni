@@ -40,7 +40,7 @@ class OrdersController {
                     if (!itemsError && items && items.length > 0) {
                         // Get the first product image for the order thumbnail
                         const firstProduct = items[0].products;
-                        order.product_image = firstProduct?.images?.[0] || null;
+                        order.product_image = items[0].image_url || firstProduct?.images?.[0] || null;
                         order.product_name = firstProduct?.name || items[0].name || 'منتج غير معروف';
                         order.items_count = items.length;
                         order.items = items;

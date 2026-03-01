@@ -65,6 +65,7 @@ class OrderService {
                 order_id: order.id,
                 product_id: item.product || item.productId || item.product_id,
                 name: item.name,
+                image_url: item.imageUrl || item.image || item.image_url || null, // Map the image URL
                 quantity: item.quantity,
                 price: item.price
             }));

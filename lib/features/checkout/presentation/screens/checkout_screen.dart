@@ -403,6 +403,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           (item) => {
             'product': item.productId,
             'name': item.name,
+            'imageUrl': item.imageUrl,
             'quantity': item.quantity,
             'price': double.parse(
               item.price.replaceAll(RegExp(r'[^0-9.]'), ''),

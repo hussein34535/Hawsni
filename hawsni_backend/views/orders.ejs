@@ -352,7 +352,7 @@
 
             (order.items || []).forEach(item => {
                 const p = item.products || {};
-                const img = (p.images && p.images.length > 0) ? p.images[0] : '';
+                const img = item.image_url || ((p.images && p.images.length > 0) ? p.images[0] : '');
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'premium-item-row';
