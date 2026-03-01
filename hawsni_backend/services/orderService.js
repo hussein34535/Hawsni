@@ -63,7 +63,7 @@ class OrderService {
         if (items && items.length > 0) {
             const orderItems = items.map(item => ({
                 order_id: order.id,
-                product_id: item.product,
+                product_id: item.product || item.productId || item.product_id,
                 name: item.name,
                 quantity: item.quantity,
                 price: item.price
