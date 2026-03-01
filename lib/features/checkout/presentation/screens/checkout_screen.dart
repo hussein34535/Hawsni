@@ -325,7 +325,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         (_nameController.text.isEmpty || _phoneController.text.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isRtl
+          content: Text(Localizations.localeOf(context).languageCode == 'ar'
               ? 'برجاء ملء بيانات التواصل'
               : 'Please fill your contact information'),
           backgroundColor: AppTheme.errorColor,
@@ -351,7 +351,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (!phoneRegExp.hasMatch(cleanPhone) && AuthService.token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isRtl
+          content: Text(Localizations.localeOf(context).languageCode == 'ar'
               ? 'يرجى إدخال رقم هاتف مصري صحيح (مثال: 01012345678)'
               : 'Please enter a valid Egyptian phone number (e.g. 01012345678)'),
           backgroundColor: AppTheme.errorColor,
