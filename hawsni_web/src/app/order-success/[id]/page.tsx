@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { checkoutService } from '@/services/checkoutService';
 import { useLanguage } from '@/context/LanguageContext';
+import { trackEvent } from '@/components/analytics/FacebookPixel';
 
 export default function OrderSuccessPage() {
     const { id } = useParams();
@@ -42,6 +43,19 @@ export default function OrderSuccessPage() {
         };
         fetchData();
     }, [id]);
+
+    useEffect(() => {
+        if (order && !loading) {
+            // Send client-side Purchase event to Meta Pixel (de-duplicated by event_id on backend CAPI)
+            trackEvent('Purchase', {
+                value: order.total_amount || order.total,
+                currency: 'EGP',
+                content_ids: order.order_items ? order.order_items.map((item: any) => item.product_id) : [],
+                content_type: 'product',
+                num_items: order.order_items ? order.order_items.reduce((acc: number, item: any) => acc + item.quantity, 0) : 0
+            }, { eventID: `order_${order.id}` }); // This eventID matches the one sent by the CAPI server
+        }
+    }, [order, loading]);
 
     const formatImageUrl = (url: string) => {
         if (!url || typeof url !== 'string') return '/placeholder.png';

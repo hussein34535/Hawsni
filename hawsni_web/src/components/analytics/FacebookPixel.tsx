@@ -11,9 +11,13 @@ declare global {
     }
 }
 
-export const trackEvent = (eventName: string, options?: any) => {
+export const trackEvent = (eventName: string, options?: any, params?: any) => {
     if (typeof window !== "undefined" && window.fbq) {
-        window.fbq("track", eventName, options);
+        if (params) {
+            window.fbq("track", eventName, options, params);
+        } else {
+            window.fbq("track", eventName, options);
+        }
     }
 };
 
