@@ -61,14 +61,29 @@ class OrderService {
 
         // 2. Create Order Items
         if (items && items.length > 0) {
-            const orderItems = items.map(item => ({
-                order_id: order.id,
-                product_id: item.product || item.productId || item.product_id,
-                name: item.name,
-                image_url: item.imageUrl || item.image || item.image_url || null, // Map the image URL
-                quantity: item.quantity,
-                price: item.price
-            }));
+            // First fetch missing image URLs directly from DB to prevent payload spoofing
+            const productIds = items.map(item => item.product || item.productId || item.product_id);
+            const { data: dbProducts } = await supabase
+                .from('products')
+                .select('id, images')
+                .in('id', productIds);
+
+            const orderItems = items.map(item => {
+                const prodId = item.product || item.productId || item.product_id;
+                const dbProduct = dbProducts?.find(p => p.id === prodId);
+                const firstImage = (dbProduct?.images && dbProduct.images.length > 0) ? dbProduct.images[0] : null;
+
+                return {
+                    order_id: order.id,
+                    product_id: prodId,
+                    name: item.name,
+                    image_url: firstImage || item.imageUrl || item.image || item.image_url || null, // Prioritize DB image
+                    quantity: item.quantity,
+                    price: item.price,
+                    size: item.size || null,
+                    color: item.color || null
+                };
+            });
 
             const { error: itemsError } = await supabase
                 .from('order_items')
