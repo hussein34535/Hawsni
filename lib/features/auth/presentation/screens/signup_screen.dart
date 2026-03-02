@@ -173,10 +173,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (value == null || value.isEmpty) {
                       return l10n.requiredField;
                     }
-                    final parts = value.trim().split(' ');
-                    if (parts.length < 2 || parts.any((p) => p.isEmpty)) {
-                      return 'الرجاء كتابة الاسم الثنائي على الأقل (Full Name Required)';
-                    }
                     return null;
                   },
                 ),
@@ -240,6 +236,8 @@ class _SignupScreenState extends State<SignupScreen> {
                     dropdownIcon: const Icon(Icons.arrow_drop_down,
                         color: AppTheme.textTertiary),
                     initialCountryCode: 'EG', // Default to Egypt
+                    invalidNumberMessage:
+                        'رقم الهاتف غير صحيح، يرجى التأكد منه',
                     onChanged: (phone) {
                       _completePhoneNumber = phone.completeNumber;
                     },

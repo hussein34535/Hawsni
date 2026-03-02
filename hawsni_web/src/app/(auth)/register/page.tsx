@@ -25,9 +25,7 @@ export default function RegisterPage() {
         setError('');
 
         try {
-            if (name.trim().split(' ').length < 2) {
-                throw new Error("Please enter your full name (at least two words).");
-            }
+            // Name is already required by HTML5 validation, no need to strictly check for 2 words anymore.
 
             const data = await authService.register({ name, email, phone, password });
             if (data.success) {
