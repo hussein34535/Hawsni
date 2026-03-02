@@ -500,7 +500,21 @@
                     headers: { 'Accept': 'application/json' }
                 });
 
+                console.log(`Frontend: Delete response status: ${res.status}`);
+
+                if (!res.ok) {
+                    const text = await res.text();
+                    console.error(`Frontend: Delete failed with status ${res.status}. Response:`, text);
+                    alert(`فشل الحذف (Status ${res.status}): يرجى التأكد من صلاحياتك.`);
+                    if (deleteBtn) {
+                        deleteBtn.innerHTML = originalIcon;
+                        deleteBtn.disabled = false;
+                    }
+                    return;
+                }
+
                 const data = await res.json();
+                console.log('Frontend: Delete response data:', data);
 
                 if (data.success) {
                     alert('تم حذف الطلب بنجاح');
@@ -514,8 +528,8 @@
                     }
                 }
             } catch (err) {
-                console.error('Network error during deleteOrder:', err);
-                alert('حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.');
+                console.error('Frontend: Critical error during deleteOrder:', err);
+                alert('حدث خطأ فني أثناء الحذف. راجع الكونسول لمزيد من التفاصيل.');
                 if (deleteBtn) {
                     deleteBtn.innerHTML = originalIcon;
                     deleteBtn.disabled = false;

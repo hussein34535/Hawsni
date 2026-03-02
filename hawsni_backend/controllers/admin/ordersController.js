@@ -113,27 +113,38 @@ class OrdersController {
     async deleteOrder(req, res) {
         try {
             const { id } = req.params;
+            console.log(`Backend: Received request to delete order ${id}`);
 
             // Delete order items first (or rely on Cascade)
+            console.log(`Backend: Deleting order items for order ${id}...`);
             const { error: itemsError } = await supabase
                 .from('order_items')
                 .delete()
                 .eq('order_id', id);
 
-            if (itemsError) throw itemsError;
+            if (itemsError) {
+                console.error(`Backend: Error deleting items for order ${id}:`, itemsError);
+                throw itemsError;
+            }
+            console.log(`Backend: Order items deleted successfully for order ${id}`);
 
             // Delete order
+            console.log(`Backend: Deleting order ${id}...`);
             const { error: orderError } = await supabase
                 .from('orders')
                 .delete()
                 .eq('id', id);
 
-            if (orderError) throw orderError;
+            if (orderError) {
+                console.error(`Backend: Error deleting order ${id}:`, orderError);
+                throw orderError;
+            }
 
+            console.log(`Backend: Order ${id} deleted successfully`);
             res.json({ success: true, message: 'تم حذف الطلب بنجاح' });
         } catch (err) {
-            console.error('Error deleting order:', err);
-            res.status(500).json({ success: false, message: 'خطأ في حذف الطلب' });
+            console.error('Backend: Critical error deleting order:', err);
+            res.status(500).json({ success: false, message: 'خطأ في حذف الطلب: ' + err.message });
         }
     }
 
