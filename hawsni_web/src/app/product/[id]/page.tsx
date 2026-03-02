@@ -131,7 +131,7 @@ export default function ProductPage() {
     const getItemCount = useCartStore((state) => state.getItemCount);
 
     // Derived state: check if current selection is in cart
-    const currentItemId = product ? `${product._id}_${selectedSize}_${selectedColor || 'default'}` : null;
+    const currentItemId = product ? `${product.id || product._id}_${selectedSize}_${selectedColor || 'default'}` : null;
     const isInCart = items.some((item) => item.id === currentItemId);
 
     // Determine real stock
