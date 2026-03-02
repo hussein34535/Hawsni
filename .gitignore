@@ -16,4 +16,4 @@ hwasi_backend/node_modules/
 .env
 .DS_Store
 Thumbs.db
-hawsni_scraper_extension/config.js
+hawsni_scraper_extension/
