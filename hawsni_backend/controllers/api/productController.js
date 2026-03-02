@@ -164,13 +164,16 @@ class ProductController {
                 colors = Array.isArray(req.body.colors) ? req.body.colors : req.body.colors.split(',').map(c => c.trim());
             }
 
+            let categoryIds = req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []);
+            if (!Array.isArray(categoryIds)) categoryIds = [categoryIds];
+
             const productData = {
                 name: req.body.name,
                 description: req.body.description,
                 price: parseFloat(req.body.price),
                 discount: parseInt(req.body.discount) || 0,
-                category_id: null, // Legacy field
-                category_ids: req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []),
+                category_id: categoryIds[0] || null, // Sync with first category
+                category_ids: categoryIds,
                 stock: parseInt(req.body.stock) || 0,
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
                 sizes: sizes,
@@ -295,12 +298,19 @@ class ProductController {
                 }
             }
 
+            // Handle Categories mapping
+            let categoryIdsToInsert = req.body.category_ids || (category_id ? [category_id] : []);
+            if (categoryIdsToInsert && !Array.isArray(categoryIdsToInsert)) {
+                categoryIdsToInsert = [categoryIdsToInsert];
+            }
+
             const { data: newProduct, error } = await supabase.from('products').insert({
                 name,
                 description,
                 price: parseFloat(price),
                 discount: parseInt(discount) || 0,
                 stock: parseInt(stock) || 0,
+                category_id: categoryIdsToInsert[0] || null, // Sync with main table
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
@@ -313,11 +323,7 @@ class ProductController {
                 return res.status(500).send(`خطأ في إضافة المنتج: ${error.message}`);
             }
 
-            // Handle Categories mapping
-            let categoryIdsToInsert = req.body.category_ids || (category_id ? [category_id] : []);
-            if (categoryIdsToInsert && !Array.isArray(categoryIdsToInsert)) {
-                categoryIdsToInsert = [categoryIdsToInsert];
-            }
+
 
             if (categoryIdsToInsert && categoryIdsToInsert.length > 0) {
                 const links = categoryIdsToInsert.map(catId => ({
@@ -453,6 +459,12 @@ class ProductController {
                 }
             }
 
+            // Handle Categories mapping Update
+            let categoryIdsToInsert = req.body.category_ids || (category_id ? [category_id] : []);
+            if (categoryIdsToInsert && !Array.isArray(categoryIdsToInsert)) {
+                categoryIdsToInsert = [categoryIdsToInsert];
+            }
+
             // Perform Update
             const { error: updateError } = await supabase.from('products').update({
                 name,
@@ -460,6 +472,7 @@ class ProductController {
                 price: parseFloat(price),
                 discount: parseInt(discount) || 0,
                 stock: parseInt(stock) || 0,
+                category_id: categoryIdsToInsert[0] || null, // Sync with main table
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
@@ -468,12 +481,6 @@ class ProductController {
             }).eq('id', req.params.id);
 
             if (updateError) throw updateError;
-
-            // Handle Categories mapping Update
-            let categoryIdsToInsert = req.body.category_ids || (category_id ? [category_id] : []);
-            if (categoryIdsToInsert && !Array.isArray(categoryIdsToInsert)) {
-                categoryIdsToInsert = [categoryIdsToInsert];
-            }
 
             // Remove old links
             await supabase.from('product_category_links').delete().eq('product_id', req.params.id);
@@ -639,6 +646,19 @@ class ProductController {
 
             const { error } = await supabase.from('products').update(safeUpdates).in('id', ids);
             if (error) throw error;
+
+            // Sync product_category_links for each ID if category_id was updated
+            if (safeUpdates.category_id) {
+                // Delete existing links for these products
+                await supabase.from('product_category_links').delete().in('product_id', ids);
+
+                // Insert new ones
+                const bulkLinks = ids.map(id => ({
+                    product_id: id,
+                    category_id: safeUpdates.category_id
+                }));
+                await supabase.from('product_category_links').insert(bulkLinks);
+            }
 
             res.json({ success: true, message: `تم تحديث ${ids.length} منتج` });
         } catch (err) {

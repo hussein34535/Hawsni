@@ -67,6 +67,11 @@ class ProductService {
     async createProduct(productData) {
         const { category_ids, ...restOfData } = productData;
 
+        // Ensure category_id is synced for backward compatibility
+        if (category_ids && Array.isArray(category_ids) && category_ids.length > 0) {
+            restOfData.category_id = category_ids[0];
+        }
+
         const { data: product, error } = await supabase
             .from('products')
             .insert(restOfData)
@@ -92,6 +97,11 @@ class ProductService {
 
     async updateProduct(id, productData) {
         const { category_ids, ...restOfData } = productData;
+
+        // Ensure category_id is synced for backward compatibility
+        if (category_ids && Array.isArray(category_ids)) {
+            restOfData.category_id = category_ids[0] || null;
+        }
 
         const { data: product, error } = await supabase
             .from('products')
