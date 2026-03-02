@@ -37,17 +37,18 @@ export default function CartItemCard({ item }: { item: CartItem }) {
                     </span>
 
                     {/* Actions: Remove and Quantity */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => removeItem(item.id)}
-                            className="w-10 h-10 flex items-center justify-center text-red-100 bg-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all group"
+                            className="w-8 h-8 flex items-center justify-center text-gray-300 hover:text-red-500 transition-colors"
+                            title={isRTL ? 'حذف' : 'Remove'}
                         >
-                            <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
+                            <Trash2 size={16} />
                         </button>
 
-                        <div className="h-8 w-[1px] bg-gray-100 mx-1" />
+                        <div className="h-6 w-[1px] bg-gray-100 mx-0.5" />
 
-                        <div className="flex items-center gap-4 bg-gray-50 p-1 rounded-xl">
+                        <div className="flex items-center gap-3 bg-gray-50 p-1 rounded-xl">
                             <button
                                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                 className="w-8 h-8 flex items-center justify-center text-gray-900 bg-white shadow-sm rounded-lg hover:bg-gray-100 transition-colors"
