@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     scrapeBtn.addEventListener('click', async () => {
-        statusDiv.textContent = 'Scraping...';
+        statusDiv.innerHTML = '<span style="color: #007bff;">⏳ الخطوة 1: جاري استخراج البيانات الخام من الصفحة...</span>';
         try {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const rawProduct = results[0].result;
             if (rawProduct) {
-                statusDiv.textContent = 'Rewriting with AI...';
+                statusDiv.innerHTML = '<span style="color: #28a745;">✅ تم استخراج البيانات.</span><br><span style="color: #007bff;">⏳ الخطوة 2: جاري الاتصال بالذكاء الاصطناعي للتحسين...</span>';
 
                 // --- OPENROUTER AI INTEGRATION ---
                 const systemPrompt = `
@@ -62,8 +62,10 @@ You are a Senior Fashion Copywriter and E-commerce Specialist for a high-end fas
                 const aiResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer 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',
-                        'Content-Type': 'application/json'
+                        'Authorization': `Bearer ${CONFIG.OPENROUTER_API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': 'https://hawsni.com',
+                        'X-Title': 'Hawsni Scraper Extension'
                     },
                     body: JSON.stringify({
                         model: "arcee-ai/trinity-large-preview:free",
@@ -75,6 +77,7 @@ You are a Senior Fashion Copywriter and E-commerce Specialist for a high-end fas
                 });
 
                 if (aiResponse.ok) {
+                    statusDiv.innerHTML += '<br><span style="color: #28a745;">✅ تم استلام الرد من الذكاء الاصطناعي.</span><br><span style="color: #007bff;">⏳ الخطوة 3: جاري تنسيق ومعالجة البيانات للحفظ...</span>';
                     const aiData = await aiResponse.json();
                     let aiText = aiData.choices[0].message.content;
 
@@ -113,19 +116,19 @@ You are a Senior Fashion Copywriter and E-commerce Specialist for a high-end fas
 
                     await chrome.storage.local.set({ scrapedProduct: product });
                     pasteBtn.disabled = false;
-                    statusDiv.textContent = 'Scraped & AI Rewritten! Go to hwasi and Paste.';
+                    statusDiv.innerHTML = '<span style="color: #28a745; font-weight: bold;">🎉 اكتملت جميع الخطوات بنجاح! انتقل للوحة التحكم واضغط Paste.</span>';
                 } else {
                     console.error("OpenRouter API Failed", await aiResponse.text());
                     // Fallback to raw if AI fails
                     await chrome.storage.local.set({ scrapedProduct: rawProduct });
                     pasteBtn.disabled = false;
-                    statusDiv.textContent = 'Scraped (AI failed). Go to hwasi and Paste.';
+                    statusDiv.innerHTML = '<span style="color: #dc3545;">⚠️ فشل الاتصال بالذكاء الاصطناعي. تم سحب البيانات الخام. انتقل للوحة التحكم واضغط Paste.</span>';
                 }
             } else {
-                statusDiv.textContent = 'No data found or scraping failed.';
+                statusDiv.innerHTML = '<span style="color: #dc3545;">❌ لم يتم العثور على بيانات في هذه الصفحة أو فشل السحب.</span>';
             }
         } catch (err) {
-            statusDiv.textContent = 'Error: ' + err.message;
+            statusDiv.innerHTML = '<span style="color: #dc3545;">❌ خطأ: ' + err.message + '</span>';
         }
     });
 

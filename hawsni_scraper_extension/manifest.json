@@ -8,6 +8,9 @@
         "scripting",
         "storage"
     ],
+    "host_permissions": [
+        "https://openrouter.ai/*"
+    ],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
