@@ -10,10 +10,14 @@ interface HeroCarouselProps {
 }
 
 import { useLanguage } from '@/context/LanguageContext';
+import dynamic from 'next/dynamic';
+
+const ImageLightbox = dynamic(() => import('@/components/common/ImageLightbox'), { ssr: false });
 
 export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) {
     const { language, isRTL } = useLanguage();
     const [index, setIndex] = useState(0);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
     useEffect(() => {
         if (banners.length === 0) return;
@@ -47,7 +51,8 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1 }}
-                    className="absolute inset-0"
+                    className="absolute inset-0 cursor-zoom-in"
+                    onClick={() => setIsLightboxOpen(true)}
                 >
                     <Image
                         src={bannerImage}
@@ -62,6 +67,15 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                     {/* The text content overlay has been removed per user request */}
                 </motion.div>
             </AnimatePresence>
+
+            {/* Full screen lightbox for banners */}
+            <ImageLightbox
+                images={banners.map(b => b.image_url || b.imageUrl || b.image || '/logo.png')}
+                currentIndex={index}
+                isOpen={isLightboxOpen}
+                onClose={() => setIsLightboxOpen(false)}
+                onNavigate={(idx) => setIndex(idx)}
+            />
 
             {/* Page Indicator */}
             {banners.length > 1 && (

@@ -32,6 +32,7 @@ import dynamic from 'next/dynamic';
 const ReviewsSection = dynamic(() => import('@/components/product/ReviewsSection'), { ssr: false });
 const SizeGuideModal = dynamic(() => import('@/components/product/SizeGuideModal'), { ssr: false });
 const VirtualTryOnModal = dynamic(() => import('@/components/product/VirtualTryOnModal'), { ssr: false });
+const ImageLightbox = dynamic(() => import('@/components/common/ImageLightbox'), { ssr: false });
 
 const formatImageUrl = (url: string) => {
     if (!url) return '';
@@ -125,6 +126,7 @@ export default function ProductPage() {
     const [isFavorite, setIsFavorite] = useState(false);
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
     const [isVTOOpen, setIsVTOOpen] = useState(false);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
     const items = useCartStore((state) => state.items);
     const addItem = useCartStore((state) => state.addItem);
@@ -327,14 +329,18 @@ export default function ProductPage() {
                             style={{ transform: `translateX(-${selectedImage * 100}%)` }}
                         >
                             {safeImages.map((img, i) => (
-                                <div key={`img-${i}`} className="min-w-full h-full relative flex-shrink-0">
+                                <div
+                                    key={`img-${i}`}
+                                    className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in"
+                                    onClick={() => setIsLightboxOpen(true)}
+                                >
                                     <Image
                                         src={formatImageUrl(img)}
                                         alt={`${product.name} - ${i + 1}`}
                                         fill
                                         priority={i === 0}
                                         sizes="(max-width: 1024px) 100vw, 50vw"
-                                        className="object-cover select-none pointer-events-none"
+                                        className="object-cover select-none"
                                     />
                                 </div>
                             ))}
@@ -645,6 +651,15 @@ export default function ProductPage() {
                     : safeImages}
                 productId={productId}
                 productName={product.name}
+            />
+
+            {/* Lightbox for full screen images */}
+            <ImageLightbox
+                images={safeImages.map(img => formatImageUrl(img))}
+                currentIndex={selectedImage}
+                isOpen={isLightboxOpen}
+                onClose={() => setIsLightboxOpen(false)}
+                onNavigate={(index) => setSelectedImage(index)}
             />
         </div>
     );

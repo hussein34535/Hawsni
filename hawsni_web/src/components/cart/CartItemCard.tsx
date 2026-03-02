@@ -36,21 +36,34 @@ export default function CartItemCard({ item }: { item: CartItem }) {
                         {item.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}
                     </span>
 
-                    {/* Quantity Selector */}
+                    {/* Actions: Remove and Quantity */}
                     <div className="flex items-center gap-4">
                         <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-8 h-8 flex items-center justify-center text-gray-900 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                            onClick={() => removeItem(item.id)}
+                            className="w-10 h-10 flex items-center justify-center text-red-100 bg-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all group"
                         >
-                            <Plus size={16} />
+                            <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
                         </button>
-                        <span className="w-6 text-center text-base font-black text-gray-900">{item.quantity}</span>
-                        <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="w-8 h-8 flex items-center justify-center text-gray-900 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-                        >
-                            <Minus size={16} />
-                        </button>
+
+                        <div className="h-8 w-[1px] bg-gray-100 mx-1" />
+
+                        <div className="flex items-center gap-4 bg-gray-50 p-1 rounded-xl">
+                            <button
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="w-8 h-8 flex items-center justify-center text-gray-900 bg-white shadow-sm rounded-lg hover:bg-gray-100 transition-colors"
+                            >
+                                <Minus size={14} />
+                            </button>
+                            <span className="w-6 text-center text-sm font-black text-gray-900">
+                                {item.quantity}
+                            </span>
+                            <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="w-8 h-8 flex items-center justify-center text-gray-900 bg-white shadow-sm rounded-lg hover:bg-gray-100 transition-colors"
+                            >
+                                <Plus size={14} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
