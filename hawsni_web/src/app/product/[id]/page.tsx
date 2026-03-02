@@ -477,7 +477,7 @@ export default function ProductPage() {
                             )}
 
                             {/* Stock Alert */}
-                            {stockCount > 0 && stockCount < 8 ? (
+                            {stockCount > 0 ? (
                                 <div className="p-4 rounded-[20px] bg-amber-50 border border-amber-100/50 flex items-center gap-3">
                                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
                                         <motion.div
