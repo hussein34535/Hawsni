@@ -86,13 +86,19 @@ class OrderService {
                     }
                 }
 
+                const passedImage = item.image_url || item.imageUrl || item.image || null;
                 const firstImage = (dbProduct?.images && dbProduct.images.length > 0) ? dbProduct.images[0] : null;
+
+                // Use passed image if it's not null and not a placeholder, otherwise fallback to first gallery image
+                const finalImage = (passedImage && !passedImage.includes('placeholder.png'))
+                    ? passedImage
+                    : (firstImage || passedImage || null);
 
                 return {
                     order_id: order.id,
                     product_id: prodId,
                     name: item.name,
-                    image_url: firstImage || item.image_url || item.imageUrl || item.image || null,
+                    image_url: finalImage,
                     quantity: item.quantity,
                     price: item.price,
                     size: item.size || null,

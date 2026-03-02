@@ -214,13 +214,27 @@ export default function ProductPage() {
             return;
         }
 
+        // Find the image for the selected color
+        let selectedColorImage = safeImages[0] || '';
+        if (selectedColor && product.colors) {
+            const parsedColors = parseColors(product.colors);
+            const colorData = parsedColors.find(c => c.color === selectedColor);
+            if (colorData) {
+                if (colorData.image) {
+                    selectedColorImage = colorData.image;
+                } else if (colorData.imageIndex !== undefined && safeImages[colorData.imageIndex]) {
+                    selectedColorImage = safeImages[colorData.imageIndex];
+                }
+            }
+        }
+
         const prodId = product.id || product._id;
         addItem({
             id: `${prodId}_${selectedSize}_${selectedColor || 'default'}`,
             productId: prodId,
             name: product.name,
             price: product.price,
-            imageUrl: safeImages[0] || '',
+            imageUrl: selectedColorImage,
             quantity: quantity,
             size: selectedSize,
             color: selectedColor || undefined
