@@ -5,6 +5,7 @@ export interface OrderItem {
     name: string;
     price: number;
     quantity: number;
+    image_url?: string;
     size?: string;
     color?: string;
 }

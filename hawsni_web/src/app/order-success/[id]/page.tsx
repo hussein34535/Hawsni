@@ -187,7 +187,7 @@ export default function OrderSuccessPage() {
                             <div key={idx} className="flex gap-4 items-center">
                                 <div className="w-20 h-24 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-100 p-2">
                                     <img
-                                        src={formatImageUrl(item.products?.images?.[0])}
+                                        src={formatImageUrl(item.products?.images?.[0] || item.image_url)}
                                         alt={item.name}
                                         className="w-full h-full object-contain mix-blend-multiply"
                                     />

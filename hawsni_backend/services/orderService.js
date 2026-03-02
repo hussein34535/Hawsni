@@ -68,22 +68,37 @@ class OrderService {
                 .select('id, images')
                 .in('id', productIds);
 
-            const orderItems = items.map(item => {
-                const prodId = item.product || item.productId || item.product_id;
-                const dbProduct = dbProducts?.find(p => p.id === prodId);
+            const orderItems = await Promise.all(items.map(async (item) => {
+                let prodId = item.product || item.productId || item.product_id;
+                let dbProduct = dbProducts?.find(p => p.id === prodId);
+
+                // Fallback: If prodId is missing or not found in DB, try finding by name
+                if (!dbProduct && item.name) {
+                    const { data: namedProduct } = await supabase
+                        .from('products')
+                        .select('id, images')
+                        .eq('name', item.name)
+                        .maybeSingle();
+
+                    if (namedProduct) {
+                        dbProduct = namedProduct;
+                        prodId = namedProduct.id;
+                    }
+                }
+
                 const firstImage = (dbProduct?.images && dbProduct.images.length > 0) ? dbProduct.images[0] : null;
 
                 return {
                     order_id: order.id,
                     product_id: prodId,
                     name: item.name,
-                    image_url: firstImage || item.imageUrl || item.image || item.image_url || null, // Prioritize DB image
+                    image_url: firstImage || item.image_url || item.imageUrl || item.image || null,
                     quantity: item.quantity,
                     price: item.price,
                     size: item.size || null,
                     color: item.color || null
                 };
-            });
+            }));
 
             const { error: itemsError } = await supabase
                 .from('order_items')

@@ -152,7 +152,7 @@ export default function ProductPage() {
                     // Track ViewContent
                     trackEvent('ViewContent', {
                         content_name: data.product.name,
-                        content_ids: [data.product._id],
+                        content_ids: [data.product.id || data.product._id],
                         content_type: 'product',
                         value: data.product.price,
                         currency: 'EGP'
@@ -214,9 +214,10 @@ export default function ProductPage() {
             return;
         }
 
+        const prodId = product.id || product._id;
         addItem({
-            id: `${product._id}_${selectedSize}_${selectedColor || 'default'}`,
-            productId: product._id,
+            id: `${prodId}_${selectedSize}_${selectedColor || 'default'}`,
+            productId: prodId,
             name: product.name,
             price: product.price,
             imageUrl: safeImages[0] || '',
@@ -228,7 +229,7 @@ export default function ProductPage() {
         // Track AddToCart
         trackEvent('AddToCart', {
             content_name: product.name,
-            content_ids: [product._id],
+            content_ids: [prodId],
             content_type: 'product',
             value: product.price,
             currency: 'EGP',
