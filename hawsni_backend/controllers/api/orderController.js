@@ -129,12 +129,24 @@ class OrderController {
             // but the view already handles complex structures in the modal.
             // Let's ensure top-level order object has product_image/name fallbacks
             const enhancedOrders = (orders || []).map(order => {
-                if (!order.product_image && order.order_items && order.order_items.length > 0) {
-                    const firstItem = order.order_items[0];
+                if (order.order_items && order.order_items.length > 0) {
+                    const firstItem = order.order_items[0] || {};
                     const prod = firstItem.products || {};
+
                     order.product_name = order.product_name || firstItem.name || prod.name || 'منتج';
-                    order.product_image = order.product_image || firstItem.image_url || (prod.images && prod.images.length > 0 ? prod.images[0] : null);
                     order.items_count = order.items_count || order.order_items.length;
+
+                    // Robust Image Logic:
+                    const rowImg = order.product_image || firstItem.image_url || '';
+                    const hasRealImage = rowImg && !rowImg.includes('placeholder.png');
+
+                    if (!hasRealImage && prod.images && prod.images.length > 0) {
+                        order.product_image = prod.images[0];
+                    } else if (!hasRealImage) {
+                        order.product_image = '/placeholder.png';
+                    } else {
+                        order.product_image = rowImg;
+                    }
                 }
                 return order;
             });

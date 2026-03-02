@@ -350,15 +350,20 @@
             const itemsList = document.getElementById('modalItemsList');
             itemsList.innerHTML = '';
 
-            (order.items || []).forEach(item => {
+            (order.order_items || order.items || []).forEach(item => {
                 const p = item.products || {};
-                const img = item.image_url || ((p.images && p.images.length > 0) ? p.images[0] : '');
+                let img = item.image_url || ((p.images && p.images.length > 0) ? p.images[0] : '/placeholder.png');
+
+                // Final safety: if the stored URL is a placeholder, try product gallery again
+                if (img.includes('placeholder.png') && p.images && p.images.length > 0) {
+                    img = p.images[0];
+                }
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'premium-item-row';
                 itemDiv.innerHTML = `
                     <div class="item-visual">
-                        <img src="${img}" onerror="this.onerror=null; this.src='https://placehold.co/150x150/eeeeee/999999?text=?';" class="item-img-detailed">
+                        <img src="${img}" onerror="this.onerror=null; this.src='/placeholder.png';" class="item-img-detailed">
                     </div>
                     <div class="item-info">
                         <div class="item-name-row">
