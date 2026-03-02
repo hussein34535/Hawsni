@@ -100,22 +100,6 @@
             </a>
         </div>
 
-        <div class="card-body border-bottom mb-3" style="background-color: #f8f9fa;">
-            <div class="row align-items-center">
-                <div class="col-md-9">
-                    <input type="text" id="scrapeUrl" class="form-control"
-                        placeholder="أدخل رابط المنتج من aff.ven-door.com للنسخ التلقائي...">
-                </div>
-                <div class="col-md-3">
-                    <button type="button" class="btn btn-info w-100" onclick="scrapeProduct()">
-                        <i class="fas fa-magic"></i> سحب البيانات
-                        <span id="scrapeLoading" style="display:none;"
-                            class="spinner-border spinner-border-sm ms-2"></span>
-                    </button>
-                </div>
-            </div>
-            <div id="scrapeError" class="text-danger mt-2" style="display:none;"></div>
-        </div>
 
         <form action="/products<%= product ? '/' + product.id : '' %>" method="POST" enctype="multipart/form-data"
             onsubmit="return handleProductSubmit(event)" id="productForm">
@@ -684,46 +668,6 @@
             // Just putting a placeholder here assuming standard logic
         }
 
-        // === Admin Scraper (Fetch API) ===
-        // Kept for backward compatibility if user uses the URL input box
-        async function scrapeProduct() {
-            const url = document.getElementById('scrapeUrl').value.trim();
-            if (!url) return;
-
-            const btn = document.querySelector('button[onclick="scrapeProduct()"]');
-            if (btn) btn.disabled = true;
-
-            try {
-                const res = await fetch('/api/admin/scrape-product', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-                const data = await res.json();
-                if (!data.success) throw new Error(data.message);
-
-                const p = data.data;
-                // Name, Desc, Price...
-                if (p.name) document.querySelector('input[name="name"]').value = p.name;
-                if (p.description) document.querySelector('textarea[name="description"]').value = p.description;
-                if (p.price) document.querySelector('input[name="price"]').value = p.price;
-                if (p.stock) document.querySelector('input[name="stock"]').value = p.stock;
-                if (p.sizes) document.querySelector('input[name="sizes"]').value = p.sizes.join(', ');
-
-                // Images
-                if (p.images && p.images.length > 0) {
-                    p.images.forEach(url => addImageToState({ type: 'scraped', url: url, file: null }, false));
-                    renderGallery();
-                    updateInputs();
-                    updateImageDropdown();
-                }
-                alert('تم سحب البيانات بنجاح!');
-            } catch (e) {
-                alert('Error: ' + e.message);
-            } finally {
-                if (btn) btn.disabled = false;
-            }
-        }
 
         // --- Colors Utility Functions (Copied from original to ensure they exist) ---
         function updateColorsInput() {
