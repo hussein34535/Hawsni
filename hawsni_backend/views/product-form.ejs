@@ -169,6 +169,10 @@
                                         <input type="color" id="colorPicker" class="form-control"
                                             style="width: 50px; padding: 0; height: 40px; flex-shrink: 0;"
                                             value="#000000">
+                                        <button type="button" class="btn btn-outline-info" onclick="openEyeDropper()"
+                                            style="height: 40px; padding: 0 10px;" title="سحب لون من صورة">
+                                            <i class="fas fa-eye-dropper"></i>
+                                        </button>
                                         <div id="imageSelectorContainer" style="flex: 1; position: relative;">
                                             <div id="selectedImagePreview"
                                                 style="display: none; border: 2px solid #dee2e6; border-radius: 8px; padding: 4px; background: white; cursor: pointer;"
@@ -189,7 +193,7 @@
                                             </div>
                                         </div>
                                         <button type="button" class="btn btn-secondary" onclick="addColor()"
-                                            style="padding: 0.5rem 1rem; flex-shrink: 0;">
+                                            style="padding: 0.5rem 1rem; flex-shrink: 0; height: 40px;">
                                             <i class="fas fa-plus"></i> إضافة
                                         </button>
                                     </div>
@@ -285,6 +289,46 @@
                         <a href="/products" class="btn btn-secondary">إلغاء</a>
                     </div>
         </form>
+    </div>
+
+    <!-- Eye Dropper Modal -->
+    <div id="eyeDropperModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+        <div
+            style="background: white; border-radius: 12px; padding: 20px; width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0;">سحب لون من صورة <i class="fas fa-eye-dropper"></i></h4>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeEyeDropper()">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
+            </div>
+
+            <div id="eyeDropperStep1">
+                <p class="text-muted mb-2">اختر إحدى الصور المرفوعة لسحب اللون منها:</p>
+                <div id="eyeDropperImageList" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                    <!-- Images will be listed here -->
+                </div>
+            </div>
+
+            <div id="eyeDropperStep2"
+                style="display: none; flex: 1; min-height: 0; flex-direction: column; align-items: center; gap: 10px;">
+                <div
+                    style="display: flex; gap: 10px; align-items: center; width: 100%; justify-content: space-between;">
+                    <span class="badge bg-info text-dark" style="font-size: 1rem;"><i class="fas fa-hand-pointer"></i>
+                        اضغط على أي مكان في الصورة لاختيار لونه</span>
+                    <button type="button" class="btn btn-sm btn-secondary"
+                        onclick="document.getElementById('eyeDropperStep2').style.display='none'; document.getElementById('eyeDropperStep1').style.display='block';">
+                        <i class="fas fa-arrow-right"></i> رجوع للصور
+                    </button>
+                </div>
+                <div
+                    style="flex: 1; width: 100%; overflow: auto; border: 2px dashed #ccc; border-radius: 8px; position: relative; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                    <!-- Canvas for pixel picking -->
+                    <canvas id="eyeDropperCanvas"
+                        style="cursor: crosshair; max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Add SortableJS -->
@@ -660,6 +704,108 @@
                 noImageBtn.style.display = 'none';
             }
             toggleImageDropdown();
+        }
+
+        // === Eye Dropper Logic ===
+        let eyeDropperActiveImageIndex = null;
+
+        function openEyeDropper() {
+            if (imageState.length === 0) {
+                alert('الرجاء رفع صور للمنتج أولاً لتتمكن من سحب الألوان منها.');
+                return;
+            }
+            const modal = document.getElementById('eyeDropperModal');
+            document.getElementById('eyeDropperStep1').style.display = 'block';
+            document.getElementById('eyeDropperStep2').style.display = 'none';
+            modal.style.display = 'flex';
+            renderEyeDropperList();
+        }
+
+        function closeEyeDropper() {
+            document.getElementById('eyeDropperModal').style.display = 'none';
+        }
+
+        function renderEyeDropperList() {
+            const list = document.getElementById('eyeDropperImageList');
+            list.innerHTML = '';
+
+            imageState.forEach((img, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'flex-shrink: 0; width: 100px; cursor: pointer; border: 2px solid transparent; border-radius: 8px; overflow: hidden; transition: 0.2s;';
+                wrapper.onmouseover = () => wrapper.style.borderColor = 'var(--primary)';
+                wrapper.onmouseout = () => wrapper.style.borderColor = 'transparent';
+                wrapper.onclick = () => activateEyeDropperCanvas(index, img.url);
+
+                const el = document.createElement('img');
+                el.src = img.url;
+                el.style.cssText = 'width: 100px; height: 100px; object-fit: cover; display: block;';
+
+                const label = document.createElement('div');
+                label.style.cssText = 'text-align: center; background: #eee; padding: 2px; font-size: 12px;';
+                label.innerHTML = `صورة ${index + 1}`;
+
+                wrapper.appendChild(el);
+                wrapper.appendChild(label);
+                list.appendChild(wrapper);
+            });
+        }
+
+        function activateEyeDropperCanvas(index, src) {
+            eyeDropperActiveImageIndex = index;
+            document.getElementById('eyeDropperStep1').style.display = 'none';
+            document.getElementById('eyeDropperStep2').style.display = 'flex';
+
+            const canvas = document.getElementById('eyeDropperCanvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // Crucial for CORS and canvas reading
+            img.onload = () => {
+                // Ensure canvas matches image dimensions
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Add click event for pixel extraction
+                canvas.onclick = function (event) {
+                    const rect = canvas.getBoundingClientRect();
+                    // Calculate scale to map screen pixels to canvas pixels
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+
+                    const x = (event.clientX - rect.left) * scaleX;
+                    const y = (event.clientY - rect.top) * scaleY;
+
+                    try {
+                        const pixel = ctx.getImageData(x, y, 1, 1).data;
+                        const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+
+                        // Set the selected color and close modal
+                        document.getElementById('colorPicker').value = hex;
+
+                        // Temporarily set the selectedImageIndex without closing dropdown directly 
+                        // (we just simulate the user picking it)
+                        selectedImageIndex = eyeDropperActiveImageIndex;
+                        const preview = document.getElementById('selectedImagePreview');
+                        const thumb = document.getElementById('selectedImageThumb');
+                        const noImageBtn = document.getElementById('noImageButton');
+
+                        thumb.src = src;
+                        preview.style.display = 'block';
+                        noImageBtn.style.display = 'none';
+
+                        closeEyeDropper();
+                    } catch (e) {
+                        alert("لا يمكن سحب اللون من هذه الصورة بأمان بسبب قيود المتصفح (CORS).");
+                        console.error(e);
+                    }
+                };
+            };
+            img.src = src;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
         }
 
         // Colors Rendering
