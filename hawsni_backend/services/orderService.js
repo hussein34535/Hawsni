@@ -50,20 +50,6 @@ class OrderService {
         }
         orderData.order_number = orderNumber;
 
-        // Get first item info for order summary
-        const firstItem = items && items.length > 0 ? items[0] : null;
-        if (firstItem) {
-            const { data: firstProd } = await supabase
-                .from('products')
-                .select('name, images')
-                .eq('id', firstItem.product || firstItem.productId || firstItem.product_id)
-                .single();
-
-            orderData.product_name = firstItem.name || firstProd?.name || 'منتج';
-            orderData.product_image = (firstProd?.images && firstProd.images.length > 0) ? firstProd.images[0] : (firstItem.image_url || null);
-            orderData.items_count = items.length;
-        }
-
         // 1. Create Order
         const { data: order, error: orderError } = await supabase
             .from('orders')
