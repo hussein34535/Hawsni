@@ -6,8 +6,8 @@ const { protect, authorize } = require('../middleware/auth');
 // Get all coupons (Admin)
 router.get('/', protect, authorize('admin'), CouponController.getAllCoupons);
 
-// Validate coupon
-router.post('/validate', protect, CouponController.validateCoupon);
+// Validate coupon (Public - so guests can use it during checkout)
+router.post('/validate', CouponController.validateCoupon);
 
 // Create coupon (Admin)
 router.post('/', protect, authorize('admin'), CouponController.createCoupon);
