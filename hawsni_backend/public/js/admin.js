@@ -34,7 +34,7 @@ function showToast(message, type = 'success') {
 }
 
 // Confirmation Dialog
-function confirm(message, onConfirm) {
+function showConfirm(message, onConfirm) {
     const overlay = document.createElement('div');
     overlay.className = 'confirm-overlay';
     overlay.innerHTML = `
@@ -123,7 +123,7 @@ function validateForm(formId) {
 // Delete Handler
 async function handleDelete(url, itemName) {
     // 1. Ask for confirmation
-    confirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
+    showConfirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
 
         // 2. Sanitize URL (fix common issues like /products//delete)
         url = url.replace(/([^:]\/)\/+/g, "$1");

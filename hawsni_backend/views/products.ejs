@@ -154,28 +154,28 @@
         async function bulkDelete() {
             const ids = getSelectedIds();
             if (!ids.length) return;
-            if (!confirm(`هل أنت متأكد من حذف ${ids.length} منتج؟`)) return;
-
-            try {
-                const res = await fetch('/products/bulk-delete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast(`تم حذف ${ids.length} منتج بنجاح`, 'success');
-                    ids.forEach(id => {
-                        const row = document.getElementById('row-' + id);
-                        if (row) row.remove();
+            showConfirm(`هل أنت متأكد من حذف ${ids.length} منتج؟`, async () => {
+                try {
+                    const res = await fetch('/products/bulk-delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids })
                     });
-                    clearSelection();
-                } else {
-                    showToast(data.message || 'فشل الحذف', 'error');
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast(`تم حذف ${ids.length} منتج بنجاح`, 'success');
+                        ids.forEach(id => {
+                            const row = document.getElementById('row-' + id);
+                            if (row) row.remove();
+                        });
+                        clearSelection();
+                    } else {
+                        showToast(data.message || 'فشل الحذف', 'error');
+                    }
+                } catch (e) {
+                    showToast('حدث خطأ أثناء الحذف', 'error');
                 }
-            } catch (e) {
-                showToast('حدث خطأ أثناء الحذف', 'error');
-            }
+            });
         }
 
         async function bulkChangeCategory() {
@@ -204,44 +204,31 @@
 
         // Override handleDelete for products (uses POST to /products/:id/delete)
         async function handleDelete(url, itemName) {
-            if (!confirm(`هل أنت متأكد من حذف ${itemName}؟`)) return;
+            showConfirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
+                url = url.replace(/([^:]\/)\/+/g, "$1");
 
-            url = url.replace(/([^:]\/)\/+/g, "$1");
-
-            if (url.endsWith('/products/') || url === '/products/delete' || url === '/products') {
-                alert('خطأ: المعرف (ID) غير موجود لهذا العنصر!');
-                return;
-            }
-
-            try {
-                const res = await fetch(url, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if (res.ok) {
-                    showToast('تم الحذف بنجاح', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
+                if (url.endsWith('/products/') || url === '/products/delete' || url === '/products') {
+                    alert('خطأ: المعرف (ID) غير موجود لهذا العنصر!');
                     return;
-                } else if (res.status === 404) {
-                    const formRes = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: '_method=DELETE'
-                    });
-                    if (formRes.ok) {
-                        showToast('تم الحذف بنجاح', 'success');
-                        setTimeout(() => window.location.reload(), 1000);
-                        return;
-                    }
                 }
 
-                const data = await res.json();
-                throw new Error(data.message || 'فشل الحذف');
-            } catch (error) {
-                console.error('Delete Error:', error);
-                showToast(error.message || 'حدث خطأ أثناء الحذف', 'error');
-            }
+                try {
+                    const res = await fetch(url, {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        showToast('تم الحذف بنجاح', 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast(data.message || 'فشل الحذف', 'error');
+                    }
+                } catch (error) {
+                    console.error('Delete Error:', error);
+                    showToast('حدث خطأ أثناء الحذف', 'error');
+                }
+            });
         }
     </script>
 

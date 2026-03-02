@@ -482,13 +482,13 @@
         }
 
         function clearAllImages() {
-            if (confirm('هل أنت متأكد من حذف جميع الصور؟')) {
+            showConfirm('هل أنت متأكد من حذف جميع الصور؟', async () => {
                 imageState = [];
                 syncColorIndexes();
                 renderGallery();
                 updateInputs();
                 updateImageDropdown();
-            }
+            });
         }
 
         function syncStateFromDOM() {

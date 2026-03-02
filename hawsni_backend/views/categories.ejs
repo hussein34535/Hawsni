@@ -102,16 +102,12 @@
 
         // Override handleDelete for categories (uses POST to /categories/:id/delete)
         function handleDelete(url, itemName) {
-            confirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
-                try {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = url;
-                    document.body.appendChild(form);
-                    form.submit();
-                } catch (error) {
-                    showToast('حدث خطأ أثناء الحذف', 'error');
-                }
+            showConfirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = url;
+                document.body.appendChild(form);
+                form.submit();
             });
         }
     </script>

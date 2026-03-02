@@ -137,17 +137,16 @@
         }
 
         function deleteImage(productId, imageIndex) {
-            if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
-                fetch(`/products/${productId}/images/${imageIndex}`, {
+            showConfirm('هل أنت متأكد من حذف هذه الصورة؟', async () => {
+                const response = await fetch(`/products/${productId}/images/${imageIndex}`, {
                     method: 'DELETE'
-                }).then(response => {
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        alert('حدث خطأ أثناء حذف الصورة');
-                    }
                 });
-            }
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    showToast('حدث خطأ أثناء حذف الصورة', 'error');
+                }
+            });
         }
 
         function previewNewImages(input) {

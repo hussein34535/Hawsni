@@ -454,87 +454,87 @@
                 return;
             }
 
-            if (!confirm(`تحذير: هل أنت متأكد من حذف ${ids.length} طلب نهائياً؟ لا يمكن التراجع عن هذه الخطوة.`)) return;
+            showConfirm(`تحذير: هل أنت متأكد من حذف ${ids.length} طلب نهائياً؟ لا يمكن التراجع عن هذه الخطوة.`, async () => {
+                const deleteBtn = document.querySelector('button[onclick="bulkDelete()"]');
+                if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...'; deleteBtn.disabled = true; }
 
-            const deleteBtn = document.querySelector('button[onclick="bulkDelete()"]');
-            if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...'; deleteBtn.disabled = true; }
-
-            try {
-                const res = await fetch('/orders/bulk-delete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    alert('تم الحذف بنجاح');
-                    setTimeout(() => window.location.reload(), 200);
-                } else {
-                    alert('خطأ من الخادم: ' + (data.message || 'غير معروف'));
+                try {
+                    const res = await fetch('/orders/bulk-delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('تم الحذف بنجاح');
+                        setTimeout(() => window.location.reload(), 200);
+                    } else {
+                        alert('خطأ من الخادم: ' + (data.message || 'غير معروف'));
+                        if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف'; deleteBtn.disabled = false; }
+                    }
+                } catch (e) {
+                    console.error('Fetch error:', e);
+                    alert('حدث خطأ في الاتصال أثناء الحذف');
                     if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف'; deleteBtn.disabled = false; }
                 }
-            } catch (e) {
-                console.error('Fetch error:', e);
-                alert('حدث خطأ في الاتصال أثناء الحذف');
-                if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف'; deleteBtn.disabled = false; }
-            }
+            });
         }
 
         async function deleteOrder(orderId) {
             console.log('Attempting delete for:', orderId);
-            if (!confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟')) return;
+            showConfirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟', async () => {
+                // Find the delete button in the row to show loading state
+                const row = document.getElementById(`row-${orderId}`);
+                const deleteBtn = row ? row.querySelector('.btn-icon.text-danger') : null;
+                const originalIcon = deleteBtn ? deleteBtn.innerHTML : '';
 
-            // Find the delete button in the row to show loading state
-            const row = document.getElementById(`row-${orderId}`);
-            const deleteBtn = row ? row.querySelector('.btn-icon.text-danger') : null;
-            const originalIcon = deleteBtn ? deleteBtn.innerHTML : '';
-
-            if (deleteBtn) {
-                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                deleteBtn.disabled = true;
-            }
-
-            try {
-                const res = await fetch(`/orders/${orderId}/delete`, {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                console.log(`Frontend: Delete response status: ${res.status}`);
-
-                if (!res.ok) {
-                    const text = await res.text();
-                    console.error(`Frontend: Delete failed with status ${res.status}. Response:`, text);
-                    alert(`فشل الحذف (Status ${res.status}): يرجى التأكد من صلاحياتك.`);
-                    if (deleteBtn) {
-                        deleteBtn.innerHTML = originalIcon;
-                        deleteBtn.disabled = false;
-                    }
-                    return;
-                }
-
-                const data = await res.json();
-                console.log('Frontend: Delete response data:', data);
-
-                if (data.success) {
-                    alert('تم حذف الطلب بنجاح');
-                    if (row) row.style.opacity = '0.5';
-                    setTimeout(() => window.location.reload(), 300);
-                } else {
-                    alert('فشل الحذف: ' + (data.message || 'خطأ غير معروف'));
-                    if (deleteBtn) {
-                        deleteBtn.innerHTML = originalIcon;
-                        deleteBtn.disabled = false;
-                    }
-                }
-            } catch (err) {
-                console.error('Frontend: Critical error during deleteOrder:', err);
-                alert('حدث خطأ فني أثناء الحذف. راجع الكونسول لمزيد من التفاصيل.');
                 if (deleteBtn) {
-                    deleteBtn.innerHTML = originalIcon;
-                    deleteBtn.disabled = false;
+                    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    deleteBtn.disabled = true;
                 }
-            }
+
+                try {
+                    const res = await fetch(`/orders/${orderId}/delete`, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    console.log(`Frontend: Delete response status: ${res.status}`);
+
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.error(`Frontend: Delete failed with status ${res.status}. Response:`, text);
+                        alert(`فشل الحذف (Status ${res.status}): يرجى التأكد من صلاحياتك.`);
+                        if (deleteBtn) {
+                            deleteBtn.innerHTML = originalIcon;
+                            deleteBtn.disabled = false;
+                        }
+                        return;
+                    }
+
+                    const data = await res.json();
+                    console.log('Frontend: Delete response data:', data);
+
+                    if (data.success) {
+                        alert('تم حذف الطلب بنجاح');
+                        if (row) row.style.opacity = '0.5';
+                        setTimeout(() => window.location.reload(), 300);
+                    } else {
+                        alert('فشل الحذف: ' + (data.message || 'خطأ غير معروف'));
+                        if (deleteBtn) {
+                            deleteBtn.innerHTML = originalIcon;
+                            deleteBtn.disabled = false;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Frontend: Critical error during deleteOrder:', err);
+                    alert('حدث خطأ فني أثناء الحذف. راجع الكونسول لمزيد من التفاصيل.');
+                    if (deleteBtn) {
+                        deleteBtn.innerHTML = originalIcon;
+                        deleteBtn.disabled = false;
+                    }
+                }
+            });
         }
 
         // Close modal on click outside
