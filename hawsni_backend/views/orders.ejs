@@ -484,19 +484,42 @@
             console.log('Attempting delete for:', orderId);
             if (!confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟')) return;
 
+            // Find the delete button in the row to show loading state
+            const row = document.getElementById(`row-${orderId}`);
+            const deleteBtn = row ? row.querySelector('.btn-icon.text-danger') : null;
+            const originalIcon = deleteBtn ? deleteBtn.innerHTML : '';
+
+            if (deleteBtn) {
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                deleteBtn.disabled = true;
+            }
+
             try {
                 const res = await fetch(`/orders/${orderId}/delete`, {
                     method: 'POST',
+                    headers: { 'Accept': 'application/json' }
                 });
-                if (res.ok) {
+
+                const data = await res.json();
+
+                if (data.success) {
                     alert('تم حذف الطلب بنجاح');
-                    setTimeout(() => window.location.reload(), 200);
+                    if (row) row.style.opacity = '0.5';
+                    setTimeout(() => window.location.reload(), 300);
                 } else {
-                    alert('فشل الحذف. يرجى مراجعة سجلات الخادم.');
+                    alert('فشل الحذف: ' + (data.message || 'خطأ غير معروف'));
+                    if (deleteBtn) {
+                        deleteBtn.innerHTML = originalIcon;
+                        deleteBtn.disabled = false;
+                    }
                 }
             } catch (err) {
                 console.error('Network error during deleteOrder:', err);
-                alert('حدث خطأ في الاتصال بالخادم');
+                alert('حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.');
+                if (deleteBtn) {
+                    deleteBtn.innerHTML = originalIcon;
+                    deleteBtn.disabled = false;
+                }
             }
         }
 

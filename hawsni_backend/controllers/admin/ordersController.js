@@ -130,10 +130,10 @@ class OrdersController {
 
             if (orderError) throw orderError;
 
-            res.redirect('/orders');
+            res.json({ success: true, message: 'تم حذف الطلب بنجاح' });
         } catch (err) {
             console.error('Error deleting order:', err);
-            res.status(500).send('خطأ في حذف الطلب');
+            res.status(500).json({ success: false, message: 'خطأ في حذف الطلب' });
         }
     }
 
