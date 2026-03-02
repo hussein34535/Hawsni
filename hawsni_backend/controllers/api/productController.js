@@ -295,24 +295,39 @@ class ProductController {
                 }
             }
 
-            const { error } = await supabase.from('products').insert({
+            const { data: newProduct, error } = await supabase.from('products').insert({
                 name,
                 description,
                 price: parseFloat(price),
                 discount: parseInt(discount) || 0,
-                // category_id: category_id || null, // Skip legacy field in insert for consistency
-                category_ids: req.body.category_ids || (category_id ? [category_id] : []),
                 stock: parseInt(stock) || 0,
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls,
                 size_guide: size_guide || ''
-            });
+            }).select().single();
 
             if (error) {
                 console.error('❌ Supabase error:', error);
                 return res.status(500).send(`خطأ في إضافة المنتج: ${error.message}`);
+            }
+
+            // Handle Categories mapping
+            let categoryIdsToInsert = req.body.category_ids || (category_id ? [category_id] : []);
+            if (categoryIdsToInsert && !Array.isArray(categoryIdsToInsert)) {
+                categoryIdsToInsert = [categoryIdsToInsert];
+            }
+
+            if (categoryIdsToInsert && categoryIdsToInsert.length > 0) {
+                const links = categoryIdsToInsert.map(catId => ({
+                    product_id: newProduct.id,
+                    category_id: catId
+                }));
+                const { error: linkError } = await supabase.from('product_category_links').insert(links);
+                if (linkError) {
+                    console.error('❌ Error linking categories:', linkError);
+                }
             }
 
             res.redirect('/products');
@@ -444,8 +459,6 @@ class ProductController {
                 description,
                 price: parseFloat(price),
                 discount: parseInt(discount) || 0,
-                // category_id: category_id || null, // Skip legacy field in update for consistency
-                category_ids: req.body.category_ids || (category_id ? [category_id] : []),
                 stock: parseInt(stock) || 0,
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
@@ -455,6 +468,27 @@ class ProductController {
             }).eq('id', req.params.id);
 
             if (updateError) throw updateError;
+
+            // Handle Categories mapping Update
+            let categoryIdsToInsert = req.body.category_ids || (category_id ? [category_id] : []);
+            if (categoryIdsToInsert && !Array.isArray(categoryIdsToInsert)) {
+                categoryIdsToInsert = [categoryIdsToInsert];
+            }
+
+            // Remove old links
+            await supabase.from('product_category_links').delete().eq('product_id', req.params.id);
+
+            // Insert new links
+            if (categoryIdsToInsert && categoryIdsToInsert.length > 0) {
+                const links = categoryIdsToInsert.map(catId => ({
+                    product_id: req.params.id,
+                    category_id: catId
+                }));
+                const { error: linkError } = await supabase.from('product_category_links').insert(links);
+                if (linkError) {
+                    console.error('❌ Error linking categories:', linkError);
+                }
+            }
 
             // Verify Persistence
             // const { data: updatedProduct } = await supabase.from('products').select('sizes, colors').eq('id', req.params.id).single();
