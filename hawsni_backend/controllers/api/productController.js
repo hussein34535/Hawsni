@@ -311,6 +311,7 @@ class ProductController {
                 discount: parseInt(discount) || 0,
                 stock: parseInt(stock) || 0,
                 category_id: categoryIdsToInsert[0] || null, // Sync with main table
+                image: (imageUrls && imageUrls.length > 0) ? imageUrls[0] : null, // Sync thumbnail
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
@@ -473,6 +474,7 @@ class ProductController {
                 discount: parseInt(discount) || 0,
                 stock: parseInt(stock) || 0,
                 category_id: categoryIdsToInsert[0] || null, // Sync with main table
+                image: (imageUrls && imageUrls.length > 0) ? imageUrls[0] : null, // Sync thumbnail
                 is_featured: is_featured === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,

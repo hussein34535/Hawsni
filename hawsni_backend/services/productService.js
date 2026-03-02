@@ -67,6 +67,11 @@ class ProductService {
     async createProduct(productData) {
         const { category_ids, ...restOfData } = productData;
 
+        // Populate image summary field for lists/thumbnails
+        if (restOfData.images && Array.isArray(restOfData.images) && restOfData.images.length > 0) {
+            restOfData.image = restOfData.images[0];
+        }
+
         // Ensure category_id is synced for backward compatibility
         if (category_ids && Array.isArray(category_ids) && category_ids.length > 0) {
             restOfData.category_id = category_ids[0];
@@ -97,6 +102,11 @@ class ProductService {
 
     async updateProduct(id, productData) {
         const { category_ids, ...restOfData } = productData;
+
+        // Populate image summary field for lists/thumbnails
+        if (restOfData.images && Array.isArray(restOfData.images)) {
+            restOfData.image = restOfData.images.length > 0 ? restOfData.images[0] : null;
+        }
 
         // Ensure category_id is synced for backward compatibility
         if (category_ids && Array.isArray(category_ids)) {

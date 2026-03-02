@@ -90,7 +90,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     };
 
     const safeImages = Array.isArray(images) ? images : [];
-    const imageUrl = safeImages.length > 0 ? formatImageUrl(safeImages[0]) : '';
+    const imageUrl = product.image ? formatImageUrl(product.image) : (safeImages.length > 0 ? formatImageUrl(safeImages[0]) : '');
     const [selectedImage, setSelectedImage] = useState(imageUrl);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);

@@ -117,8 +117,29 @@ class OrderController {
     // Admin UI Methods
     async renderOrdersPage(req, res) {
         try {
-            const { data: orders } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-            res.render('orders', { orders: orders || [] });
+            // Fetch orders with items and product images to show thumbnails in list
+            const { data: orders, error } = await supabase
+                .from('orders')
+                .select('*, order_items(*, products(name, images))')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            // Flatten slightly for the view's convenience if needed, 
+            // but the view already handles complex structures in the modal.
+            // Let's ensure top-level order object has product_image/name fallbacks
+            const enhancedOrders = (orders || []).map(order => {
+                if (!order.product_image && order.order_items && order.order_items.length > 0) {
+                    const firstItem = order.order_items[0];
+                    const prod = firstItem.products || {};
+                    order.product_name = order.product_name || firstItem.name || prod.name || 'منتج';
+                    order.product_image = order.product_image || firstItem.image_url || (prod.images && prod.images.length > 0 ? prod.images[0] : null);
+                    order.items_count = order.items_count || order.order_items.length;
+                }
+                return order;
+            });
+
+            res.render('orders', { orders: enhancedOrders });
         } catch (error) {
             console.error('Error fetching orders:', error);
             res.status(500).send(`خطأ في جلب الطلبات: ${error.message}`);

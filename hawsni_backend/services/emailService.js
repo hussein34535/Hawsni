@@ -116,7 +116,13 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
 
     const itemsHtml = items.map(item => {
         const itemName = item.name || (item.products && item.products.name) || '—';
-        const itemImage = item.image_url || item.imageUrl || (item.products && item.products.images && item.products.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?';
+        let itemImage = item.image_url || item.imageUrl || (item.products && item.products.images && item.products.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?';
+
+        // Final sanity check for placeholder
+        if (itemImage === '/placeholder.png' && item.products && item.products.images && item.products.images.length > 0) {
+            itemImage = item.products.images[0];
+        }
+
         return `
         <tr>
             <td style="padding: 14px 0; border-bottom: 1px solid #f0f0f0; width: 60px;">
@@ -384,7 +390,13 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     // Build items rows
     const itemsHtml = (items || []).map(item => {
         const itemName = item.name || '—';
-        const itemImage = item.image_url || item.imageUrl || (item.products && item.products.images && item.products.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?';
+        let itemImage = item.image_url || item.imageUrl || (item.products && item.products.images && item.products.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?';
+
+        // Final sanity check for placeholder
+        if (itemImage === '/placeholder.png' && item.products && item.products.images && item.products.images.length > 0) {
+            itemImage = item.products.images[0];
+        }
+
         return `
         <tr>
             <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; width: 50px;">

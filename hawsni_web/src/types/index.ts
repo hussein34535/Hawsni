@@ -32,6 +32,7 @@ export interface Product {
     price: number;
     description: string;
     images: string[];
+    image?: string; // Summary thumbnail field
     category: string | Category;
     isFeatured: boolean;
     colors?: any[];
