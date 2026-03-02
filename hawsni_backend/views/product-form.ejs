@@ -411,6 +411,19 @@
 
                 recursiveParse(rawData);
                 colors = cleanColors;
+
+                // Initialize imageIds for existing colors if they only have imageIndex
+                colors.forEach(c => {
+                    if (c.imageIndex !== null && c.imageIndex !== undefined && !c.imageId) {
+                        if (imageState[c.imageIndex]) {
+                            c.imageId = imageState[c.imageIndex].id;
+                        } else {
+                            // Invalid index, clear it
+                            c.imageIndex = null;
+                        }
+                    }
+                });
+
                 renderColors();
                 updateColorsInput();
             }
@@ -462,6 +475,7 @@
 
         function removeImage(id) {
             imageState = imageState.filter(img => img.id !== id);
+            syncColorIndexes();
             renderGallery();
             updateInputs();
             updateImageDropdown();
@@ -470,6 +484,7 @@
         function clearAllImages() {
             if (confirm('هل أنت متأكد من حذف جميع الصور؟')) {
                 imageState = [];
+                syncColorIndexes();
                 renderGallery();
                 updateInputs();
                 updateImageDropdown();
@@ -484,6 +499,21 @@
                 if (img) newState.push(img);
             });
             imageState = newState;
+            syncColorIndexes();
+        }
+
+        function syncColorIndexes() {
+            colors.forEach(c => {
+                if (c.imageId) {
+                    const newIndex = imageState.findIndex(img => img.id === c.imageId);
+                    c.imageIndex = newIndex !== -1 ? newIndex : null;
+                    if (newIndex === -1) c.imageId = null; // Image deleted
+                } else {
+                    c.imageIndex = null;
+                }
+            });
+            updateColorsInput();
+            renderColors();
         }
 
         function renderGallery() {
@@ -849,9 +879,18 @@
             const picker = document.getElementById('colorPicker');
             const color = picker.value;
             // Add logic similar to original
+            let imageId = null;
+            if (selectedImageIndex !== null && imageState[selectedImageIndex]) {
+                imageId = imageState[selectedImageIndex].id;
+            }
+
             const exists = colors.find(c => c.color === color);
-            if (exists) exists.imageIndex = selectedImageIndex;
-            else colors.push({ color, imageIndex: selectedImageIndex });
+            if (exists) {
+                exists.imageIndex = selectedImageIndex;
+                exists.imageId = imageId;
+            } else {
+                colors.push({ color, imageIndex: selectedImageIndex, imageId });
+            }
 
             selectedImageIndex = null;
             document.getElementById('selectedImagePreview').style.display = 'none';
