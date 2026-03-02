@@ -124,23 +124,36 @@ class _ProductGridState extends State<ProductGrid> {
         scrollDirection: Axis.horizontal,
         itemCount: products.length,
         itemBuilder: (context, index) {
-          final product = products[index];
-          final images = product['images'] as List?;
+          final productMap = products[index] as Map<String, dynamic>;
+          final images = productMap['images'] as List?;
           final imageUrl = images != null && images.isNotEmpty
               ? '${ApiService.baseUrl}${images[0]}'
               : '';
 
-          // Generate a unique ID for the product (in a real app, this would come from the backend)
-          final productId = product['id']?.toString() ?? 'product_$index';
+          final productId = productMap['id']?.toString() ?? 'product_$index';
+          final stock = productMap['countInStock'] ?? productMap['stock'] ?? 0;
 
           return ProductCard(
             id: productId,
+            name: productMap['name'] ?? 'منتج بدون اسم',
+            price: '${productMap['price'] ?? 0}',
             imageUrl: imageUrl,
-            name: product['name'] ?? 'منتج بدون اسم',
-            price: '${product['price'] ?? 0} جنيه',
-            rating: (product['rating'] ?? 4.5).toDouble(),
-            reviewCount: product['reviewCount'] ?? 128,
+            rating: (productMap['rating'] ?? 4.5).toDouble(),
+            reviewCount:
+                productMap['numReviews'] ?? productMap['reviewCount'] ?? 128,
             screenId: 'product_grid',
+            colors: productMap['colors'],
+            sizes: productMap['sizes'] != null
+                ? List<String>.from(productMap['sizes'])
+                : null,
+            images: images?.map((e) => e.toString()).toList(),
+            discount: 0,
+            isFeatured:
+                productMap['isFeatured'] ?? productMap['is_featured'] ?? false,
+            blurHash: productMap['blur_hash'],
+            showBadge: stock <= 0,
+            badgeText: stock <= 0 ? 'نفدت الكمية' : null,
+            badgeColor: stock <= 0 ? Colors.red.shade600 : null,
           );
         },
       ),

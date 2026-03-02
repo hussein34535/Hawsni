@@ -78,6 +78,7 @@ class DisplayData {
   final List<dynamic> colors;
   final String? sizeGuide;
   final String? blurHash;
+  final int stock;
 
   DisplayData({
     required this.name,
@@ -91,6 +92,7 @@ class DisplayData {
     required this.colors,
     this.sizeGuide,
     this.blurHash,
+    required this.stock,
   });
 }
 
@@ -162,14 +164,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             CurvedAnimation(parent: _cardEntry, curve: Curves.easeOutCubic));
     _cardFade = CurvedAnimation(parent: _cardEntry, curve: Curves.easeIn);
 
-    _checkStockStatus();
-
     WidgetsBinding.instance.addPostFrameCallback((_) => _cardEntry.forward());
   }
 
-  void _checkStockStatus() {
-    _stockCount = Random().nextInt(15) + 2;
-    _isLowStock = _stockCount < 8; // If less than 8, show low stock warning
+  void _checkStockStatus(int stock) {
+    _stockCount = stock;
+    _isLowStock = _stockCount > 0 && _stockCount < 8;
   }
 
   @override
@@ -345,8 +345,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           const SizedBox(width: 12),
           Expanded(
               child: Text(msg,
-                  style: const TextStyle(fontFamily: 'Cairo',
-                      color: Colors.white, fontWeight: FontWeight.w700))),
+                  style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700))),
         ],
       ),
       backgroundColor: isError
@@ -371,6 +373,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     List<String> sizes = widget.sizes ?? [];
     List<dynamic> colors = widget.colors ?? [];
     String? sizeGuide;
+    int stock = 0;
 
     if (state is ProductDetailsLoaded) {
       name = state.product.name;
@@ -378,6 +381,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       description = state.product.description;
       rating = state.product.rating;
       reviewCount = state.product.reviewCount;
+      stock = state.product.stock;
       sizes = state.product.sizes ?? [];
       colors = state.product.colors ?? [];
       sizeGuide = state.product.sizeGuide;
@@ -387,6 +391,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       }
     }
     if (images.isEmpty) images = [imageUrl];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _stockCount != stock) {
+        setState(() => _checkStockStatus(stock));
+      }
+    });
 
     return DisplayData(
         name: name,
@@ -398,7 +408,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         images: images,
         sizes: sizes,
         colors: colors,
-        sizeGuide: sizeGuide);
+        sizeGuide: sizeGuide,
+        stock: stock);
   }
 
   @override
@@ -619,10 +630,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3), // More transparent
+                      color: Colors.black
+                          .withValues(alpha: 0.3), // More transparent
                       borderRadius: BorderRadius.circular(100),
                       border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1), width: 0.5),
+                          color: Colors.white.withValues(alpha: 0.1),
+                          width: 0.5),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -649,7 +662,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         // Counter text
                         Text(
                           '${_currentImageIndex + 1}/${data.images.length}',
-                          style: TextStyle(fontFamily: 'Cairo',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
                             color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
@@ -692,7 +706,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             ? BorderRadius.circular(24)
             : const BorderRadius.vertical(top: Radius.circular(32)),
         boxShadow: isDesktop
-            ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20)]
+            ? [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05), blurRadius: 20)
+              ]
             : [
                 BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -706,14 +723,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         children: [
           // ── Title & Price (Big Brand Style) ──
           Text(data.name,
-              style: TextStyle(fontFamily: 'Cairo',
+              style: TextStyle(
+                  fontFamily: 'Cairo',
                   fontSize: isDesktop ? 32 : 26,
                   fontWeight: FontWeight.w900,
                   height: 1.2,
                   color: Colors.black87)),
           const SizedBox(height: 8),
           Text('${data.price} $currency',
-              style: TextStyle(fontFamily: 'Cairo',
+              style: TextStyle(
+                fontFamily: 'Cairo',
                 fontSize: isDesktop ? 26 : 22,
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primaryColor,
@@ -755,11 +774,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                         Text('جرب هذه القطعة الآن',
-                            style: TextStyle(fontFamily: 'Cairo',
-                                fontWeight: FontWeight.bold, fontSize: 14)),
+                            style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14)),
                         Text('شاهد كيف تبدو عليك بالذكاء الاصطناعي',
-                            style: TextStyle(fontFamily: 'Cairo',
-                                fontSize: 12, color: Colors.black54))
+                            style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                color: Colors.black54))
                       ])),
                 ],
               ),
@@ -770,7 +793,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           // Colors
           if (data.colors.isNotEmpty) ...[
             const Text('اللون',
-                style: TextStyle(fontFamily: 'Cairo',
+                style: TextStyle(
+                    fontFamily: 'Cairo',
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87)),
@@ -785,7 +809,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('المقاس',
-                    style: TextStyle(fontFamily: 'Cairo',
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87)),
@@ -798,7 +823,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           size: 16, color: AppTheme.primaryColor),
                       SizedBox(width: 4),
                       Text('دليل المقاسات',
-                          style: TextStyle(fontFamily: 'Cairo',
+                          style: TextStyle(
+                              fontFamily: 'Cairo',
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.primaryColor,
@@ -829,8 +855,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   const SizedBox(width: 12),
                   Expanded(
                       child: Text('الكمية محدودة! باقِ $_stockCount قطع فقط',
-                          style: TextStyle(fontFamily: 'Cairo',
+                          style: TextStyle(
+                              fontFamily: 'Cairo',
                               color: Colors.orange.shade800,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13))),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+          ] else if (data.stock <= 0 && state is ProductDetailsLoaded) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.2))),
+              child: Row(
+                children: [
+                  const Icon(Icons.remove_shopping_cart_rounded,
+                      color: Colors.red, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: Text('نفدت الكمية',
+                          style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: Colors.red.shade800,
                               fontWeight: FontWeight.bold,
                               fontSize: 13))),
                 ],
@@ -844,7 +894,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('الكمية',
-                  style: TextStyle(fontFamily: 'Cairo',
+                  style: TextStyle(
+                      fontFamily: 'Cairo',
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87)),
@@ -867,7 +918,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                         width: 32,
                         child: Text('$_quantity',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontFamily: 'Cairo',
+                            style: const TextStyle(
+                                fontFamily: 'Cairo',
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16))),
@@ -892,25 +944,38 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     '${widget.productId}${_selectedSize != null ? "_$_selectedSize" : ""}${_selectedColor != null ? "_$_selectedColor" : ""}';
                 isAdded = cartState.items.any((item) => item.id == itemId);
               }
-              final buttonColor =
-                  isAdded ? Colors.green.shade800 : AppTheme.primaryColor;
-              final buttonText = isAdded
-                  ? 'اذهب للسلة 🛒'
-                  : (AppLocalizations.of(context)?.addToCart ?? 'إضافة للسلة');
-              final buttonIcon = isAdded
-                  ? Icons.arrow_forward_rounded
-                  : Icons.shopping_bag_rounded;
+              final isSoldOut =
+                  data.stock <= 0 && state is ProductDetailsLoaded;
+              final buttonColor = isSoldOut
+                  ? Colors.grey.shade400
+                  : (isAdded ? Colors.green.shade800 : AppTheme.primaryColor);
+              final buttonText = isSoldOut
+                  ? 'نفدت الكمية'
+                  : (isAdded
+                      ? 'اذهب للسلة 🛒'
+                      : (AppLocalizations.of(context)?.addToCart ??
+                          'إضافة للسلة'));
+              final buttonIcon = isSoldOut
+                  ? Icons.remove_shopping_cart_rounded
+                  : (isAdded
+                      ? Icons.arrow_forward_rounded
+                      : Icons.shopping_bag_rounded);
 
               return SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
-                  onPressed: () =>
-                      isAdded ? _goToCart(context) : _addToCart(context, data),
+                  onPressed: isSoldOut
+                      ? null
+                      : () => isAdded
+                          ? _goToCart(context)
+                          : _addToCart(context, data),
                   icon: Icon(buttonIcon),
                   label: Text(buttonText,
-                      style: const TextStyle(fontFamily: 'Cairo',
-                          fontWeight: FontWeight.bold, fontSize: 18)),
+                      style: const TextStyle(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
                     foregroundColor: Colors.white,
@@ -927,13 +992,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
           // Description
           const Text('التفاصيل',
-              style: TextStyle(fontFamily: 'Cairo',
+              style: TextStyle(
+                  fontFamily: 'Cairo',
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87)),
           const SizedBox(height: 12),
           Text(data.description,
-              style: const TextStyle(fontFamily: 'Cairo',
+              style: const TextStyle(
+                  fontFamily: 'Cairo',
                   fontSize: 15,
                   height: 1.8,
                   color: Colors.black87,
@@ -999,10 +1066,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               children: [
                 if (_quantity > 1)
                   Text('$_quantity × ${data.price} $currency',
-                      style: const TextStyle(fontFamily: 'Cairo',
-                          fontSize: 10, color: Colors.white54, height: 1)),
+                      style: const TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 10,
+                          color: Colors.white54,
+                          height: 1)),
                 Text('$formattedTotal $currency',
-                    style: const TextStyle(fontFamily: 'Cairo',
+                    style: const TextStyle(
+                        fontFamily: 'Cairo',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -1020,12 +1091,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   item.size == _selectedSize &&
                   item.color == _selectedColor);
             }
-            final buttonText = isAdded ? 'اذهب للسلة 🛒' : addToCartStr;
-            final buttonIcon = isAdded
-                ? Icons.arrow_forward_rounded
-                : Icons.shopping_bag_rounded;
-            final buttonBgConfig =
-                isAdded ? Colors.green.shade50 : Colors.white;
+            final isSoldOut = data.stock <= 0 && state is ProductDetailsLoaded;
+            final buttonText = isSoldOut
+                ? 'نفدت الكمية'
+                : (isAdded ? 'اذهب للسلة 🛒' : addToCartStr);
+            final buttonIcon = isSoldOut
+                ? Icons.remove_shopping_cart_rounded
+                : (isAdded
+                    ? Icons.arrow_forward_rounded
+                    : Icons.shopping_bag_rounded);
+            final buttonBgConfig = isSoldOut
+                ? Colors.grey.shade300
+                : (isAdded ? Colors.green.shade50 : Colors.white);
+            final buttonTextColor =
+                isSoldOut ? Colors.grey.shade600 : Colors.black;
 
             return AnimatedBuilder(
               animation: _cartPop,
@@ -1035,8 +1114,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 return Transform.scale(scale: s, child: child);
               },
               child: GestureDetector(
-                onTap: () =>
-                    isAdded ? _goToCart(context) : _addToCart(context, data),
+                onTap: isSoldOut
+                    ? null
+                    : () => isAdded
+                        ? _goToCart(context)
+                        : _addToCart(context, data),
                 child: Container(
                   height: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -1045,11 +1127,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       borderRadius: BorderRadius.circular(100)),
                   child: Row(
                     children: [
-                      Icon(buttonIcon, color: Colors.black, size: 20),
+                      Icon(buttonIcon, color: buttonTextColor, size: 20),
                       const SizedBox(width: 8),
                       Text(buttonText,
-                          style: const TextStyle(fontFamily: 'Cairo',
-                              color: Colors.black,
+                          style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: buttonTextColor,
                               fontWeight: FontWeight.bold,
                               fontSize: 14)),
                     ],
@@ -1159,7 +1242,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     color: isSel ? Colors.black : Colors.grey.shade300,
                     width: 1.5)),
             child: Text(s,
-                style: TextStyle(fontFamily: 'Cairo',
+                style: TextStyle(
+                    fontFamily: 'Cairo',
                     color: isSel ? Colors.white : Colors.black,
                     fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
                     fontSize: 14)),
@@ -1309,7 +1393,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text('دليل المقاسات',
-                        style: TextStyle(fontFamily: 'Cairo',
+                        style: TextStyle(
+                            fontFamily: 'Cairo',
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87)),
@@ -1340,7 +1425,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                       return [
                         Text(
                           content,
-                          style: const TextStyle(fontFamily: 'Cairo',
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
                             fontSize: 15,
                             height: 1.8,
                             color: Colors.black87,
@@ -1384,13 +1470,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color:
-                                      AppTheme.primaryColor.withValues(alpha: 0.08),
+                                  color: AppTheme.primaryColor
+                                      .withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   key,
-                                  style: const TextStyle(fontFamily: 'Cairo',
+                                  style: const TextStyle(
+                                    fontFamily: 'Cairo',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: AppTheme.primaryColor,
@@ -1413,7 +1500,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                               fit: hasKeyVal ? FlexFit.loose : FlexFit.tight,
                               child: Text(
                                 val,
-                                style: TextStyle(fontFamily: 'Cairo',
+                                style: TextStyle(
+                                  fontFamily: 'Cairo',
                                   fontSize: 16,
                                   fontWeight: hasKeyVal
                                       ? FontWeight.w600
@@ -1450,8 +1538,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     elevation: 0,
                   ),
                   child: const Text('حسناً',
-                      style: TextStyle(fontFamily: 'Cairo',
-                          fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
                 ),
               ),
             ),
@@ -1469,11 +1559,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
             AppLocalizations.of(ctx)?.sessionExpired ?? 'Session Expired',
-            style: const TextStyle(fontFamily: 'Cairo',fontWeight: FontWeight.bold)),
+            style: const TextStyle(
+                fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
         content: Text(
             AppLocalizations.of(ctx)?.sessionExpiredMessage ??
                 'Please login again.',
-            style: const TextStyle(fontFamily: 'Cairo',)),
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+            )),
         actions: [
           TextButton(
               onPressed: () {
@@ -1482,8 +1575,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     MaterialPageRoute(builder: (_) => const LoginScreen()));
               },
               child: Text(AppLocalizations.of(ctx)?.ok ?? 'OK',
-                  style: const TextStyle(fontFamily: 'Cairo',
-                      fontWeight: FontWeight.bold, color: Colors.black)))
+                  style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)))
         ],
       ),
     );
@@ -1583,7 +1678,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                         decoration: BoxDecoration(
                                             color: active
                                                 ? Colors.black
-                                                : Colors.black.withValues(alpha: 0.3),
+                                                : Colors.black
+                                                    .withValues(alpha: 0.3),
                                             borderRadius:
                                                 BorderRadius.circular(4),
                                             border: Border.all(

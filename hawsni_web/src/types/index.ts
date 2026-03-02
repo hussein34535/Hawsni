@@ -39,4 +39,6 @@ export interface Product {
     rating?: number;
     reviews?: number;
     size_guide?: string;
+    stock?: number;
+    countInStock?: number;
 }

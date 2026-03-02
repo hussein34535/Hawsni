@@ -169,7 +169,8 @@ class _ProductCardState extends State<ProductCard> {
                                 ? [] // Enforce empty shadows on web for better WebGL performance
                                 : [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.08),
+                                      color:
+                                          Colors.black.withValues(alpha: 0.08),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
@@ -246,7 +247,8 @@ class _ProductCardState extends State<ProductCard> {
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.1),
+                                      color:
+                                          Colors.black.withValues(alpha: 0.1),
                                       blurRadius: 4,
                                     ),
                                   ],
@@ -262,6 +264,35 @@ class _ProductCardState extends State<ProductCard> {
                             },
                           ),
                         ),
+                        // Badge Overlay (e.g., Sold Out, New, Best Seller)
+                        if (widget.showBadge && widget.badgeText != null)
+                          Positioned(
+                            top: 8,
+                            left: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: widget.badgeColor ?? Colors.red,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                widget.badgeText!,
+                                style: const TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -279,7 +310,8 @@ class _ProductCardState extends State<ProductCard> {
                           widget.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontFamily: 'Cairo',
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
                             // Ensure nice Arabic font
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -408,7 +440,8 @@ class _ProductCardState extends State<ProductCard> {
                                   children: [
                                     TextSpan(
                                       text: widget.price.split('.')[0],
-                                      style: const TextStyle(fontFamily: 'Cairo',
+                                      style: const TextStyle(
+                                        fontFamily: 'Cairo',
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.primaryColor,
@@ -418,7 +451,8 @@ class _ProductCardState extends State<ProductCard> {
                                     TextSpan(
                                       text: AppLocalizations.of(context)!
                                           .currencySymbol,
-                                      style: const TextStyle(fontFamily: 'Cairo',
+                                      style: const TextStyle(
+                                        fontFamily: 'Cairo',
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.primaryColor,

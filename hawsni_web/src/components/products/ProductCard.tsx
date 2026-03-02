@@ -124,6 +124,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                         </div>
                     )}
                 </AnimatePresence>
+                {/* Sold Out Badge OVERLAY */}
+                {(product.stock !== undefined && product.stock <= 0) || (product.countInStock !== undefined && product.countInStock <= 0) ? (
+                    <div className="absolute top-2 left-2 z-10 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+                        نفدت الكمية
+                    </div>
+                ) : null}
 
                 {/* Favorite Button removed from Product Card as requested */}
 

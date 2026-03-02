@@ -80,6 +80,14 @@ class ProductsScreen extends StatelessWidget {
                             screenId: 'products',
                             colors: product.colors,
                             sizes: product.sizes,
+                            images: product.images,
+                            isFeatured: product.isFeatured,
+                            blurHash: product.blurHash,
+                            showBadge: product.stock <= 0,
+                            badgeText:
+                                product.stock <= 0 ? 'نفدت الكمية' : null,
+                            badgeColor:
+                                product.stock <= 0 ? Colors.red.shade600 : null,
                           );
                         },
                         childCount: products.length,

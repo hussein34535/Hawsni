@@ -134,8 +134,8 @@ export default function ProductPage() {
     const currentItemId = product ? `${product._id}_${selectedSize}_${selectedColor || 'default'}` : null;
     const isInCart = items.some((item) => item.id === currentItemId);
 
-    // Stock simulation
-    const [stockCount] = useState(Math.floor(Math.random() * 5) + 2);
+    // Determine real stock
+    const stockCount = product?.stock ?? (product as any)?.countInStock ?? 0;
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -477,19 +477,30 @@ export default function ProductPage() {
                             )}
 
                             {/* Stock Alert */}
-                            <div className="p-4 rounded-[20px] bg-amber-50 border border-amber-100/50 flex items-center gap-3">
-                                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                    <motion.div
-                                        animate={{ scale: [1, 1.1, 1] }}
-                                        transition={{ duration: 1.5, repeat: Infinity }}
-                                    >
-                                        <Flame size={16} className="text-amber-500 fill-amber-500" />
-                                    </motion.div>
+                            {stockCount > 0 && stockCount < 8 ? (
+                                <div className="p-4 rounded-[20px] bg-amber-50 border border-amber-100/50 flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                        <motion.div
+                                            animate={{ scale: [1, 1.1, 1] }}
+                                            transition={{ duration: 1.5, repeat: Infinity }}
+                                        >
+                                            <Flame size={16} className="text-amber-500 fill-amber-500" />
+                                        </motion.div>
+                                    </div>
+                                    <span className="text-xs font-black text-amber-900 font-cairo">
+                                        {t.product?.low_stock?.replace('{count}', stockCount.toString()) || (isRTL ? `الكمية محدودة! باق ${stockCount} قطع فقط` : `Limited Stock! Only ${stockCount} left`)}
+                                    </span>
                                 </div>
-                                <span className="text-xs font-black text-amber-900 font-cairo">
-                                    {t.product?.low_stock?.replace('{count}', stockCount.toString()) || (isRTL ? `الكمية محدودة! باق ${stockCount} قطع فقط` : `Limited Stock! Only ${stockCount} left`)}
-                                </span>
-                            </div>
+                            ) : stockCount <= 0 ? (
+                                <div className="p-4 rounded-[20px] bg-red-50 border border-red-100/50 flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                        <ShoppingBag size={16} className="text-red-500" />
+                                    </div>
+                                    <span className="text-xs font-black text-red-900 font-cairo">
+                                        نفدت الكمية
+                                    </span>
+                                </div>
+                            ) : null}
 
                             {/* Quantity & Actions - Visible on all screens now */}
                             <div className="flex flex-col gap-4">
@@ -564,15 +575,18 @@ export default function ProductPage() {
                     </div>
 
                     <button
-                        onClick={isInCart ? () => router.push('/cart') : handleAddToCart}
+                        onClick={stockCount <= 0 ? undefined : (isInCart ? () => router.push('/cart') : handleAddToCart)}
                         className={`
                             flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
-                            ${(!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
-                                ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                : isInCart
-                                    ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'
-                                    : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
+                            ${stockCount <= 0
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : (!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
+                                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                    : isInCart
+                                        ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'
+                                        : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
                         `}
+                        disabled={stockCount <= 0}
                     >
                         <AnimatePresence mode="wait">
                             <motion.div
@@ -584,9 +598,11 @@ export default function ProductPage() {
                             >
                                 <ShoppingBag size={18} />
                                 <span className="font-cairo">
-                                    {isInCart
-                                        ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
-                                        : (t.product?.add_to_cart || 'Add to Cart')}
+                                    {stockCount <= 0
+                                        ? 'نفدت الكمية'
+                                        : isInCart
+                                            ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
+                                            : (t.product?.add_to_cart || 'Add to Cart')}
                                 </span>
                             </motion.div>
                         </AnimatePresence>
