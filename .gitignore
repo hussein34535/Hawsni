@@ -17,3 +17,4 @@ hwasi_backend/node_modules/
 .DS_Store
 Thumbs.db
 hawsni_scraper_extension/
+test_scraper/
