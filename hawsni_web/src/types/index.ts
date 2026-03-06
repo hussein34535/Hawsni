@@ -31,6 +31,7 @@ export interface Product {
     _id: string;
     name: string;
     price: number;
+    discount?: number;
     description: string;
     images: string[];
     image?: string; // Summary thumbnail field

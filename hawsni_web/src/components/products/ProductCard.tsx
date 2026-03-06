@@ -14,6 +14,8 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
     const _id = product._id || (product as any).id;
     const { name, price } = product;
+    const discount = product.discount || 0;
+    const finalPrice = discount > 0 ? price - (price * discount / 100) : price;
     const images = product.images ?? [];
     const colors = product.colors ?? [];
     const formatImageUrl = (url: string) => {
@@ -131,6 +133,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                 ) : null}
 
+                {/* Discount Badge */}
+                {discount > 0 && (
+                    <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-[11px] font-black px-2 py-1 rounded-lg shadow-sm font-cairo" dir="ltr">
+                        -{discount}%
+                    </div>
+                )}
+
                 {/* Favorite Button removed from Product Card as requested */}
 
             </div>
@@ -171,13 +180,20 @@ export default function ProductCard({ product }: ProductCardProps) {
                 )}
 
                 {/* 3. Price */}
-                <div className="flex items-end gap-1">
-                    <span className="text-[15px] font-bold text-[var(--color-brand-primary)] leading-none">
-                        {price.toLocaleString('en-US')}
-                    </span>
-                    <span className="text-[10px] font-semibold text-[var(--color-brand-primary)] leading-none mb-[2px]">
-                        EGP
-                    </span>
+                <div className="flex flex-col gap-0.5">
+                    {discount > 0 && (
+                        <div className="text-[11px] text-gray-400 line-through font-semibold leading-none">
+                            {price.toLocaleString('en-US')} EGP
+                        </div>
+                    )}
+                    <div className="flex items-end gap-1">
+                        <span className={`text-[15px] font-bold leading-none ${discount > 0 ? 'text-red-500' : 'text-[var(--color-brand-primary)]'}`}>
+                            {finalPrice.toLocaleString('en-US')}
+                        </span>
+                        <span className={`text-[10px] font-semibold leading-none mb-[2px] ${discount > 0 ? 'text-red-500' : 'text-[var(--color-brand-primary)]'}`}>
+                            EGP
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>

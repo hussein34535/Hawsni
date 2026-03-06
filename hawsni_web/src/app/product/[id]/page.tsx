@@ -152,11 +152,13 @@ export default function ProductPage() {
                     }
 
                     // Track ViewContent
+                    const discount = data.product.discount || 0;
+                    const finalPrice = discount > 0 ? data.product.price - (data.product.price * discount / 100) : data.product.price;
                     trackEvent('ViewContent', {
                         content_name: data.product.name,
                         content_ids: [data.product.id || data.product._id],
                         content_type: 'product',
-                        value: data.product.price,
+                        value: finalPrice,
                         currency: 'EGP'
                     });
                 }
@@ -231,11 +233,14 @@ export default function ProductPage() {
         }
 
         const prodId = product.id || product._id;
+        const discount = product.discount || 0;
+        const finalPrice = discount > 0 ? product.price - (product.price * discount / 100) : product.price;
+
         addItem({
             id: `${prodId}_${selectedSize}_${selectedColor || 'default'}`,
             productId: prodId,
             name: product.name,
-            price: product.price,
+            price: finalPrice,
             imageUrl: selectedColorImage,
             quantity: quantity,
             size: selectedSize,
@@ -247,7 +252,7 @@ export default function ProductPage() {
             content_name: product.name,
             content_ids: [prodId],
             content_type: 'product',
-            value: product.price,
+            value: finalPrice,
             currency: 'EGP',
             num_items: quantity
         });
@@ -398,8 +403,18 @@ export default function ProductPage() {
                                     ({(product as any).num_reviews || 0} {isRTL ? 'تقييم' : 'Reviews'})
                                 </span>
                             </div>
-                            <div className="flex items-baseline gap-2 text-[var(--color-brand-primary)] font-black text-2xl mt-1">
-                                <span>{product.price.toLocaleString('en-US')}</span>
+                            {product.discount ? (
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-sm text-gray-400 line-through font-bold">
+                                        {product.price.toLocaleString('en-US')} {isRTL ? 'ج.م' : 'EGP'}
+                                    </span>
+                                    <span className="bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-md" dir="ltr">
+                                        -{product.discount}%
+                                    </span>
+                                </div>
+                            ) : null}
+                            <div className={`flex items-baseline gap-2 font-black text-2xl mt-1 ${product.discount ? 'text-red-500' : 'text-[var(--color-brand-primary)]'}`}>
+                                <span>{((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
                                 <span className="text-xs uppercase font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </div>
                         </div>
@@ -590,7 +605,7 @@ export default function ProductPage() {
                             </motion.div>
                         )}
                         <span className="text-lg font-black text-white font-cairo">
-                            {(product.price * quantity).toLocaleString()}
+                            {(((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price) * quantity).toLocaleString()}
                             <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                         </span>
                     </div>
