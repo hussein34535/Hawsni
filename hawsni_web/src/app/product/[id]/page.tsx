@@ -333,22 +333,37 @@ export default function ProductPage() {
                             className="w-full h-full flex transition-transform duration-300 ease-out"
                             style={{ transform: `translateX(-${selectedImage * 100}%)` }}
                         >
-                            {safeImages.map((img, i) => (
-                                <div
-                                    key={`img-${i}`}
-                                    className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in"
-                                    onClick={() => setIsLightboxOpen(true)}
-                                >
-                                    <Image
-                                        src={formatImageUrl(img)}
-                                        alt={`${product.name} - ${i + 1}`}
-                                        fill
-                                        priority={i === 0}
-                                        sizes="(max-width: 1024px) 100vw, 50vw"
-                                        className="object-cover select-none"
-                                    />
-                                </div>
-                            ))}
+                            {safeImages.map((img, i) => {
+                                const isVideo = img.match(/\.(mp4|webm|mov)$/i) !== null;
+                                return (
+                                    <div
+                                        key={`img-${i}`}
+                                        className={`min-w-full h-full relative flex-shrink-0 ${isVideo ? '' : 'cursor-zoom-in'}`}
+                                        onClick={() => !isVideo && setIsLightboxOpen(true)}
+                                    >
+                                        {isVideo ? (
+                                            <video
+                                                src={formatImageUrl(img)}
+                                                className="w-full h-full object-cover"
+                                                autoPlay
+                                                loop
+                                                muted
+                                                playsInline
+                                                controlsList="nodownload"
+                                            />
+                                        ) : (
+                                            <Image
+                                                src={formatImageUrl(img)}
+                                                alt={`${product.name} - ${i + 1}`}
+                                                fill
+                                                priority={i === 0}
+                                                sizes="(max-width: 1024px) 100vw, 50vw"
+                                                className="object-cover select-none"
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         {/* Arrow buttons for desktop */}

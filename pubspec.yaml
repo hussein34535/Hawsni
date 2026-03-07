@@ -45,7 +45,9 @@ dependencies:
   flutter_blurhash: ^0.9.1
   add_to_cart_animation: ^2.0.4
 
-  flutter_web_plugins: any
+  flutter_web_plugins:
+    sdk: flutter
+  video_player: ^2.8.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

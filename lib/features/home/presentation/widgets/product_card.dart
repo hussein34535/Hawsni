@@ -71,6 +71,24 @@ class _ProductCardState extends State<ProductCard> {
     }
   }
 
+  String _getThumbnailUrl(String url) {
+    if (url.toLowerCase().endsWith('.mp4') ||
+        url.toLowerCase().endsWith('.webm') ||
+        url.toLowerCase().endsWith('.mov')) {
+      if (url.contains('res.cloudinary.com')) {
+        return url.replaceAll(
+            RegExp(r'\.(mp4|webm|mov)$', caseSensitive: false), '.jpg');
+      }
+    }
+    return url;
+  }
+
+  bool _isVideoUrl(String url) {
+    return url.toLowerCase().endsWith('.mp4') ||
+        url.toLowerCase().endsWith('.webm') ||
+        url.toLowerCase().endsWith('.mov');
+  }
+
   void _triggerPrecache() {
     if (!mounted) return;
     try {
@@ -180,7 +198,8 @@ class _ProductCardState extends State<ProductCard> {
                             borderRadius: BorderRadius.circular(16),
                             child: kIsWeb
                                 ? Image.network(
-                                    _selectedImageUrl ?? widget.imageUrl,
+                                    _getThumbnailUrl(
+                                        _selectedImageUrl ?? widget.imageUrl),
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                     height: double.infinity,
@@ -196,8 +215,8 @@ class _ProductCardState extends State<ProductCard> {
                                     ),
                                   )
                                 : CachedNetworkImage(
-                                    imageUrl:
-                                        _selectedImageUrl ?? widget.imageUrl,
+                                    imageUrl: _getThumbnailUrl(
+                                        _selectedImageUrl ?? widget.imageUrl),
                                     fit: BoxFit.cover,
                                     memCacheWidth:
                                         350, // Strict memory constraint
@@ -228,6 +247,29 @@ class _ProductCardState extends State<ProductCard> {
                                   ),
                           ),
                         ),
+
+                        // Video Play Icon Overlay
+                        if (_isVideoUrl(_selectedImageUrl ?? widget.imageUrl))
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: Center(
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.play_arrow,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ),
 
                         // Favorite Button Overlay
                         Positioned(

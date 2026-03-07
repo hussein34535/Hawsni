@@ -7,21 +7,20 @@ const storage = multer.memoryStorage();
 // فلتر للتحقق من نوع الملف (صور فقط)
 const fileFilter = (req, file, cb) => {
   console.log('🔍 Multer fileFilter checking:', file.originalname, file.mimetype);
-  const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
+  const allowedTypes = /jpeg|jpg|png|gif|webp|svg|mp4|webm|mov|avi/i;
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = allowedTypes.test(file.mimetype);
 
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    console.error('❌ Multer rejected file:', file.originalname);
-    cb(new Error('الصور فقط مسموح بها! (Only images are allowed)'));
+    cb(new Error('الصور والفيديوهات فقط مسموح بها! (Only images and videos are allowed)'));
   }
 };
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 4 * 1024 * 1024 }, // 4MB max (Vercel limit is 4.5MB)
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max for local (Vercel limits to 4.5MB externally, but direct uploads bypass this)
   fileFilter: fileFilter
 });
 

@@ -23,7 +23,18 @@ export default function ProductCard({ product }: ProductCardProps) {
         if (url.startsWith('http')) return url;
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
         const baseUrl = apiUrl.replace(/\/api$/, '');
-        return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+        const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : (url.startsWith('http') ? url : `${baseUrl}/${url}`);
+
+        // If it's a Cloudinary video URL, we can get a thumbnail by changing the extension to .jpg
+        if (fullUrl.match(/\.(mp4|webm|mov)$/i) && fullUrl.includes('res.cloudinary.com')) {
+            return fullUrl.replace(/\.(mp4|webm|mov)$/i, '.jpg');
+        }
+        return fullUrl;
+    };
+
+    const isVideoUrl = (url: string) => {
+        if (!url) return false;
+        return url.match(/\.(mp4|webm|mov)$/i) !== null;
     };
 
     const COLOR_MAP: Record<string, string> = {
@@ -92,8 +103,16 @@ export default function ProductCard({ product }: ProductCardProps) {
     };
 
     const safeImages = Array.isArray(images) ? images : [];
-    const imageUrl = product.image ? formatImageUrl(product.image) : (safeImages.length > 0 ? formatImageUrl(safeImages[0]) : '');
-    const [selectedImage, setSelectedImage] = useState(imageUrl);
+    // The starting visual is either the featured image or the first image in the array
+    const baseImageUrl = product.image ? product.image : (safeImages.length > 0 ? safeImages[0] : '');
+
+    // We store the RAW url in state so we know if it's a video or not
+    const [rawSelectedMedia, setRawSelectedMedia] = useState(baseImageUrl);
+
+    // The formatImageUrl handles converting Cloudinary videos to .jpg thumbnails
+    const displayThumbnailUrl = formatImageUrl(rawSelectedMedia);
+    const isCurrentlyVideo = isVideoUrl(rawSelectedMedia);
+
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
 
@@ -102,9 +121,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             {/* Image Container */}
             <div className="relative aspect-square bg-[#F5F5F5] rounded-2xl overflow-hidden mb-2">
                 <AnimatePresence mode="wait">
-                    {selectedImage ? (
+                    {displayThumbnailUrl ? (
                         <motion.div
-                            key={selectedImage}
+                            key={displayThumbnailUrl}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -112,13 +131,23 @@ export default function ProductCard({ product }: ProductCardProps) {
                             className="relative w-full h-full"
                         >
                             <Image
-                                src={selectedImage || '/logo.png'}
+                                src={displayThumbnailUrl || '/logo.png'}
                                 alt={name || 'Product'}
                                 fill
                                 loading="lazy"
                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                                 className="object-cover group-hover:scale-110 transition-transform duration-500"
                             />
+                            {/* Video Play Icon Overlay */}
+                            {isCurrentlyVideo && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div className="w-10 h-10 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform duration-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            )}
                         </motion.div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
@@ -163,9 +192,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                                         e.stopPropagation();
                                         setSelectedColor(c.color);
                                         if (c.image) {
-                                            setSelectedImage(formatImageUrl(c.image));
+                                            setRawSelectedMedia(c.image);
                                         } else if (c.imageIndex !== undefined && images[c.imageIndex]) {
-                                            setSelectedImage(formatImageUrl(images[c.imageIndex]));
+                                            setRawSelectedMedia(images[c.imageIndex]);
                                         }
                                     }}
                                     style={{ backgroundColor: formatColor(c.color) }}

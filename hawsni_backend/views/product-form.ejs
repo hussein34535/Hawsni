@@ -245,7 +245,8 @@
 
                             <!-- Hidden File Input for standard uploads (Legacy - Restored Name) -->
                             <!-- Used for ADDING files to the JS state only -->
-                            <input type="file" id="imageAdder" multiple accept="image/*" style="display: none;"
+                            <input type="file" id="imageAdder" multiple
+                                accept="image/*,video/mp4,video/webm,video/quicktime" style="display: none;"
                                 onchange="handleFileSelect(this)">
 
                             <!-- Direct Upload URLs (sent to server instead of files) -->
@@ -336,7 +337,7 @@
 
     <script>
         // === Unified Image State ===
-        // Items: { id: string, type: 'file'|'scraped'|'existing', url: string, file: File|null }
+        // Items: { id: string, type: 'file'|'scraped'|'existing', url: string, file: File|null, isVideo: boolean }
         let imageState = [];
         let colors = [];
         let selectedImageIndex = null;
@@ -365,7 +366,8 @@
             const existingProduct = productDataEl && productDataEl.getAttribute('data-product') !== 'null' ? JSON.parse(productDataEl.getAttribute('data-product')) : null;
             if (existingProduct && existingProduct.images && Array.isArray(existingProduct.images)) {
                 existingProduct.images.forEach(url => {
-                    addImageToState({ type: 'existing', url: url, file: null }, false);
+                    const isVideo = url.match(/\.(mp4|webm|mov)$/i) !== null;
+                    addImageToState({ type: 'existing', url: url, file: null, isVideo }, false);
                 });
                 renderGallery(); // Render once after adding all
                 updateImageDropdown();
@@ -435,7 +437,8 @@
             if (input.files) {
                 Array.from(input.files).forEach(file => {
                     const url = URL.createObjectURL(file);
-                    addImageToState({ type: 'file', url: url, file: file }, false);
+                    const isVideo = file.type.startsWith('video/');
+                    addImageToState({ type: 'file', url: url, file: file, isVideo }, false);
                 });
                 renderGallery();
                 updateInputs();
@@ -449,9 +452,8 @@
             const p = event.detail;
             if (p && p.images && Array.isArray(p.images)) {
                 p.images.forEach(url => {
-                    // Avoid duplicates if possible?
-                    // For now just append
-                    addImageToState({ type: 'scraped', url: url, file: null }, false);
+                    const isVideo = url.match(/\.(mp4|webm|mov)$/i) !== null;
+                    addImageToState({ type: 'scraped', url: url, file: null, isVideo }, false);
                 });
                 renderGallery();
                 updateInputs();
@@ -535,9 +537,20 @@
                 card.className = 'image-card';
                 card.dataset.id = img.id;
 
-                const imageEl = document.createElement('img');
-                imageEl.src = img.url;
-                imageEl.setAttribute('draggable', 'false'); // Prevent browser default drag
+                let mediaEl;
+                if (img.isVideo) {
+                    mediaEl = document.createElement('video');
+                    mediaEl.src = img.url;
+                    mediaEl.setAttribute('draggable', 'false');
+                    mediaEl.autoplay = true;
+                    mediaEl.loop = true;
+                    mediaEl.muted = true;
+                    mediaEl.style.cssText = 'width: 100%; height: 100%; object-fit: cover; pointer-events: none; display: block;';
+                } else {
+                    mediaEl = document.createElement('img');
+                    mediaEl.src = img.url;
+                    mediaEl.setAttribute('draggable', 'false');
+                }
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
@@ -552,7 +565,7 @@
                 badge.className = 'image-badge';
                 badge.textContent = `${index + 1}. ${(img.type === 'file' ? 'ملف' : (img.type === 'scraped' ? 'مستورد' : 'موجود'))}`;
 
-                card.appendChild(imageEl);
+                card.appendChild(mediaEl);
                 card.appendChild(deleteBtn);
                 card.appendChild(badge);
                 grid.appendChild(card);
@@ -631,9 +644,10 @@
                 const uploadedUrls = [];
 
                 if (filesToUpload.length > 0) {
-                    // Compress files over 4MB
+                    // Compress image files over 4MB, skip compression for videos
                     for (let i = 0; i < filesToUpload.length; i++) {
-                        if (filesToUpload[i].file.size > 4 * 1024 * 1024) {
+                        const isVideo = filesToUpload[i].file.type.startsWith('video/');
+                        if (!isVideo && filesToUpload[i].file.size > 4 * 1024 * 1024) {
                             submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ضغط صورة ${i + 1}...`;
                             filesToUpload[i].file = await compressImage(filesToUpload[i].file);
                         }
