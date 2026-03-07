@@ -15,6 +15,7 @@ import {
     ChevronRight,
     Flame,
     Info,
+    Play,
     Ruler,
     X,
     Camera,
@@ -343,15 +344,20 @@ export default function ProductPage() {
                                         onClick={() => setIsLightboxOpen(true)}
                                     >
                                         {isVideo ? (
-                                            <video
-                                                src={formatImageUrl(img)}
-                                                className="w-full h-full object-cover pointer-events-none"
-                                                autoPlay
-                                                loop
-                                                muted
-                                                playsInline
-                                                controlsList="nodownload"
-                                            />
+                                            <>
+                                                <video
+                                                    src={formatImageUrl(img)}
+                                                    className="w-full h-full object-cover pointer-events-none"
+                                                    playsInline
+                                                    controlsList="nodownload"
+                                                    preload="metadata"
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                    <div className="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+                                                        <Play className="text-white ml-1 w-8 h-8" fill="currentColor" />
+                                                    </div>
+                                                </div>
+                                            </>
                                         ) : (
                                             <Image
                                                 src={formatImageUrl(img)}
