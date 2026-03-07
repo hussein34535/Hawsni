@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:hwasi_app/core/widgets/media_viewer_widget.dart';
 
 class FullScreenGallery extends StatefulWidget {
   final List<String> images;
@@ -34,6 +35,14 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
     super.dispose();
   }
 
+  bool _isVideoUrl(String url) {
+    final lowerUrl = url.toLowerCase();
+    return lowerUrl.contains('.mp4') ||
+        lowerUrl.contains('.webm') ||
+        lowerUrl.contains('.mov') ||
+        lowerUrl.contains('/video/upload/');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,8 +53,24 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
           PhotoViewGallery.builder(
             scrollPhysics: const BouncingScrollPhysics(),
             builder: (BuildContext context, int index) {
+              final url = widget.images[index];
+              if (_isVideoUrl(url)) {
+                return PhotoViewGalleryPageOptions.customChild(
+                  child: Center(
+                    child: MediaViewerWidget(url: url),
+                  ),
+                  initialScale: PhotoViewComputedScale.contained,
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale:
+                      PhotoViewComputedScale.contained, // No zoom on video
+                  heroAttributes: PhotoViewHeroAttributes(
+                    tag: 'fullscreen_$index',
+                  ),
+                );
+              }
+
               return PhotoViewGalleryPageOptions(
-                imageProvider: CachedNetworkImageProvider(widget.images[index]),
+                imageProvider: CachedNetworkImageProvider(url),
                 initialScale: PhotoViewComputedScale.contained,
                 minScale: PhotoViewComputedScale.contained,
                 maxScale: PhotoViewComputedScale.covered * 2,

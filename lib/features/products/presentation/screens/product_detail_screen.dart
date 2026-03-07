@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
 import 'package:meta_seo/meta_seo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +13,7 @@ import 'package:hwasi_app/core/services/wishlist_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/utils/responsive_layout.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/core/widgets/media_viewer_widget.dart';
 import 'package:hwasi_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
 import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
@@ -1625,23 +1625,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                       setState(() => _currentImageIndex = i),
                                   itemBuilder: (_, i) => Hero(
                                     tag: 'desktop_img_$i',
-                                    child: CachedNetworkImage(
-                                      imageUrl: data.images[i],
-                                      fit: BoxFit.cover,
-                                      memCacheWidth: 800,
-                                      placeholder: (_, __) {
-                                        if (data.blurHash != null &&
-                                            data.blurHash!.isNotEmpty) {
-                                          return BlurHash(
-                                            hash: data.blurHash!,
-                                            imageFit: BoxFit.cover,
-                                          );
-                                        }
-                                        return Container(
-                                            color: Colors.grey[200]);
-                                      },
-                                      errorWidget: (_, __, ___) =>
-                                          Container(color: Colors.grey[200]),
+                                    child: MediaViewerWidget(
+                                      url: data.images[i],
+                                      blurHash: data.blurHash,
                                     ),
                                   ),
                                 ),
@@ -1702,107 +1688,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           ),
         );
       },
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MEDIA VIEWER WIDGET
-// ─────────────────────────────────────────────────────────────────────────────
-class MediaViewerWidget extends StatefulWidget {
-  final String url;
-  final String? blurHash;
-
-  const MediaViewerWidget({
-    super.key,
-    required this.url,
-    this.blurHash,
-  });
-
-  @override
-  State<MediaViewerWidget> createState() => _MediaViewerWidgetState();
-}
-
-class _MediaViewerWidgetState extends State<MediaViewerWidget> {
-  VideoPlayerController? _videoController;
-  bool _isVideo = false;
-  bool _isVideoInitialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAndInitVideo();
-  }
-
-  void _checkAndInitVideo() {
-    final lowerUrl = widget.url.toLowerCase();
-    if (lowerUrl.endsWith('.mp4') ||
-        lowerUrl.endsWith('.webm') ||
-        lowerUrl.endsWith('.mov')) {
-      _isVideo = true;
-      _videoController = VideoPlayerController.networkUrl(Uri.parse(widget.url))
-        ..initialize().then((_) {
-          if (mounted) {
-            setState(() {
-              _isVideoInitialized = true;
-            });
-            _videoController?.setLooping(true);
-            _videoController?.setVolume(0.0); // Muted by default like IG/Web
-            _videoController?.play();
-          }
-        });
-    }
-  }
-
-  @override
-  void dispose() {
-    _videoController?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isVideo) {
-      if (_isVideoInitialized && _videoController != null) {
-        return SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: _videoController!.value.size.width,
-              height: _videoController!.value.size.height,
-              child: VideoPlayer(_videoController!),
-            ),
-          ),
-        );
-      } else {
-        return Container(
-          color: Colors.black12,
-          child: const Center(
-            child: CircularProgressIndicator(
-              color: AppTheme.primaryColor,
-              strokeWidth: 2,
-            ),
-          ),
-        );
-      }
-    }
-
-    // Fallback to Image
-    return CachedNetworkImage(
-      imageUrl: widget.url,
-      fit: BoxFit.cover,
-      alignment: Alignment.topCenter,
-      memCacheWidth: 800,
-      placeholder: (_, __) {
-        if (widget.blurHash != null && widget.blurHash!.isNotEmpty) {
-          return BlurHash(
-            hash: widget.blurHash!,
-            imageFit: BoxFit.cover,
-          );
-        }
-        return Container(color: Colors.grey[100]);
-      },
-      errorWidget: (_, __, ___) => Container(color: Colors.grey[100]),
     );
   }
 }
