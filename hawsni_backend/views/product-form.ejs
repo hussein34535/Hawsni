@@ -101,7 +101,7 @@
         </div>
 
 
-        <form action="/admin/products<%= product ? '/' + product.id : '' %>" method="POST"
+        <form action="/products<%= product ? '/' + product.id : '' %>" method="POST"
             onsubmit="return handleProductSubmit(event)" id="productForm">
 
             <% if (product) { %>
