@@ -339,13 +339,13 @@ export default function ProductPage() {
                                 return (
                                     <div
                                         key={`img-${i}`}
-                                        className={`min-w-full h-full relative flex-shrink-0 ${isVideo ? '' : 'cursor-zoom-in'}`}
-                                        onClick={() => !isVideo && setIsLightboxOpen(true)}
+                                        className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in"
+                                        onClick={() => setIsLightboxOpen(true)}
                                     >
                                         {isVideo ? (
                                             <video
                                                 src={formatImageUrl(img)}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-cover pointer-events-none"
                                                 autoPlay
                                                 loop
                                                 muted

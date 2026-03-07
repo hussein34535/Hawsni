@@ -92,17 +92,37 @@ export default function ImageLightbox({
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="relative w-full h-[80vh] max-w-5xl mx-4"
+                        className="relative w-full h-[80vh] max-w-5xl mx-4 flex items-center justify-center"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <Image
-                            src={images[currentIndex]}
-                            alt={`Fullscreen view ${currentIndex + 1}`}
-                            fill
-                            className="object-contain"
-                            priority
-                            sizes="100vw"
-                        />
+                        {(() => {
+                            const currentSrc = images[currentIndex];
+                            const lowerSrc = currentSrc.toLowerCase();
+                            const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
+
+                            if (isVideo) {
+                                return (
+                                    <video
+                                        src={currentSrc}
+                                        className="w-full h-full object-contain"
+                                        controls
+                                        playsInline
+                                        controlsList="nodownload"
+                                    />
+                                );
+                            }
+
+                            return (
+                                <Image
+                                    src={currentSrc}
+                                    alt={`Fullscreen view ${currentIndex + 1}`}
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                    sizes="100vw"
+                                />
+                            );
+                        })()}
                     </motion.div>
 
                     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/60 font-medium tracking-widest text-sm">
