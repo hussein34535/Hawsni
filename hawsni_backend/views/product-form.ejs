@@ -681,23 +681,26 @@
                         const cloudData = await cloudRes.json();
                         if (cloudData.secure_url) {
                             uploadedUrls.push(cloudData.secure_url);
+                            filesToUpload[i].url = cloudData.secure_url;
+                            filesToUpload[i].type = 'existing';
                         } else {
                             throw new Error(cloudData.error?.message || 'فشل رفع الملف');
                         }
                     }
                 }
 
-                // 4. Add scraped URLs
-                const scrapedUrls = imageState.filter(img => img.type === 'scraped').map(img => img.url);
-                const allNewUrls = [...uploadedUrls, ...scrapedUrls];
+                // 4. Preserve perfect drag-and-drop sort order.
+                // We map all imageState objects (which now all have real URLs)
+                const finalOrderedUrls = imageState.map(img => img.url);
 
-                // 5. Set direct upload URLs in hidden input
-                document.getElementById('directUploadUrls').value = JSON.stringify(allNewUrls);
+                // 5. Send the exact ordered sequence to the backend via 'image_urls'
+                document.getElementById('directUploadUrls').value = JSON.stringify(finalOrderedUrls);
 
-                // 6. Clear scraped images input (already included in directUploadUrls)
+                // 6. Clear other inputs so backend 'updateProductAdmin' doesn't prepend or append duplicates
                 document.getElementById('scrapedImagesInput').value = '[]';
+                document.getElementById('retainedImagesInput').value = '[]';
 
-                // 7. Submit form normally (without files, only data + URLs)
+                // 7. Submit form normally
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
                 form.submit();
             } catch (err) {
