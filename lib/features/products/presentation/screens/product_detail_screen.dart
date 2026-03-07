@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:meta_seo/meta_seo.dart';
@@ -1702,6 +1703,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         );
       },
     );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1804,4 +1806,3 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
     );
   }
 }
-
