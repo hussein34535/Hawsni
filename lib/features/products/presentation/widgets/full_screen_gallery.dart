@@ -56,8 +56,11 @@ class _FullScreenGalleryState extends State<FullScreenGallery> {
               final url = widget.images[index];
               if (_isVideoUrl(url)) {
                 return PhotoViewGalleryPageOptions.customChild(
-                  child: Center(
-                    child: MediaViewerWidget(url: url),
+                  child: MediaViewerWidget(
+                    url: url,
+                    autoPlay: false,
+                    showControls: true,
+                    fit: BoxFit.contain,
                   ),
                   initialScale: PhotoViewComputedScale.contained,
                   minScale: PhotoViewComputedScale.contained,

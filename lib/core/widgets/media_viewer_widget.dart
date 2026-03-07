@@ -8,10 +8,17 @@ class MediaViewerWidget extends StatefulWidget {
   final String url;
   final String? blurHash;
 
+  final bool autoPlay;
+  final bool showControls;
+  final BoxFit fit;
+
   const MediaViewerWidget({
     super.key,
     required this.url,
     this.blurHash,
+    this.autoPlay = true,
+    this.showControls = false,
+    this.fit = BoxFit.cover,
   });
 
   @override
@@ -42,9 +49,16 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
             setState(() {
               _isVideoInitialized = true;
             });
-            _videoController?.setLooping(true);
-            _videoController?.setVolume(0.0); // Muted by default like IG/Web
-            _videoController?.play();
+            if (widget.showControls) {
+              _videoController?.setVolume(1.0); // Sound on for full screen
+              _videoController?.setLooping(false);
+            } else {
+              _videoController?.setVolume(0.0); // Muted by default like IG/Web
+              _videoController?.setLooping(true);
+            }
+            if (widget.autoPlay) {
+              _videoController?.play();
+            }
           }
         });
     }
@@ -60,9 +74,9 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
   Widget build(BuildContext context) {
     if (_isVideo) {
       if (_isVideoInitialized && _videoController != null) {
-        return SizedBox.expand(
+        final videoOutput = SizedBox.expand(
           child: FittedBox(
-            fit: BoxFit.cover,
+            fit: widget.fit,
             child: SizedBox(
               width: _videoController!.value.size.width,
               height: _videoController!.value.size.height,
@@ -70,6 +84,44 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
             ),
           ),
         );
+
+        if (widget.showControls) {
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              videoOutput,
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _videoController!.value.isPlaying
+                        ? _videoController!.pause()
+                        : _videoController!.play();
+                  });
+                },
+                child: Container(
+                  color: Colors.transparent, // Capture taps
+                  child: Center(
+                    child: AnimatedOpacity(
+                      opacity: _videoController!.value.isPlaying ? 0.0 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: const BoxDecoration(
+                          color: Colors.black45,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.play_arrow_rounded,
+                            color: Colors.white, size: 56),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        return videoOutput;
       } else {
         return Container(
           color: Colors.black12,
@@ -86,8 +138,8 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
     // Fallback to Image
     return CachedNetworkImage(
       imageUrl: widget.url,
-      fit: BoxFit.cover,
-      alignment: Alignment.topCenter,
+      fit: widget.fit,
+      alignment: Alignment.center,
       memCacheWidth: 800,
       placeholder: (_, __) {
         if (widget.blurHash != null && widget.blurHash!.isNotEmpty) {
