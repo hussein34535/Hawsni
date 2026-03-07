@@ -334,7 +334,8 @@ export default function ProductPage() {
                             style={{ transform: `translateX(-${selectedImage * 100}%)` }}
                         >
                             {safeImages.map((img, i) => {
-                                const isVideo = img.match(/\.(mp4|webm|mov)$/i) !== null;
+                                const lowerImg = img.toLowerCase();
+                                const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerImg) || lowerImg.includes('/video/upload/');
                                 return (
                                     <div
                                         key={`img-${i}`}

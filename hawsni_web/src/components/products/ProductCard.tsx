@@ -18,23 +18,30 @@ export default function ProductCard({ product }: ProductCardProps) {
     const finalPrice = discount > 0 ? price - (price * discount / 100) : price;
     const images = product.images ?? [];
     const colors = product.colors ?? [];
-    const formatImageUrl = (url: string) => {
-        if (!url) return '';
-        if (url.startsWith('http')) return url;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
-        const baseUrl = apiUrl.replace(/\/api$/, '');
-        const fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : (url.startsWith('http') ? url : `${baseUrl}/${url}`);
-
-        // If it's a Cloudinary video URL, we can get a thumbnail by changing the extension to .jpg
-        if (fullUrl.match(/\.(mp4|webm|mov)$/i) && fullUrl.includes('res.cloudinary.com')) {
-            return fullUrl.replace(/\.(mp4|webm|mov)$/i, '.jpg');
-        }
-        return fullUrl;
-    };
-
     const isVideoUrl = (url: string) => {
         if (!url) return false;
-        return url.match(/\.(mp4|webm|mov)$/i) !== null;
+        const lowerUrl = url.toLowerCase();
+        return /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerUrl) || lowerUrl.includes('/video/upload/');
+    };
+
+    const formatImageUrl = (url: string) => {
+        if (!url) return '';
+        let fullUrl = url;
+        if (!url.startsWith('http')) {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
+            const baseUrl = apiUrl.replace(/\/api$/, '');
+            fullUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+        }
+
+        // If it's a Cloudinary video URL, we can get a thumbnail by changing the extension to .jpg
+        if (isVideoUrl(fullUrl) && fullUrl.includes('res.cloudinary.com')) {
+            if (/\.(mp4|webm|mov)(?=\?|$)/i.test(fullUrl)) {
+                return fullUrl.replace(/\.(mp4|webm|mov)(?=\?|$)/i, '.jpg');
+            } else {
+                return `${fullUrl}.jpg`;
+            }
+        }
+        return fullUrl;
     };
 
     const COLOR_MAP: Record<string, string> = {
