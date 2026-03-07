@@ -27,7 +27,8 @@ class CategoryController {
 
             let imageUrl = null;
             if (req.file) {
-                imageUrl = await uploadToSupabase(req.file, 'categories');
+                const result = await uploadToSupabase(req.file, 'categories');
+                imageUrl = result ? (result.url || result) : null;
             }
 
             const category = await CategoryService.createCategory({
@@ -54,7 +55,8 @@ class CategoryController {
             };
 
             if (req.file) {
-                updateData.image = await uploadToSupabase(req.file, 'categories');
+                const result = await uploadToSupabase(req.file, 'categories');
+                updateData.image = result ? (result.url || result) : null;
             }
 
             const category = await CategoryService.updateCategory(req.params.id, updateData);
@@ -144,11 +146,12 @@ class CategoryController {
 
             let imageUrl = null;
             if (req.file) {
-                imageUrl = await uploadToSupabase(req.file, 'categories');
+                const result = await uploadToSupabase(req.file, 'categories');
+                imageUrl = result ? (result.url || result) : null;
             }
 
-            const { data, error } = await supabase.from('categories').insert({ 
-                name, 
+            const { data, error } = await supabase.from('categories').insert({
+                name,
                 description: description || '',
                 image: imageUrl,
                 sort_order: maxOrder + 1
@@ -182,8 +185,8 @@ class CategoryController {
             };
 
             if (req.file) {
-                const imageUrl = await uploadToSupabase(req.file, 'categories');
-                updateData.image = imageUrl;
+                const result = await uploadToSupabase(req.file, 'categories');
+                updateData.image = result ? (result.url || result) : null;
             }
 
             const { data, error } = await supabase.from('categories').update(updateData).eq('id', req.params.id).select().single();
