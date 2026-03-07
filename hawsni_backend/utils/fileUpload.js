@@ -24,15 +24,24 @@ cloudinary.config({
  */
 const uploadToCloudinary = async (file, folder = 'products') => {
   return new Promise((resolve, reject) => {
+    const isVideo = file.mimetype && file.mimetype.startsWith('video/');
+
+    // Set appropriate transformations based on media type
+    const transformation = isVideo
+      ? [
+        { quality: "auto", fetch_format: "auto" }
+      ]
+      : [
+        { width: 1200, crop: "limit" }, // Limit max width to 1200px
+        { quality: "auto:good" },
+        { fetch_format: "auto" }
+      ];
+
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
         resource_type: 'auto',
-        transformation: [
-          { width: 1200, crop: "limit" }, // Limit max width to 1200px
-          { quality: "auto:good" },
-          { fetch_format: "auto" }
-        ]
+        transformation: transformation
       },
       (error, result) => {
         if (error) {

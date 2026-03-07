@@ -101,7 +101,7 @@
         </div>
 
 
-        <form action="/products<%= product ? '/' + product.id : '' %>" method="POST" enctype="multipart/form-data"
+        <form action="/admin/products<%= product ? '/' + product.id : '' %>" method="POST"
             onsubmit="return handleProductSubmit(event)" id="productForm">
 
             <% if (product) { %>
@@ -659,16 +659,22 @@
 
                     // 3. Upload each file directly to Cloudinary
                     for (let i = 0; i < filesToUpload.length; i++) {
-                        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> رفع صورة ${i + 1}/${filesToUpload.length}...`;
+                        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> رفع ملف ${i + 1}/${filesToUpload.length}...`;
+
+                        const file = filesToUpload[i].file;
+                        const isVideo = file.type.startsWith('video/');
 
                         const formData = new FormData();
-                        formData.append('file', filesToUpload[i].file);
+                        formData.append('file', file);
                         formData.append('api_key', signData.api_key);
                         formData.append('timestamp', signData.timestamp);
                         formData.append('signature', signData.signature);
                         formData.append('folder', signData.folder);
 
-                        const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`, {
+                        // Let Cloudinary auto-detect if image or video
+                        const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/auto/upload`;
+
+                        const cloudRes = await fetch(uploadEndpoint, {
                             method: 'POST',
                             body: formData
                         });
@@ -676,7 +682,7 @@
                         if (cloudData.secure_url) {
                             uploadedUrls.push(cloudData.secure_url);
                         } else {
-                            throw new Error(cloudData.error?.message || 'فشل رفع الصورة');
+                            throw new Error(cloudData.error?.message || 'فشل رفع الملف');
                         }
                     }
                 }

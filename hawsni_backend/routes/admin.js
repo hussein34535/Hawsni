@@ -54,9 +54,9 @@ const CategoryController = require('../controllers/api/categoryController');
 // Products Routes
 router.get('/products', ProductController.renderProductsPage);
 router.get('/products/new', ProductController.renderNewProductPage);
-router.post('/products', upload.array('images', 5), ProductController.createProductAdmin);
+router.post('/products', ProductController.createProductAdmin);
 router.get('/products/:id/edit', ProductController.renderEditProductPage);
-router.post('/products/:id', upload.array('images', 5), ProductController.updateProductAdmin);
+router.post('/products/:id', ProductController.updateProductAdmin);
 router.delete('/products/:id', ProductController.deleteProductAdmin);
 
 // Products Bulk Routes
