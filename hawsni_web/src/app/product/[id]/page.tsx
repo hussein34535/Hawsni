@@ -322,10 +322,9 @@ export default function ProductPage() {
             <main className="max-w-7xl mx-auto pb-40">
                 <div className="grid grid-cols-1 lg:grid-cols-2">
 
-                    {/* Left: Image Gallery with Touch Swipe */}
                     <div
                         ref={galleryRef}
-                        className="relative aspect-[4/5] bg-gray-100 overflow-hidden lg:rounded-b-[4rem] group"
+                        className="relative aspect-[4/5] bg-white overflow-hidden lg:rounded-b-[4rem] group"
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
@@ -347,7 +346,7 @@ export default function ProductPage() {
                                             <>
                                                 <video
                                                     src={formatImageUrl(img)}
-                                                    className="w-full h-full object-cover pointer-events-none"
+                                                    className="w-full h-full object-contain pointer-events-none"
                                                     playsInline
                                                     controlsList="nodownload"
                                                     preload="metadata"
@@ -365,7 +364,7 @@ export default function ProductPage() {
                                                 fill
                                                 priority={i === 0}
                                                 sizes="(max-width: 1024px) 100vw, 50vw"
-                                                className="object-cover select-none"
+                                                className="object-contain select-none"
                                             />
                                         )}
                                     </div>
