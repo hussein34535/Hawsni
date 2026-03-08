@@ -291,7 +291,7 @@ export default function ProductPage() {
         <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
 
             {/* Header / AppBar - Transparent Overlay (Matches Flutter exactly) */}
-            <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/20 to-transparent pointer-events-none h-32 pt-6`}>
+            <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/20 to-transparent pointer-events-none h-24 pt-2`}>
                 <button
                     onClick={() => router.back()}
                     className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-95 transition-transform"
@@ -412,17 +412,20 @@ export default function ProductPage() {
                             </button>
                         )}
 
+                        {/* Bottom Gradient for Pagination (Balances Top Gradient) */}
+                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent pointer-events-none z-[15]" />
+
                         {/* Custom Dots Pagination - Smaller and more subtle */}
                         {safeImages.length > 1 && (
-                            <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/5`} dir="ltr">
-                                <span className="text-[9px] text-white/60 font-bold mr-1.5 tracking-tighter">
+                            <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2.5 py-1 bg-black/20 backdrop-blur-md rounded-full border border-white/5`} dir="ltr">
+                                <span className="text-[8.5px] text-white/60 font-bold mr-1 tracking-tighter">
                                     {selectedImage + 1} / {safeImages.length}
                                 </span>
                                 {safeImages.map((_, i) => (
                                     <button
                                         key={`dot-${i}`}
                                         onClick={() => setSelectedImage(i)}
-                                        className={`h-1 rounded-full transition-all duration-500 ${i === selectedImage ? 'w-3 bg-white/80' : 'w-1 bg-white/20 hover:bg-white/40'}`}
+                                        className={`h-[3px] rounded-full transition-all duration-500 ${i === selectedImage ? 'w-2 bg-white/80' : 'w-[3px] bg-white/20 hover:bg-white/40'}`}
                                     />
                                 ))}
                             </div>
