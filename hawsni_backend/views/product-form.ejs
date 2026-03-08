@@ -414,6 +414,9 @@
                 recursiveParse(rawData);
                 colors = cleanColors;
 
+                // FORCE DELETE ANY EXISTING imageId loaded from DB because they are invalid in a new session (the DB shouldn't hold DOM ids)
+                colors.forEach(c => { delete c.imageId; });
+
                 // Initialize imageIds for existing colors if they only have imageIndex
                 colors.forEach(c => {
                     if (c.imageIndex !== null && c.imageIndex !== undefined && !c.imageId) {
@@ -871,7 +874,11 @@
         // --- Colors Utility Functions (Copied from original to ensure they exist) ---
         function updateColorsInput() {
             const colorsInput = document.getElementById('colorsInput');
-            if (colorsInput) colorsInput.value = JSON.stringify(colors);
+            if (colorsInput) {
+                // Strip the temporary DOM 'imageId' before sending to the database
+                const cleanColors = colors.map(c => ({ color: c.color, imageIndex: c.imageIndex }));
+                colorsInput.value = JSON.stringify(cleanColors);
+            }
         }
 
         function renderColors() {
