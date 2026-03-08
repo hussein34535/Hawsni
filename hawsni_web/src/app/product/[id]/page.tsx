@@ -342,12 +342,12 @@ export default function ProductPage() {
                                         className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in overflow-hidden"
                                         onClick={() => setIsLightboxOpen(true)}
                                     >
-                                        {/* Cinematic Blurred Background Layer */}
-                                        <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center bg-white">
+                                        {/* Cinematic Blurred Background Layer - Optimized to only render on active slide */}
+                                        <div className={`absolute inset-0 pointer-events-none z-0 flex items-center justify-center bg-white ${selectedImage !== i ? 'hidden' : 'opacity-100 transition-opacity duration-300'}`}>
                                             {isVideo ? (
                                                 <video
                                                     src={formatImageUrl(img)}
-                                                    className="w-full h-full object-cover blur-3xl opacity-50 scale-110"
+                                                    className="w-full h-full object-cover blur-2xl opacity-40 scale-[1.15]"
                                                     muted playsInline autoPlay loop
                                                 />
                                             ) : (
@@ -356,7 +356,7 @@ export default function ProductPage() {
                                                     alt=""
                                                     fill
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                                    className="object-cover blur-3xl opacity-50 scale-110"
+                                                    className="object-cover blur-2xl opacity-40 scale-[1.15]"
                                                 />
                                             )}
                                         </div>
