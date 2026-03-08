@@ -603,7 +603,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.15),
                     Colors.transparent
                   ]))),
             ),
@@ -620,7 +620,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
                           colors: [
-                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.15),
                     Colors.transparent
                   ]))),
             ),
