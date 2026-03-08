@@ -170,7 +170,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
   void _checkStockStatus(int stock) {
     _stockCount = stock;
-    _isLowStock = _stockCount > 0 && _stockCount < 8;
+    _isLowStock = _stockCount > 0 && _stockCount < 50;
   }
 
   @override
