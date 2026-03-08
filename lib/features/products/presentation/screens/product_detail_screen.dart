@@ -639,10 +639,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 child: Center(
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.black
-                          .withValues(alpha: 0.15), // Much more transparent
+                      color:
+                          Colors.black.withValues(alpha: 0.35), // More visible
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: Row(
@@ -655,13 +655,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeOutCubic,
                             margin: EdgeInsets.only(
-                                right: i < data.images.length - 1 ? 4 : 0),
-                            width: active ? 8 : 4, // Smaller dots
-                            height: 4,
+                                right: i < data.images.length - 1 ? 5 : 0),
+                            width: active ? 14 : 7, // Bigger dots
+                            height: 7,
                             decoration: BoxDecoration(
                               color: active
                                   ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.35),
+                                  : Colors.white.withValues(alpha: 0.55),
                               borderRadius: BorderRadius.circular(100),
                             ),
                           );
