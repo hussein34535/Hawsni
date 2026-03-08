@@ -585,6 +585,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   child: MediaViewerWidget(
                     url: data.images[i],
                     blurHash: data.blurHash,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
@@ -1628,6 +1629,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                                     child: MediaViewerWidget(
                                       url: data.images[i],
                                       blurHash: data.blurHash,
+                                      fit: BoxFit.contain,
                                     ),
                                   ),
                                 ),
