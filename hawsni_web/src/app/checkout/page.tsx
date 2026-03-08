@@ -48,6 +48,7 @@ export default function CheckoutPage() {
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
     const [shippingSettings, setShippingSettings] = useState<any>(null);
+    const [freeDeliveryActive, setFreeDeliveryActive] = useState(false);
     const [selectedGov, setSelectedGov] = useState('');
     const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
     const [newAddress, setNewAddress] = useState<{ street: string; city: string; type: 'home' | 'office' | 'other' }>({ street: '', city: '', type: 'home' });
@@ -69,6 +70,12 @@ export default function CheckoutPage() {
             try {
                 const settingsRes = await checkoutService.getShippingSettings();
                 setShippingSettings(settingsRes.settings);
+
+                // Check if free delivery is enabled globally
+                try {
+                    const pubRes = await import('@/lib/axios').then(m => m.default.get('/settings/public'));
+                    setFreeDeliveryActive(!!pubRes.data?.data?.free_delivery_enabled);
+                } catch { }
 
                 if (token) {
                     const addrRes = await addressService.getAddresses();
@@ -104,6 +111,9 @@ export default function CheckoutPage() {
     const subtotal = getTotal();
 
     const calculateShipping = () => {
+        // Free delivery is fully on — skip all calculations
+        if (freeDeliveryActive) return { cost: 0, min: 1, max: 2 };
+
         if (!shippingSettings) return { cost: 50, min: 3, max: 7 };
         const threshold = shippingSettings.free_shipping_threshold || 0;
 

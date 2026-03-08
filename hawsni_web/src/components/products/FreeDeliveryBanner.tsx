@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Truck } from 'lucide-react';
+import apiClient from '@/lib/axios';
 
 interface Props {
     isRTL?: boolean;
@@ -16,13 +17,26 @@ function timeUntilMidnight(): number {
 
 export function FreeDeliveryBanner({ isRTL = false }: Props) {
     const [seconds, setSeconds] = useState<number>(timeUntilMidnight());
+    const [enabled, setEnabled] = useState<boolean | null>(null); // null = loading
 
+    // Fetch setting from backend
     useEffect(() => {
-        const id = setInterval(() => {
-            setSeconds(timeUntilMidnight());
-        }, 1000);
-        return () => clearInterval(id);
+        apiClient.get('/settings/public')
+            .then(res => {
+                const val = res.data?.data?.free_delivery_enabled;
+                setEnabled(!!val);
+            })
+            .catch(() => setEnabled(false));
     }, []);
+
+    // Countdown tick
+    useEffect(() => {
+        if (!enabled) return;
+        const id = setInterval(() => setSeconds(timeUntilMidnight()), 1000);
+        return () => clearInterval(id);
+    }, [enabled]);
+
+    if (!enabled) return null; // Hidden when off or loading
 
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
     const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
@@ -36,12 +50,9 @@ export function FreeDeliveryBanner({ isRTL = false }: Props) {
                 boxShadow: '0 6px 20px rgba(29,191,115,0.30)',
             }}
         >
-            {/* Truck icon */}
             <div className="flex-shrink-0 animate-bounce">
                 <Truck size={24} className="text-white" />
             </div>
-
-            {/* Text */}
             <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
                 <p className="text-white font-black text-sm font-cairo leading-tight">
                     🎉 {isRTL ? 'توصيل مجاني لمدة 24 ساعة!' : 'Free Delivery for 24 Hours!'}
@@ -50,8 +61,6 @@ export function FreeDeliveryBanner({ isRTL = false }: Props) {
                     {isRTL ? 'العرض ينتهي في منتصف الليل' : 'Offer ends at midnight'}
                 </p>
             </div>
-
-            {/* Countdown pill */}
             <div
                 className="flex-shrink-0 px-3 py-1.5 rounded-xl font-black text-white text-sm tracking-widest font-cairo"
                 style={{ background: 'rgba(255,255,255,0.20)' }}

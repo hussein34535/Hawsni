@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
 
-/// Premium animated free-delivery countdown banner.
-/// The countdown resets to midnight (next full 24h window) every day.
+/// Fetches `free_delivery_enabled` from the backend settings API.
+/// Shows nothing when the setting is OFF.
 class FreeDeliveryBanner extends StatefulWidget {
   const FreeDeliveryBanner({super.key});
 
@@ -12,8 +13,9 @@ class FreeDeliveryBanner extends StatefulWidget {
 
 class _FreeDeliveryBannerState extends State<FreeDeliveryBanner>
     with SingleTickerProviderStateMixin {
-  late Timer _timer;
+  bool? _enabled; // null = still loading
   Duration _remaining = _timeUntilMidnight();
+  Timer? _timer;
 
   late final AnimationController _pulse;
   late final Animation<double> _scale;
@@ -29,23 +31,37 @@ class _FreeDeliveryBannerState extends State<FreeDeliveryBanner>
   void initState() {
     super.initState();
 
-    // Tick every second
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final next = _timeUntilMidnight();
-      if (mounted) setState(() => _remaining = next);
-    });
-
-    // Subtle pulse animation on the icon
+    // Pulse animation
     _pulse = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 900))
       ..repeat(reverse: true);
     _scale = Tween<double>(begin: 1.0, end: 1.18)
         .animate(CurvedAnimation(parent: _pulse, curve: Curves.easeInOut));
+
+    _fetchSetting();
+  }
+
+  Future<void> _fetchSetting() async {
+    try {
+      final data = await ApiService.get('/settings/public', includeAuth: false);
+      final enabled = data?['data']?['free_delivery_enabled'] == true;
+      if (!mounted) return;
+      setState(() => _enabled = enabled);
+      if (enabled) _startTimer();
+    } catch (_) {
+      if (mounted) setState(() => _enabled = false);
+    }
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _remaining = _timeUntilMidnight());
+    });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     _pulse.dispose();
     super.dispose();
   }
@@ -54,12 +70,15 @@ class _FreeDeliveryBannerState extends State<FreeDeliveryBanner>
 
   @override
   Widget build(BuildContext context) {
+    // Hidden when loading or disabled
+    if (_enabled != true) return const SizedBox.shrink();
+
     final h = _pad(_remaining.inHours);
     final m = _pad(_remaining.inMinutes.remainder(60));
     final s = _pad(_remaining.inSeconds.remainder(60));
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         decoration: BoxDecoration(
@@ -79,20 +98,17 @@ class _FreeDeliveryBannerState extends State<FreeDeliveryBanner>
         ),
         child: Row(
           children: [
-            // Pulsing truck icon
             ScaleTransition(
               scale: _scale,
               child: const Icon(Icons.local_shipping_rounded,
                   color: Colors.white, size: 26),
             ),
             const SizedBox(width: 12),
-
-            // Text block
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
+                children: const [
+                  Text(
                     '🎉 توصيل مجاني لمدة 24 ساعة!',
                     style: TextStyle(
                       fontFamily: 'Cairo',
@@ -101,8 +117,8 @@ class _FreeDeliveryBannerState extends State<FreeDeliveryBanner>
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 1),
-                  const Text(
+                  SizedBox(height: 1),
+                  Text(
                     'العرض ينتهي في منتصف الليل',
                     style: TextStyle(
                       fontFamily: 'Cairo',
@@ -113,8 +129,6 @@ class _FreeDeliveryBannerState extends State<FreeDeliveryBanner>
                 ],
               ),
             ),
-
-            // Countdown pill
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(

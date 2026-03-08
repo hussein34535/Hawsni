@@ -18,6 +18,7 @@ class SettingsController {
                 address: '',
                 currency: 'EGP',
                 meta_pixel_id: '',
+                free_delivery_enabled: false,
                 social_links: {
                     facebook: '',
                     instagram: '',
@@ -78,6 +79,7 @@ class SettingsController {
                     tiktok
                 },
                 meta_pixel_id,
+                free_delivery_enabled: req.body.free_delivery_enabled === 'on',
                 updated_at: new Date().toISOString()
             };
 

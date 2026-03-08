@@ -114,6 +114,32 @@
                 </div>
             </div>
 
+            <!-- Free Delivery Toggle -->
+            <div class="card" style="margin-bottom: 1.5rem; border: 2px solid #1DBF73;">
+                <div class="card-header" style="background: linear-gradient(135deg,#1DBF73,#0AA65B); color:#fff;">
+                    <h2 class="card-title" style="color:#fff;"><i class="fas fa-truck"></i> التوصيل المجاني</h2>
+                </div>
+                <div
+                    style="padding: 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+                    <div>
+                        <p style="font-weight:bold; margin:0 0 4px;">تفعيل عرض التوصيل المجاني</p>
+                        <small style="color:#666;">لما يتفعل، يظهر بانر العد التنازلي في صفحة المنتج وتكون قيمة التوصيل
+                            صفر تلقائياً عند الدفع.</small>
+                    </div>
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
+                        <input type="checkbox" name="free_delivery_enabled" id="free_delivery_enabled"
+                            <%=settings.free_delivery_enabled ? 'checked' : '' %>
+                        style="width:20px;height:20px;accent-color:#1DBF73;"
+                        onchange="var l=document.getElementById('freeDeliveryLabel');l.textContent=this.checked?'✅
+                        مفعّل':'❌ معطّل';l.style.color=this.checked?'#1DBF73':'#999';">
+                        <span id="freeDeliveryLabel"
+                            style="font-weight:bold;font-size:1rem;color:<%- settings.free_delivery_enabled ? '#1DBF73' : '#999' %>;">
+                            <%=settings.free_delivery_enabled ? '✅ مفعّل' : '❌ معطّل' %>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
             <div style="display: flex; justify-content: flex-end;">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> حفظ الإعدادات
