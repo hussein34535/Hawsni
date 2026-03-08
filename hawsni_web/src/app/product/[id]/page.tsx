@@ -339,34 +339,56 @@ export default function ProductPage() {
                                 return (
                                     <div
                                         key={`img-${i}`}
-                                        className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in"
+                                        className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in overflow-hidden"
                                         onClick={() => setIsLightboxOpen(true)}
                                     >
-                                        {isVideo ? (
-                                            <>
+                                        {/* Cinematic Blurred Background Layer */}
+                                        <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center bg-white">
+                                            {isVideo ? (
                                                 <video
                                                     src={formatImageUrl(img)}
-                                                    className="w-full h-full object-contain pointer-events-none"
-                                                    playsInline
-                                                    controlsList="nodownload"
-                                                    preload="metadata"
+                                                    className="w-full h-full object-cover blur-3xl opacity-50 scale-110"
+                                                    muted playsInline autoPlay loop
                                                 />
-                                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                    <div className="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
-                                                        <Play className="text-white ml-1 w-8 h-8" fill="currentColor" />
+                                            ) : (
+                                                <Image
+                                                    src={formatImageUrl(img)}
+                                                    alt=""
+                                                    fill
+                                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                                    className="object-cover blur-3xl opacity-50 scale-110"
+                                                />
+                                            )}
+                                        </div>
+
+                                        {/* Foreground Focused Layer */}
+                                        <div className="absolute inset-0 z-10 flex items-center justify-center">
+                                            {isVideo ? (
+                                                <>
+                                                    <video
+                                                        src={formatImageUrl(img)}
+                                                        className="w-full h-full object-contain pointer-events-none"
+                                                        playsInline
+                                                        controlsList="nodownload"
+                                                        preload="metadata"
+                                                    />
+                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                                        <div className="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+                                                            <Play className="text-white ml-1 w-8 h-8" fill="currentColor" />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <Image
-                                                src={formatImageUrl(img)}
-                                                alt={`${product.name} - ${i + 1}`}
-                                                fill
-                                                priority={i === 0}
-                                                sizes="(max-width: 1024px) 100vw, 50vw"
-                                                className="object-contain select-none"
-                                            />
-                                        )}
+                                                </>
+                                            ) : (
+                                                <Image
+                                                    src={formatImageUrl(img)}
+                                                    alt={`${product.name} - ${i + 1}`}
+                                                    fill
+                                                    priority={i === 0}
+                                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                                    className="object-contain select-none"
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })}
