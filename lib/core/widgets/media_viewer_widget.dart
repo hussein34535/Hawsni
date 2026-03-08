@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
@@ -70,6 +71,54 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
     super.dispose();
   }
 
+  Widget _buildWithCinematicBackground(Widget foreground) {
+    if (widget.fit != BoxFit.contain) {
+      return foreground;
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Background Layer
+        Positioned.fill(
+          child: Container(
+            color: Colors.white,
+            child: widget.blurHash != null && widget.blurHash!.isNotEmpty
+                ? ImageFiltered(
+                    imageFilter: ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                    child: Transform.scale(
+                      scale: 1.1,
+                      child: BlurHash(
+                        hash: widget.blurHash!,
+                        imageFit: BoxFit.cover,
+                      ),
+                    ),
+                  )
+                : (!_isVideo
+                    ? ImageFiltered(
+                        imageFilter:
+                            ui.ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                        child: Transform.scale(
+                          scale: 1.1,
+                          child: CachedNetworkImage(
+                            imageUrl: widget.url,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+                    : const SizedBox()),
+          ),
+        ),
+        // Overlay to wash it out elegantly
+        Positioned.fill(
+          child: Container(color: Colors.white.withOpacity(0.5)),
+        ),
+        // Foreground focused item
+        foreground,
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isVideo) {
@@ -121,7 +170,7 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
           );
         }
 
-        return videoOutput;
+        return _buildWithCinematicBackground(videoOutput);
       } else {
         return Container(
           color: Colors.black12,
@@ -136,7 +185,7 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
     }
 
     // Fallback to Image
-    return CachedNetworkImage(
+    final imageOutput = CachedNetworkImage(
       imageUrl: widget.url,
       fit: widget.fit,
       alignment: Alignment.center,
@@ -152,5 +201,7 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
       },
       errorWidget: (_, __, ___) => Container(color: Colors.grey[100]),
     );
+
+    return _buildWithCinematicBackground(imageOutput);
   }
 }
