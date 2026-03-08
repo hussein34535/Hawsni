@@ -33,6 +33,7 @@ import dynamic from 'next/dynamic';
 const ReviewsSection = dynamic(() => import('@/components/product/ReviewsSection'), { ssr: false });
 const SizeGuideModal = dynamic(() => import('@/components/product/SizeGuideModal'), { ssr: false });
 const VirtualTryOnModal = dynamic(() => import('@/components/product/VirtualTryOnModal'), { ssr: false });
+import { FreeDeliveryBanner } from '@/components/products/FreeDeliveryBanner';
 const ImageLightbox = dynamic(() => import('@/components/common/ImageLightbox'), { ssr: false });
 
 const formatImageUrl = (url: string) => {
@@ -461,6 +462,9 @@ export default function ProductPage() {
                                 <span className="text-xs uppercase font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </div>
                         </div>
+
+                        {/* Free Delivery Countdown Banner */}
+                        <FreeDeliveryBanner isRTL={isRTL} />
 
                         {/* VTO Banner (Try with AI) */}
                         {product.is_vto_enabled !== false && (

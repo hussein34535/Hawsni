@@ -33,6 +33,7 @@ import 'package:hwasi_app/features/products/presentation/widgets/full_screen_gal
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/free_delivery_banner.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXTENSIONS (Safe Color Parsing)
@@ -734,6 +735,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 color: AppTheme.primaryColor,
               )),
           const SizedBox(height: 32),
+
+          // Free Delivery Banner
+          const FreeDeliveryBanner(),
+          const SizedBox(height: 20),
 
           // Try On Banner
           if (data.isVtoEnabled) ...[
