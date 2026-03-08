@@ -1148,8 +1148,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
   Widget _colorRow(List<dynamic> colors) {
     return Wrap(
-      spacing: 12,
-      runSpacing: 12,
+      spacing: 6,
+      runSpacing: 6,
       children: colors.map((cd) {
         String name = '';
         int? linked;
@@ -1212,8 +1212,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
   Widget _sizeRow(List<String> sizes) {
     return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+      spacing: 6,
+      runSpacing: 6,
       children: sizes.map((s) {
         final isSel = _selectedSize == s;
         return GestureDetector(
@@ -1225,7 +1225,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
                 color: isSel ? Colors.black : Colors.white,
                 borderRadius: BorderRadius.circular(12),

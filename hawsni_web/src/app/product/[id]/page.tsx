@@ -488,7 +488,7 @@ export default function ProductPage() {
                             {product.colors && product.colors.length > 0 && (
                                 <div>
                                     <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
-                                    <div className={`flex flex-wrap gap-4 pb-4 pt-2 px-2 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                                    <div className={`flex flex-wrap gap-2 pb-4 pt-2 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                                         {parseColors(product.colors).map((c, i) => (
                                             <button
                                                 key={`${c.color}-${i}`}
@@ -541,7 +541,7 @@ export default function ProductPage() {
                                             <span>{t.product?.size_guide || (isRTL ? 'دليل المقاسات' : 'Size Guide')}</span>
                                         </button>
                                     </div>
-                                    <div className="flex flex-wrap gap-3">
+                                    <div className="flex flex-wrap gap-1.5">
                                         {product.sizes.map((s, i) => (
                                             <button
                                                 key={`${s}-${i}`}
