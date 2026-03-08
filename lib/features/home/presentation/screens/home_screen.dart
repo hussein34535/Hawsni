@@ -15,6 +15,7 @@ import 'package:hwasi_app/features/products/data/services/product_service.dart';
 import 'package:hwasi_app/features/products/presentation/screens/products_screen.dart';
 import 'package:hwasi_app/features/search/presentation/screens/search_screen.dart';
 import 'package:hwasi_app/core/utils/responsive_layout.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/free_delivery_banner.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -116,14 +117,18 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
 
+                        // Free Delivery Countdown Banner
+                        const SliverToBoxAdapter(
+                          child: FreeDeliveryBanner(),
+                        ),
+
                         // Categories Section
                         SliverToBoxAdapter(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(20, 24, 20, 12),
+                                padding: EdgeInsets.fromLTRB(20, 24, 20, 12),
                                 child: Row(
                                   children: [
                                     Text(
