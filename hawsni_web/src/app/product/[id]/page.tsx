@@ -294,20 +294,20 @@ export default function ProductPage() {
             <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/10 to-transparent pointer-events-none h-24 pt-2`}>
                 <button
                     onClick={() => router.back()}
-                    className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 pointer-events-auto active:scale-95 transition-transform"
+                    className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 pointer-events-auto active:scale-95 transition-transform"
                 >
                     {isRTL ? <ArrowRight size={20} className="text-white" /> : <ArrowLeft size={20} className="text-white" />}
                 </button>
                 <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-2 pointer-events-auto`}>
                     <button
                         onClick={handleFavoriteClick}
-                        className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-95 transition-transform"
+                        className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 active:scale-95 transition-transform"
                     >
                         <Heart size={20} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'} />
                     </button>
                     <button
                         onClick={() => router.push('/cart')}
-                        className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/20 active:scale-95 transition-transform relative"
+                        className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 active:scale-95 transition-transform relative"
                     >
                         <ShoppingBag size={20} className="text-white" />
                         {getItemCount() > 0 && (
@@ -417,10 +417,7 @@ export default function ProductPage() {
 
                         {/* Custom Dots Pagination - Smaller and more subtle */}
                         {safeImages.length > 1 && (
-                            <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2.5 py-1 bg-black/20 backdrop-blur-md rounded-full border border-white/5`} dir="ltr">
-                                <span className="text-[8.5px] text-white/60 font-bold mr-1 tracking-tighter">
-                                    {selectedImage + 1} / {safeImages.length}
-                                </span>
+                            <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/10 backdrop-blur-md rounded-full`} dir="ltr">
                                 {safeImages.map((_, i) => (
                                     <button
                                         key={`dot-${i}`}
