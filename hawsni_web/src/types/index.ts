@@ -37,6 +37,7 @@ export interface Product {
     image?: string; // Summary thumbnail field
     category: string | Category;
     isFeatured: boolean;
+    is_vto_enabled?: boolean;
     colors?: any[];
     sizes?: string[];
     rating?: number;

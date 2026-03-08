@@ -364,6 +364,11 @@
                         <label for="is_featured">مميز</label>
                     </div>
                     <div class="form-group checkbox">
+                        <input type="checkbox" id="is_vto_enabled" name="is_vto_enabled" <%=product.is_vto_enabled
+                            !==false ? 'checked' : '' %>>
+                        <label for="is_vto_enabled">تفعيل تجربة VTO المدعومة بالذكاء الاصطناعي</label>
+                    </div>
+                    <div class="form-group checkbox">
                         <input type="checkbox" id="is_active" name="is_active" <%=product.is_active ? 'checked' : '' %>>
                         <label for="is_active">مفعل</label>
                     </div>

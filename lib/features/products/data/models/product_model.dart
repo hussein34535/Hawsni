@@ -14,6 +14,7 @@ class ProductModel {
   final List<String>? images;
   final String? sizeGuide;
   final String? blurHash;
+  final bool isVtoEnabled;
 
   ProductModel({
     required this.id,
@@ -31,6 +32,7 @@ class ProductModel {
     this.images,
     this.sizeGuide,
     this.blurHash,
+    this.isVtoEnabled = true,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class ProductModel {
       reviewCount: json['num_reviews'] ?? json['numReviews'] ?? 0,
       stock: json['stock'] ?? json['countInStock'] ?? 0,
       isFeatured: json['is_featured'] ?? json['isFeatured'] ?? false,
+      isVtoEnabled: json['is_vto_enabled'] ?? json['isVtoEnabled'] ?? true,
       sizes: json['sizes'] != null
           ? (json['sizes'] is String
               ? (json['sizes'] as String)
@@ -88,6 +91,7 @@ class ProductModel {
       if (images != null) 'images': images,
       if (sizeGuide != null) 'size_guide': sizeGuide,
       if (blurHash != null) 'blur_hash': blurHash,
+      'is_vto_enabled': isVtoEnabled,
     };
   }
 }

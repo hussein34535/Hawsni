@@ -463,25 +463,27 @@ export default function ProductPage() {
                         </div>
 
                         {/* VTO Banner (Try with AI) */}
-                        <motion.div
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setIsVTOOpen(true)}
-                            className={`mb-8 p-4 rounded-3xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
-                        >
-                            <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl" />
-                            <div className={`flex items-center gap-4 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row text-right'}`}>
-                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/5 border border-purple-50">
-                                    <Flame size={24} className="text-purple-600" />
+                        {product.is_vto_enabled !== false && (
+                            <motion.div
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setIsVTOOpen(true)}
+                                className={`mb-8 p-4 rounded-3xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+                            >
+                                <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl" />
+                                <div className={`flex items-center gap-4 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row text-right'}`}>
+                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/5 border border-purple-50">
+                                        <Flame size={24} className="text-purple-600" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-black text-gray-900 font-cairo text-base">{t.product?.vto_banner || (isRTL ? 'جرب القطعة دي دلوقتي' : 'Try this piece now')}</h4>
+                                        <p className="text-[11px] text-gray-400 font-bold font-cairo">{t.product?.vto_desc || (isRTL ? 'شوف شكلها عليك بالذكاء الاصطناعي' : 'See how it looks on you with AI')}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-black text-gray-900 font-cairo text-base">{t.product?.vto_banner || (isRTL ? 'جرب القطعة دي دلوقتي' : 'Try this piece now')}</h4>
-                                    <p className="text-[11px] text-gray-400 font-bold font-cairo">{t.product?.vto_desc || (isRTL ? 'شوف شكلها عليك بالذكاء الاصطناعي' : 'See how it looks on you with AI')}</p>
+                                <div className={isRTL ? 'rotate-180' : ''}>
+                                    <ChevronRight size={20} className="text-purple-300 group-hover:translate-x-1 transition-transform" />
                                 </div>
-                            </div>
-                            <div className={isRTL ? 'rotate-180' : ''}>
-                                <ChevronRight size={20} className="text-purple-300 group-hover:translate-x-1 transition-transform" />
-                            </div>
-                        </motion.div>
+                            </motion.div>
+                        )}
 
                         <div className="space-y-10">
                             {/* Color Selection */}

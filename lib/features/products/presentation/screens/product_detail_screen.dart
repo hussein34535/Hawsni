@@ -80,6 +80,7 @@ class DisplayData {
   final String? sizeGuide;
   final String? blurHash;
   final int stock;
+  final bool isVtoEnabled;
 
   DisplayData({
     required this.name,
@@ -94,6 +95,7 @@ class DisplayData {
     this.sizeGuide,
     this.blurHash,
     required this.stock,
+    required this.isVtoEnabled,
   });
 }
 
@@ -375,6 +377,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     List<dynamic> colors = widget.colors ?? [];
     String? sizeGuide;
     int stock = 0;
+    bool isVtoEnabled = true;
 
     if (state is ProductDetailsLoaded) {
       name = state.product.name;
@@ -386,6 +389,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       sizes = state.product.sizes ?? [];
       colors = state.product.colors ?? [];
       sizeGuide = state.product.sizeGuide;
+      isVtoEnabled = state.product.isVtoEnabled;
       if ((state.product.images ?? []).isNotEmpty) {
         images = state.product.images!;
         imageUrl = images[0];
@@ -410,7 +414,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         sizes: sizes,
         colors: colors,
         sizeGuide: sizeGuide,
-        stock: stock);
+        stock: stock,
+        isVtoEnabled: isVtoEnabled);
   }
 
   @override
@@ -731,55 +736,57 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           const SizedBox(height: 32),
 
           // Try On Banner
-          GestureDetector(
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => VirtualTryOnScreen(
-                        productImageUrl: data.imageUrl,
-                        productId: widget.productId))),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                    const Color(0xFF9C4AF7).withValues(alpha: 0.1),
-                    const Color(0xFFE94E8F).withValues(alpha: 0.1)
-                  ]),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                      color: const Color(0xFF9C4AF7).withValues(alpha: 0.2))),
-              child: Row(
-                children: [
-                  Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                              colors: [Color(0xFF9C4AF7), Color(0xFFE94E8F)]),
-                          borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.auto_awesome_rounded,
-                          color: Colors.white, size: 18)),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                        Text('جرب هذه القطعة الآن',
-                            style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14)),
-                        Text('شاهد كيف تبدو عليك بالذكاء الاصطناعي',
-                            style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: 12,
-                                color: Colors.black54))
-                      ])),
-                ],
+          if (data.isVtoEnabled) ...[
+            GestureDetector(
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => VirtualTryOnScreen(
+                          productImageUrl: data.imageUrl,
+                          productId: widget.productId))),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                      const Color(0xFF9C4AF7).withValues(alpha: 0.1),
+                      const Color(0xFFE94E8F).withValues(alpha: 0.1)
+                    ]),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                        color: const Color(0xFF9C4AF7).withValues(alpha: 0.2))),
+                child: Row(
+                  children: [
+                    Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                                colors: [Color(0xFF9C4AF7), Color(0xFFE94E8F)]),
+                            borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.auto_awesome_rounded,
+                            color: Colors.white, size: 18)),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                          Text('جرب هذه القطعة الآن',
+                              style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14)),
+                          Text('شاهد كيف تبدو عليك بالذكاء الاصطناعي',
+                              style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 12,
+                                  color: Colors.black54))
+                        ])),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
+          ],
 
           // Colors
           if (data.colors.isNotEmpty) ...[

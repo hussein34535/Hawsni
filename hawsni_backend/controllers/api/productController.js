@@ -112,6 +112,7 @@ class ProductController {
                 category_ids: req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []),
                 stock: parseInt(req.body.stock) || 0,
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
+                is_vto_enabled: req.body.is_vto_enabled === 'on' || req.body.is_vto_enabled === 'true' || req.body.is_vto_enabled === true || (req.body.is_vto_enabled === undefined && true), // fallback for old payloads
                 sizes: sizes,
                 colors: colors,
                 images: imageUrls
@@ -176,6 +177,7 @@ class ProductController {
                 category_ids: categoryIds,
                 stock: parseInt(req.body.stock) || 0,
                 is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
+                is_vto_enabled: req.body.is_vto_enabled === 'on' || req.body.is_vto_enabled === 'true' || req.body.is_vto_enabled === true,
                 sizes: sizes,
                 colors: colors,
                 images: imageUrls

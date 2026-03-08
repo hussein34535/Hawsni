@@ -61,6 +61,10 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isVtoEnabled: {
+    type: Boolean,
+    default: true
+  },
   isActive: {
     type: Boolean,
     default: true
