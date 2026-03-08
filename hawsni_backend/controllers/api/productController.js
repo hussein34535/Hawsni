@@ -238,7 +238,7 @@ class ProductController {
 
     async createProductAdmin(req, res) {
         try {
-            const { name, description, price, discount, category_id, stock, is_featured, sizes, size_guide } = req.body;
+            const { name, description, price, discount, category_id, stock, is_featured, is_vto_enabled, sizes, size_guide } = req.body;
 
             console.log('📦 CreateProductAdmin Called. Files:', req.files ? req.files.length : 'No files');
 
@@ -314,6 +314,7 @@ class ProductController {
                 stock: parseInt(stock) || 0,
                 category_id: categoryIdsToInsert[0] || null, // Sync with main table
                 is_featured: is_featured === 'on',
+                is_vto_enabled: is_vto_enabled === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls,
@@ -370,7 +371,7 @@ class ProductController {
 
     async updateProductAdmin(req, res) {
         try {
-            const { name, description, price, discount, category_id, stock, is_featured, sizes, colors, size_guide } = req.body;
+            const { name, description, price, discount, category_id, stock, is_featured, is_vto_enabled, sizes, colors, size_guide } = req.body;
             console.log('🔄 UpdateProductAdmin Called for ID:', req.params.id);
             console.log('📂 Files received:', req.files ? req.files.length : 'None');
             console.log('📦 Raw Sizes:', req.body.sizes);
@@ -476,6 +477,7 @@ class ProductController {
                 stock: parseInt(stock) || 0,
                 category_id: categoryIdsToInsert[0] || null, // Sync with main table
                 is_featured: is_featured === 'on',
+                is_vto_enabled: is_vto_enabled === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
                 images: imageUrls,
