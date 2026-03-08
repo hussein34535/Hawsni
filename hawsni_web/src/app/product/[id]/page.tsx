@@ -501,7 +501,7 @@ export default function ProductPage() {
                                                     }
                                                 }}
                                                 className={`
-                                                    w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 p-1 border-2 
+                                                    w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 p-[3px] border-2 
                                                     ${selectedColor === c.color
                                                         ? 'border-[var(--color-brand-primary)] scale-110 shadow-lg shadow-[var(--color-brand-primary)]/20'
                                                         : 'border-transparent bg-gray-50 hover:bg-gray-100'}
@@ -546,7 +546,7 @@ export default function ProductPage() {
                                             <button
                                                 key={`${s}-${i}`}
                                                 onClick={() => setSelectedSize(s)}
-                                                className={`min-w-[4rem] h-12 px-4 rounded-[16px] border-2 font-black text-base transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-100'}`}
+                                                className={`min-w-[3.5rem] h-10 px-3 rounded-xl border-2 font-black text-sm transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-100'}`}
                                             >
                                                 {s}
                                             </button>

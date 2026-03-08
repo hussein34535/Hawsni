@@ -1148,8 +1148,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
   Widget _colorRow(List<dynamic> colors) {
     return Wrap(
-      spacing: 16,
-      runSpacing: 16,
+      spacing: 12,
+      runSpacing: 12,
       children: colors.map((cd) {
         String name = '';
         int? linked;
@@ -1190,9 +1190,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: 44,
-            height: 44,
-            padding: EdgeInsets.all(isSel ? 3 : 0),
+            width: 36,
+            height: 36,
+            padding: EdgeInsets.all(isSel ? 2 : 0),
             decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -1212,8 +1212,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
   Widget _sizeRow(List<String> sizes) {
     return Wrap(
-      spacing: 12,
-      runSpacing: 12,
+      spacing: 10,
+      runSpacing: 10,
       children: sizes.map((s) {
         final isSel = _selectedSize == s;
         return GestureDetector(
@@ -1225,7 +1225,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
                 color: isSel ? Colors.black : Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -1237,7 +1237,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     fontFamily: 'Cairo',
                     color: isSel ? Colors.white : Colors.black,
                     fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
-                    fontSize: 14)),
+                    fontSize: 13)),
           ),
         );
       }).toList(),
