@@ -617,7 +617,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                 child: Center(
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.black
                           .withValues(alpha: 0.3), // More transparent
@@ -636,9 +636,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeOutCubic,
                             margin: EdgeInsets.only(
-                                right: i < data.images.length - 1 ? 4 : 0),
-                            width: active ? 16 : 4, // Smaller dots
-                            height: 4,
+                                right: i < data.images.length - 1 ? 3 : 0),
+                            width: active ? 8 : 3, // Smaller dots
+                            height: 3,
                             decoration: BoxDecoration(
                               color: active
                                   ? Colors.white
@@ -647,15 +647,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                             ),
                           );
                         }),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         // Counter text
                         Text(
                           '${_currentImageIndex + 1}/${data.images.length}',
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                           ),
                         ),
