@@ -608,6 +608,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   ]))),
             ),
 
+            // Bottom Gradient for Indicators (Balances Top Gradient)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 120, // Enough height for the dots to sit on
+              child: DecoratedBox(
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                    Colors.black.withValues(alpha: 0.35),
+                    Colors.transparent
+                  ]))),
+            ),
+
             // Premium Image Indicator
             if (data.images.length > 1)
               Positioned(
