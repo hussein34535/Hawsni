@@ -2,12 +2,23 @@ const supabase = require('../config/supabase');
 
 class ReviewService {
     async getProductReviews(productId) {
-        // Single query with join — avoids N+1 lookups
-        const { data, error } = await supabase
+        // Try with optional columns first, fall back to minimal select if they don't exist
+        let data, error;
+
+        ({ data, error } = await supabase
             .from('reviews')
             .select('id, rating, comment, images, custom_name, reviewer_name, created_at, user_id, users(name)')
             .eq('product_id', productId)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false }));
+
+        if (error) {
+            console.warn('Full select failed, retrying minimal:', error.message);
+            ({ data, error } = await supabase
+                .from('reviews')
+                .select('id, rating, comment, created_at, user_id, users(name)')
+                .eq('product_id', productId)
+                .order('created_at', { ascending: false }));
+        }
 
         if (error) {
             console.error('ReviewService.getProductReviews error:', error.message);
@@ -15,7 +26,6 @@ class ReviewService {
         }
 
         const enhancedData = (data || []).map((review) => {
-            // Priority: custom_name (admin) > reviewer_name (saved at insert) > join name > Anonymous
             const joinedName = review.users?.name;
             const userName = review.custom_name ||
                 review.reviewer_name ||
@@ -46,7 +56,12 @@ class ReviewService {
             throw new Error('You already reviewed this product');
         }
 
-        const { data, error } = await supabase
+        // ── Try full insert (with optional columns) ──────────────────────────
+        // If columns like `images` or `reviewer_name` don't exist in Supabase yet,
+        // fall back to a minimal insert so the review is ALWAYS saved.
+        let data, error;
+
+        ({ data, error } = await supabase
             .from('reviews')
             .insert([{
                 user_id: userId,
@@ -54,11 +69,25 @@ class ReviewService {
                 rating,
                 comment,
                 images: images || [],
-                // Store name as safety net in case join ever fails
                 reviewer_name: reviewerName || null,
             }])
             .select()
-            .single();
+            .single());
+
+        if (error) {
+            console.warn('Full insert failed, retrying without optional columns:', error.message);
+            // Fallback: only the columns guaranteed to exist
+            ({ data, error } = await supabase
+                .from('reviews')
+                .insert([{
+                    user_id: userId,
+                    product_id: productId,
+                    rating,
+                    comment,
+                }])
+                .select()
+                .single());
+        }
 
         if (error) throw new Error(error.message);
 
