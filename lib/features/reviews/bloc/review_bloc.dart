@@ -26,7 +26,8 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   Future<void> _onAddReview(AddReview event, Emitter<ReviewState> emit) async {
     try {
       await _reviewService.createReview(
-          event.productId, event.rating, event.comment);
+          event.productId, event.rating, event.comment,
+          images: event.images);
       add(LoadReviews(event.productId));
     } catch (e) {
       emit(ReviewError(e.toString()));

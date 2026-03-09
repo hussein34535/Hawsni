@@ -5,7 +5,7 @@ class ReviewService {
         // Get reviews without join first
         const { data, error } = await supabase
             .from('reviews')
-            .select('id, rating, comment, created_at, user_id')
+            .select('id, rating, comment, images, created_at, user_id')
             .eq('product_id', productId)
             .order('created_at', { ascending: false });
 
@@ -29,15 +29,16 @@ class ReviewService {
             }
             return {
                 ...review,
-                _id: review.id, // Map review ID to _id
-                user: { name: userName, _id: review.user_id } // Map user ID to _id
+                _id: review.id,
+                images: review.images || [],
+                user: { name: userName, _id: review.user_id }
             };
         }));
 
         return enhancedData;
     }
 
-    async createReview(userId, productId, rating, comment) {
+    async createReview(userId, productId, rating, comment, images = []) {
         // Check if already reviewed
         const { data: existing } = await supabase
             .from('reviews')
@@ -56,7 +57,8 @@ class ReviewService {
                 user_id: userId,
                 product_id: productId,
                 rating,
-                comment
+                comment,
+                images: images || []
             }])
             .select()
             .single();

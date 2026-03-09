@@ -10,6 +10,7 @@ export interface Review {
     };
     rating: number;
     comment: string;
+    images?: string[];
     createdAt: string;
 }
 
@@ -24,9 +25,9 @@ export const reviewService = {
         }
     },
 
-    createReview: async (productId: string, rating: number, comment: string): Promise<{ success: boolean; review?: Review; message?: string }> => {
+    createReview: async (productId: string, rating: number, comment: string, images: string[] = []): Promise<{ success: boolean; review?: Review; message?: string }> => {
         try {
-            const response = await apiClient.post('/reviews', { productId, rating, comment });
+            const response = await apiClient.post('/reviews', { productId, rating, comment, images });
             return response.data;
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to submit review';

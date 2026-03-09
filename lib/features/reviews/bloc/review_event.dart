@@ -21,15 +21,17 @@ class AddReview extends ReviewEvent {
   final String productId;
   final double rating;
   final String comment;
+  final List<String> images;
 
   const AddReview({
     required this.productId,
     required this.rating,
     required this.comment,
+    this.images = const [],
   });
 
   @override
-  List<Object> get props => [productId, rating, comment];
+  List<Object> get props => [productId, rating, comment, images];
 }
 
 class DeleteReview extends ReviewEvent {

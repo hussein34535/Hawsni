@@ -15,7 +15,8 @@ class ReviewService {
   }
 
   Future<ReviewModel> createReview(
-      String productId, double rating, String comment) async {
+      String productId, double rating, String comment,
+      {List<String> images = const []}) async {
     try {
       final data = await ApiService.post(
         '/reviews',
@@ -23,6 +24,7 @@ class ReviewService {
           'productId': productId,
           'rating': rating,
           'comment': comment,
+          'images': images,
         },
       );
       return ReviewModel.fromJson(data['review']);
