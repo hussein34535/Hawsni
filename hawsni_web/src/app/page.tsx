@@ -26,15 +26,17 @@ export default function HomePage() {
   const { t, language, isRTL } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catData, prodData, bannerData] = await Promise.allSettled([
+        const [catData, prodData, featData, bannerData] = await Promise.allSettled([
           categoryService.getCategories(),
           productService.getProducts(),
+          productService.getFeaturedProducts(),
           apiClient.get('/banners')
         ]);
 
@@ -43,6 +45,9 @@ export default function HomePage() {
         }
         if (prodData.status === 'fulfilled') {
           setProducts(prodData.value?.products || []);
+        }
+        if (featData.status === 'fulfilled') {
+          setFeaturedProducts(featData.value?.products || []);
         }
         if (bannerData.status === 'fulfilled') {
           const bd = bannerData.value?.data;
@@ -87,9 +92,26 @@ export default function HomePage() {
         {/* Categories */}
         <CategoryList categories={categories} isLoading={isLoading} />
 
+        {/* Featured Products */}
+        {(!isLoading && featuredProducts.length > 0) && (
+          <section className="pt-8 pb-4">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-black text-gray-900 tracking-tight">{isRTL ? 'المنتجات المميزة' : 'Featured Products'}</h2>
+              <button className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">{t.common.view_all}</button>
+            </div>
+            {/* Horizontal Scroll for Featured */}
+            <div className={`flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+              {featuredProducts.map((product) => (
+                <div key={product._id || (product as any).id} className="min-w-[160px] max-w-[160px] sm:min-w-[200px] sm:max-w-[200px] snap-start flex-shrink-0">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Products Grid */}
-        <section className="pt-4 pb-[100px]">
+        {/* Products Grid (New Arrivals) */}
+        <section className="pt-8 pb-[100px]">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-black text-gray-900 tracking-tight">{t.home.new_arrivals}</h2>
             <button className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">{t.common.view_all}</button>

@@ -44,7 +44,17 @@ const formatImageUrl = (url: string) => {
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 };
 
-
+const getThumbnailUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.includes('cloudinary.com')) {
+        // Insert Cloudinary transformations: fill 100x100, auto quality, auto format
+        const parts = url.split('/upload/');
+        if (parts.length === 2) {
+            return `${parts[0]}/upload/c_fill,w_100,h_100,q_auto,f_auto/${parts[1]}`;
+        }
+    }
+    return url;
+};
 
 const parseColors = (colors: any[] | undefined) => {
     if (!colors) return [];
@@ -449,11 +459,13 @@ export default function ProductPage() {
                                     <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
                                     <div className={`flex flex-wrap gap-2 pb-4 pt-2 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                                         {parseColors(product.colors).map((c, i) => {
-                                            const thumbImage = c.image
+                                            const rawImage = c.image
                                                 ? formatImageUrl(c.image)
                                                 : (c.imageIndex !== undefined && product.images?.[c.imageIndex]
                                                     ? formatImageUrl(product.images[c.imageIndex])
                                                     : null);
+
+                                            const thumbImage = getThumbnailUrl(rawImage);
 
                                             return (
                                                 <button
