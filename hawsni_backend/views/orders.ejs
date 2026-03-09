@@ -284,9 +284,8 @@
             </div>
         </div>
     </div>
-
-    <div id="orders-data-store" data-orders='<%- JSON.stringify(orders).replace(/' /g, "&#39;" ) %>'></div>
-
+    <div id="orders-data-store" data-orders='<%- JSON.stringify(orders).replace(/&#39;/g, "&#39;").replace(/'
+        /g, "&#39;" ) %>'></div>
     <script>
         const ordersData = JSON.parse(document.getElementById('orders-data-store').dataset.orders);
         const sMap = {
