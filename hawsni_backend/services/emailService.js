@@ -248,7 +248,7 @@ const STATUS_CONFIG = {
         message: 'طلبك اتشحن وفي الطريق! المندوب هيتواصل معاك قريب.',
         step: 2
     },
-    'Out for Delivery': {
+    'In Transit': {
         ar: 'المندوب في طريقه إليك!',
         emoji: '🏍️',
         color: '#f59e0b',
@@ -330,12 +330,14 @@ async function sendOrderStatusEmail(toEmail, userName, orderId, status) {
                 </div>
                 ` : ''}
 
+                ${(status === 'Shipped' || status === 'In Transit') ? `
                 <!-- Track Button -->
                 <div style="text-align: center; margin: 25px 0;">
                     <a href="https://hwasi.com/track-order?id=${orderId}" style="background: ${config.color}; color: #ffffff; padding: 14px 35px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 14px; display: inline-block; box-shadow: 0 4px 15px ${config.color}40;">
                         📍 تتبع طلبك
                     </a>
                 </div>
+                ` : ''}
 
                 ${status === 'Delivered' ? `
                 <div style="background: #fef9ef; border: 1px solid #fde68a; border-radius: 16px; padding: 20px; text-align: center; margin-top: 20px;">

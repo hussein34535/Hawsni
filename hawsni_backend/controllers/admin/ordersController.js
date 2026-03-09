@@ -1,4 +1,5 @@
 const supabase = require('../../config/supabase');
+const emailService = require('../../services/emailService');
 
 class OrdersController {
     // List all orders
@@ -72,10 +73,39 @@ class OrdersController {
                 .from('orders')
                 .update({ status })
                 .eq('id', id)
-                .select()
+                .select('*, users(name, email)')
                 .single();
 
             if (error) throw error;
+
+            // Send email notification silently
+            try {
+                let customerEmail = data.users?.email;
+                let customerName = data.users?.name;
+
+                // Fallback to shipping_address if guest
+                if (!customerEmail || !customerName) {
+                    let ship = data.shipping_address;
+                    if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                        try { ship = JSON.parse(ship); } catch (e) { }
+                    }
+                    if (typeof ship === 'object' && ship !== null) {
+                        customerEmail = ship.email || ship.guestEmail || customerEmail;
+                        customerName = ship.name || ship.guestName || customerName;
+                    }
+                }
+
+                if (customerEmail) {
+                    emailService.sendOrderStatusEmail(
+                        customerEmail,
+                        customerName || 'عميلنا العزيز',
+                        data.id,
+                        status
+                    ).catch(err => console.error('Failed to send status email:', err));
+                }
+            } catch (emailErr) {
+                console.error('Error preparing status email:', emailErr);
+            }
 
             res.redirect('/orders');
         } catch (err) {
@@ -95,12 +125,45 @@ class OrdersController {
                 return res.status(400).json({ success: false, message: 'الحالة مطلوبة' });
             }
 
-            const { error } = await supabase
+            const { data, error } = await supabase
                 .from('orders')
                 .update({ status })
-                .in('id', ids);
+                .in('id', ids)
+                .select('*, users(name, email)');
 
             if (error) throw error;
+
+            // Send emails for bulk updates silently
+            if (data && data.length > 0) {
+                data.forEach(order => {
+                    try {
+                        let customerEmail = order.users?.email;
+                        let customerName = order.users?.name;
+
+                        if (!customerEmail || !customerName) {
+                            let ship = order.shipping_address;
+                            if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                                try { ship = JSON.parse(ship); } catch (e) { }
+                            }
+                            if (typeof ship === 'object' && ship !== null) {
+                                customerEmail = ship.email || ship.guestEmail || customerEmail;
+                                customerName = ship.name || ship.guestName || customerName;
+                            }
+                        }
+
+                        if (customerEmail) {
+                            emailService.sendOrderStatusEmail(
+                                customerEmail,
+                                customerName || 'عميلنا العزيز',
+                                order.id,
+                                status
+                            ).catch(err => console.error(`Failed to send status email for order ${order.id}:`, err));
+                        }
+                    } catch (emailErr) {
+                        console.error(`Error preparing status email for order ${order.id}:`, emailErr);
+                    }
+                });
+            }
 
             res.json({ success: true, message: `تم تحديث ${ids.length} طلب` });
         } catch (err) {
