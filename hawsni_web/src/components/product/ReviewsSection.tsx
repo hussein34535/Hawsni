@@ -288,11 +288,11 @@ export default function ReviewsSection({ productId }: { productId: string }) {
 
                                     {/* Review images */}
                                     {review.images && review.images.length > 0 && (
-                                        <div className="flex gap-2 mt-3 flex-wrap">
+                                        <div className="flex gap-3 mt-4 flex-wrap">
                                             {review.images.map((img: string, i: number) => (
                                                 <img key={i} src={img} alt=""
                                                     onClick={() => setLightbox(img)}
-                                                    className="w-20 h-20 rounded-xl object-cover cursor-pointer hover:opacity-90 transition-opacity border border-gray-100"
+                                                    className="w-[100px] h-[130px] sm:w-[120px] sm:h-[150px] rounded-2xl object-cover cursor-pointer hover:opacity-90 hover:scale-[1.02] shadow-md transition-all border border-gray-100"
                                                 />
                                             ))}
                                         </div>
