@@ -4,7 +4,6 @@ import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
 import 'package:hwasi_app/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
 
@@ -25,7 +24,6 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  String _completePhoneNumber = '';
 
   Future<void> _signup() async {
     final l10n = AppLocalizations.of(context)!;
@@ -40,9 +38,7 @@ class _SignupScreenState extends State<SignupScreen> {
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
-        _completePhoneNumber.isNotEmpty
-            ? _completePhoneNumber
-            : _phoneController.text.trim(),
+        _phoneController.text.trim(),
       );
 
       if (result != null) {
@@ -52,9 +48,7 @@ class _SignupScreenState extends State<SignupScreen> {
               MaterialPageRoute(
                 builder: (context) => OtpVerificationScreen(
                   email: _emailController.text.trim(),
-                  phone: _completePhoneNumber.isNotEmpty
-                      ? _completePhoneNumber
-                      : _phoneController.text.trim(),
+                  phone: _phoneController.text.trim(),
                 ),
               ),
             );
@@ -194,57 +188,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: IntlPhoneField(
-                    controller: _phoneController,
-                    decoration: InputDecoration(
-                      labelText: l10n.phone,
-                      labelStyle:
-                          const TextStyle(color: AppTheme.textSecondary),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                            color: AppTheme.primaryColor, width: 1),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 16),
-                      errorStyle: const TextStyle(color: AppTheme.errorColor),
-                      counterText: '',
-                    ),
-                    style: const TextStyle(color: AppTheme.textPrimary),
-                    dropdownTextStyle:
-                        const TextStyle(color: AppTheme.textPrimary),
-                    dropdownIcon: const Icon(Icons.arrow_drop_down,
-                        color: AppTheme.textTertiary),
-                    initialCountryCode: 'EG', // Default to Egypt
-                    invalidNumberMessage:
-                        'رقم الهاتف غير صحيح، يرجى التأكد منه',
-                    onChanged: (phone) {
-                      _completePhoneNumber = phone.completeNumber;
-                    },
-                    onCountryChanged: (country) {
-                      // Handle country change
-                    },
-                  ),
+                _buildTextField(
+                  controller: _phoneController,
+                  label: l10n.phone,
+                  icon: Icons.phone_android_outlined,
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return l10n.requiredField;
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
