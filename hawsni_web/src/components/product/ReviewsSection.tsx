@@ -278,7 +278,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                         </div>
                                     </div>
                                     <span className="text-[10px] text-gray-400 font-bold font-cairo mb-3 block opacity-60">
-                                        {new Date(review.createdAt).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
+                                        {new Date(review.created_at || review.createdAt || '').toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
                                             year: 'numeric', month: 'long', day: 'numeric'
                                         })}
                                     </span>

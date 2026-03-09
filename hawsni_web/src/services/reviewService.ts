@@ -11,7 +11,8 @@ export interface Review {
     rating: number;
     comment: string;
     images?: string[];
-    createdAt: string;
+    created_at?: string;  // Supabase returns snake_case
+    createdAt?: string;   // kept for compatibility
 }
 
 export const reviewService = {
