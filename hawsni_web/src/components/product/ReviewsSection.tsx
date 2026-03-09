@@ -7,7 +7,7 @@ import { reviewService, Review } from '@/services/reviewService';
 import { useLanguage } from '@/context/LanguageContext';
 import apiClient from '@/lib/axios';
 
-const CLOUD_NAME = 'dqczqsvpj';
+const CLOUD_NAME = 'djxkwged9';
 const UPLOAD_PRESET = 'hawsni_reviews';
 
 async function uploadToCloudinary(file: File): Promise<string> {
