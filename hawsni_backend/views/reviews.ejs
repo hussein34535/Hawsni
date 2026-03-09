@@ -1,0 +1,174 @@
+<%- include('partials/header', { title: 'إدارة التقييمات' , pageTitle: 'إدارة التقييمات' , page: 'reviews' }) %>
+
+    <% if (locals.success) { %>
+        <div
+            style="background:#d1fae5; border:1px solid #6ee7b7; color:#065f46; padding:12px 20px; border-radius:12px; margin-bottom:20px; font-weight:bold;">
+            ✅ تم إضافة التقييم بنجاح!
+        </div>
+        <% } %>
+            <% if (locals.error) { %>
+                <div
+                    style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:12px 20px; border-radius:12px; margin-bottom:20px; font-weight:bold;">
+                    ❌ خطأ: <%= error %>
+                </div>
+                <% } %>
+
+                    <div style="display:grid; grid-template-columns:1fr 1.5fr; gap:24px; align-items:start;">
+
+                        <!-- ── Add Review Form ── -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title"><i class="fas fa-star" style="color:#F59E0B;"></i> إضافة تقييم
+                                    جديد</h2>
+                            </div>
+                            <div style="padding:1.5rem;">
+                                <form method="POST" action="/reviews">
+
+                                    <div class="form-group">
+                                        <label class="form-label">المنتج</label>
+                                        <select name="product_id" class="form-control" required>
+                                            <option value="">— اختر منتج —</option>
+                                            <% products.forEach(p=> { %>
+                                                <option value="<%= p.id %>">
+                                                    <%= p.name %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">اسم المراجع (مخصص)</label>
+                                        <input type="text" name="custom_name" class="form-control" required
+                                            placeholder="مثال: أحمد محمد">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">التقييم</label>
+                                        <div id="starPicker"
+                                            style="display:flex; gap:8px; font-size:2rem; cursor:pointer; margin-bottom:4px;">
+                                            <% [1,2,3,4,5].forEach(s=> { %>
+                                                <span class="star-btn" data-val="<%= s %>"
+                                                    style="color:#D1D5DB; transition:color .15s;">★</span>
+                                                <% }) %>
+                                        </div>
+                                        <input type="hidden" name="rating" id="ratingInput" required value="0">
+                                        <small style="color:#9CA3AF;">اضغط على نجمة لاختيار التقييم</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">التعليق</label>
+                                        <textarea name="comment" class="form-control" rows="4" required
+                                            placeholder="اكتب التعليق هنا..."></textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary" style="width:100%;">
+                                        <i class="fas fa-paper-plane"></i> إرسال التقييم
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- ── Reviews Table ── -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title"><i class="fas fa-list"></i> آخر التقييمات (<%= reviews.length %>)
+                                </h2>
+                            </div>
+                            <div style="overflow-x:auto; max-height:70vh; overflow-y:auto;">
+                                <table class="table" style="font-size:0.9rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>المنتج</th>
+                                            <th>الاسم</th>
+                                            <th>التقييم</th>
+                                            <th>التعليق</th>
+                                            <th>التاريخ</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (reviews.length===0) { %>
+                                            <tr>
+                                                <td colspan="6" style="text-align:center; color:#9CA3AF; padding:2rem;">
+                                                    لا توجد تقييمات بعد</td>
+                                            </tr>
+                                            <% } else { %>
+                                                <% reviews.forEach(r=> { %>
+                                                    <tr>
+                                                        <td
+                                                            style="font-weight:bold; max-width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                                            <%= r.productName %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (r.custom_name) { %>
+                                                                <span
+                                                                    style="background:#EDE9FE; color:#7C3AED; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">
+                                                                    ✍️ <%= r.custom_name %>
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span style="color:#6B7280;">عميل</span>
+                                                                    <% } %>
+                                                        </td>
+                                                        <td
+                                                            style="color:#F59E0B; font-size:1.1rem; white-space:nowrap;">
+                                                            <% for(let i=0;i<r.rating;i++){%>★<% } %>
+                                                                    <% for(let i=r.rating;i<5;i++){%><span
+                                                                            style="color:#D1D5DB;">★</span>
+                                                                        <% } %>
+                                                        </td>
+                                                        <td style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                                                            title="<%= r.comment %>">
+                                                            <%= r.comment %>
+                                                        </td>
+                                                        <td
+                                                            style="color:#9CA3AF; font-size:0.8rem; white-space:nowrap;">
+                                                            <%= new Date(r.created_at).toLocaleDateString('ar-EG') %>
+                                                        </td>
+                                                        <td>
+                                                            <button onclick="deleteReview('<%= r.id %>')"
+                                                                style="background:none; border:none; color:#EF4444; cursor:pointer; padding:4px;"
+                                                                title="حذف">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                        // ── Star Picker ──────────────────────────────────────────────────────────────
+                        const stars = document.querySelectorAll('.star-btn');
+                        const ratingInput = document.getElementById('ratingInput');
+
+                        stars.forEach(star => {
+                            star.addEventListener('mouseover', () => highlight(star.dataset.val));
+                            star.addEventListener('mouseout', () => highlight(ratingInput.value || 0));
+                            star.addEventListener('click', () => {
+                                ratingInput.value = star.dataset.val;
+                                highlight(star.dataset.val);
+                            });
+                        });
+
+                        function highlight(val) {
+                            stars.forEach(s => {
+                                s.style.color = parseInt(s.dataset.val) <= parseInt(val) ? '#F59E0B' : '#D1D5DB';
+                            });
+                        }
+
+                        // ── Delete Review ─────────────────────────────────────────────────────────────
+                        async function deleteReview(id) {
+                            if (!confirm('هل أنت متأكد من حذف هذا التقييم؟')) return;
+                            const res = await fetch(`/reviews/${id}`, { method: 'DELETE' });
+                            const data = await res.json();
+                            if (data.success) location.reload();
+                            else alert('فشل الحذف: ' + data.message);
+                        }
+                    </script>
+
+                    <%- include('partials/footer') %>

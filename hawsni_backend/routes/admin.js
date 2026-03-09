@@ -14,6 +14,7 @@ const ProductController = require('../controllers/api/productController');
 const shippingController = require('../controllers/admin/shippingController');
 const settingsController = require('../controllers/admin/settingsController');
 const adminAuthController = require('../controllers/admin/adminAuthController');
+const adminReviewsController = require('../controllers/admin/reviewsController');
 const { adminProtect } = require('../middleware/adminAuth');
 
 // Auth Routes (Public for Admin)
@@ -78,5 +79,10 @@ router.post('/shipping', shippingController.update);
 // General Settings Routes
 router.get('/settings', settingsController.index);
 router.post('/settings', settingsController.update);
+
+// Reviews Management Routes
+router.get('/reviews', adminReviewsController.index);
+router.post('/reviews', adminReviewsController.create);
+router.delete('/reviews/:id', adminReviewsController.delete);
 
 module.exports = router;

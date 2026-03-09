@@ -5,7 +5,7 @@ class ReviewService {
         // Get reviews without join first
         const { data, error } = await supabase
             .from('reviews')
-            .select('id, rating, comment, images, created_at, user_id')
+            .select('id, rating, comment, images, custom_name, created_at, user_id')
             .eq('product_id', productId)
             .order('created_at', { ascending: false });
 
@@ -17,16 +17,19 @@ class ReviewService {
         // Get user names for each review
         const enhancedData = await Promise.all(data.map(async (review) => {
             let userName = 'Anonymous';
-            if (review.user_id) {
+
+            // Admin-created reviews have a custom_name instead of a user_id
+            if (review.custom_name) {
+                userName = review.custom_name;
+            } else if (review.user_id) {
                 const { data: userData } = await supabase
                     .from('users')
                     .select('name')
                     .eq('id', review.user_id)
                     .single();
-                if (userData) {
-                    userName = userData.name || 'Anonymous';
-                }
+                if (userData) userName = userData.name || 'Anonymous';
             }
+
             return {
                 ...review,
                 _id: review.id,
