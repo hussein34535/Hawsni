@@ -43,6 +43,11 @@ class AdminReviewController {
     async create(req, res) {
         try {
             const { product_id, custom_name, rating, comment } = req.body;
+            // images[] comes as an array from hidden inputs injected by the JS uploader
+            const rawImages = req.body['images[]'];
+            const images = rawImages
+                ? (Array.isArray(rawImages) ? rawImages : [rawImages])
+                : [];
 
             if (!product_id || !custom_name || !rating || !comment) {
                 return res.redirect('/reviews?error=يرجى+ملء+جميع+الحقول');
@@ -55,8 +60,7 @@ class AdminReviewController {
                     custom_name: custom_name.trim(),
                     rating: parseFloat(rating),
                     comment: comment.trim(),
-                    images: [],
-                    // No user_id for manual reviews
+                    images,
                 }]);
 
             if (error) throw new Error(error.message);

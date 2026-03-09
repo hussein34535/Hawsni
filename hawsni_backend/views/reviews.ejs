@@ -61,7 +61,36 @@
                                             placeholder="اكتب التعليق هنا..."></textarea>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary" style="width:100%;">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-images" style="color:#6366F1;"></i>
+                                            الصور (اختياري - حتى 4 صور)
+                                        </label>
+
+                                        <!-- Image preview grid -->
+                                        <div id="imgPreviews"
+                                            style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; min-height:0;">
+                                        </div>
+
+                                        <!-- Pick button -->
+                                        <button type="button" id="pickImgBtn"
+                                            style="display:flex; align-items:center; gap:8px; padding:8px 16px; border:2px dashed #C7D2FE; border-radius:12px; background:#F5F3FF; color:#6366F1; font-weight:bold; cursor:pointer; font-size:0.85rem;"
+                                            onclick="document.getElementById('imgFileInput').click()">
+                                            <i class="fas fa-cloud-upload-alt"></i> اختر صور
+                                        </button>
+                                        <input type="file" id="imgFileInput" accept="image/*" multiple hidden>
+
+                                        <!-- Upload progress -->
+                                        <div id="uploadStatus"
+                                            style="display:none; margin-top:8px; color:#6366F1; font-size:0.82rem; font-weight:bold;">
+                                            <i class="fas fa-spinner fa-spin"></i> جاري رفع الصور...
+                                        </div>
+
+                                        <!-- Hidden inputs will be injected here by JS -->
+                                        <div id="hiddenImgInputs"></div>
+                                    </div>
+
+                                    <button type="submit" id="submitBtn" class="btn btn-primary" style="width:100%;">
                                         <i class="fas fa-paper-plane"></i> إرسال التقييم
                                     </button>
                                 </form>
@@ -142,7 +171,87 @@
                     </div>
 
                     <script>
-                        // ── Star Picker ──────────────────────────────────────────────────────────────
+                        // ── Cloudinary Config ─────────────────────────────────────────────────────────
+                        const CLOUD_NAME = 'dqczqsvpj';
+                        const UPLOAD_PRESET = 'hawsni_reviews';
+
+                        let selectedFiles = [];
+
+                        const fileInput = document.getElementById('imgFileInput');
+                        const previews = document.getElementById('imgPreviews');
+                        const hiddenDiv = document.getElementById('hiddenImgInputs');
+                        const statusDiv = document.getElementById('uploadStatus');
+                        const submitBtn = document.getElementById('submitBtn');
+                        const reviewForm = submitBtn.closest('form');
+
+                        fileInput.addEventListener('change', () => {
+                            const newFiles = Array.from(fileInput.files);
+                            const remaining = 4 - selectedFiles.length;
+                            selectedFiles = [...selectedFiles, ...newFiles.slice(0, remaining)].slice(0, 4);
+                            fileInput.value = '';
+                            renderPreviews();
+                        });
+
+                        function renderPreviews() {
+                            previews.innerHTML = '';
+                            selectedFiles.forEach((file, i) => {
+                                const reader = new FileReader();
+                                reader.onload = e => {
+                                    const wrap = document.createElement('div');
+                                    wrap.style.cssText = 'position:relative; width:72px; height:72px;';
+                                    wrap.innerHTML = `
+                                        <img src="${e.target.result}" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid #E5E7EB;">
+                                        <button type="button" onclick="removeFile(${i})"
+                                            style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#EF4444;border:none;border-radius:50%;color:white;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+                                    `;
+                                    previews.appendChild(wrap);
+                                };
+                                reader.readAsDataURL(file);
+                            });
+                        }
+
+                        function removeFile(idx) {
+                            selectedFiles.splice(idx, 1);
+                            renderPreviews();
+                        }
+
+                        async function uploadSingle(file) {
+                            const fd = new FormData();
+                            fd.append('file', file);
+                            fd.append('upload_preset', UPLOAD_PRESET);
+                            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                                method: 'POST', body: fd
+                            });
+                            const data = await res.json();
+                            if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed');
+                            return data.secure_url;
+                        }
+
+                        reviewForm.addEventListener('submit', async function (e) {
+                            if (selectedFiles.length === 0) return; // no images → submit normally
+                            e.preventDefault();
+
+                            submitBtn.disabled = true;
+                            statusDiv.style.display = 'block';
+
+                            try {
+                                const urls = await Promise.all(selectedFiles.map(uploadSingle));
+                                hiddenDiv.innerHTML = '';
+                                urls.forEach(url => {
+                                    const inp = document.createElement('input');
+                                    inp.type = 'hidden';
+                                    inp.name = 'images[]';
+                                    inp.value = url;
+                                    hiddenDiv.appendChild(inp);
+                                });
+                                reviewForm.submit();
+                            } catch (err) {
+                                statusDiv.innerHTML = `<span style="color:#EF4444;">❌ فشل الرفع: ${err.message}</span>`;
+                                submitBtn.disabled = false;
+                            }
+                        });
+
+                        // ── Star Picker ───────────────────────────────────────────────────────────────
                         const stars = document.querySelectorAll('.star-btn');
                         const ratingInput = document.getElementById('ratingInput');
 
