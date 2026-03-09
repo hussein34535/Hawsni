@@ -2,12 +2,12 @@ const supabase = require('../config/supabase');
 
 class ReviewService {
     async getProductReviews(productId) {
-        // Try with optional columns first, fall back to minimal select if they don't exist
+        // Step 1: Fetch reviews (try with optional columns, fall back if missing)
         let data, error;
 
         ({ data, error } = await supabase
             .from('reviews')
-            .select('id, rating, comment, images, custom_name, reviewer_name, created_at, user_id, users(name)')
+            .select('id, rating, comment, images, custom_name, reviewer_name, created_at, user_id')
             .eq('product_id', productId)
             .order('created_at', { ascending: false }));
 
@@ -15,21 +15,32 @@ class ReviewService {
             console.warn('Full select failed, retrying minimal:', error.message);
             ({ data, error } = await supabase
                 .from('reviews')
-                .select('id, rating, comment, created_at, user_id, users(name)')
+                .select('id, rating, comment, created_at, user_id')
                 .eq('product_id', productId)
                 .order('created_at', { ascending: false }));
         }
 
-        if (error) {
-            console.error('ReviewService.getProductReviews error:', error.message);
-            throw new Error(error.message);
+        if (error) throw new Error(error.message);
+        if (!data || data.length === 0) return [];
+
+        // Step 2: Batch fetch user names in ONE query (not N+1)
+        const userIds = [...new Set(data.map(r => r.user_id).filter(Boolean))];
+        let userMap = {};
+
+        if (userIds.length > 0) {
+            const { data: users } = await supabase
+                .from('users')
+                .select('id, name')
+                .in('id', userIds);
+
+            (users || []).forEach(u => { userMap[u.id] = u.name; });
         }
 
-        const enhancedData = (data || []).map((review) => {
-            const joinedName = review.users?.name;
+        // Step 3: Map each review with resolved name
+        return data.map((review) => {
             const userName = review.custom_name ||
                 review.reviewer_name ||
-                joinedName ||
+                userMap[review.user_id] ||
                 'Anonymous';
 
             return {
@@ -39,8 +50,6 @@ class ReviewService {
                 user: { name: userName, _id: review.user_id }
             };
         });
-
-        return enhancedData;
     }
 
     async createReview(userId, productId, rating, comment, images = [], reviewerName = '') {
