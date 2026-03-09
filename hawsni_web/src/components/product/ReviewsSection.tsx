@@ -156,7 +156,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     );
 
     return (
-        <section className="mt-8 pb-28 sm:pb-32">
+        <section className="mt-8">
             {/* Lightbox */}
             <AnimatePresence>
                 {lightbox && (
@@ -194,7 +194,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                 </div>
             </div>
 
-            <div className="mt-16 sm:mt-24 border-t border-gray-100 pt-16" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className="mt-8 sm:mt-12 border-t border-gray-100 pt-8" dir={isRTL ? 'rtl' : 'ltr'}>
                 {/* Header & Stats... */}
 
                 {/* Review Form */}
@@ -269,7 +269,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                 )}
 
                 {!loggedIn && (
-                    <div className="mb-10 p-6 bg-gray-900 text-white rounded-[24px] flex items-center justify-between gap-4">
+                    <div className="mb-6 p-6 bg-gray-900 text-white rounded-[24px] flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
                                 <User size={20} className="text-white" />
@@ -308,18 +308,6 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                     transition={{ delay: idx * 0.05 }}
                                     className="bg-white border border-gray-50 p-6 rounded-[24px] shadow-sm relative overflow-hidden">
 
-                                    {isOwner && !isEditing && (
-                                        <div className="absolute top-4 ltr:right-4 rtl:left-4 flex gap-2 z-10" dir={isRTL ? 'rtl' : 'ltr'}>
-                                            <button onClick={() => startEdit(review)} className="text-gray-400 hover:text-blue-500 transition-colors text-xs font-cairo font-bold bg-white/50 px-2 rounded-md backdrop-blur-sm">
-                                                {isRTL ? 'تعديل' : 'Edit'}
-                                            </button>
-                                            <span className="text-gray-200">|</span>
-                                            <button onClick={() => handleDelete(review._id)} className="text-gray-400 hover:text-red-500 transition-colors text-xs font-cairo font-bold bg-white/50 px-2 rounded-md backdrop-blur-sm">
-                                                {isRTL ? 'حذف' : 'Delete'}
-                                            </button>
-                                        </div>
-                                    )}
-
                                     {isEditing ? (
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2 text-amber-400 mb-2">
@@ -356,7 +344,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                 )}
                                             </div>
                                             <div className="flex-1 mt-1">
-                                                <div className="flex items-center justify-between mb-1.5 ltr:pr-16 ltr:sm:pr-20 rtl:pl-16 rtl:sm:pl-20">
+                                                <div className="flex items-center justify-between mb-1.5">
                                                     <h4 className="font-black text-gray-900 font-cairo text-sm">{review.user?.name || 'Anonymous'}</h4>
                                                     <div className="flex gap-0.5 text-amber-400">
                                                         {[...Array(5)].map((_, i) => (
@@ -364,11 +352,23 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                         ))}
                                                     </div>
                                                 </div>
-                                                <span className="text-[10px] text-gray-400 font-bold font-cairo mb-3 block opacity-60">
-                                                    {new Date(review.created_at || review.createdAt || '').toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
-                                                        year: 'numeric', month: 'long', day: 'numeric'
-                                                    })}
-                                                </span>
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <span className="text-[10px] text-gray-400 font-bold font-cairo opacity-60">
+                                                        {new Date(review.created_at || review.createdAt || '').toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
+                                                            year: 'numeric', month: 'long', day: 'numeric'
+                                                        })}
+                                                    </span>
+                                                    {isOwner && !isEditing && (
+                                                        <div className="flex items-center gap-2">
+                                                            <button onClick={() => startEdit(review)} className="text-gray-400 hover:text-blue-500 transition-colors text-[10px] font-cairo font-bold bg-gray-50 px-2 py-0.5 rounded border border-gray-100 hover:bg-white hover:shadow-sm">
+                                                                {isRTL ? 'تعديل' : 'Edit'}
+                                                            </button>
+                                                            <button onClick={() => handleDelete(review._id)} className="text-gray-400 hover:text-red-500 transition-colors text-[10px] font-cairo font-bold bg-gray-50 px-2 py-0.5 rounded border border-gray-100 hover:bg-white hover:shadow-sm">
+                                                                {isRTL ? 'حذف' : 'Delete'}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 {review.comment && (
                                                     <p className="text-[13px] text-gray-600 leading-relaxed font-bold font-cairo break-words whitespace-pre-line">
                                                         {review.comment}
