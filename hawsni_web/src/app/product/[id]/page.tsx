@@ -44,54 +44,7 @@ const formatImageUrl = (url: string) => {
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 };
 
-const COLOR_MAP: Record<string, string> = {
-    // English
-    'red': '#FF0000',
-    'blue': '#0000FF',
-    'green': '#008000',
-    'black': '#000000',
-    'white': '#FFFFFF',
-    'grey': '#808080',
-    'gray': '#808080',
-    'yellow': '#FFFF00',
-    'orange': '#FFA500',
-    'purple': '#800080',
-    'pink': '#FFC0CB',
-    'brown': '#A52A2A',
-    'teal': '#008080',
-    'navy': '#000080',
-    'maroon': '#800000',
-    'beige': '#F5F5DC',
-    // Arabic
-    'أحمر': '#FF0000',
-    'أزرق': '#0000FF',
-    'أخضر': '#008000',
-    'أسود': '#000000',
-    'أبيض': '#FFFFFF',
-    'رمادي': '#808080',
-    'أصفر': '#FFFF00',
-    'برتقالي': '#FFA500',
-    'بنفسجي': '#800080',
-    'وردي': '#FFC0CB',
-    'بني': '#A52A2A',
-    'تركواز': '#008080',
-    'كحلي': '#000080',
-    'نبيتي': '#800000',
-    'بيج': '#F5F5DC',
-    'سماوي': '#87CEEB',
-    'رصاصي': '#D3D3D3',
-    'زيتي': '#556B2F'
-};
 
-const formatColor = (color: string) => {
-    if (!color) return 'transparent';
-    const normalized = color.toLowerCase().trim();
-    if (COLOR_MAP[normalized]) return COLOR_MAP[normalized];
-    if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') || /^[a-fA-F0-9]{6}$/.test(color)) {
-        return color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl') ? color : `#${color}`;
-    }
-    return '#808080'; // Fallback to grey
-};
 
 const parseColors = (colors: any[] | undefined) => {
     if (!colors) return [];
@@ -495,41 +448,53 @@ export default function ProductPage() {
                                 <div>
                                     <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
                                     <div className={`flex flex-wrap gap-2 pb-4 pt-2 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                                        {parseColors(product.colors).map((c, i) => (
-                                            <button
-                                                key={`${c.color}-${i}`}
-                                                onClick={() => {
-                                                    setSelectedColor(c.color);
-                                                    if (c.imageIndex !== undefined && c.imageIndex !== null) {
-                                                        setSelectedImage(c.imageIndex);
-                                                        // Scroll to gallery
-                                                        galleryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                                    }
-                                                }}
-                                                className={`
-                                                    w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 p-[3px] border-2 
-                                                    ${selectedColor === c.color
-                                                        ? 'border-[var(--color-brand-primary)] scale-110 shadow-lg shadow-[var(--color-brand-primary)]/20'
-                                                        : 'border-transparent bg-gray-50 hover:bg-gray-100'}
-                                                `}
-                                            >
-                                                <div
-                                                    style={{
-                                                        backgroundColor: formatColor(c.color),
-                                                        backgroundImage: c.image ? `url(${formatImageUrl(c.image)})` : 'none',
-                                                        backgroundSize: 'cover',
-                                                        backgroundPosition: 'center'
+                                        {parseColors(product.colors).map((c, i) => {
+                                            const thumbImage = c.image
+                                                ? formatImageUrl(c.image)
+                                                : (c.imageIndex !== undefined && product.images?.[c.imageIndex]
+                                                    ? formatImageUrl(product.images[c.imageIndex])
+                                                    : null);
+
+                                            return (
+                                                <button
+                                                    key={`${c.color}-${i}`}
+                                                    onClick={() => {
+                                                        setSelectedColor(c.color);
+                                                        if (c.imageIndex !== undefined && c.imageIndex !== null) {
+                                                            setSelectedImage(c.imageIndex);
+                                                            // Scroll to gallery
+                                                            galleryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                        }
                                                     }}
-                                                    className="w-full h-full rounded-full flex items-center justify-center shadow-inner overflow-hidden relative"
+                                                    className={`
+                                                        w-14 h-18 rounded-xl flex-shrink-0 flex items-center justify-center transition-all duration-300 p-0.5 border-2 group relative
+                                                        ${selectedColor === c.color
+                                                            ? 'border-[var(--color-brand-primary)] shadow-md shadow-[var(--color-brand-primary)]/20'
+                                                            : 'border-transparent hover:border-gray-300'}
+                                                    `}
+                                                    title={c.color}
                                                 >
-                                                    {selectedColor === c.color && (
-                                                        <div className="absolute inset-0 bg-black/10 flex items-center justify-center backdrop-blur-[1px]">
-                                                            <Check size={18} className="text-white drop-shadow-md" />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </button>
-                                        ))}
+                                                    <div className="w-full h-full rounded-[10px] overflow-hidden relative bg-gray-50 flex items-center justify-center">
+                                                        {thumbImage ? (
+                                                            <Image
+                                                                src={thumbImage}
+                                                                alt={c.color}
+                                                                fill
+                                                                className="object-cover"
+                                                                sizes="56px"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-[10px] text-gray-400 font-bold px-1 text-center font-cairo leading-tight">{c.color}</span>
+                                                        )}
+                                                        {selectedColor === c.color && (
+                                                            <div className="absolute inset-0 bg-black/10 flex items-center justify-center backdrop-blur-[1px]">
+                                                                <Check size={18} className="text-white drop-shadow-md" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
