@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, Sparkles } from 'lucide-react';
 import HeroCarousel from '@/components/home/HeroCarousel';
 
 import dynamic from 'next/dynamic';
@@ -96,7 +96,10 @@ export default function HomePage() {
         {(!isLoading && featuredProducts.length > 0) && (
           <section className="pt-8 pb-4">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-black text-gray-900 tracking-tight">{isRTL ? 'المنتجات المميزة' : 'Featured Products'}</h2>
+              <h2 className="text-xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                <Sparkles size={20} className="text-amber-500 fill-amber-500/20" />
+                {isRTL ? 'المنتجات المميزة' : 'Featured Products'}
+              </h2>
               <button className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">{t.common.view_all}</button>
             </div>
             {/* Horizontal Scroll for Featured */}
