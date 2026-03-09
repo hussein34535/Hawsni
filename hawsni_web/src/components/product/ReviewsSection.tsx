@@ -156,7 +156,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     );
 
     return (
-        <section className="mt-8">
+        <section className="mt-8 pb-28 sm:pb-32">
             {/* Lightbox */}
             <AnimatePresence>
                 {lightbox && (
@@ -306,15 +306,15 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                 <motion.div key={review._id || idx}
                                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: idx * 0.05 }}
-                                    className="bg-white border border-gray-50 p-6 rounded-[24px] shadow-sm relative">
+                                    className="bg-white border border-gray-50 p-6 rounded-[24px] shadow-sm relative overflow-hidden">
 
                                     {isOwner && !isEditing && (
-                                        <div className="absolute top-4 right-4 flex gap-2" dir={isRTL ? 'rtl' : 'ltr'}>
-                                            <button onClick={() => startEdit(review)} className="text-gray-400 hover:text-blue-500 transition-colors text-xs font-cairo font-bold">
+                                        <div className="absolute top-4 ltr:right-4 rtl:left-4 flex gap-2 z-10" dir={isRTL ? 'rtl' : 'ltr'}>
+                                            <button onClick={() => startEdit(review)} className="text-gray-400 hover:text-blue-500 transition-colors text-xs font-cairo font-bold bg-white/50 px-2 rounded-md backdrop-blur-sm">
                                                 {isRTL ? 'تعديل' : 'Edit'}
                                             </button>
                                             <span className="text-gray-200">|</span>
-                                            <button onClick={() => handleDelete(review._id)} className="text-gray-400 hover:text-red-500 transition-colors text-xs font-cairo font-bold">
+                                            <button onClick={() => handleDelete(review._id)} className="text-gray-400 hover:text-red-500 transition-colors text-xs font-cairo font-bold bg-white/50 px-2 rounded-md backdrop-blur-sm">
                                                 {isRTL ? 'حذف' : 'Delete'}
                                             </button>
                                         </div>
@@ -347,7 +347,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                     ) : (
                                         <div className="flex items-start gap-4">
                                             <div className="w-12 h-12 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-50 shadow-sm flex-shrink-0">
-                                                {review.user.avatar_url ? (
+                                                {review.user?.avatar_url ? (
                                                     <img src={review.user.avatar_url} alt={review.user.name} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-indigo-500">
@@ -356,8 +356,8 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                 )}
                                             </div>
                                             <div className="flex-1 mt-1">
-                                                <div className="flex items-center justify-between mb-1.5 pr-16 sm:pr-20">
-                                                    <h4 className="font-black text-gray-900 font-cairo text-sm">{review.user.name}</h4>
+                                                <div className="flex items-center justify-between mb-1.5 ltr:pr-16 ltr:sm:pr-20 rtl:pl-16 rtl:sm:pl-20">
+                                                    <h4 className="font-black text-gray-900 font-cairo text-sm">{review.user?.name || 'Anonymous'}</h4>
                                                     <div className="flex gap-0.5 text-amber-400">
                                                         {[...Array(5)].map((_, i) => (
                                                             <Star key={i} size={10} fill={i < review.rating ? 'currentColor' : 'none'} strokeWidth={2} />
@@ -397,7 +397,9 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                                     {isLastVisible && (
                                                                         <div className="absolute inset-0 bg-black/40 rounded-2xl flex flex-col items-center justify-center transition-all group-hover:bg-black/50">
                                                                             <span className="text-white text-2xl font-black font-cairo">+{review.images!.length - 2}</span>
-                                                                            <span className="text-white/90 text-[10px] font-bold font-cairo opacity-0 group-hover:opacity-100 mt-1 transition-opacity">عرض المزيد</span>
+                                                                            <span className="text-white/90 text-[10px] font-bold font-cairo opacity-0 group-hover:opacity-100 mt-1 transition-opacity">
+                                                                                {isRTL ? 'عرض المزيد' : 'Show More'}
+                                                                            </span>
                                                                         </div>
                                                                     )}
                                                                 </div>
