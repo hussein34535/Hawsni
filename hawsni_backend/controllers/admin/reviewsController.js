@@ -43,8 +43,8 @@ class AdminReviewController {
     async create(req, res) {
         try {
             const { product_id, custom_name, rating, comment } = req.body;
-            // images[] comes as an array from hidden inputs injected by the JS uploader
-            const rawImages = req.body['images[]'];
+            // Express might parse it as `req.body.images` or `req.body['images[]']`
+            const rawImages = req.body.images || req.body['images[]'];
             const images = rawImages
                 ? (Array.isArray(rawImages) ? rawImages : [rawImages])
                 : [];
