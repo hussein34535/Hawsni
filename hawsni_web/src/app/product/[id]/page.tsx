@@ -467,14 +467,14 @@ export default function ProductPage() {
                                                         }
                                                     }}
                                                     className={`
-                                                        w-14 h-18 rounded-xl flex-shrink-0 flex items-center justify-center transition-all duration-300 p-0.5 border-2 group relative
+                                                        w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 p-[3px] border-2 group relative
                                                         ${selectedColor === c.color
-                                                            ? 'border-[var(--color-brand-primary)] shadow-md shadow-[var(--color-brand-primary)]/20'
-                                                            : 'border-transparent hover:border-gray-300'}
+                                                            ? 'border-[var(--color-brand-primary)] shadow-md shadow-[var(--color-brand-primary)]/20 scale-110'
+                                                            : 'border-transparent bg-gray-50 hover:border-gray-300 hover:scale-105'}
                                                     `}
                                                     title={c.color}
                                                 >
-                                                    <div className="w-full h-full rounded-[10px] overflow-hidden relative bg-gray-50 flex items-center justify-center">
+                                                    <div className="w-full h-full rounded-full overflow-hidden relative bg-white flex items-center justify-center shadow-inner">
                                                         {thumbImage ? (
                                                             <Image
                                                                 src={thumbImage}
