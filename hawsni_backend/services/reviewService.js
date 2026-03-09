@@ -52,8 +52,12 @@ class ReviewService {
         });
     }
 
-    async createReview(userId, productId, rating, comment, images = [], reviewerName = '') {
-        // Check if already reviewed
+    async createReview(userId, productId, rating, comment, images = [], reviewerName = null) {
+        if (!rating || rating < 1 || rating > 5) {
+            throw new Error('Please provide a valid rating between 1 and 5');
+        }
+
+        // Check if user already reviewed
         const { data: existing } = await supabase
             .from('reviews')
             .select('id')

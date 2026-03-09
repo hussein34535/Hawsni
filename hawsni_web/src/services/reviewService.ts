@@ -49,5 +49,23 @@ export const reviewService = {
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to submit review';
         }
+    },
+
+    updateReview: async (reviewId: string, rating: number, comment: string): Promise<{ success: boolean; review?: Review; message?: string }> => {
+        try {
+            const response = await apiClient.put(`/reviews/${reviewId}`, { rating, comment });
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to update review';
+        }
+    },
+
+    deleteReview: async (reviewId: string): Promise<{ success: boolean; message?: string }> => {
+        try {
+            const response = await apiClient.delete(`/reviews/${reviewId}`);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to delete review';
+        }
     }
 };
