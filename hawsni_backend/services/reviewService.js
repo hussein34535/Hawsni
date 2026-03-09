@@ -2,33 +2,25 @@ const supabase = require('../config/supabase');
 
 class ReviewService {
     async getProductReviews(productId) {
-        // Get reviews without join first
+        // Single query with join — avoids N+1 lookups
         const { data, error } = await supabase
             .from('reviews')
-            .select('id, rating, comment, images, custom_name, created_at, user_id')
+            .select('id, rating, comment, images, custom_name, reviewer_name, created_at, user_id, users(name)')
             .eq('product_id', productId)
             .order('created_at', { ascending: false });
 
-        if (error) throw new Error(error.message);
+        if (error) {
+            console.error('ReviewService.getProductReviews error:', error.message);
+            throw new Error(error.message);
+        }
 
-        // Debug: Log the raw data from Supabase
-        console.log('Supabase raw response:', JSON.stringify(data, null, 2));
-
-        // Get user names for each review
-        const enhancedData = await Promise.all(data.map(async (review) => {
-            let userName = 'Anonymous';
-
-            // Admin-created reviews have a custom_name instead of a user_id
-            if (review.custom_name) {
-                userName = review.custom_name;
-            } else if (review.user_id) {
-                const { data: userData } = await supabase
-                    .from('users')
-                    .select('name')
-                    .eq('id', review.user_id)
-                    .single();
-                if (userData) userName = userData.name || 'Anonymous';
-            }
+        const enhancedData = (data || []).map((review) => {
+            // Priority: custom_name (admin) > reviewer_name (saved at insert) > join name > Anonymous
+            const joinedName = review.users?.name;
+            const userName = review.custom_name ||
+                review.reviewer_name ||
+                joinedName ||
+                'Anonymous';
 
             return {
                 ...review,
@@ -36,16 +28,16 @@ class ReviewService {
                 images: review.images || [],
                 user: { name: userName, _id: review.user_id }
             };
-        }));
+        });
 
         return enhancedData;
     }
 
-    async createReview(userId, productId, rating, comment, images = []) {
+    async createReview(userId, productId, rating, comment, images = [], reviewerName = '') {
         // Check if already reviewed
         const { data: existing } = await supabase
             .from('reviews')
-            .select('*')
+            .select('id')
             .eq('user_id', userId)
             .eq('product_id', productId)
             .single();
@@ -61,7 +53,9 @@ class ReviewService {
                 product_id: productId,
                 rating,
                 comment,
-                images: images || []
+                images: images || [],
+                // Store name as safety net in case join ever fails
+                reviewer_name: reviewerName || null,
             }])
             .select()
             .single();
