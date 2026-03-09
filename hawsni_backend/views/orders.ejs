@@ -88,7 +88,9 @@
                                 if (typeof ship==='string' && ship.trim() !=='' ) { cAddr=ship; } const
                                 sMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'In Transit' : 'info'
                                 , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; const sClass=sMap[order.status]
-                                || 'warning' ; %>
+                                || 'warning' ; const tMap={ 'Processing' : 'قيد المعالجة' , 'Shipped' : 'تم الشحن'
+                                , 'In Transit' : 'في الطريق' , 'Delivered' : 'تم التوصيل' , 'Cancelled' : 'ملغي' };
+                                const displayStatus=tMap[order.status] || order.status; %>
                                 <tr id="row-<%= order.id %>" class="order-row"
                                     onclick="showOrderDetails('<%= order.id %>')">
                                     <td onclick="event.stopPropagation()">
@@ -135,7 +137,7 @@
                                         </span></td>
                                     <td>
                                         <span class="badge badge-<%= sClass %>">
-                                            <%= order.status || 'Processing' %>
+                                            <%= displayStatus %>
                                         </span>
                                     </td>
                                     <td>
@@ -153,15 +155,15 @@
                                                 <select name="status" class="status-select select-<%= sClass %>"
                                                     onchange="this.form.submit()">
                                                     <option value="Processing" <%=order.status==='Processing'
-                                                        ? 'selected' : '' %>>Processing</option>
+                                                        ? 'selected' : '' %>>قيد المعالجة</option>
                                                     <option value="Shipped" <%=order.status==='Shipped' ? 'selected'
-                                                        : '' %>>Shipped</option>
+                                                        : '' %>>تم الشحن</option>
                                                     <option value="In Transit" <%=order.status==='In Transit'
-                                                        ? 'selected' : '' %>>In Transit</option>
+                                                        ? 'selected' : '' %>>في الطريق</option>
                                                     <option value="Delivered" <%=order.status==='Delivered' ? 'selected'
-                                                        : '' %>>Delivered</option>
+                                                        : '' %>>تم التوصيل</option>
                                                     <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected'
-                                                        : '' %>>Cancelled</option>
+                                                        : '' %>>ملغي</option>
                                                 </select>
                                             </form>
                                             <button class="btn-icon text-danger"
@@ -296,6 +298,13 @@
             'Delivered': 'success',
             'Cancelled': 'danger'
         };
+        const tMap = {
+            'Processing': 'قيد المعالجة',
+            'Shipped': 'تم الشحن',
+            'In Transit': 'في الطريق',
+            'Delivered': 'تم التوصيل',
+            'Cancelled': 'ملغي'
+        };
 
         function showOrderDetails(orderId) {
             const order = ordersData.find(o => o.id === orderId);
@@ -308,7 +317,7 @@
             });
 
             const statusBadge = document.getElementById('modalStatusBadge');
-            statusBadge.textContent = order.status || 'Processing';
+            statusBadge.textContent = tMap[order.status] || order.status || 'قيد المعالجة';
             statusBadge.className = 'badge badge-' + (sMap[order.status] || 'warning');
 
             // Customer Details logic
