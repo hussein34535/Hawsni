@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface User {
     _id: string;
@@ -17,23 +18,28 @@ interface AuthState {
     logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-    user: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null,
-    token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-    isLoading: true,
-    setUser: (user, token) => {
-        if (token) localStorage.setItem('token', token);
-        else if (token === null) localStorage.removeItem('token');
+export const useAuthStore = create<AuthState>()(
+    persist(
+        (set) => ({
+            user: null,
+            token: null,
+            isLoading: false,
+            setUser: (user, token) => {
+                if (token) localStorage.setItem('token', token);
+                else if (token === null) localStorage.removeItem('token');
 
-        if (user) localStorage.setItem('user', JSON.stringify(user));
-        else if (user === null) localStorage.removeItem('user');
-
-        set({ user, token: token ?? null, isLoading: false });
-    },
-    setLoading: (isLoading) => set({ isLoading }),
-    logout: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        set({ user: null, token: null });
-    },
-}));
+                set({ user, token: token ?? null, isLoading: false });
+            },
+            setLoading: (isLoading) => set({ isLoading }),
+            logout: () => {
+                localStorage.removeItem('token');
+                set({ user: null, token: null });
+            },
+        }),
+        {
+            name: 'auth-storage', // name of item in the storage (must be unique)
+            storage: createJSONStorage(() => localStorage), // (optional) by default the 'localStorage' is used
+            partialize: (state) => ({ user: state.user, token: state.token }),
+        }
+    )
+);

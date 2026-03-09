@@ -125,7 +125,7 @@ export default function RegisterPage() {
                                 onChange={(e) => setPhone(e.target.value)}
                                 required
                                 className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
-                                placeholder="+20 123 456 7890"
+                                placeholder="010 123 456 78"
                             />
                         </div>
                     </div>
