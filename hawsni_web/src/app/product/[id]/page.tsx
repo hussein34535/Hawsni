@@ -586,9 +586,9 @@ export default function ProductPage() {
                         <div className="flex flex-col gap-6 mb-10">
                             <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight">{product.name}</h1>
                             
-                            <div className={`flex items-start justify-between gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                                {/* Price - Now on the right (for RTL) or primary side */}
-                                <div className={`flex flex-col ${isRTL ? 'items-start' : 'items-end'}`}>
+                            <div className="flex items-start justify-between gap-4">
+                                {/* Price - Naturally on the right in RTL, left in LTR due to flex-row and dir="rtl" */}
+                                <div className="flex flex-col">
                                     {product.discount ? (
                                         <div className="flex items-center gap-2">
                                             <span className="text-sm text-gray-400 line-through font-bold">
@@ -605,23 +605,23 @@ export default function ProductPage() {
                                     </div>
                                 </div>
 
-                                {/* Rating and Reviews - Clickable Link */}
+                                {/* Rating and Reviews - Naturally on the left in RTL, right in LTR */}
                                 <div 
                                     className="flex flex-col gap-1 cursor-pointer group"
                                     onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                                 >
-                                    <div className={`flex items-center gap-1.5 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                                    <div className="flex items-center gap-2">
                                         <div className="flex text-amber-400">
                                             {[...Array(5)].map((_, i) => (
-                                                <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
+                                                <Star key={i} size={16} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
                                             ))}
                                         </div>
-                                        <span className="text-xs font-black text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-md min-w-[28px] text-center">
+                                        <span className="text-sm font-black text-amber-700 bg-amber-100/50 px-2 py-0.5 rounded-lg border border-amber-200 min-w-[34px] text-center shadow-sm">
                                             {product.rating?.toFixed(1) || '0.0'}
                                         </span>
                                     </div>
-                                    <span className="text-[11px] text-[var(--color-brand-primary)] font-black font-cairo underline decoration-dotted underline-offset-4 group-hover:text-indigo-600 transition-colors">
-                                        {(product as any).num_reviews || 0} {isRTL ? 'تقييم حقيقي' : 'Verified Reviews'}
+                                    <span className={`text-[11px] font-bold text-gray-400 group-hover:text-[var(--color-brand-primary)] transition-colors ${isRTL ? 'text-left' : 'text-right'}`}>
+                                        {isRTL ? `(${product.reviews_count || 0}) تقييم حقيقي` : `(${product.reviews_count || 0}) Verified Reviews`}
                                     </span>
                                 </div>
                             </div>
