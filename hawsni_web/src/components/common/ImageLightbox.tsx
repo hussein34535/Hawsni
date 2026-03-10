@@ -32,6 +32,41 @@ interface LightboxImageProps {
     translateY: any;
 }
 
+interface LightboxBackgroundItemProps {
+    img: string;
+    idx: number;
+    scrollX: any;
+    windowWidth: number;
+}
+
+function LightboxBackgroundItem({
+    img,
+    idx,
+    scrollX,
+    windowWidth
+}: LightboxBackgroundItemProps) {
+    const opacity = useTransform(
+        scrollX,
+        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
+        [0, 1, 0]
+    );
+
+    return (
+        <motion.div
+            className="absolute inset-0"
+            style={{ opacity }}
+        >
+            <Image
+                src={img}
+                alt=""
+                fill
+                className="object-cover blur-3xl opacity-30 scale-110"
+                sizes="10vw"
+            />
+        </motion.div>
+    );
+}
+
 function LightboxImage({
     img,
     idx,
@@ -351,26 +386,14 @@ export default function ImageLightbox({
 
                     {/* Cinematic Cross-fading Background Blur */}
                     <div className="absolute inset-0 z-0 overflow-hidden">
-                        {images.map((img: string, idx: number) => (
-                            <motion.div
+                        {windowWidth > 0 && images.map((img: string, idx: number) => (
+                            <LightboxBackgroundItem
                                 key={`bg-${idx}`}
-                                className="absolute inset-0"
-                                style={{
-                                    opacity: useTransform(
-                                        scrollX,
-                                        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
-                                        [0, 1, 0]
-                                    )
-                                }}
-                            >
-                                <Image
-                                    src={img}
-                                    alt=""
-                                    fill
-                                    className="object-cover blur-3xl opacity-30 scale-110"
-                                    sizes="10vw"
-                                />
-                            </motion.div>
+                                img={img}
+                                idx={idx}
+                                scrollX={scrollX}
+                                windowWidth={windowWidth}
+                            />
                         ))}
                     </div>
 
@@ -384,7 +407,7 @@ export default function ImageLightbox({
                                 cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
                             }}
                         >
-                            {images.map((img: string, idx: number) => (
+                            {windowWidth > 0 && images.map((img: string, idx: number) => (
                                 <LightboxImage
                                     key={idx}
                                     img={img}
