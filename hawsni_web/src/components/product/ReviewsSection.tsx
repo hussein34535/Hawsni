@@ -330,75 +330,80 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-12 h-12 rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-50 shadow-sm flex-shrink-0">
-                                                {review.user?.avatar_url ? (
-                                                    <img src={review.user.avatar_url} alt={review.user.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-indigo-500">
-                                                        <User size={18} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1 mt-1">
-                                                <div className="flex items-center justify-between mb-1.5">
-                                                    <h4 className="font-black text-gray-900 font-cairo text-sm">{review.user?.name || 'Anonymous'}</h4>
-                                                    <div className="flex gap-0.5 text-amber-400">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <Star key={i} size={10} fill={i < review.rating ? 'currentColor' : 'none'} strokeWidth={2} />
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <span className="text-[10px] text-gray-400 font-bold font-cairo opacity-60">
-                                                        {new Date(review.created_at || review.createdAt || '').toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
-                                                            year: 'numeric', month: 'long', day: 'numeric'
-                                                        })}
-                                                    </span>
-                                                    {isOwner && !isEditing && (
-                                                        <div className="flex items-center gap-2">
-                                                            <button onClick={() => startEdit(review)} className="text-gray-400 hover:text-blue-500 transition-colors text-[10px] font-cairo font-bold bg-gray-50 px-2 py-0.5 rounded border border-gray-100 hover:bg-white hover:shadow-sm">
-                                                                {isRTL ? 'تعديل' : 'Edit'}
-                                                            </button>
-                                                            <button onClick={() => handleDelete(review._id)} className="text-gray-400 hover:text-red-500 transition-colors text-[10px] font-cairo font-bold bg-gray-50 px-2 py-0.5 rounded border border-gray-100 hover:bg-white hover:shadow-sm">
-                                                                {isRTL ? 'حذف' : 'Delete'}
-                                                            </button>
+                                        <div className="flex flex-col gap-3">
+                                            {/* Header: Avatar + Name + Stars */}
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center border border-gray-50 flex-shrink-0">
+                                                    {review.user?.avatar_url ? (
+                                                        <img src={review.user.avatar_url} alt={review.user.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-indigo-500">
+                                                            <User size={16} />
                                                         </div>
                                                     )}
                                                 </div>
-                                                {review.comment && (
-                                                    <p className="text-[13px] text-gray-600 leading-relaxed font-bold font-cairo break-words whitespace-pre-line">
-                                                        {review.comment}
-                                                    </p>
-                                                )}
-
-                                                {/* Review images slider */}
-                                                {review.images && review.images.length > 0 && (
-                                                    <div className="relative mt-5">
-                                                        <div 
-                                                            className={`flex gap-3 overflow-x-auto pb-3 hide-scrollbar scroll-smooth ${isRTL ? 'flex-row-reverse' : 'flex-row'} ${review.images.length <= 2 ? 'justify-center' : ''}`}
-                                                            style={{ scrollSnapType: 'x mandatory' }}
-                                                        >
-                                                            {review.images.map((img: string, i: number) => (
-                                                                <div 
-                                                                    key={i} 
-                                                                    className="relative flex-shrink-0 cursor-zoom-in group active:scale-95 transition-transform" 
-                                                                    style={{ scrollSnapAlign: isRTL ? 'end' : 'start' }}
-                                                                    onClick={() => setLightbox({ images: review.images!, index: i })}
-                                                                >
-                                                                    <div className="relative w-[100px] h-[130px] sm:w-[120px] sm:h-[155px] rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
-                                                                        <img
-                                                                            src={img}
-                                                                            alt=""
-                                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                                        />
-                                                                    </div>
-                                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center justify-between">
+                                                        <h4 className="font-black text-gray-900 font-cairo text-sm truncate">{review.user?.name || 'Anonymous'}</h4>
+                                                        <div className="flex gap-0.5 text-amber-400 flex-shrink-0">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <Star key={i} size={10} fill={i < review.rating ? 'currentColor' : 'none'} strokeWidth={2} />
                                                             ))}
                                                         </div>
                                                     </div>
-                                                )}
+                                                    <div className="flex items-center gap-3 mt-0.5">
+                                                        <span className="text-[10px] text-gray-400 font-bold font-cairo opacity-60">
+                                                            {new Date(review.created_at || review.createdAt || '').toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
+                                                                year: 'numeric', month: 'long', day: 'numeric'
+                                                            })}
+                                                        </span>
+                                                        {isOwner && !isEditing && (
+                                                            <div className="flex items-center gap-2">
+                                                                <button onClick={() => startEdit(review)} className="text-gray-400 hover:text-blue-500 transition-colors text-[10px] font-cairo font-bold bg-gray-50 px-2 py-0.5 rounded border border-gray-100 hover:bg-white hover:shadow-sm">
+                                                                    {isRTL ? 'تعديل' : 'Edit'}
+                                                                </button>
+                                                                <button onClick={() => handleDelete(review._id)} className="text-gray-400 hover:text-red-500 transition-colors text-[10px] font-cairo font-bold bg-gray-50 px-2 py-0.5 rounded border border-gray-100 hover:bg-white hover:shadow-sm">
+                                                                    {isRTL ? 'حذف' : 'Delete'}
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            {/* Comment - Full Width */}
+                                            {review.comment && (
+                                                <p className="text-[13px] text-gray-600 leading-relaxed font-bold font-cairo break-words whitespace-pre-line">
+                                                    {review.comment}
+                                                </p>
+                                            )}
+
+                                            {/* Review images - Full Width */}
+                                            {review.images && review.images.length > 0 && (
+                                                <div className="relative mt-1">
+                                                    <div 
+                                                        className={`flex gap-3 overflow-x-auto pb-2 hide-scrollbar scroll-smooth ${isRTL ? 'flex-row-reverse' : 'flex-row'} ${review.images.length <= 2 ? 'justify-center' : ''}`}
+                                                        style={{ scrollSnapType: 'x mandatory' }}
+                                                    >
+                                                        {review.images.map((img: string, i: number) => (
+                                                            <div 
+                                                                key={i} 
+                                                                className="relative flex-shrink-0 cursor-zoom-in group active:scale-95 transition-transform" 
+                                                                style={{ scrollSnapAlign: isRTL ? 'end' : 'start' }}
+                                                                onClick={() => setLightbox({ images: review.images!, index: i })}
+                                                            >
+                                                                <div className="relative w-[100px] h-[130px] sm:w-[120px] sm:h-[155px] rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
+                                                                    <img
+                                                                        src={img}
+                                                                        alt=""
+                                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </motion.div>
