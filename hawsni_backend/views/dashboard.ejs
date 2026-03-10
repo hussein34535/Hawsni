@@ -1,300 +1,428 @@
 <%- include('partials/header', { title: 'لوحة التحكم' , pageTitle: 'لوحة التحكم' , page: 'dashboard' }) %>
 
-    <div style="margin-bottom: 2rem;">
-        <h2 style="color: var(--dark-gray); font-size: 1.5rem;">👋 أهلاً بك في لوحة التحكم</h2>
-        <p style="color: var(--medium-gray);">إليك نظرة عامة على أداء متجرك</p>
-    </div>
+<style>
+    /* Dashboard-specific clean styles */
+    .dash-welcome {
+        margin-bottom: 1.5rem;
+    }
+    .dash-welcome h2 {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--dark);
+        margin-bottom: 2px;
+    }
+    .dash-welcome p {
+        color: var(--medium-gray);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
 
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <a href="/orders" style="text-decoration: none;">
-            <div class="stat-card primary">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-value">
-                            <%= revenue %> ج.م
-                        </div>
-                        <div class="stat-label">إجمالي المبيعات</div>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-sack-dollar"></i>
-                    </div>
-                </div>
+    /* Mini stat cards - clean 2-column grid */
+    .dash-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+    .dash-stat {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 1rem;
+        text-decoration: none;
+        display: block;
+        transition: box-shadow 0.2s, transform 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .dash-stat:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        transform: translateY(-1px);
+    }
+    .dash-stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .dash-stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    .dash-stat-num {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: var(--dark);
+        line-height: 1;
+    }
+    .dash-stat-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--medium-gray);
+        margin-top: 4px;
+    }
+
+    /* Section titles */
+    .dash-section-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--dark);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .dash-section-title i {
+        font-size: 0.9rem;
+    }
+
+    /* Clarity section */
+    .clarity-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .clarity-stat {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.85rem;
+        border-right: 3px solid;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .clarity-stat-num {
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: var(--dark);
+    }
+    .clarity-stat-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--medium-gray);
+        margin-top: 2px;
+    }
+    .clarity-timer {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .clarity-timer-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #e0f0ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0078d4;
+        flex-shrink: 0;
+    }
+    .clarity-timer-text {
+        font-size: 0.75rem;
+        color: #666;
+        font-weight: 700;
+    }
+    .clarity-timer-countdown {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: #0078d4;
+        font-family: monospace;
+        letter-spacing: 1px;
+    }
+
+    /* Quick actions as icon buttons row */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-bottom: 1.5rem;
+    }
+    .quick-action {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 1rem 0.5rem;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+    .quick-action:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        transform: translateY(-1px);
+    }
+    .quick-action i {
+        font-size: 1.15rem;
+    }
+    .quick-action span {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--dark-gray);
+    }
+
+    /* Orders list - compact card style instead of table */
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.85rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    .order-left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .order-id {
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: var(--dark);
+        font-family: monospace;
+    }
+    .order-date {
+        font-size: 0.7rem;
+        color: var(--medium-gray);
+        font-weight: 600;
+    }
+    .order-right {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+    }
+    .order-total {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--dark);
+    }
+
+    @media (max-width: 768px) {
+        .dash-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .quick-actions {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    @media (max-width: 480px) {
+        .dash-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .clarity-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<!-- Welcome -->
+<div class="dash-welcome">
+    <h2>👋 أهلاً بك</h2>
+    <p>نظرة عامة على أداء متجرك</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="dash-stats">
+    <a href="/orders" class="dash-stat">
+        <div class="dash-stat-top">
+            <div class="dash-stat-icon" style="background: var(--primary-light); color: var(--primary-color);">
+                <i class="fas fa-sack-dollar"></i>
             </div>
-        </a>
-
-        <a href="/orders" style="text-decoration: none;">
-            <div class="stat-card warning">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-value">
-                            <%= ordersCount %>
-                        </div>
-                        <div class="stat-label">الطلبات</div>
-                    </div>
-                    <div class="stat-icon" style="background: rgba(243,156,18,0.1); color: var(--warning);">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                </div>
+        </div>
+        <div class="dash-stat-num"><%= revenue %></div>
+        <div class="dash-stat-label">المبيعات (ج.م)</div>
+    </a>
+    <a href="/orders" class="dash-stat">
+        <div class="dash-stat-top">
+            <div class="dash-stat-icon" style="background: #fef3c7; color: var(--warning);">
+                <i class="fas fa-shopping-cart"></i>
             </div>
-        </a>
-
-        <a href="/products" style="text-decoration: none;">
-            <div class="stat-card info">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-value">
-                            <%= productsCount %>
-                        </div>
-                        <div class="stat-label">المنتجات</div>
-                    </div>
-                    <div class="stat-icon" style="background: rgba(52,152,219,0.1); color: var(--info);">
-                        <i class="fas fa-box"></i>
-                    </div>
-                </div>
+        </div>
+        <div class="dash-stat-num"><%= ordersCount %></div>
+        <div class="dash-stat-label">الطلبات</div>
+    </a>
+    <a href="/products" class="dash-stat">
+        <div class="dash-stat-top">
+            <div class="dash-stat-icon" style="background: #dbeafe; color: var(--info);">
+                <i class="fas fa-box"></i>
             </div>
-        </a>
-
-        <a href="/categories" style="text-decoration: none;">
-            <div class="stat-card success">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-value">
-                            <%= categoriesCount %>
-                        </div>
-                        <div class="stat-label">التصنيفات</div>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-tags"></i>
-                    </div>
-                </div>
+        </div>
+        <div class="dash-stat-num"><%= productsCount %></div>
+        <div class="dash-stat-label">المنتجات</div>
+    </a>
+    <a href="/categories" class="dash-stat">
+        <div class="dash-stat-top">
+            <div class="dash-stat-icon" style="background: #d1fae5; color: var(--success);">
+                <i class="fas fa-tags"></i>
             </div>
-        </a>
-
-        <a href="/users" style="text-decoration: none;">
-            <div class="stat-card primary">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-value">
-                            <%= usersCount %>
-                        </div>
-                        <div class="stat-label">المستخدمين</div>
-                    </div>
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
+        </div>
+        <div class="dash-stat-num"><%= categoriesCount %></div>
+        <div class="dash-stat-label">التصنيفات</div>
+    </a>
+    <a href="/users" class="dash-stat">
+        <div class="dash-stat-top">
+            <div class="dash-stat-icon" style="background: var(--primary-light); color: var(--primary-color);">
+                <i class="fas fa-users"></i>
             </div>
-        </a>
-
-        <a href="/banners" style="text-decoration: none;">
-            <div class="stat-card danger">
-                <div class="stat-header">
-                    <div>
-                        <div class="stat-value">
-                            <%= bannersCount %>
-                        </div>
-                        <div class="stat-label">البنرات</div>
-                    </div>
-                    <div class="stat-icon" style="background: rgba(231,76,60,0.1); color: var(--danger);">
-                        <i class="fas fa-images"></i>
-                    </div>
-                </div>
+        </div>
+        <div class="dash-stat-num"><%= usersCount %></div>
+        <div class="dash-stat-label">المستخدمين</div>
+    </a>
+    <a href="/banners" class="dash-stat">
+        <div class="dash-stat-top">
+            <div class="dash-stat-icon" style="background: #fee2e2; color: var(--danger);">
+                <i class="fas fa-images"></i>
             </div>
-        </a>
-    </div>
+        </div>
+        <div class="dash-stat-num"><%= bannersCount %></div>
+        <div class="dash-stat-label">البنرات</div>
+    </a>
+</div>
 
-    <!-- Microsoft Clarity Stats -->
-    <% if (typeof clarityInsights !== 'undefined' && clarityInsights && clarityInsights.data) { %>
-        <div style="margin-bottom: 2rem; margin-top: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3 style="color: var(--dark-gray); margin: 0;"><i class="fas fa-chart-line" style="color: #0078d4;"></i> إحصائيات Clarity اللحظية</h3>
-                <span style="font-size: 0.85rem; color: #666; background: #e0f0ff; padding: 4px 10px; border-radius: 12px;">
-                    <i class="fas fa-sync-alt" style="margin-right: 4px;"></i> تحديث كل 2.5 ساعة تلقائياً
-                </span>
+<!-- Quick Actions -->
+<div class="dash-section-title">
+    <i class="fas fa-bolt" style="color: var(--warning);"></i> إجراءات سريعة
+</div>
+<div class="quick-actions">
+    <a href="/products/new" class="quick-action">
+        <i class="fas fa-plus-circle" style="color: var(--primary-color);"></i>
+        <span>إضافة منتج</span>
+    </a>
+    <a href="/orders" class="quick-action">
+        <i class="fas fa-clipboard-list" style="color: var(--warning);"></i>
+        <span>عرض الطلبات</span>
+    </a>
+    <a href="/banners/new" class="quick-action">
+        <i class="fas fa-image" style="color: var(--danger);"></i>
+        <span>إضافة بنر</span>
+    </a>
+    <a href="/categories" class="quick-action">
+        <i class="fas fa-tags" style="color: var(--success);"></i>
+        <span>التصنيفات</span>
+    </a>
+    <a href="/shipping" class="quick-action">
+        <i class="fas fa-truck" style="color: var(--info);"></i>
+        <span>الشحن</span>
+    </a>
+    <a href="/settings" class="quick-action">
+        <i class="fas fa-cog" style="color: var(--medium-gray);"></i>
+        <span>الإعدادات</span>
+    </a>
+</div>
+
+<!-- Microsoft Clarity Stats -->
+<% if (typeof clarityInsights !== 'undefined' && clarityInsights && clarityInsights.data) { %>
+    <div style="margin-bottom: 1.5rem;">
+        <div class="dash-section-title">
+            <i class="fas fa-chart-line" style="color: #0078d4;"></i> إحصائيات الزوار
+            <span style="font-size: 0.65rem; color: #666; background: #e0f0ff; padding: 3px 8px; border-radius: 8px; margin-right: auto; font-weight: 600;">
+                <i class="fas fa-sync-alt"></i> كل 2.5 ساعة
+            </span>
+        </div>
+        <div class="clarity-grid">
+            <div class="clarity-stat" style="border-right-color: #0078d4;">
+                <div class="clarity-stat-num"><%= clarityInsights.data.activeUsers || 0 %></div>
+                <div class="clarity-stat-label">المستخدمين النشطين</div>
             </div>
-            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-                <div class="stat-card" style="border-right: 4px solid #0078d4;">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-value"><%= clarityInsights.data.activeUsers || 0 %></div>
-                            <div class="stat-label">المستخدمين النشطين (الآن)</div>
-                        </div>
-                        <div class="stat-icon" style="background: rgba(0, 120, 212, 0.1); color: #0078d4;">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card" style="border-right: 4px solid #107c10;">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-value"><%= clarityInsights.data.liveSessions || 0 %></div>
-                            <div class="stat-label">الجلسات المباشرة</div>
-                        </div>
-                        <div class="stat-icon" style="background: rgba(16, 124, 16, 0.1); color: #107c10;">
-                            <i class="fas fa-desktop"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-card" style="border-right: 4px solid #d83b01;">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-value"><%= clarityInsights.data.rageClicks || 0 %></div>
-                            <div class="stat-label">النقرات الغاضبة (Rage Clicks)</div>
-                        </div>
-                        <div class="stat-icon" style="background: rgba(216, 59, 1, 0.1); color: #d83b01;">
-                            <i class="fas fa-mouse-pointer"></i>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="stat-card" style="border-right: 4px solid #881798;">
-                    <div class="stat-header">
-                        <div>
-                            <div class="stat-value"><%= clarityInsights.data.deadClicks || 0 %></div>
-                            <div class="stat-label">النقرات الميتة (Dead Clicks)</div>
-                        </div>
-                        <div class="stat-icon" style="background: rgba(136, 23, 152, 0.1); color: #881798;">
-                            <i class="fas fa-hand-pointer"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="clarity-stat" style="border-right-color: #107c10;">
+                <div class="clarity-stat-num"><%= clarityInsights.data.liveSessions || 0 %></div>
+                <div class="clarity-stat-label">الجلسات المباشرة</div>
             </div>
-            <div style="background: #fff; padding: 15px 20px; border-radius: 12px; margin-top: 15px; border: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0f0ff; display: flex; align-items: center; justify-content: center; color: #0078d4;">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.85rem; color: #666; font-weight: bold;">تحديث البيانات القادم خلال</div>
-                        <div id="clarity-countdown" style="font-size: 1.2rem; font-weight: 900; color: #0078d4; font-family: monospace; letter-spacing: 1px;" dir="ltr">--:--:--</div>
-                    </div>
-                </div>
-                <div style="text-align: left; font-size: 0.8rem; color: #888;" dir="ltr">
-                    <div><i class="fas fa-history"></i> Last Fetch: <span style="font-weight: bold; color: #444;"><%= new Date(clarityInsights.lastFetched).toLocaleTimeString('ar-EG') %></span></div>
-                </div>
+            <div class="clarity-stat" style="border-right-color: #d83b01;">
+                <div class="clarity-stat-num"><%= clarityInsights.data.rageClicks || 0 %></div>
+                <div class="clarity-stat-label">نقرات غاضبة</div>
             </div>
-
-            <script>
-                // Live Countdown Script
-                (function() {
-                    const nextFetchTime = parseInt("<%= clarityInsights.nextFetch %>", 10);
-                    const countdownEl = document.getElementById('clarity-countdown');
-                    
-                    function updateCountdown() {
-                        const now = Date.now();
-                        const diff = nextFetchTime - now;
-
-                        if (diff <= 0) {
-                            countdownEl.innerText = 'يتم التحديث الآن...';
-                            countdownEl.style.color = '#107c10';
-                            // Reload page after a few seconds to get new data
-                            setTimeout(() => window.location.reload(), 5000);
-                            return;
-                        }
-
-                        // Calculate hours, minutes, seconds
-                        const hours = Math.floor(diff / (1000 * 60 * 60));
-                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                        // Format with leading zeros
-                        const h = String(hours).padStart(2, '0');
-                        const m = String(minutes).padStart(2, '0');
-                        const s = String(seconds).padStart(2, '0');
-
-                        countdownEl.innerText = `${h}:${m}:${s}`;
+            <div class="clarity-stat" style="border-right-color: #881798;">
+                <div class="clarity-stat-num"><%= clarityInsights.data.deadClicks || 0 %></div>
+                <div class="clarity-stat-label">نقرات ميتة</div>
+            </div>
+        </div>
+        <div class="clarity-timer">
+            <div class="clarity-timer-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <div class="clarity-timer-text">التحديث القادم</div>
+                <div id="clarity-countdown" class="clarity-timer-countdown" dir="ltr">--:--:--</div>
+            </div>
+            <div style="margin-right: auto; font-size: 0.7rem; color: #999;" dir="ltr">
+                <i class="fas fa-history"></i> <%= new Date(clarityInsights.lastFetched).toLocaleTimeString('ar-EG') %>
+            </div>
+        </div>
+        <script>
+            (function() {
+                const nextFetchTime = parseInt("<%= clarityInsights.nextFetch %>", 10);
+                const countdownEl = document.getElementById('clarity-countdown');
+                function updateCountdown() {
+                    const now = Date.now();
+                    const diff = nextFetchTime - now;
+                    if (diff <= 0) {
+                        countdownEl.innerText = 'يتم التحديث...';
+                        countdownEl.style.color = '#107c10';
+                        setTimeout(() => window.location.reload(), 5000);
+                        return;
                     }
+                    const h = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, '0');
+                    const m = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                    const s = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, '0');
+                    countdownEl.innerText = `${h}:${m}:${s}`;
+                }
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+            })();
+        </script>
+    </div>
+<% } %>
 
-                    // Update immediately, then every second
-                    updateCountdown();
-                    setInterval(updateCountdown, 1000);
-                })();
-            </script>
+<!-- Recent Orders -->
+<div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <div class="dash-section-title" style="margin-bottom: 0;">
+            <i class="fas fa-shopping-bag" style="color: var(--warning);"></i> أحدث الطلبات
+        </div>
+        <a href="/orders" style="font-size: 0.75rem; font-weight: 700; color: var(--primary-color); text-decoration: none;">
+            عرض الكل <i class="fas fa-arrow-left" style="font-size: 0.65rem;"></i>
+        </a>
+    </div>
+    <% if (orders && orders.length > 0) { %>
+        <% orders.forEach(order => { %>
+            <div class="order-item">
+                <div class="order-left">
+                    <div class="order-id">#<%= order.id.substring(0, 8) %></div>
+                    <div class="order-date"><%= new Date(order.created_at).toLocaleDateString('ar-EG') %></div>
+                </div>
+                <div class="order-right">
+                    <div class="order-total"><%= parseFloat(order.total).toFixed(0) %> ج.م</div>
+                    <% const statusMap = { 'Processing': 'warning', 'Shipped': 'info', 'Delivered': 'success', 'Cancelled': 'danger' }; %>
+                    <span class="badge badge-<%= statusMap[order.status] || 'warning' %>" style="font-size: 0.65rem; padding: 2px 8px;">
+                        <%= order.status || 'Processing' %>
+                    </span>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div style="text-align: center; padding: 2rem; color: var(--medium-gray);">
+            <i class="fas fa-shopping-bag" style="font-size: 2.5rem; opacity: 0.2; margin-bottom: 0.5rem; display: block;"></i>
+            <p style="font-size: 0.85rem; font-weight: 600;">لا توجد طلبات حتى الآن</p>
         </div>
     <% } %>
+</div>
 
-    <!-- Content Grid -->
-    <div class="content-grid">
-        <!-- Recent Orders -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-shopping-cart"></i> أحدث الطلبات
-                </h2>
-                <a href="/orders" class="btn btn-secondary btn-sm">عرض الكل</a>
-            </div>
-
-            <% if (orders && orders.length> 0) { %>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>رقم الطلب</th>
-                                <th>المبلغ</th>
-                                <th>الحالة</th>
-                                <th>التاريخ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% orders.forEach(order=> { %>
-                                <tr>
-                                    <td>#<%= order.id.substring(0, 8) %>
-                                    </td>
-                                    <td>
-                                        <%= parseFloat(order.total).toFixed(2) %> ج.م
-                                    </td>
-                                    <td>
-                                        <% const statusMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'Delivered'
-                                            : 'success' , 'Cancelled' : 'danger' }; %>
-                                            <span class="badge badge-<%= statusMap[order.status] || 'warning' %>">
-                                                <%= order.status || 'Processing' %>
-                                            </span>
-                                    </td>
-                                    <td>
-                                        <%= new Date(order.created_at).toLocaleDateString('ar-EG') %>
-                                    </td>
-                                </tr>
-                                <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-                <% } else { %>
-                    <div class="text-center" style="padding: 3rem; color: var(--medium-gray);">
-                        <i class="fas fa-shopping-bag" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem;"></i>
-                        <p>لا توجد طلبات حتى الآن</p>
-                    </div>
-                    <% } %>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">
-                    <i class="fas fa-bolt"></i> إجراءات سريعة
-                </h2>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <a href="/products/new" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> إضافة منتج
-                </a>
-                <a href="/categories" class="btn btn-secondary">
-                    <i class="fas fa-tags"></i> إدارة التصنيفات
-                </a>
-                <a href="/banners/new" class="btn btn-secondary">
-                    <i class="fas fa-images"></i> إضافة بنر
-                </a>
-                <a href="/orders" class="btn btn-secondary">
-                    <i class="fas fa-shopping-cart"></i> عرض الطلبات
-                </a>
-                <a href="/shipping" class="btn btn-warning" style="color: white;">
-                    <i class="fas fa-truck"></i> إعدادات الشحن
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <%- include('partials/footer') %>
+<%- include('partials/footer') %>
