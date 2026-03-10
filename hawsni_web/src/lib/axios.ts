@@ -53,14 +53,10 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
 
-            // Paths that are allowed to handle 401 gracefully (e.g., guest wishlist)
-            const guestAllowedPaths = ['/wishlist'];
-            const currentPath = window.location.pathname;
-            const isGuestAllowed = guestAllowedPaths.some(path => currentPath.startsWith(path));
-
-            if (!window.location.pathname.includes('/login') && !isGuestAllowed) {
-                window.location.href = '/login';
-            }
+            // We only clear local storage on 401 to ensure the user is logged out system-wide.
+            // We DO NOT force a window.location redirect here, as it breaks the UX for guests
+            // on pages that might make background auth-checks (like product pages).
+            // Protected routes should handle redirects individually based on auth state.
         }
         return Promise.reject(error);
     }
