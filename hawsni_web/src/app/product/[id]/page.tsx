@@ -154,6 +154,7 @@ export default function ProductPage() {
     const [isVTOOpen, setIsVTOOpen] = useState(false);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
+    const reviewsRef = useRef<HTMLDivElement>(null);
 
     const items = useCartStore((state) => state.items);
     const addItem = useCartStore((state) => state.addItem);
@@ -434,7 +435,7 @@ export default function ProductPage() {
 
                     <div
                         ref={galleryRef}
-                        className="relative aspect-[4/5] bg-white overflow-hidden lg:rounded-b-[4rem] group"
+                        className="relative aspect-[4/4] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group"
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
@@ -496,7 +497,7 @@ export default function ProductPage() {
                                                     fill
                                                     priority={i === 0}
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                                    className="object-contain select-none"
+                                                    className="object-cover select-none"
                                                 />
                                             )}
                                         </div>
@@ -526,14 +527,18 @@ export default function ProductPage() {
                         {/* Bottom Gradient for Pagination (Balances Top Gradient) */}
                         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/15 to-transparent pointer-events-none z-[15]" />
 
-                        {/* Custom Dots Pagination - Smaller and more subtle */}
+                        {/* Custom Dots Pagination - Smaller, subtle, and clickable */}
                         {safeImages.length > 1 && (
-                            <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/10 backdrop-blur-md rounded-full`} dir="ltr">
+                            <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/10 backdrop-blur-md rounded-full pointer-events-auto z-20`} dir="ltr">
                                 {safeImages.map((_: string, i: number) => (
                                     <button
                                         key={`dot-${i}`}
-                                        onClick={() => setSelectedImage(i)}
-                                        className={`h-[3px] rounded-full transition-all duration-500 ${i === selectedImage ? 'w-2 bg-white/80' : 'w-[3px] bg-white/20 hover:bg-white/40'}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedImage(i);
+                                        }}
+                                        className={`h-2 rounded-full transition-all duration-300 pointer-events-auto cursor-pointer ${i === selectedImage ? 'w-4 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'}`}
+                                        aria-label={`Go to slide ${i + 1}`}
                                     />
                                 ))}
                             </div>
@@ -565,34 +570,41 @@ export default function ProductPage() {
 
                     {/* Right: Info Section */}
                     <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        {/* Title and Rating */}
+                        {/* Title and Rating/Price */}
                         <div className="flex flex-col gap-2 mb-8">
-                            <div className="flex items-center justify-between">
-                                <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight">{product.name}</h1>
+                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight">{product.name}</h1>
+                            
+                            {/* Price */}
+                            <div className="flex flex-col gap-1 mt-1">
+                                {product.discount ? (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-gray-400 line-through font-bold">
+                                            {product.price.toLocaleString('en-US')} {isRTL ? 'ج.م' : 'EGP'}
+                                        </span>
+                                        <span className="bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-md" dir="ltr">
+                                            -{product.discount}%
+                                        </span>
+                                    </div>
+                                ) : null}
+                                <div className={`flex items-baseline gap-2 font-black text-3xl ${product.discount ? 'text-red-500' : 'text-[var(--color-brand-primary)]'}`}>
+                                    <span>{((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
+                                    <span className="text-sm uppercase font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
+
+                            {/* Rating and Reviews */}
+                            <div 
+                                className="flex items-center gap-2 mt-2 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                                onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                            >
                                 <div className="flex text-amber-400">
                                     {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={12} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} />
+                                        <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} />
                                     ))}
                                 </div>
-                                <span className="text-[10px] text-gray-400 font-bold">
-                                    ({(product as any).num_reviews || 0} {isRTL ? 'تقييم' : 'Reviews'})
+                                <span className="text-xs text-[var(--color-brand-primary)] font-bold font-cairo underline underline-offset-2">
+                                    ({(product as any).num_reviews || 0} {isRTL ? 'تقييم - عرض الكل' : 'Reviews - View all'})
                                 </span>
-                            </div>
-                            {product.discount ? (
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-sm text-gray-400 line-through font-bold">
-                                        {product.price.toLocaleString('en-US')} {isRTL ? 'ج.م' : 'EGP'}
-                                    </span>
-                                    <span className="bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-md" dir="ltr">
-                                        -{product.discount}%
-                                    </span>
-                                </div>
-                            ) : null}
-                            <div className={`flex items-baseline gap-2 font-black text-2xl mt-1 ${product.discount ? 'text-red-500' : 'text-[var(--color-brand-primary)]'}`}>
-                                <span>{((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
-                                <span className="text-xs uppercase font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </div>
                         </div>
 
@@ -764,7 +776,7 @@ export default function ProductPage() {
                             </div>
 
                             {/* Reviews Section Integration */}
-                            <div className="pt-10 border-t border-gray-100">
+                            <div ref={reviewsRef} className="pt-10 border-t border-gray-100">
                                 <ReviewsSection productId={productId} />
                             </div>
                         </div>
