@@ -375,7 +375,10 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                 {/* Review images slider */}
                                                 {review.images && review.images.length > 0 && (
                                                     <div className="relative mt-5">
-                                                        <div className={`flex gap-4 overflow-x-auto pb-4 px-1 hide-scrollbar scroll-smooth ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} style={{ scrollSnapType: 'x mandatory' }}>
+                                                        <div 
+                                                            className={`flex gap-3 overflow-x-auto pb-3 hide-scrollbar scroll-smooth ${isRTL ? 'flex-row-reverse' : 'flex-row'} ${review.images.length <= 2 ? 'justify-center' : ''}`}
+                                                            style={{ scrollSnapType: 'x mandatory' }}
+                                                        >
                                                             {review.images.map((img: string, i: number) => (
                                                                 <div 
                                                                     key={i} 
@@ -383,7 +386,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                                     style={{ scrollSnapAlign: isRTL ? 'end' : 'start' }}
                                                                     onClick={() => setLightbox({ images: review.images!, index: i })}
                                                                 >
-                                                                    <div className="relative w-[130px] h-[170px] sm:w-[150px] sm:h-[200px] rounded-3xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
+                                                                    <div className="relative w-[100px] h-[130px] sm:w-[120px] sm:h-[155px] rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
                                                                         <img
                                                                             src={img}
                                                                             alt=""
