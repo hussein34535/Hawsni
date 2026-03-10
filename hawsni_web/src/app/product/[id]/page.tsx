@@ -89,8 +89,8 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
             answer: isRTL ? 'نعم، نوفر خدمة الاسترجاع والاستبدال خلال 14 يوماً من استلام الطلب بشرط بقاء المنتج في حالته الأصلية.' : 'Yes, we offer returns and exchanges within 14 days of receiving the order, provided the product is in its original condition.'
         },
         {
-            question: isRTL ? 'هل المنتجات أصلية؟' : 'Are the products authentic?',
-            answer: isRTL ? 'جميع منتجات Hawsni أصلية 100% ومصنوعة بأعلى معايير الجودة لتناسب ذوقك الرفيع.' : 'All Hawsni products are 100% authentic and crafted with the highest quality standards.'
+            question: isRTL ? 'هل يوجد معاينة قبل الاستلام؟' : 'Can I inspect the order upon delivery?',
+            answer: isRTL ? 'نعم، متاح معاينة للمنتج للتأكد من جودته ومطابقته لطلبك. إذا كان هناك أي خطأ أو عيب، لا تتحملين أي رسوم. أما لأي سبب آخر، يتم دفع 50 جنيهاً مصاريف شحن لشركة التوصيل.' : 'Yes, you can inspect the product upon delivery. If there are any defects or errors, you pay nothing. For any other reason, a 50 EGP shipping fee applies.'
         }
     ];
 
