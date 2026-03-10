@@ -20,7 +20,8 @@ import {
     X,
     Camera,
     Image as ImageIcon,
-    ChevronDown
+    ChevronDown,
+    Hand
 } from 'lucide-react';
 import Image from 'next/image';
 import { useCartStore } from '@/store/cartStore';
@@ -151,6 +152,7 @@ export default function ProductPage() {
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
     const [isVTOOpen, setIsVTOOpen] = useState(false);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
 
     const items = useCartStore((state) => state.items);
     const addItem = useCartStore((state) => state.addItem);
@@ -208,6 +210,23 @@ export default function ProductPage() {
     // Safe images array (null-safe)
     const safeImages = Array.isArray(product?.images) ? product.images : [];
 
+    // Show swipe hint on first visit (only once ever, persisted in localStorage)
+    useEffect(() => {
+        if (safeImages.length > 1 && typeof window !== 'undefined') {
+            const seen = localStorage.getItem('hwasi_seen_gallery_swipe');
+            if (!seen) {
+                // Small delay so the page loads first
+                const showTimer = setTimeout(() => {
+                    setShowGallerySwipeHint(true);
+                    localStorage.setItem('hwasi_seen_gallery_swipe', '1');
+                    // Auto-dismiss after 3 seconds
+                    setTimeout(() => setShowGallerySwipeHint(false), 3000);
+                }, 800);
+                return () => clearTimeout(showTimer);
+            }
+        }
+    }, [safeImages.length]);
+
     // Touch-based image swipe
     const touchStartX = useRef(0);
     const touchDeltaX = useRef(0);
@@ -235,6 +254,10 @@ export default function ProductPage() {
             setSelectedImage(prev => prev + 1);
         } else if (touchDeltaX.current > threshold && selectedImage > 0) {
             setSelectedImage(prev => prev - 1);
+        } else if (touchDeltaX.current > threshold && selectedImage === 0 && count > 1) {
+            // User tried to swipe backwards on first image - show hint
+            setShowGallerySwipeHint(true);
+            setTimeout(() => setShowGallerySwipeHint(false), 3000);
         }
         touchDeltaX.current = 0;
     }, [safeImages.length, selectedImage]);
@@ -469,6 +492,29 @@ export default function ProductPage() {
                                 ))}
                             </div>
                         )}
+
+                        {/* Swipe Hint Overlay for Product Gallery */}
+                        <AnimatePresence>
+                            {showGallerySwipeHint && safeImages.length > 1 && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
+                                >
+                                    <div className="bg-black/50 text-white px-6 py-4 rounded-full backdrop-blur-md flex items-center gap-3 shadow-lg">
+                                        <motion.div
+                                            animate={{ x: [15, -15, 15] }}
+                                            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                                        >
+                                            <Hand size={28} />
+                                        </motion.div>
+                                        <span className="font-cairo font-bold text-sm">{isRTL ? 'اسحب لليسار لعرض المزيد' : 'Swipe left for more'}</span>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     {/* Right: Info Section */}

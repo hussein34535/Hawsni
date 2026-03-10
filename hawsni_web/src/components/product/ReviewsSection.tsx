@@ -211,18 +211,22 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                     }}
                                 />
                                 
-                                {/* Swipe Hint Animation */}
+                                {/* Swipe Hint Animation - auto-dismiss after 3s */}
                                 {lightbox.images.length > 1 && !hasSeenSwipeHint && (
                                     <motion.div 
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
                                         className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none"
+                                        onAnimationComplete={() => {
+                                            setTimeout(() => setHasSeenSwipeHint(true), 3000);
+                                        }}
                                     >
                                         <div className="bg-black/60 text-white px-6 py-4 rounded-full backdrop-blur-md flex flex-col items-center gap-2">
                                             <motion.div
                                                 animate={{ x: [-20, 20, -20] }}
-                                                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                                                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
                                             >
                                                 <Hand size={32} />
                                             </motion.div>
