@@ -31,6 +31,10 @@ class ProductService {
             query = query.lte('price', parseFloat(filters.maxPrice));
         }
 
+        if (filters.is_featured !== undefined) {
+            query = query.eq('is_featured', filters.is_featured === 'true' || filters.is_featured === true);
+        }
+
         if (sort) {
             const sortBy = sort === 'price_asc' ? 'price' : sort === 'price_desc' ? 'price.desc' : 'created_at.desc';
             query = query.order(sortBy);

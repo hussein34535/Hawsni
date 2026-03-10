@@ -242,8 +242,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
                 {/* 2. Interactive Colors */}
                 {colors.length > 0 && (
-                    <div className="flex mb-1">
-                        {parseColors(colors).slice(0, 5).map((c, i) => {
+                    <div className="flex flex-wrap gap-1.5 mb-2 items-center">
+                        {parseColors(colors).slice(0, 4).map((c, i) => {
                             const isSelected = selectedColor === c.color;
                             return (
                                 <button
@@ -258,13 +258,18 @@ export default function ProductCard({ product }: ProductCardProps) {
                                         }
                                     }}
                                     style={{ backgroundColor: formatColor(c.color) }}
-                                    className={`w-7 h-7 rounded-full mr-2 transition-all border ${isSelected
+                                    className={`w-6 h-6 rounded-full shrink-0 transition-all border ${isSelected
                                         ? 'border-[var(--color-brand-primary)] border-[2px] shadow-[0_0_6px_rgba(27,77,62,0.4)] scale-110'
                                         : 'border-gray-300 border-[0.5px]'
                                         }`}
                                 />
                             );
                         })}
+                        {colors.length > 4 && (
+                            <span className="text-[10px] font-bold text-gray-400 ml-0.5">
+                                +{colors.length - 4}
+                            </span>
+                        )}
                     </div>
                 )}
 

@@ -22,8 +22,8 @@ async function applyFreeDeliveryMarkup(products) {
 class ProductController {
     async getProducts(req, res) {
         try {
-            const { category, search, minPrice, maxPrice, sort } = req.query;
-            const filters = { category, search, minPrice, maxPrice };
+            const { category, search, minPrice, maxPrice, sort, featured } = req.query;
+            const filters = { category, search, minPrice, maxPrice, is_featured: featured };
 
             const products = await ProductService.getAllProducts(filters, sort);
             const adjusted = await applyFreeDeliveryMarkup(products);

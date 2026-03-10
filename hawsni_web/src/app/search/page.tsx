@@ -28,6 +28,7 @@ function SearchContent() {
     const searchParams = useSearchParams();
     const initialQuery = searchParams.get('q') || '';
     const initialCategory = searchParams.get('category') || null;
+    const initialFeatured = searchParams.get('featured') === 'true';
 
     const [query, setQuery] = useState(initialQuery);
     const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -42,12 +43,13 @@ function SearchContent() {
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(5000);
     const [sortBy, setSortBy] = useState('newest');
+    const [isFeatured, setIsFeatured] = useState(initialFeatured);
 
     useEffect(() => {
         loadSearchHistory();
         loadCategories();
-        if (initialQuery || initialCategory) {
-            handleSearch(initialQuery, initialCategory);
+        if (initialQuery || initialCategory || initialFeatured) {
+            handleSearch(initialQuery, initialCategory, initialFeatured);
         }
     }, []);
 
@@ -87,8 +89,8 @@ function SearchContent() {
         }
     };
 
-    const handleSearch = async (term: string = query, catId: string | null = selectedCategory) => {
-        if (!term.trim() && !catId) return;
+    const handleSearch = async (term: string = query, catId: string | null = selectedCategory, featured: boolean = isFeatured) => {
+        if (!term.trim() && !catId && !featured) return;
 
         setIsLoading(true);
         setSuggestions([]);
@@ -102,6 +104,7 @@ function SearchContent() {
                 sortBy
             };
             if (catId) params.category = catId;
+            if (featured) params.featured = true;
 
             const { data } = await axios.get('/products/search', { params });
             setSearchResults(data.products || []);
@@ -118,6 +121,7 @@ function SearchContent() {
         setMinPrice(0);
         setMaxPrice(5000);
         setSortBy('newest');
+        setIsFeatured(false);
         setQuery('');
         setSearchResults([]);
     };
