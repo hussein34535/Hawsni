@@ -1,9 +1,10 @@
 'use client';
 
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, MoreVertical, Download, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useCallback, useState, useRef } from 'react';
+import { useToastStore } from '@/store/toastStore';
 
 interface ImageLightboxProps {
     images: string[];
@@ -26,6 +27,7 @@ export default function ImageLightbox({
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
     const imageRef = useRef<HTMLDivElement>(null);
+    const { showToast } = useToastStore();
 
     const resetZoom = useCallback(() => {
         setZoom(1);
@@ -50,16 +52,25 @@ export default function ImageLightbox({
             const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = blobUrl;
-            // Extract filename from URL or use a default
-            const filename = url.split('/').pop()?.split('?')[0] || 'hwasi-image.jpg';
+            
+            // Extract a clean filename or use a default
+            const urlParts = url.split('/');
+            let filename = urlParts[urlParts.length - 1].split('?')[0] || 'hwasi-image.jpg';
+            if (!filename.includes('.')) {
+                filename += '.jpg';
+            }
+
             link.download = filename;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(blobUrl);
+
+            showToast('تم تحميل الصورة بنجاح وتجدها في معرض الصور الخاص بك', 'success');
             setShowMenu(false);
         } catch (error) {
             console.error('Download failed:', error);
+            showToast('عذراً، فشل تحميل الصورة. يرجى المحاولة مرة أخرى', 'error');
             // Fallback for CORS issues: open in new tab
             window.open(url, '_blank');
         }
