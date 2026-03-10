@@ -411,17 +411,12 @@
         }
 
         function closeModal(event) {
-            if (event) {
-                // If it's a click event, stop propagation if it's outside
-                if (event.target.id === 'orderModal') {
-                    document.getElementById('orderModal').classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            } else {
-                // Direct call (like from the close button)
-                document.getElementById('orderModal').classList.remove('active');
-                document.body.style.overflow = '';
+            // If an event is passed and the clicked target isn't the backdrop, ignore it.
+            if (event && event.target.id !== 'orderModal') {
+                return;
             }
+            document.getElementById('orderModal').classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         function copyAddress() {

@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-    /* Brand Colors - Premium Deep Green & Gold */
-    --brand-primary: #0A3626;      /* Deeper, more luxurious green */
-    --brand-secondary: #124D38;
-    --brand-light: #F0F5F3;        /* Slightly warmer light background */
-    --brand-accent: #D4AF37;       /* Gold accent */
-    --brand-accent-hover: #C5A028;
+    /* Brand Colors - Premium Modern Slate/Indigo */
+    --brand-primary: #0F172A;      /* Slate 900 for a stark, modern look */
+    --brand-secondary: #1E293B;    /* Slate 800 */
+    --brand-light: #F8FAFC;        /* Slate 50 */
+    --brand-accent: #3B82F6;       /* Vibrant Blue accent */
+    --brand-accent-hover: #2563EB;
 
     /* Neutrals - Sleek Slate/Zinc */
-    --bg-main: #F4F7F6;            /* Softer page background */
+    --bg-main: #F1F5F9;            /* Slate 100 */
     --bg-card: #FFFFFF;
     --text-main: #0F172A;          /* Slate 900 for sharp text */
     --text-muted: #64748B;         /* Slate 500 */
@@ -17,10 +17,10 @@
     --border-medium: #CBD5E1;      /* Slate 300 */
 
     /* Semantic with softer tints */
-    --success: #059669;
-    --warning: #D97706;
-    --danger: #DC2626;
-    --info: #2563EB;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --info: #3B82F6;
 
     --success-bg: #ECFDF5;
     --warning-bg: #FFFBEB;
@@ -31,10 +31,10 @@
     --hidden: none;
 
     /* Shadows - Ultra Soft & Layered for Premium SaaS Feel */
-    --shadow-sm: 0 1px 2px 0 rgba(10, 54, 38, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(10, 54, 38, 0.08), 0 2px 4px -2px rgba(10, 54, 38, 0.04);
-    --shadow-lg: 0 10px 25px -5px rgba(10, 54, 38, 0.08), 0 8px 10px -6px rgba(10, 54, 38, 0.04);
-    --shadow-xl: 0 20px 40px -10px rgba(10, 54, 38, 0.12);
+    --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    --shadow-xl: 0 20px 40px -10px rgba(15, 23, 42, 0.12);
     --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
 
     /* Spacing & Sizing */
@@ -654,7 +654,7 @@ tr:hover td {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 9999;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -737,18 +737,19 @@ tr:hover td {
 }
 
 .modal-close {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     border: none;
     background: var(--bg-main);
-    color: var(--text-muted);
-    font-size: 1.5rem;
+    color: var(--text-main);
+    font-size: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: var(--trans-fast);
+    box-shadow: var(--shadow-sm);
 }
 
 .modal-close:hover {
