@@ -374,27 +374,29 @@ export default function ReviewsSection({ productId }: { productId: string }) {
 
                                                 {/* Review images slider */}
                                                 {review.images && review.images.length > 0 && (
-                                                    <div className="relative mt-4">
-                                                        <div className={`flex gap-3 overflow-x-auto pb-4 px-1 hide-scrollbar scroll-smooth ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} style={{ scrollSnapType: 'x mandatory' }}>
+                                                    <div className="relative mt-5">
+                                                        <div className={`flex gap-4 overflow-x-auto pb-4 px-1 hide-scrollbar scroll-smooth ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} style={{ scrollSnapType: 'x mandatory' }}>
                                                             {review.images.map((img: string, i: number) => (
                                                                 <div 
                                                                     key={i} 
-                                                                    className="relative flex-shrink-0 cursor-zoom-in group" 
+                                                                    className="relative flex-shrink-0 cursor-zoom-in group active:scale-95 transition-transform" 
                                                                     style={{ scrollSnapAlign: isRTL ? 'end' : 'start' }}
                                                                     onClick={() => setLightbox({ images: review.images!, index: i })}
                                                                 >
-                                                                    <img
-                                                                        src={img}
-                                                                        alt=""
-                                                                        className="w-[110px] h-[140px] sm:w-[130px] sm:h-[170px] rounded-2xl object-cover hover:opacity-95 transition-all border border-gray-100 shadow-sm"
-                                                                    />
-                                                                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                    <div className="relative w-[130px] h-[170px] sm:w-[150px] sm:h-[200px] rounded-3xl overflow-hidden shadow-sm border border-gray-100 ring-1 ring-black/5 bg-gray-50">
+                                                                        <img
+                                                                            src={img}
+                                                                            alt=""
+                                                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                                        />
+                                                                        <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
+                                                                    </div>
                                                                 </div>
                                                             ))}
                                                         </div>
                                                         {/* Subtle fade edges for overflow indication */}
-                                                        <div className={`absolute top-0 bottom-4 w-12 pointer-events-none z-10 bg-gradient-to-r from-white to-transparent ${isRTL ? 'right-0' : 'left-0'}`} />
-                                                        <div className={`absolute top-0 bottom-4 w-12 pointer-events-none z-10 bg-gradient-to-l from-white to-transparent ${isRTL ? 'left-0' : 'right-0'}`} />
+                                                        <div className={`absolute top-0 bottom-4 w-12 pointer-events-none z-10 bg-gradient-to-r from-white/80 to-transparent ${isRTL ? 'right-0' : 'left-0'}`} />
+                                                        <div className={`absolute top-0 bottom-4 w-12 pointer-events-none z-10 bg-gradient-to-l from-white/80 to-transparent ${isRTL ? 'left-0' : 'right-0'}`} />
                                                     </div>
                                                 )}
                                             </div>

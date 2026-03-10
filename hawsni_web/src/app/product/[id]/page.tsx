@@ -584,7 +584,7 @@ export default function ProductPage() {
                     <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
                         {/* Title and Header Layout Refined */}
                         <div className="flex flex-col gap-6 mb-10">
-                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight">{product.name}</h1>
+                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight mb-2.5">{product.name}</h1>
                             
                             <div className="flex items-start justify-between gap-4">
                                 {/* Price - Naturally on the right in RTL, left in LTR due to flex-row and dir="rtl" */}
@@ -605,23 +605,23 @@ export default function ProductPage() {
                                     </div>
                                 </div>
 
-                                {/* Rating and Reviews - Naturally on the left in RTL, right in LTR */}
+                                {/* Rating and Reviews - Redesigned per user request */}
                                 <div 
-                                    className="flex flex-col gap-1 cursor-pointer group"
+                                    className={`flex flex-col gap-1 cursor-pointer group ${isRTL ? 'items-start' : 'items-end'}`}
                                     onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                                 >
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex text-amber-400">
+                                    <div className="flex items-center gap-2" dir="ltr">
+                                        <div className="flex gap-0.5 text-amber-400">
                                             {[...Array(5)].map((_, i) => (
-                                                <Star key={i} size={16} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
+                                                <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
                                             ))}
                                         </div>
-                                        <span className="text-sm font-black text-amber-700 bg-amber-100/50 px-2 py-0.5 rounded-lg border border-amber-200 min-w-[34px] text-center shadow-sm">
+                                        <span className="text-sm font-black text-gray-900">
                                             {product.rating?.toFixed(1) || '0.0'}
                                         </span>
                                     </div>
-                                    <span className={`text-[11px] font-bold text-gray-400 group-hover:text-[var(--color-brand-primary)] transition-colors ${isRTL ? 'text-left' : 'text-right'}`}>
-                                        {isRTL ? `(${product.reviews_count || 0}) تقييم حقيقي` : `(${product.reviews_count || 0}) Verified Reviews`}
+                                    <span className={`text-[11px] font-bold text-gray-400 group-hover:text-[var(--color-brand-primary)] transition-colors ${isRTL ? 'text-right' : 'text-left'}`}>
+                                        {isRTL ? `(${product.reviews || 0}) عرض التقييمات` : `View Reviews (${product.reviews || 0})`}
                                     </span>
                                 </div>
                             </div>

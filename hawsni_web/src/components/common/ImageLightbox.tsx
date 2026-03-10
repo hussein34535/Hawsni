@@ -111,110 +111,82 @@ export default function ImageLightbox({
                         else onClose();
                     }}
                 >
-                    {/* Top right buttons */}
-                    <div className="absolute top-6 right-6 z-[120] flex items-center gap-3">
-                        {/* Zoom Controls */}
-                        <div className="hidden lg:flex items-center gap-2 mr-4">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setZoom(Math.max(1, zoom - 0.5)); }}
-                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 transition-all backdrop-blur-md"
-                            >
-                                <ZoomOut size={20} />
-                            </button>
-                            <span className="text-white/80 text-xs font-bold w-10 text-center">{Math.round(zoom * 100)}%</span>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setZoom(Math.min(5, zoom + 0.5)); }}
-                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 transition-all backdrop-blur-md"
-                            >
-                                <ZoomIn size={20} />
-                            </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); resetZoom(); }}
-                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 transition-all backdrop-blur-md"
-                                title="Reset Zoom"
-                            >
-                                <Maximize size={18} />
-                            </button>
-                        </div>
-
-                        <div className="relative">
+                    {/* Top Controls Overlay */}
+                    <div className="absolute top-0 left-0 right-0 z-[120] p-6 flex items-center justify-between pointer-events-none">
+                        {/* Top Left: Close and Download (Always Visible) */}
+                        <div className="flex items-center gap-3 pointer-events-auto">
                             <motion.button
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all backdrop-blur-md shadow-lg"
+                                whileTap={{ scale: 0.9 }}
+                                className="w-12 h-12 bg-black/40 hover:bg-black/60 rounded-2xl flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10 shadow-2xl"
+                                onClick={(e) => { e.stopPropagation(); onClose(); }}
+                            >
+                                <X size={24} strokeWidth={2.5} />
+                            </motion.button>
+
+                            <motion.button
+                                whileTap={{ scale: 0.9 }}
+                                className="w-12 h-12 bg-black/40 hover:bg-black/60 rounded-2xl flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10 shadow-2xl"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setShowMenu(!showMenu);
+                                    handleDownload(images[currentIndex]);
                                 }}
                             >
-                                <MoreVertical size={20} strokeWidth={2.5} />
+                                <Download size={22} strokeWidth={2.5} />
                             </motion.button>
-                            
-                            <AnimatePresence>
-                                {showMenu && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                        className="absolute top-12 right-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl overflow-hidden min-w-[140px]"
-                                    >
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDownload(images[currentIndex]);
-                                            }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors text-sm font-bold font-cairo"
-                                        >
-                                            <Download size={16} />
-                                            تنزيل الصورة
-                                        </button>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
                         </div>
 
-                        <motion.button
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all backdrop-blur-md shadow-lg"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onClose();
-                            }}
-                        >
-                            <X size={20} strokeWidth={2.5} />
-                        </motion.button>
+                        {/* Top Right: Zoom Controls (Visible on all devices) */}
+                        <div className="flex items-center gap-2 pointer-events-auto">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setZoom(Math.max(1, zoom - 0.5)); }}
+                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-xl flex items-center justify-center text-white transition-all backdrop-blur-md border border-white/10"
+                            >
+                                <ZoomOut size={18} />
+                            </button>
+                            <div className="hidden sm:flex w-12 items-center justify-center text-[10px] font-black text-white/70 tracking-tighter">
+                                {Math.round(zoom * 100)}%
+                            </div>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setZoom(Math.min(5, zoom + 0.5)); }}
+                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-xl flex items-center justify-center text-white transition-all backdrop-blur-md border border-white/10"
+                            >
+                                <ZoomIn size={18} />
+                            </button>
+                        </div>
                     </div>
 
+                    {/* Navigation Arrows (Desktop Only) */}
                     {images.length > 1 && (
                         <>
                             <button
-                                className="absolute left-4 lg:left-8 z-[110] w-12 h-12 bg-black/40 hover:bg-black/60 active:scale-90 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all shadow-lg backdrop-blur-md"
+                                className="hidden lg:flex absolute left-8 z-[110] w-14 h-14 bg-white/10 hover:bg-white/20 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/10"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleNavigate((currentIndex - 1 + images.length) % images.length);
                                 }}
                             >
-                                <ChevronLeft size={24} strokeWidth={2.5} />
+                                <ChevronLeft size={32} strokeWidth={2.5} />
                             </button>
                             <button
-                                className="absolute right-4 lg:right-8 z-[110] w-12 h-12 bg-black/40 hover:bg-black/60 active:scale-90 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all shadow-lg backdrop-blur-md"
+                                className="hidden lg:flex absolute right-8 z-[110] w-14 h-14 bg-white/10 hover:bg-white/20 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/10"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleNavigate((currentIndex + 1) % images.length);
                                 }}
                             >
-                                <ChevronRight size={24} strokeWidth={2.5} />
+                                <ChevronRight size={32} strokeWidth={2.5} />
                             </button>
                         </>
                     )}
 
+                    {/* Main Image View with Swipe Support */}
                     <motion.div
                         ref={imageRef}
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className={`relative w-full h-full max-h-screen max-w-7xl mx-auto flex items-center justify-center p-2 lg:p-10 ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'}`}
+                        className={`relative w-full h-full max-h-screen max-w-7xl mx-auto flex items-center justify-center p-4 lg:p-20 ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                        onClick={(e) => e.stopPropagation()}
                         onDoubleClick={(e) => {
                             e.stopPropagation();
                             toggleZoom();
@@ -233,65 +205,98 @@ export default function ImageLightbox({
                         }}
                         onMouseUp={() => setIsDragging(false)}
                         onMouseLeave={() => setIsDragging(false)}
-                        onTouchStart={(e) => {
-                            if (e.touches.length === 2) return; // Handle pinch separately if needed
-                            if (zoom <= 1) return;
-                            setIsDragging(true);
-                            dragStart.current = { x: e.touches[0].clientX - position.x, y: e.touches[0].clientY - position.y };
-                        }}
-                        onTouchMove={(e) => {
-                            if (!isDragging || zoom <= 1 || e.touches.length === 2) return;
-                            setPosition({
-                                x: e.touches[0].clientX - dragStart.current.x,
-                                y: e.touches[0].clientY - dragStart.current.y
-                            });
-                        }}
-                        onTouchEnd={() => setIsDragging(false)}
-                        style={{ touchAction: 'none' }}
                     >
-                        {(() => {
-                            const currentSrc = images[currentIndex];
-                            const lowerSrc = currentSrc.toLowerCase();
-                            const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentIndex}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ 
+                                    opacity: 1, 
+                                    x: position.x,
+                                    y: position.y,
+                                    scale: zoom
+                                }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ 
+                                    type: 'spring', 
+                                    damping: 30, 
+                                    stiffness: 300, 
+                                    mass: 0.8,
+                                    opacity: { duration: 0.2 }
+                                }}
+                                drag={zoom <= 1 ? "x" : false}
+                                dragConstraints={{ left: 0, right: 0 }}
+                                onDragEnd={(_, info) => {
+                                    if (zoom > 1) return;
+                                    const threshold = 50;
+                                    if (info.offset.x < -threshold) {
+                                        handleNavigate((currentIndex + 1) % images.length);
+                                    } else if (info.offset.x > threshold) {
+                                        handleNavigate((currentIndex - 1 + images.length) % images.length);
+                                    }
+                                }}
+                                className="relative w-full h-full flex items-center justify-center"
+                            >
+                                {(() => {
+                                    const currentSrc = images[currentIndex];
+                                    const lowerSrc = currentSrc.toLowerCase();
+                                    const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
 
-                            if (isVideo) {
-                                return (
-                                    <video
-                                        src={currentSrc}
-                                        className="w-full h-full object-contain"
-                                        controls
-                                        playsInline
-                                        controlsList="nodownload"
-                                    />
-                                );
-                            }
+                                    if (isVideo) {
+                                        return (
+                                            <video
+                                                src={currentSrc}
+                                                className="w-full h-full max-h-[80vh] object-contain rounded-xl"
+                                                controls
+                                                playsInline
+                                                controlsList="nodownload"
+                                            />
+                                        );
+                                    }
 
-                            return (
-                                <motion.div
-                                    animate={{ 
-                                        scale: zoom,
-                                        x: position.x,
-                                        y: position.y
-                                    }}
-                                    transition={{ type: 'spring', damping: 25, stiffness: 200, mass: 0.5 }}
-                                    className="relative w-full h-full"
-                                >
-                                    <Image
-                                        src={currentSrc}
-                                        alt={`Fullscreen view ${currentIndex + 1}`}
-                                        fill
-                                        className={`object-contain transition-transform duration-200 ${isDragging ? 'scale-[1.002]' : ''}`}
-                                        priority
-                                        sizes="100vw"
-                                        draggable={false}
-                                    />
-                                </motion.div>
-                            );
-                        })()}
+                                    return (
+                                        <Image
+                                            src={currentSrc}
+                                            alt={`Fullscreen view ${currentIndex + 1}`}
+                                            fill
+                                            className="object-contain select-none"
+                                            priority
+                                            sizes="100vw"
+                                            draggable={false}
+                                        />
+                                    );
+                                })()}
+                            </motion.div>
+                        </AnimatePresence>
                     </motion.div>
 
-                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/60 font-medium tracking-widest text-sm">
-                        {currentIndex + 1} / {images.length}
+                    {/* Bottom: Thumbnail Row and Counter */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center gap-6 z-[120] bg-gradient-to-t from-black/60 to-transparent">
+                        {images.length > 1 && (
+                            <div className="flex items-center gap-3 overflow-x-auto max-w-full px-4 py-2 hide-scrollbar">
+                                {images.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={(e) => { e.stopPropagation(); handleNavigate(idx); }}
+                                        className={`
+                                            relative flex-shrink-0 w-14 h-18 sm:w-16 sm:h-20 rounded-xl overflow-hidden border-2 transition-all
+                                            ${currentIndex === idx ? 'border-white scale-110 shadow-xl' : 'border-transparent opacity-40 hover:opacity-100'}
+                                        `}
+                                    >
+                                        <Image
+                                            src={img}
+                                            alt={`Thumb ${idx}`}
+                                            fill
+                                            className="object-cover"
+                                            sizes="64px"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        <div className="text-white/60 font-black tracking-[0.2em] text-[10px] uppercase bg-white/5 py-1.5 px-4 rounded-full backdrop-blur-md border border-white/5">
+                            {currentIndex + 1} <span className="mx-2 opacity-30">/</span> {images.length}
+                        </div>
                     </div>
                 </motion.div>
             )}
