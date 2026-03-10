@@ -180,7 +180,7 @@
             <script>
                 // Live Countdown Script
                 (function() {
-                    const nextFetchTime = <%= clarityInsights.nextFetch %>;
+                    const nextFetchTime = parseInt("<%= clarityInsights.nextFetch %>", 10);
                     const countdownEl = document.getElementById('clarity-countdown');
                     
                     function updateCountdown() {
