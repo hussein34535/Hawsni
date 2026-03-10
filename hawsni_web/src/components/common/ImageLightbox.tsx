@@ -91,6 +91,9 @@ function LightboxImage({
                     controls
                     playsInline
                     controlsList="nodownload"
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
                 />
             ) : (
                 <div className="relative w-full h-full pointer-events-none p-4 lg:p-12">

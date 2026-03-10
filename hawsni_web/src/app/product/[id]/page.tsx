@@ -457,20 +457,16 @@ export default function ProductPage() {
                                         {/* Foreground Focused Layer */}
                                         <div className="absolute inset-0 z-10 flex items-center justify-center">
                                             {isVideo ? (
-                                                <>
+                                                <div className="w-full h-full flex items-center justify-center">
                                                     <video
                                                         src={formatImageUrl(img)}
-                                                        className="w-full h-full object-contain pointer-events-none"
+                                                        className="w-full h-full object-contain"
                                                         playsInline
+                                                        controls
                                                         controlsList="nodownload"
                                                         preload="metadata"
                                                     />
-                                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                        <div className="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
-                                                            <Play className="text-white ml-1 w-8 h-8" fill="currentColor" />
-                                                        </div>
-                                                    </div>
-                                                </>
+                                                </div>
                                             ) : (
                                                 <Image
                                                     src={formatImageUrl(img)}
