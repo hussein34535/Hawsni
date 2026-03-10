@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Star, MessageSquare, User, ImagePlus, X } from 'lucide-react';
+import { Star, ThumbsUp, MessageSquare, ImagePlus, X, User, CheckCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Hand } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { reviewService, Review } from '@/services/reviewService';
 import { useLanguage } from '@/context/LanguageContext';
@@ -51,7 +51,8 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     };
 
     // Lightbox
-    const [lightbox, setLightbox] = useState<string | null>(null);
+    const [lightbox, setLightbox] = useState<{ images: string[], index: number } | null>(null);
+    const [hasSeenSwipeHint, setHasSeenSwipeHint] = useState(false);
 
     const loggedIn = typeof window !== 'undefined' && !!localStorage.getItem('token');
     const currentUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
@@ -162,13 +163,99 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                 {lightbox && (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
-                        onClick={() => setLightbox(null)}
+                        className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center backdrop-blur-md"
                     >
-                        <button className="absolute top-4 right-4 text-white" onClick={() => setLightbox(null)}>
-                            <X size={28} />
-                        </button>
-                        <img src={lightbox} className="max-w-full max-h-[90vh] rounded-2xl object-contain" />
+                        {/* Top Bar Navigation */}
+                        <div className="absolute top-0 w-full p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/80 to-transparent">
+                            <div className="text-white/80 text-sm font-bold tracking-widest px-4 font-mono">
+                                {lightbox.index + 1} / {lightbox.images.length}
+                            </div>
+                            <button className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all active:scale-90" onClick={() => setLightbox(null)}>
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Middle Content area */}
+                        <div className="flex-1 w-full flex items-center justify-center relative px-12 touch-pan-y">
+                            {lightbox.images.length > 1 && (
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.images.length) % lightbox.images.length }); }}
+                                    className="absolute left-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all active:scale-90 z-10 hidden sm:flex"
+                                >
+                                    <ChevronLeft size={28} />
+                                </button>
+                            )}
+                            
+                            {/* Swipeable image container setup (conceptual simplified version for now, relies on framer motion if possible, or simple clicks) */}
+                            <AnimatePresence mode="wait">
+                                <motion.img 
+                                    key={lightbox.index}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.2 }}
+                                    src={lightbox.images[lightbox.index]} 
+                                    className="max-w-full max-h-[75vh] object-contain rounded-md shadow-2xl relative z-10" 
+                                    drag="x"
+                                    dragConstraints={{ left: 0, right: 0 }}
+                                    dragElastic={0.2}
+                                    onDragStart={() => setHasSeenSwipeHint(true)}
+                                    onDragEnd={(e, { offset, velocity }) => {
+                                        setHasSeenSwipeHint(true);
+                                        const swipe = Math.abs(offset.x) * velocity.x;
+                                        if (swipe < -100) {
+                                            setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.images.length });
+                                        } else if (swipe > 100) {
+                                            setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.images.length) % lightbox.images.length });
+                                        }
+                                    }}
+                                />
+                                
+                                {/* Swipe Hint Animation */}
+                                {lightbox.images.length > 1 && !hasSeenSwipeHint && (
+                                    <motion.div 
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none"
+                                    >
+                                        <div className="bg-black/60 text-white px-6 py-4 rounded-full backdrop-blur-md flex flex-col items-center gap-2">
+                                            <motion.div
+                                                animate={{ x: [-20, 20, -20] }}
+                                                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                                            >
+                                                <Hand size={32} />
+                                            </motion.div>
+                                            <span className="font-cairo font-bold text-sm">{isRTL ? 'اسحب للتنقل بين الصور' : 'Swipe to navigate'}</span>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            {lightbox.images.length > 1 && (
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.images.length }); }}
+                                    className="absolute right-4 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all active:scale-90 z-10 hidden sm:flex"
+                                >
+                                    <ChevronRight size={28} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Bottom Thumbnail Bar */}
+                        {lightbox.images.length > 1 && (
+                            <div className="w-full pb-8 pt-4 px-4 flex justify-center items-center gap-3">
+                                {lightbox.images.map((img, i) => (
+                                    <button 
+                                        key={i} 
+                                        onClick={() => setLightbox({ ...lightbox, index: i })}
+                                        className={`relative w-16 h-16 rounded-lg overflow-hidden transition-all duration-300 ${i === lightbox.index ? 'ring-2 ring-[var(--color-brand-primary)] ring-offset-2 ring-offset-black scale-110 opacity-100' : 'opacity-40 hover:opacity-75'}`}
+                                    >
+                                        <img src={img} className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -386,7 +473,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                                     if (isLastVisible) {
                                                                         toggleExpandReview(review._id || idx.toString());
                                                                     } else {
-                                                                        setLightbox(img);
+                                                                        setLightbox({ images: review.images!, index: i });
                                                                     }
                                                                 }}>
                                                                     <img
