@@ -232,21 +232,28 @@ export default function ProductPage() {
     const touchDeltaX = useRef(0);
     const galleryRef = useRef<HTMLDivElement>(null);
     const isSwiping = useRef(false);
+    const [dragOffset, setDragOffset] = useState(0);
 
     const handleTouchStart = useCallback((e: ReactTouchEvent) => {
         touchStartX.current = e.touches[0].clientX;
         touchDeltaX.current = 0;
         isSwiping.current = true;
+        setDragOffset(0);
     }, []);
 
     const handleTouchMove = useCallback((e: ReactTouchEvent) => {
         if (!isSwiping.current) return;
-        touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+        const delta = e.touches[0].clientX - touchStartX.current;
+        touchDeltaX.current = delta;
+        // Convert pixel offset to percentage of gallery width
+        const galleryWidth = galleryRef.current?.offsetWidth || window.innerWidth;
+        setDragOffset((delta / galleryWidth) * 100);
     }, []);
 
     const handleTouchEnd = useCallback(() => {
         if (!isSwiping.current) return;
         isSwiping.current = false;
+        setDragOffset(0);
         const threshold = 50;
         const count = safeImages.length || 1;
 
@@ -395,8 +402,8 @@ export default function ProductPage() {
                         onTouchEnd={handleTouchEnd}
                     >
                         <div
-                            className="w-full h-full flex transition-transform duration-300 ease-out"
-                            style={{ transform: `translateX(-${selectedImage * 100}%)` }}
+                            className={`w-full h-full flex ease-out ${dragOffset === 0 ? 'transition-transform duration-400' : ''}`}
+                            style={{ transform: `translateX(calc(-${selectedImage * 100}% + ${dragOffset}%))` }}
                         >
                             {safeImages.map((img, i) => {
                                 const lowerImg = img.toLowerCase();
