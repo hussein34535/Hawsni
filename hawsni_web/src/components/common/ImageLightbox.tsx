@@ -1,9 +1,9 @@
 'use client';
 
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, animate } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import { useToastStore } from '@/store/toastStore';
 
 interface ImageLightboxProps {
@@ -27,14 +27,39 @@ export default function ImageLightbox({
     const dragStart = useRef({ x: 0, y: 0 });
     const thumbContainerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToastStore();
+    const [windowWidth, setWindowWidth] = useState(0);
+
+    useEffect(() => {
+        setWindowWidth(window.innerWidth);
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Use MotionValues for high-performance dragging (no re-renders)
     const translateX = useMotionValue(0); // For zoomed image dragging
     const translateY = useMotionValue(0);
     
-    // The main tape/strip position
+    // The main tape/strip position (in pixels for 1:1 tracking)
     const tapeX = useMotionValue(0);
-    const springTapeX = useSpring(tapeX, { stiffness: 250, damping: 32, mass: 0.5 });
+
+    // Snapshot of tapeX for other visual effects
+    const visualTapeX = useSpring(tapeX, { stiffness: 200, damping: 30, mass: 0.8 });
+
+    // Snap to index helper
+    const snapToIndex = useCallback((index: number, animateSnap: boolean = true) => {
+        const target = -index * windowWidth;
+        if (animateSnap) {
+            animate(tapeX, target, {
+                type: 'spring',
+                stiffness: 250,
+                damping: 32,
+                mass: 0.5
+            });
+        } else {
+            tapeX.set(target);
+        }
+    }, [tapeX, windowWidth]);
 
     // Spring for smooth zoom-drag reset
     const springX = useSpring(translateX, { stiffness: 300, damping: 30 });
@@ -52,14 +77,19 @@ export default function ImageLightbox({
     // Update tape position whenever currentIndex changes (if not dragging)
     useEffect(() => {
         if (!isDragging) {
-            tapeX.set(-currentIndex * 100);
+            snapToIndex(currentIndex, true);
         }
-    }, [currentIndex, tapeX, isDragging]);
+    }, [currentIndex, snapToIndex, isDragging]);
 
     // Handle navigation with extreme smoothness
     const handleNavigate = (index: number) => {
         resetZoom();
         onNavigate(index);
+    };
+    
+    // Convert px offset to percentage for the tape
+    const handleDrag = (_: any, info: { offset: { x: number } }) => {
+        // We let Framer Motion handle the x transform directly on tapeX
     };
 
     const toggleZoom = () => {
@@ -226,11 +256,37 @@ export default function ImageLightbox({
                         </>
                     )}
 
+                    {/* Cinematic Cross-fading Background Blur */}
+                    <div className="absolute inset-0 z-0 overflow-hidden">
+                        {images.map((img, idx) => (
+                            <motion.div
+                                key={`bg-${idx}`}
+                                className="absolute inset-0"
+                                style={{
+                                    opacity: useTransform(
+                                        visualTapeX,
+                                        [-(idx + 1) * windowWidth, -idx * windowWidth, -(idx - 1) * windowWidth],
+                                        [0, 1, 0]
+                                    )
+                                }}
+                            >
+                                <Image
+                                    src={img}
+                                    alt=""
+                                    fill
+                                    className="object-cover blur-3xl opacity-30 scale-110"
+                                    sizes="10vw"
+                                />
+                            </motion.div>
+                        ))}
+                    </div>
+
                     {/* Main Filmstrip View */}
-                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden pointer-events-none">
+                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden pointer-events-none z-10">
                         <motion.div
                             drag={zoom <= 1 ? "x" : false}
-                            dragElastic={0.1}
+                            dragConstraints={{ left: -(images.length - 1) * windowWidth, right: 0 }}
+                            dragElastic={0.15}
                             onDragStart={() => setIsDragging(true)}
                             onDragEnd={(_, info) => {
                                 setIsDragging(false);
@@ -240,19 +296,21 @@ export default function ImageLightbox({
                                 const velocity = info.velocity.x;
                                 const threshold = 50;
                                 
-                                // Determine next index based on swipe distance and velocity
-                                let nextIndex = currentIndex;
+                                // Determine next index based on current position + swipe/velocity
+                                const x = tapeX.get();
+                                let calculatedIndex = Math.round(-x / windowWidth);
+
                                 if (swipe < -threshold || velocity < -500) {
-                                    nextIndex = Math.min(currentIndex + 1, images.length - 1);
+                                    calculatedIndex = Math.min(calculatedIndex + 1, images.length - 1);
                                 } else if (swipe > threshold || velocity > 500) {
-                                    nextIndex = Math.max(currentIndex - 1, 0);
+                                    calculatedIndex = Math.max(calculatedIndex - 1, 0);
                                 }
                                 
-                                handleNavigate(nextIndex);
+                                handleNavigate(calculatedIndex);
                             }}
                             className="flex h-full w-full pointer-events-auto touch-none"
                             style={{ 
-                                x: springTapeX,
+                                x: zoom > 1 ? 0 : tapeX,
                                 width: `${images.length * 100}%`
                             }}
                         >
@@ -260,16 +318,28 @@ export default function ImageLightbox({
                                 const lowerSrc = img.toLowerCase();
                                 const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
 
+                                // Dynamic Scale and Opacity for "Connected" feel
+                                const scale = useTransform(
+                                    visualTapeX,
+                                    [-(idx + 1) * windowWidth, -idx * windowWidth, -(idx - 1) * windowWidth],
+                                    [0.85, 1, 0.85]
+                                );
+                                const opacity = useTransform(
+                                    visualTapeX,
+                                    [-(idx + 1) * windowWidth, -idx * windowWidth, -(idx - 1) * windowWidth],
+                                    [0.4, 1, 0.4]
+                                );
+
                                 return (
                                     <motion.div
                                         key={idx}
-                                        className="relative h-full flex items-center justify-center pointer-events-auto"
+                                        className="relative h-full flex items-center justify-center pointer-events-auto px-2"
                                         style={{ 
                                             width: `${100 / images.length}%`,
-                                            // Only apply individual zoom/drag style to the active image in the strip
                                             x: idx === currentIndex && zoom > 1 ? springX : 0,
                                             y: idx === currentIndex && zoom > 1 ? springY : 0,
-                                            scale: idx === currentIndex ? zoom : 1,
+                                            scale: idx === currentIndex && zoom > 1 ? zoom : scale,
+                                            opacity: zoom > 1 ? (idx === currentIndex ? 1 : 0) : opacity,
                                             zIndex: idx === currentIndex ? 10 : 1,
                                             cursor: idx === currentIndex && zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
                                         }}
@@ -320,13 +390,13 @@ export default function ImageLightbox({
                     </div>
 
                     {/* Bottom: Thumbnail Row and Counter */}
-                    <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center gap-4 z-[130] bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 flex flex-col items-center gap-3 sm:gap-4 z-[130] bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                         {images.length > 1 && (
                             <div 
                                 ref={thumbContainerRef}
-                                className="flex items-center gap-3 overflow-x-auto max-w-full sm:max-w-[90vw] px-10 py-4 hide-scrollbar pointer-events-auto scroll-smooth"
+                                className="flex items-center gap-2 sm:gap-3 overflow-x-auto w-full max-w-[100vw] sm:max-w-[90vw] px-4 sm:px-10 py-2 sm:py-4 hide-scrollbar pointer-events-auto scroll-smooth"
                                 style={{ 
-                                    justifyContent: images.length * 80 < (typeof window !== 'undefined' ? window.innerWidth : 1000) * 0.9 ? 'center' : 'start' 
+                                    justifyContent: (images.length * (windowWidth < 640 ? 56 : 72)) < windowWidth * 0.9 ? 'center' : 'start' 
                                 }}
                             >
                                 {images.map((img, idx) => (
@@ -337,7 +407,7 @@ export default function ImageLightbox({
                                             handleNavigate(idx); 
                                         }}
                                         className={`
-                                            relative flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 transition-all
+                                            relative flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all
                                             ${currentIndex === idx 
                                                 ? 'border-amber-400 scale-110 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-2 ring-amber-400/20' 
                                                 : 'border-white/10 opacity-50 hover:opacity-100 hover:border-white/30'}
