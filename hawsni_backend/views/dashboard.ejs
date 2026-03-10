@@ -1,371 +1,236 @@
 <%- include('partials/header', { title: 'لوحة التحكم' , pageTitle: 'لوحة التحكم' , page: 'dashboard' }) %>
 
 <style>
-    /* Dashboard-specific clean styles */
+    /* Dashboard Specific Tweaks - Cleanly integrated with admin.css */
     .dash-welcome {
-        margin-bottom: 1.5rem;
+        margin-bottom: 2.5rem;
     }
     .dash-welcome h2 {
-        font-size: 1.2rem;
-        font-weight: 800;
-        color: var(--dark);
-        margin-bottom: 2px;
+        font-size: 1.8rem;
+        color: var(--brand-primary);
+        margin-bottom: 4px;
     }
     .dash-welcome p {
-        color: var(--medium-gray);
-        font-size: 0.85rem;
+        color: var(--text-muted);
         font-weight: 600;
     }
 
-    /* Mini stat cards - clean 2-column grid */
-    .dash-stats {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 1.5rem;
-    }
-    .dash-stat {
-        background: var(--white);
-        border: 1px solid var(--border-color);
-        border-radius: 14px;
-        padding: 1rem;
+    /* Stats Cards - Using CSS Grid from admin.css */
+    .stat-card-link {
         text-decoration: none;
         display: block;
-        transition: box-shadow 0.2s, transform 0.2s;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-    }
-    .dash-stat:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        transform: translateY(-1px);
-    }
-    .dash-stat-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-    .dash-stat-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1rem;
-    }
-    .dash-stat-num {
-        font-size: 1.4rem;
-        font-weight: 900;
-        color: var(--dark);
-        line-height: 1;
-    }
-    .dash-stat-label {
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: var(--medium-gray);
-        margin-top: 4px;
     }
 
-    /* Section titles */
-    .dash-section-title {
-        font-size: 0.95rem;
-        font-weight: 800;
-        color: var(--dark);
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .dash-section-title i {
-        font-size: 0.9rem;
-    }
-
-    /* Clarity section */
+    /* Clarity Section Enhancements */
     .clarity-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-        margin-bottom: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
     }
     .clarity-stat {
-        background: var(--white);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 0.85rem;
-        border-right: 3px solid;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-    }
-    .clarity-stat-num {
-        font-size: 1.3rem;
-        font-weight: 900;
-        color: var(--dark);
-    }
-    .clarity-stat-label {
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: var(--medium-gray);
-        margin-top: 2px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-md);
+        padding: 1.2rem;
+        border-right: 4px solid;
     }
     .clarity-timer {
-        background: var(--white);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 0.85rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-md);
+        padding: 1.2rem;
         display: flex;
         align-items: center;
-        gap: 10px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        gap: 1rem;
     }
     .clarity-timer-icon {
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
-        background: #e0f0ff;
+        background: var(--brand-light);
+        color: var(--brand-primary);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #0078d4;
-        flex-shrink: 0;
-    }
-    .clarity-timer-text {
-        font-size: 0.75rem;
-        color: #666;
-        font-weight: 700;
     }
     .clarity-timer-countdown {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         font-weight: 900;
-        color: #0078d4;
+        color: var(--brand-primary);
         font-family: monospace;
-        letter-spacing: 1px;
     }
 
-    /* Quick actions as icon buttons row */
-    .quick-actions {
+    /* Quick Actions Grid */
+    .quick-actions-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2.5rem;
     }
-    .quick-action {
-        background: var(--white);
-        border: 1px solid var(--border-color);
-        border-radius: 14px;
-        padding: 1rem 0.5rem;
+    .quick-action-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-md);
+        padding: 1.5rem 1rem;
         text-align: center;
-        text-decoration: none;
-        transition: all 0.2s;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        transition: var(--trans-base);
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 6px;
+        gap: 10px;
     }
-    .quick-action:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        transform: translateY(-1px);
+    .quick-action-card:hover {
+        border-color: var(--brand-primary);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
     }
-    .quick-action i {
-        font-size: 1.15rem;
+    .quick-action-card i {
+        font-size: 1.5rem;
     }
-    .quick-action span {
-        font-size: 0.72rem;
+    .quick-action-card span {
         font-weight: 700;
-        color: var(--dark-gray);
+        color: var(--text-main);
+        font-size: 0.9rem;
     }
 
-    /* Orders list - compact card style instead of table */
+    /* Orders Item */
     .order-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.85rem 0;
-        border-bottom: 1px solid var(--border-color);
+        padding: 1.2rem 0;
+        border-bottom: 1px solid var(--border-soft);
     }
-    .order-item:last-child {
-        border-bottom: none;
-    }
-    .order-left {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-    .order-id {
-        font-size: 0.82rem;
-        font-weight: 800;
-        color: var(--dark);
-        font-family: monospace;
-    }
-    .order-date {
-        font-size: 0.7rem;
-        color: var(--medium-gray);
-        font-weight: 600;
-    }
-    .order-right {
-        text-align: left;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 4px;
-    }
-    .order-total {
-        font-size: 0.9rem;
-        font-weight: 800;
-        color: var(--dark);
-    }
-
+    .order-item:last-child { border-bottom: none; }
+    .order-id { font-family: monospace; font-weight: 800; color: var(--brand-primary); }
+    .order-total { font-weight: 900; font-size: 1.1rem; }
+    
     @media (max-width: 768px) {
-        .dash-stats {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .quick-actions {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-    @media (max-width: 480px) {
-        .dash-stats {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .clarity-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+        .clarity-grid { grid-template-columns: 1fr 1fr; }
+        .dash-welcome h2 { font-size: 1.4rem; }
     }
 </style>
 
-<!-- Welcome -->
+<!-- Welcome Section -->
 <div class="dash-welcome">
-    <h2>👋 أهلاً بك</h2>
-    <p>نظرة عامة على أداء متجرك</p>
+    <h2>👋 أهلاً بك في لوحة التحكم</h2>
+    <p>نظرة عامة شاملة على أداء متجرك اليوم</p>
 </div>
 
-<!-- Stats Grid -->
-<div class="dash-stats">
-    <a href="/orders" class="dash-stat">
-        <div class="dash-stat-top">
-            <div class="dash-stat-icon" style="background: var(--primary-light); color: var(--primary-color);">
+<!-- Stats Dashboard -->
+<div class="stats-grid">
+    <a href="/orders" class="stat-card-link">
+        <div class="stat-card" style="border-right: 4px solid var(--brand-primary);">
+            <div class="stat-icon" style="background: var(--brand-light); color: var(--brand-primary);">
                 <i class="fas fa-sack-dollar"></i>
             </div>
+            <div class="stat-value"><%= revenue %></div>
+            <div class="stat-label">إجمالي المبيعات (ج.م)</div>
         </div>
-        <div class="dash-stat-num"><%= revenue %></div>
-        <div class="dash-stat-label">المبيعات (ج.م)</div>
     </a>
-    <a href="/orders" class="dash-stat">
-        <div class="dash-stat-top">
-            <div class="dash-stat-icon" style="background: #fef3c7; color: var(--warning);">
+    <a href="/orders" class="stat-card-link">
+        <div class="stat-card" style="border-right: 4px solid var(--warning);">
+            <div class="stat-icon" style="background: #FFFBEB; color: var(--warning);">
                 <i class="fas fa-shopping-cart"></i>
             </div>
+            <div class="stat-value"><%= ordersCount %></div>
+            <div class="stat-label">الطلبات الجديدة</div>
         </div>
-        <div class="dash-stat-num"><%= ordersCount %></div>
-        <div class="dash-stat-label">الطلبات</div>
     </a>
-    <a href="/products" class="dash-stat">
-        <div class="dash-stat-top">
-            <div class="dash-stat-icon" style="background: #dbeafe; color: var(--info);">
+    <a href="/products" class="stat-card-link">
+        <div class="stat-card" style="border-right: 4px solid var(--info);">
+            <div class="stat-icon" style="background: #EFF6FF; color: var(--info);">
                 <i class="fas fa-box"></i>
             </div>
+            <div class="stat-value"><%= productsCount %></div>
+            <div class="stat-label">إجمالي المنتجات</div>
         </div>
-        <div class="dash-stat-num"><%= productsCount %></div>
-        <div class="dash-stat-label">المنتجات</div>
     </a>
-    <a href="/categories" class="dash-stat">
-        <div class="dash-stat-top">
-            <div class="dash-stat-icon" style="background: #d1fae5; color: var(--success);">
-                <i class="fas fa-tags"></i>
-            </div>
-        </div>
-        <div class="dash-stat-num"><%= categoriesCount %></div>
-        <div class="dash-stat-label">التصنيفات</div>
-    </a>
-    <a href="/users" class="dash-stat">
-        <div class="dash-stat-top">
-            <div class="dash-stat-icon" style="background: var(--primary-light); color: var(--primary-color);">
+    <a href="/users" class="stat-card-link">
+        <div class="stat-card" style="border-right: 4px solid var(--success);">
+            <div class="stat-icon" style="background: #ECFDF5; color: var(--success);">
                 <i class="fas fa-users"></i>
             </div>
+            <div class="stat-value"><%= usersCount %></div>
+            <div class="stat-label">المستخدمين</div>
         </div>
-        <div class="dash-stat-num"><%= usersCount %></div>
-        <div class="dash-stat-label">المستخدمين</div>
-    </a>
-    <a href="/banners" class="dash-stat">
-        <div class="dash-stat-top">
-            <div class="dash-stat-icon" style="background: #fee2e2; color: var(--danger);">
-                <i class="fas fa-images"></i>
-            </div>
-        </div>
-        <div class="dash-stat-num"><%= bannersCount %></div>
-        <div class="dash-stat-label">البنرات</div>
     </a>
 </div>
 
 <!-- Quick Actions -->
-<div class="dash-section-title">
-    <i class="fas fa-bolt" style="color: var(--warning);"></i> إجراءات سريعة
+<div class="card-title" style="margin-bottom: 1.5rem;">
+    <i class="fas fa-bolt" style="color: var(--warning);"></i> 
+    <span>إجراءات سريعة</span>
 </div>
-<div class="quick-actions">
-    <a href="/products/new" class="quick-action">
-        <i class="fas fa-plus-circle" style="color: var(--primary-color);"></i>
+<div class="quick-actions-grid">
+    <a href="/products/new" class="quick-action-card">
+        <i class="fas fa-plus-circle" style="color: var(--brand-primary);"></i>
         <span>إضافة منتج</span>
     </a>
-    <a href="/orders" class="quick-action">
+    <a href="/orders" class="quick-action-card">
         <i class="fas fa-clipboard-list" style="color: var(--warning);"></i>
         <span>عرض الطلبات</span>
     </a>
-    <a href="/banners/new" class="quick-action">
+    <a href="/banners/new" class="quick-action-card">
         <i class="fas fa-image" style="color: var(--danger);"></i>
-        <span>إضافة بنر</span>
+        <span>تحميل بنر</span>
     </a>
-    <a href="/categories" class="quick-action">
+    <a href="/categories" class="quick-action-card">
         <i class="fas fa-tags" style="color: var(--success);"></i>
         <span>التصنيفات</span>
     </a>
-    <a href="/shipping" class="quick-action">
+    <a href="/shipping" class="quick-action-card">
         <i class="fas fa-truck" style="color: var(--info);"></i>
-        <span>الشحن</span>
+        <span>إعدادات الشحن</span>
     </a>
-    <a href="/settings" class="quick-action">
-        <i class="fas fa-cog" style="color: var(--medium-gray);"></i>
+    <a href="/settings" class="quick-action-card">
+        <i class="fas fa-cog" style="color: var(--text-muted);"></i>
         <span>الإعدادات</span>
     </a>
 </div>
 
 <!-- Microsoft Clarity Stats -->
 <% if (typeof clarityInsights !== 'undefined' && clarityInsights && clarityInsights.data) { %>
-    <div style="margin-bottom: 1.5rem;">
-        <div class="dash-section-title">
-            <i class="fas fa-chart-line" style="color: #0078d4;"></i> إحصائيات الزوار
-            <span style="font-size: 0.65rem; color: #666; background: #e0f0ff; padding: 3px 8px; border-radius: 8px; margin-right: auto; font-weight: 600;">
-                <i class="fas fa-sync-alt"></i> كل 2.5 ساعة
+    <div class="card" style="padding: 1.5rem;">
+        <div class="card-header" style="margin-bottom: 1.5rem; border: none;">
+            <div class="card-title">
+                <i class="fas fa-chart-line" style="color: var(--brand-primary);"></i>
+                <span>إحصائيات الزوار</span>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--brand-primary); background: var(--brand-light); padding: 5px 12px; border-radius: 50px; font-weight: 700;">
+                <i class="fas fa-sync-alt"></i> مباشر الآن
             </span>
         </div>
+        
         <div class="clarity-grid">
             <div class="clarity-stat" style="border-right-color: #0078d4;">
-                <div class="clarity-stat-num"><%= clarityInsights.data.activeUsers || 0 %></div>
-                <div class="clarity-stat-label">المستخدمين النشطين</div>
+                <div class="stat-value" style="font-size: 1.5rem;"><%= clarityInsights.data.activeUsers || 0 %></div>
+                <div class="stat-label">مستخدم نشط</div>
             </div>
             <div class="clarity-stat" style="border-right-color: #107c10;">
-                <div class="clarity-stat-num"><%= clarityInsights.data.liveSessions || 0 %></div>
-                <div class="clarity-stat-label">الجلسات المباشرة</div>
+                <div class="stat-value" style="font-size: 1.5rem;"><%= clarityInsights.data.liveSessions || 0 %></div>
+                <div class="stat-label">جلسة مباشرة</div>
             </div>
             <div class="clarity-stat" style="border-right-color: #d83b01;">
-                <div class="clarity-stat-num"><%= clarityInsights.data.rageClicks || 0 %></div>
-                <div class="clarity-stat-label">نقرات غاضبة</div>
-            </div>
-            <div class="clarity-stat" style="border-right-color: #881798;">
-                <div class="clarity-stat-num"><%= clarityInsights.data.deadClicks || 0 %></div>
-                <div class="clarity-stat-label">نقرات ميتة</div>
+                <div class="stat-value" style="font-size: 1.5rem;"><%= clarityInsights.data.rageClicks || 0 %></div>
+                <div class="stat-label">نقرات غاضبة</div>
             </div>
         </div>
+
         <div class="clarity-timer">
             <div class="clarity-timer-icon">
                 <i class="fas fa-clock"></i>
             </div>
-            <div>
-                <div class="clarity-timer-text">التحديث القادم</div>
+            <div style="flex: 1;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">التحديث القادم</div>
                 <div id="clarity-countdown" class="clarity-timer-countdown" dir="ltr">--:--:--</div>
             </div>
-            <div style="margin-right: auto; font-size: 0.7rem; color: #999;" dir="ltr">
+            <div style="font-size: 0.75rem; color: var(--text-muted);" dir="ltr">
                 <i class="fas fa-history"></i> <%= new Date(clarityInsights.lastFetched).toLocaleTimeString('ar-EG') %>
             </div>
         </div>
+        
         <script>
             (function() {
                 const nextFetchTime = parseInt("<%= clarityInsights.nextFetch %>", 10);
@@ -375,7 +240,7 @@
                     const diff = nextFetchTime - now;
                     if (diff <= 0) {
                         countdownEl.innerText = 'يتم التحديث...';
-                        countdownEl.style.color = '#107c10';
+                        countdownEl.style.color = 'var(--success)';
                         setTimeout(() => window.location.reload(), 5000);
                         return;
                     }
@@ -391,38 +256,46 @@
     </div>
 <% } %>
 
-<!-- Recent Orders -->
-<div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 1.5rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-        <div class="dash-section-title" style="margin-bottom: 0;">
-            <i class="fas fa-shopping-bag" style="color: var(--warning);"></i> أحدث الطلبات
-        </div>
-        <a href="/orders" style="font-size: 0.75rem; font-weight: 700; color: var(--primary-color); text-decoration: none;">
-            عرض الكل <i class="fas fa-arrow-left" style="font-size: 0.65rem;"></i>
+<!-- Recent Orders Section -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-shopping-bag" style="color: var(--warning);"></i>
+            <span>أحدث الطلبات</span>
+        </h3>
+        <a href="/orders" class="btn btn-secondary btn-sm">
+            عرض الكل <i class="fas fa-arrow-left"></i>
         </a>
     </div>
-    <% if (orders && orders.length > 0) { %>
-        <% orders.forEach(order => { %>
-            <div class="order-item">
-                <div class="order-left">
-                    <div class="order-id">#<%= order.id.substring(0, 8) %></div>
-                    <div class="order-date"><%= new Date(order.created_at).toLocaleDateString('ar-EG') %></div>
+    
+    <div class="orders-list">
+        <% if (orders && orders.length > 0) { %>
+            <% orders.forEach(order => { %>
+                <div class="order-item">
+                    <div>
+                        <div class="order-id">#<%= order.id.substring(0, 8).toUpperCase() %></div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                            <%= new Date(order.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' }) %>
+                        </div>
+                    </div>
+                    <div style="text-align: left;">
+                        <div class="order-total"><%= parseFloat(order.total).toFixed(0) %> ج.م</div>
+                        <% const statusMap = { 'Processing': 'warning', 'Shipped': 'info', 'Delivered': 'success', 'Cancelled': 'danger' }; %>
+                        <span class="badge badge-<%= statusMap[order.status] || 'warning' %>" style="margin-top: 6px; display: inline-block;">
+                            <%= order.status || 'معلق' %>
+                        </span>
+                    </div>
                 </div>
-                <div class="order-right">
-                    <div class="order-total"><%= parseFloat(order.total).toFixed(0) %> ج.م</div>
-                    <% const statusMap = { 'Processing': 'warning', 'Shipped': 'info', 'Delivered': 'success', 'Cancelled': 'danger' }; %>
-                    <span class="badge badge-<%= statusMap[order.status] || 'warning' %>" style="font-size: 0.65rem; padding: 2px 8px;">
-                        <%= order.status || 'Processing' %>
-                    </span>
-                </div>
+            <% }) %>
+        <% } else { %>
+            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <i class="fas fa-shopping-bag" style="font-size: 3rem; opacity: 0.1; margin-bottom: 1rem; display: block;"></i>
+                <p>لا توجد طلبات حالياً</p>
             </div>
-        <% }) %>
-    <% } else { %>
-        <div style="text-align: center; padding: 2rem; color: var(--medium-gray);">
-            <i class="fas fa-shopping-bag" style="font-size: 2.5rem; opacity: 0.2; margin-bottom: 0.5rem; display: block;"></i>
-            <p style="font-size: 0.85rem; font-weight: 600;">لا توجد طلبات حتى الآن</p>
-        </div>
-    <% } %>
+        <% } %>
+    </div>
 </div>
+
+<%- include('partials/footer') %>
 
 <%- include('partials/footer') %>

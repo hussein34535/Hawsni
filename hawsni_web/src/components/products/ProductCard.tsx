@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Star } from 'lucide-react';
+import { Heart, Star, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { wishlistService } from '@/services/wishlistService';
+import { useToastStore } from '@/store/toastStore';
+import { useEffect } from 'react';
 
 import { Product } from '@/types';
 
@@ -122,6 +125,43 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isFavoriting, setIsFavoriting] = useState(false);
+    const { showToast } = useToastStore();
+
+    useEffect(() => {
+        const checkWishlist = async () => {
+            try {
+                const data = await wishlistService.getWishlist();
+                const isFavorited = data.wishlist.some(item => (item.product?._id || item.product?.id) === _id);
+                setIsFavorite(isFavorited);
+            } catch (error) {
+                console.error('Failed to check wishlist:', error);
+            }
+        };
+        checkWishlist();
+    }, [_id]);
+
+    const handleFavoriteToggle = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (isFavoriting) return;
+        setIsFavoriting(true);
+        try {
+            if (isFavorite) {
+                await wishlistService.removeFromWishlist(_id);
+                setIsFavorite(false);
+                showToast('Removed from favorites', 'success');
+            } else {
+                await wishlistService.addToWishlist(product);
+                setIsFavorite(true);
+                showToast('Added to favorites', 'success');
+            }
+        } catch (error) {
+            console.error('Failed to toggle favorite:', error);
+            showToast('Failed to update favorites', 'error');
+        } finally {
+            setIsFavoriting(false);
+        }
+    };
 
     return (
         <div className="group flex flex-col cursor-pointer" onClick={() => window.location.href = `/product/${_id}`}>
@@ -176,7 +216,20 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                 )}
 
-                {/* Favorite Button removed from Product Card as requested */}
+                {/* Favorite Button */}
+                <button
+                    onClick={handleFavoriteToggle}
+                    className="absolute top-2 left-2 z-20 w-8 h-8 bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all active:scale-90"
+                >
+                    {isFavoriting ? (
+                        <Loader2 size={16} className="text-gray-400 animate-spin" />
+                    ) : (
+                        <Heart
+                            size={18}
+                            className={`${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
+                        />
+                    )}
+                </button>
 
             </div>
 
@@ -205,8 +258,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                                         }
                                     }}
                                     style={{ backgroundColor: formatColor(c.color) }}
-                                    className={`w-5 h-5 rounded-full mr-1.5 transition-all border ${isSelected
-                                        ? 'border-[var(--color-brand-primary)] border-[1.5px] shadow-[0_0_4px_rgba(27,77,62,0.3)]'
+                                    className={`w-7 h-7 rounded-full mr-2 transition-all border ${isSelected
+                                        ? 'border-[var(--color-brand-primary)] border-[2px] shadow-[0_0_6px_rgba(27,77,62,0.4)] scale-110'
                                         : 'border-gray-300 border-[0.5px]'
                                         }`}
                                 />

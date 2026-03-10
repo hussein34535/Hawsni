@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, ArrowRight, XCircle, CheckCircle2 } from 'lucide-react';
+import { Mail, ArrowRight, XCircle, CheckCircle2, Lock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/authService';
@@ -23,7 +23,6 @@ export default function ForgotPasswordPage() {
         try {
             await authService.forgotPassword(email);
             setIsSuccess(true);
-            // Redirect to reset-password page after a short delay
             setTimeout(() => {
                 router.push(`/reset-password?email=${encodeURIComponent(email)}`);
             }, 3000);
@@ -35,120 +34,96 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-secondary)] relative overflow-hidden" dir="rtl">
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[var(--color-brand-primary)] opacity-10 blur-[100px] rounded-full" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-[var(--color-brand-accent)] opacity-10 blur-[100px] rounded-full" />
+        <div className="min-h-screen flex flex-col bg-white" dir="rtl">
+            {/* Simple Top Navigation */}
+            <div className="p-4 md:p-8">
+                <button 
+                    onClick={() => router.push('/login')}
+                    className="flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-colors group"
+                >
+                    <ArrowLeft size={20} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-sm font-bold font-cairo">العودة لتسجيل الدخول</span>
+                </button>
+            </div>
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="w-full max-w-md p-8 bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 relative z-10"
-            >
-                <div className="text-center mb-10">
-                    <motion.div
-                        initial={{ scale: 0.8 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", bounce: 0.5 }}
-                        className="w-16 h-16 bg-[var(--color-brand-primary)] rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-lg shadow-emerald-900/20"
-                    >
-                        <LockKeyhole className="text-white w-8 h-8" />
-                    </motion.div>
-                    <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2">نسيت كلمة المرور؟</h1>
-                    <p className="text-[var(--color-text-secondary)]">لا تقلق! أدخل بريدك الإلكتروني لتلقي كود الاستعادة.</p>
-                </div>
-
-                {error && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="mb-6 p-4 bg-red-50 rounded-xl flex items-center text-red-600 border border-red-100"
-                    >
-                        <XCircle className="w-5 h-5 ml-3 flex-shrink-0" />
-                        <span className="text-sm font-medium">{error}</span>
-                    </motion.div>
-                )}
-
-                {isSuccess ? (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-center space-y-4"
-                    >
-                        <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
-                            <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+            <div className="flex-1 flex items-center justify-center p-4">
+                <div className="w-full max-w-[420px]">
+                    <div className="text-center mb-10">
+                        <div className="w-12 h-12 bg-gray-900 rounded-xl mx-auto flex items-center justify-center mb-6 shadow-xl">
+                            <Lock className="text-white w-6 h-6" />
                         </div>
-                        <h2 className="text-xl font-bold text-gray-900">تحقق من بريدك الإلكتروني</h2>
-                        <p className="text-[var(--color-text-secondary)]">
-                            لقد أرسلنا كود التحقق المكون من 6 أرقام إلى <strong>{email}</strong>.
-                        </p>
-                        <p className="text-sm text-emerald-600 font-medium">جاري التحويل لصفحة التغيير...</p>
-                    </motion.div>
-                ) : (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-1">
-                            <label className="text-sm font-semibold text-[var(--color-text-secondary)] mr-1">البريد الإلكتروني</label>
-                            <div className="relative group">
-                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                                    <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-[var(--color-brand-primary)] transition-colors" />
-                                </div>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full pr-11 pl-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[var(--color-brand-primary)]/20 focus:border-[var(--color-brand-primary)] outline-none transition-all text-right"
-                                    placeholder="example@hawsni.com"
-                                />
-                            </div>
-                        </div>
+                        <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-2 font-cairo">نسيت كلمة المرور؟</h1>
+                        <p className="text-gray-500 text-sm font-bold font-cairo">أدخل بريدك الإلكتروني لتلقي كود الاستعادة</p>
+                    </div>
 
-                        <motion.button
-                            whileHover={{ scale: 1.01 }}
-                            whileTap={{ scale: 0.99 }}
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full py-4 px-6 bg-[var(--color-brand-primary)] hover:bg-[var(--color-brand-secondary)] text-white rounded-xl font-semibold shadow-lg shadow-[var(--color-brand-primary)]/30 transition-all flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-50 rounded-2xl flex items-center text-red-600 border border-red-100">
+                            <XCircle className="w-5 h-5 ml-3 flex-shrink-0" />
+                            <span className="text-xs font-bold font-cairo">{error}</span>
+                        </div>
+                    )}
+
+                    {isSuccess ? (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="text-center space-y-4 p-8 bg-emerald-50 rounded-3xl border border-emerald-100"
                         >
-                            {isLoading ? (
-                                <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    <span>إرسال كود الاستعادة</span>
-                                    <ArrowRight className="w-5 h-5 mr-2 rotate-180" />
-                                </>
-                            )}
-                        </motion.button>
-                    </form>
-                )}
+                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm">
+                                <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                            </div>
+                            <div className="space-y-1">
+                                <h2 className="text-xl font-black text-gray-900 font-cairo">تحقق من بريدك!</h2>
+                                <p className="text-sm font-bold text-emerald-600 font-cairo leading-relaxed">
+                                    أرسلنا كود التحقق إلى <br />
+                                    <span dir="ltr">{email}</span>
+                                </p>
+                            </div>
+                            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest font-cairo pt-2">جاري التحويل...</p>
+                        </motion.div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-1.5">
+                                <label className="text-[13px] font-black text-gray-400 mr-1 font-cairo">البريد الإلكتروني</label>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                        <Mail className="h-4 w-4 text-gray-300 group-focus-within:text-gray-900 transition-colors" />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        className="w-full pr-11 pl-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-gray-900/5 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
+                                        placeholder="example@hawsni.com"
+                                    />
+                                </div>
+                            </div>
 
-                <div className="mt-8 text-center">
-                    <Link href="/login" className="text-sm font-semibold text-[var(--color-brand-primary)] hover:underline">
-                        العودة لتسجيل الدخول
-                    </Link>
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full py-4 px-6 bg-gray-900 hover:bg-black text-white rounded-2xl font-black text-sm shadow-xl shadow-gray-900/10 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] font-cairo"
+                            >
+                                {isLoading ? (
+                                    <div className="h-5 w-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <span>إرسال كود الاستعادة</span>
+                                        <ArrowRight className="w-4 h-4 mr-1 rotate-180" />
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    )}
+
+                    <div className="mt-10 text-center">
+                        <Link href="/login" className="text-sm font-black text-gray-400 hover:text-gray-900 transition-colors font-cairo">
+                            تذكرت كلمة المرور؟ <span className="text-gray-900 hover:underline">تسجيل الدخول</span>
+                        </Link>
+                    </div>
                 </div>
-            </motion.div>
+            </div>
         </div>
-    );
-}
-
-function LockKeyhole(props: any) {
-    return (
-        <svg
-            {...props}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <circle cx="12" cy="16" r="1" />
-            <rect x="3" y="10" width="18" height="12" rx="2" />
-            <path d="M7 10V7a5 5 0 0 1 10 0v3" />
-        </svg>
     );
 }

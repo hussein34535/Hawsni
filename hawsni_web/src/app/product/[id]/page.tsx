@@ -31,6 +31,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { trackEvent } from '@/components/analytics/FacebookPixel';
 import { trackGAEvent } from '@/components/analytics/GoogleAnalytics';
 import { Product } from '@/types';
+import { wishlistService } from '@/services/wishlistService';
 import dynamic from 'next/dynamic';
 
 const ReviewsSection = dynamic(() => import('@/components/product/ReviewsSection'), { ssr: false });
@@ -205,6 +206,17 @@ export default function ProductPage() {
         };
 
         if (productId) fetchProduct();
+
+        const checkWishlist = async () => {
+            try {
+                const data = await wishlistService.getWishlist();
+                const isItemInWishlist = data.wishlist.some(item => (item.product?._id || item.product?.id) === productId);
+                setIsFavorite(isItemInWishlist);
+            } catch (error) {
+                console.error('Failed to check wishlist:', error);
+            }
+        };
+        checkWishlist();
     }, [productId]);
 
     // Safe images array (null-safe)
@@ -349,13 +361,23 @@ export default function ProductPage() {
         showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
     };
 
-    const handleFavoriteClick = () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            showToast(isRTL ? 'يرجى تسجيل الدخول أولاً لإضافة المنتج للمفضلة' : 'Please login first to add to wishlist', 'error');
-            return;
+    const handleFavoriteClick = async () => {
+        if (!product) return;
+        
+        try {
+            if (isFavorite) {
+                await wishlistService.removeFromWishlist(product.id || product._id);
+                setIsFavorite(false);
+                showToast(isRTL ? 'تم الإزالة من المفضلة' : 'Removed from favorites', 'success');
+            } else {
+                await wishlistService.addToWishlist(product);
+                setIsFavorite(true);
+                showToast(isRTL ? 'تم الإضافة للمفضلة' : 'Added to favorites', 'success');
+            }
+        } catch (error) {
+            console.error('Wishlist operation failed:', error);
+            showToast(isRTL ? 'فشلت العملية' : 'Operation failed', 'error');
         }
-        setIsFavorite(!isFavorite);
     };
 
     if (isLoading) {
@@ -422,7 +444,7 @@ export default function ProductPage() {
                             className="w-full h-full flex"
                             style={{ transform: `translateX(-${selectedImage * 100}%)`, transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}
                         >
-                            {safeImages.map((img, i) => {
+                            {safeImages.map((img: string, i: number) => {
                                 const lowerImg = img.toLowerCase();
                                 const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerImg) || lowerImg.includes('/video/upload/');
                                 return (
@@ -507,7 +529,7 @@ export default function ProductPage() {
                         {/* Custom Dots Pagination - Smaller and more subtle */}
                         {safeImages.length > 1 && (
                             <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/10 backdrop-blur-md rounded-full`} dir="ltr">
-                                {safeImages.map((_, i) => (
+                                {safeImages.map((_: string, i: number) => (
                                     <button
                                         key={`dot-${i}`}
                                         onClick={() => setSelectedImage(i)}
@@ -673,7 +695,7 @@ export default function ProductPage() {
                                         </button>
                                     </div>
                                     <div className="flex flex-wrap gap-1.5">
-                                        {product.sizes.map((s, i) => (
+                                        {product.sizes.map((s: string, i: number) => (
                                             <button
                                                 key={`${s}-${i}`}
                                                 onClick={() => setSelectedSize(s)}

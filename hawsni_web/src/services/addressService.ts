@@ -8,6 +8,7 @@ export interface Address {
     state?: string;
     country: string;
     isDefault: boolean;
+    is_default?: boolean; // backend uses snake_case
 }
 
 export const addressService = {
@@ -22,7 +23,12 @@ export const addressService = {
 
     addAddress: async (addressData: Omit<Address, '_id'>): Promise<{ success: boolean; address: Address }> => {
         try {
-            const response = await apiClient.post('/users/addresses', addressData);
+            const data = { ...addressData };
+            if ((data as any).isDefault !== undefined) {
+                (data as any).is_default = (data as any).isDefault;
+                delete (data as any).isDefault;
+            }
+            const response = await apiClient.post('/users/addresses', data);
             return response.data;
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to add address';
@@ -31,10 +37,25 @@ export const addressService = {
 
     updateAddress: async (id: string, addressData: Partial<Address>): Promise<{ success: boolean; address: Address }> => {
         try {
-            const response = await apiClient.put(`/users/addresses/${id}`, addressData);
+            // Map camelCase to snake_case for backend
+            const data = { ...addressData };
+            if (data.isDefault !== undefined) {
+                (data as any).is_default = data.isDefault;
+                delete data.isDefault;
+            }
+            const response = await apiClient.put(`/users/addresses/${id}`, data);
             return response.data;
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to update address';
+        }
+    },
+
+    setDefaultAddress: async (id: string): Promise<any> => {
+        try {
+            const response = await apiClient.put(`/users/addresses/${id}`, { is_default: true });
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to set default address';
         }
     },
 

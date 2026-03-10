@@ -1,228 +1,140 @@
 <%- include('partials/header', { title: 'إدارة المنتجات' , pageTitle: 'المنتجات' , page: 'products' }) %>
 
 <style>
-    /* Product card layout for mobile */
+    /* Specific Product Page Tweaks */
     .product-list {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
     }
     .product-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 10px;
-        background: var(--white);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        text-decoration: none;
-        transition: box-shadow 0.15s;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        gap: 15px;
+        padding: 1.2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-md);
+        transition: var(--trans-base);
     }
     .product-item:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        box-shadow: var(--shadow-md);
+        border-color: var(--brand-primary);
     }
-    .product-item-checkbox {
-        flex-shrink: 0;
-    }
-    .product-item-checkbox input {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-        accent-color: var(--primary-color);
-    }
-    .product-item-img {
-        width: 52px;
-        height: 52px;
-        border-radius: 10px;
+    .product-img-small {
+        width: 60px;
+        height: 60px;
         object-fit: cover;
-        border: 1px solid var(--border-color);
-        flex-shrink: 0;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-soft);
     }
-    .product-item-img-placeholder {
-        width: 52px;
-        height: 52px;
-        border-radius: 10px;
-        background: var(--light-gray);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--medium-gray);
-        flex-shrink: 0;
-        font-size: 1.1rem;
-    }
-    .product-item-info {
+    .product-info-main {
         flex: 1;
         min-width: 0;
     }
-    .product-item-name {
-        font-size: 0.85rem;
-        font-weight: 700;
-        color: var(--dark);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .product-item-meta {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 3px;
-        flex-wrap: wrap;
-    }
-    .product-item-price {
-        font-size: 0.8rem;
+    .product-name-link {
         font-weight: 800;
-        color: var(--success);
+        color: var(--text-main);
+        font-size: 1rem;
+        display: block;
+        margin-bottom: 4px;
     }
-    .product-item-stock {
-        font-size: 0.7rem;
-        font-weight: 700;
-        padding: 1px 7px;
-        border-radius: 6px;
-    }
-    .product-item-category {
-        font-size: 0.7rem;
-        color: var(--medium-gray);
-        font-weight: 600;
-    }
-    .product-item-actions {
-        display: flex;
-        gap: 6px;
-        flex-shrink: 0;
-    }
-    .product-item-actions .btn-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 8px;
-        border: 1px solid var(--border-color);
-        background: var(--white);
+    .product-meta-row {
         display: flex;
         align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.15s;
-        font-size: 0.85rem;
-        text-decoration: none;
-        color: var(--medium-gray);
-    }
-    .product-item-actions .btn-icon:hover {
-        background: var(--light-gray);
-    }
-    .product-item-actions .btn-icon.danger {
-        color: var(--danger);
-    }
-    .product-item-actions .btn-icon.danger:hover {
-        background: #fee2e2;
-    }
-
-    /* Bulk bar */
-    .bulk-bar {
-        display: none;
-        background: #f0f4ff;
-        border: 1px solid #c7d7ff;
-        border-radius: 12px;
-        padding: 10px 12px;
-        margin-bottom: 10px;
-        align-items: center;
-        gap: 8px;
+        gap: 10px;
         flex-wrap: wrap;
     }
-    .bulk-bar.visible {
-        display: flex;
-    }
-    .bulk-bar-count {
-        font-weight: 700;
-        color: #3b5bdb;
-        font-size: 0.85rem;
-    }
-    .bulk-bar-actions {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        flex: 1;
-    }
-    .bulk-bar select {
-        padding: 6px 8px;
-        border-radius: 8px;
-        border: 1px solid #c7d7ff;
-        font-size: 0.78rem;
-        font-family: inherit;
-        max-width: 140px;
+    
+    @media (max-width: 768px) {
+        .product-item { padding: 1rem; gap: 10px; }
+        .product-img-small { width: 50px; height: 50px; }
+        .product-name-link { font-size: 0.9rem; }
     }
 </style>
 
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">
-                <i class="fas fa-box"></i> المنتجات (<%= products ? products.length : 0 %>)
+                <i class="fas fa-box" style="color: var(--brand-primary);"></i>
+                <span>المنتجات</span>
+                <span class="badge badge-info" style="font-size: 0.7rem; margin-right: 8px;"><%= products ? products.length : 0 %></span>
             </h2>
             <a href="/products/new" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> إضافة
+                <i class="fas fa-plus"></i> إضافة منتج
             </a>
         </div>
 
         <% if (products && products.length > 0) { %>
             <!-- Bulk Action Bar -->
-            <div class="bulk-bar" id="bulkBar">
-                <span class="bulk-bar-count" id="selectedCount">0 محدد</span>
-                <div class="bulk-bar-actions">
-                    <button onclick="bulkDelete()" class="btn btn-danger btn-sm" style="font-size:0.75rem; padding:4px 10px;">
-                        <i class="fas fa-trash"></i> حذف
+            <div id="bulkBar" class="hidden" style="background: var(--brand-light); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); padding: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span id="selectedCount" style="font-weight: 800; color: var(--brand-primary);">0 محدد</span>
+                    <button onclick="clearSelection()" class="btn btn-secondary btn-sm" style="padding: 4px 8px;">
+                        <i class="fas fa-times"></i>
                     </button>
-                    <select id="bulkCategorySelect">
-                        <option value="">تصنيف --</option>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <select id="bulkCategorySelect" class="form-control" style="height: 36px; padding: 0 10px; font-size: 0.8rem; width: auto;">
+                        <option value="">نقل للتصنيف...</option>
                         <% categories.forEach(cat => { %>
                             <option value="<%= cat.id %>"><%= cat.name %></option>
                         <% }) %>
                     </select>
-                    <button onclick="bulkChangeCategory()" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:4px 10px;">
-                        <i class="fas fa-tag"></i> تطبيق
+                    <button onclick="bulkChangeCategory()" class="btn btn-primary btn-sm" style="height: 36px;">
+                        تطبيق
                     </button>
-                    <button onclick="clearSelection()" class="btn btn-sm" style="font-size:0.75rem; padding:4px 10px; background:#e9ecef; color:#555; border:none; border-radius:8px; cursor:pointer;">
-                        <i class="fas fa-times"></i>
+                    <button onclick="bulkDelete()" class="btn btn-danger btn-sm" style="height: 36px;">
+                        <i class="fas fa-trash"></i> حذف
                     </button>
                 </div>
             </div>
 
-            <!-- Select All -->
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 0 4px;">
-                <input type="checkbox" id="selectAll" onchange="toggleAll(this)" style="width:18px;height:18px;cursor:pointer;accent-color:var(--primary-color);">
-                <label for="selectAll" style="font-size: 0.78rem; font-weight: 700; color: var(--medium-gray); cursor: pointer;">تحديد الكل</label>
+            <!-- Select All & Filters -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding: 0 4px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 700; color: var(--text-muted); font-size: 0.85rem;">
+                    <input type="checkbox" id="selectAll" onchange="toggleAll(this)" style="width: 20px; height: 20px; accent-color: var(--brand-primary);">
+                    تحديد الكل
+                </label>
             </div>
 
             <!-- Products List (Card Style) -->
             <div class="product-list">
                 <% products.forEach(product => { %>
                     <div class="product-item" id="row-<%= product.id %>">
-                        <div class="product-item-checkbox">
-                            <input type="checkbox" class="product-checkbox" value="<%= product.id %>" onchange="updateBulkBar()">
-                        </div>
+                        <input type="checkbox" class="product-checkbox" value="<%= product.id %>" onchange="updateBulkBar()" style="width: 18px; height: 18px; accent-color: var(--brand-primary); flex-shrink: 0;">
+                        
                         <% if (product.images && product.images.length > 0) { %>
-                            <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="product-item-img">
+                            <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="product-img-small">
                         <% } else { %>
-                            <div class="product-item-img-placeholder">
+                            <div class="product-img-small" style="background: var(--bg-main); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 1.2rem;">
                                 <i class="fas fa-image"></i>
                             </div>
                         <% } %>
-                        <div class="product-item-info">
-                            <div class="product-item-name"><%= product.name %></div>
-                            <div class="product-item-meta">
-                                <span class="product-item-price"><%= product.price ? product.price.toFixed(0) : '0' %> ج.م</span>
-                                <span class="product-item-stock badge <%= (product.stock > 10) ? 'badge-success' : (product.stock > 0 ? 'badge-warning' : 'badge-danger') %>">
-                                    <%= product.stock || 0 %>
+
+                        <div class="product-info-main">
+                            <a href="/products/<%= product.id %>/edit" class="product-name-link"><%= product.name %></a>
+                            <div class="product-meta-row">
+                                <span style="font-weight: 900; color: var(--brand-primary); font-size: 0.9rem;">
+                                    <%= product.price ? product.price.toFixed(0) : '0' %> ج.م
+                                </span>
+                                <span class="badge <%= (product.stock > 10) ? 'badge-success' : (product.stock > 0 ? 'badge-warning' : 'badge-danger') %>" style="font-size: 0.65rem; padding: 2px 8px;">
+                                    مخزون: <%= product.stock || 0 %>
                                 </span>
                                 <% if (product.category_name) { %>
-                                    <span class="product-item-category"><%= product.category_name %></span>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">
+                                        <i class="fas fa-tag" style="font-size: 0.6rem; opacity: 0.5;"></i> <%= product.category_name %>
+                                    </span>
                                 <% } %>
                             </div>
                         </div>
-                        <div class="product-item-actions">
-                            <a href="/products/<%= product.id %>/edit" class="btn-icon" title="تعديل">
-                                <i class="fas fa-pen"></i>
+
+                        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                            <a href="/products/<%= product.id %>/edit" class="btn btn-secondary btn-sm" style="padding: 8px; width: 36px; height: 36px;" title="تعديل">
+                                <i class="fas fa-pen" style="font-size: 0.8rem;"></i>
                             </a>
-                            <button onclick="handleDelete('/products/<%= product.id %>/delete', 'هذا المنتج')" class="btn-icon danger" title="حذف">
-                                <i class="fas fa-trash"></i>
+                            <button onclick="handleDelete('/products/<%= product.id %>/delete', '<%= product.name %>')" class="btn btn-danger btn-sm" style="padding: 8px; width: 36px; height: 36px;" title="حذف">
+                                <i class="fas fa-trash" style="font-size: 0.8rem;"></i>
                             </button>
                         </div>
                     </div>

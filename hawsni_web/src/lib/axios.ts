@@ -52,7 +52,13 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
-            if (!window.location.pathname.includes('/login')) {
+
+            // Paths that are allowed to handle 401 gracefully (e.g., guest wishlist)
+            const guestAllowedPaths = ['/wishlist'];
+            const currentPath = window.location.pathname;
+            const isGuestAllowed = guestAllowedPaths.some(path => currentPath.startsWith(path));
+
+            if (!window.location.pathname.includes('/login') && !isGuestAllowed) {
                 window.location.href = '/login';
             }
         }

@@ -30,6 +30,7 @@ import { checkoutService, OrderData } from '@/services/checkoutService';
 import { couponService } from '@/services/couponService';
 import { trackEvent } from '@/components/analytics/FacebookPixel';
 import { trackGAEvent } from '@/components/analytics/GoogleAnalytics';
+import { authService } from '@/services/authService';
 
 const egyptGovernorates = [
     'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -79,6 +80,16 @@ export default function CheckoutPage() {
                 } catch { }
 
                 if (token) {
+                    // Fetch user profile to auto-fill email
+                    try {
+                        const profile = await authService.getProfile();
+                        if (profile.success && profile.user) {
+                            setGuestInfo(prev => ({ ...prev, email: profile.user.email || '' }));
+                        }
+                    } catch (err) {
+                        console.error('Failed to auto-fill email:', err);
+                    }
+
                     const addrRes = await addressService.getAddresses();
                     const addrs = addrRes.addresses || [];
                     setAddresses(addrs);
@@ -232,10 +243,12 @@ export default function CheckoutPage() {
                 discount: couponDiscount,
                 totalAmount: total,
                 couponCode: isCouponApplied ? couponCode : undefined,
-                ...(!isAuthenticated && {
+                ...(!isAuthenticated ? {
                     guestName: guestInfo.name,
                     guestPhone: guestInfo.phone,
                     guestEmail: guestInfo.email
+                } : {
+                    guestEmail: guestInfo.email // Always include email if we have it
                 })
             };
 

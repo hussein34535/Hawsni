@@ -15,8 +15,12 @@ import {
     Bell,
     Languages,
     DollarSign,
+    Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { addressService, Address } from '@/services/addressService';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useToastStore } from '@/store/toastStore';
 import { authService } from '@/services/authService';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -54,6 +58,7 @@ export default function ProfilePage() {
     const { user, isGuest, loading } = useAuth();
     const { t, language, setLanguage, isRTL } = useLanguage();
     const router = useRouter();
+    const { showToast } = useToastStore();
 
     if (loading) {
         return (
@@ -132,7 +137,12 @@ export default function ProfilePage() {
                         subtitle={language === 'en' ? 'English' : 'العربية'}
                         onClick={toggleLanguage}
                     />
-                    <MenuItem icon={DollarSign} title={t.profile.items.currency} subtitle={language === 'ar' ? 'ج.م' : 'EGP'} />
+                    <MenuItem 
+                        icon={DollarSign} 
+                        title={t.profile.items.currency} 
+                        subtitle={language === 'ar' ? 'ج.م' : 'EGP'} 
+                        onClick={() => showToast(isRTL ? 'الجنيه المصري هو العملة الوحيدة المتاحة حالياً' : 'EGP is currently the only supported currency', 'info')}
+                    />
                 </MenuSection>
 
                 <MenuSection title={t.profile.sections.activity} isRTL={isRTL}>

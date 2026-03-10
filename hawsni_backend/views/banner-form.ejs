@@ -37,7 +37,7 @@
                             </label>
                         </div>
 
-                        <div id="uploadInput" style="display: <% if (banner) { %>none<% } else { %>block<% } %>;">
+                        <div id="uploadInput" class="<%= banner ? 'hidden' : '' %>">
                             <input type="file" id="bannerFileInput" class="form-control" accept="image/*"
                                 onchange="previewUploadedImage(this)">
                             <input type="hidden" name="banner_image_url" id="bannerDirectUrl">
@@ -45,7 +45,7 @@
                                 3:1)</small>
                         </div>
 
-                        <div id="urlInput" style="display: <% if (banner) { %>block<% } else { %>none<% } %>;">
+                        <div id="urlInput" class="<%= banner ? '' : 'hidden' %>">
                             <input type="url" name="image_url" class="form-control"
                                 placeholder="https://example.com/image.jpg"
                                 value="<%= banner ? banner.image_url : '' %>" onchange="previewUrlImage(this)">
@@ -56,14 +56,12 @@
                     <!-- Image Preview with Aspect Ratio Guide -->
                     <div class="form-group">
                         <label class="form-label">معاينة الصورة (نسبة 3:1)</label>
-                        <div
-                            style="position: relative; max-width: 600px; border: 2px dashed var(--light-gray); border-radius: var(--radius-md); overflow: hidden; aspect-ratio: 3/1; background: var(--light);">
+                        <div class="banner-preview-box">
                             <img id="imagePreview" src="<%= banner ? banner.image_url : '' %>"
-                                style="width: 100%; height: 100%; <%= banner ? 'display: block;' : 'display: none;' %> object-fit: cover;">
+                                class="<%= banner ? 'd-block' : 'd-none' %>">
                             <div id="placeholderText"
-                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: var(--medium-gray); <%= banner ? 'display: none;' : 'display: block;' %>">
-                                <i class="fas fa-image"
-                                    style="font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.3;"></i>
+                                class="<%= banner ? 'd-none' : 'd-block' %>">
+                                <i class="fas fa-image"></i>
                                 <p>معاينة الصورة بنسبة 3:1</p>
                                 <small>1200 × 400 بكسل</small>
                             </div>

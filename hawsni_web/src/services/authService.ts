@@ -79,6 +79,15 @@ export const authService = {
         }
     },
 
+    changePassword: async (oldPassword: string, newPassword: string): Promise<any> => {
+        try {
+            const response = await apiClient.post('/auth/change-password', { oldPassword, newPassword });
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to change password';
+        }
+    },
+
     logout: async (): Promise<void> => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');

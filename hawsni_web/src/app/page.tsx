@@ -100,7 +100,7 @@ export default function HomePage() {
                 <Sparkles size={20} className="text-amber-500 fill-amber-500/20" />
                 {isRTL ? 'المنتجات المميزة' : 'Featured Products'}
               </h2>
-              <button className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">{t.common.view_all}</button>
+              <Link href="/search" className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">{t.common.view_all}</Link>
             </div>
             {/* Horizontal Scroll for Featured */}
             <div className={`flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 hide-scrollbar ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -117,7 +117,7 @@ export default function HomePage() {
         <section className="pt-8 pb-[100px]">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-black text-gray-900 tracking-tight">{t.home.new_arrivals}</h2>
-            <button className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">{t.common.view_all}</button>
+            <Link href="/search" className="text-sm font-bold text-[var(--color-brand-primary)] hover:underline">{t.common.view_all}</Link>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-6">
