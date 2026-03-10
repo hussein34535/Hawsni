@@ -29,20 +29,26 @@
         margin-bottom: 1.5rem;
     }
     .clarity-stat {
-        background: var(--bg-card);
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-md);
-        padding: 1.2rem;
-        border-right: 4px solid;
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem 1.2rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
     }
     .clarity-timer {
-        background: var(--bg-card);
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: var(--radius-lg);
         padding: 1.2rem;
         display: flex;
         align-items: center;
         gap: 1rem;
+        margin-top: 1.5rem;
     }
     .clarity-timer-icon {
         width: 44px;
@@ -69,29 +75,34 @@
         margin-bottom: 2.5rem;
     }
     .quick-action-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-md);
-        padding: 1.5rem 1rem;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: var(--radius-xl);
+        padding: 1.8rem 1rem;
         text-align: center;
-        transition: var(--trans-base);
+        transition: var(--trans-bounce);
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 10px;
+        gap: 15px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
     }
     .quick-action-card:hover {
-        border-color: var(--brand-primary);
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-md);
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 15px 30px -10px rgba(15, 23, 42, 0.08);
+        border-color: rgba(255, 255, 255, 1);
     }
     .quick-action-card i {
-        font-size: 1.5rem;
+        font-size: 1.8rem;
+        filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.1));
     }
     .quick-action-card span {
-        font-weight: 700;
+        font-weight: 800;
         color: var(--text-main);
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
 
     /* Orders Item */
@@ -99,12 +110,20 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.2rem 0;
-        border-bottom: 1px solid var(--border-soft);
+        padding: 1.2rem;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: var(--radius-lg);
+        margin-bottom: 0.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        transition: var(--trans-base);
     }
-    .order-item:last-child { border-bottom: none; }
-    .order-id { font-family: monospace; font-weight: 800; color: var(--brand-primary); }
-    .order-total { font-weight: 900; font-size: 1.1rem; }
+    .order-item:hover {
+        background: rgba(255, 255, 255, 0.7);
+        transform: scale(1.01);
+        box-shadow: var(--shadow-sm);
+    }
+    .order-id { font-family: monospace; font-weight: 800; color: var(--brand-accent); font-size: 1rem; }
+    .order-total { font-weight: 900; font-size: 1.2rem; color: var(--text-main); }
     
     @media (max-width: 768px) {
         .clarity-grid { grid-template-columns: 1fr 1fr; }
@@ -121,8 +140,8 @@
 <!-- Stats Dashboard -->
 <div class="stats-grid">
     <a href="/orders" class="stat-card-link">
-        <div class="stat-card" style="border-right: 4px solid var(--brand-primary);">
-            <div class="stat-icon" style="background: var(--brand-light); color: var(--brand-primary);">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--brand-primary);">
                 <i class="fas fa-sack-dollar"></i>
             </div>
             <div class="stat-value"><%= revenue %></div>
@@ -130,8 +149,8 @@
         </div>
     </a>
     <a href="/orders" class="stat-card-link">
-        <div class="stat-card" style="border-right: 4px solid var(--warning);">
-            <div class="stat-icon" style="background: #FFFBEB; color: var(--warning);">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--warning);">
                 <i class="fas fa-shopping-cart"></i>
             </div>
             <div class="stat-value"><%= ordersCount %></div>
@@ -139,8 +158,8 @@
         </div>
     </a>
     <a href="/products" class="stat-card-link">
-        <div class="stat-card" style="border-right: 4px solid var(--info);">
-            <div class="stat-icon" style="background: #EFF6FF; color: var(--info);">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--info);">
                 <i class="fas fa-box"></i>
             </div>
             <div class="stat-value"><%= productsCount %></div>
@@ -148,8 +167,8 @@
         </div>
     </a>
     <a href="/users" class="stat-card-link">
-        <div class="stat-card" style="border-right: 4px solid var(--success);">
-            <div class="stat-icon" style="background: #ECFDF5; color: var(--success);">
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--success);">
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-value"><%= usersCount %></div>
@@ -204,16 +223,16 @@
         </div>
         
         <div class="clarity-grid">
-            <div class="clarity-stat" style="border-right-color: #0078d4;">
-                <div class="stat-value" style="font-size: 1.5rem;"><%= clarityInsights.data.activeUsers || 0 %></div>
+            <div class="clarity-stat">
+                <div class="stat-value" style="font-size: 1.8rem; color: #0078d4;"><%= clarityInsights.data.activeUsers || 0 %></div>
                 <div class="stat-label">مستخدم نشط</div>
             </div>
-            <div class="clarity-stat" style="border-right-color: #107c10;">
-                <div class="stat-value" style="font-size: 1.5rem;"><%= clarityInsights.data.liveSessions || 0 %></div>
+            <div class="clarity-stat">
+                <div class="stat-value" style="font-size: 1.8rem; color: #107c10;"><%= clarityInsights.data.liveSessions || 0 %></div>
                 <div class="stat-label">جلسة مباشرة</div>
             </div>
-            <div class="clarity-stat" style="border-right-color: #d83b01;">
-                <div class="stat-value" style="font-size: 1.5rem;"><%= clarityInsights.data.rageClicks || 0 %></div>
+            <div class="clarity-stat">
+                <div class="stat-value" style="font-size: 1.8rem; color: #d83b01;"><%= clarityInsights.data.rageClicks || 0 %></div>
                 <div class="stat-label">نقرات غاضبة</div>
             </div>
         </div>
