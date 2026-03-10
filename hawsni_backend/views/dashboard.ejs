@@ -162,10 +162,57 @@
                     </div>
                 </div>
             </div>
-            <div style="font-size: 0.8rem; color: #888; text-align: left; margin-top: 5px;" dir="ltr">
-                <i class="far fa-clock"></i> Last fetched: <%= new Date(clarityInsights.lastFetched).toLocaleTimeString('ar-EG') %> |
-                Next fetch: <%= new Date(clarityInsights.nextFetch).toLocaleTimeString('ar-EG') %>
+            <div style="background: #fff; padding: 15px 20px; border-radius: 12px; margin-top: 15px; border: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #e0f0ff; display: flex; align-items: center; justify-content: center; color: #0078d4;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: #666; font-weight: bold;">تحديث البيانات القادم خلال</div>
+                        <div id="clarity-countdown" style="font-size: 1.2rem; font-weight: 900; color: #0078d4; font-family: monospace; letter-spacing: 1px;" dir="ltr">--:--:--</div>
+                    </div>
+                </div>
+                <div style="text-align: left; font-size: 0.8rem; color: #888;" dir="ltr">
+                    <div><i class="fas fa-history"></i> Last Fetch: <span style="font-weight: bold; color: #444;"><%= new Date(clarityInsights.lastFetched).toLocaleTimeString('ar-EG') %></span></div>
+                </div>
             </div>
+
+            <script>
+                // Live Countdown Script
+                (function() {
+                    const nextFetchTime = <%= clarityInsights.nextFetch %>;
+                    const countdownEl = document.getElementById('clarity-countdown');
+                    
+                    function updateCountdown() {
+                        const now = Date.now();
+                        const diff = nextFetchTime - now;
+
+                        if (diff <= 0) {
+                            countdownEl.innerText = 'يتم التحديث الآن...';
+                            countdownEl.style.color = '#107c10';
+                            // Reload page after a few seconds to get new data
+                            setTimeout(() => window.location.reload(), 5000);
+                            return;
+                        }
+
+                        // Calculate hours, minutes, seconds
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                        // Format with leading zeros
+                        const h = String(hours).padStart(2, '0');
+                        const m = String(minutes).padStart(2, '0');
+                        const s = String(seconds).padStart(2, '0');
+
+                        countdownEl.innerText = `${h}:${m}:${s}`;
+                    }
+
+                    // Update immediately, then every second
+                    updateCountdown();
+                    setInterval(updateCountdown, 1000);
+                })();
+            </script>
         </div>
     <% } %>
 
