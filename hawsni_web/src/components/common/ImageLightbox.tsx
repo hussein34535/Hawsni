@@ -60,8 +60,8 @@ function LightboxBackgroundItem({
                 src={img}
                 alt=""
                 fill
-                className="object-cover blur-3xl opacity-30 scale-110"
-                sizes="10vw"
+                className="object-cover blur-3xl opacity-50 scale-125 transition-opacity duration-500"
+                sizes="20vw"
             />
         </motion.div>
     );
@@ -146,13 +146,14 @@ function LightboxImage({
                     controlsList="nodownload"
                 />
             ) : (
-                <div className="relative w-full h-full pointer-events-none p-4 lg:p-20">
+                <div className="relative w-full h-full pointer-events-none p-4 lg:p-12">
                     <Image
                         src={img}
                         alt={`Fullscreen view ${idx + 1}`}
                         fill
                         className="object-contain select-none"
                         priority={idx === currentIndex}
+                        quality={100}
                         sizes="100vw"
                         draggable={false}
                     />
@@ -298,8 +299,8 @@ export default function ImageLightbox({
         if (isOpen) {
             document.body.style.overflow = 'hidden';
             // Initial scroll to current index
-            if (scrollContainerRef.current) {
-                scrollContainerRef.current.scrollLeft = currentIndex * window.innerWidth;
+            if (scrollContainerRef.current && windowWidth > 0) {
+                scrollContainerRef.current.scrollLeft = currentIndex * windowWidth;
             }
         }
         return () => {
@@ -330,7 +331,7 @@ export default function ImageLightbox({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm touch-none"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/92 backdrop-blur-md touch-none"
                     onClick={() => {
                         if (showMenu) setShowMenu(false);
                         else onClose();
