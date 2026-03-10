@@ -110,7 +110,7 @@ function LightboxImage({
     return (
         <motion.div
             key={idx}
-            className="relative h-full w-[100vw] flex-shrink-0 flex items-center justify-center pointer-events-auto px-2 snap-center"
+            className="relative h-full w-[100vw] flex-shrink-0 flex items-center justify-center pointer-events-auto px-2 snap-center snap-always"
             style={{ 
                 x: idx === currentIndex && zoom > 1 ? springX : 0,
                 y: idx === currentIndex && zoom > 1 ? springY : 0,
@@ -449,10 +449,10 @@ export default function ImageLightbox({
                                             handleNavigate(idx); 
                                         }}
                                         className={`
-                                            relative flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all
+                                            relative flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all duration-300
                                             ${currentIndex === idx 
-                                                ? 'border-amber-400 scale-110 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-2 ring-amber-400/20' 
-                                                : 'border-white/10 opacity-50 hover:opacity-100 hover:border-white/30'}
+                                                ? 'border-white scale-110 ring-4 ring-white/10 z-10' 
+                                                : 'border-white/5 opacity-40 hover:opacity-80 hover:border-white/20'}
                                         `}
                                     >
                                         <Image
