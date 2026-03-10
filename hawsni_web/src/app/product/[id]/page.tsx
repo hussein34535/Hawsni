@@ -231,29 +231,37 @@ export default function ProductPage() {
     const touchStartX = useRef(0);
     const touchDeltaX = useRef(0);
     const galleryRef = useRef<HTMLDivElement>(null);
+    const sliderRef = useRef<HTMLDivElement>(null);
     const isSwiping = useRef(false);
-    const [dragOffset, setDragOffset] = useState(0);
 
     const handleTouchStart = useCallback((e: ReactTouchEvent) => {
         touchStartX.current = e.touches[0].clientX;
         touchDeltaX.current = 0;
         isSwiping.current = true;
-        setDragOffset(0);
+        // Remove transition during drag for instant response
+        if (sliderRef.current) {
+            sliderRef.current.style.transition = 'none';
+        }
     }, []);
 
     const handleTouchMove = useCallback((e: ReactTouchEvent) => {
-        if (!isSwiping.current) return;
+        if (!isSwiping.current || !sliderRef.current) return;
         const delta = e.touches[0].clientX - touchStartX.current;
         touchDeltaX.current = delta;
-        // Convert pixel offset to percentage of gallery width
+        // Directly manipulate DOM - no React re-render needed
+        const baseOffset = selectedImage * 100;
         const galleryWidth = galleryRef.current?.offsetWidth || window.innerWidth;
-        setDragOffset((delta / galleryWidth) * 100);
-    }, []);
+        const dragPercent = (delta / galleryWidth) * 100;
+        sliderRef.current.style.transform = `translateX(${-baseOffset + dragPercent}%)`;
+    }, [selectedImage]);
 
     const handleTouchEnd = useCallback(() => {
         if (!isSwiping.current) return;
         isSwiping.current = false;
-        setDragOffset(0);
+        // Restore smooth transition for the snap
+        if (sliderRef.current) {
+            sliderRef.current.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }
         const threshold = 50;
         const count = safeImages.length || 1;
 
@@ -262,9 +270,17 @@ export default function ProductPage() {
         } else if (touchDeltaX.current > threshold && selectedImage > 0) {
             setSelectedImage(prev => prev - 1);
         } else if (touchDeltaX.current > threshold && selectedImage === 0 && count > 1) {
-            // User tried to swipe backwards on first image - show hint
             setShowGallerySwipeHint(true);
             setTimeout(() => setShowGallerySwipeHint(false), 3000);
+            // Snap back to current position
+            if (sliderRef.current) {
+                sliderRef.current.style.transform = `translateX(-${selectedImage * 100}%)`;
+            }
+        } else {
+            // Snap back if swipe wasn't enough
+            if (sliderRef.current) {
+                sliderRef.current.style.transform = `translateX(-${selectedImage * 100}%)`;
+            }
         }
         touchDeltaX.current = 0;
     }, [safeImages.length, selectedImage]);
@@ -402,8 +418,9 @@ export default function ProductPage() {
                         onTouchEnd={handleTouchEnd}
                     >
                         <div
-                            className={`w-full h-full flex ease-out ${dragOffset === 0 ? 'transition-transform duration-400' : ''}`}
-                            style={{ transform: `translateX(calc(-${selectedImage * 100}% + ${dragOffset}%))` }}
+                            ref={sliderRef}
+                            className="w-full h-full flex"
+                            style={{ transform: `translateX(-${selectedImage * 100}%)`, transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}
                         >
                             {safeImages.map((img, i) => {
                                 const lowerImg = img.toLowerCase();
