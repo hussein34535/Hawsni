@@ -87,24 +87,10 @@ function LightboxImage({
     const lowerSrc = img.toLowerCase();
     const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
 
-    // calculate offset based on scrollX
-    // scrollX is from 0 to (images.length -1) * windowWidth
-    const offset = useTransform(
-        scrollX,
-        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
-        [-100, 0, 100]
-    );
-
     const scale = useTransform(
         scrollX,
         [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
-        [0.85, 1, 0.85]
-    );
-
-    const opacity = useTransform(
-        scrollX,
-        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
-        [0.4, 1, 0.4]
+        [0.95, 1, 0.95]
     );
 
     return (
@@ -115,7 +101,7 @@ function LightboxImage({
                 x: idx === currentIndex && zoom > 1 ? springX : 0,
                 y: idx === currentIndex && zoom > 1 ? springY : 0,
                 scale: idx === currentIndex && zoom > 1 ? zoom : scale,
-                opacity: zoom > 1 ? (idx === currentIndex ? 1 : 0) : opacity,
+                opacity: zoom > 1 ? (idx === currentIndex ? 1 : 0) : 1,
                 zIndex: idx === currentIndex ? 10 : 1,
                 cursor: idx === currentIndex && zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
             }}

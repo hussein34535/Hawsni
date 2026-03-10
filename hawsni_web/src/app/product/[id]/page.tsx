@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, TouchEvent as ReactTouchEvent } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -258,63 +258,28 @@ export default function ProductPage() {
         }
     }, [safeImages.length]);
 
-    // Touch-based image swipe
-    const touchStartX = useRef(0);
-    const touchDeltaX = useRef(0);
+    // Native CSS scroll snap - no manual touch handling needed
     const galleryRef = useRef<HTMLDivElement>(null);
     const sliderRef = useRef<HTMLDivElement>(null);
-    const isSwiping = useRef(false);
 
-    const handleTouchStart = useCallback((e: ReactTouchEvent) => {
-        touchStartX.current = e.touches[0].clientX;
-        touchDeltaX.current = 0;
-        isSwiping.current = true;
-        // Remove transition during drag for instant response
-        if (sliderRef.current) {
-            sliderRef.current.style.transition = 'none';
+    const handleGalleryScroll = useCallback(() => {
+        if (!sliderRef.current) return;
+        const scrollLeft = sliderRef.current.scrollLeft;
+        const width = sliderRef.current.offsetWidth;
+        const newIndex = Math.round(scrollLeft / width);
+        if (newIndex !== selectedImage && newIndex >= 0 && newIndex < safeImages.length) {
+            setSelectedImage(newIndex);
         }
+    }, [selectedImage, safeImages.length]);
+
+    const scrollToImage = useCallback((index: number) => {
+        if (!sliderRef.current) return;
+        sliderRef.current.scrollTo({
+            left: index * sliderRef.current.offsetWidth,
+            behavior: 'smooth'
+        });
+        setSelectedImage(index);
     }, []);
-
-    const handleTouchMove = useCallback((e: ReactTouchEvent) => {
-        if (!isSwiping.current || !sliderRef.current) return;
-        const delta = e.touches[0].clientX - touchStartX.current;
-        touchDeltaX.current = delta;
-        // Directly manipulate DOM - no React re-render needed
-        const baseOffset = selectedImage * 100;
-        const galleryWidth = galleryRef.current?.offsetWidth || window.innerWidth;
-        const dragPercent = (delta / galleryWidth) * 100;
-        sliderRef.current.style.transform = `translateX(${-baseOffset + dragPercent}%)`;
-    }, [selectedImage]);
-
-    const handleTouchEnd = useCallback(() => {
-        if (!isSwiping.current) return;
-        isSwiping.current = false;
-        // Restore smooth transition for the snap
-        if (sliderRef.current) {
-            sliderRef.current.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        }
-        const threshold = 50;
-        const count = safeImages.length || 1;
-
-        if (touchDeltaX.current < -threshold && selectedImage < count - 1) {
-            setSelectedImage(prev => prev + 1);
-        } else if (touchDeltaX.current > threshold && selectedImage > 0) {
-            setSelectedImage(prev => prev - 1);
-        } else if (touchDeltaX.current > threshold && selectedImage === 0 && count > 1) {
-            setShowGallerySwipeHint(true);
-            setTimeout(() => setShowGallerySwipeHint(false), 3000);
-            // Snap back to current position
-            if (sliderRef.current) {
-                sliderRef.current.style.transform = `translateX(-${selectedImage * 100}%)`;
-            }
-        } else {
-            // Snap back if swipe wasn't enough
-            if (sliderRef.current) {
-                sliderRef.current.style.transform = `translateX(-${selectedImage * 100}%)`;
-            }
-        }
-        touchDeltaX.current = 0;
-    }, [safeImages.length, selectedImage]);
 
     const handleAddToCart = (e: React.MouseEvent) => {
         if (!product) return;
@@ -454,14 +419,12 @@ export default function ProductPage() {
                     <div
                         ref={galleryRef}
                         className="relative aspect-[4/4] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group"
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
                     >
                         <div
                             ref={sliderRef}
-                            className="w-full h-full flex"
-                            style={{ transform: `translateX(-${selectedImage * 100}%)`, transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}
+                            onScroll={handleGalleryScroll}
+                            className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
+                            style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
                         >
                             {safeImages.map((img: string, i: number) => {
                                 const lowerImg = img.toLowerCase();
@@ -469,7 +432,7 @@ export default function ProductPage() {
                                 return (
                                     <div
                                         key={`img-${i}`}
-                                        className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in overflow-hidden"
+                                        className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in overflow-hidden snap-center snap-always"
                                         onClick={() => setIsLightboxOpen(true)}
                                     >
                                         {/* Cinematic Blurred Background Layer - Optimized to only render on active slide */}
@@ -527,7 +490,7 @@ export default function ProductPage() {
                         {/* Arrow buttons for desktop */}
                         {safeImages.length > 1 && selectedImage > 0 && (
                             <button
-                                onClick={() => setSelectedImage(prev => prev - 1)}
+                                onClick={() => scrollToImage(selectedImage - 1)}
                                 className="hidden lg:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 backdrop-blur-md rounded-full items-center justify-center shadow-lg hover:bg-white transition-colors z-10"
                             >
                                 <ArrowLeft size={18} />
@@ -535,7 +498,7 @@ export default function ProductPage() {
                         )}
                         {safeImages.length > 1 && selectedImage < safeImages.length - 1 && (
                             <button
-                                onClick={() => setSelectedImage(prev => prev + 1)}
+                                onClick={() => scrollToImage(selectedImage + 1)}
                                 className="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 backdrop-blur-md rounded-full items-center justify-center shadow-lg hover:bg-white transition-colors z-10"
                             >
                                 <ArrowRight size={18} />
@@ -572,7 +535,7 @@ export default function ProductPage() {
                             {safeImages.map((_: string, i: number) => (
                                 <button
                                     key={`dot-${i}`}
-                                    onClick={() => setSelectedImage(i)}
+                                    onClick={() => scrollToImage(i)}
                                     className={`h-1.5 rounded-full transition-all duration-300 ${i === selectedImage ? 'w-6 bg-gray-800' : 'w-1.5 bg-gray-300 hover:bg-gray-400'}`}
                                     aria-label={`Go to slide ${i + 1}`}
                                 />
