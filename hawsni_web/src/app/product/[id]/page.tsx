@@ -19,7 +19,8 @@ import {
     Ruler,
     X,
     Camera,
-    Image as ImageIcon
+    Image as ImageIcon,
+    ChevronDown
 } from 'lucide-react';
 import Image from 'next/image';
 import { useCartStore } from '@/store/cartStore';
@@ -73,6 +74,63 @@ const parseColors = (colors: any[] | undefined) => {
         }
         return c;
     });
+};
+
+const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+    const faqs = [
+        {
+            question: isRTL ? 'متى يصل طلبي؟' : 'When will my order arrive?',
+            answer: isRTL ? 'يصل طلبك خلال 2 إلى 5 أيام عمل تقريباً حسب موقعك.' : 'Your order will arrive within 2 to 5 business days depending on your location.'
+        },
+        {
+            question: isRTL ? 'هل يمكنني إرجاع أو استبدال المنتج؟' : 'Can I return or exchange the product?',
+            answer: isRTL ? 'نعم، نوفر خدمة الاسترجاع والاستبدال خلال 14 يوماً من استلام الطلب بشرط بقاء المنتج في حالته الأصلية.' : 'Yes, we offer returns and exchanges within 14 days of receiving the order, provided the product is in its original condition.'
+        },
+        {
+            question: isRTL ? 'هل المنتجات أصلية؟' : 'Are the products authentic?',
+            answer: isRTL ? 'جميع منتجات Hawsni أصلية 100% ومصنوعة بأعلى معايير الجودة لتناسب ذوقك الرفيع.' : 'All Hawsni products are 100% authentic and crafted with the highest quality standards.'
+        }
+    ];
+
+    return (
+        <div className="mt-8 pt-6 border-t border-gray-100">
+            <h4 className="text-base font-black text-gray-900 mb-4 font-cairo">
+                {isRTL ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+            </h4>
+            <div className="flex flex-col gap-3">
+                {faqs.map((faq, index) => (
+                    <div key={index} className="border border-gray-100 rounded-2xl overflow-hidden bg-gray-50/50">
+                        <button
+                            onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                            className={`w-full flex items-center justify-between p-4 bg-transparent hover:bg-gray-50 transition-colors ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                        >
+                            <span className="font-bold text-sm text-gray-800 font-cairo">{faq.question}</span>
+                            <ChevronDown
+                                size={18}
+                                className={`text-gray-400 transition-transform duration-300 flex-shrink-0 ${openIndex === index ? 'rotate-180' : ''}`}
+                            />
+                        </button>
+                        <AnimatePresence>
+                            {openIndex === index && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <div className={`p-4 pt-0 text-sm font-medium text-gray-500 font-cairo leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
+                                        {faq.answer}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 };
 
 export default function ProductPage() {
@@ -584,12 +642,13 @@ export default function ProductPage() {
                                 </div>
                             </div>
 
-                            {/* Description */}
+                            {/* Description & FAQs */}
                             <div className="pt-8 border-t border-gray-100">
                                 <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.description || 'Details'}</h3>
                                 <p className="text-gray-500 leading-relaxed font-bold font-cairo text-sm opacity-70">
                                     {product.description}
                                 </p>
+                                <FAQAccordion isRTL={isRTL} />
                             </div>
 
                             {/* Reviews Section Integration */}
