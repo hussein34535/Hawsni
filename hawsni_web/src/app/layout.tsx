@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     images: ['/logo.png'],
   },
   alternates: {
-    canonical: 'https://hawsni.com',
+    canonical: 'https://hwasi.com',
   }
 };
 

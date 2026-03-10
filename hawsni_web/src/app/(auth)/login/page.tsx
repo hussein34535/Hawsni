@@ -62,7 +62,7 @@ export default function LoginPage() {
                             <span className="text-white text-xl font-black">H</span>
                         </div>
                         <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-2 font-cairo">تسجيل الدخول</h1>
-                        <p className="text-gray-500 text-sm font-bold font-cairo">أهلاً بك مجدداً في حوسني</p>
+                        <p className="text-gray-500 text-sm font-bold font-cairo">أهلاً بك مجدداً في هوسي</p>
                     </div>
 
                     {error && (
@@ -85,7 +85,7 @@ export default function LoginPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="w-full pr-11 pl-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-gray-900/5 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
-                                    placeholder="example@hawsni.com"
+                                    placeholder="example@hwasi.com"
                                 />
                             </div>
                         </div>

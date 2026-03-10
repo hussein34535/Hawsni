@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: '/profile/',
         },
-        sitemap: 'https://hawsni.com/sitemap.xml',
+        sitemap: 'https://hwasi.com/sitemap.xml',
     }
 }

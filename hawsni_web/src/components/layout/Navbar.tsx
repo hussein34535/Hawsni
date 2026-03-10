@@ -52,7 +52,7 @@ export default function Navbar() {
                         {/* Logo */}
                         <Link href="/">
                             <div className="w-12 h-12 flex items-center justify-center">
-                                <img src="/logo.png" alt="Hawsni Logo" className="w-full h-full object-contain" />
+                                <img src="/logo.png" alt="Hwasi Logo" className="w-full h-full object-contain" />
                             </div>
                         </Link>
 

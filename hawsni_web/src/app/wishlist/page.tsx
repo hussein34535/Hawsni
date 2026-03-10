@@ -68,12 +68,15 @@ export default function WishlistPage() {
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                         <AnimatePresence>
-                            {wishlist.map((item) => {
+                            {wishlist.map((item, index) => {
                                 const prod = item.product;
                                 if (!prod) return null;
+                                const prodId = prod._id || prod.id;
+                                if (!prodId) return null;
+
                                 return (
                                     <motion.div
-                                        key={prod._id || prod.id}
+                                        key={`${prodId}-${index}`}
                                         layout
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
@@ -84,7 +87,7 @@ export default function WishlistPage() {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleRemoveFromWishlist(prod._id || prod.id);
+                                                handleRemoveFromWishlist(prodId);
                                             }}
                                             className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-red-500 hover:bg-red-500 hover:text-white transition-all z-10`}
                                         >

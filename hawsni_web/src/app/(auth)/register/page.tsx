@@ -61,7 +61,7 @@ export default function RegisterPage() {
                             <span className="text-white text-xl font-black">H</span>
                         </div>
                         <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-2 font-cairo">إنشاء حساب</h1>
-                        <p className="text-gray-500 text-sm font-bold font-cairo">انضم إلى مجتمع حوسني الراقي</p>
+                        <p className="text-gray-500 text-sm font-bold font-cairo">انضم إلى مجتمع هوسي الراقي</p>
                     </div>
 
                     {error && (
@@ -101,7 +101,7 @@ export default function RegisterPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     className="w-full pr-11 pl-4 py-4 bg-gray-50 border border-transparent rounded-2xl focus:bg-white focus:border-gray-200 focus:ring-4 focus:ring-gray-900/5 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
-                                    placeholder="example@hawsni.com"
+                                    placeholder="example@hwasi.com"
                                 />
                             </div>
                         </div>

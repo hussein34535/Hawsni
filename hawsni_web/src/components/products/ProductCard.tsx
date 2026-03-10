@@ -216,21 +216,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </div>
                 )}
 
-                {/* Favorite Button */}
-                <button
-                    onClick={handleFavoriteToggle}
-                    className="absolute top-2 left-2 z-20 w-8 h-8 bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-all active:scale-90"
-                >
-                    {isFavoriting ? (
-                        <Loader2 size={16} className="text-gray-400 animate-spin" />
-                    ) : (
-                        <Heart
-                            size={18}
-                            className={`${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
-                        />
-                    )}
-                </button>
-
             </div>
 
             {/* Details Section */}

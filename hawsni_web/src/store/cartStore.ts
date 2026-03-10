@@ -68,7 +68,7 @@ export const useCartStore = create<CartState>()(
             }
         }),
         {
-            name: 'hawsni-cart',
+            name: 'hwasi-cart',
         }
     )
 );

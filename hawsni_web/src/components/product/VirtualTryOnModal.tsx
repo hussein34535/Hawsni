@@ -70,7 +70,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `hawsni-vto-${Date.now()}.png`;
+            link.download = `hwasi-vto-${Date.now()}.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

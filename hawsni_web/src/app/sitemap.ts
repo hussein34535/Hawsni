@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next'
 
-const BASE_URL = 'https://hawsni.com'
+const BASE_URL = 'https://hwasi.com'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
