@@ -25,6 +25,7 @@ export default function ImageLightbox({
     const [zoom, setZoom] = useState(1);
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
+    const thumbContainerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToastStore();
 
     // Use MotionValues for high-performance dragging (no re-renders)
@@ -158,6 +159,20 @@ export default function ImageLightbox({
             document.body.style.touchAction = 'auto';
         };
     }, [isOpen, handleKeyDown]);
+
+    // Auto-scroll active thumbnail into view
+    useEffect(() => {
+        if (isOpen && thumbContainerRef.current) {
+            const activeThumb = thumbContainerRef.current.children[currentIndex] as HTMLElement;
+            if (activeThumb) {
+                activeThumb.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'center'
+                });
+            }
+        }
+    }, [currentIndex, isOpen, images.length]);
 
     if (!isOpen) return null;
 
@@ -314,7 +329,13 @@ export default function ImageLightbox({
                     {/* Bottom: Thumbnail Row and Counter */}
                     <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center gap-4 z-[130] bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                         {images.length > 1 && (
-                            <div className="flex items-center justify-center gap-3 overflow-x-auto max-w-[90vw] px-4 py-4 hide-scrollbar pointer-events-auto">
+                            <div 
+                                ref={thumbContainerRef}
+                                className="flex items-center gap-3 overflow-x-auto max-w-full sm:max-w-[90vw] px-10 py-4 hide-scrollbar pointer-events-auto scroll-smooth"
+                                style={{ 
+                                    justifyContent: images.length * 80 < (typeof window !== 'undefined' ? window.innerWidth : 1000) * 0.9 ? 'center' : 'start' 
+                                }}
+                            >
                                 {images.map((img, idx) => (
                                     <button
                                         key={idx}
