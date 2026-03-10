@@ -1,9 +1,9 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, MoreVertical, Download } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 
 interface ImageLightboxProps {
     images: string[];
@@ -20,6 +20,29 @@ export default function ImageLightbox({
     onClose,
     onNavigate
 }: ImageLightboxProps) {
+    const [showMenu, setShowMenu] = useState(false);
+
+    const handleDownload = async (url: string) => {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            // Extract filename from URL or use a default
+            const filename = url.split('/').pop()?.split('?')[0] || 'hwasi-image.jpg';
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+            setShowMenu(false);
+        } catch (error) {
+            console.error('Download failed:', error);
+            // Fallback for CORS issues: open in new tab
+            window.open(url, '_blank');
+        }
+    };
 
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (!isOpen) return;
@@ -51,19 +74,61 @@ export default function ImageLightbox({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm"
-                    onClick={onClose}
+                    onClick={() => {
+                        if (showMenu) setShowMenu(false);
+                        else onClose();
+                    }}
                 >
-                    <motion.button
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="absolute top-6 right-6 z-[110] w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all backdrop-blur-md shadow-lg"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onClose();
-                        }}
-                    >
-                        <X size={20} strokeWidth={2.5} />
-                    </motion.button>
+                    {/* Top right buttons */}
+                    <div className="absolute top-6 right-6 z-[120] flex items-center gap-3">
+                        <div className="relative">
+                            <motion.button
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all backdrop-blur-md shadow-lg"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMenu(!showMenu);
+                                }}
+                            >
+                                <MoreVertical size={20} strokeWidth={2.5} />
+                            </motion.button>
+                            
+                            <AnimatePresence>
+                                {showMenu && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                        className="absolute top-12 right-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl overflow-hidden min-w-[140px]"
+                                    >
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDownload(images[currentIndex]);
+                                            }}
+                                            className="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-white/10 transition-colors text-sm font-bold font-cairo"
+                                        >
+                                            <Download size={16} />
+                                            تنزيل الصورة
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        <motion.button
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all backdrop-blur-md shadow-lg"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onClose();
+                            }}
+                        >
+                            <X size={20} strokeWidth={2.5} />
+                        </motion.button>
+                    </div>
 
                     {images.length > 1 && (
                         <>
