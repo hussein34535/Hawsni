@@ -21,10 +21,35 @@ exports.adminProtect = async (req, res, next) => {
         }
 
         // 2. Verify with Supabase
-        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+        let { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+
+        // 2.5 Attempt to Refresh if Expired
+        if (authError || !authUser) {
+            const refreshToken = req.cookies?.admin_refresh_token;
+            if (refreshToken) {
+                const { data: refreshData, error: refreshError } = await supabase.auth.setSession({
+                    access_token: token || '',
+                    refresh_token: refreshToken
+                });
+
+                if (!refreshError && refreshData.session) {
+                    // Update cookies with new tokens
+                    const cookieOptions = {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === 'production',
+                        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+                    };
+                    res.cookie('admin_token', refreshData.session.access_token, cookieOptions);
+                    res.cookie('admin_refresh_token', refreshData.session.refresh_token, cookieOptions);
+                    authUser = refreshData.session.user;
+                    authError = null;
+                }
+            }
+        }
 
         if (authError || !authUser) {
             res.clearCookie('admin_token');
+            res.clearCookie('admin_refresh_token');
             if (req.headers.accept && req.headers.accept.includes('text/html')) {
                 return res.redirect('/admin/login');
             }

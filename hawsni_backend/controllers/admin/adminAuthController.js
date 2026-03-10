@@ -4,7 +4,7 @@ const { supabaseAuth } = require('../../config/supabase');
 class AdminAuthController {
     // Show login page
     renderLogin(req, res) {
-        if (req.cookies.admin_token) {
+        if (req.cookies.admin_token || req.cookies.admin_refresh_token) {
             return res.redirect('/dashboard');
         }
         res.render('admin-login');
@@ -46,12 +46,15 @@ class AdminAuthController {
                 return res.render('admin-login', { error: 'عذراً، ليس لديك صلاحيات المسؤول.' });
             }
 
-            // 3. Set Cookie
-            res.cookie('admin_token', session.access_token, {
+            // 3. Set Cookies (Access Token + Refresh Token)
+            const cookieOptions = {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-            });
+            };
+
+            res.cookie('admin_token', session.access_token, cookieOptions);
+            res.cookie('admin_refresh_token', session.refresh_token, cookieOptions);
 
             res.redirect('/dashboard');
         } catch (err) {
@@ -63,6 +66,7 @@ class AdminAuthController {
     // Handle logout
     logout(req, res) {
         res.clearCookie('admin_token');
+        res.clearCookie('admin_refresh_token');
         res.redirect('/admin/login');
     }
 }
