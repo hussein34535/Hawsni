@@ -68,22 +68,22 @@ export default function ImageLightbox({
                     {images.length > 1 && (
                         <>
                             <button
-                                className="absolute left-4 lg:left-8 z-[110] w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                                className="absolute left-3 lg:left-8 z-[110] w-14 h-14 bg-white/20 hover:bg-white/40 active:scale-90 rounded-full flex items-center justify-center text-white transition-all border border-white/20 shadow-lg shadow-black/30 backdrop-blur-sm"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onNavigate((currentIndex - 1 + images.length) % images.length);
                                 }}
                             >
-                                <ChevronLeft size={32} />
+                                <ChevronLeft size={28} strokeWidth={2.5} />
                             </button>
                             <button
-                                className="absolute right-4 lg:right-8 z-[110] w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                                className="absolute right-3 lg:right-8 z-[110] w-14 h-14 bg-white/20 hover:bg-white/40 active:scale-90 rounded-full flex items-center justify-center text-white transition-all border border-white/20 shadow-lg shadow-black/30 backdrop-blur-sm"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onNavigate((currentIndex + 1) % images.length);
                                 }}
                             >
-                                <ChevronRight size={32} />
+                                <ChevronRight size={28} strokeWidth={2.5} />
                             </button>
                         </>
                     )}
