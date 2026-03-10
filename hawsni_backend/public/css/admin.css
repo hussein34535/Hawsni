@@ -56,6 +56,8 @@ body {
     line-height: 1.6;
     direction: rtl;
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Layout */
@@ -74,8 +76,9 @@ body {
     top: 0;
     height: 100vh;
     overflow-y: auto;
-    transition: transform var(--transition-base), width var(--transition-base);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), width var(--transition-base);
     z-index: 1000;
+    -webkit-overflow-scrolling: touch;
 }
 
 .sidebar-header {
@@ -177,17 +180,20 @@ body {
     color: var(--dark-gray);
     font-weight: 700;
     margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .topbar-actions {
     display: flex;
     gap: var(--spacing-sm);
     align-items: center;
+    flex-shrink: 0;
 }
 
 #menuToggle {
     display: none;
-    /* Hidden on desktop */
     background: transparent;
     border: none;
     font-size: 1.5rem;
@@ -195,6 +201,7 @@ body {
     cursor: pointer;
     padding: 8px;
     border-radius: var(--radius-sm);
+    -webkit-tap-highlight-color: transparent;
 }
 
 #menuToggle:hover {
@@ -213,12 +220,13 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.4);
+    background: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 999;
     pointer-events: none;
     opacity: 0;
-    transition: opacity var(--transition-base);
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-overlay.active {
@@ -245,6 +253,7 @@ body {
     border: 1px solid var(--border-color);
     padding: var(--spacing-xl);
     margin-bottom: var(--spacing-lg);
+    overflow: hidden;
 }
 
 .card-header {
@@ -255,7 +264,6 @@ body {
     padding-bottom: var(--spacing-md);
     border-bottom: 1px solid var(--border-color);
     flex-wrap: wrap;
-    /* Important for mobile */
     gap: 10px;
 }
 
@@ -284,6 +292,9 @@ body {
     text-decoration: none;
     transition: all var(--transition-fast);
     line-height: 1.5;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .btn-primary {
@@ -340,11 +351,13 @@ body {
     padding: 0.75rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    font-size: 1rem;
+    font-size: 16px; /* Prevents iOS zoom on focus */
     transition: all var(--transition-fast);
     background: var(--white);
     color: var(--dark-gray);
     font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .form-control:focus {
@@ -365,8 +378,6 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px;
-    /* Force scroll on small screens */
     text-align: right;
 }
 
@@ -438,6 +449,7 @@ tr:hover {
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
+    flex-shrink: 0;
 }
 
 .stat-card.primary .stat-icon {
@@ -470,6 +482,7 @@ tr:hover {
     font-weight: 800;
     color: var(--dark);
     margin-top: 8px;
+    word-break: break-word;
 }
 
 .stat-label {
@@ -487,6 +500,7 @@ tr:hover {
     font-size: 0.8rem;
     font-weight: 700;
     line-height: 1;
+    white-space: nowrap;
 }
 
 .badge-success {
@@ -522,127 +536,412 @@ tr:hover {
     color: var(--medium-gray);
 }
 
-/* Mobile Responsive */
+/* ============================================
+   TABLET RESPONSIVE (1024px)
+   ============================================ */
 @media (max-width: 1024px) {
-
     .content-grid,
     .two-col-grid {
         grid-template-columns: 1fr;
     }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
 }
 
+/* ============================================
+   MOBILE RESPONSIVE (768px) — THE BIG ONE
+   ============================================ */
 @media (max-width: 768px) {
+
+    /* ---- Layout ---- */
     .admin-layout {
         flex-direction: column;
     }
 
+    /* ---- Sidebar: Off-canvas with smooth slide ---- */
     .sidebar {
         transform: translateX(100%);
-        width: 280px;
+        width: 85vw;
+        max-width: 320px;
         border-left: none;
+        box-shadow: none;
     }
 
     .sidebar.active {
         transform: translateX(0);
-        box-shadow: -10px 0 20px rgba(0, 0, 0, 0.1);
+        box-shadow: -8px 0 30px rgba(0, 0, 0, 0.15);
     }
 
+    .sidebar-header {
+        padding: var(--spacing-lg);
+    }
+
+    .sidebar-brand h1 {
+        font-size: 1.3rem;
+    }
+
+    .nav-link {
+        padding: 14px var(--spacing-lg);
+        font-size: 0.95rem;
+        min-height: 48px; /* Touch target */
+    }
+
+    .nav-section-title {
+        padding: var(--spacing-sm) var(--spacing-lg);
+    }
+
+    /* ---- Main Content: Full width ---- */
     .main-content {
         margin-right: 0;
         width: 100%;
         max-width: 100vw;
+        min-width: 0;
     }
 
+    /* ---- Topbar ---- */
     #menuToggle {
-        display: block;
-        /* Show hamburger only on mobile */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        border-radius: var(--radius-md);
+        font-size: 1.3rem;
     }
 
     .topbar {
-        padding: 8px var(--spacing-md);
-        height: 60px;
-        position: sticky;
+        padding: 8px 12px;
+        height: 56px;
+        gap: 8px;
     }
 
     .page-title {
-        font-size: 1.1rem;
+        font-size: 1rem;
+        max-width: 140px;
     }
 
-    .topbar-actions .btn span {
+    .topbar-actions .btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .topbar-actions .btn span,
+    .topbar-actions .btn:not(.btn-sm) > span {
         display: none;
-        /* Hide text in buttons on mobile */
     }
 
+    /* ---- Content Area ---- */
     .content-wrapper {
-        padding: var(--spacing-md);
+        padding: 12px;
         max-width: 100vw;
         overflow-x: hidden;
     }
 
+    /* ---- Cards ---- */
     .card {
-        padding: var(--spacing-md);
+        padding: 14px;
         border-radius: var(--radius-md);
-        max-width: 100%;
-        overflow: hidden;
+        margin-bottom: 12px;
     }
 
+    .card-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+    }
+
+    .card-header .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .card-title {
+        font-size: 1rem;
+    }
+
+    /* ---- Stats Grid: 2 columns on mobile ---- */
     .stats-grid {
-        grid-template-columns: 1fr;
-        /* Switch to 1 column on mobile */
-        gap: var(--spacing-sm);
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px;
     }
 
     .stat-card {
-        padding: var(--spacing-md);
+        padding: 12px;
+        border-radius: var(--radius-md);
+    }
+
+    .stat-card:hover {
+        transform: none;
     }
 
     .stat-value {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 
+    .stat-label {
+        font-size: 0.75rem;
+        line-height: 1.3;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .stat-header {
+        gap: 6px;
+    }
+
+    /* ---- Tables: Mobile Cards ---- */
+    .table-responsive {
+        border: none;
+        border-radius: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 500px;
+    }
+
+    th, td {
+        padding: 10px 8px;
+        font-size: 0.82rem;
+    }
+
+    /* ---- Buttons ---- */
     .btn {
+        min-height: 44px;
+        font-size: 0.9rem;
+    }
+
+    .btn-sm {
+        min-height: 36px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    /* Inline flex button groups - prevent wrapping and overflow */
+    td .btn,
+    td [style*="display: flex"] .btn,
+    td [style*="display:flex"] .btn {
+        min-height: 32px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* ---- Forms ---- */
+    .form-control {
+        padding: 0.65rem 0.85rem;
+        font-size: 16px; /* Prevents iOS zoom */
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+    }
+
+    /* ---- Inline Style Overrides ----
+       Many views use inline styles for flex layouts.
+       These force them to stack on mobile. */
+    [style*="display: flex"][style*="gap"] {
+        flex-wrap: wrap !important;
+    }
+
+    /* Product row image + text layout fix */
+    td > div[style*="display: flex"] {
+        gap: 0.5rem !important;
+    }
+
+    td > div[style*="display: flex"] img {
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 8px !important;
+    }
+
+    td > div[style*="display: flex"] > div {
+        min-width: 0;
+    }
+
+    td > div[style*="display: flex"] > div > div:first-child {
+        font-size: 0.82rem !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+    }
+
+    /* ---- Modals & Overlays ---- */
+    .confirm-dialog,
+    [style*="max-width: 400px"],
+    [style*="max-width:400px"] {
+        width: calc(100vw - 32px) !important;
+        max-width: 100% !important;
+        margin: 0 16px;
+    }
+
+    /* ---- Dashboard Welcome Section ---- */
+    [style*="font-size: 1.5rem"] {
+        font-size: 1.15rem !important;
+    }
+
+    /* ---- Dashboard Clarity Section - force readability ---- */
+    [style*="display: flex"][style*="justify-content: space-between"][style*="align-items: center"][style*="margin-bottom: 1rem"] {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+    }
+
+    /* Clarity countdown card */
+    [style*="padding: 15px 20px"][style*="display: flex"][style*="justify-content: space-between"] {
+        flex-direction: column !important;
+        gap: 12px !important;
+        padding: 12px !important;
+    }
+
+    /* ---- Bulk Action Bars ---- */
+    #bulkBar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        padding: 10px !important;
+    }
+
+    #bulkBar > div,
+    #bulkBar [style*="display: flex"] {
+        flex-wrap: wrap !important;
+    }
+
+    #bulkBar .form-control {
+        width: 100% !important;
+    }
+
+    #bulkBar .btn {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* ---- Toast positioning ---- */
+    #toast-container {
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+    }
+
+    .toast {
         width: 100%;
-        /* Full width buttons on small screens usually */
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Prevent any element from overflowing */
+    img, video, iframe, embed, object {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Fix select dropdowns */
+    select.form-control {
+        padding-right: 2rem;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: left 0.75rem center;
+    }
+}
+
+/* ============================================
+   VERY SMALL MOBILE (480px)
+   ============================================ */
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .stat-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+
+    .stat-card {
+        padding: 10px;
+    }
+
+    .page-title {
+        font-size: 0.9rem;
+        max-width: 100px;
+    }
+
+    .topbar {
+        padding: 6px 8px;
+        height: 50px;
+    }
+
+    .content-wrapper {
+        padding: 8px;
+    }
+
+    .card {
+        padding: 10px;
+        border-radius: 8px;
         margin-bottom: 8px;
     }
 
-    /* Exceptions for button width */
-    .topbar-actions .btn,
-    .btn-sm,
-    .card-header .btn {
-        width: auto;
-        margin-bottom: 0;
+    .card-title {
+        font-size: 0.9rem;
     }
 
-    /* For tables, ensure scrolling works */
-    .table-responsive {
-        margin: 0 -var(--spacing-md);
-        /* Edge to edge tables */
-        width: calc(100% + var(--spacing-xl));
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        display: block;
+    .btn {
+        font-size: 0.82rem;
+        padding: 0.4rem 0.8rem;
     }
 
-    th,
-    td {
-        padding: 10px;
-        white-space: nowrap;
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    table {
+        min-width: 400px;
+    }
+
+    th, td {
+        padding: 8px 6px;
+        font-size: 0.78rem;
     }
 }
 
-/* Very Small Mobile */
-@media (max-width: 480px) {
+/* ============================================
+   VERY TINY SCREENS (360px and below)
+   ============================================ */
+@media (max-width: 360px) {
     .stats-grid {
-        grid-template-columns: 1fr;
-        /* 1 column on very small */
+        grid-template-columns: 1fr !important;
+    }
+
+    .sidebar {
+        width: 100vw;
+        max-width: 100vw;
     }
 }
 
-/* Toast Notifications */
+/* ============================================
+   TOAST NOTIFICATIONS
+   ============================================ */
 #toast-container {
     position: fixed;
     bottom: 24px;
@@ -671,5 +970,18 @@ tr:hover {
     to {
         transform: translateX(0);
         opacity: 1;
+    }
+}
+
+/* ============================================
+   SAFE AREA (Notch / Dynamic Island)
+   ============================================ */
+@supports (padding: env(safe-area-inset-top)) {
+    .topbar {
+        padding-top: max(8px, env(safe-area-inset-top));
+    }
+
+    .sidebar {
+        padding-top: env(safe-area-inset-top);
     }
 }

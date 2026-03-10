@@ -64,10 +64,11 @@ function showConfirm(message, onConfirm) {
     const dialog = overlay.querySelector('.confirm-dialog');
     dialog.style.cssText = `
         background: white;
-        padding: 2rem;
-        border-radius: 12px;
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
         text-align: center;
         max-width: 400px;
+        width: calc(100vw - 32px);
         animation: scaleIn 0.3s ease;
     `;
 
