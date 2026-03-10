@@ -1,3 +1,5 @@
+import apiClient from '@/lib/axios';
+
 const GUEST_WISHLIST_KEY = 'guest_wishlist';
 
 export const wishlistService = {
