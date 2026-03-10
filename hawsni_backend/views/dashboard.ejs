@@ -104,6 +104,71 @@
         </a>
     </div>
 
+    <!-- Microsoft Clarity Stats -->
+    <% if (typeof clarityInsights !== 'undefined' && clarityInsights && clarityInsights.data) { %>
+        <div style="margin-bottom: 2rem; margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="color: var(--dark-gray); margin: 0;"><i class="fas fa-chart-line" style="color: #0078d4;"></i> إحصائيات Clarity اللحظية</h3>
+                <span style="font-size: 0.85rem; color: #666; background: #e0f0ff; padding: 4px 10px; border-radius: 12px;">
+                    <i class="fas fa-sync-alt" style="margin-right: 4px;"></i> تحديث كل 2.5 ساعة تلقائياً
+                </span>
+            </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="stat-card" style="border-right: 4px solid #0078d4;">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value"><%= clarityInsights.data.activeUsers || 0 %></div>
+                            <div class="stat-label">المستخدمين النشطين (الآن)</div>
+                        </div>
+                        <div class="stat-icon" style="background: rgba(0, 120, 212, 0.1); color: #0078d4;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card" style="border-right: 4px solid #107c10;">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value"><%= clarityInsights.data.liveSessions || 0 %></div>
+                            <div class="stat-label">الجلسات المباشرة</div>
+                        </div>
+                        <div class="stat-icon" style="background: rgba(16, 124, 16, 0.1); color: #107c10;">
+                            <i class="fas fa-desktop"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="border-right: 4px solid #d83b01;">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value"><%= clarityInsights.data.rageClicks || 0 %></div>
+                            <div class="stat-label">النقرات الغاضبة (Rage Clicks)</div>
+                        </div>
+                        <div class="stat-icon" style="background: rgba(216, 59, 1, 0.1); color: #d83b01;">
+                            <i class="fas fa-mouse-pointer"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card" style="border-right: 4px solid #881798;">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value"><%= clarityInsights.data.deadClicks || 0 %></div>
+                            <div class="stat-label">النقرات الميتة (Dead Clicks)</div>
+                        </div>
+                        <div class="stat-icon" style="background: rgba(136, 23, 152, 0.1); color: #881798;">
+                            <i class="fas fa-hand-pointer"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="font-size: 0.8rem; color: #888; text-align: left; margin-top: 5px;" dir="ltr">
+                <i class="far fa-clock"></i> Last fetched: <%= new Date(clarityInsights.lastFetched).toLocaleTimeString('ar-EG') %> |
+                Next fetch: <%= new Date(clarityInsights.nextFetch).toLocaleTimeString('ar-EG') %>
+            </div>
+        </div>
+    <% } %>
+
     <!-- Content Grid -->
     <div class="content-grid">
         <!-- Recent Orders -->
