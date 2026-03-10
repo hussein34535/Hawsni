@@ -33,7 +33,6 @@ import { trackGAEvent } from '@/components/analytics/GoogleAnalytics';
 import { Product } from '@/types';
 import { wishlistService } from '@/services/wishlistService';
 import dynamic from 'next/dynamic';
-import FacebookPixelPurchaseEvent from '@/components/analytics/FacebookPixelPurchaseEvent';
 
 const ProductVideoItem = ({ src }: { src: string }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -366,7 +365,7 @@ export default function ProductPage() {
             productId: prodId,
             name: product.name,
             price: finalPrice,
-            imageUrl: selectedColorImage,
+            imageUrl: formatImageUrl(selectedColorImage),
             quantity: quantity,
             size: selectedSize,
             color: selectedColor || undefined
