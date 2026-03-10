@@ -32,40 +32,7 @@ interface LightboxImageProps {
     translateY: any;
 }
 
-interface LightboxBackgroundItemProps {
-    img: string;
-    idx: number;
-    scrollX: any;
-    windowWidth: number;
-}
 
-function LightboxBackgroundItem({
-    img,
-    idx,
-    scrollX,
-    windowWidth
-}: LightboxBackgroundItemProps) {
-    const opacity = useTransform(
-        scrollX,
-        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
-        [0, 1, 0]
-    );
-
-    return (
-        <motion.div
-            className="absolute inset-0"
-            style={{ opacity }}
-        >
-            <Image
-                src={img}
-                alt=""
-                fill
-                className="object-cover blur-3xl opacity-50 scale-125 transition-opacity duration-500"
-                sizes="20vw"
-            />
-        </motion.div>
-    );
-}
 
 function LightboxImage({
     img,
@@ -87,12 +54,6 @@ function LightboxImage({
     const lowerSrc = img.toLowerCase();
     const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
 
-    const scale = useTransform(
-        scrollX,
-        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
-        [0.95, 1, 0.95]
-    );
-
     return (
         <motion.div
             key={idx}
@@ -100,7 +61,7 @@ function LightboxImage({
             style={{ 
                 x: idx === currentIndex && zoom > 1 ? springX : 0,
                 y: idx === currentIndex && zoom > 1 ? springY : 0,
-                scale: idx === currentIndex && zoom > 1 ? zoom : scale,
+                scale: idx === currentIndex && zoom > 1 ? zoom : 1,
                 opacity: zoom > 1 ? (idx === currentIndex ? 1 : 0) : 1,
                 zIndex: idx === currentIndex ? 10 : 1,
                 cursor: idx === currentIndex && zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
@@ -371,18 +332,7 @@ export default function ImageLightbox({
                         </>
                     )}
 
-                    {/* Cinematic Cross-fading Background Blur */}
-                    <div className="absolute inset-0 z-0 overflow-hidden">
-                        {windowWidth > 0 && images.map((img: string, idx: number) => (
-                            <LightboxBackgroundItem
-                                key={`bg-${idx}`}
-                                img={img}
-                                idx={idx}
-                                scrollX={scrollX}
-                                windowWidth={windowWidth}
-                            />
-                        ))}
-                    </div>
+
 
                     {/* Main Filmstrip View (Natural Scroll) */}
                     <div className="relative w-full h-full flex items-center justify-center overflow-hidden z-10">
