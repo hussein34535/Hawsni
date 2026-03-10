@@ -349,7 +349,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                         ))}
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-3 mb-3">
+                                                <div className="flex items-center gap-3 mb-1">
                                                     <span className="text-[10px] text-gray-400 font-bold font-cairo opacity-60">
                                                         {new Date(review.created_at || review.createdAt || '').toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', {
                                                             year: 'numeric', month: 'long', day: 'numeric'
