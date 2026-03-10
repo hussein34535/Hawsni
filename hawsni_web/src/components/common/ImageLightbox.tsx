@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, MoreVertical, Download, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { useToastStore } from '@/store/toastStore';
@@ -23,20 +23,27 @@ export default function ImageLightbox({
 }: ImageLightboxProps) {
     const [showMenu, setShowMenu] = useState(false);
     const [zoom, setZoom] = useState(1);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
-    const imageRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToastStore();
+
+    // Use MotionValues for high-performance dragging (no re-renders)
+    const translateX = useMotionValue(0);
+    const translateY = useMotionValue(0);
+    
+    // Spring for smooth zoom-drag reset
+    const springX = useSpring(translateX, { stiffness: 300, damping: 30 });
+    const springY = useSpring(translateY, { stiffness: 300, damping: 30 });
 
     const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
     const [direction, setDirection] = useState(0);
 
     const resetZoom = useCallback(() => {
         setZoom(1);
-        setPosition({ x: 0, y: 0 });
+        translateX.set(0);
+        translateY.set(0);
         setLastTouchDistance(null);
-    }, []);
+    }, [translateX, translateY]);
 
     // Handle navigation with extreme smoothness
     const handleNavigate = (index: number) => {
@@ -81,8 +88,8 @@ export default function ImageLightbox({
         } else if (zoom > 1) {
             setIsDragging(true);
             dragStart.current = { 
-                x: e.touches[0].clientX - position.x, 
-                y: e.touches[0].clientY - position.y 
+                x: e.touches[0].clientX - translateX.get(), 
+                y: e.touches[0].clientY - translateY.get() 
             };
         }
     };
@@ -97,10 +104,8 @@ export default function ImageLightbox({
             setZoom(prev => Math.min(5, Math.max(1, prev + delta)));
             setLastTouchDistance(distance);
         } else if (isDragging && zoom > 1 && e.touches.length === 1) {
-            setPosition({
-                x: e.touches[0].clientX - dragStart.current.x,
-                y: e.touches[0].clientY - dragStart.current.y
-            });
+            translateX.set(e.touches[0].clientX - dragStart.current.x);
+            translateY.set(e.touches[0].clientY - dragStart.current.y);
         }
     };
 
@@ -150,6 +155,7 @@ export default function ImageLightbox({
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'unset';
+            document.body.style.touchAction = 'auto';
         };
     }, [isOpen, handleKeyDown]);
 
@@ -162,7 +168,7 @@ export default function ImageLightbox({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm touch-none"
                     onClick={() => {
                         if (showMenu) setShowMenu(false);
                         else onClose();
@@ -250,24 +256,22 @@ export default function ImageLightbox({
                                     setIsDragging(false);
                                     setLastTouchDistance(null);
                                 }}
-                                className="absolute inset-0 flex items-center justify-center p-4 lg:p-20"
+                                className="absolute inset-0 flex items-center justify-center p-4 lg:p-20 pointer-events-auto"
                                 style={{ 
-                                    x: zoom > 1 ? position.x : 0,
-                                    y: zoom > 1 ? position.y : 0,
+                                    x: zoom > 1 ? springX : 0,
+                                    y: zoom > 1 ? springY : 0,
                                     scale: zoom,
                                     cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
                                 }}
                                 onMouseDown={(e) => {
                                     if (zoom <= 1) return;
                                     setIsDragging(true);
-                                    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+                                    dragStart.current = { x: e.clientX - translateX.get(), y: e.clientY - translateY.get() };
                                 }}
                                 onMouseMove={(e) => {
                                     if (!isDragging || zoom <= 1) return;
-                                    setPosition({
-                                        x: e.clientX - dragStart.current.x,
-                                        y: e.clientY - dragStart.current.y
-                                    });
+                                    translateX.set(e.clientX - dragStart.current.x);
+                                    translateY.set(e.clientY - dragStart.current.y);
                                 }}
                                 onMouseUp={() => setIsDragging(false)}
                                 onMouseLeave={() => setIsDragging(false)}
@@ -290,7 +294,7 @@ export default function ImageLightbox({
                                     }
 
                                     return (
-                                        <div className="relative w-full h-full">
+                                        <div className="relative w-full h-full pointer-events-none">
                                             <Image
                                                 src={currentSrc}
                                                 alt={`Fullscreen view ${currentIndex + 1}`}
