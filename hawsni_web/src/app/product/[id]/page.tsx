@@ -33,6 +33,56 @@ import { trackGAEvent } from '@/components/analytics/GoogleAnalytics';
 import { Product } from '@/types';
 import { wishlistService } from '@/services/wishlistService';
 import dynamic from 'next/dynamic';
+import FacebookPixelPurchaseEvent from '@/components/analytics/FacebookPixelPurchaseEvent';
+
+const ProductVideoItem = ({ src }: { src: string }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    const togglePlay = () => {
+        if (videoRef.current) {
+            if (videoRef.current.paused) {
+                videoRef.current.play();
+                setIsPlaying(true);
+            } else {
+                videoRef.current.pause();
+                setIsPlaying(false);
+            }
+        }
+    };
+
+    return (
+        <div 
+            className="w-full h-full flex items-center justify-center cursor-pointer group"
+            onClick={(e) => {
+                e.stopPropagation();
+                togglePlay();
+            }}
+        >
+            <video
+                ref={videoRef}
+                src={src}
+                className="w-full h-full object-contain"
+                playsInline
+                controls={false}
+                controlsList="nodownload"
+                loop
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+            />
+            
+            {/* Modern Play/Pause Overlay */}
+            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isPlaying ? 'opacity-0 scale-110' : 'opacity-100 scale-100 bg-black/10'}`}>
+                {!isPlaying && (
+                    <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-white/40 transform transition-transform group-hover:scale-110 group-active:scale-95">
+                        <Play className="w-8 h-8 text-white ml-1 drop-shadow-md" fill="currentColor" />
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 const ReviewsSection = dynamic(() => import('@/components/product/ReviewsSection'), { ssr: false });
 const SizeGuideModal = dynamic(() => import('@/components/product/SizeGuideModal'), { ssr: false });
@@ -457,16 +507,7 @@ export default function ProductPage() {
                                         {/* Foreground Focused Layer */}
                                         <div className="absolute inset-0 z-10 flex items-center justify-center">
                                             {isVideo ? (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <video
-                                                        src={formatImageUrl(img)}
-                                                        className="w-full h-full object-contain"
-                                                        playsInline
-                                                        controls
-                                                        controlsList="nodownload"
-                                                        preload="metadata"
-                                                    />
-                                                </div>
+                                                <ProductVideoItem src={formatImageUrl(img)} />
                                             ) : (
                                                 <Image
                                                     src={formatImageUrl(img)}

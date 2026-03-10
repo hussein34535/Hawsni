@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useScroll } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Download, Play } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { useToastStore } from '@/store/toastStore';
@@ -54,6 +54,21 @@ function LightboxImage({
     const lowerSrc = img.toLowerCase();
     const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
 
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    const togglePlay = () => {
+        if (videoRef.current) {
+            if (videoRef.current.paused) {
+                videoRef.current.play();
+                setIsPlaying(true);
+            } else {
+                videoRef.current.pause();
+                setIsPlaying(false);
+            }
+        }
+    };
+
     return (
         <motion.div
             key={idx}
@@ -85,16 +100,35 @@ function LightboxImage({
             onMouseLeave={() => onDragStateChange(false)}
         >
             {isVideo ? (
-                <video
-                    src={img}
-                    className="w-full h-full max-h-[80vh] object-contain rounded-xl"
-                    controls
-                    playsInline
-                    controlsList="nodownload"
-                    onClick={(e) => e.stopPropagation()}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
-                />
+                <div 
+                    className="relative w-full h-full max-h-[80vh] flex items-center justify-center cursor-pointer group"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        togglePlay();
+                    }}
+                >
+                    <video
+                        ref={videoRef}
+                        src={img}
+                        className="w-full h-full object-contain rounded-xl"
+                        playsInline
+                        controls={false}
+                        controlsList="nodownload"
+                        loop
+                        onPlay={() => setIsPlaying(true)}
+                        onPause={() => setIsPlaying(false)}
+                        onEnded={() => setIsPlaying(false)}
+                    />
+                    
+                    {/* Modern Play/Pause Overlay */}
+                    <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isPlaying ? 'opacity-0 scale-110' : 'opacity-100 scale-100 bg-black/20'}`}>
+                        {!isPlaying && (
+                            <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-white/30 transform transition-transform group-hover:scale-110 group-active:scale-95">
+                                <Play className="w-10 h-10 text-white ml-2 drop-shadow-md" fill="currentColor" />
+                            </div>
+                        )}
+                    </div>
+                </div>
             ) : (
                 <div className="relative w-full h-full pointer-events-none p-4 lg:p-12">
                     <Image
