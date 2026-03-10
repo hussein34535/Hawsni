@@ -6,27 +6,27 @@
             const pendingOrders = orders.filter(o => o.status === 'Processing').length;
             const completedOrders = orders.filter(o => o.status === 'Delivered').length;
             %>
-            <div class="stat-card primary">
+            <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-icon" style="background: var(--brand-light); color: var(--brand-primary);"><i class="fas fa-dollar-sign"></i></div>
                     <div class="stat-label">إجمالي المبيعات</div>
                 </div>
                 <div class="stat-value">
                     <%= totalRevenue.toLocaleString() %> ج.م
                 </div>
             </div>
-            <div class="stat-card warning">
+            <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-icon" style="background: var(--warning-bg); color: var(--warning);"><i class="fas fa-clock"></i></div>
                     <div class="stat-label">طلبات قيد المعالجة</div>
                 </div>
                 <div class="stat-value">
                     <%= pendingOrders %>
                 </div>
             </div>
-            <div class="stat-card success">
+            <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-icon" style="background: var(--success-bg); color: var(--success);"><i class="fas fa-check-circle"></i></div>
                     <div class="stat-label">طلبات مكتملة</div>
                 </div>
                 <div class="stat-value">
@@ -189,19 +189,19 @@
     </div>
 
     <!-- Order Details Modal -->
-    <div id="orderModal" class="modal">
-        <div class="modal-content">
+    <div id="orderModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <div class="header-main">
                     <div class="header-id-group">
-                        <span class="header-badge">طلب جديد</span>
+                        <span class="header-badge">تفاصيل الطلب</span>
                         <h3 id="modalOrderId" class="modal-title"></h3>
                     </div>
                     <p id="modalOrderDate" class="modal-subtitle"></p>
                 </div>
                 <div class="header-actions">
                     <div id="modalStatusBadge" class="badge"></div>
-                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                    <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
                 </div>
             </div>
 
@@ -228,7 +228,7 @@
                                     <span id="modalDiscount"></span>
                                 </div>
                                 <div class="payment-item total">
-                                    <span>الإجمالي القديم:</span>
+                                    <span>الإجمالي:</span>
                                     <span id="modalTotalAmount"></span>
                                 </div>
                             </div>
@@ -243,7 +243,7 @@
                                 <div id="modalAvatar" class="profile-avatar"></div>
                                 <div class="profile-details">
                                     <h5 id="modalCustomerName"></h5>
-                                    <p id="modalCustomerPhone"></p>
+                                    <p id="modalCustomerPhone" style="direction: ltr; text-align: right;"></p>
                                     <p id="modalCustomerEmail" class="email-text"></p>
                                 </div>
                             </div>
@@ -410,13 +410,22 @@
             document.body.style.overflow = 'hidden';
         }
 
-        function closeModal() {
-            document.getElementById('orderModal').classList.remove('active');
-            document.body.style.overflow = '';
+        function closeModal(event) {
+            if (event) {
+                // If it's a click event, stop propagation if it's outside
+                if (event.target.id === 'orderModal') {
+                    document.getElementById('orderModal').classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            } else {
+                // Direct call (like from the close button)
+                document.getElementById('orderModal').classList.remove('active');
+                document.body.style.overflow = '';
+            }
         }
 
         function copyAddress() {
-            const addr = document.getElementById('modalAddress').textContent;
+            const addr = document.getElementById('modalAddressFull').textContent;
             navigator.clipboard.writeText(addr);
             alert('تم نسخ العنوان بنجاح');
         }
@@ -546,11 +555,12 @@
             });
         }
 
-        // Close modal on click outside
-        window.onclick = (event) => {
-            const modal = document.getElementById('orderModal');
-            if (event.target == modal) closeModal();
-        }
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
     </script>
 
     <style>

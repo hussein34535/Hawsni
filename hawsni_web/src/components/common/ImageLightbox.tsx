@@ -56,34 +56,34 @@ export default function ImageLightbox({
                     <motion.button
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="absolute top-6 right-6 z-[110] w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors"
+                        className="absolute top-6 right-6 z-[110] w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all backdrop-blur-md shadow-lg"
                         onClick={(e) => {
                             e.stopPropagation();
                             onClose();
                         }}
                     >
-                        <X size={24} />
+                        <X size={20} strokeWidth={2.5} />
                     </motion.button>
 
                     {images.length > 1 && (
                         <>
                             <button
-                                className="absolute left-3 lg:left-8 z-[110] w-14 h-14 bg-white/20 hover:bg-white/40 active:scale-90 rounded-full flex items-center justify-center text-white transition-all border border-white/20 shadow-lg shadow-black/30 backdrop-blur-sm"
+                                className="absolute left-4 lg:left-8 z-[110] w-12 h-12 bg-black/40 hover:bg-black/60 active:scale-90 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all shadow-lg backdrop-blur-md"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onNavigate((currentIndex - 1 + images.length) % images.length);
                                 }}
                             >
-                                <ChevronLeft size={28} strokeWidth={2.5} />
+                                <ChevronLeft size={24} strokeWidth={2.5} />
                             </button>
                             <button
-                                className="absolute right-3 lg:right-8 z-[110] w-14 h-14 bg-white/20 hover:bg-white/40 active:scale-90 rounded-full flex items-center justify-center text-white transition-all border border-white/20 shadow-lg shadow-black/30 backdrop-blur-sm"
+                                className="absolute right-4 lg:right-8 z-[110] w-12 h-12 bg-black/40 hover:bg-black/60 active:scale-90 rounded-full flex items-center justify-center text-white/90 hover:text-white transition-all shadow-lg backdrop-blur-md"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onNavigate((currentIndex + 1) % images.length);
                                 }}
                             >
-                                <ChevronRight size={28} strokeWidth={2.5} />
+                                <ChevronRight size={24} strokeWidth={2.5} />
                             </button>
                         </>
                     )}
@@ -92,8 +92,9 @@ export default function ImageLightbox({
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className="relative w-full h-[80vh] max-w-5xl mx-4 flex items-center justify-center"
+                        className="relative w-full h-full max-h-screen max-w-7xl mx-auto flex items-center justify-center p-2 lg:p-10"
                         onClick={(e) => e.stopPropagation()}
+                        style={{ touchAction: 'pan-y pinch-zoom' }}
                     >
                         {(() => {
                             const currentSrc = images[currentIndex];
