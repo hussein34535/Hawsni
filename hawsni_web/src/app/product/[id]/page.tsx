@@ -98,39 +98,57 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
     ];
 
     return (
-        <div className="mt-8 pt-6 border-t border-gray-100">
-            <h4 className="text-base font-black text-gray-900 mb-4 font-cairo">
-                {isRTL ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+        <div className="mt-10 pt-8 border-t border-gray-100">
+            <h4 className="text-base font-black text-gray-900 mb-6 font-cairo flex items-center gap-2">
+                <Info size={18} className="text-[var(--color-brand-primary)]" />
+                {isRTL ? 'معلومات تهمك' : 'Important Information'}
             </h4>
-            <div className="flex flex-col gap-3">
-                {faqs.map((faq, index) => (
-                    <div key={index} className="border border-gray-100 rounded-2xl overflow-hidden bg-gray-50/50">
-                        <button
-                            onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                            className={`w-full flex items-center justify-between p-4 bg-transparent hover:bg-gray-50 transition-colors ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+            <div className="flex flex-col gap-4">
+                {faqs.map((faq, index) => {
+                    const isOpen = openIndex === index;
+                    return (
+                        <div 
+                            key={index} 
+                            className={`
+                                rounded-2xl border transition-all duration-300 group
+                                ${isOpen 
+                                    ? 'bg-white border-[var(--color-brand-primary)]/30 shadow-xl shadow-[var(--color-brand-primary)]/5' 
+                                    : 'bg-gray-50/40 border-gray-100 hover:border-gray-200 hover:bg-gray-50/80'}
+                            `}
                         >
-                            <span className="font-bold text-sm text-gray-800 font-cairo">{faq.question}</span>
-                            <ChevronDown
-                                size={18}
-                                className={`text-gray-400 transition-transform duration-300 flex-shrink-0 ${openIndex === index ? 'rotate-180' : ''}`}
-                            />
-                        </button>
-                        <AnimatePresence>
-                            {openIndex === index && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <div className={`p-4 pt-0 text-sm font-medium text-gray-500 font-cairo leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
-                                        {faq.answer}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                ))}
+                            <button
+                                onClick={() => setOpenIndex(isOpen ? null : index)}
+                                className={`w-full flex items-center justify-between p-5 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
+                            >
+                                <span className={`font-black text-sm font-cairo transition-colors ${isOpen ? 'text-[var(--color-brand-primary)]' : 'text-gray-700'}`}>
+                                    {faq.question}
+                                </span>
+                                <div className={`
+                                    w-8 h-8 rounded-xl flex items-center justify-center transition-all
+                                    ${isOpen ? 'bg-[var(--color-brand-primary)] text-white rotate-180' : 'bg-white text-gray-400 group-hover:text-gray-600'}
+                                `}>
+                                    <ChevronDown size={16} strokeWidth={3} />
+                                </div>
+                            </button>
+                            <AnimatePresence>
+                                {isOpen && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                    >
+                                        <div className={`px-5 pb-5 text-sm font-bold text-gray-500 font-cairo leading-relaxed opacity-90 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                            <div className="pt-3 border-t border-gray-50">
+                                                {faq.answer}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -565,8 +583,8 @@ export default function ProductPage() {
                     {/* Right: Info Section */}
                     <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
                         {/* Title and Header Layout Refined */}
-                        <div className="flex flex-col gap-4 mb-8">
-                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight">{product.name}</h1>
+                        <div className="flex flex-col gap-6 mb-10">
+                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight">{product.name}</h1>
                             
                             <div className={`flex items-start justify-between gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                                 {/* Price - Now on the right (for RTL) or primary side */}
@@ -592,10 +610,15 @@ export default function ProductPage() {
                                     className="flex flex-col gap-1 cursor-pointer group"
                                     onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                                 >
-                                    <div className="flex text-amber-400">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
-                                        ))}
+                                    <div className={`flex items-center gap-1.5 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                                        <div className="flex text-amber-400">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
+                                            ))}
+                                        </div>
+                                        <span className="text-xs font-black text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-md min-w-[28px] text-center">
+                                            {product.rating?.toFixed(1) || '0.0'}
+                                        </span>
                                     </div>
                                     <span className="text-[11px] text-[var(--color-brand-primary)] font-black font-cairo underline decoration-dotted underline-offset-4 group-hover:text-indigo-600 transition-colors">
                                         {(product as any).num_reviews || 0} {isRTL ? 'تقييم حقيقي' : 'Verified Reviews'}
