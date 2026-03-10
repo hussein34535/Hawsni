@@ -372,36 +372,29 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                                                     </p>
                                                 )}
 
-                                                {/* Review images */}
-                                                {review.images && review.images.length > 0 && visibleImages && (
-                                                    <div className="flex gap-3 mt-4 flex-wrap">
-                                                        {visibleImages.map((img: string, i: number) => {
-                                                            const isLastVisible = i === 1 && hasMoreImages;
-
-                                                            return (
-                                                                <div key={i} className="relative cursor-pointer group" onClick={() => {
-                                                                    if (isLastVisible) {
-                                                                        toggleExpandReview(review._id || idx.toString());
-                                                                    } else {
-                                                                        setLightbox({ images: review.images!, index: i });
-                                                                    }
-                                                                }}>
+                                                {/* Review images slider */}
+                                                {review.images && review.images.length > 0 && (
+                                                    <div className="relative mt-4">
+                                                        <div className={`flex gap-3 overflow-x-auto pb-4 px-1 hide-scrollbar scroll-smooth ${isRTL ? 'flex-row-reverse' : 'flex-row'}`} style={{ scrollSnapType: 'x mandatory' }}>
+                                                            {review.images.map((img: string, i: number) => (
+                                                                <div 
+                                                                    key={i} 
+                                                                    className="relative flex-shrink-0 cursor-zoom-in group" 
+                                                                    style={{ scrollSnapAlign: isRTL ? 'end' : 'start' }}
+                                                                    onClick={() => setLightbox({ images: review.images!, index: i })}
+                                                                >
                                                                     <img
                                                                         src={img}
                                                                         alt=""
-                                                                        className={`w-[100px] h-[130px] sm:w-[120px] sm:h-[150px] rounded-2xl object-cover hover:opacity-90 hover:scale-[1.02] shadow-md transition-all border border-gray-100 ${isLastVisible ? 'opacity-50' : ''}`}
+                                                                        className="w-[110px] h-[140px] sm:w-[130px] sm:h-[170px] rounded-2xl object-cover hover:opacity-95 transition-all border border-gray-100 shadow-sm"
                                                                     />
-                                                                    {isLastVisible && (
-                                                                        <div className="absolute inset-0 bg-black/40 rounded-2xl flex flex-col items-center justify-center transition-all group-hover:bg-black/50">
-                                                                            <span className="text-white text-2xl font-black font-cairo">+{review.images!.length - 2}</span>
-                                                                            <span className="text-white/90 text-[10px] font-bold font-cairo opacity-0 group-hover:opacity-100 mt-1 transition-opacity">
-                                                                                {isRTL ? 'عرض المزيد' : 'Show More'}
-                                                                            </span>
-                                                                        </div>
-                                                                    )}
+                                                                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                                                 </div>
-                                                            );
-                                                        })}
+                                                            ))}
+                                                        </div>
+                                                        {/* Subtle fade edges for overflow indication */}
+                                                        <div className={`absolute top-0 bottom-4 w-12 pointer-events-none z-10 bg-gradient-to-r from-white to-transparent ${isRTL ? 'right-0' : 'left-0'}`} />
+                                                        <div className={`absolute top-0 bottom-4 w-12 pointer-events-none z-10 bg-gradient-to-l from-white to-transparent ${isRTL ? 'left-0' : 'right-0'}`} />
                                                     </div>
                                                 )}
                                             </div>

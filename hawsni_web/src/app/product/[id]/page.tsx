@@ -564,41 +564,43 @@ export default function ProductPage() {
 
                     {/* Right: Info Section */}
                     <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        {/* Title and Rating/Price */}
-                        <div className="flex flex-col gap-2 mb-8">
+                        {/* Title and Header Layout Refined */}
+                        <div className="flex flex-col gap-4 mb-8">
                             <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight">{product.name}</h1>
                             
-                            {/* Price */}
-                            <div className="flex flex-col gap-1 mt-1">
-                                {product.discount ? (
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm text-gray-400 line-through font-bold">
-                                            {product.price.toLocaleString('en-US')} {isRTL ? 'ج.م' : 'EGP'}
-                                        </span>
-                                        <span className="bg-red-500 text-white text-xs font-black px-2 py-0.5 rounded-md" dir="ltr">
-                                            -{product.discount}%
-                                        </span>
+                            <div className={`flex items-start justify-between gap-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                                {/* Price - Now on the right (for RTL) or primary side */}
+                                <div className={`flex flex-col ${isRTL ? 'items-start' : 'items-end'}`}>
+                                    {product.discount ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-gray-400 line-through font-bold">
+                                                {product.price.toLocaleString('en-US')} {isRTL ? 'ج.م' : 'EGP'}
+                                            </span>
+                                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md" dir="ltr">
+                                                -{product.discount}%
+                                            </span>
+                                        </div>
+                                    ) : null}
+                                    <div className={`flex items-baseline gap-1 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
+                                        <span>{((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
+                                        <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
-                                ) : null}
-                                <div className={`flex items-baseline gap-1.5 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
-                                    <span>{((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
-                                    <span className="text-sm uppercase font-bold text-gray-500">{isRTL ? 'ج.م' : 'EGP'}</span>
                                 </div>
-                            </div>
 
-                            {/* Rating and Reviews */}
-                            <div 
-                                className="flex items-center gap-2 mt-2 cursor-pointer group w-fit"
-                                onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                            >
-                                <div className="flex text-amber-400">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} />
-                                    ))}
+                                {/* Rating and Reviews - Clickable Link */}
+                                <div 
+                                    className="flex flex-col gap-1 cursor-pointer group"
+                                    onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                                >
+                                    <div className="flex text-amber-400">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
+                                        ))}
+                                    </div>
+                                    <span className="text-[11px] text-[var(--color-brand-primary)] font-black font-cairo underline decoration-dotted underline-offset-4 group-hover:text-indigo-600 transition-colors">
+                                        {(product as any).num_reviews || 0} {isRTL ? 'تقييم حقيقي' : 'Verified Reviews'}
+                                    </span>
                                 </div>
-                                <span className="text-xs text-gray-500 font-bold font-cairo group-hover:text-gray-900 transition-colors">
-                                    ({(product as any).num_reviews || 0} {isRTL ? 'تقييم' : 'reviews'})
-                                </span>
                             </div>
                         </div>
 
