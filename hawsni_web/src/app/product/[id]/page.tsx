@@ -524,26 +524,6 @@ export default function ProductPage() {
                             </button>
                         )}
 
-                        {/* Bottom Gradient for Pagination (Balances Top Gradient) */}
-                        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/15 to-transparent pointer-events-none z-[15]" />
-
-                        {/* Custom Dots Pagination - Smaller, subtle, and clickable */}
-                        {safeImages.length > 1 && (
-                            <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 bg-black/10 backdrop-blur-md rounded-full pointer-events-auto z-20`} dir="ltr">
-                                {safeImages.map((_: string, i: number) => (
-                                    <button
-                                        key={`dot-${i}`}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedImage(i);
-                                        }}
-                                        className={`h-2 rounded-full transition-all duration-300 pointer-events-auto cursor-pointer ${i === selectedImage ? 'w-4 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'}`}
-                                        aria-label={`Go to slide ${i + 1}`}
-                                    />
-                                ))}
-                            </div>
-                        )}
-
                         {/* Swipe Hint Overlay for Product Gallery */}
                         <AnimatePresence>
                             {showGallerySwipeHint && safeImages.length > 1 && (
@@ -568,6 +548,20 @@ export default function ProductPage() {
                         </AnimatePresence>
                     </div>
 
+                    {/* Custom Dots Pagination - Smaller, elegant, underneath */}
+                    {safeImages.length > 1 && (
+                        <div className="flex items-center justify-center gap-1.5 py-4 pb-0 bg-white" dir="ltr">
+                            {safeImages.map((_: string, i: number) => (
+                                <button
+                                    key={`dot-${i}`}
+                                    onClick={() => setSelectedImage(i)}
+                                    className={`h-1.5 rounded-full transition-all duration-300 ${i === selectedImage ? 'w-6 bg-gray-800' : 'w-1.5 bg-gray-300 hover:bg-gray-400'}`}
+                                    aria-label={`Go to slide ${i + 1}`}
+                                />
+                            ))}
+                        </div>
+                    )}
+
                     {/* Right: Info Section */}
                     <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
                         {/* Title and Rating/Price */}
@@ -586,15 +580,15 @@ export default function ProductPage() {
                                         </span>
                                     </div>
                                 ) : null}
-                                <div className={`flex items-baseline gap-2 font-black text-3xl ${product.discount ? 'text-red-500' : 'text-[var(--color-brand-primary)]'}`}>
+                                <div className={`flex items-baseline gap-1.5 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
                                     <span>{((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
-                                    <span className="text-sm uppercase font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
+                                    <span className="text-sm uppercase font-bold text-gray-500">{isRTL ? 'ج.م' : 'EGP'}</span>
                                 </div>
                             </div>
 
                             {/* Rating and Reviews */}
                             <div 
-                                className="flex items-center gap-2 mt-2 cursor-pointer hover:opacity-80 transition-opacity w-fit"
+                                className="flex items-center gap-2 mt-2 cursor-pointer group w-fit"
                                 onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                             >
                                 <div className="flex text-amber-400">
@@ -602,8 +596,8 @@ export default function ProductPage() {
                                         <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} />
                                     ))}
                                 </div>
-                                <span className="text-xs text-[var(--color-brand-primary)] font-bold font-cairo underline underline-offset-2">
-                                    ({(product as any).num_reviews || 0} {isRTL ? 'تقييم - عرض الكل' : 'Reviews - View all'})
+                                <span className="text-xs text-gray-500 font-bold font-cairo group-hover:text-gray-900 transition-colors">
+                                    ({(product as any).num_reviews || 0} {isRTL ? 'تقييم' : 'reviews'})
                                 </span>
                             </div>
                         </div>
