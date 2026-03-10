@@ -29,9 +29,12 @@ export default function ImageLightbox({
     const imageRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToastStore();
 
+    const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+
     const resetZoom = useCallback(() => {
         setZoom(1);
         setPosition({ x: 0, y: 0 });
+        setLastTouchDistance(null);
     }, []);
 
     // Handle navigation with zoom reset
@@ -45,6 +48,39 @@ export default function ImageLightbox({
         else setZoom(2.5);
     };
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (e.touches.length === 2) {
+            const distance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            setLastTouchDistance(distance);
+        } else if (zoom > 1) {
+            setIsDragging(true);
+            dragStart.current = { 
+                x: e.touches[0].clientX - position.x, 
+                y: e.touches[0].clientY - position.y 
+            };
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (e.touches.length === 2 && lastTouchDistance !== null) {
+            const distance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const delta = (distance - lastTouchDistance) * 0.01;
+            setZoom(prev => Math.min(5, Math.max(1, prev + delta)));
+            setLastTouchDistance(distance);
+        } else if (isDragging && zoom > 1 && e.touches.length === 1) {
+            setPosition({
+                x: e.touches[0].clientX - dragStart.current.x,
+                y: e.touches[0].clientY - dragStart.current.y
+            });
+        }
+    };
+
     const handleDownload = async (url: string) => {
         try {
             const response = await fetch(url);
@@ -53,7 +89,6 @@ export default function ImageLightbox({
             const link = document.createElement('a');
             link.href = blobUrl;
             
-            // Extract a clean filename or use a default
             const urlParts = url.split('/');
             let filename = urlParts[urlParts.length - 1].split('?')[0] || 'hwasi-image.jpg';
             if (!filename.includes('.')) {
@@ -71,7 +106,6 @@ export default function ImageLightbox({
         } catch (error) {
             console.error('Download failed:', error);
             showToast('عذراً، فشل تحميل الصورة. يرجى المحاولة مرة أخرى', 'error');
-            // Fallback for CORS issues: open in new tab
             window.open(url, '_blank');
         }
     };
@@ -113,11 +147,11 @@ export default function ImageLightbox({
                 >
                     {/* Top Controls Overlay */}
                     <div className="absolute top-0 left-0 right-0 z-[120] p-6 flex items-center justify-between pointer-events-none">
-                        {/* Top Left: Close and Download (Always Visible) */}
+                        {/* Top Left: Close and Download Only */}
                         <div className="flex items-center gap-3 pointer-events-auto">
                             <motion.button
                                 whileTap={{ scale: 0.9 }}
-                                className="w-12 h-12 bg-black/40 hover:bg-black/60 rounded-2xl flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10 shadow-2xl"
+                                className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10 shadow-2xl"
                                 onClick={(e) => { e.stopPropagation(); onClose(); }}
                             >
                                 <X size={24} strokeWidth={2.5} />
@@ -125,7 +159,7 @@ export default function ImageLightbox({
 
                             <motion.button
                                 whileTap={{ scale: 0.9 }}
-                                className="w-12 h-12 bg-black/40 hover:bg-black/60 rounded-2xl flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10 shadow-2xl"
+                                className="w-12 h-12 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center text-white transition-all backdrop-blur-xl border border-white/10 shadow-2xl"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleDownload(images[currentIndex]);
@@ -134,32 +168,13 @@ export default function ImageLightbox({
                                 <Download size={22} strokeWidth={2.5} />
                             </motion.button>
                         </div>
-
-                        {/* Top Right: Zoom Controls (Visible on all devices) */}
-                        <div className="flex items-center gap-2 pointer-events-auto">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setZoom(Math.max(1, zoom - 0.5)); }}
-                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-xl flex items-center justify-center text-white transition-all backdrop-blur-md border border-white/10"
-                            >
-                                <ZoomOut size={18} />
-                            </button>
-                            <div className="hidden sm:flex w-12 items-center justify-center text-[10px] font-black text-white/70 tracking-tighter">
-                                {Math.round(zoom * 100)}%
-                            </div>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setZoom(Math.min(5, zoom + 0.5)); }}
-                                className="w-10 h-10 bg-black/40 hover:bg-black/60 rounded-xl flex items-center justify-center text-white transition-all backdrop-blur-md border border-white/10"
-                            >
-                                <ZoomIn size={18} />
-                            </button>
-                        </div>
                     </div>
 
                     {/* Navigation Arrows (Desktop Only) */}
                     {images.length > 1 && (
                         <>
                             <button
-                                className="hidden lg:flex absolute left-8 z-[110] w-14 h-14 bg-white/10 hover:bg-white/20 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/10"
+                                className="hidden lg:flex absolute left-8 z-[110] w-14 h-14 bg-white/5 hover:bg-white/10 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/5"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleNavigate((currentIndex - 1 + images.length) % images.length);
@@ -168,7 +183,7 @@ export default function ImageLightbox({
                                 <ChevronLeft size={32} strokeWidth={2.5} />
                             </button>
                             <button
-                                className="hidden lg:flex absolute right-8 z-[110] w-14 h-14 bg-white/10 hover:bg-white/20 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/10"
+                                className="hidden lg:flex absolute right-8 z-[110] w-14 h-14 bg-white/5 hover:bg-white/10 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/5"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleNavigate((currentIndex + 1) % images.length);
@@ -185,7 +200,7 @@ export default function ImageLightbox({
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}
-                        className={`relative w-full h-full max-h-screen max-w-7xl mx-auto flex items-center justify-center p-4 lg:p-20 ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : ''}`}
+                        className={`relative w-full h-full max-h-screen max-w-7xl mx-auto flex items-center justify-center p-4 lg:p-20 overflow-hidden ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : ''}`}
                         onClick={(e) => e.stopPropagation()}
                         onDoubleClick={(e) => {
                             e.stopPropagation();
@@ -205,24 +220,29 @@ export default function ImageLightbox({
                         }}
                         onMouseUp={() => setIsDragging(false)}
                         onMouseLeave={() => setIsDragging(false)}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={() => {
+                            setIsDragging(false);
+                            setLastTouchDistance(null);
+                        }}
                     >
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentIndex}
-                                initial={{ opacity: 0, x: 20 }}
+                                initial={{ opacity: 0, x: 100 }}
                                 animate={{ 
                                     opacity: 1, 
-                                    x: position.x,
-                                    y: position.y,
+                                    x: zoom > 1 ? position.x : 0,
+                                    y: zoom > 1 ? position.y : 0,
                                     scale: zoom
                                 }}
-                                exit={{ opacity: 0, x: -20 }}
+                                exit={{ opacity: 0, x: -100 }}
                                 transition={{ 
                                     type: 'spring', 
-                                    damping: 30, 
                                     stiffness: 300, 
-                                    mass: 0.8,
-                                    opacity: { duration: 0.2 }
+                                    damping: 30,
+                                    mass: 0.8
                                 }}
                                 drag={zoom <= 1 ? "x" : false}
                                 dragConstraints={{ left: 0, right: 0 }}
@@ -271,16 +291,16 @@ export default function ImageLightbox({
                     </motion.div>
 
                     {/* Bottom: Thumbnail Row and Counter */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center gap-6 z-[120] bg-gradient-to-t from-black/60 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center gap-6 z-[120] bg-gradient-to-t from-black/80 to-transparent">
                         {images.length > 1 && (
-                            <div className="flex items-center gap-3 overflow-x-auto max-w-full px-4 py-2 hide-scrollbar">
+                            <div className="flex items-center justify-center gap-3 overflow-x-auto max-w-full px-8 py-2 hide-scrollbar scroll-smooth">
                                 {images.map((img, idx) => (
                                     <button
                                         key={idx}
                                         onClick={(e) => { e.stopPropagation(); handleNavigate(idx); }}
                                         className={`
-                                            relative flex-shrink-0 w-14 h-18 sm:w-16 sm:h-20 rounded-xl overflow-hidden border-2 transition-all
-                                            ${currentIndex === idx ? 'border-white scale-110 shadow-xl' : 'border-transparent opacity-40 hover:opacity-100'}
+                                            relative flex-shrink-0 w-12 h-16 sm:w-16 sm:h-20 rounded-xl overflow-hidden border-2 transition-all
+                                            ${currentIndex === idx ? 'border-amber-400 scale-110 shadow-[0_0_15px_rgba(251,191,36,0.5)]' : 'border-white/20 opacity-40 hover:opacity-100'}
                                         `}
                                     >
                                         <Image

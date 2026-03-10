@@ -621,7 +621,7 @@ export default function ProductPage() {
                                         </span>
                                     </div>
                                     <span className={`text-[11px] font-bold text-gray-400 group-hover:text-[var(--color-brand-primary)] transition-colors ${isRTL ? 'text-right' : 'text-left'}`}>
-                                        {isRTL ? `(${product.reviews || 0}) عرض التقييمات` : `View Reviews (${product.reviews || 0})`}
+                                        {isRTL ? `(${product.num_reviews || 0}) عرض التقييمات` : `View Reviews (${product.num_reviews || 0})`}
                                     </span>
                                 </div>
                             </div>

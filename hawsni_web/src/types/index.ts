@@ -41,7 +41,7 @@ export interface Product {
     colors?: any[];
     sizes?: string[];
     rating?: number;
-    reviews?: number;
+    num_reviews?: number;
     size_guide?: string;
     stock?: number;
     countInStock?: number;
