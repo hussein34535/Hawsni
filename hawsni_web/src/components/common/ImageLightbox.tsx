@@ -227,25 +227,26 @@ export default function ImageLightbox({
                             setLastTouchDistance(null);
                         }}
                     >
-                        <AnimatePresence mode="wait">
+                        <AnimatePresence initial={false} mode="popLayout">
                             <motion.div
                                 key={currentIndex}
-                                initial={{ opacity: 0, x: 100 }}
+                                initial={{ opacity: 0, x: 300 }}
                                 animate={{ 
                                     opacity: 1, 
                                     x: zoom > 1 ? position.x : 0,
                                     y: zoom > 1 ? position.y : 0,
                                     scale: zoom
                                 }}
-                                exit={{ opacity: 0, x: -100 }}
+                                exit={{ opacity: 0, x: -300 }}
                                 transition={{ 
                                     type: 'spring', 
-                                    stiffness: 300, 
-                                    damping: 30,
-                                    mass: 0.8
+                                    stiffness: 260, 
+                                    damping: 26,
+                                    mass: 1
                                 }}
                                 drag={zoom <= 1 ? "x" : false}
                                 dragConstraints={{ left: 0, right: 0 }}
+                                dragElastic={1}
                                 onDragEnd={(_, info) => {
                                     if (zoom > 1) return;
                                     const threshold = 50;
@@ -255,7 +256,7 @@ export default function ImageLightbox({
                                         handleNavigate((currentIndex - 1 + images.length) % images.length);
                                     }
                                 }}
-                                className="relative w-full h-full flex items-center justify-center"
+                                className="relative w-full h-full flex items-center justify-center p-4"
                             >
                                 {(() => {
                                     const currentSrc = images[currentIndex];
@@ -291,16 +292,21 @@ export default function ImageLightbox({
                     </motion.div>
 
                     {/* Bottom: Thumbnail Row and Counter */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col items-center gap-6 z-[120] bg-gradient-to-t from-black/80 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center gap-4 z-[130] bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                         {images.length > 1 && (
-                            <div className="flex items-center justify-center gap-3 overflow-x-auto max-w-full px-8 py-2 hide-scrollbar scroll-smooth">
+                            <div className="flex items-center justify-center gap-3 overflow-x-auto max-w-[90vw] px-4 py-4 hide-scrollbar pointer-events-auto">
                                 {images.map((img, idx) => (
                                     <button
                                         key={idx}
-                                        onClick={(e) => { e.stopPropagation(); handleNavigate(idx); }}
+                                        onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            handleNavigate(idx); 
+                                        }}
                                         className={`
-                                            relative flex-shrink-0 w-12 h-16 sm:w-16 sm:h-20 rounded-xl overflow-hidden border-2 transition-all
-                                            ${currentIndex === idx ? 'border-amber-400 scale-110 shadow-[0_0_15px_rgba(251,191,36,0.5)]' : 'border-white/20 opacity-40 hover:opacity-100'}
+                                            relative flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 transition-all
+                                            ${currentIndex === idx 
+                                                ? 'border-amber-400 scale-110 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-2 ring-amber-400/20' 
+                                                : 'border-white/10 opacity-50 hover:opacity-100 hover:border-white/30'}
                                         `}
                                     >
                                         <Image
@@ -314,7 +320,7 @@ export default function ImageLightbox({
                                 ))}
                             </div>
                         )}
-                        <div className="text-white/60 font-black tracking-[0.2em] text-[10px] uppercase bg-white/5 py-1.5 px-4 rounded-full backdrop-blur-md border border-white/5">
+                        <div className="text-white/60 font-black tracking-[0.2em] text-[10px] uppercase bg-white/10 py-2 px-5 rounded-full backdrop-blur-md border border-white/10 pointer-events-auto shadow-2xl">
                             {currentIndex + 1} <span className="mx-2 opacity-30">/</span> {images.length}
                         </div>
                     </div>
