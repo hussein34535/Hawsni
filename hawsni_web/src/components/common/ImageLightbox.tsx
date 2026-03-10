@@ -1,9 +1,9 @@
 'use client';
 
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, animate } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useScroll } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { useToastStore } from '@/store/toastStore';
 
 interface ImageLightboxProps {
@@ -12,6 +12,119 @@ interface ImageLightboxProps {
     isOpen: boolean;
     onClose: () => void;
     onNavigate: (index: number) => void;
+}
+
+interface LightboxImageProps {
+    img: string;
+    idx: number;
+    currentIndex: number;
+    scrollX: any;
+    windowWidth: number;
+    zoom: number;
+    springX: any;
+    springY: any;
+    isDragging: boolean;
+    handleTouchStart: (e: React.TouchEvent) => void;
+    handleTouchMove: (e: React.TouchEvent) => void;
+    onDragStateChange: (state: boolean) => void;
+    dragStart: React.MutableRefObject<{ x: number; y: number }>;
+    translateX: any;
+    translateY: any;
+}
+
+function LightboxImage({
+    img,
+    idx,
+    currentIndex,
+    scrollX,
+    windowWidth,
+    zoom,
+    springX,
+    springY,
+    isDragging,
+    handleTouchStart,
+    handleTouchMove,
+    onDragStateChange,
+    dragStart,
+    translateX,
+    translateY
+}: LightboxImageProps) {
+    const lowerSrc = img.toLowerCase();
+    const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
+
+    // calculate offset based on scrollX
+    // scrollX is from 0 to (images.length -1) * windowWidth
+    const offset = useTransform(
+        scrollX,
+        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
+        [-100, 0, 100]
+    );
+
+    const scale = useTransform(
+        scrollX,
+        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
+        [0.85, 1, 0.85]
+    );
+
+    const opacity = useTransform(
+        scrollX,
+        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
+        [0.4, 1, 0.4]
+    );
+
+    return (
+        <motion.div
+            key={idx}
+            className="relative h-full w-[100vw] flex-shrink-0 flex items-center justify-center pointer-events-auto px-2 snap-center"
+            style={{ 
+                x: idx === currentIndex && zoom > 1 ? springX : 0,
+                y: idx === currentIndex && zoom > 1 ? springY : 0,
+                scale: idx === currentIndex && zoom > 1 ? zoom : scale,
+                opacity: zoom > 1 ? (idx === currentIndex ? 1 : 0) : opacity,
+                zIndex: idx === currentIndex ? 10 : 1,
+                cursor: idx === currentIndex && zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
+            }}
+            onTouchStart={idx === currentIndex ? handleTouchStart : undefined}
+            onTouchMove={idx === currentIndex ? handleTouchMove : undefined}
+            onTouchEnd={() => {
+                onDragStateChange(false);
+            }}
+            onMouseDown={(e) => {
+                if (idx !== currentIndex || zoom <= 1) return;
+                onDragStateChange(true);
+                dragStart.current = { x: e.clientX - translateX.get(), y: e.clientY - translateY.get() };
+            }}
+            onMouseMove={(e) => {
+                if (idx !== currentIndex || !isDragging || zoom <= 1) return;
+                translateX.set(e.clientX - dragStart.current.x);
+                translateY.set(e.clientY - dragStart.current.y);
+            }}
+            onMouseUp={() => onDragStateChange(false)}
+            onMouseLeave={() => onDragStateChange(false)}
+        >
+            {isVideo ? (
+                <video
+                    src={img}
+                    className="w-full h-full max-h-[80vh] object-contain rounded-xl"
+                    controls
+                    playsInline
+                    controlsList="nodownload"
+                />
+            ) : (
+                <div className="relative w-full h-full pointer-events-none p-4 lg:p-20">
+                    <Image
+                        src={img}
+                        alt={`Fullscreen view ${idx + 1}`}
+                        fill
+                        className="object-contain select-none"
+                        priority={idx === currentIndex}
+                        sizes="100vw"
+                        draggable={false}
+                    />
+                </div>
+            )}
+        </motion.div>
+    );
 }
 
 export default function ImageLightbox({
@@ -26,6 +139,7 @@ export default function ImageLightbox({
     const [isDragging, setIsDragging] = useState(false);
     const dragStart = useRef({ x: 0, y: 0 });
     const thumbContainerRef = useRef<HTMLDivElement>(null);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const { showToast } = useToastStore();
     const [windowWidth, setWindowWidth] = useState(0);
 
@@ -36,32 +150,12 @@ export default function ImageLightbox({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Use MotionValues for high-performance dragging (no re-renders)
-    const translateX = useMotionValue(0); // For zoomed image dragging
+    // Scroll state for animations
+    const { scrollX } = useScroll({ container: scrollContainerRef });
+
+    // MotionValues for zoomed image dragging
+    const translateX = useMotionValue(0);
     const translateY = useMotionValue(0);
-    
-    // The main tape/strip position (in pixels for 1:1 tracking)
-    const tapeX = useMotionValue(0);
-
-    // Snapshot of tapeX for other visual effects
-    const visualTapeX = useSpring(tapeX, { stiffness: 200, damping: 30, mass: 0.8 });
-
-    // Snap to index helper
-    const snapToIndex = useCallback((index: number, animateSnap: boolean = true) => {
-        const target = -index * windowWidth;
-        if (animateSnap) {
-            animate(tapeX, target, {
-                type: 'spring',
-                stiffness: 250,
-                damping: 32,
-                mass: 0.5
-            });
-        } else {
-            tapeX.set(target);
-        }
-    }, [tapeX, windowWidth]);
-
-    // Spring for smooth zoom-drag reset
     const springX = useSpring(translateX, { stiffness: 300, damping: 30 });
     const springY = useSpring(translateY, { stiffness: 300, damping: 30 });
 
@@ -74,29 +168,31 @@ export default function ImageLightbox({
         setLastTouchDistance(null);
     }, [translateX, translateY]);
 
-    // Update tape position whenever currentIndex changes (if not dragging)
-    useEffect(() => {
-        if (!isDragging) {
-            snapToIndex(currentIndex, true);
-        }
-    }, [currentIndex, snapToIndex, isDragging]);
-
-    // Handle navigation with extreme smoothness
-    const handleNavigate = (index: number) => {
+    // Handle manual navigation (arrows/thumbs)
+    const handleNavigate = useCallback((index: number) => {
         resetZoom();
         onNavigate(index);
-    };
-    
-    // Convert px offset to percentage for the tape
-    const handleDrag = (_: any, info: { offset: { x: number } }) => {
-        // We let Framer Motion handle the x transform directly on tapeX
-    };
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTo({
+                left: index * windowWidth,
+                behavior: 'smooth'
+            });
+        }
+    }, [onNavigate, resetZoom, windowWidth]);
+
+    // Update index based on scroll position
+    const handleScroll = useCallback(() => {
+        if (!scrollContainerRef.current || isDragging) return;
+        const index = Math.round(scrollContainerRef.current.scrollLeft / windowWidth);
+        if (index !== currentIndex && index >= 0 && index < images.length) {
+            onNavigate(index);
+        }
+    }, [currentIndex, images.length, onNavigate, windowWidth, isDragging]);
 
     const toggleZoom = () => {
         if (zoom > 1) resetZoom();
         else setZoom(2.5);
     };
-
 
     const handleTouchStart = (e: React.TouchEvent) => {
         if (e.touches.length === 2) {
@@ -139,9 +235,7 @@ export default function ImageLightbox({
             
             const urlParts = url.split('/');
             let filename = urlParts[urlParts.length - 1].split('?')[0] || 'hwasi-image.jpg';
-            if (!filename.includes('.')) {
-                filename += '.jpg';
-            }
+            if (!filename.includes('.')) filename += '.jpg';
 
             link.download = filename;
             document.body.appendChild(link);
@@ -152,7 +246,6 @@ export default function ImageLightbox({
             showToast('تم تحميل الصورة بنجاح وتجدها في معرض الصور الخاص بك', 'success');
             setShowMenu(false);
         } catch (error) {
-            console.error('Download failed:', error);
             showToast('عذراً، فشل تحميل الصورة. يرجى المحاولة مرة أخرى', 'error');
             window.open(url, '_blank');
         }
@@ -169,17 +262,17 @@ export default function ImageLightbox({
         window.addEventListener('keydown', handleKeyDown);
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
+            // Initial scroll to current index
+            if (scrollContainerRef.current) {
+                scrollContainerRef.current.scrollLeft = currentIndex * window.innerWidth;
+            }
         }
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'unset';
-            document.body.style.touchAction = 'auto';
         };
-    }, [isOpen, handleKeyDown]);
+    }, [isOpen, handleKeyDown, currentIndex]);
 
-    // Auto-scroll active thumbnail into view
     useEffect(() => {
         if (isOpen && thumbContainerRef.current) {
             const activeThumb = thumbContainerRef.current.children[currentIndex] as HTMLElement;
@@ -191,7 +284,7 @@ export default function ImageLightbox({
                 });
             }
         }
-    }, [currentIndex, isOpen, images.length]);
+    }, [currentIndex, isOpen]);
 
     if (!isOpen) return null;
 
@@ -258,14 +351,14 @@ export default function ImageLightbox({
 
                     {/* Cinematic Cross-fading Background Blur */}
                     <div className="absolute inset-0 z-0 overflow-hidden">
-                        {images.map((img, idx) => (
+                        {images.map((img: string, idx: number) => (
                             <motion.div
                                 key={`bg-${idx}`}
                                 className="absolute inset-0"
                                 style={{
                                     opacity: useTransform(
-                                        visualTapeX,
-                                        [-(idx + 1) * windowWidth, -idx * windowWidth, -(idx - 1) * windowWidth],
+                                        scrollX,
+                                        [(idx - 1) * windowWidth, idx * windowWidth, (idx + 1) * windowWidth],
                                         [0, 1, 0]
                                     )
                                 }}
@@ -281,112 +374,37 @@ export default function ImageLightbox({
                         ))}
                     </div>
 
-                    {/* Main Filmstrip View */}
-                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden pointer-events-none z-10">
-                        <motion.div
-                            drag={zoom <= 1 ? "x" : false}
-                            dragConstraints={{ left: -(images.length - 1) * windowWidth, right: 0 }}
-                            dragElastic={0.15}
-                            onDragStart={() => setIsDragging(true)}
-                            onDragEnd={(_, info) => {
-                                setIsDragging(false);
-                                if (zoom > 1) return;
-                                
-                                const swipe = info.offset.x;
-                                const velocity = info.velocity.x;
-                                const threshold = 50;
-                                
-                                // Determine next index based on current position + swipe/velocity
-                                const x = tapeX.get();
-                                let calculatedIndex = Math.round(-x / windowWidth);
-
-                                if (swipe < -threshold || velocity < -500) {
-                                    calculatedIndex = Math.min(calculatedIndex + 1, images.length - 1);
-                                } else if (swipe > threshold || velocity > 500) {
-                                    calculatedIndex = Math.max(calculatedIndex - 1, 0);
-                                }
-                                
-                                handleNavigate(calculatedIndex);
-                            }}
-                            className="flex h-full w-full pointer-events-auto touch-none"
+                    {/* Main Filmstrip View (Natural Scroll) */}
+                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden z-10">
+                        <div
+                            ref={scrollContainerRef}
+                            onScroll={handleScroll}
+                            className={`flex h-full w-full overflow-x-auto snap-x snap-mandatory hide-scrollbar ${zoom > 1 ? 'overflow-hidden pointer-events-none' : 'pointer-events-auto'}`}
                             style={{ 
-                                x: zoom > 1 ? 0 : tapeX,
-                                width: `${images.length * 100}%`
+                                cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
                             }}
                         >
-                            {images.map((img, idx) => {
-                                const lowerSrc = img.toLowerCase();
-                                const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
-
-                                // Dynamic Scale and Opacity for "Connected" feel
-                                const scale = useTransform(
-                                    visualTapeX,
-                                    [-(idx + 1) * windowWidth, -idx * windowWidth, -(idx - 1) * windowWidth],
-                                    [0.85, 1, 0.85]
-                                );
-                                const opacity = useTransform(
-                                    visualTapeX,
-                                    [-(idx + 1) * windowWidth, -idx * windowWidth, -(idx - 1) * windowWidth],
-                                    [0.4, 1, 0.4]
-                                );
-
-                                return (
-                                    <motion.div
-                                        key={idx}
-                                        className="relative h-full flex items-center justify-center pointer-events-auto px-2"
-                                        style={{ 
-                                            width: `${100 / images.length}%`,
-                                            x: idx === currentIndex && zoom > 1 ? springX : 0,
-                                            y: idx === currentIndex && zoom > 1 ? springY : 0,
-                                            scale: idx === currentIndex && zoom > 1 ? zoom : scale,
-                                            opacity: zoom > 1 ? (idx === currentIndex ? 1 : 0) : opacity,
-                                            zIndex: idx === currentIndex ? 10 : 1,
-                                            cursor: idx === currentIndex && zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
-                                        }}
-                                        onTouchStart={idx === currentIndex ? handleTouchStart : undefined}
-                                        onTouchMove={idx === currentIndex ? handleTouchMove : undefined}
-                                        onTouchEnd={() => {
-                                            setIsDragging(false);
-                                            setLastTouchDistance(null);
-                                        }}
-                                        onMouseDown={(e) => {
-                                            if (idx !== currentIndex || zoom <= 1) return;
-                                            setIsDragging(true);
-                                            dragStart.current = { x: e.clientX - translateX.get(), y: e.clientY - translateY.get() };
-                                        }}
-                                        onMouseMove={(e) => {
-                                            if (idx !== currentIndex || !isDragging || zoom <= 1) return;
-                                            translateX.set(e.clientX - dragStart.current.x);
-                                            translateY.set(e.clientY - dragStart.current.y);
-                                        }}
-                                        onMouseUp={() => setIsDragging(false)}
-                                        onMouseLeave={() => setIsDragging(false)}
-                                    >
-                                        {isVideo ? (
-                                            <video
-                                                src={img}
-                                                className="w-full h-full max-h-[80vh] object-contain rounded-xl"
-                                                controls
-                                                playsInline
-                                                controlsList="nodownload"
-                                            />
-                                        ) : (
-                                            <div className="relative w-full h-full pointer-events-none p-4 lg:p-20">
-                                                <Image
-                                                    src={img}
-                                                    alt={`Fullscreen view ${idx + 1}`}
-                                                    fill
-                                                    className="object-contain select-none"
-                                                    priority={idx === currentIndex}
-                                                    sizes="100vw"
-                                                    draggable={false}
-                                                />
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                );
-                            })}
-                        </motion.div>
+                            {images.map((img: string, idx: number) => (
+                                <LightboxImage
+                                    key={idx}
+                                    img={img}
+                                    idx={idx}
+                                    currentIndex={currentIndex}
+                                    scrollX={scrollX}
+                                    windowWidth={windowWidth}
+                                    zoom={zoom}
+                                    springX={springX}
+                                    springY={springY}
+                                    isDragging={isDragging}
+                                    handleTouchStart={handleTouchStart}
+                                    handleTouchMove={handleTouchMove}
+                                    onDragStateChange={setIsDragging}
+                                    dragStart={dragStart}
+                                    translateX={translateX}
+                                    translateY={translateY}
+                                />
+                            ))}
+                        </div>
                     </div>
 
                     {/* Bottom: Thumbnail Row and Counter */}
@@ -399,7 +417,7 @@ export default function ImageLightbox({
                                     justifyContent: (images.length * (windowWidth < 640 ? 56 : 72)) < windowWidth * 0.9 ? 'center' : 'start' 
                                 }}
                             >
-                                {images.map((img, idx) => (
+                                {images.map((img: string, idx: number) => (
                                     <button
                                         key={idx}
                                         onClick={(e) => { 
