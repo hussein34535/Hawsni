@@ -29,15 +29,18 @@ export default function ImageLightbox({
     const { showToast } = useToastStore();
 
     // Use MotionValues for high-performance dragging (no re-renders)
-    const translateX = useMotionValue(0);
+    const translateX = useMotionValue(0); // For zoomed image dragging
     const translateY = useMotionValue(0);
     
+    // The main tape/strip position
+    const tapeX = useMotionValue(0);
+    const springTapeX = useSpring(tapeX, { stiffness: 250, damping: 32, mass: 0.5 });
+
     // Spring for smooth zoom-drag reset
     const springX = useSpring(translateX, { stiffness: 300, damping: 30 });
     const springY = useSpring(translateY, { stiffness: 300, damping: 30 });
 
     const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
-    const [direction, setDirection] = useState(0);
 
     const resetZoom = useCallback(() => {
         setZoom(1);
@@ -46,10 +49,15 @@ export default function ImageLightbox({
         setLastTouchDistance(null);
     }, [translateX, translateY]);
 
+    // Update tape position whenever currentIndex changes (if not dragging)
+    useEffect(() => {
+        if (!isDragging) {
+            tapeX.set(-currentIndex * 100);
+        }
+    }, [currentIndex, tapeX, isDragging]);
+
     // Handle navigation with extreme smoothness
     const handleNavigate = (index: number) => {
-        const newDirection = index > currentIndex ? 1 : -1;
-        setDirection(newDirection);
         resetZoom();
         onNavigate(index);
     };
@@ -59,25 +67,6 @@ export default function ImageLightbox({
         else setZoom(2.5);
     };
 
-    const variants = {
-        enter: (direction: number) => ({
-            x: direction > 0 ? '100%' : direction < 0 ? '-100%' : 0,
-            opacity: 0,
-            scale: 0.95,
-        }),
-        center: {
-            zIndex: 1,
-            x: 0,
-            opacity: 1,
-            scale: 1,
-        },
-        exit: (direction: number) => ({
-            zIndex: 0,
-            x: direction < 0 ? '100%' : direction > 0 ? '-100%' : 0,
-            opacity: 0,
-            scale: 0.95,
-        })
-    };
 
     const handleTouchStart = (e: React.TouchEvent) => {
         if (e.touches.length === 2) {
@@ -142,8 +131,8 @@ export default function ImageLightbox({
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (!isOpen) return;
         if (e.key === 'Escape') onClose();
-        if (e.key === 'ArrowRight') handleNavigate((currentIndex + 1) % images.length);
-        if (e.key === 'ArrowLeft') handleNavigate((currentIndex - 1 + images.length) % images.length);
+        if (e.key === 'ArrowRight') handleNavigate(Math.min(currentIndex + 1, images.length - 1));
+        if (e.key === 'ArrowLeft') handleNavigate(Math.max(currentIndex - 1, 0));
     }, [isOpen, currentIndex, images.length, onClose, handleNavigate]);
 
     useEffect(() => {
@@ -217,19 +206,19 @@ export default function ImageLightbox({
                     {images.length > 1 && (
                         <>
                             <button
-                                className="hidden lg:flex absolute left-8 z-[110] w-14 h-14 bg-white/5 hover:bg-white/10 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/5"
+                                className={`hidden lg:flex absolute left-8 z-[110] w-14 h-14 bg-white/5 hover:bg-white/10 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/5 ${currentIndex === 0 ? 'opacity-20 cursor-not-allowed' : ''}`}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    handleNavigate((currentIndex - 1 + images.length) % images.length);
+                                    if (currentIndex > 0) handleNavigate(currentIndex - 1);
                                 }}
                             >
                                 <ChevronLeft size={32} strokeWidth={2.5} />
                             </button>
                             <button
-                                className="hidden lg:flex absolute right-8 z-[110] w-14 h-14 bg-white/5 hover:bg-white/10 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/5"
+                                className={`hidden lg:flex absolute right-8 z-[110] w-14 h-14 bg-white/5 hover:bg-white/10 active:scale-90 rounded-full items-center justify-center text-white transition-all shadow-2xl backdrop-blur-xl border border-white/5 ${currentIndex === images.length - 1 ? 'opacity-20 cursor-not-allowed' : ''}`}
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    handleNavigate((currentIndex + 1) % images.length);
+                                    if (currentIndex < images.length - 1) handleNavigate(currentIndex + 1);
                                 }}
                             >
                                 <ChevronRight size={32} strokeWidth={2.5} />
@@ -237,93 +226,97 @@ export default function ImageLightbox({
                         </>
                     )}
 
-                    {/* Main Image View with Swipe Support */}
-                    <div className="relative w-full h-full max-h-screen max-w-7xl mx-auto flex items-center justify-center overflow-hidden">
-                        <AnimatePresence initial={false} mode="popLayout" custom={direction}>
-                            <motion.div
-                                key={currentIndex}
-                                custom={direction}
-                                variants={variants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{
-                                    x: { type: "spring", stiffness: 300, damping: 30, mass: 0.8 },
-                                    opacity: { duration: 0.2 },
-                                    scale: { duration: 0.2 }
-                                }}
-                                drag={zoom <= 1 ? "x" : false}
-                                dragConstraints={{ left: 0, right: 0 }}
-                                dragElastic={1}
-                                onDragEnd={(_, info) => {
-                                    if (zoom > 1) return;
-                                    const swipe = info.offset.x;
-                                    const threshold = 50;
-                                    if (swipe < -threshold) {
-                                        handleNavigate((currentIndex + 1) % images.length);
-                                    } else if (swipe > threshold) {
-                                        handleNavigate((currentIndex - 1 + images.length) % images.length);
-                                    }
-                                }}
-                                onTouchStart={handleTouchStart}
-                                onTouchMove={handleTouchMove}
-                                onTouchEnd={() => {
-                                    setIsDragging(false);
-                                    setLastTouchDistance(null);
-                                }}
-                                className="absolute inset-0 flex items-center justify-center p-4 lg:p-20 pointer-events-auto"
-                                style={{ 
-                                    x: zoom > 1 ? springX : 0,
-                                    y: zoom > 1 ? springY : 0,
-                                    scale: zoom,
-                                    cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
-                                }}
-                                onMouseDown={(e) => {
-                                    if (zoom <= 1) return;
-                                    setIsDragging(true);
-                                    dragStart.current = { x: e.clientX - translateX.get(), y: e.clientY - translateY.get() };
-                                }}
-                                onMouseMove={(e) => {
-                                    if (!isDragging || zoom <= 1) return;
-                                    translateX.set(e.clientX - dragStart.current.x);
-                                    translateY.set(e.clientY - dragStart.current.y);
-                                }}
-                                onMouseUp={() => setIsDragging(false)}
-                                onMouseLeave={() => setIsDragging(false)}
-                            >
-                                {(() => {
-                                    const currentSrc = images[currentIndex];
-                                    const lowerSrc = currentSrc.toLowerCase();
-                                    const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
+                    {/* Main Filmstrip View */}
+                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden pointer-events-none">
+                        <motion.div
+                            drag={zoom <= 1 ? "x" : false}
+                            dragElastic={0.1}
+                            onDragStart={() => setIsDragging(true)}
+                            onDragEnd={(_, info) => {
+                                setIsDragging(false);
+                                if (zoom > 1) return;
+                                
+                                const swipe = info.offset.x;
+                                const velocity = info.velocity.x;
+                                const threshold = 50;
+                                
+                                // Determine next index based on swipe distance and velocity
+                                let nextIndex = currentIndex;
+                                if (swipe < -threshold || velocity < -500) {
+                                    nextIndex = Math.min(currentIndex + 1, images.length - 1);
+                                } else if (swipe > threshold || velocity > 500) {
+                                    nextIndex = Math.max(currentIndex - 1, 0);
+                                }
+                                
+                                handleNavigate(nextIndex);
+                            }}
+                            className="flex h-full w-full pointer-events-auto touch-none"
+                            style={{ 
+                                x: springTapeX,
+                                width: `${images.length * 100}%`
+                            }}
+                        >
+                            {images.map((img, idx) => {
+                                const lowerSrc = img.toLowerCase();
+                                const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerSrc) || lowerSrc.includes('/video/upload/');
 
-                                    if (isVideo) {
-                                        return (
+                                return (
+                                    <motion.div
+                                        key={idx}
+                                        className="relative h-full flex items-center justify-center pointer-events-auto"
+                                        style={{ 
+                                            width: `${100 / images.length}%`,
+                                            // Only apply individual zoom/drag style to the active image in the strip
+                                            x: idx === currentIndex && zoom > 1 ? springX : 0,
+                                            y: idx === currentIndex && zoom > 1 ? springY : 0,
+                                            scale: idx === currentIndex ? zoom : 1,
+                                            zIndex: idx === currentIndex ? 10 : 1,
+                                            cursor: idx === currentIndex && zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
+                                        }}
+                                        onTouchStart={idx === currentIndex ? handleTouchStart : undefined}
+                                        onTouchMove={idx === currentIndex ? handleTouchMove : undefined}
+                                        onTouchEnd={() => {
+                                            setIsDragging(false);
+                                            setLastTouchDistance(null);
+                                        }}
+                                        onMouseDown={(e) => {
+                                            if (idx !== currentIndex || zoom <= 1) return;
+                                            setIsDragging(true);
+                                            dragStart.current = { x: e.clientX - translateX.get(), y: e.clientY - translateY.get() };
+                                        }}
+                                        onMouseMove={(e) => {
+                                            if (idx !== currentIndex || !isDragging || zoom <= 1) return;
+                                            translateX.set(e.clientX - dragStart.current.x);
+                                            translateY.set(e.clientY - dragStart.current.y);
+                                        }}
+                                        onMouseUp={() => setIsDragging(false)}
+                                        onMouseLeave={() => setIsDragging(false)}
+                                    >
+                                        {isVideo ? (
                                             <video
-                                                src={currentSrc}
+                                                src={img}
                                                 className="w-full h-full max-h-[80vh] object-contain rounded-xl"
                                                 controls
                                                 playsInline
                                                 controlsList="nodownload"
                                             />
-                                        );
-                                    }
-
-                                    return (
-                                        <div className="relative w-full h-full pointer-events-none">
-                                            <Image
-                                                src={currentSrc}
-                                                alt={`Fullscreen view ${currentIndex + 1}`}
-                                                fill
-                                                className="object-contain select-none"
-                                                priority
-                                                sizes="100vw"
-                                                draggable={false}
-                                            />
-                                        </div>
-                                    );
-                                })()}
-                            </motion.div>
-                        </AnimatePresence>
+                                        ) : (
+                                            <div className="relative w-full h-full pointer-events-none p-4 lg:p-20">
+                                                <Image
+                                                    src={img}
+                                                    alt={`Fullscreen view ${idx + 1}`}
+                                                    fill
+                                                    className="object-contain select-none"
+                                                    priority={idx === currentIndex}
+                                                    sizes="100vw"
+                                                    draggable={false}
+                                                />
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                );
+                            })}
+                        </motion.div>
                     </div>
 
                     {/* Bottom: Thumbnail Row and Counter */}
