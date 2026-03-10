@@ -163,7 +163,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
                 {lightbox && (
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center backdrop-blur-md"
+                        className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center backdrop-blur-md"
                     >
                         {/* Top Bar Navigation */}
                         <div className="absolute top-0 w-full p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/80 to-transparent">
