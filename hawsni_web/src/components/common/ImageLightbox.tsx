@@ -30,6 +30,7 @@ export default function ImageLightbox({
     const { showToast } = useToastStore();
 
     const [lastTouchDistance, setLastTouchDistance] = useState<number | null>(null);
+    const [direction, setDirection] = useState(0);
 
     const resetZoom = useCallback(() => {
         setZoom(1);
@@ -37,8 +38,10 @@ export default function ImageLightbox({
         setLastTouchDistance(null);
     }, []);
 
-    // Handle navigation with zoom reset
+    // Handle navigation with extreme smoothness
     const handleNavigate = (index: number) => {
+        const newDirection = index > currentIndex ? 1 : -1;
+        setDirection(newDirection);
         resetZoom();
         onNavigate(index);
     };
@@ -46,6 +49,26 @@ export default function ImageLightbox({
     const toggleZoom = () => {
         if (zoom > 1) resetZoom();
         else setZoom(2.5);
+    };
+
+    const variants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? '100%' : direction < 0 ? '-100%' : 0,
+            opacity: 0,
+            scale: 0.95,
+        }),
+        center: {
+            zIndex: 1,
+            x: 0,
+            opacity: 1,
+            scale: 1,
+        },
+        exit: (direction: number) => ({
+            zIndex: 0,
+            x: direction < 0 ? '100%' : direction > 0 ? '-100%' : 0,
+            opacity: 0,
+            scale: 0.95,
+        })
     };
 
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -113,9 +136,9 @@ export default function ImageLightbox({
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (!isOpen) return;
         if (e.key === 'Escape') onClose();
-        if (e.key === 'ArrowRight') onNavigate((currentIndex + 1) % images.length);
-        if (e.key === 'ArrowLeft') onNavigate((currentIndex - 1 + images.length) % images.length);
-    }, [isOpen, currentIndex, images.length, onClose, onNavigate]);
+        if (e.key === 'ArrowRight') handleNavigate((currentIndex + 1) % images.length);
+        if (e.key === 'ArrowLeft') handleNavigate((currentIndex - 1 + images.length) % images.length);
+    }, [isOpen, currentIndex, images.length, onClose, handleNavigate]);
 
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown);
@@ -147,7 +170,6 @@ export default function ImageLightbox({
                 >
                     {/* Top Controls Overlay */}
                     <div className="absolute top-0 left-0 right-0 z-[120] p-6 flex items-center justify-between pointer-events-none">
-                        {/* Top Left: Close and Download Only */}
                         <div className="flex items-center gap-3 pointer-events-auto">
                             <motion.button
                                 whileTap={{ scale: 0.9 }}
@@ -195,68 +217,60 @@ export default function ImageLightbox({
                     )}
 
                     {/* Main Image View with Swipe Support */}
-                    <motion.div
-                        ref={imageRef}
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
-                        className={`relative w-full h-full max-h-screen max-w-7xl mx-auto flex items-center justify-center p-4 lg:p-20 overflow-hidden ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : ''}`}
-                        onClick={(e) => e.stopPropagation()}
-                        onDoubleClick={(e) => {
-                            e.stopPropagation();
-                            toggleZoom();
-                        }}
-                        onMouseDown={(e) => {
-                            if (zoom <= 1) return;
-                            setIsDragging(true);
-                            dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
-                        }}
-                        onMouseMove={(e) => {
-                            if (!isDragging || zoom <= 1) return;
-                            setPosition({
-                                x: e.clientX - dragStart.current.x,
-                                y: e.clientY - dragStart.current.y
-                            });
-                        }}
-                        onMouseUp={() => setIsDragging(false)}
-                        onMouseLeave={() => setIsDragging(false)}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={() => {
-                            setIsDragging(false);
-                            setLastTouchDistance(null);
-                        }}
-                    >
-                        <AnimatePresence initial={false} mode="popLayout">
+                    <div className="relative w-full h-full max-h-screen max-w-7xl mx-auto flex items-center justify-center overflow-hidden">
+                        <AnimatePresence initial={false} mode="popLayout" custom={direction}>
                             <motion.div
                                 key={currentIndex}
-                                initial={{ opacity: 0, x: 300 }}
-                                animate={{ 
-                                    opacity: 1, 
-                                    x: zoom > 1 ? position.x : 0,
-                                    y: zoom > 1 ? position.y : 0,
-                                    scale: zoom
-                                }}
-                                exit={{ opacity: 0, x: -300 }}
-                                transition={{ 
-                                    type: 'spring', 
-                                    stiffness: 260, 
-                                    damping: 26,
-                                    mass: 1
+                                custom={direction}
+                                variants={variants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    x: { type: "spring", stiffness: 300, damping: 30, mass: 0.8 },
+                                    opacity: { duration: 0.2 },
+                                    scale: { duration: 0.2 }
                                 }}
                                 drag={zoom <= 1 ? "x" : false}
                                 dragConstraints={{ left: 0, right: 0 }}
                                 dragElastic={1}
                                 onDragEnd={(_, info) => {
                                     if (zoom > 1) return;
+                                    const swipe = info.offset.x;
                                     const threshold = 50;
-                                    if (info.offset.x < -threshold) {
+                                    if (swipe < -threshold) {
                                         handleNavigate((currentIndex + 1) % images.length);
-                                    } else if (info.offset.x > threshold) {
+                                    } else if (swipe > threshold) {
                                         handleNavigate((currentIndex - 1 + images.length) % images.length);
                                     }
                                 }}
-                                className="relative w-full h-full flex items-center justify-center p-4"
+                                onTouchStart={handleTouchStart}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={() => {
+                                    setIsDragging(false);
+                                    setLastTouchDistance(null);
+                                }}
+                                className="absolute inset-0 flex items-center justify-center p-4 lg:p-20"
+                                style={{ 
+                                    x: zoom > 1 ? position.x : 0,
+                                    y: zoom > 1 ? position.y : 0,
+                                    scale: zoom,
+                                    cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'auto'
+                                }}
+                                onMouseDown={(e) => {
+                                    if (zoom <= 1) return;
+                                    setIsDragging(true);
+                                    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+                                }}
+                                onMouseMove={(e) => {
+                                    if (!isDragging || zoom <= 1) return;
+                                    setPosition({
+                                        x: e.clientX - dragStart.current.x,
+                                        y: e.clientY - dragStart.current.y
+                                    });
+                                }}
+                                onMouseUp={() => setIsDragging(false)}
+                                onMouseLeave={() => setIsDragging(false)}
                             >
                                 {(() => {
                                     const currentSrc = images[currentIndex];
@@ -276,20 +290,22 @@ export default function ImageLightbox({
                                     }
 
                                     return (
-                                        <Image
-                                            src={currentSrc}
-                                            alt={`Fullscreen view ${currentIndex + 1}`}
-                                            fill
-                                            className="object-contain select-none"
-                                            priority
-                                            sizes="100vw"
-                                            draggable={false}
-                                        />
+                                        <div className="relative w-full h-full">
+                                            <Image
+                                                src={currentSrc}
+                                                alt={`Fullscreen view ${currentIndex + 1}`}
+                                                fill
+                                                className="object-contain select-none"
+                                                priority
+                                                sizes="100vw"
+                                                draggable={false}
+                                            />
+                                        </div>
                                     );
                                 })()}
                             </motion.div>
                         </AnimatePresence>
-                    </motion.div>
+                    </div>
 
                     {/* Bottom: Thumbnail Row and Counter */}
                     <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-center gap-4 z-[130] bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
