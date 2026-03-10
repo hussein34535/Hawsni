@@ -29,6 +29,7 @@ import { addressService, Address } from '@/services/addressService';
 import { checkoutService, OrderData } from '@/services/checkoutService';
 import { couponService } from '@/services/couponService';
 import { trackEvent } from '@/components/analytics/FacebookPixel';
+import { trackGAEvent } from '@/components/analytics/GoogleAnalytics';
 
 const egyptGovernorates = [
     'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -105,6 +106,16 @@ export default function CheckoutPage() {
             })),
             value: getTotal(),
             currency: 'EGP'
+        });
+        trackGAEvent('begin_checkout', {
+            currency: 'EGP',
+            value: getTotal(),
+            items: items.map(item => ({
+                item_id: item.productId,
+                item_name: item.name,
+                price: item.price,
+                quantity: item.quantity
+            }))
         });
     }, []);
 

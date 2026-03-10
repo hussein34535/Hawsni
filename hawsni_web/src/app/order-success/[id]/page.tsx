@@ -17,6 +17,7 @@ import {
 import { checkoutService } from '@/services/checkoutService';
 import { useLanguage } from '@/context/LanguageContext';
 import { trackEvent } from '@/components/analytics/FacebookPixel';
+import { trackGAEvent } from '@/components/analytics/GoogleAnalytics';
 
 export default function OrderSuccessPage() {
     const { id } = useParams();
@@ -54,6 +55,19 @@ export default function OrderSuccessPage() {
                 content_type: 'product',
                 num_items: order.order_items ? order.order_items.reduce((acc: number, item: any) => acc + item.quantity, 0) : 0
             }, { eventID: `order_${order.id}` }); // This eventID matches the one sent by the CAPI server
+
+            // Send Purchase event to GA4
+            trackGAEvent('purchase', {
+                transaction_id: order.id,
+                value: order.total_amount || order.total,
+                currency: 'EGP',
+                items: order.order_items ? order.order_items.map((item: any) => ({
+                    item_id: item.product_id,
+                    item_name: item.name,
+                    price: item.price,
+                    quantity: item.quantity
+                })) : []
+            });
         }
     }, [order, loading]);
 

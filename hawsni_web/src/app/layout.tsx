@@ -57,6 +57,8 @@ import Navbar from "@/components/layout/Navbar";
 import BottomNav from "@/components/layout/BottomNav";
 import ToastContainer from "@/components/layout/ToastContainer";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import MicrosoftClarity from "@/components/analytics/MicrosoftClarity";
 import { LanguageProvider } from "@/context/LanguageContext";
 
 export default function RootLayout({
@@ -75,6 +77,8 @@ export default function RootLayout({
           <BottomNav />
           <ToastContainer />
           <FacebookPixel />
+          <GoogleAnalytics />
+          <MicrosoftClarity />
         </LanguageProvider>
       </body>
     </html>
