@@ -26,30 +26,34 @@ const uploadToCloudinary = async (file, folder = 'products') => {
   return new Promise((resolve, reject) => {
     const isVideo = file.mimetype && file.mimetype.startsWith('video/');
 
-    // Set appropriate transformations based on media type
     const uploadOptions = {
       folder: folder,
-      resource_type: 'auto',
+      resource_type: isVideo ? 'video' : 'auto', // Explicitly set video
     };
 
     if (isVideo) {
-      // ضغط الفيديو بقوة: حد أقصى 1280x720 مع bitrate 800k → ناتج ~5-10MB لمدة دقيقة
+      // Aggressive video compression
       uploadOptions.transformation = [
         {
           width: 1280,
           height: 720,
-          crop: 'limit',           // مش بيكبر لو أصغر، بس بيصغر لو أكبر
-          bit_rate: '800k',        // الجودة المقبولة مع حجم صغير
-          video_codec: 'h264',     // الأكثر ضغطاً وتوافقاً
+          crop: 'limit',
+          bit_rate: '500k',        // Very small file size (~3.75MB/min)
+          quality: 'auto:eco',     // More aggressive compression
+          video_codec: 'h264',
           audio_codec: 'aac',
-          fetch_format: 'mp4',     // إجباري mp4 لأقل حجم
+          fetch_format: 'mp4',
         }
       ];
-      // تحديد الحجم الأقصى للملف الأصلي اللي يترفع - 200MB
+
+      // Use eager to ensure the transformation is applied and accessible
+      uploadOptions.eager = uploadOptions.transformation;
+      uploadOptions.eager_async = false; // Wait for it to be ready
+
       if (file.size && file.size > 200 * 1024 * 1024) {
         return reject(new Error('حجم الفيديو كبير جداً، الحد الأقصى 200MB'));
       }
-      console.log(`📹 Uploading video with compression (original size: ${Math.round((file.size || 0) / 1024 / 1024)}MB)`);
+      console.log(`📹 Uploading video with aggressive compression (original size: ${Math.round((file.size || 0) / 1024 / 1024)}MB)`);
     } else {
       uploadOptions.transformation = [
         { width: 1200, crop: 'limit' },
@@ -62,16 +66,23 @@ const uploadToCloudinary = async (file, folder = 'products') => {
       uploadOptions,
       (error, result) => {
         if (error) {
-          console.error('❌ Cloudinary Upload Error Details:', error);
+          console.error('❌ Cloudinary Upload Error:', error);
           return reject(new Error(`Cloudinary Upload Error: ${error.message}`));
         }
+        
+        // If it's a video, prefer the eager transformation URL (which is definitely compressed)
+        let finalUrl = result.secure_url;
+        if (isVideo && result.eager && result.eager.length > 0) {
+          finalUrl = result.eager[0].secure_url;
+        }
+
         const sizeMB = result.bytes ? Math.round(result.bytes / 1024 / 1024 * 10) / 10 : '?';
-        console.log(`✅ Cloudinary Upload Success: ${result.secure_url} (${sizeMB}MB)`);
-        resolve({ url: result.secure_url, blurHash: null });
+        console.log(`✅ Upload Success: ${finalUrl} (${sizeMB}MB)`);
+        
+        resolve({ url: finalUrl, blurHash: null });
       }
     );
 
-    // تحويل الـ Buffer إلى Stream
     streamifier.createReadStream(file.buffer).pipe(uploadStream);
   });
 };
