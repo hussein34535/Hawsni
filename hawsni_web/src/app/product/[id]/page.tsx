@@ -4,27 +4,10 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ArrowLeft,
-    ArrowRight,
-    ShoppingBag,
-    Heart,
-    Star,
-    Minus,
-    Plus,
-    Check,
-    ChevronRight,
-    Flame,
-    Info,
-    Play,
-    Ruler,
-    X,
-    Camera,
-    Image as ImageIcon,
-    ChevronDown,
-    Hand
+    Share2, Heart, ArrowRight, ArrowLeft, ShoppingBag, Star, Play, Pause, Maximize,
+    Hand, Flame, Check, Ruler, Info, Copy, CheckCircle2, Minus, Plus, ChevronRight,
+    X, ChevronDown
 } from 'lucide-react';
-import Image from 'next/image';
-import { useCartStore } from '@/store/cartStore';
 import { useToastStore } from '@/store/toastStore';
 import { productService } from '@/services/productService';
 import { useLanguage } from '@/context/LanguageContext';
@@ -37,8 +20,11 @@ import dynamic from 'next/dynamic';
 const ProductVideoItem = ({ src }: { src: string }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [showControls, setShowControls] = useState(false);
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const togglePlay = () => {
+    const togglePlay = (e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
         if (videoRef.current) {
             if (videoRef.current.paused) {
                 videoRef.current.play();
@@ -50,13 +36,53 @@ const ProductVideoItem = ({ src }: { src: string }) => {
         }
     };
 
+    const toggleFullscreen = (e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        if (videoRef.current) {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else if (videoRef.current.requestFullscreen) {
+                videoRef.current.requestFullscreen();
+            } else if ((videoRef.current as any).webkitRequestFullscreen) {
+                (videoRef.current as any).webkitRequestFullscreen(); // iOS
+            }
+        }
+    };
+
+    const handleVideoClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isPlaying) {
+            togglePlay();
+            setShowControls(true);
+            startControlsTimer();
+        } else {
+            setShowControls(prev => !prev);
+            if (!showControls) {
+                startControlsTimer();
+            } else {
+                if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+            }
+        }
+    };
+
+    const startControlsTimer = () => {
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = setTimeout(() => {
+            if (isPlaying) setShowControls(false);
+        }, 3000);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        };
+    }, []);
+
     return (
         <div 
-            className="w-full h-full flex items-center justify-center cursor-pointer group"
-            onClick={(e) => {
-                e.stopPropagation();
-                togglePlay();
-            }}
+            className="w-full h-full flex items-center justify-center cursor-pointer group overflow-hidden relative"
+            onClick={handleVideoClick}
+            onMouseMove={isPlaying ? startControlsTimer : undefined}
         >
             <video
                 ref={videoRef}
@@ -66,19 +92,66 @@ const ProductVideoItem = ({ src }: { src: string }) => {
                 controls={false}
                 controlsList="nodownload"
                 loop
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                onEnded={() => setIsPlaying(false)}
+                onPlay={() => {
+                    setIsPlaying(true);
+                    startControlsTimer();
+                }}
+                onPause={() => {
+                    setIsPlaying(false);
+                    setShowControls(true);
+                }}
+                onEnded={() => {
+                    setIsPlaying(false);
+                    setShowControls(true);
+                }}
             />
             
-            {/* Modern Play/Pause Overlay */}
-            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isPlaying ? 'opacity-0 scale-110' : 'opacity-100 scale-100 bg-black/10'}`}>
-                {!isPlaying && (
-                    <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-white/40 transform transition-transform group-hover:scale-110 group-active:scale-95">
-                        <Play className="w-8 h-8 text-white ml-1 drop-shadow-md" fill="currentColor" />
-                    </div>
+            {/* Modern Play/Pause Overlay (Center) - Only shows when initially paused */}
+            <AnimatePresence>
+                {!isPlaying && !showControls && (
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.2 }}
+                        className="absolute inset-0 flex items-center justify-center bg-black/10"
+                    >
+                        <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-white/40 transform transition-transform hover:scale-110 active:scale-95">
+                            <Play className="w-8 h-8 text-white ml-1 drop-shadow-md" fill="currentColor" />
+                        </div>
+                    </motion.div>
                 )}
-            </div>
+            </AnimatePresence>
+
+            {/* Bottom Control Bar */}
+            <AnimatePresence>
+                {(showControls || !isPlaying) && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        className="absolute bottom-4 left-4 right-4 h-12 bg-black/40 backdrop-blur-xl rounded-2xl flex items-center px-3 justify-between border border-white/10 shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button 
+                            onClick={togglePlay}
+                            className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors focus:outline-none"
+                        >
+                            {isPlaying ? (
+                                <Pause className="w-4 h-4 text-white" fill="currentColor" />
+                            ) : (
+                                <Play className="w-4 h-4 text-white ml-0.5" fill="currentColor" />
+                            )}
+                        </button>
+                        
+                        <button 
+                            onClick={toggleFullscreen}
+                            className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors focus:outline-none"
+                        >
+                            <Maximize className="w-4 h-4 text-white" />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

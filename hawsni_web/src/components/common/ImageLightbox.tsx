@@ -1,9 +1,7 @@
-'use client';
-
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useScroll } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Download, Play } from 'lucide-react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { motion, useMotionValue, useSpring, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { X, ChevronLeft, ChevronRight, Download, Play, Pause, Maximize } from 'lucide-react';
 import { useToastStore } from '@/store/toastStore';
 
 interface ImageLightboxProps {
@@ -56,8 +54,11 @@ function LightboxImage({
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [showControls, setShowControls] = useState(false);
+    const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const togglePlay = () => {
+    const togglePlay = (e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
         if (videoRef.current) {
             if (videoRef.current.paused) {
                 videoRef.current.play();
@@ -68,6 +69,48 @@ function LightboxImage({
             }
         }
     };
+
+    const toggleFullscreen = (e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        if (videoRef.current) {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else if (videoRef.current.requestFullscreen) {
+                videoRef.current.requestFullscreen();
+            } else if ((videoRef.current as any).webkitRequestFullscreen) {
+                (videoRef.current as any).webkitRequestFullscreen(); // iOS
+            }
+        }
+    };
+
+    const handleVideoClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isPlaying) {
+            togglePlay();
+            setShowControls(true);
+            startControlsTimer();
+        } else {
+            setShowControls(prev => !prev);
+            if (!showControls) {
+                startControlsTimer();
+            } else {
+                if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+            }
+        }
+    };
+
+    const startControlsTimer = () => {
+        if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        controlsTimeoutRef.current = setTimeout(() => {
+            if (isPlaying) setShowControls(false);
+        }, 3000);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+        };
+    }, []);
 
     return (
         <motion.div
@@ -101,33 +144,78 @@ function LightboxImage({
         >
             {isVideo ? (
                 <div 
-                    className="relative w-full h-full max-h-[80vh] flex items-center justify-center cursor-pointer group"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        togglePlay();
-                    }}
+                    className="relative w-full h-full max-h-[80vh] flex items-center justify-center cursor-pointer overflow-hidden rounded-xl"
+                    onClick={handleVideoClick}
+                    onMouseMove={isPlaying ? startControlsTimer : undefined}
                 >
                     <video
                         ref={videoRef}
                         src={img}
-                        className="w-full h-full object-contain rounded-xl"
+                        className="w-full h-full object-contain"
                         playsInline
                         controls={false}
                         controlsList="nodownload"
                         loop
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
-                        onEnded={() => setIsPlaying(false)}
+                        onPlay={() => {
+                            setIsPlaying(true);
+                            startControlsTimer();
+                        }}
+                        onPause={() => {
+                            setIsPlaying(false);
+                            setShowControls(true);
+                        }}
+                        onEnded={() => {
+                            setIsPlaying(false);
+                            setShowControls(true);
+                        }}
                     />
                     
-                    {/* Modern Play/Pause Overlay */}
-                    <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isPlaying ? 'opacity-0 scale-110' : 'opacity-100 scale-100 bg-black/20'}`}>
-                        {!isPlaying && (
-                            <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-white/30 transform transition-transform group-hover:scale-110 group-active:scale-95">
-                                <Play className="w-10 h-10 text-white ml-2 drop-shadow-md" fill="currentColor" />
-                            </div>
+                    {/* Modern Play/Pause Overlay (Center) - Only shows when initially paused */}
+                    <AnimatePresence>
+                        {!isPlaying && !showControls && (
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 1.2 }}
+                                className="absolute inset-0 flex items-center justify-center bg-black/20"
+                            >
+                                <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-white/30 transform transition-transform hover:scale-110 active:scale-95">
+                                    <Play className="w-10 h-10 text-white ml-2 drop-shadow-md" fill="currentColor" />
+                                </div>
+                            </motion.div>
                         )}
-                    </div>
+                    </AnimatePresence>
+
+                    {/* Bottom Control Bar */}
+                    <AnimatePresence>
+                        {(showControls || !isPlaying) && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 20 }}
+                                className="absolute bottom-4 left-4 right-4 h-14 bg-black/40 backdrop-blur-xl rounded-2xl flex items-center px-4 justify-between border border-white/10 shadow-2xl"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button 
+                                    onClick={togglePlay}
+                                    className="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors focus:outline-none"
+                                >
+                                    {isPlaying ? (
+                                        <Pause className="w-5 h-5 text-white" fill="currentColor" />
+                                    ) : (
+                                        <Play className="w-5 h-5 text-white ml-0.5" fill="currentColor" />
+                                    )}
+                                </button>
+                                
+                                <button 
+                                    onClick={toggleFullscreen}
+                                    className="w-10 h-10 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors focus:outline-none"
+                                >
+                                    <Maximize className="w-5 h-5 text-white" />
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             ) : (
                 <div className="relative w-full h-full pointer-events-none p-4 lg:p-12">
