@@ -665,11 +665,17 @@
                         }
                     }
 
-                    // 2. Get Cloudinary signature from backend
-                    const signRes = await fetch('/api/cloudinary/sign?folder=products');
+                    // 2. Prepare Cloudinary parameters
+                    const isVideoUpload = filesToUpload.some(img => img.file.type.startsWith('video/'));
+                    const videoTransform = 'w_1280,h_720,c_limit,br_500k,q_auto:eco,vc_h264,ac_aac,f_mp4';
+                    
+                    // 3. Get Cloudinary signature from backend
+                    // If we have videos, we need to sign the eager transformation
+                    const signUrl = `/api/cloudinary/sign?folder=products${isVideoUpload ? `&eager=${videoTransform}&resource_type=video` : ''}`;
+                    const signRes = await fetch(signUrl);
                     const signData = await signRes.json();
 
-                    // 3. Upload each file directly to Cloudinary
+                    // 4. Upload each file directly to Cloudinary
                     for (let i = 0; i < filesToUpload.length; i++) {
                         submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> رفع ملف ${i + 1}/${filesToUpload.length}...`;
 
@@ -682,18 +688,30 @@
                         formData.append('timestamp', signData.timestamp);
                         formData.append('signature', signData.signature);
                         formData.append('folder', signData.folder);
+                        
+                        // Add eager transformations for videos
+                        if (isVideo) {
+                            formData.append('eager', videoTransform);
+                        }
 
                         // Let Cloudinary auto-detect if image or video
-                        const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/auto/upload`;
+                        const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/${isVideo ? 'video' : 'image'}/upload`;
 
                         const cloudRes = await fetch(uploadEndpoint, {
                             method: 'POST',
                             body: formData
                         });
                         const cloudData = await cloudRes.json();
-                        if (cloudData.secure_url) {
-                            uploadedUrls.push(cloudData.secure_url);
-                            filesToUpload[i].url = cloudData.secure_url;
+                        
+                        let finalUrl = cloudData.secure_url;
+                        // Use the compressed (eager) version for videos
+                        if (isVideo && cloudData.eager && cloudData.eager.length > 0) {
+                            finalUrl = cloudData.eager[0].secure_url;
+                            console.log('✅ Using compressed video URL:', finalUrl);
+                        }
+
+                        if (finalUrl) {
+                            filesToUpload[i].url = finalUrl;
                             filesToUpload[i].type = 'existing';
                         } else {
                             throw new Error(cloudData.error?.message || 'فشل رفع الملف');

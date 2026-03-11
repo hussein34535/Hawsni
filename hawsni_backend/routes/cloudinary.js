@@ -16,13 +16,19 @@ cloudinary.config({
 router.get('/sign', (req, res) => {
     try {
         const folder = req.query.folder || 'products';
+        const eager = req.query.eager || '';
+        const resource_type = req.query.resource_type || 'image';
         const timestamp = Math.round(new Date().getTime() / 1000);
 
+        const paramsToSign = {
+            timestamp,
+            folder
+        };
+
+        if (eager) paramsToSign.eager = eager;
+
         const signature = cloudinary.utils.api_sign_request(
-            {
-                timestamp,
-                folder
-            },
+            paramsToSign,
             process.env.CLOUDINARY_SECRET || process.env.CLOUDINARY_API_SECRET
         );
 
@@ -31,6 +37,8 @@ router.get('/sign', (req, res) => {
             timestamp,
             signature,
             folder,
+            eager,
+            resource_type,
             cloud_name: process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME,
             api_key: process.env.CLOUDINARY_KEY || process.env.CLOUDINARY_API_KEY,
         });
