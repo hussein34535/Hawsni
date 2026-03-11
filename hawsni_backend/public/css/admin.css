@@ -16,16 +16,17 @@
     --border-soft: #E2E8F0;        /* Slate 200 */
     --border-medium: #CBD5E1;      /* Slate 300 */
 
-    /* Semantic with softer tints */
+    --white: #FFFFFF;
+
     --success: #10B981; /* Emerald 500 */
     --warning: #F59E0B;
     --danger: #EF4444;
     --info: #3B82F6;
 
-    --success-bg: #ECFDF5;
-    --warning-bg: #FFFBEB;
-    --danger-bg: #FEF2F2;
-    --info-bg: #EFF6FF;
+    --success-bg: #10B981;
+    --warning-bg: #F59E0B;
+    --danger-bg: #EF4444;
+    --info-bg: #3B82F6;
 
     /* Utilities */
     --hidden: none;
@@ -455,22 +456,31 @@ tr:hover td {
     background: rgba(14, 68, 53, 0.01);
 }
 
-/* Badges */
+/* Badges - Solid Premium Style */
 .badge {
-    padding: 0.35rem 0.8rem;
+    padding: 0.4rem 0.9rem;
     border-radius: 50px;
     font-size: 0.75rem;
     font-weight: 800;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     letter-spacing: 0.02em;
+    color: var(--white) !important;
 }
 
-.badge-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
-.badge-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
-.badge-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-.badge-info { background: var(--info-bg); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.2); }
+.badge-success { background: var(--success); }
+.badge-warning { background: var(--warning); }
+.badge-danger { background: var(--danger); }
+.badge-info { background: var(--info); }
+.badge-primary { background: var(--brand-primary); }
+.badge-secondary { background: var(--text-muted); }
+
+/* Status specific mapping for orders */
+.badge-processing { background: var(--brand-accent); }
+.badge-transit { background: var(--info); }
+.badge-delivered { background: var(--success); }
+.badge-cancelled { background: var(--danger); }
 
 /* Responsive Overrides - Fixing Phone Experience */
 @media (max-width: 1024px) {
