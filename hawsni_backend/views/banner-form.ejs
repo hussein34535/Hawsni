@@ -38,10 +38,10 @@
                         </div>
 
                         <div id="uploadInput" class="<%= banner ? 'hidden' : '' %>">
-                            <input type="file" id="bannerFileInput" class="form-control" accept="image/*"
+                            <input type="file" id="bannerFileInput" class="form-control" accept="image/*,video/mp4,video/webm,video/quicktime"
                                 onchange="previewUploadedImage(this)">
                             <input type="hidden" name="banner_image_url" id="bannerDirectUrl">
-                            <small class="text-muted">اختر صورة بجودة عالية (المقاس المثالي: 1200x400 بكسل - نسبة
+                            <small class="text-muted">اختر صورة أو فيديو بجودة عالية (المقاس المثالي: 1200x400 بكسل - نسبة
                                 3:1)</small>
                         </div>
 
@@ -467,15 +467,21 @@
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تجهيز الصورة...';
 
                 try {
-                    // Compress if over 4MB
                     let fileToUpload = fileInput.files[0];
-                    if (fileToUpload.size > 4 * 1024 * 1024) {
+                    const isVideo = fileToUpload.type.startsWith('video/');
+                    const videoTransform = 'w_1280,h_720,c_limit,br_500k,q_auto:eco,vc_h264,ac_aac,f_mp4';
+
+                    // Compress images if over 4MB, skip for videos (handled by Cloudinary)
+                    if (!isVideo && fileToUpload.size > 4 * 1024 * 1024) {
                         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري ضغط الصورة...';
                         fileToUpload = await compressImage(fileToUpload);
                     }
 
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع الصورة...';
-                    const signRes = await fetch('/api/cloudinary/sign?folder=banners');
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري رفع الملف...';
+                    
+                    // Get signature - if video, include eager params
+                    const signUrl = `/api/cloudinary/sign?folder=banners${isVideo ? `&eager=${videoTransform}&resource_type=video` : ''}`;
+                    const signRes = await fetch(signUrl);
                     const signData = await signRes.json();
 
                     const formData = new FormData();
@@ -485,23 +491,36 @@
                     formData.append('signature', signData.signature);
                     formData.append('folder', signData.folder);
 
-                    const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`, {
+                    if (isVideo) {
+                        formData.append('eager', videoTransform);
+                    }
+
+                    const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/${isVideo ? 'video' : 'image'}/upload`;
+
+                    const cloudRes = await fetch(uploadEndpoint, {
                         method: 'POST',
                         body: formData
                     });
                     const cloudData = await cloudRes.json();
 
-                    if (cloudData.secure_url) {
-                        document.getElementById('bannerDirectUrl').value = cloudData.secure_url;
+                    let finalUrl = cloudData.secure_url;
+                    // Use the compressed (eager) version for videos
+                    if (isVideo && cloudData.eager && cloudData.eager.length > 0) {
+                        finalUrl = cloudData.eager[0].secure_url;
+                        console.log('✅ Using compressed video URL for banner:', finalUrl);
+                    }
+
+                    if (finalUrl) {
+                        document.getElementById('bannerDirectUrl').value = finalUrl;
                         // Also set the image_url field
                         const urlField = document.querySelector('input[name="image_url"]');
-                        if (urlField) urlField.value = cloudData.secure_url;
+                        if (urlField) urlField.value = finalUrl;
                         // Clear file input to prevent sending in form
                         fileInput.value = '';
                         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
                         form.submit();
                     } else {
-                        throw new Error(cloudData.error?.message || 'فشل رفع الصورة');
+                        throw new Error(cloudData.error?.message || 'فشل رفع الملف');
                     }
                 } catch (err) {
                     console.error('Banner upload error:', err);
