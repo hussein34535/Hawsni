@@ -565,20 +565,6 @@ export default function ProductPage() {
                         </AnimatePresence>
                     </div>
 
-                    {/* Custom Dots Pagination - Smaller, elegant, underneath */}
-                    {safeImages.length > 1 && (
-                        <div className="flex items-center justify-center gap-1.5 py-4 pb-0 bg-white" dir="ltr">
-                            {safeImages.map((_: string, i: number) => (
-                                <button
-                                    key={`dot-${i}`}
-                                    onClick={() => scrollToImage(i)}
-                                    className={`h-1.5 rounded-full transition-all duration-300 ${i === selectedImage ? 'w-6 bg-gray-800' : 'w-1.5 bg-gray-300 hover:bg-gray-400'}`}
-                                    aria-label={`Go to slide ${i + 1}`}
-                                />
-                            ))}
-                        </div>
-                    )}
-
                     {/* Right: Info Section */}
                     <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
                         {/* Title and Header Layout Refined */}
