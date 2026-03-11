@@ -27,28 +27,46 @@ const uploadToCloudinary = async (file, folder = 'products') => {
     const isVideo = file.mimetype && file.mimetype.startsWith('video/');
 
     // Set appropriate transformations based on media type
-    const transformation = isVideo
-      ? [
-        { quality: "auto", fetch_format: "auto" }
-      ]
-      : [
-        { width: 1200, crop: "limit" }, // Limit max width to 1200px
-        { quality: "auto:good" },
-        { fetch_format: "auto" }
+    const uploadOptions = {
+      folder: folder,
+      resource_type: 'auto',
+    };
+
+    if (isVideo) {
+      // ضغط الفيديو بقوة: حد أقصى 1280x720 مع bitrate 800k → ناتج ~5-10MB لمدة دقيقة
+      uploadOptions.transformation = [
+        {
+          width: 1280,
+          height: 720,
+          crop: 'limit',           // مش بيكبر لو أصغر، بس بيصغر لو أكبر
+          bit_rate: '800k',        // الجودة المقبولة مع حجم صغير
+          video_codec: 'h264',     // الأكثر ضغطاً وتوافقاً
+          audio_codec: 'aac',
+          fetch_format: 'mp4',     // إجباري mp4 لأقل حجم
+        }
       ];
+      // تحديد الحجم الأقصى للملف الأصلي اللي يترفع - 200MB
+      if (file.size && file.size > 200 * 1024 * 1024) {
+        return reject(new Error('حجم الفيديو كبير جداً، الحد الأقصى 200MB'));
+      }
+      console.log(`📹 Uploading video with compression (original size: ${Math.round((file.size || 0) / 1024 / 1024)}MB)`);
+    } else {
+      uploadOptions.transformation = [
+        { width: 1200, crop: 'limit' },
+        { quality: 'auto:good' },
+        { fetch_format: 'auto' }
+      ];
+    }
 
     const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: folder,
-        resource_type: 'auto',
-        transformation: transformation
-      },
+      uploadOptions,
       (error, result) => {
         if (error) {
           console.error('❌ Cloudinary Upload Error Details:', error);
           return reject(new Error(`Cloudinary Upload Error: ${error.message}`));
         }
-        console.log('✅ Cloudinary Upload Success:', result.secure_url);
+        const sizeMB = result.bytes ? Math.round(result.bytes / 1024 / 1024 * 10) / 10 : '?';
+        console.log(`✅ Cloudinary Upload Success: ${result.secure_url} (${sizeMB}MB)`);
         resolve({ url: result.secure_url, blurHash: null });
       }
     );
@@ -58,4 +76,4 @@ const uploadToCloudinary = async (file, folder = 'products') => {
   });
 };
 
-module.exports = uploadToCloudinary;
+module.exports = uploadToCloudinary;

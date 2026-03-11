@@ -8,6 +8,8 @@ import {
     Hand, Flame, Check, Ruler, Info, Copy, CheckCircle2, Minus, Plus, ChevronRight,
     X, ChevronDown
 } from 'lucide-react';
+import Image from 'next/image';
+import { useCartStore } from '@/store/cartStore';
 import { useToastStore } from '@/store/toastStore';
 import { productService } from '@/services/productService';
 import { useLanguage } from '@/context/LanguageContext';
