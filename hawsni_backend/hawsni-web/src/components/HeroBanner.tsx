@@ -15,6 +15,17 @@ export default function HeroBanner() {
     const [videoLoadingStates, setVideoLoadingStates] = useState<{ [key: string]: boolean }>({});
     const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
 
+    // Utility to optimize Cloudinary URLs on the fly
+    const optimizeVideoUrl = (url: string) => {
+        if (!url || !url.includes('cloudinary.com')) return url;
+        // Inject optimization parameters: q_auto:eco (economy quality), f_auto (best format), br_1000k (limit bitrate)
+        // This significantly reduces file size for faster mobile loading
+        if (url.includes('/video/upload/')) {
+            return url.replace('/video/upload/', '/video/upload/q_auto:eco,f_auto,br_1000k,vc_h264/');
+        }
+        return url;
+    };
+
     const fetchBanners = async () => {
         try {
             const res = await bannersApi.getAll();
@@ -146,11 +157,13 @@ export default function HeroBanner() {
                                 <div className="relative w-full h-full">
                                     <video
                                         ref={(el) => { videoRefs.current[banner.id] = el; }}
-                                        src={banner.image_url}
+                                        src={optimizeVideoUrl(banner.image_url)}
                                         className="w-full h-full object-cover"
                                         muted
                                         loop
                                         playsInline
+                                        preload="auto"
+                                        crossOrigin="anonymous"
                                         onLoadStart={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
                                         onWaiting={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
                                         onSeeking={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
