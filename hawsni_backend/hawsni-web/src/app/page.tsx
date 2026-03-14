@@ -46,6 +46,9 @@ export default function HomePage() {
       {/* ============================== */}
       {/* 🎪 HERO SECTION (Flutter Match) */}
       {/* ============================== */}
+      {/* SEO Title - Hidden but accessible to crawlers */}
+      <h1 className="sr-only">Hwasi | Premium AI-Powered Fashion E-Commerce</h1>
+      
       <HeroBanner />
 
       {/* ============================== */}
