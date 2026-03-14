@@ -13,8 +13,8 @@ export const metadata: Metadata = {
     default: "Hwasi | Premium Fashion E-Commerce",
     template: "%s | Hwasi"
   },
-  description: "Experience the future of shopping with AI-powered Virtual Try-On. Discover premium fashion at Hwasi. هواسي - تجربة تسوق فريدة مع ميزة قياس الملابس بالذكاء الاصطناعي",
-  keywords: ["Hwasi", "هواسي", "fashion", "e-commerce", "virtual try-on", "AI shopping", "clothes Saudi Arabia", "أزياء", "تسوق أونلاين"],
+  description: "Experience the future of shopping with AI-powered Virtual Try-On. Discover premium fashion at Hwasi. هوسي - تجربة تسوق فريدة مع ميزة قياس الملابس بالذكاء الاصطناعي",
+  keywords: ["Hwasi", "هوسي", "fashion", "e-commerce", "virtual try-on", "AI shopping", "clothes Saudi Arabia", "أزياء", "تسوق أونلاين"],
   authors: [{ name: "Hwasi Team" }],
   creator: "Hwasi",
   publisher: "Hwasi",
