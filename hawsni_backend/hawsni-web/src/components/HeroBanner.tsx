@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Sparkles, Play, Pause, Maximize } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Play, Pause, Maximize, Loader2 } from 'lucide-react';
 import { bannersApi, Banner } from '@/lib/api';
 
 export default function HeroBanner() {
@@ -12,6 +12,7 @@ export default function HeroBanner() {
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
     const [loading, setLoading] = useState(true);
     const [playingStates, setPlayingStates] = useState<{ [key: string]: boolean }>({});
+    const [videoLoadingStates, setVideoLoadingStates] = useState<{ [key: string]: boolean }>({});
     const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
 
     const fetchBanners = async () => {
@@ -71,6 +72,8 @@ export default function HeroBanner() {
                     video.muted = true;
                     video.currentTime = 0;
                     setPlayingStates(prev => ({ ...prev, [banner.id]: false }));
+                    // Clear loading state when moving away
+                    setVideoLoadingStates(prev => ({ ...prev, [banner.id]: false }));
                 }
             }
         });
@@ -119,6 +122,7 @@ export default function HeroBanner() {
                 {banners.map((banner, index) => {
                     const isVideo = banner.image_url?.match(/\.(mp4|webm|mov|ogg)($|\?)/i) || banner.image_url?.includes('video/upload');
                     const isActive = index === currentSlide;
+                    const isVideoLoading = videoLoadingStates[banner.id];
                     
                     return (
                         <div
@@ -138,11 +142,25 @@ export default function HeroBanner() {
                                         muted
                                         loop
                                         playsInline
+                                        onLoadStart={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
+                                        onWaiting={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
+                                        onPlaying={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: false }))}
+                                        onCanPlay={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: false }))}
                                         onPlay={() => setPlayingStates(prev => ({ ...prev, [banner.id]: true }))}
                                         onPause={() => setPlayingStates(prev => ({ ...prev, [banner.id]: false }))}
                                         poster={banner.image_url.replace(/\/video\/upload\//, '/video/upload/so_0/')}
                                     />
                                     
+                                    {/* Video Loading Indicator */}
+                                    {isActive && isVideoLoading && (
+                                        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <Loader2 className="w-12 h-12 text-white animate-spin drop-shadow-lg" />
+                                                <span className="text-white/80 text-sm font-medium tracking-widest uppercase animate-pulse">Loading Video...</span>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Video Controls Overlay - Only when active */}
                                     {isActive && (
                                         <div className="absolute right-6 bottom-32 z-40 flex flex-col gap-3">
