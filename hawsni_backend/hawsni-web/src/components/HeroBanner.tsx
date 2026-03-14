@@ -63,8 +63,13 @@ export default function HeroBanner() {
                 if (index === currentSlide) {
                     // Start active video muted for autoplay friendliness
                     video.muted = true;
+                    // Pre-emptively set loading state if not ready
+                    if (video.readyState < 3) {
+                        setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }));
+                    }
                     video.play().catch(() => {
                         // Autoplay might be blocked until user interaction
+                        setVideoLoadingStates(prev => ({ ...prev, [banner.id]: false }));
                     });
                 } else {
                     // Forcefully pause and mute non-active videos to stop audio immediately
@@ -85,9 +90,13 @@ export default function HeroBanner() {
         if (video) {
             if (video.paused) {
                 video.muted = false; // Unmute when user clicks play manually
-                video.play();
-                setPlayingStates(prev => ({ ...prev, [bannerId]: true }));
-                setIsAutoPlaying(false);
+                setVideoLoadingStates(prev => ({ ...prev, [bannerId]: true }));
+                video.play().then(() => {
+                    setPlayingStates(prev => ({ ...prev, [bannerId]: true }));
+                    setIsAutoPlaying(false);
+                }).catch(() => {
+                    setVideoLoadingStates(prev => ({ ...prev, [bannerId]: false }));
+                });
             } else {
                 video.pause();
                 setPlayingStates(prev => ({ ...prev, [bannerId]: false }));
@@ -144,19 +153,29 @@ export default function HeroBanner() {
                                         playsInline
                                         onLoadStart={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
                                         onWaiting={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
+                                        onSeeking={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
+                                        onStalled={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: true }))}
                                         onPlaying={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: false }))}
                                         onCanPlay={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: false }))}
+                                        onCanPlayThrough={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: false }))}
                                         onPlay={() => setPlayingStates(prev => ({ ...prev, [banner.id]: true }))}
                                         onPause={() => setPlayingStates(prev => ({ ...prev, [banner.id]: false }))}
+                                        onError={() => setVideoLoadingStates(prev => ({ ...prev, [banner.id]: false }))}
                                         poster={banner.image_url.replace(/\/video\/upload\//, '/video/upload/so_0/')}
                                     />
                                     
                                     {/* Video Loading Indicator */}
                                     {isActive && isVideoLoading && (
-                                        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                                        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                                             <div className="flex flex-col items-center gap-4">
-                                                <Loader2 className="w-12 h-12 text-white animate-spin drop-shadow-lg" />
-                                                <span className="text-white/80 text-sm font-medium tracking-widest uppercase animate-pulse">Loading Video...</span>
+                                                <div className="relative">
+                                                    <Loader2 className="w-16 h-16 text-white animate-spin opacity-20" />
+                                                    <Loader2 className="w-16 h-16 text-white animate-spin absolute inset-0 [animation-duration:1.5s]" style={{ clipPath: 'inset(0 0 50% 0)' }} />
+                                                </div>
+                                                <div className="flex flex-col items-center">
+                                                    <span className="text-white text-base font-bold tracking-[0.2em] uppercase">Loading</span>
+                                                    <span className="text-white/60 text-[10px] font-medium tracking-[0.3em] uppercase mt-1">Experience Ready Soon</span>
+                                                </div>
                                             </div>
                                         </div>
                                     )}
