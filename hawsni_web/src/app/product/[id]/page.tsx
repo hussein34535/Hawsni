@@ -321,6 +321,15 @@ export default function ProductPage() {
                         setSelectedSize(sizes[0]);
                     }
 
+                    // Auto-select color if only one
+                    const colors = (data.product as any).colors ?? [];
+                    if (colors.length === 1) {
+                        const parsed = parseColors(colors);
+                        if (parsed[0]?.color) {
+                            setSelectedColor(parsed[0].color);
+                        }
+                    }
+
                     // Track ViewContent
                     const discount = data.product.discount || 0;
                     const finalPrice = discount > 0 ? data.product.price - (data.product.price * discount / 100) : data.product.price;
@@ -715,7 +724,7 @@ export default function ProductPage() {
 
                         <div className="space-y-10">
                             {/* Color Selection */}
-                            {product.colors && product.colors.length > 0 && (
+                            {product.colors && product.colors.length > 1 && (
                                 <div>
                                     <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
                                     <div className={`flex flex-wrap gap-2 pb-4 pt-2 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -786,15 +795,21 @@ export default function ProductPage() {
                                         </button>
                                     </div>
                                     <div className="flex flex-wrap gap-1.5">
-                                        {product.sizes.map((s: string, i: number) => (
-                                            <button
-                                                key={`${s}-${i}`}
-                                                onClick={() => setSelectedSize(s)}
-                                                className={`min-w-[3.5rem] h-10 px-3 rounded-xl border-2 font-black text-sm transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-100'}`}
-                                            >
-                                                {s}
-                                            </button>
-                                        ))}
+                                        {product.sizes.length > 1 ? (
+                                            product.sizes.map((s: string, i: number) => (
+                                                <button
+                                                    key={`${s}-${i}`}
+                                                    onClick={() => setSelectedSize(s)}
+                                                    className={`min-w-[3.5rem] h-10 px-3 rounded-xl border-2 font-black text-sm transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-100'}`}
+                                                >
+                                                    {s}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <p className="font-black text-gray-900 bg-gray-50 px-5 py-2.5 rounded-2xl border border-gray-100 inline-block font-cairo">
+                                                {product.sizes[0]}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             )}

@@ -226,7 +226,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </h4>
 
                 {/* 2. Interactive Colors */}
-                {colors.length > 0 && (
+                {colors.length > 1 && (
                     <div className="flex flex-wrap gap-1.5 mb-2 items-center">
                         {parseColors(colors).slice(0, 4).map((c, i) => {
                             const isSelected = selectedColor === c.color;
