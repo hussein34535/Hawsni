@@ -227,20 +227,26 @@ export default function ProductDetailPage() {
                     {product.sizes && product.sizes.length > 0 && (
                         <div>
                             <h3 className="font-medium text-gray-900 mb-3">Size</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {product.sizes.map((size) => (
-                                    <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
-                                        className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${selectedSize === size
-                                            ? 'border-[var(--primary)] bg-[var(--primary)] text-white'
-                                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
-                            </div>
+                            {product.sizes.length > 1 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {product.sizes.map((size) => (
+                                        <button
+                                            key={size}
+                                            onClick={() => setSelectedSize(size)}
+                                            className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${selectedSize === size
+                                                ? 'border-[var(--primary)] bg-[var(--primary)] text-white'
+                                                : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                                                }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-700 font-medium bg-gray-50 px-4 py-2 rounded-lg border border-gray-100 inline-block">
+                                    {product.sizes[0]}
+                                </p>
+                            )}
                         </div>
                     )}
 
@@ -248,24 +254,36 @@ export default function ProductDetailPage() {
                     {product.colors && product.colors.length > 0 && (
                         <div>
                             <h3 className="font-medium text-gray-900 mb-3">Color</h3>
-                            <div className="flex flex-wrap gap-3">
-                                {product.colors.map((colorObj, index) => {
-                                    const colorValue = typeof colorObj === 'string' ? colorObj : colorObj.color;
-                                    const colorName = typeof colorObj === 'object' ? colorObj.name : colorValue;
-                                    return (
-                                        <button
-                                            key={index}
-                                            onClick={() => setSelectedColor(colorValue)}
-                                            className={`w-10 h-10 rounded-full border-2 transition-all ${selectedColor === colorValue
-                                                ? 'ring-2 ring-[var(--primary)] ring-offset-2 border-transparent'
-                                                : 'border-gray-200 hover:border-gray-300'
-                                                }`}
-                                            style={{ backgroundColor: colorValue }}
-                                            title={colorName}
-                                        />
-                                    );
-                                })}
-                            </div>
+                            {product.colors.length > 1 ? (
+                                <div className="flex flex-wrap gap-3">
+                                    {product.colors.map((colorObj, index) => {
+                                        const colorValue = typeof colorObj === 'string' ? colorObj : colorObj.color;
+                                        const colorName = typeof colorObj === 'object' ? colorObj.name : colorValue;
+                                        return (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedColor(colorValue)}
+                                                className={`w-10 h-10 rounded-full border-2 transition-all ${selectedColor === colorValue
+                                                    ? 'ring-2 ring-[var(--primary)] ring-offset-2 border-transparent'
+                                                    : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                                style={{ backgroundColor: colorValue }}
+                                                title={colorName}
+                                            />
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-lg border border-gray-100 inline-flex">
+                                    <div 
+                                        className="w-6 h-6 rounded-full border border-gray-200"
+                                        style={{ backgroundColor: typeof product.colors[0] === 'string' ? product.colors[0] : product.colors[0].color }}
+                                    />
+                                    <span className="text-gray-700 font-medium">
+                                        {typeof product.colors[0] === 'object' ? product.colors[0].name : product.colors[0]}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
 
