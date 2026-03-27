@@ -317,15 +317,22 @@ async function sendOrderStatusEmail(toEmail, userName, order, status) {
         }).join('');
 
         reviewSection = `
-            <div style="background: #f8faf9; border: 2px dashed #0E4435; border-radius: 20px; padding: 25px; margin-top: 25px;">
-                <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #0E4435; font-weight: 900; text-align: center;">يا باطل! هوسي وصلك بجد؟ 🤩</h3>
-                <p style="margin: 0 0 20px 0; font-size: 14px; color: #4a4a4a; line-height: 1.6; text-align: center;">
-                    ألف مبروك على قطعك الجديدة! يا رب تكون عاجباك ومنورة دولابك. 💖<br>
-                    رأيك بيفرق معانا جداً.. لو وقتك يسمح، ممكن تقولنا رأيك في القطع اللي معاك؟ ده بيساعدنا نطور من نفسنا، وبيساعد غيرك يختار صح. 🙏✨
-                </p>
-                ${itemsListHtml}
-                <div style="text-align: center; margin-top: 15px;">
-                    <p style="margin: 0; font-size: 11px; color: #999; font-weight: 600;">بنتمنى نشوفك تاني قريب! <br> فريق هوسي 🖤</p>
+            <div style="background: #fdfdfd; border: 1px solid #e8e8e8; border-radius: 16px; padding: 30px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <span style="font-size: 32px; display: block; margin-bottom: 10px;">✨</span>
+                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #1a1a1a; font-weight: 800;">نسعد دائماً باختياركم هَوَسي</h3>
+                    <p style="margin: 0; font-size: 14px; color: #666; line-height: 1.8;">
+                        نتمنى أن تنال اختياراتكم إعجابكم. تكتمل أناقة مننتجاتنا بآرائكم وتجاربكم القيمة.<br>
+                        يرجى التكرم بتقييم المنتجات لمساعدتنا في تقديم الأفضل دائماً.
+                    </p>
+                </div>
+                
+                <div style="margin-top: 25px;">
+                    ${itemsListHtml}
+                </div>
+
+                <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f5f5f5;">
+                    <p style="margin: 0; font-size: 12px; color: #999; font-weight: 600;">شكراً لثقتكم بنا،<br>فريق إدارة هَوَسي</p>
                 </div>
             </div>
         `;
