@@ -450,6 +450,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                     itemName: product.name,
                     itemCategory: product.category);
 
+                // Auto-select if only one option exists
+                if (product.sizes != null && product.sizes!.length == 1) {
+                  _selectedSize = product.sizes![0];
+                }
+                if (product.colors != null && product.colors!.length == 1) {
+                  final colorObj = product.colors![0];
+                  if (colorObj is String) {
+                    _selectedColor = colorObj;
+                  } else if (colorObj is Map) {
+                    _selectedColor = colorObj['color'] as String?;
+                  }
+                }
+
                 // SEO: Dynamic Meta Tags & Structured Data
                 if (kIsWeb && !kIsWasm) {
                   final meta = MetaSEO();
@@ -794,7 +807,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           ],
 
           // Colors
-          if (data.colors.isNotEmpty) ...[
+          if (data.colors.length > 1) ...[
             const Text('اللون',
                 style: TextStyle(
                     fontFamily: 'Cairo',
@@ -838,7 +851,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
               ],
             ),
             const SizedBox(height: 16),
-            _sizeRow(data.sizes),
+            if (data.sizes.length > 1)
+              _sizeRow(data.sizes)
+            else
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Text(
+                  data.sizes[0],
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
             const SizedBox(height: 32),
           ],
 
