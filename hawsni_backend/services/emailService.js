@@ -320,19 +320,22 @@ async function sendOrderStatusEmail(toEmail, userName, order, status) {
             <div style="background: #fdfdfd; border: 1px solid #e8e8e8; border-radius: 16px; padding: 30px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
                 <div style="text-align: center; margin-bottom: 20px;">
                     <span style="font-size: 32px; display: block; margin-bottom: 10px;">✨</span>
-                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #1a1a1a; font-weight: 800;">نسعد دائماً باختياركم هَوَسي</h3>
+                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #1a1a1a; font-weight: 800;">شكراً لثقتكم في هَوَسي</h3>
                     <p style="margin: 0; font-size: 14px; color: #666; line-height: 1.8;">
-                        نتمنى أن تنال اختياراتكم إعجابكم. تكتمل أناقة مننتجاتنا بآرائكم وتجاربكم القيمة.<br>
-                        يرجى التكرم بتقييم المنتجات لمساعدتنا في تقديم الأفضل دائماً.
+                        وصلت طلباتكم بسلام! أملنا أن تضيف منتجاتنا لمسة من الأناقة والفخامة ليومكم.<br>
+                        نسعد دائماً بخدمتكم، ونتمنى أن نكون عند حسن ظنكم في اختياراتكم القادمة.
                     </p>
                 </div>
                 
-                <div style="margin-top: 25px;">
+                <div style="margin-top: 25px; background: #fafafa; padding: 15px; border-radius: 12px;">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <p style="margin: 0; font-size: 13px; color: #444; font-weight: 700;">يسعدنا سماع رأيكم في المنتجات:</p>
+                    </div>
                     ${itemsListHtml}
                 </div>
 
                 <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f5f5f5;">
-                    <p style="margin: 0; font-size: 12px; color: #999; font-weight: 600;">شكراً لثقتكم بنا،<br>فريق إدارة هَوَسي</p>
+                    <p style="margin: 0; font-size: 12px; color: #999; font-weight: 600;">مع خالص التحيات،<br>فريق إدارة هَوَسي</p>
                 </div>
             </div>
         `;
