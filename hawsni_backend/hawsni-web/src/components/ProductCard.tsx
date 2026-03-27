@@ -72,7 +72,7 @@ export default function ProductCard({
                 </div>
 
                 {/* Colors */}
-                {product.colors && product.colors.length > 0 && (
+                {product.colors && product.colors.length > 1 && (
                     <div className="flex gap-1.5 mt-3">
                         {product.colors.slice(0, 4).map((colorObj, idx) => {
                             const colorValue = typeof colorObj === 'string' ? colorObj : colorObj.color;

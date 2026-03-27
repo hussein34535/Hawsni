@@ -365,7 +365,7 @@ class _ProductCardState extends State<ProductCard> {
                         const SizedBox(height: 4),
 
                         // 2. Interactive Colors
-                        if (widget.colors != null && widget.colors!.isNotEmpty)
+                        if (widget.colors != null && widget.colors!.length > 1)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 4.0),
                             child: Row(
