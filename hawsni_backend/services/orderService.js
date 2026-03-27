@@ -189,43 +189,36 @@ class OrderService {
             .from('orders')
             .update(updateData)
             .eq('id', id)
-            .select()
+            .select(`
+                *,
+                users(name, email),
+                order_items(
+                    *,
+                    products(id, name, images)
+                )
+            `)
             .single();
 
         if (error) throw error;
 
         // Send status update email (non-blocking)
         try {
-            const { data: order } = await supabase
-                .from('orders')
-                .select('user_id, shipping_address')
-                .eq('id', id)
-                .single();
-
-            if (order) {
-                let customerEmail = null;
-                let customerName = 'عميل';
-
-                if (order.user_id) {
-                    const { data: user } = await supabase
-                        .from('users')
-                        .select('email, name')
-                        .eq('id', order.user_id)
-                        .single();
-                    if (user) {
-                        customerEmail = user.email;
-                        customerName = user.name || customerName;
-                    }
-                }
+            if (data) {
+                let customerEmail = data.users?.email || null;
+                let customerName = data.users?.name || 'عميل';
 
                 // Guest fallback
-                if (!customerEmail && order.shipping_address) {
-                    customerEmail = order.shipping_address.email;
-                    customerName = order.shipping_address.name || customerName;
+                if (!customerEmail && data.shipping_address) {
+                    let shipping = data.shipping_address;
+                    if (typeof shipping === 'string') {
+                        try { shipping = JSON.parse(shipping); } catch (e) { }
+                    }
+                    customerEmail = shipping?.email || null;
+                    customerName = shipping?.name || customerName;
                 }
 
                 if (customerEmail) {
-                    emailService.sendOrderStatusEmail(customerEmail, customerName, id, status)
+                    emailService.sendOrderStatusEmail(customerEmail, customerName, data, status)
                         .catch(err => console.error('Order status email failed:', err));
                 }
             }

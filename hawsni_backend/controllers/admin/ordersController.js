@@ -73,7 +73,14 @@ class OrdersController {
                 .from('orders')
                 .update({ status })
                 .eq('id', id)
-                .select('*, users(name, email)')
+                .select(`
+                    *,
+                    users(name, email),
+                    order_items(
+                        *,
+                        products(id, name, images)
+                    )
+                `)
                 .single();
 
             if (error) throw error;
@@ -99,7 +106,7 @@ class OrdersController {
                     emailService.sendOrderStatusEmail(
                         customerEmail,
                         customerName || 'عميلنا العزيز',
-                        data.id,
+                        data, // Pass the full order object
                         status
                     ).catch(err => console.error('Failed to send status email:', err));
                 }
@@ -129,7 +136,14 @@ class OrdersController {
                 .from('orders')
                 .update({ status })
                 .in('id', ids)
-                .select('*, users(name, email)');
+                .select(`
+                    *,
+                    users(name, email),
+                    order_items(
+                        *,
+                        products(id, name, images)
+                    )
+                `);
 
             if (error) throw error;
 
@@ -155,7 +169,7 @@ class OrdersController {
                             emailService.sendOrderStatusEmail(
                                 customerEmail,
                                 customerName || 'عميلنا العزيز',
-                                order.id,
+                                order, // Pass the full order object
                                 status
                             ).catch(err => console.error(`Failed to send status email for order ${order.id}:`, err));
                         }

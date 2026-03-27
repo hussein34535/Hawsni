@@ -32,7 +32,7 @@ import 'package:hwasi_app/features/vto/presentation/screens/virtual_try_on_scree
 import 'package:hwasi_app/features/products/presentation/widgets/full_screen_gallery.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+// import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:hwasi_app/features/home/presentation/widgets/free_delivery_banner.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -274,9 +274,11 @@ const STATUS_CONFIG = {
     },
 };
 
-async function sendOrderStatusEmail(toEmail, userName, orderId, status) {
+async function sendOrderStatusEmail(toEmail, userName, order, status) {
     const config = STATUS_CONFIG[status] || { ar: status, emoji: '📦', color: '#0E4435', icon: '📦', message: '', step: 0 };
+    const orderId = typeof order === 'object' ? order.id : order;
     const orderNumber = String(orderId).substring(0, 6).toUpperCase();
+    const items = (typeof order === 'object' && order.order_items) ? order.order_items : [];
 
     // Build progress steps
     const steps = ['تم التأكيد', 'جاري التجهيز / الشحن', 'تم التسليم'];
@@ -294,6 +296,40 @@ async function sendOrderStatusEmail(toEmail, userName, orderId, status) {
             </td>
         `;
     }).join('');
+
+    // Review Request Section for Delivered Items
+    let reviewSection = '';
+    if (status === 'Delivered' && items.length > 0) {
+        const itemsListHtml = items.map(item => {
+            const productId = item.product_id || (item.products && item.products.id);
+            const itemName = item.name || (item.products && item.products.name) || 'منتج';
+            let itemImage = item.image_url || (item.products && item.products.images && item.products.images[0]) || 'https://hwasi.com/logo.png';
+            
+            return `
+                <div style="display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #f0f0f0;">
+                    <img src="${itemImage}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; margin-left: 12px;" alt="${itemName}">
+                    <div style="flex: 1; text-align: right;">
+                        <p style="margin: 0; font-size: 13px; font-weight: 800; color: #1a1a1a;">${itemName}</p>
+                        <a href="https://hwasi.com/product/${productId}#reviews" style="display: inline-block; margin-top: 5px; color: #0E4435; font-size: 11px; font-weight: 900; text-decoration: none;">⭐ قيم هذا المنتج الآن</a>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        reviewSection = `
+            <div style="background: #f8faf9; border: 2px dashed #0E4435; border-radius: 20px; padding: 25px; margin-top: 25px;">
+                <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #0E4435; font-weight: 900; text-align: center;">يا باطل! هوسي وصلك بجد؟ 🤩</h3>
+                <p style="margin: 0 0 20px 0; font-size: 14px; color: #4a4a4a; line-height: 1.6; text-align: center;">
+                    ألف مبروك على قطعك الجديدة! يا رب تكون عاجباك ومنورة دولابك. 💖<br>
+                    رأيك بيفرق معانا جداً.. لو وقتك يسمح، ممكن تقولنا رأيك في القطع اللي معاك؟ ده بيساعدنا نطور من نفسنا، وبيساعد غيرك يختار صح. 🙏✨
+                </p>
+                ${itemsListHtml}
+                <div style="text-align: center; margin-top: 15px;">
+                    <p style="margin: 0; font-size: 11px; color: #999; font-weight: 600;">بنتمنى نشوفك تاني قريب! <br> فريق هوسي 🖤</p>
+                </div>
+            </div>
+        `;
+    }
 
     return _send({
         to: toEmail,
@@ -339,12 +375,7 @@ async function sendOrderStatusEmail(toEmail, userName, orderId, status) {
                 </div>
                 ` : ''}
 
-                ${status === 'Delivered' ? `
-                <div style="background: #fef9ef; border: 1px solid #fde68a; border-radius: 16px; padding: 20px; text-align: center; margin-top: 20px;">
-                    <p style="margin: 0; font-size: 14px; font-weight: 800; color: #92400e;">⭐ رأيك يهمنا!</p>
-                    <p style="margin: 8px 0 0 0; font-size: 13px; color: #a16207;">شاركنا تقييمك وساعد غيرك يختار</p>
-                </div>
-                ` : ''}
+                ${reviewSection}
             </div>
 
             <!-- Footer -->
