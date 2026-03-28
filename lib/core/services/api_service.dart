@@ -28,6 +28,9 @@ class ApiService {
   static Map<String, String> _getHeaders({bool includeAuth = false}) {
     final headers = {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
     };
 
     if (includeAuth && AuthService.token != null) {
@@ -40,8 +43,12 @@ class ApiService {
   // Generic GET request
   static Future<dynamic> get(String endpoint, {bool includeAuth = true}) async {
     try {
+      final String cacheBuster = endpoint.contains('?') 
+          ? '&_t=${DateTime.now().millisecondsSinceEpoch}' 
+          : '?_t=${DateTime.now().millisecondsSinceEpoch}';
+
       final response = await http.get(
-        Uri.parse('${_config.baseUrl}$endpoint'),
+        Uri.parse('${_config.baseUrl}$endpoint$cacheBuster'),
         headers: _getHeaders(includeAuth: includeAuth),
       );
 

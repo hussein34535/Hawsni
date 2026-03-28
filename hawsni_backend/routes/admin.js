@@ -25,6 +25,14 @@ router.get('/admin/logout', adminAuthController.logout);
 // Apply protection to all following routes
 router.use(adminProtect);
 
+// Prevent caching for all admin routes
+router.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
+
 // Dashboard
 router.get('/dashboard', dashboardController.getDashboard);
 
