@@ -915,14 +915,39 @@
 
             colors.forEach((c, idx) => {
                 const div = document.createElement('div');
-                div.style.cssText = 'display:inline-flex; align-items:center; gap:5px; background:#f1f1f1; padding:5px 10px; border-radius:15px; margin:5px;';
+                div.className = 'color-swatch-item';
+                div.style.cssText = 'display:inline-flex; align-items:center; gap:8px; background:#f8f9fa; padding:6px 14px; border-radius:50px; margin:5px; border:1px solid #ddd; cursor:pointer; transition: all 0.2s;';
+                div.onmouseover = () => { div.style.borderColor = 'var(--primary)'; div.style.transform = 'translateY(-2px)'; div.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)'; };
+                div.onmouseout = () => { div.style.borderColor = '#ddd'; div.style.transform = 'none'; div.style.boxShadow = 'none'; };
+                div.onclick = () => editColor(idx);
+                
                 div.innerHTML = `
-                    <div style="width:16px;height:16px;border-radius:50%;background:${c.color};border:1px solid #ccc;"></div>
-                    <span>${c.color}</span>
-                    ${c.imageIndex !== null ? `<i class="fas fa-image" style="color:#28a745" title="Img ${c.imageIndex + 1}"></i>` : ''}
-                    <span style="color:red;cursor:pointer;margin-right:5px;" onclick="removeColor(${idx})">&times;</span>
+                    <div style="width:18px;height:18px;border-radius:50%;background:${c.color};border:1px solid rgba(0,0,0,0.1);"></div>
+                    <span style="font-size: 13px; font-weight: 500;">${c.color}</span>
+                    ${c.imageIndex !== null ? `<i class="fas fa-link" style="color:var(--primary); font-size: 11px;" title="مرتبط بصورة ${c.imageIndex + 1}"></i>` : '<i class="fas fa-link-slash" style="color:#999; font-size: 11px;" title="غير مرتبط بصورة"></i>'}
+                    <span style="color:#dc3545; cursor:pointer; margin-right:5px; padding: 2px 5px;" onclick="event.stopPropagation(); removeColor(${idx})">
+                        <i class="fas fa-trash" style="font-size: 11px;"></i>
+                    </span>
                 `;
                 container.appendChild(div);
+            });
+        }
+
+        function editColor(index) {
+            const c = colors[index];
+            if (!c) return;
+
+            // Load into picker
+            document.getElementById('colorPicker').value = c.color;
+            
+            // Load image mapping
+            selectImage(c.imageIndex, (c.imageIndex !== null && imageState[c.imageIndex]) ? imageState[c.imageIndex].url : null);
+            
+            // Visual feedback
+            const container = document.getElementById('colorsContainer');
+            Array.from(container.children).forEach((child, i) => {
+                child.style.background = (i === index) ? '#e9ecef' : '#f8f9fa';
+                child.style.borderColor = (i === index) ? 'var(--primary)' : '#ddd';
             });
         }
 
