@@ -35,9 +35,14 @@ class ProductService {
             query = query.eq('is_featured', filters.is_featured === 'true' || filters.is_featured === true);
         }
 
-        if (sort) {
-            const sortBy = sort === 'price_asc' ? 'price' : sort === 'price_desc' ? 'price.desc' : 'created_at.desc';
-            query = query.order(sortBy);
+        if (sort === 'price_asc') {
+            query = query.order('price', { ascending: true });
+        } else if (sort === 'price_desc') {
+            query = query.order('price', { ascending: false });
+        } else {
+            // Default sort: High Demand (Featured) first, then Newest
+            query = query.order('is_featured', { ascending: false })
+                         .order('created_at', { ascending: false });
         }
 
         const { data, error } = await query;
