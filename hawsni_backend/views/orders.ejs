@@ -321,6 +321,15 @@
             const order = ordersData.find(o => o.id === orderId);
             if (!order) return;
 
+            // Reset No Answer Button state
+            const noAnswerBtn = document.getElementById('noAnswerBtn');
+            if (noAnswerBtn) {
+                noAnswerBtn.innerHTML = '<span>📞</span><span>إرسال تنبيه "لم يرد"</span>';
+                noAnswerBtn.disabled = false;
+                noAnswerBtn.style.borderColor = '#f59e0b';
+                noAnswerBtn.style.color = '#92400e';
+            }
+
             // Update Header & Badge
             document.getElementById('modalOrderId').textContent = 'طلب رقم #' + order.id.substring(0, 8);
             document.getElementById('modalOrderDate').textContent = new Date(order.created_at).toLocaleString('ar-EG', {
