@@ -40,9 +40,8 @@ class ProductService {
         } else if (sort === 'price_desc') {
             query = query.order('price', { ascending: false });
         } else {
-            // Default sort: High Demand (Featured) first, then Newest
-            query = query.order('is_featured', { ascending: false })
-                         .order('created_at', { ascending: false });
+            // Default sort: Newest first
+            query = query.order('created_at', { ascending: false });
         }
 
         const { data, error } = await query;
