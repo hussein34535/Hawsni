@@ -877,7 +877,6 @@ export default function ProductPage() {
                                         <Plus size={16} strokeWidth={3} />
                                     </button>
                                 </div>
-                                </div>
                             </div>
 
                             {/* Related / High Demand Products Section (Appears after adding to cart) */}
