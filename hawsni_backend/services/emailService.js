@@ -163,20 +163,6 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
 
             <div style="padding: 30px;">
                 
-                <!-- Important Notice: 12 Hours Contact -->
-                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 16px; padding: 20px; margin-bottom: 25px;">
-                    <div style="display: flex; align-items: flex-start; gap: 12px;">
-                        <span style="font-size: 22px; flex-shrink: 0;">📞</span>
-                        <div>
-                            <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #92400e;">ملاحظة هامة</p>
-                            <p style="margin: 0; font-size: 13px; color: #78350f; line-height: 1.7;">
-                                قد يتواصل معكم أحد أفراد فريقنا خلال <b>12 ساعة</b> للتأكد من بعض تفاصيل طلبكم،
-                                نرجو الرد على أي اتصال أو رسالة واردة لضمان وصول الطلب في أسرع وقت ممكن.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Order Timeline -->
                 <div style="background: #f9f9f9; border-radius: 16px; padding: 20px; margin-bottom: 25px; border: 1px solid #f0f0f0;">
                     <h3 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 900; color: #1a1a1a;">📍 حالة طلبك الآن</h3>
