@@ -929,7 +929,7 @@ export default function ProductPage() {
                                                             catId = anyProduct?.category_id || (anyProduct?.category_ids && anyProduct.category_ids[0]);
                                                         }
                                                         
-                                                        router.push(catId ? `/shop?category=${catId}` : '/shop');
+                                                        router.push(catId ? `/search?category=${catId}` : '/search');
                                                     }}
                                                     className="inline-flex items-center gap-2 text-[var(--color-brand-primary)] font-bold text-sm bg-white border border-gray-100 px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm font-cairo"
                                                 >
