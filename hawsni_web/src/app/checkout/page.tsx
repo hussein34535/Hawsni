@@ -63,6 +63,7 @@ export default function CheckoutPage() {
     const [isCouponApplied, setIsCouponApplied] = useState(false);
     const [couponDiscount, setCouponDiscount] = useState(0);
     const [couponType, setCouponType] = useState<'percentage' | 'fixed'>('percentage');
+    const [notes, setNotes] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -251,7 +252,8 @@ export default function CheckoutPage() {
                 } : {
                     guestAlternativePhone: newAddress.alternativePhone,
                     guestEmail: guestInfo.email // Always include email if we have it
-                })
+                }),
+                notes: notes || undefined
             };
 
             const result = await checkoutService.placeOrder(orderData);
@@ -512,6 +514,24 @@ export default function CheckoutPage() {
                                     </button>
                                 )}
                             </div>
+                        </div>
+                    </section>
+ 
+                    {/* Order Notes */}
+                    <section>
+                        <div className="flex items-center gap-3 mb-5">
+                            <Plus className="w-7 h-7 text-[#0E4435]" />
+                            <h2 className="text-xl font-black text-gray-900 font-cairo">
+                                {isRTL ? 'ملاحظات إضافية' : 'Order Notes'}
+                            </h2>
+                        </div>
+                        <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
+                            <textarea
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                placeholder={isRTL ? 'مثال: رقم جرس مختلف، ملاحظة للمندوب...' : 'Example: different doorbell, instructions for driver...'}
+                                className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm min-h-[120px] resize-none"
+                            />
                         </div>
                     </section>
                 </div>

@@ -39,7 +39,7 @@ class OrderController {
 
     async createOrder(req, res) {
         try {
-            const { items, shippingAddress, paymentMethod, subtotal, discount, couponCode, guestName, guestEmail, guestPhone, guestAlternativePhone } = req.body;
+            const { items, shippingAddress, paymentMethod, subtotal, discount, couponCode, notes, guestName, guestEmail, guestPhone, guestAlternativePhone } = req.body;
 
             let finalShippingAddress = shippingAddress;
             if (typeof shippingAddress === 'string') {
@@ -66,6 +66,7 @@ class OrderController {
                 shipping_fee: req.body.shippingFee || 0,
                 discount: discount || 0,
                 coupon_code: couponCode,
+                notes: notes || null,
                 total: req.body.total || Math.max(0, subtotal - (discount || 0) + (req.body.shippingFee || 0)),
                 status: 'Processing'
             };

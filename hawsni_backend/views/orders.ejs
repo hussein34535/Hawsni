@@ -290,6 +290,13 @@
                             </div>
                         </div>
 
+                        <div id="modalNotesSection" class="detail-section" style="display: none;">
+                            <h4 class="section-title"><i class="fas fa-sticky-note"></i> ملاحظات الطلب</h4>
+                            <div class="address-card" style="border-color: #f59e0b; background: #fffcf0; padding: 15px;">
+                                <p id="modalNotesText" style="margin: 0; font-weight: 700; color: #92400e; line-height: 1.6; font-size: 0.9rem;"></p>
+                            </div>
+                        </div>
+
                         <div class="detail-section">
                             <h4 class="section-title"><i class="fas fa-credit-card"></i> طريقة الدفع</h4>
                             <div class="method-card">
@@ -406,6 +413,16 @@
             document.getElementById('modalCustomerEmail').textContent = cEmail;
             document.getElementById('modalAvatar').textContent = cName === 'غير معروف' ? '?' : cName.charAt(0).toUpperCase();
             document.getElementById('modalPaymentMethod').textContent = order.payment_method || 'Cash on Delivery';
+            
+            // Handle Order Notes
+            const notesSection = document.getElementById('modalNotesSection');
+            const notesText = document.getElementById('modalNotesText');
+            if (order.notes && order.notes.trim() !== '') {
+                notesText.textContent = order.notes;
+                notesSection.style.display = 'block';
+            } else {
+                notesSection.style.display = 'none';
+            }
 
             // Items List Overhaul
             const itemsList = document.getElementById('modalItemsList');

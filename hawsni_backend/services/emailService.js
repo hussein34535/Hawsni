@@ -507,6 +507,14 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
                             <td style="padding: 6px 0; color: #999; font-size: 12px; font-weight: 700;">التواصل</td>
                             <td style="padding: 6px 0; color: #0E4435; font-size: 14px; font-weight: 900; text-align: left; direction: ltr;">${(shippingAddress && shippingAddress.phone) || '—'}</td>
                         </tr>
+                        ${order.notes ? `
+                        <tr>
+                            <td style="padding: 12px 0 6px 0; color: #f59e0b; font-size: 11px; font-weight: 900; border-top: 1px solid #f0f0f0;" colspan="2">ملاحظات العميل:</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0 0 10px 0; color: #92400e; font-size: 13px; font-weight: 700; line-height: 1.5;" colspan="2">${order.notes}</td>
+                        </tr>
+                        ` : ''}
                     </table>
                 </div>
 

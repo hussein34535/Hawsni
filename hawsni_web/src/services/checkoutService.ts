@@ -23,6 +23,7 @@ export interface OrderData {
     guestPhone?: string;
     guestAlternativePhone?: string;
     guestEmail?: string;
+    notes?: string;
 }
 
 export const checkoutService = {
