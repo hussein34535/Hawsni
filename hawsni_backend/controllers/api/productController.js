@@ -117,21 +117,34 @@ class ProductController {
 
     async createProduct(req, res) {
         try {
-            let imageUrls = [];
+            // Helper to ensure absolute URLs
+            const ensureAbsoluteUrl = (url) => {
+                if (!url || typeof url !== 'string') return url;
+                if (url.startsWith('http')) return url;
+                const cloudName = process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'hwasibackend'; 
+                if (url.match(/^[a-z0-9_]+(\.[a-z0-9]+)?$/i)) {
+                    return `https://res.cloudinary.com/${cloudName}/image/upload/${url}`;
+                }
+                return url;
+            };
 
+            let rawImageUrls = [];
             // Priority 1: Direct URLs from Cloudinary (Direct Upload)
             if (req.body.image_urls) {
                 const urls = typeof req.body.image_urls === 'string'
                     ? JSON.parse(req.body.image_urls)
                     : req.body.image_urls;
-                imageUrls = Array.isArray(urls) ? urls : [urls];
+                rawImageUrls = Array.isArray(urls) ? urls : [urls];
             }
             // Priority 2: Traditional file upload via Multer (fallback)
             else if (req.files && req.files.length > 0) {
                 const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                 const results = await Promise.all(uploadPromises);
-                imageUrls = results.map(r => r.url);
+                rawImageUrls = results.map(r => r.url);
             }
+
+            // Sanitize all URLs
+            const imageUrls = rawImageUrls.map(ensureAbsoluteUrl).filter(url => url);
 
             let sizes = [];
             let colors = [];
@@ -464,44 +477,72 @@ class ProductController {
             console.log('📦 Raw Sizes:', req.body.sizes);
             console.log('📦 Raw Colors:', req.body.colors);
 
+            // Helper to ensure absolute URLs (Fix for ERR_CONNECTION_RESET)
+            const ensureAbsoluteUrl = (url) => {
+                if (!url || typeof url !== 'string') return url;
+                if (url.startsWith('http')) return url;
+                // If it's a relative path starting with a Cloudinary public ID, prepend the base URL
+                // We'll use a standard Cloudinary base URL if one is missing. 
+                // We can't know the exact cloud_name easily here, but we can try to find it from env
+                const cloudName = process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'hwasibackend'; 
+                if (url.match(/^[a-z0-9_]+(\.[a-z0-9]+)?$/i)) {
+                    return `https://res.cloudinary.com/${cloudName}/image/upload/${url}`;
+                }
+                return url;
+            };
+
             const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
 
-            // Handle Retained Images (deletion/persistence)
-            let imageUrls = [];
-            if (req.body.retained_images) {
-                try {
-                    imageUrls = JSON.parse(req.body.retained_images);
-                    if (!Array.isArray(imageUrls)) imageUrls = [];
-                } catch (e) {
-                    console.error('Error parsing retained images:', e);
-                    imageUrls = [];
-                }
-            } else {
-                imageUrls = currentProduct?.images || [];
-            }
+            // SOURCE OF TRUTH: The final sequence from the frontend
+            let finalImageUrls = [];
 
-            // Priority 1: Direct URLs from Cloudinary
+            // Case A: Frontend sent the final ordered sequence (Direct Upload or Sort)
             if (req.body.image_urls) {
-                const urls = typeof req.body.image_urls === 'string'
-                    ? JSON.parse(req.body.image_urls)
-                    : req.body.image_urls;
-                const newUrls = Array.isArray(urls) ? urls : [urls];
-                imageUrls = [...imageUrls, ...newUrls];
-                console.log('✅ Direct upload URLs received:', newUrls);
-            }
-            // Priority 2: Traditional Multer upload (fallback)
+                try {
+                    const urls = typeof req.body.image_urls === 'string'
+                        ? JSON.parse(req.body.image_urls)
+                        : req.body.image_urls;
+                    finalImageUrls = Array.isArray(urls) ? urls : [urls];
+                    console.log('✅ Final image sequence received (Direct/Sort):', finalImageUrls.length);
+                } catch (e) {
+                    console.error('Error parsing image_urls:', e);
+                }
+            } 
+            // Case B: Traditional files uploaded (Fallback)
             else if (req.files && req.files.length > 0) {
                 try {
+                    // Start with retained images
+                    let retained = [];
+                    if (req.body.retained_images) {
+                        retained = JSON.parse(req.body.retained_images);
+                    } else {
+                        retained = currentProduct?.images || [];
+                    }
+                    
                     const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
                     const results = await Promise.all(uploadPromises);
-                    const newImageUrls = results.map(r => r.url);
-                    console.log('✅ New images uploaded:', newImageUrls);
-                    imageUrls = [...imageUrls, ...newImageUrls];
+                    const newUploaded = results.map(r => r.url);
+                    finalImageUrls = [...retained, ...newUploaded];
+                    console.log('✅ Traditional upload added to retained:', newUploaded.length);
                 } catch (imgErr) {
                     console.error('❌ Check Cloudinary Error in Update:', imgErr);
                     return res.status(500).send(`خطأ في رفع الصور: ${imgErr.message}`);
                 }
             }
+            // Case C: Just retained images (Sort or simple edit)
+            else if (req.body.retained_images) {
+                try {
+                    finalImageUrls = JSON.parse(req.body.retained_images);
+                } catch (e) {
+                    finalImageUrls = currentProduct?.images || [];
+                }
+            } else {
+                finalImageUrls = currentProduct?.images || [];
+            }
+
+            // SANITIZATION: Fix broken relative URLs
+            let imageUrls = finalImageUrls.map(ensureAbsoluteUrl).filter(url => url);
+            console.log('🖼️ Final sanitized image count:', imageUrls.length);
 
             // Parse sizes — support Arabic comma ، and English comma ,
             let sizesArray = [];
