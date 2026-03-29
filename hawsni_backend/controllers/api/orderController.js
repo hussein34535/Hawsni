@@ -39,7 +39,7 @@ class OrderController {
 
     async createOrder(req, res) {
         try {
-            const { items, shippingAddress, paymentMethod, subtotal, discount, couponCode, guestName, guestEmail, guestPhone } = req.body;
+            const { items, shippingAddress, paymentMethod, subtotal, discount, couponCode, guestName, guestEmail, guestPhone, guestAlternativePhone } = req.body;
 
             let finalShippingAddress = shippingAddress;
             if (typeof shippingAddress === 'string') {
@@ -55,6 +55,7 @@ class OrderController {
             // Ensure name and phone are stored in the address object for guest/one-time use
             if (guestName) finalShippingAddress.name = guestName;
             if (guestPhone) finalShippingAddress.phone = guestPhone;
+            if (guestAlternativePhone) finalShippingAddress.alternative_phone = guestAlternativePhone;
             if (guestEmail) finalShippingAddress.email = guestEmail;
 
             const orderData = {

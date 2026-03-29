@@ -53,10 +53,10 @@ export default function CheckoutPage() {
     const [freeDeliveryActive, setFreeDeliveryActive] = useState(false);
     const [selectedGov, setSelectedGov] = useState('');
     const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
-    const [newAddress, setNewAddress] = useState<{ street: string; city: string; type: 'home' | 'office' | 'other' }>({ street: '', city: '', type: 'home' });
+    const [newAddress, setNewAddress] = useState<{ street: string; city: string; type: 'home' | 'office' | 'other'; alternativePhone?: string }>({ street: '', city: '', type: 'home', alternativePhone: '' });
 
     // Guest Info
-    const [guestInfo, setGuestInfo] = useState({ name: '', phone: '', email: '', street: '', city: '' });
+    const [guestInfo, setGuestInfo] = useState({ name: '', phone: '', phone2: '', email: '', street: '', city: '' });
 
     // Coupon states
     const [couponCode, setCouponCode] = useState('');
@@ -246,8 +246,10 @@ export default function CheckoutPage() {
                 ...(!isAuthenticated ? {
                     guestName: guestInfo.name,
                     guestPhone: guestInfo.phone,
+                    guestAlternativePhone: guestInfo.phone2,
                     guestEmail: guestInfo.email
                 } : {
+                    guestAlternativePhone: newAddress.alternativePhone,
                     guestEmail: guestInfo.email // Always include email if we have it
                 })
             };
@@ -308,7 +310,13 @@ export default function CheckoutPage() {
                                 <input
                                     type="tel" value={guestInfo.phone}
                                     onChange={e => setGuestInfo({ ...guestInfo, phone: e.target.value })}
-                                    placeholder={isRTL ? 'رقم الهاتف' : 'Phone Number'}
+                                    placeholder={isRTL ? 'رقم الهاتف الأساسي' : 'Primary Phone Number'}
+                                    className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
+                                />
+                                <input
+                                    type="tel" value={guestInfo.phone2}
+                                    onChange={e => setGuestInfo({ ...guestInfo, phone2: e.target.value })}
+                                    placeholder={isRTL ? 'رقم هاتف آخر (اختياري)' : 'Alternative Phone (Optional)'}
                                     className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
                                 />
                                 <input
@@ -418,7 +426,7 @@ export default function CheckoutPage() {
                                             {egyptGovernorates.map(gov => <option key={gov} value={gov}>{gov}</option>)}
                                         </select>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 mb-4">
                                         {(['home', 'office', 'other'] as const).map((type) => (
                                             <button
                                                 key={type}
@@ -430,6 +438,12 @@ export default function CheckoutPage() {
                                             </button>
                                         ))}
                                     </div>
+                                    <input
+                                        type="tel" value={newAddress.alternativePhone}
+                                        onChange={e => setNewAddress({ ...newAddress, alternativePhone: e.target.value })}
+                                        placeholder={isRTL ? 'رقم هاتف آخر (اختياري)' : 'Alternative Phone (Optional)'}
+                                        className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
+                                    />
                                 </motion.div>
                             )}
                         </div>

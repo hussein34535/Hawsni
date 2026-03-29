@@ -21,6 +21,7 @@ export interface OrderData {
     couponCode?: string;
     guestName?: string;
     guestPhone?: string;
+    guestAlternativePhone?: string;
     guestEmail?: string;
 }
 
