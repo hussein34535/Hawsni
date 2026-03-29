@@ -466,15 +466,20 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     const now = new Date();
     const timeStr = now.toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-    // Simple items summary text
-    const itemsSummary = (items || []).map(item => `${item.name} (${item.quantity})`).join('، ');
-
-    // Parse shipping address for phone
-    let address = shippingAddress;
-    if (typeof address === 'string') {
-        try { address = JSON.parse(address); } catch (e) { address = {}; }
-    }
-    address = address || {};
+    // Build items rows (re-adding for bottom section)
+    const itemsHtml = (items || []).map(item => {
+        const itemName = item.name || '—';
+        return `
+        <tr>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #444; font-size: 13px;">
+                <span style="font-weight: 700;">${itemName}</span>
+                <span style="color: #999; font-size: 11px;"> (الكمية: ${item.quantity})</span>
+            </td>
+            <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; text-align: left; font-weight: 700; color: #0E4435; font-size: 13px;">
+                ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
+            </td>
+        </tr>`;
+    }).join('');
 
     return _send({
         to: ADMIN_EMAIL,
@@ -483,8 +488,8 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
         <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 30px; overflow: hidden; border: 1px solid #f0f0f0; box-shadow: 0 15px 45px rgba(0,0,0,0.05);">
             
             <div style="background: #0E4435; padding: 40px 30px; text-align: center;">
-                <div style="background: rgba(255,255,255,0.1); width: 60px; height: 60px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;">
-                    <span style="font-size: 30px;">💰</span>
+                <div style="background: rgba(255,255,255,0.1); width: 70px; height: 70px; border-radius: 22px; margin: 0 auto 15px auto; line-height: 70px; text-align: center;">
+                    <span style="font-size: 32px; vertical-align: middle;">💰</span>
                 </div>
                 <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">وصلك طلب جديد!</h1>
                 <p style="color: rgba(255,255,255,0.6); margin: 5px 0 0 0; font-size: 13px;">رقم الطلب #${orderNumber}</p>
@@ -507,20 +512,28 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
                             <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left; direction: ltr;">${address.phone || '—'}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">المنتجات:</td>
-                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 13px; font-weight: 700; text-align: left;">${itemCount} قطع</td>
+                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">التاريخ:</td>
+                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 13px; font-weight: 700; text-align: left;">${timeStr}</td>
                         </tr>
                     </table>
                 </div>
 
-                <div style="text-align: center;">
+                <div style="text-align: center; margin-bottom: 40px;">
                     <a href="https://hwasibackend.vercel.app/orders" style="background: #0E4435; color: #ffffff; padding: 18px 40px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(14,68,53,0.2);">
                         🖥️ فتح لوحة التحكم
                     </a>
                 </div>
 
-                <p style="text-align: center; color: #ccc; font-size: 11px; margin-top: 30px;">
-                    تم الاستلام في ${timeStr} • نظام Hawsni
+                <!-- Detailed Items (At the bottom) -->
+                <div style="border-top: 2px dashed #f0f0f0; padding-top: 25px;">
+                    <h4 style="margin: 0 0 15px 0; font-size: 13px; font-weight: 900; color: #999; text-align: center;">تفاصيل المنتجات</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        ${itemsHtml}
+                    </table>
+                </div>
+
+                <p style="text-align: center; color: #bbb; font-size: 10px; margin-top: 30px;">
+                    تم الاستلام عبر نظام Hawsni • الفخامة في كل تفصيلة
                 </p>
             </div>
         </div>`
