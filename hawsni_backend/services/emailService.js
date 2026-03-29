@@ -253,11 +253,11 @@ const STATUS_CONFIG = {
         step: 1
     },
     'Shipped': {
-        ar: 'طلبك في الطريق إليك!',
+        ar: 'طلبك مع شركة الشحن الآن!',
         emoji: '🚚',
         color: '#2563eb',
         icon: '🚀',
-        message: 'طلبك اتشحن وفي الطريق! المندوب هيتواصل معاك قريب.',
+        message: 'تم تسليم طلبكم إلى شركة الشحن وهو في طريقه إليكم. ستتواصل معكم شركة الشحن قريباً لتحديد موعد التسليم.',
         step: 2
     },
     'In Transit': {
@@ -389,8 +389,26 @@ async function sendOrderStatusEmail(toEmail, userName, order, status) {
                 ` : ''}
 
                 ${(status === 'Shipped' || status === 'In Transit') ? `
+                <!-- Shipping Info Box -->
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 16px; padding: 22px; margin-bottom: 20px;">
+                    <p style="margin: 0 0 14px 0; font-size: 14px; font-weight: 900; color: #1e40af;">📋 ماذا يحدث الآن؟</p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <span style="font-size: 16px; flex-shrink: 0;">1️⃣</span>
+                            <p style="margin: 0; font-size: 13px; color: #1e3a8a; line-height: 1.6;">طلبكم تم تسليمه لشركة الشحن وهو في طريقه إليكم.</p>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <span style="font-size: 16px; flex-shrink: 0;">2️⃣</span>
+                            <p style="margin: 0; font-size: 13px; color: #1e3a8a; line-height: 1.6;">ستتواصل معكم شركة الشحن قريباً لتحديد موعد التسليم — نرجو إبقاء الهاتف متاحاً.</p>
+                        </div>
+                        <div style="display: flex; align-items: flex-start; gap: 10px;">
+                            <span style="font-size: 16px; flex-shrink: 0;">3️⃣</span>
+                            <p style="margin: 0; font-size: 13px; color: #1e3a8a; line-height: 1.6;">الدفع عند الاستلام — لا تدفع أي مبلغ مسبقاً لأي شخص.</p>
+                        </div>
+                    </div>
+                </div>
                 <!-- Track Button -->
-                <div style="text-align: center; margin: 25px 0;">
+                <div style="text-align: center; margin: 20px 0;">
                     <a href="https://hwasi.com/track-order?id=${orderId}" style="background: ${config.color}; color: #ffffff; padding: 14px 35px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 14px; display: inline-block; box-shadow: 0 4px 15px ${config.color}40;">
                         📍 تتبع طلبك
                     </a>
