@@ -281,7 +281,7 @@ const STATUS_CONFIG = {
         emoji: '❌',
         color: '#ef4444',
         icon: '⚠️',
-        message: 'تم إلغاء طلبك. لو في أي مشكلة، تواصل معانا وهنساعدك.',
+        message: 'تم إلغاء طلبك. لو عندك أي استفسار أو أردت إعادة الطلب، تواصل معنا على إنستغرام.',
         step: 0
     },
 };
@@ -416,6 +416,18 @@ async function sendOrderStatusEmail(toEmail, userName, order, status) {
                 ` : ''}
 
                 ${reviewSection}
+
+                ${status === 'Cancelled' ? `
+                <!-- Instagram Contact -->
+                <div style="background: linear-gradient(135deg, #fdf2f8, #fce7f3); border: 1px solid #f9a8d4; border-radius: 16px; padding: 22px; text-align: center; margin-top: 20px;">
+                    <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 900; color: #9d174d;">لو عندك أي استفسار، إحنا هنا</p>
+                    <p style="margin: 0 0 16px 0; font-size: 13px; color: #be185d; line-height: 1.6;">تواصل معنا على إنستغرام وهنرد عليك في أسرع وقت.</p>
+                    <a href="https://www.instagram.com/hwasi_eg" target="_blank"
+                        style="display: inline-flex; align-items: center; gap: 8px; background: #e1306c; color: #fff; padding: 12px 28px; border-radius: 50px; font-size: 14px; font-weight: 900; text-decoration: none;">
+                        📸 تواصل عبر إنستغرام @hwasi_eg
+                    </a>
+                </div>
+                ` : ''}
             </div>
 
             <!-- Footer -->
