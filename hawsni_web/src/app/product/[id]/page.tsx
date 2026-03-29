@@ -299,7 +299,7 @@ export default function ProductPage() {
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
     const reviewsRef = useRef<HTMLDivElement>(null);
-
+    const relatedSectionRef = useRef<HTMLDivElement>(null);
     const items = useCartStore((state) => state.items);
     const addItem = useCartStore((state) => state.addItem);
     const getItemCount = useCartStore((state) => state.getItemCount);
@@ -404,6 +404,20 @@ export default function ProductPage() {
             }
         }
     }, [safeImages.length]);
+
+    // Scroll to related products when they appear (after adding to cart)
+    useEffect(() => {
+        if (isInCart && relatedProducts.length > 0) {
+            // Small delay to ensure the animation has started and the element is measurable
+            const timer = setTimeout(() => {
+                relatedSectionRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 600);
+            return () => clearTimeout(timer);
+        }
+    }, [isInCart, relatedProducts.length]);
 
     // Native CSS scroll snap - no manual touch handling needed
     const galleryRef = useRef<HTMLDivElement>(null);
@@ -883,14 +897,15 @@ export default function ProductPage() {
                             <AnimatePresence>
                                 {isInCart && relatedProducts.length > 0 && (
                                     <motion.div
+                                        ref={relatedSectionRef}
                                         initial={{ opacity: 0, height: 0, y: -20, marginBottom: 0 }}
-                                        animate={{ opacity: 1, height: 'auto', y: 0, marginBottom: 24 }}
+                                        animate={{ opacity: 1, height: 'auto', y: 0, marginBottom: 32 }}
                                         exit={{ opacity: 0, height: 0, y: -20, marginBottom: 0 }}
-                                        transition={{ duration: 0.5, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                        transition={{ duration: 0.6, ease: [0.04, 0.62, 0.23, 0.98] }}
                                         className="overflow-hidden mt-8"
                                     >
-                                        <div className="p-5 border border-[var(--color-brand-primary)]/20 shadow-lg shadow-[var(--color-brand-primary)]/5 bg-gradient-to-b from-white to-[var(--color-brand-primary)]/5 rounded-3xl">
-                                            <h3 className="text-xl font-black text-gray-900 font-cairo text-center mb-5">
+                                        <div className="p-5 border border-gray-100 bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.02]">
+                                            <h3 className="text-xl font-black text-gray-900 font-cairo text-center mb-6">
                                                 {isRTL ? 'منتجات أخرى قد تعجبك' : 'Other products you might like'}
                                             </h3>
                                             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5">
@@ -901,11 +916,22 @@ export default function ProductPage() {
                                             <div className="flex justify-center">
                                                 <button 
                                                     onClick={() => {
-                                                        const anyProduct = product as any;
-                                                        const catId = anyProduct?.category_id || (anyProduct?.category_ids && anyProduct.category_ids[0]);
+                                                        let catId = '';
+                                                        if (typeof product.category === 'string') {
+                                                            catId = product.category;
+                                                        } else if (product.category && typeof product.category === 'object') {
+                                                            catId = (product.category as any)._id || (product.category as any).id;
+                                                        }
+                                                        
+                                                        // Fallback to legacy fields if not found
+                                                        if (!catId) {
+                                                            const anyProduct = product as any;
+                                                            catId = anyProduct?.category_id || (anyProduct?.category_ids && anyProduct.category_ids[0]);
+                                                        }
+                                                        
                                                         router.push(catId ? `/shop?category=${catId}` : '/shop');
                                                     }}
-                                                    className="inline-flex items-center gap-2 text-[var(--color-brand-primary)] font-bold text-sm bg-white border border-[var(--color-brand-primary)]/20 px-6 py-2.5 rounded-xl hover:bg-[var(--color-brand-primary)] hover:text-white transition-all duration-300 shadow-sm font-cairo shadow-[var(--color-brand-primary)]/20"
+                                                    className="inline-flex items-center gap-2 text-[var(--color-brand-primary)] font-bold text-sm bg-white border border-gray-100 px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm font-cairo"
                                                 >
                                                     <span>{isRTL ? 'عرض المزيد' : 'View More'}</span>
                                                     {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
