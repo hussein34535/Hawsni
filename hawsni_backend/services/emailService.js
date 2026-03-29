@@ -511,6 +511,11 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
                             <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">الهاتف:</td>
                             <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left; direction: ltr;">${address.phone || '—'}</td>
                         </tr>
+                        ${address.alternative_phone ? `
+                        <tr>
+                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">هاتف بديل:</td>
+                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left; direction: ltr;">${address.alternative_phone}</td>
+                        </tr>` : ''}
                         <tr>
                             <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">التاريخ:</td>
                             <td style="padding: 8px 0; color: #1a1a1a; font-size: 13px; font-weight: 700; text-align: left;">${timeStr}</td>

@@ -243,7 +243,8 @@
                                 <div id="modalAvatar" class="profile-avatar"></div>
                                 <div class="profile-details">
                                     <h5 id="modalCustomerName"></h5>
-                                    <p id="modalCustomerPhone" style="direction: ltr; text-align: right;"></p>
+                                    <p id="modalCustomerPhone" style="direction: ltr; text-align: right; margin-bottom: 2px;"></p>
+                                    <p id="modalCustomerPhone2" style="direction: ltr; text-align: right; font-size: 0.8rem; color: #64748b; margin-bottom: 8px; display: none;"></p>
                                     <p id="modalCustomerEmail" class="email-text"></p>
                                 </div>
                             </div>
@@ -371,6 +372,15 @@
 
             document.getElementById('modalCustomerName').textContent = cName;
             document.getElementById('modalCustomerPhone').textContent = cPhone;
+            
+            const phone2Elem = document.getElementById('modalCustomerPhone2');
+            if (ship && ship.alternative_phone) {
+                phone2Elem.textContent = 'هاتف بديل: ' + ship.alternative_phone;
+                phone2Elem.style.display = 'block';
+            } else {
+                phone2Elem.style.display = 'none';
+            }
+
             document.getElementById('modalCustomerEmail').textContent = cEmail;
             document.getElementById('modalAvatar').textContent = cName === 'غير معروف' ? '?' : cName.charAt(0).toUpperCase();
             document.getElementById('modalPaymentMethod').textContent = order.payment_method || 'Cash on Delivery';
