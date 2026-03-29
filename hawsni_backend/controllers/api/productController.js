@@ -66,6 +66,55 @@ class ProductController {
         }
     }
 
+    async getRelatedProducts(req, res) {
+        try {
+            const { id } = req.params;
+            
+            // Fetch current product to find its category
+            const current = await ProductService.getProductById(id);
+            let categoryId = current ? current.category_id : null;
+
+            // Start by trying to find other products in the same category
+            let query = supabase.from('products')
+                .select('*')
+                .neq('id', id)
+                .order('created_at', { ascending: false })
+                .limit(8);
+
+            if (categoryId) {
+                query = query.eq('category_id', categoryId);
+            }
+
+            let { data: related, error } = await query;
+            if (error) throw error;
+
+            let finalProducts = related || [];
+
+            // If we didn't find enough related products, fill with other recent/featured products
+            if (finalProducts.length < 4) {
+                const existingIds = new Set(finalProducts.map(p => p.id));
+                existingIds.add(id);
+
+                const { data: more } = await supabase.from('products')
+                    .select('*')
+                    .not('id', 'in', `(${Array.from(existingIds).join(',')})`)
+                    .order('is_featured', { ascending: false }) // Prioritize high demand/featured
+                    .order('created_at', { ascending: false })
+                    .limit(8 - finalProducts.length);
+
+                if (more && more.length > 0) {
+                    finalProducts = [...finalProducts, ...more];
+                }
+            }
+
+            const adjusted = await applyFreeDeliveryMarkup(finalProducts);
+            res.json({ success: true, products: adjusted });
+        } catch (error) {
+            console.error('Error fetching related products:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
     async createProduct(req, res) {
         try {
             let imageUrls = [];

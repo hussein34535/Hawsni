@@ -34,5 +34,14 @@ export const productService = {
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to load featured products';
         }
+    },
+
+    getRelatedProducts: async (id: string): Promise<{ success: boolean; products: Product[] }> => {
+        try {
+            const response = await apiClient.get(`/products/${id}/related`);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to load related products';
+        }
     }
 };

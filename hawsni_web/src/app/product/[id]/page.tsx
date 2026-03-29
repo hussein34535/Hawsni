@@ -163,6 +163,7 @@ const SizeGuideModal = dynamic(() => import('@/components/product/SizeGuideModal
 const VirtualTryOnModal = dynamic(() => import('@/components/product/VirtualTryOnModal'), { ssr: false });
 import { FreeDeliveryBanner } from '@/components/products/FreeDeliveryBanner';
 const ImageLightbox = dynamic(() => import('@/components/common/ImageLightbox'), { ssr: false });
+import ProductCard from '@/components/products/ProductCard';
 
 const formatImageUrl = (url: string) => {
     if (!url) return '';
@@ -286,6 +287,7 @@ export default function ProductPage() {
     const { showToast } = useToastStore();
 
     const [product, setProduct] = useState<Product | null>(null);
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -357,7 +359,19 @@ export default function ProductPage() {
             }
         };
 
-        if (productId) fetchProduct();
+        const fetchRelated = async () => {
+            try {
+                const res = await productService.getRelatedProducts(productId);
+                if (res.success) setRelatedProducts(res.products);
+            } catch (error) {
+                console.error('Failed to fetch related products:', error);
+            }
+        };
+
+        if (productId) {
+            fetchProduct();
+            fetchRelated();
+        }
 
         const checkWishlist = async () => {
             try {
@@ -948,6 +962,28 @@ export default function ProductPage() {
                     </button>
                 </motion.div>
             </div>
+
+            {/* Related / High Demand Products Section */}
+            {relatedProducts.length > 0 && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-24">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 font-cairo">
+                                {isRTL ? 'منتجات ذات صلة' : 'Related Products'}
+                            </h2>
+                            <p className="text-gray-500 mt-2 font-cairo text-sm sm:text-base">
+                                {isRTL ? 'قد تنال إعجابك أيضاً' : 'You might also like'}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                        {relatedProducts.map((p) => (
+                            <ProductCard key={p.id || p._id} product={p} />
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Size Guide Bottom Sheet Modal */}
             <SizeGuideModal

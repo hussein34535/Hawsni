@@ -23,6 +23,11 @@ router.get('/featured', ProductController.getFeatured);
 // @access  Public
 router.get('/:id', ProductController.getProduct);
 
+// @route   GET /api/products/:id/related
+// @desc    Get related products (high demand / same category)
+// @access  Public
+router.get('/:id/related', ProductController.getRelatedProducts);
+
 // @route   POST /api/products
 // @desc    Create product (Admin only)
 // @access  Private/Admin
