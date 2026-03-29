@@ -47,8 +47,8 @@
                     <select id="bulkStatusSelect" class="form-control" style="width: auto; height: 38px;">
                         <option value="">-- تغيير الحالة --</option>
                         <option value="Processing">قيد المعالجة</option>
-                        <option value="Shipped">تم الشحن</option>
-                        <option value="In Transit">في الطريق</option>
+                        <option value="Shipped">مع شركة الشحن</option>
+                        <option value="In Transit">مع المندوب</option>
                         <option value="Delivered">تم التوصيل</option>
                         <option value="Cancelled">ملغي</option>
                     </select>
@@ -88,8 +88,8 @@
                                 if (typeof ship==='string' && ship.trim() !=='' ) { cAddr=ship; } const
                                 sMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'In Transit' : 'info'
                                 , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; const sClass=sMap[order.status]
-                                || 'warning' ; const tMap={ 'Processing' : 'قيد المعالجة' , 'Shipped' : 'تم الشحن'
-                                , 'In Transit' : 'في الطريق' , 'Delivered' : 'تم التوصيل' , 'Cancelled' : 'ملغي' };
+                                || 'warning' ; const tMap={ 'Processing' : 'قيد المعالجة' , 'Shipped' : 'مع شركة الشحن'
+                                , 'In Transit' : 'مع المندوب' , 'Delivered' : 'تم التوصيل' , 'Cancelled' : 'ملغي' };
                                 const displayStatus=tMap[order.status] || order.status; %>
                                 <tr id="row-<%= order.id %>" class="order-row"
                                     onclick="showOrderDetails('<%= order.id %>')">
@@ -157,9 +157,9 @@
                                                     <option value="Processing" <%=order.status==='Processing'
                                                         ? 'selected' : '' %>>قيد المعالجة</option>
                                                     <option value="Shipped" <%=order.status==='Shipped' ? 'selected'
-                                                        : '' %>>تم الشحن</option>
+                                                        : '' %>>مع شركة الشحن</option>
                                                     <option value="In Transit" <%=order.status==='In Transit'
-                                                        ? 'selected' : '' %>>في الطريق</option>
+                                                        ? 'selected' : '' %>>مع المندوب</option>
                                                     <option value="Delivered" <%=order.status==='Delivered' ? 'selected'
                                                         : '' %>>تم التوصيل</option>
                                                     <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected'
@@ -200,6 +200,13 @@
                     <p id="modalOrderDate" class="modal-subtitle"></p>
                 </div>
                 <div class="header-actions">
+                    <select id="modalStatusSelect" class="status-select" onchange="changeModalStatus(this.value)" style="margin-left: 10px;">
+                        <option value="Processing">قيد المعالجة</option>
+                        <option value="Shipped">مع شركة الشحن</option>
+                        <option value="In Transit">مع المندوب</option>
+                        <option value="Delivered">تم التوصيل</option>
+                        <option value="Cancelled">ملغي</option>
+                    </select>
                     <div id="modalStatusBadge" class="badge"></div>
                     <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
                 </div>
@@ -310,8 +317,8 @@
         };
         const tMap = {
             'Processing': 'قيد المعالجة',
-            'Shipped': 'تم الشحن',
-            'In Transit': 'في الطريق',
+            'Shipped': 'مع شركة الشحن',
+            'In Transit': 'مع المندوب',
             'Delivered': 'تم التوصيل',
             'Cancelled': 'ملغي'
         };
@@ -338,8 +345,15 @@
             });
 
             const statusBadge = document.getElementById('modalStatusBadge');
-            statusBadge.textContent = tMap[order.status] || order.status || 'قيد المعالجة';
+            const statusText = tMap[order.status] || order.status || 'قيد المعالجة';
+            statusBadge.textContent = statusText;
             statusBadge.className = 'badge badge-' + (sMap[order.status] || 'warning');
+
+            const statusSelect = document.getElementById('modalStatusSelect');
+            if (statusSelect) {
+                statusSelect.value = order.status || 'Processing';
+                statusSelect.className = 'status-select select-' + (sMap[order.status] || 'warning');
+            }
 
             // Customer Details logic
             let cName = 'غير معروف';
@@ -438,6 +452,65 @@
 
             document.getElementById('orderModal').classList.add('active');
             document.body.style.overflow = 'hidden';
+        }
+
+        async function changeModalStatus(newStatus) {
+            if (!currentOrderId) return;
+            const statusSelect = document.getElementById('modalStatusSelect');
+            const statusBadge = document.getElementById('modalStatusBadge');
+            const originalStatus = statusSelect.value;
+            
+            // Show loading state
+            statusSelect.disabled = true;
+            statusBadge.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحديث...';
+            
+            try {
+                const res = await fetch(`/orders/${currentOrderId}/status`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Update order in ordersData local cache
+                    const orderIdx = ordersData.findIndex(o => o.id === currentOrderId);
+                    if (orderIdx > -1) ordersData[orderIdx].status = newStatus;
+                    
+                    // Update Modal UI
+                    statusBadge.textContent = tMap[newStatus] || newStatus;
+                    statusBadge.className = 'badge badge-' + (sMap[newStatus] || 'warning');
+                    statusSelect.className = 'status-select select-' + (sMap[newStatus] || 'warning');
+                    
+                    // Optional: update the row in the main table behind the modal
+                    const row = document.getElementById(`row-${currentOrderId}`);
+                    if (row) {
+                        const rowBadge = row.querySelector('.badge');
+                        if (rowBadge) {
+                            rowBadge.textContent = tMap[newStatus] || newStatus;
+                            rowBadge.className = 'badge badge-' + (sMap[newStatus] || 'warning');
+                        }
+                        const rowSelect = row.querySelector('.status-select');
+                        if (rowSelect) {
+                            rowSelect.value = newStatus;
+                            rowSelect.className = 'status-select select-' + (sMap[newStatus] || 'warning');
+                        }
+                    }
+                } else {
+                    alert('خطأ: ' + (data.message || 'فشل التحديث'));
+                    statusSelect.value = originalStatus;
+                }
+            } catch (err) {
+                console.error('Update status error:', err);
+                alert('حدث خطأ في الاتصال');
+                statusSelect.value = originalStatus;
+            } finally {
+                statusSelect.disabled = false;
+            }
         }
 
         function closeModal(event) {

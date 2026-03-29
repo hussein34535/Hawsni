@@ -63,10 +63,14 @@ class OrdersController {
 
             if (error) throw error;
 
-            // Step 2: redirect immediately so admin isn't blocked
-            res.redirect('/orders');
+            // Step 2: respond based on request type
+            if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+                res.json({ success: true, message: 'تم تحديث الحالة بنجاح' });
+            } else {
+                res.redirect('/orders');
+            }
 
-            // Step 3: send email in background (non-blocking, after redirect)
+            // Step 3: send email in background (non-blocking)
             supabase
                 .from('orders')
                 .select(`*, users(name, email), order_items(*, products(id, name, images))`)
