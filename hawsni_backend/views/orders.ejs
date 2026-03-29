@@ -47,8 +47,7 @@
                     <select id="bulkStatusSelect" class="form-control" style="width: auto; height: 38px;">
                         <option value="">-- تغيير الحالة --</option>
                         <option value="Processing">قيد المعالجة</option>
-                        <option value="Shipped">مع شركة الشحن</option>
-                        <option value="In Transit">مع المندوب</option>
+                        <option value="In Transit">مع شركة الشحن</option>
                         <option value="Delivered">تم التوصيل</option>
                         <option value="Cancelled">ملغي</option>
                     </select>
@@ -86,10 +85,10 @@
                                 !==null) { cName=ship.name || ship.guestName || cName; cPhone=ship.phone ||
                                 ship.guestPhone || cPhone; cAddr=ship.address || ship.shippingAddress || cAddr; } else
                                 if (typeof ship==='string' && ship.trim() !=='' ) { cAddr=ship; } const
-                                sMap={ 'Processing' : 'warning' , 'Shipped' : 'info' , 'In Transit' : 'info'
+                                sMap={ 'Processing' : 'warning', 'In Transit' : 'info'
                                 , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; const sClass=sMap[order.status]
-                                || 'warning' ; const tMap={ 'Processing' : 'قيد المعالجة' , 'Shipped' : 'مع شركة الشحن'
-                                , 'In Transit' : 'مع المندوب' , 'Delivered' : 'تم التوصيل' , 'Cancelled' : 'ملغي' };
+                                || 'warning' ; const tMap={ 'Processing' : 'قيد المعالجة'
+                                , 'In Transit' : 'مع شركة الشحن' , 'Delivered' : 'تم التوصيل' , 'Cancelled' : 'ملغي' };
                                 const displayStatus=tMap[order.status] || order.status; %>
                                 <tr id="row-<%= order.id %>" class="order-row"
                                     onclick="showOrderDetails('<%= order.id %>')">
@@ -164,10 +163,8 @@
                                                     onchange="this.form.submit()">
                                                     <option value="Processing" <%=order.status==='Processing'
                                                         ? 'selected' : '' %>>قيد المعالجة</option>
-                                                    <option value="Shipped" <%=order.status==='Shipped' ? 'selected'
-                                                        : '' %>>مع شركة الشحن</option>
                                                     <option value="In Transit" <%=order.status==='In Transit'
-                                                        ? 'selected' : '' %>>مع المندوب</option>
+                                                        ? 'selected' : '' %>>مع شركة الشحن</option>
                                                     <option value="Delivered" <%=order.status==='Delivered' ? 'selected'
                                                         : '' %>>تم التوصيل</option>
                                                     <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected'
@@ -210,8 +207,7 @@
                 <div class="header-actions">
                     <select id="modalStatusSelect" class="status-select" onchange="changeModalStatus(this.value)" style="margin-left: 10px;">
                         <option value="Processing">قيد المعالجة</option>
-                        <option value="Shipped">مع شركة الشحن</option>
-                        <option value="In Transit">مع المندوب</option>
+                        <option value="In Transit">مع شركة الشحن</option>
                         <option value="Delivered">تم التوصيل</option>
                         <option value="Cancelled">ملغي</option>
                     </select>
@@ -325,15 +321,13 @@
         const ordersData = JSON.parse(document.getElementById('orders-data').textContent || '[]');
         const sMap = {
             'Processing': 'warning',
-            'Shipped': 'info',
             'In Transit': 'info',
             'Delivered': 'success',
             'Cancelled': 'danger'
         };
         const tMap = {
             'Processing': 'قيد المعالجة',
-            'Shipped': 'مع شركة الشحن',
-            'In Transit': 'مع المندوب',
+            'In Transit': 'مع شركة الشحن',
             'Delivered': 'تم التوصيل',
             'Cancelled': 'ملغي'
         };
