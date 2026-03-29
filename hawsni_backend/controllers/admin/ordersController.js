@@ -69,51 +69,61 @@ class OrdersController {
             const { id } = req.params;
             const { status } = req.body;
 
-            // Step 1: simple update — fast, no joins
-            const { error } = await supabase
+            // Update and retrieve full data in ONE query
+            const { data: order, error } = await supabase
                 .from('orders')
                 .update({ status })
-                .eq('id', id);
+                .eq('id', id)
+                .select(`
+                    *,
+                    users(name, email),
+                    order_items(
+                        *,
+                        products(id, name, images)
+                    )
+                `)
+                .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error(`Status Update Error for Order ${id}:`, error);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: `خطأ في تحديث الحالة: ${error.message || 'فشل الاتصال بقاعدة البيانات'}` 
+                });
+            }
 
-            // Step 2: respond based on request type
+            // Respond to client immediately
             if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
                 res.json({ success: true, message: 'تم تحديث الحالة بنجاح' });
             } else {
                 res.redirect('/orders');
             }
 
-            // Step 3: send email in background (non-blocking)
-            supabase
-                .from('orders')
-                .select(`*, users(name, email), order_items(*, products(id, name, images))`)
-                .eq('id', id)
-                .single()
-                .then(({ data }) => {
-                    if (!data) return;
-                    let customerEmail = data.users?.email;
-                    let customerName = data.users?.name;
-                    if (!customerEmail) {
-                        let ship = data.shipping_address;
-                        if (typeof ship === 'string' && ship.trim().startsWith('{')) {
-                            try { ship = JSON.parse(ship); } catch (e) { }
-                        }
-                        if (typeof ship === 'object' && ship !== null) {
-                            customerEmail = ship.email || ship.guestEmail;
-                            customerName = customerName || ship.name || ship.guestName;
-                        }
+            // Send notification in background
+            if (order) {
+                let customerEmail = order.users?.email;
+                let customerName = order.users?.name;
+
+                if (!customerEmail) {
+                    let ship = order.shipping_address;
+                    if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                        try { ship = JSON.parse(ship); } catch (e) { }
                     }
-                    if (customerEmail) {
-                        emailService.sendOrderStatusEmail(customerEmail, customerName || 'عميلنا العزيز', data, status)
-                            .catch(err => console.error('Failed to send status email:', err));
+                    if (typeof ship === 'object' && ship !== null) {
+                        customerEmail = ship.email || ship.guestEmail;
+                        customerName = customerName || ship.name || ship.guestName;
                     }
-                })
-                .catch(err => console.error('Error fetching order for email:', err));
+                }
+
+                if (customerEmail) {
+                    emailService.sendOrderStatusEmail(customerEmail, customerName || 'عميلنا العزيز', order, status)
+                        .catch(err => console.error('Background Email Error:', err));
+                }
+            }
 
         } catch (err) {
-            console.error('Error updating order status:', err);
-            res.status(500).send('خطأ في تحديث حالة الطلب');
+            console.error('Critical Controller Error:', err);
+            res.status(500).send('خطأ تقني في معالجة طلب تحديث الحالة');
         }
     }
 
