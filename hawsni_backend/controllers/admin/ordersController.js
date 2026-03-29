@@ -2,59 +2,45 @@ const supabase = require('../../config/supabase');
 const emailService = require('../../services/emailService');
 
 class OrdersController {
-    // List all orders
+    // List all orders - single query with join (no N+1 problem)
     async index(req, res) {
         try {
-            // Fetch orders
             const { data: orders, error: ordersError } = await supabase
                 .from('orders')
-                .select('*, users(name, phone)')
+                .select(`
+                    *,
+                    users(name, phone, email),
+                    order_items(
+                        *,
+                        products(id, name, images, price)
+                    )
+                `)
                 .order('created_at', { ascending: false });
 
             if (ordersError) throw ordersError;
 
-            // For each order, fetch order items with product details
-            const ordersWithProducts = await Promise.all(
-                (orders || []).map(async (order) => {
-                    // Pre-parse shipping_address if it's a JSON string
-                    if (typeof order.shipping_address === 'string' && order.shipping_address.trim().startsWith('{')) {
-                        try {
-                            order.shipping_address = JSON.parse(order.shipping_address);
-                        } catch (e) {
-                            console.error('Error parsing shipping_address:', e);
-                        }
-                    }
+            const ordersWithProducts = (orders || []).map(order => {
+                // Pre-parse shipping_address if it's a JSON string
+                if (typeof order.shipping_address === 'string' && order.shipping_address.trim().startsWith('{')) {
+                    try { order.shipping_address = JSON.parse(order.shipping_address); } catch (e) { }
+                }
 
-                    const { data: items, error: itemsError } = await supabase
-                        .from('order_items')
-                        .select(`
-                            *,
-                            products (
-                                id,
-                                name,
-                                images,
-                                price
-                            )
-                        `)
-                        .eq('order_id', order.id);
+                const items = order.order_items || [];
+                if (items.length > 0) {
+                    const firstProduct = items[0].products;
+                    order.product_image = items[0].image_url || firstProduct?.images?.[0] || null;
+                    order.product_name = firstProduct?.name || items[0].name || 'منتج غير معروف';
+                    order.items_count = items.length;
+                    order.items = items;
+                } else {
+                    order.product_image = null;
+                    order.product_name = 'منتج';
+                    order.items_count = 0;
+                    order.items = [];
+                }
 
-                    if (!itemsError && items && items.length > 0) {
-                        // Get the first product image for the order thumbnail
-                        const firstProduct = items[0].products;
-                        order.product_image = items[0].image_url || firstProduct?.images?.[0] || null;
-                        order.product_name = firstProduct?.name || items[0].name || 'منتج غير معروف';
-                        order.items_count = items.length;
-                        order.items = items;
-                    } else {
-                        order.product_image = null;
-                        order.product_name = 'منتج';
-                        order.items_count = 0;
-                        order.items = [];
-                    }
-
-                    return order;
-                })
-            );
+                return order;
+            });
 
             res.render('orders', { orders: ordersWithProducts });
         } catch (err) {
