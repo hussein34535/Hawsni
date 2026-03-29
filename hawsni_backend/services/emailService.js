@@ -466,6 +466,13 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     const now = new Date();
     const timeStr = now.toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
 
+    // Safely parse shipping address
+    let address = shippingAddress;
+    if (typeof address === 'string' && address.startsWith('{')) {
+        try { address = JSON.parse(address); } catch (e) { address = {}; }
+    }
+    if (!address || typeof address !== 'object') address = {};
+
     // Build items rows (re-adding for bottom section)
     const itemsHtml = (items || []).map(item => {
         const itemName = item.name || '—';
