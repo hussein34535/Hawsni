@@ -465,35 +465,11 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     const itemCount = (items || []).length;
     const now = new Date();
     const timeStr = now.toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
-    const dateStr = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-    // Build items rows
-    const itemsHtml = (items || []).map(item => {
-        const itemName = item.name || '—';
-        let itemImage = item.image_url || item.imageUrl || (item.products && item.products.images && item.products.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?';
+    // Simple items summary text
+    const itemsSummary = (items || []).map(item => `${item.name} (${item.quantity})`).join('، ');
 
-        // Final sanity check for placeholder
-        if (itemImage === '/placeholder.png' && item.products && item.products.images && item.products.images.length > 0) {
-            itemImage = item.products.images[0];
-        }
-
-        return `
-        <tr>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; width: 50px;">
-                <img src="${itemImage}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;" alt="${itemName}">
-            </td>
-            <td style="padding: 12px 10px; border-bottom: 1px solid #f5f5f5;">
-                <span style="font-weight: 800; color: #1a1a1a; font-size: 14px;">${itemName}</span>
-                <br><span style="color: #999; font-size: 11px;">الكمية: ${item.quantity} ${item.size ? '| المقاس: ' + item.size : ''} ${item.color ? '| اللون: ' + item.color : ''}</span>
-            </td>
-            <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; text-align: left; font-weight: 900; color: #0E4435; font-size: 14px; white-space: nowrap;">
-                ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
-            </td>
-        </tr>
-    `;
-    }).join('');
-
-    // Parse shipping address
+    // Parse shipping address for phone
     let address = shippingAddress;
     if (typeof address === 'string') {
         try { address = JSON.parse(address); } catch (e) { address = {}; }
@@ -504,88 +480,48 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
         to: ADMIN_EMAIL,
         subject: `💰 طلب جديد #${orderNumber} — ${Number(total).toLocaleString()} ج.م`,
         htmlContent: `
-        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #e8e8e8; box-shadow: 0 20px 60px rgba(0,0,0,0.08);">
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 30px; overflow: hidden; border: 1px solid #f0f0f0; box-shadow: 0 15px 45px rgba(0,0,0,0.05);">
             
-            <!-- Header: Banner -->
-            <div style="background: linear-gradient(135deg, #0E4435 0%, #1a6b54 50%, #0E4435 100%); padding: 40px 30px; text-align: center; position: relative;">
-                <div style="font-size: 50px; margin-bottom: 8px;">🛒</div>
-                <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px;">طلب من ${customerName || 'عميل'}!</h1>
-                <p style="color: rgba(255,255,255,0.7); margin: 8px 0 0 0; font-size: 14px; font-weight: 600;">لديك طلب جديد ينتظر المراجعة</p>
-            </div>
-
-            <!-- Big Money Amount -->
-            <div style="background: #f8fdf9; padding: 30px; text-align: center; border-bottom: 2px solid #0E4435;">
-                <p style="color: #666; font-size: 13px; margin: 0 0 8px 0; font-weight: 700;">إجمالي الطلب</p>
-                <div style="font-size: 48px; font-weight: 900; color: #0E4435; letter-spacing: -1px; line-height: 1;">
-                    ${Number(total).toLocaleString()}
-                    <span style="font-size: 20px; color: #1a6b54;"> ج.م</span>
+            <div style="background: #0E4435; padding: 40px 30px; text-align: center;">
+                <div style="background: rgba(255,255,255,0.1); width: 60px; height: 60px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                    <span style="font-size: 30px;">💰</span>
                 </div>
-                <div style="margin-top: 15px; display: inline-block;">
-                    <span style="background: #0E4435; color: #fff; padding: 6px 16px; border-radius: 50px; font-size: 12px; font-weight: 800;">
-                        🧾 طلب #${orderNumber}
-                    </span>
-                </div>
+                <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">وصلك طلب جديد!</h1>
+                <p style="color: rgba(255,255,255,0.6); margin: 5px 0 0 0; font-size: 13px;">رقم الطلب #${orderNumber}</p>
             </div>
 
             <div style="padding: 30px;">
-                
-                <!-- Customer Info -->
-                <div style="background: #f9f9f9; border-radius: 16px; padding: 20px; margin-bottom: 25px; border: 1px solid #f0f0f0;">
-                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                        <span style="font-size: 18px; margin-left: 8px;">👤</span>
-                        <h3 style="margin: 0; font-size: 15px; font-weight: 900; color: #1a1a1a;">بيانات العميل</h3>
-                    </div>
-                    <table style="width: 100%; font-size: 14px; color: #444;">
-                        <tr>
-                            <td style="padding: 5px 0; font-weight: 700; color: #999; width: 80px;">الاسم</td>
-                            <td style="padding: 5px 0; font-weight: 800;">${customerName || '—'}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 5px 0; font-weight: 700; color: #999;">الإيميل</td>
-                            <td style="padding: 5px 0; font-weight: 600;">${customerEmail || 'زائر'}</td>
-                        </tr>
-                        ${address.phone ? `<tr>
-                            <td style="padding: 5px 0; font-weight: 700; color: #999;">الهاتف</td>
-                            <td style="padding: 5px 0; font-weight: 800; direction: ltr; text-align: right;">${address.phone}</td>
-                        </tr>` : ''}
-                    </table>
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <p style="color: #999; font-size: 12px; font-weight: 800; margin-bottom: 5px; text-transform: uppercase;">إجمالي المبلغ</p>
+                    <h2 style="color: #0E4435; font-size: 42px; font-weight: 900; margin: 0;">${Number(total).toLocaleString()} <span style="font-size: 16px;">ج.م</span></h2>
                 </div>
 
-                <!-- Order Items -->
-                <div style="margin-bottom: 25px;">
-                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                        <span style="font-size: 18px; margin-left: 8px;">📦</span>
-                        <h3 style="margin: 0; font-size: 15px; font-weight: 900; color: #1a1a1a;">المنتجات (${itemCount})</h3>
-                    </div>
+                <div style="background: #fcfcfc; border: 1px solid #f5f5f5; border-radius: 20px; padding: 20px; margin-bottom: 30px;">
                     <table style="width: 100%; border-collapse: collapse;">
-                        ${itemsHtml || '<tr><td style="color: #999; padding: 10px 0;">لا توجد تفاصيل</td></tr>'}
+                        <tr>
+                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">العميل:</td>
+                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left;">${customerName || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">الهاتف:</td>
+                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left; direction: ltr;">${address.phone || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">المنتجات:</td>
+                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 13px; font-weight: 700; text-align: left;">${itemCount} قطع</td>
+                        </tr>
                     </table>
                 </div>
 
-                <!-- Shipping Address -->
-                ${address.address || address.city ? `
-                <div style="background: #f9f9f9; border-radius: 16px; padding: 20px; margin-bottom: 25px; border: 1px solid #f0f0f0;">
-                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
-                        <span style="font-size: 18px; margin-left: 8px;">📍</span>
-                        <h3 style="margin: 0; font-size: 15px; font-weight: 900; color: #1a1a1a;">عنوان التوصيل</h3>
-                    </div>
-                    <p style="color: #444; font-size: 14px; line-height: 1.7; margin: 0; font-weight: 600;">
-                        ${address.address || ''}${address.area ? '، ' + address.area : ''}${address.city ? '، ' + address.city : ''}${address.governorate ? '، ' + address.governorate : ''}
-                    </p>
+                <div style="text-align: center;">
+                    <a href="https://hwasibackend.vercel.app/orders" style="background: #0E4435; color: #ffffff; padding: 18px 40px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(14,68,53,0.2);">
+                        🖥️ فتح لوحة التحكم
+                    </a>
                 </div>
-                ` : ''}
 
-                <!-- Payment Info -->
-                <div style="background: linear-gradient(135deg, #0E4435, #1a6b54); border-radius: 16px; padding: 20px; text-align: center;">
-                    <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin: 0 0 5px 0; font-weight: 700;">طريقة الدفع</p>
-                    <p style="color: #fff; font-size: 16px; font-weight: 900; margin: 0;">💵 الدفع عند الاستلام</p>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div style="background: #f5f5f5; padding: 20px 30px; text-align: center; border-top: 1px solid #eee;">
-                <p style="color: #0E4435; font-size: 13px; font-weight: 900; margin: 0 0 5px 0;">Hawsni — Premium Fashion ✨</p> 
-                <p style="color: #aaa; font-size: 11px; margin: 0;">${dateStr} • ${timeStr}</p>
+                <p style="text-align: center; color: #ccc; font-size: 11px; margin-top: 30px;">
+                    تم الاستلام في ${timeStr} • نظام Hawsni
+                </p>
             </div>
         </div>`
     });
