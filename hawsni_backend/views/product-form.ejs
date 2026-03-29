@@ -888,7 +888,7 @@
         }
 
         function rgbToHex(r, g, b) {
-            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toLowerCase();
         }
 
         // Colors Rendering
@@ -938,17 +938,27 @@
             if (!c) return;
 
             // Load into picker
-            document.getElementById('colorPicker').value = c.color;
+            document.getElementById('colorPicker').value = c.color.toLowerCase();
             
             // Load image mapping
             selectImage(c.imageIndex, (c.imageIndex !== null && imageState[c.imageIndex]) ? imageState[c.imageIndex].url : null);
             
-            // Visual feedback
+            // Visual feedback - highlight the active swatch
             const container = document.getElementById('colorsContainer');
             Array.from(container.children).forEach((child, i) => {
-                child.style.background = (i === index) ? '#e9ecef' : '#f8f9fa';
-                child.style.borderColor = (i === index) ? 'var(--primary)' : '#ddd';
+                if (i === index) {
+                    child.style.background = '#eef2ff';
+                    child.style.borderColor = 'var(--primary)';
+                    child.style.boxShadow = '0 0 0 2px rgba(79, 70, 229, 0.2)';
+                } else {
+                    child.style.background = '#f8f9fa';
+                    child.style.borderColor = '#ddd';
+                    child.style.boxShadow = 'none';
+                }
             });
+            
+            // Scroll to picker for better visibility
+            document.getElementById('colorPicker').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function removeColor(index) {
@@ -959,24 +969,37 @@
 
         function addColor() {
             const picker = document.getElementById('colorPicker');
-            const color = picker.value;
-            // Add logic similar to original
+            const color = picker.value.toLowerCase(); // Standardize to lowercase
+            
             let imageId = null;
             if (selectedImageIndex !== null && imageState[selectedImageIndex]) {
                 imageId = imageState[selectedImageIndex].id;
             }
 
-            const exists = colors.find(c => c.color === color);
+            // Check if color already exists (case-insensitive)
+            const exists = colors.find(c => c.color.toLowerCase() === color);
             if (exists) {
                 exists.imageIndex = selectedImageIndex;
                 exists.imageId = imageId;
+                exists.color = color; // Sync with picker value
             } else {
                 colors.push({ color, imageIndex: selectedImageIndex, imageId });
             }
 
+            // Reset selection state
             selectedImageIndex = null;
             document.getElementById('selectedImagePreview').style.display = 'none';
             document.getElementById('noImageButton').style.display = 'block';
+            
+            // Reset visual feedback on swatches
+            const container = document.getElementById('colorsContainer');
+            if (container) {
+                Array.from(container.children).forEach(child => {
+                    child.style.background = '#f8f9fa';
+                    child.style.borderColor = '#ddd';
+                    child.style.boxShadow = 'none';
+                });
+            }
 
             updateColorsInput();
             renderColors();

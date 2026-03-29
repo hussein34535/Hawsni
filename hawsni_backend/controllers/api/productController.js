@@ -478,20 +478,28 @@ class ProductController {
             console.log('📦 Raw Colors:', req.body.colors);
 
             // Helper to ensure absolute URLs (Fix for ERR_CONNECTION_RESET)
-            const ensureAbsoluteUrl = (url) => {
+            const ensureAbsoluteUrl = (url, cloudName = 'hwasibackend') => {
                 if (!url || typeof url !== 'string') return url;
                 if (url.startsWith('http')) return url;
                 // If it's a relative path starting with a Cloudinary public ID, prepend the base URL
-                // We'll use a standard Cloudinary base URL if one is missing. 
-                // We can't know the exact cloud_name easily here, but we can try to find it from env
-                const cloudName = process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'hwasibackend'; 
                 if (url.match(/^[a-z0-9_]+(\.[a-z0-9]+)?$/i)) {
                     return `https://res.cloudinary.com/${cloudName}/image/upload/${url}`;
                 }
                 return url;
             };
 
+            // 1. Get current product data
             const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
+
+            // 2. Identify the correct Cloudinary account from existing data
+            let detectedCloudName = process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'hwasibackend';
+            const allPossibleImages = [...(currentProduct?.images || []), ...(req.body.image_urls ? (typeof req.body.image_urls === 'string' ? JSON.parse(req.body.image_urls) : req.body.image_urls) : [])];
+            const sampleUrl = allPossibleImages.find(u => typeof u === 'string' && u.includes('res.cloudinary.com/'));
+            if (sampleUrl) {
+                const match = sampleUrl.match(/res\.cloudinary\.com\/([^/]+)\//);
+                if (match && match[1]) detectedCloudName = match[1];
+            }
+            console.log('☁️ Detected Cloudinary Name:', detectedCloudName);
 
             // SOURCE OF TRUTH: The final sequence from the frontend
             let finalImageUrls = [];
@@ -540,8 +548,8 @@ class ProductController {
                 finalImageUrls = currentProduct?.images || [];
             }
 
-            // SANITIZATION: Fix broken relative URLs
-            let imageUrls = finalImageUrls.map(ensureAbsoluteUrl).filter(url => url);
+            // SANITIZATION: Fix broken relative URLs using the detected cloud name
+            let imageUrls = finalImageUrls.map(url => ensureAbsoluteUrl(url, detectedCloudName)).filter(url => url);
             console.log('🖼️ Final sanitized image count:', imageUrls.length);
 
             // Parse sizes — support Arabic comma ، and English comma ,

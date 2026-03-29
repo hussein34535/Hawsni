@@ -20,26 +20,40 @@ class OrdersController {
             if (ordersError) throw ordersError;
 
             const ordersWithProducts = (orders || []).map(order => {
-                // Pre-parse shipping_address if it's a JSON string
-                if (typeof order.shipping_address === 'string' && order.shipping_address.trim().startsWith('{')) {
-                    try { order.shipping_address = JSON.parse(order.shipping_address); } catch (e) { }
-                }
+                try {
+                    // Pre-parse shipping_address if it's a JSON string
+                    if (typeof order.shipping_address === 'string' && order.shipping_address.trim().startsWith('{')) {
+                        try { order.shipping_address = JSON.parse(order.shipping_address); } catch (e) { }
+                    }
 
-                const items = order.order_items || [];
-                if (items.length > 0) {
-                    const firstProduct = items[0].products;
-                    order.product_image = items[0].image_url || firstProduct?.images?.[0] || null;
-                    order.product_name = firstProduct?.name || items[0].name || 'منتج غير معروف';
-                    order.items_count = items.length;
-                    order.items = items;
-                } else {
-                    order.product_image = null;
-                    order.product_name = 'منتج';
-                    order.items_count = 0;
-                    order.items = [];
-                }
+                    // Safety: Ensure total is a number
+                    order.total = parseFloat(order.total || 0);
 
-                return order;
+                    const items = order.order_items || [];
+                    if (items.length > 0) {
+                        const firstItem = items[0];
+                        const firstProduct = firstItem.products;
+                        order.product_image = firstItem.image_url || firstProduct?.images?.[0] || null;
+                        order.product_name = firstProduct?.name || firstItem.name || 'منتج غير معروف';
+                        order.items_count = items.length;
+                        
+                        // Ensure all item prices are numbers
+                        order.items = items.map(item => ({
+                            ...item,
+                            price: parseFloat(item.price || 0)
+                        }));
+                    } else {
+                        order.product_image = null;
+                        order.product_name = 'طلب بدون منتجات';
+                        order.items_count = 0;
+                        order.items = [];
+                    }
+
+                    return order;
+                } catch (mapErr) {
+                    console.error(`Error processing order ${order?.id}:`, mapErr);
+                    return { ...order, product_name: 'خطأ في معالجة الطلب', total: 0 };
+                }
             });
 
             res.render('orders', { orders: ordersWithProducts });

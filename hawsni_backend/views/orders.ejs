@@ -132,9 +132,14 @@
                                         </div>
                                     </td>
                                     <td><span class="order-id">#<%= order.id.substring(0, 8) %></span></td>
-                                    <td><span class="order-amount">
-                                            <%= parseFloat(order.total).toFixed(2) %> ج.م
-                                        </span></td>
+                                        <% 
+                                            const total = parseFloat(order.total || 0);
+                                            const displayTotal = isNaN(total) ? '0.00' : total.toFixed(2);
+                                        %>
+                                        <span class="order-amount">
+                                            <%= displayTotal %> ج.م
+                                        </span>
+                                    </td>
                                     <td>
                                         <span class="badge badge-<%= sClass %>">
                                             <%= displayStatus %>
@@ -448,7 +453,8 @@
                 document.getElementById('discountRow').style.display = 'none';
             }
 
-            document.getElementById('modalTotalAmount').textContent = parseFloat(order.total).toFixed(2) + ' ج.م';
+            const totalAmount = parseFloat(order.total || 0);
+            document.getElementById('modalTotalAmount').textContent = (isNaN(totalAmount) ? '0.00' : totalAmount.toFixed(2)) + ' ج.م';
 
             document.getElementById('orderModal').classList.add('active');
             document.body.style.overflow = 'hidden';
