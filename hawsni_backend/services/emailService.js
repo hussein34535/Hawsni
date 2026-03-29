@@ -591,6 +591,65 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     });
 }
 
+// ──────────────────────────────────────────────
+// 7. No Answer Phone Call Email
+// ──────────────────────────────────────────────
+async function sendNoAnswerEmail(toEmail, userName, orderNumber) {
+    const shortOrder = String(orderNumber).substring(0, 8).toUpperCase();
+    return _send({
+        to: toEmail,
+        subject: `📞 تنبيه بشأن طلبك #${shortOrder} — Hawsni`,
+        htmlContent: `
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #e8e8e8; box-shadow: 0 10px 40px rgba(0,0,0,0.06);">
+
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #0E4435 0%, #1a6b54 100%); padding: 30px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900;">Hawsni</h1>
+                <p style="color: rgba(255,255,255,0.6); margin: 5px 0 0 0; font-size: 12px; font-weight: 600;">الفخامة في كل تفصيلة</p>
+            </div>
+
+            <!-- Icon Banner -->
+            <div style="background: #fff8f0; padding: 35px 30px 25px; text-align: center; border-bottom: 2px solid #fed7aa;">
+                <div style="font-size: 52px; margin-bottom: 12px;">📞</div>
+                <h2 style="color: #c2410c; margin: 0 0 8px 0; font-size: 20px; font-weight: 900;">حاولنا التواصل معكم هاتفياً</h2>
+                <span style="background: #fed7aa; color: #9a3412; padding: 5px 16px; border-radius: 50px; font-size: 12px; font-weight: 800;">طلب #${shortOrder}</span>
+            </div>
+
+            <div style="padding: 32px 30px;">
+
+                <p style="color: #333; font-size: 15px; line-height: 1.8; margin: 0 0 22px 0;">
+                    عزيزنا <b>${userName}</b>،
+                </p>
+
+                <div style="background: #fafafa; border-right: 4px solid #0E4435; border-radius: 0 16px 16px 0; padding: 20px; margin-bottom: 22px;">
+                    <p style="color: #333; font-size: 14px; line-height: 1.9; margin: 0;">
+                        تواصل معكم فريقنا هاتفياً للتأكد من بعض تفاصيل طلبكم وضمان وصوله بأفضل صورة ممكنة،
+                        إلا أننا لم نتمكن من إتمام المكالمة في الوقت الحالي.<br><br>
+                        <b>نرجو إبقاء هاتفكم متاحاً</b> كي نتمكن من خدمتكم على أكمل وجه.
+                    </p>
+                </div>
+
+                <!-- Warning Box -->
+                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 16px; padding: 18px; margin-bottom: 25px; text-align: center;">
+                    <p style="margin: 0; font-size: 13px; color: #991b1b; line-height: 1.7; font-weight: 700;">
+                        ⚠️ عدم الاستجابة لمحاولات التواصل قد يؤدي إلى إلغاء الطلب تلقائياً.
+                    </p>
+                </div>
+
+                <p style="color: #888; font-size: 13px; line-height: 1.8; text-align: center; margin: 0;">
+                    نحن نسعى دائماً لتقديم أفضل تجربة شراء لكم.<br>
+                    شكراً لتفهمكم وتعاونكم 🖤
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                <p style="color: #0E4435; font-size: 13px; font-weight: 900; margin: 0;">Hawsni — Premium Fashion ✨</p>
+            </div>
+        </div>`
+    });
+}
+
 module.exports = {
     sendOtpEmail,
     sendPasswordResetEmail,
@@ -598,4 +657,5 @@ module.exports = {
     sendOrderStatusEmail,
     sendAdminNotification,
     sendNewOrderAdminEmail,
+    sendNoAnswerEmail,
 };

@@ -233,6 +233,43 @@ class OrdersController {
             res.status(500).json({ success: false, message: err.message });
         }
     }
+
+    // Send "no answer" phone call notification email
+    async sendNoAnswer(req, res) {
+        try {
+            const { id } = req.params;
+
+            const { data: order, error } = await supabase
+                .from('orders')
+                .select('*, users(name, email)')
+                .eq('id', id)
+                .single();
+
+            if (error || !order) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+
+            let customerEmail = order.users?.email;
+            let customerName = order.users?.name;
+
+            if (!customerEmail) {
+                let ship = order.shipping_address;
+                if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                    try { ship = JSON.parse(ship); } catch (e) { }
+                }
+                if (typeof ship === 'object' && ship !== null) {
+                    customerEmail = ship.email || ship.guestEmail;
+                    customerName = customerName || ship.name || ship.guestName;
+                }
+            }
+
+            if (!customerEmail) return res.status(400).json({ success: false, message: 'لا يوجد إيميل للعميل' });
+
+            await emailService.sendNoAnswerEmail(customerEmail, customerName || 'عميلنا العزيز', order.order_number || order.id);
+            res.json({ success: true, message: 'تم إرسال الإيميل بنجاح' });
+        } catch (err) {
+            console.error('Error sending no-answer email:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
 }
 
 module.exports = new OrdersController();

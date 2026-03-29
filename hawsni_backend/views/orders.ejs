@@ -284,6 +284,15 @@
                     </div>
                 </div>
             </div>
+
+            <!-- No Answer Email Action -->
+            <div style="padding: 16px 30px 24px; border-top: 1px solid #f0f0f0; background: #fafafa;">
+                <button id="noAnswerBtn" onclick="sendNoAnswerEmail()"
+                    style="display: flex; align-items: center; gap: 8px; background: #fff; border: 1.5px solid #f59e0b; color: #92400e; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; transition: all 0.2s; font-family: inherit;">
+                    <span>📞</span>
+                    <span>إرسال تنبيه "لم يرد"</span>
+                </button>
+            </div>
         </div>
     </div>
     <script id="orders-data" type="application/json">
@@ -306,7 +315,9 @@
             'Cancelled': 'ملغي'
         };
 
+        let currentOrderId = null;
         function showOrderDetails(orderId) {
+            currentOrderId = orderId;
             const order = ordersData.find(o => o.id === orderId);
             if (!order) return;
 
@@ -556,6 +567,31 @@
                 closeModal();
             }
         });
+
+        async function sendNoAnswerEmail() {
+            if (!currentOrderId) return;
+            const btn = document.getElementById('noAnswerBtn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
+            btn.disabled = true;
+            try {
+                const res = await fetch(`/orders/${currentOrderId}/no-answer`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    btn.innerHTML = '<span>✅</span><span>تم الإرسال!</span>';
+                    btn.style.borderColor = '#16a34a';
+                    btn.style.color = '#15803d';
+                } else {
+                    alert('خطأ: ' + data.message);
+                    btn.innerHTML = orig;
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                alert('حدث خطأ في الاتصال');
+                btn.innerHTML = orig;
+                btn.disabled = false;
+            }
+        }
     </script>
 
     <style>

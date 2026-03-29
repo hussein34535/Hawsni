@@ -56,6 +56,7 @@ router.post('/orders/:id/status', ordersController.updateStatus);
 router.post('/orders/:id/delete', ordersController.deleteOrder);
 router.post('/orders/bulk-status', ordersController.bulkUpdateStatus);
 router.post('/orders/bulk-delete', ordersController.bulkDelete);
+router.post('/orders/:id/no-answer', ordersController.sendNoAnswer);
 
 // Category Controller
 const CategoryController = require('../controllers/api/categoryController');
