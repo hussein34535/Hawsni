@@ -54,6 +54,18 @@ router.get('/:id/cancel-email', async (req, res) => {
 
         if (cancelErr) throw cancelErr;
 
+        // Notify admin
+        const emailService = require('../services/emailService');
+        emailService.sendAdminNotification(
+            `❌ إلغاء طلب من العميل — #${id.substring(0, 8).toUpperCase()}`,
+            `<div dir="rtl" style="font-family:sans-serif;padding:20px;">
+                <h3>تم إلغاء طلب عبر رابط الإيميل</h3>
+                <p><b>رقم الطلب:</b> ${id}</p>
+                <p><b>الاختصار:</b> #${id.substring(0, 8).toUpperCase()}</p>
+                <p style="color:#dc2626;font-weight:bold;">تم الإلغاء من قِبل العميل مباشرةً عبر رابط الإيميل.</p>
+            </div>`
+        ).catch(() => {});
+
         return res.send(`
             <div dir="rtl" style="font-family:'Segoe UI',sans-serif;text-align:center;padding:60px;max-width:500px;margin:auto;">
                 <div style="font-size:64px;margin-bottom:20px;">✅</div>

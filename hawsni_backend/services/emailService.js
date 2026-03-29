@@ -309,46 +309,40 @@ async function sendOrderStatusEmail(toEmail, userName, order, status) {
         `;
     }).join('');
 
-    // Review Request Section for Delivered Items
+    // Build review section (shown at top for Delivered orders)
     let reviewSection = '';
     if (status === 'Delivered' && items.length > 0) {
         const itemsListHtml = items.map(item => {
             const productId = item.product_id || (item.products && item.products.id);
             const itemName = item.name || (item.products && item.products.name) || 'منتج';
             let itemImage = item.image_url || (item.products && item.products.images && item.products.images[0]) || 'https://hwasi.com/logo.png';
-            
+
             return `
-                <div style="display: flex; align-items: center; background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #f0f0f0;">
-                    <img src="${itemImage}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; margin-left: 12px;" alt="${itemName}">
+                <div style="background: #fff; border: 1px solid #e8e8e8; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px;">
+                    <img src="${itemImage}" style="width: 60px; height: 60px; border-radius: 12px; object-fit: cover; flex-shrink: 0;" alt="${itemName}">
                     <div style="flex: 1; text-align: right;">
-                        <p style="margin: 0; font-size: 13px; font-weight: 800; color: #1a1a1a;">${itemName}</p>
-                        <a href="https://hwasi.com/product/${productId}#reviews" style="display: inline-block; margin-top: 5px; color: #0E4435; font-size: 11px; font-weight: 900; text-decoration: none;">⭐ قيم هذا المنتج الآن</a>
+                        <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #1a1a1a;">${itemName}</p>
+                        <div style="font-size: 18px; margin-bottom: 8px;">⭐⭐⭐⭐⭐</div>
+                        <a href="https://hwasi.com/product/${productId}#reviews"
+                            style="display: inline-block; background: #0E4435; color: #fff; padding: 9px 20px; border-radius: 50px; font-size: 12px; font-weight: 900; text-decoration: none;">
+                            قيّم هذا المنتج الآن
+                        </a>
                     </div>
                 </div>
             `;
         }).join('');
 
         reviewSection = `
-            <div style="background: #fdfdfd; border: 1px solid #e8e8e8; border-radius: 16px; padding: 30px; margin-top: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+            <div style="background: linear-gradient(135deg, #f0faf5, #e6f7f0); border: 2px solid #0E4435; border-radius: 20px; padding: 30px; margin-bottom: 25px;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <span style="font-size: 32px; display: block; margin-bottom: 10px;">✨</span>
-                    <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #1a1a1a; font-weight: 800;">شكراً لثقتكم في هَوَسي</h3>
-                    <p style="margin: 0; font-size: 14px; color: #666; line-height: 1.8;">
-                        وصلت طلباتكم بسلام! أملنا أن تضيف منتجاتنا لمسة من الأناقة والفخامة ليومكم.<br>
-                        نسعد دائماً بخدمتكم، ونتمنى أن نكون عند حسن ظنكم في اختياراتكم القادمة.
+                    <span style="font-size: 40px; display: block; margin-bottom: 10px;">✨</span>
+                    <h3 style="margin: 0 0 8px 0; font-size: 20px; color: #0E4435; font-weight: 900;">شكراً لثقتكم في هَوَسي</h3>
+                    <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.7;">
+                        وصل طلبكم بسلام! رأيكم يهمنا ويساعد بقية العملاء.<br>
+                        <b>دقيقة واحدة فقط لمشاركة تجربتكم:</b>
                     </p>
                 </div>
-                
-                <div style="margin-top: 25px; background: #fafafa; padding: 15px; border-radius: 12px;">
-                    <div style="text-align: center; margin-bottom: 15px;">
-                        <p style="margin: 0; font-size: 13px; color: #444; font-weight: 700;">يسعدنا سماع رأيكم في المنتجات:</p>
-                    </div>
-                    ${itemsListHtml}
-                </div>
-
-                <div style="text-align: center; margin-top: 25px; padding-top: 20px; border-top: 1px solid #f5f5f5;">
-                    <p style="margin: 0; font-size: 12px; color: #999; font-weight: 600;">مع خالص التحيات،<br>فريق إدارة هَوَسي</p>
-                </div>
+                ${itemsListHtml}
             </div>
         `;
     }
@@ -378,6 +372,9 @@ async function sendOrderStatusEmail(toEmail, userName, order, status) {
                     مرحباً <b>${userName}</b> 👋<br>
                     <span style="color: #666;">${config.message}</span>
                 </p>
+
+                <!-- Review Section (prominent, shown first for Delivered) -->
+                ${reviewSection}
 
                 ${status !== 'Cancelled' ? `
                 <!-- Progress Bar -->
@@ -414,8 +411,6 @@ async function sendOrderStatusEmail(toEmail, userName, order, status) {
                     </a>
                 </div>
                 ` : ''}
-
-                ${reviewSection}
 
                 ${status === 'Cancelled' ? `
                 <!-- Instagram Contact -->

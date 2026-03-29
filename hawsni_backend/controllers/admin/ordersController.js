@@ -55,52 +55,44 @@ class OrdersController {
             const { id } = req.params;
             const { status } = req.body;
 
-            const { data, error } = await supabase
+            // Step 1: simple update — fast, no joins
+            const { error } = await supabase
                 .from('orders')
                 .update({ status })
-                .eq('id', id)
-                .select(`
-                    *,
-                    users(name, email),
-                    order_items(
-                        *,
-                        products(id, name, images)
-                    )
-                `)
-                .single();
+                .eq('id', id);
 
             if (error) throw error;
 
-            // Send email notification silently
-            try {
-                let customerEmail = data.users?.email;
-                let customerName = data.users?.name;
-
-                // Fallback to shipping_address if guest
-                if (!customerEmail || !customerName) {
-                    let ship = data.shipping_address;
-                    if (typeof ship === 'string' && ship.trim().startsWith('{')) {
-                        try { ship = JSON.parse(ship); } catch (e) { }
-                    }
-                    if (typeof ship === 'object' && ship !== null) {
-                        customerEmail = ship.email || ship.guestEmail || customerEmail;
-                        customerName = ship.name || ship.guestName || customerName;
-                    }
-                }
-
-                if (customerEmail) {
-                    emailService.sendOrderStatusEmail(
-                        customerEmail,
-                        customerName || 'عميلنا العزيز',
-                        data, // Pass the full order object
-                        status
-                    ).catch(err => console.error('Failed to send status email:', err));
-                }
-            } catch (emailErr) {
-                console.error('Error preparing status email:', emailErr);
-            }
-
+            // Step 2: redirect immediately so admin isn't blocked
             res.redirect('/orders');
+
+            // Step 3: send email in background (non-blocking, after redirect)
+            supabase
+                .from('orders')
+                .select(`*, users(name, email), order_items(*, products(id, name, images))`)
+                .eq('id', id)
+                .single()
+                .then(({ data }) => {
+                    if (!data) return;
+                    let customerEmail = data.users?.email;
+                    let customerName = data.users?.name;
+                    if (!customerEmail) {
+                        let ship = data.shipping_address;
+                        if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                            try { ship = JSON.parse(ship); } catch (e) { }
+                        }
+                        if (typeof ship === 'object' && ship !== null) {
+                            customerEmail = ship.email || ship.guestEmail;
+                            customerName = customerName || ship.name || ship.guestName;
+                        }
+                    }
+                    if (customerEmail) {
+                        emailService.sendOrderStatusEmail(customerEmail, customerName || 'عميلنا العزيز', data, status)
+                            .catch(err => console.error('Failed to send status email:', err));
+                    }
+                })
+                .catch(err => console.error('Error fetching order for email:', err));
+
         } catch (err) {
             console.error('Error updating order status:', err);
             res.status(500).send('خطأ في تحديث حالة الطلب');
