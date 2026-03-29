@@ -163,6 +163,20 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
 
             <div style="padding: 30px;">
                 
+                <!-- Important Notice: 12 Hours Contact -->
+                <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 16px; padding: 20px; margin-bottom: 25px;">
+                    <div style="display: flex; align-items: flex-start; gap: 12px;">
+                        <span style="font-size: 22px; flex-shrink: 0;">📞</span>
+                        <div>
+                            <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #92400e;">ملاحظة هامة</p>
+                            <p style="margin: 0; font-size: 13px; color: #78350f; line-height: 1.7;">
+                                قد يتواصل معكم أحد أفراد فريقنا خلال <b>12 ساعة</b> للتأكد من بعض تفاصيل طلبكم،
+                                نرجو الرد على أي اتصال أو رسالة واردة لضمان وصول الطلب في أسرع وقت ممكن.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Order Timeline -->
                 <div style="background: #f9f9f9; border-radius: 16px; padding: 20px; margin-bottom: 25px; border: 1px solid #f0f0f0;">
                     <h3 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 900; color: #1a1a1a;">📍 حالة طلبك الآن</h3>
@@ -209,13 +223,25 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
                 </div>
 
                 <!-- Track Button -->
-                <div style="text-align: center; margin: 30px 0;">
+                <div style="text-align: center; margin: 25px 0;">
                     <a href="https://hwasi.com/track-order?id=${order.id}" style="background: #0E4435; color: #ffffff; padding: 16px 40px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(14,68,53,0.3);">
                         📍 تتبع طلبك الآن
                     </a>
                 </div>
 
-                <p style="color: #aaa; font-size: 12px; text-align: center; line-height: 1.7;">
+                <!-- Cancel Section -->
+                <div style="background: #fafafa; border: 1px solid #e8e8e8; border-radius: 16px; padding: 22px; margin-top: 20px; text-align: center;">
+                    <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #555;">هل تريد إلغاء طلبك؟</p>
+                    <p style="margin: 0 0 16px 0; font-size: 12px; color: #999; line-height: 1.6;">
+                        يمكنكم إلغاء الطلب بسهولة قبل بدء تجهيزه.<br>بعد الشحن لن يكون الإلغاء متاحاً.
+                    </p>
+                    <a href="https://hwasibackend.vercel.app/api/orders/${order.id}/cancel-email"
+                        style="display: inline-block; background: #fff; color: #dc2626; border: 1.5px solid #dc2626; padding: 11px 28px; border-radius: 50px; font-size: 13px; font-weight: 800; text-decoration: none;">
+                        ❌ إلغاء الطلب
+                    </a>
+                </div>
+
+                <p style="color: #aaa; font-size: 12px; text-align: center; line-height: 1.7; margin-top: 20px;">
                     هنبعتلك إشعار فور شحن الطلب 🚚<br>لو عندك أي سؤال، إحنا هنا دايماً
                 </p>
             </div>
