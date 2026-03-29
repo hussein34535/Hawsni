@@ -883,6 +883,35 @@ export default function ProductPage() {
                                 <FAQAccordion isRTL={isRTL} />
                             </div>
 
+                            {/* Related / High Demand Products Section */}
+                            {relatedProducts.length > 0 && (
+                                <div className="pt-10 border-t border-gray-100 pb-2">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h3 className="text-xl font-black text-gray-900 font-cairo">
+                                                {isRTL ? 'منتجات أخرى قد تعجبك' : 'Other products you might like'}
+                                            </h3>
+                                        </div>
+                                        <button 
+                                            onClick={() => {
+                                                const anyProduct = product as any;
+                                                const catId = anyProduct?.category_id || (anyProduct?.category_ids && anyProduct.category_ids[0]);
+                                                router.push(catId ? `/shop?category=${catId}` : '/shop');
+                                            }}
+                                            className="text-[var(--color-brand-primary)] font-bold flex items-center gap-1 text-sm bg-[var(--color-brand-primary)]/5 px-4 py-2 rounded-xl flex-shrink-0 hover:bg-[var(--color-brand-primary)]/10 transition-colors font-cairo"
+                                        >
+                                            <span>{isRTL ? 'عرض المزيد' : 'View More'}</span>
+                                            {isRTL ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3 sm:gap-5">
+                                        {relatedProducts.slice(0, 2).map((p) => (
+                                            <ProductCard key={p.id || p._id} product={p} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Reviews Section Integration */}
                             <div ref={reviewsRef} className="pt-10 border-t border-gray-100">
                                 <ReviewsSection productId={productId} />
@@ -963,27 +992,6 @@ export default function ProductPage() {
                 </motion.div>
             </div>
 
-            {/* Related / High Demand Products Section */}
-            {relatedProducts.length > 0 && (
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 mb-24">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 font-cairo">
-                                {isRTL ? 'منتجات ذات صلة' : 'Related Products'}
-                            </h2>
-                            <p className="text-gray-500 mt-2 font-cairo text-sm sm:text-base">
-                                {isRTL ? 'قد تنال إعجابك أيضاً' : 'You might also like'}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        {relatedProducts.map((p) => (
-                            <ProductCard key={p.id || p._id} product={p} />
-                        ))}
-                    </div>
-                </div>
-            )}
 
             {/* Size Guide Bottom Sheet Modal */}
             <SizeGuideModal
