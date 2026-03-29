@@ -118,21 +118,20 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
         const itemName = item.name || (item.products && item.products.name) || '—';
         let itemImage = item.image_url || item.imageUrl || (item.products && item.products.images && item.products.images[0]) || 'https://placehold.co/100x100/eeeeee/999999?text=?';
 
-        // Final sanity check for placeholder
         if (itemImage === '/placeholder.png' && item.products && item.products.images && item.products.images.length > 0) {
             itemImage = item.products.images[0];
         }
 
         return `
         <tr>
-            <td style="padding: 14px 0; border-bottom: 1px solid #f0f0f0; width: 60px;">
-                <img src="${itemImage}" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover; border: 1px solid #eee;" alt="${itemName}">
+            <td style="padding: 15px 0; border-bottom: 1px solid #f8f8f8; width: 65px;">
+                <img src="${itemImage}" style="width: 55px; height: 55px; border-radius: 12px; object-fit: cover; border: 1px solid #eee;" alt="${itemName}">
             </td>
-            <td style="padding: 14px 10px; border-bottom: 1px solid #f0f0f0;">
-                <span style="font-weight: 800; color: #1a1a1a; font-size: 14px;">${itemName}</span>
-                <br><span style="color: #999; font-size: 11px;">المقاس: ${item.size || 'عادي'} | الكمية: ${item.quantity}${item.color ? ' | اللون: ' + item.color : ''}</span>
+            <td style="padding: 15px 12px; border-bottom: 1px solid #f8f8f8;">
+                <p style="margin: 0; font-weight: 800; color: #1a1a1a; font-size: 14px; line-height: 1.4;">${itemName}</p>
+                <p style="margin: 4px 0 0 0; color: #aaa; font-size: 11px; font-weight: 700;">${item.size || 'عادي'} | x${item.quantity}${item.color ? ' | ' + item.color : ''}</p>
             </td>
-            <td style="padding: 14px 0; border-bottom: 1px solid #f0f0f0; text-align: left; font-weight: 900; color: #0E4435; font-size: 14px; white-space: nowrap;">
+            <td style="padding: 15px 0; border-bottom: 1px solid #f8f8f8; text-align: left; font-weight: 900; color: #0E4435; font-size: 14px;">
                 ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
             </td>
         </tr>
@@ -143,102 +142,85 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
         to: toEmail,
         subject: `✅ تم تأكيد طلبك #${orderNumber} — Hawsni`,
         htmlContent: `
-        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #e8e8e8; box-shadow: 0 10px 40px rgba(0,0,0,0.06);">
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 30px; overflow: hidden; border: 1px solid #f0f0f0; box-shadow: 0 10px 40px rgba(0,0,0,0.05);">
             
             <!-- Header -->
-            <div style="background: linear-gradient(135deg, #0E4435 0%, #1a6b54 100%); padding: 40px 30px; text-align: center;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900;">Hawsni</h1>
-                <p style="color: rgba(255,255,255,0.6); margin: 5px 0 0 0; font-size: 12px; font-weight: 600;">الفخامة في كل تفصيلة</p>
+            <div style="background: #0E4435; padding: 45px 30px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 1px;">Hawsni</h1>
+                <p style="color: rgba(255,255,255,0.4); margin: 5px 0 0 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">Premium Fashion</p>
             </div>
 
-            <!-- Success Banner -->
-            <div style="background: #f0faf5; padding: 30px; text-align: center; border-bottom: 2px solid #d4edda;">
-                <div style="font-size: 44px; margin-bottom: 10px;">🎉</div>
-                <h2 style="color: #0E4435; margin: 0; font-size: 22px; font-weight: 900;">تم تأكيد طلبك بنجاح!</h2>
-                <p style="color: #666; font-size: 14px; margin: 10px 0 0 0;">مرحباً <b>${userName}</b>، شكراً لثقتك بـ Hawsni</p>
-                <div style="margin-top: 15px;">
-                    <span style="background: #0E4435; color: #fff; padding: 8px 20px; border-radius: 50px; font-size: 13px; font-weight: 800;">🧾 طلب رقم #${orderNumber}</span>
+            <div style="padding: 35px 30px;">
+                <!-- Success Message -->
+                <div style="text-align: center; margin-bottom: 35px;">
+                    <div style="font-size: 45px; margin-bottom: 15px;">🛍️</div>
+                    <h2 style="color: #0E4435; margin: 0 0 8px 0; font-size: 24px; font-weight: 900;">شكراً لثقتك بنا، ${userName}!</h2>
+                    <p style="color: #888; font-size: 14px; line-height: 1.6;">لقد استلمنا طلبك رقم <b>#${orderNumber}</b> بنجاح.<br>فريقنا يعمل الآن على تجهيزه بكل حب.</p>
                 </div>
-            </div>
 
-            <div style="padding: 30px;">
-                
-                <!-- Order Timeline -->
-                <div style="background: #f9f9f9; border-radius: 16px; padding: 20px; margin-bottom: 25px; border: 1px solid #f0f0f0;">
-                    <h3 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 900; color: #1a1a1a;">📍 حالة طلبك الآن</h3>
+                <!-- Minimal Timeline -->
+                <div style="background: #fafafa; border-radius: 20px; padding: 20px; margin-bottom: 30px; border: 1px solid #f5f5f5;">
                     <table style="width: 100%;">
                         <tr>
                             <td style="text-align: center; width: 33%;">
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #0E4435; margin: 0 auto 8px auto; display: flex; align-items: center; justify-content: center;">
-                                    <span style="color: white; font-size: 16px;">✓</span>
-                                </div>
-                                <span style="font-size: 11px; font-weight: 800; color: #0E4435;">تم التأكيد</span>
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #0E4435; margin: 0 auto 8px auto;"></div>
+                                <span style="font-size: 10px; font-weight: 900; color: #0E4435;">تم التأكيد</span>
                             </td>
                             <td style="text-align: center; width: 33%;">
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0e0e0; margin: 0 auto 8px auto;"></div>
-                                <span style="font-size: 11px; font-weight: 700; color: #999;">جاري التجهيز</span>
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #eee; margin: 0 auto 8px auto;"></div>
+                                <span style="font-size: 10px; font-weight: 700; color: #ccc;">جاري التجهيز</span>
                             </td>
                             <td style="text-align: center; width: 33%;">
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0e0e0; margin: 0 auto 8px auto;"></div>
-                                <span style="font-size: 11px; font-weight: 700; color: #999;">في الطريق إليك</span>
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #eee; margin: 0 auto 8px auto;"></div>
+                                <span style="font-size: 10px; font-weight: 700; color: #ccc;">يصلك قريباً</span>
                             </td>
                         </tr>
                     </table>
                 </div>
 
-                <!-- Items -->
-                <div style="margin-bottom: 25px;">
-                    <h3 style="margin: 0 0 15px 0; font-size: 14px; font-weight: 900; color: #1a1a1a;">📦 المنتجات</h3>
+                <!-- Product List -->
+                <div style="margin-bottom: 35px;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 13px; font-weight: 900; color: #bbb; text-transform: uppercase;">تفاصيل المنتجات</h3>
                     <table style="width: 100%; border-collapse: collapse;">
                         ${itemsHtml}
                     </table>
                 </div>
 
-                <!-- Total -->
-                <div style="background: linear-gradient(135deg, #0E4435, #1a6b54); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
+                <!-- Summary Box -->
+                <div style="background: #0E4435; border-radius: 24px; padding: 25px; margin-bottom: 35px; box-shadow: 0 8px 20px rgba(14,68,53,0.1);">
                     <table style="width: 100%;">
                         <tr>
-                            <td style="color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 700;">إجمالي المبلغ</td>
-                            <td style="text-align: left; color: #fff; font-size: 24px; font-weight: 900;">${Number(total).toLocaleString()} <span style="font-size: 14px;">ج.م</span></td>
-                        </tr>
-                        <tr>
-                            <td style="color: rgba(255,255,255,0.5); font-size: 12px; padding-top: 5px;">💵 الدفع عند الاستلام</td>
-                            <td></td>
+                            <td style="color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 700;">إجمالي المبلغ المدفوع عند الاستلام</td>
+                            <td style="text-align: left; color: #fff; font-size: 26px; font-weight: 900;">${Number(total).toLocaleString()} <span style="font-size: 14px; font-weight: 700;">ج.م</span></td>
                         </tr>
                     </table>
                 </div>
 
                 <!-- Track Button -->
-                <div style="text-align: center; margin: 25px 0;">
-                    <a href="https://hwasi.com/track-order?id=${order.id}" style="background: #0E4435; color: #ffffff; padding: 16px 40px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(14,68,53,0.3);">
-                        📍 تتبع طلبك الآن
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <a href="https://hwasi.com/track-order?id=${order.id}" style="background: #ffffff; color: #0E4435; border: 2px solid #0E4435; padding: 16px 45px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block;">
+                        📍 تتبع حالة طلبك
                     </a>
                 </div>
 
-                <!-- Cancel Section -->
-                <div style="background: #fafafa; border: 1px solid #e8e8e8; border-radius: 16px; padding: 22px; margin-top: 20px; text-align: center;">
-                    <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #555;">هل تريد إلغاء طلبك؟</p>
-                    <p style="margin: 0 0 16px 0; font-size: 12px; color: #999; line-height: 1.6;">
-                        يمكنكم إلغاء الطلب بسهولة قبل بدء تجهيزه.<br>بعد الشحن لن يكون الإلغاء متاحاً.
+                <!-- Help Section -->
+                <div style="text-align: center; padding-top: 25px; border-top: 1px solid #f5f5f5;">
+                    <p style="color: #999; font-size: 12px; line-height: 1.6; margin: 0;">
+                        هل لديك أي استفسار؟ تواصل معنا عبر إنستغرام 💖<br>
+                        <b>تنويه:</b> يرجى إبقاء الهاتف متاحاً لتأكيد الطلب.
                     </p>
-                    <a href="https://hwasibackend.vercel.app/api/orders/${order.id}/cancel-email"
-                        style="display: inline-block; background: #fff; color: #dc2626; border: 1.5px solid #dc2626; padding: 11px 28px; border-radius: 50px; font-size: 13px; font-weight: 800; text-decoration: none;">
-                        ❌ إلغاء الطلب
-                    </a>
                 </div>
-
-                <p style="color: #aaa; font-size: 12px; text-align: center; line-height: 1.7; margin-top: 20px;">
-                    هنبعتلك إشعار فور شحن الطلب 🚚<br>لو عندك أي سؤال، إحنا هنا دايماً
-                </p>
             </div>
 
             <!-- Footer -->
-            <div style="background: #f5f5f5; padding: 20px; text-align: center; border-top: 1px solid #eee;">
-                <p style="color: #0E4435; font-size: 13px; font-weight: 900; margin: 0;">Hawsni — Premium Fashion ✨</p>
+            <div style="background: #fafafa; padding: 20px; text-align: center; border-top: 1px solid #f0f0f0;">
+                <p style="color: #ccc; font-size: 10px; font-weight: 800; margin: 0;">Hawsni — Quality and Elegance ✨</p>
             </div>
         </div>`
     });
 }
+
+// ──────────────────────────────────────────────
 
 // ──────────────────────────────────────────────
 // 4. Order Status Update Email (Customer)
@@ -462,18 +444,6 @@ async function sendAdminNotification(subject, htmlContent) {
 async function sendNewOrderAdminEmail({ order, customerName, customerEmail, items, shippingAddress }) {
     const orderNumber = order.order_number || String(order.id).substring(0, 6).toUpperCase();
     const total = order.total || order.total_amount || 0;
-    const itemCount = (items || []).length;
-    const now = new Date();
-    const timeStr = now.toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-    // Safely parse shipping address
-    let address = shippingAddress;
-    if (typeof address === 'string' && address.startsWith('{')) {
-        try { address = JSON.parse(address); } catch (e) { address = {}; }
-    }
-    if (!address || typeof address !== 'object') address = {};
-
-    // Build items rows (re-adding for bottom section)
     const itemsHtml = (items || []).map(item => {
         const itemName = item.name || '—';
         return `
@@ -488,64 +458,75 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
         </tr>`;
     }).join('');
 
+    // Preheader helps control what shows in the notification preview on mobile/desktop
+    const preheader = `تبريكات! طلب جديد من ${customerName || 'عميل'} بقيمة ${Number(total).toLocaleString()} ج.م`;
+
     return _send({
         to: ADMIN_EMAIL,
         subject: `💰 طلب جديد #${orderNumber} — ${Number(total).toLocaleString()} ج.م`,
         htmlContent: `
-        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 30px; overflow: hidden; border: 1px solid #f0f0f0; box-shadow: 0 15px 45px rgba(0,0,0,0.05);">
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 450px; margin: 0 auto; background: #ffffff; border-radius: 35px; overflow: hidden; border: 1px solid #f0f0f0; box-shadow: 0 15px 45px rgba(0,0,0,0.05);">
             
-            <div style="background: #0E4435; padding: 40px 30px; text-align: center;">
-                <div style="background: rgba(255,255,255,0.1); width: 70px; height: 70px; border-radius: 22px; margin: 0 auto 15px auto; line-height: 70px; text-align: center;">
-                    <span style="font-size: 32px; vertical-align: middle;">💰</span>
-                </div>
-                <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 900;">وصلك طلب جديد!</h1>
-                <p style="color: rgba(255,255,255,0.6); margin: 5px 0 0 0; font-size: 13px;">رقم الطلب #${orderNumber}</p>
+            <!-- Invisible Preheader -->
+            <div style="display: none; max-height: 0px; overflow: hidden; mso-hide: all;">
+                ${preheader}
             </div>
 
-            <div style="padding: 30px;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <p style="color: #999; font-size: 12px; font-weight: 800; margin-bottom: 5px; text-transform: uppercase;">إجمالي المبلغ</p>
-                    <h2 style="color: #0E4435; font-size: 42px; font-weight: 900; margin: 0;">${Number(total).toLocaleString()} <span style="font-size: 16px;">ج.م</span></h2>
+            <!-- Header Badge -->
+            <div style="background: #0E4435; padding: 50px 30px; text-align: center;">
+                <div style="background: rgba(255,255,255,0.12); width: 80px; height: 80px; border-radius: 28px; margin: 0 auto 20px auto; text-align: center;">
+                    <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td align="center" valign="middle" style="font-size: 38px;">💰</td>
+                        </tr>
+                    </table>
+                </div>
+                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px;">وصلك طلب جديد!</h1>
+                <p style="color: rgba(255,255,255,0.5); margin: 6px 0 0 0; font-size: 13px; font-weight: 700;">رقم الطلب #${orderNumber}</p>
+            </div>
+
+            <div style="padding: 35px 30px;">
+                <!-- Main Badge Content -->
+                <div style="text-align: center; margin-bottom: 35px;">
+                    <p style="color: #bbb; font-size: 11px; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">إجمالي المبيعة</p>
+                    <h2 style="color: #0E4435; font-size: 48px; font-weight: 900; margin: 0; line-height: 1;">${Number(total).toLocaleString()} <span style="font-size: 14px; font-weight: 800;">ج.م</span></h2>
                 </div>
 
-                <div style="background: #fcfcfc; border: 1px solid #f5f5f5; border-radius: 20px; padding: 20px; margin-bottom: 30px;">
+                <!-- Customer Minimal Info -->
+                <div style="background: #f8faf9; border-radius: 24px; padding: 22px; margin-bottom: 30px; border: 1px solid #edf2f0;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr>
-                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">العميل:</td>
-                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left;">${customerName || '—'}</td>
+                            <td style="padding: 6px 0; color: #999; font-size: 12px; font-weight: 700;">العميل</td>
+                            <td style="padding: 6px 0; color: #1a1a1a; font-size: 15px; font-weight: 900; text-align: left;">${customerName || '—'}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">الهاتف:</td>
-                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left; direction: ltr;">${address.phone || '—'}</td>
+                            <td style="padding: 6px 0; color: #999; font-size: 12px; font-weight: 700;">المحافظة</td>
+                            <td style="padding: 6px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left;">${(shippingAddress && shippingAddress.state) || '—'}</td>
                         </tr>
-                        ${address.alternative_phone ? `
                         <tr>
-                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">هاتف بديل:</td>
-                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left; direction: ltr;">${address.alternative_phone}</td>
-                        </tr>` : ''}
-                        <tr>
-                            <td style="padding: 8px 0; color: #999; font-size: 13px; font-weight: 700;">التاريخ:</td>
-                            <td style="padding: 8px 0; color: #1a1a1a; font-size: 13px; font-weight: 700; text-align: left;">${timeStr}</td>
+                            <td style="padding: 6px 0; color: #999; font-size: 12px; font-weight: 700;">التواصل</td>
+                            <td style="padding: 6px 0; color: #0E4435; font-size: 14px; font-weight: 900; text-align: left; direction: ltr;">${(shippingAddress && shippingAddress.phone) || '—'}</td>
                         </tr>
                     </table>
                 </div>
 
-                <div style="text-align: center; margin-bottom: 40px;">
-                    <a href="https://hwasibackend.vercel.app/orders" style="background: #0E4435; color: #ffffff; padding: 18px 40px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block; box-shadow: 0 10px 20px rgba(14,68,53,0.2);">
-                        🖥️ فتح لوحة التحكم
+                <!-- Action Button -->
+                <div style="text-align: center; margin-bottom: 45px;">
+                    <a href="https://hwasibackend.vercel.app/orders" style="background: #0E4435; color: #ffffff; padding: 18px 45px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block; box-shadow: 0 12px 25px rgba(14,68,53,0.15);">
+                        فتح الطلبات 🖥️
                     </a>
                 </div>
 
-                <!-- Detailed Items (At the bottom) -->
-                <div style="border-top: 2px dashed #f0f0f0; padding-top: 25px;">
-                    <h4 style="margin: 0 0 15px 0; font-size: 13px; font-weight: 900; color: #999; text-align: center;">تفاصيل المنتجات</h4>
+                <!-- Product Details (Moved to bottom) -->
+                <div style="border-top: 1px solid #f0f0f0; padding-top: 30px;">
+                    <h4 style="margin: 0 0 15px 0; font-size: 12px; font-weight: 900; color: #ccc; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">محتويات الشحنة</h4>
                     <table style="width: 100%; border-collapse: collapse;">
                         ${itemsHtml}
                     </table>
                 </div>
 
-                <p style="text-align: center; color: #bbb; font-size: 10px; margin-top: 30px;">
-                    تم الاستلام عبر نظام Hawsni • الفخامة في كل تفصيلة
+                <p style="text-align: center; color: #eee; font-size: 9px; margin-top: 40px; font-weight: 700;">
+                    Hawsni System • Premium Notification
                 </p>
             </div>
         </div>`

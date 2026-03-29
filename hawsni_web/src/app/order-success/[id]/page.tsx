@@ -246,7 +246,7 @@ export default function OrderSuccessPage() {
                         <span className="text-gray-400 font-bold">{isRTL ? 'إجمالي المبلغ' : 'Total Amount'}</span>
                         <div className="text-right">
                             <span className="text-2xl font-black text-[#0E4435]">
-                                {order.total_amount?.toLocaleString()}
+                                {(order.total_amount || order.total)?.toLocaleString()}
                             </span>
                             <span className="text-xs font-bold text-[#0E4435] ml-1">{isRTL ? 'ج.م' : 'EGP'}</span>
                         </div>
