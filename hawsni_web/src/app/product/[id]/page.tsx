@@ -756,10 +756,15 @@ export default function ProductPage() {
                                                     key={`${c.color}-${i}`}
                                                     onClick={() => {
                                                         setSelectedColor(c.color);
-                                                        if (c.imageIndex !== undefined && c.imageIndex !== null) {
-                                                            setSelectedImage(c.imageIndex);
-                                                            // Scroll to gallery
-                                                            galleryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                        if (c.imageIndex !== undefined && c.imageIndex !== null && c.imageIndex >= 0) {
+                                                            scrollToImage(c.imageIndex);
+                                                            // Optional: gently scroll the page up to ensure the image is in view
+                                                            if (galleryRef.current) {
+                                                                const rect = galleryRef.current.getBoundingClientRect();
+                                                                if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                                                                    galleryRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                                }
+                                                            }
                                                         }
                                                     }}
                                                     className={`
