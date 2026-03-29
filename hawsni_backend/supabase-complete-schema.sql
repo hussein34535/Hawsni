@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS orders (
   coupon_code TEXT,
   total DECIMAL(10,2) NOT NULL,
   status TEXT DEFAULT 'Processing' CHECK (status IN ('Processing', 'In Transit', 'Delivered', 'Cancelled')),
+  notes TEXT,
   is_paid BOOLEAN DEFAULT false,
   paid_at TIMESTAMPTZ,
   delivered_at TIMESTAMPTZ,
