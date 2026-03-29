@@ -131,7 +131,10 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td><span class="order-id">#<%= order.id.substring(0, 8) %></span></td>
+                                    <td>
+                                        <span class="order-id">#<%= order.id.substring(0, 8) %></span>
+                                    </td>
+                                    <td>
                                         <% 
                                             const total = parseFloat(order.total || 0);
                                             const displayTotal = isNaN(total) ? '0.00' : total.toFixed(2);
