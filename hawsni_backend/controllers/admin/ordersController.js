@@ -305,8 +305,9 @@ class OrdersController {
             if (!prompt) return res.status(400).json({ success: false, message: 'النص مطلوب' });
 
             const { GoogleGenerativeAI } = require('@google/generative-ai');
-            const genAI = new GoogleGenerativeAI('AIzaSyDCt--SaextCGXZBKki_eexi2AOKEuNgvk');
-            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyC7ettZvIuhgEu3BeIEVuYsd00SDtvMY60';
+            const genAI = new GoogleGenerativeAI(apiKey);
+            const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
             const systemInstruction = `
 أنت مساعد ذكاء اصطناعي لمتجر إلكتروني يسمى Hawsni للفخامة والأزياء.
