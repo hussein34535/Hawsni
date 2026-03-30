@@ -600,6 +600,35 @@ async function sendNoAnswerEmail(toEmail, userName, orderNumber) {
     });
 }
 
+// ──────────────────────────────────────────────
+// 8. Custom AI Email
+// ──────────────────────────────────────────────
+async function sendCustomAIEmail(toEmail, subject, htmlBody) {
+    return _send({
+        to: toEmail,
+        subject: subject || 'رسالة من فريق عمل Hawsni ✨',
+        htmlContent: `
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #e8e8e8; box-shadow: 0 10px 40px rgba(0,0,0,0.06);">
+
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #0E4435 0%, #1a6b54 100%); padding: 30px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900;">Hawsni</h1>
+                <p style="color: rgba(255,255,255,0.6); margin: 5px 0 0 0; font-size: 12px; font-weight: 600;">الفخامة في كل تفصيلة</p>
+            </div>
+
+            <!-- AI Body Content -->
+            <div style="padding: 32px 30px;">
+                ${htmlBody}
+            </div>
+
+            <!-- Footer -->
+            <div style="background: #f5f5f5; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                <p style="color: #0E4435; font-size: 13px; font-weight: 900; margin: 0;">Hawsni — Premium Fashion ✨</p>
+            </div>
+        </div>`
+    });
+}
+
 module.exports = {
     sendOtpEmail,
     sendPasswordResetEmail,
@@ -608,4 +637,5 @@ module.exports = {
     sendAdminNotification,
     sendNewOrderAdminEmail,
     sendNoAnswerEmail,
+    sendCustomAIEmail,
 };

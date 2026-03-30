@@ -320,6 +320,25 @@
                     <span>إرسال تنبيه "لم يرد"</span>
                 </button>
             </div>
+
+            <!-- Custom AI Email Box -->
+            <div style="padding: 16px 30px 24px; border-top: 1px solid #f0f0f0; background: #fafafa;">
+                <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #1e293b;"><i class="fas fa-robot" style="color:#6366f1;"></i> إنشاء إيميل مخصص بالذكاء الاصطناعي</h4>
+                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                    <input type="text" id="aiEmailPrompt" placeholder="مثال: اعتذر للعميل وبلغه أن المنتج نفذ وسنقوم برد المبلغ..." style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 13px; outline: none;">
+                    <button id="generateAiBtn" onclick="generateAiEmail()" style="display: flex; align-items: center; justify-content: center; background: #6366f1; color: white; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: inherit;">
+                        ✨ توليد
+                    </button>
+                </div>
+                
+                <div id="aiPreviewBox" style="display: none; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; max-height: 200px; overflow-y: auto;">
+                    <div id="aiEmailContent" style="font-size: 13px; color: #334155; line-height: 1.6;"></div>
+                </div>
+                
+                <button id="sendAiEmailBtn" onclick="sendAiEmail()" style="display: none; width: 100%; justify-content: center; align-items: center; gap: 8px; background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: inherit;">
+                    <i class="fas fa-paper-plane"></i> إرسال هذا الإيميل للعميل
+                </button>
+            </div>
         </div>
     </div>
     <script id="orders-data" type="application/json">
@@ -354,6 +373,12 @@
                 noAnswerBtn.style.borderColor = '#f59e0b';
                 noAnswerBtn.style.color = '#92400e';
             }
+
+            // Reset AI Box state
+            document.getElementById('aiEmailPrompt').value = '';
+            document.getElementById('aiPreviewBox').style.display = 'none';
+            document.getElementById('aiEmailContent').innerHTML = '';
+            document.getElementById('sendAiEmailBtn').style.display = 'none';
 
             // Update Header & Badge
             document.getElementById('modalOrderId').textContent = 'طلب رقم #' + order.id.substring(0, 8);
@@ -709,6 +734,84 @@
             } catch (e) {
                 alert('حدث خطأ في الاتصال');
                 btn.innerHTML = orig;
+                btn.disabled = false;
+            }
+        }
+
+        let currentGeneratedHtml = '';
+
+        async function generateAiEmail() {
+            if (!currentOrderId) return;
+            const promptInput = document.getElementById('aiEmailPrompt');
+            const prompt = promptInput.value.trim();
+            if(!prompt) {
+                alert('الرجاء كتابة الفكرة أولاً');
+                return;
+            }
+
+            const btn = document.getElementById('generateAiBtn');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/orders/${currentOrderId}/generate-ai-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    currentGeneratedHtml = data.generatedHtml;
+                    document.getElementById('aiEmailContent').innerHTML = currentGeneratedHtml;
+                    document.getElementById('aiPreviewBox').style.display = 'block';
+                    document.getElementById('sendAiEmailBtn').style.display = 'flex';
+                } else {
+                    alert('خطأ: ' + data.message);
+                }
+            } catch (err) {
+                alert('حدث خطأ أثناء التوليد');
+            } finally {
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }
+        }
+
+        async function sendAiEmail() {
+            if (!currentOrderId || !currentGeneratedHtml) return;
+            
+            const btn = document.getElementById('sendAiEmailBtn');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/orders/${currentOrderId}/send-ai-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ htmlContent: currentGeneratedHtml })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    btn.innerHTML = '<i class="fas fa-check"></i> تم الإرسال بنجاح!';
+                    btn.style.background = '#16a34a';
+                    setTimeout(() => {
+                        document.getElementById('aiPreviewBox').style.display = 'none';
+                        document.getElementById('aiEmailPrompt').value = '';
+                        btn.style.display = 'none';
+                        btn.style.background = '#0ea5e9';
+                        btn.innerHTML = origHTML;
+                    }, 3000);
+                } else {
+                    alert('خطأ: ' + data.message);
+                    btn.innerHTML = origHTML;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert('حدث خطأ في الإرسال');
+                btn.innerHTML = origHTML;
                 btn.disabled = false;
             }
         }

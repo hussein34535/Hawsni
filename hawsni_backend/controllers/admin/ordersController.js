@@ -298,6 +298,76 @@ class OrdersController {
             res.status(500).json({ success: false, message: err.message });
         }
     }
+    // AI Generate Email
+    async generateAIEmail(req, res) {
+        try {
+            const { prompt } = req.body;
+            if (!prompt) return res.status(400).json({ success: false, message: 'النص مطلوب' });
+
+            const { GoogleGenerativeAI } = require('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI('AIzaSyDCt--SaextCGXZBKki_eexi2AOKEuNgvk');
+            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+            const systemInstruction = `
+أنت مساعد ذكاء اصطناعي لمتجر إلكتروني يسمى Hawsni للفخامة والأزياء.
+المطلوب منك تحويل النص البسيط التالي المكتوب من قبل الإدارة إلى رسالة بريد إلكتروني احترافية للعميل.
+اكتب الرسالة بلغة عربية رسمية وودودة، واستخدم تنسيق HTML البسيط (بدون وسوم <html> أو <body>، استخدم فقط <p> و <strong> و <ul> و <br> وغيرها من التنسيقات البسيطة).
+لا تضع أي مقدمات، فقط النص الذي سيتم إرساله في البريد.
+النص المطلوب تحويله:
+"${prompt}"
+`;
+            const result = await model.generateContent(systemInstruction);
+            let responseText = result.response.text();
+            
+            // Remove markdown codeblock around HTML if it exists
+            responseText = responseText.replace(/```html/g, '').replace(/```/g, '').trim();
+
+            res.json({ success: true, generatedHtml: responseText });
+        } catch (err) {
+            console.error('Error in AI Generation:', err);
+            res.status(500).json({ success: false, message: 'حدث خطأ أثناء توليد الرسالة: ' + err.message });
+        }
+    }
+
+    // Send AI Email
+    async sendAIEmail(req, res) {
+        try {
+            const { id } = req.params;
+            const { htmlContent } = req.body;
+
+            if (!htmlContent) return res.status(400).json({ success: false, message: 'محتوى الرسالة مطلوب' });
+
+            const { data: order, error } = await supabase
+                .from('orders')
+                .select('*, users(name, email)')
+                .eq('id', id)
+                .single();
+
+            if (error || !order) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+
+            let customerEmail = order.users?.email;
+            let customerName = order.users?.name;
+
+            if (!customerEmail) {
+                let ship = order.shipping_address;
+                if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                    try { ship = JSON.parse(ship); } catch (e) { }
+                }
+                if (typeof ship === 'object' && ship !== null) {
+                    customerEmail = ship.email || ship.guestEmail;
+                    customerName = customerName || ship.name || ship.guestName;
+                }
+            }
+
+            if (!customerEmail) return res.status(400).json({ success: false, message: 'هذا العميل لم يقم بتسجيل بريد إلكتروني، لا يمكن إرسال الرسالة.' });
+
+            await emailService.sendCustomAIEmail(customerEmail, 'رسالة من إدارة متجر Hawsni ✨', htmlContent);
+            res.json({ success: true, message: 'تم إرسال رسالة الذكاء الاصطناعي بنجاح' });
+        } catch (err) {
+            console.error('Error sending AI email:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
 }
 
 module.exports = new OrdersController();
