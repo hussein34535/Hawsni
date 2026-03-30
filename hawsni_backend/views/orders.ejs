@@ -764,7 +764,29 @@
                 const data = await res.json();
                 if (data.success) {
                     currentGeneratedHtml = data.generatedHtml;
-                    document.getElementById('aiEmailContent').innerHTML = currentGeneratedHtml;
+                    const emailPreviewTemplate = `
+                        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 100%; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e8e8e8; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                            <!-- Header -->
+                            <div style="background: linear-gradient(135deg, #0E4435 0%, #1a6b54 100%); padding: 20px; text-align: center;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 18px; font-weight: 900;">Hawsni</h1>
+                                <p style="color: rgba(255,255,255,0.6); margin: 5px 0 0 0; font-size: 11px; font-weight: 600;">الفخامة في كل تفصيلة</p>
+                            </div>
+                            <!-- AI Body Content -->
+                            <div style="padding: 24px 20px; font-size: 13px; color: #334155; line-height: 1.6;">
+                                <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">إلى: عميل المتجر</p>
+                                ${currentGeneratedHtml}
+                            </div>
+                            <!-- Footer -->
+                            <div style="background: #f5f5f5; padding: 15px; text-align: center; border-top: 1px solid #eee;">
+                                <p style="color: #0E4435; font-size: 11px; font-weight: 900; margin: 0;">Hawsni — Premium Fashion ✨</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('aiEmailContent').innerHTML = emailPreviewTemplate;
+                    // remove visual max height and padding from parent container as preview is self-contained
+                    document.getElementById('aiPreviewBox').style.padding = '0';
+                    document.getElementById('aiPreviewBox').style.background = 'transparent';
+                    document.getElementById('aiPreviewBox').style.border = 'none';
                     document.getElementById('aiPreviewBox').style.display = 'block';
                     document.getElementById('sendAiEmailBtn').style.display = 'flex';
                 } else {
