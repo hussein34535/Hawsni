@@ -305,7 +305,11 @@ class OrdersController {
             if (!prompt) return res.status(400).json({ success: false, message: 'النص مطلوب' });
 
             const { GoogleGenerativeAI } = require('@google/generative-ai');
-            const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyC7ettZvIuhgEu3BeIEVuYsd00SDtvMY60';
+            const apiKey = process.env.GEMINI_API_KEY;
+            if (!apiKey) {
+                console.error("GEMINI_API_KEY is not defined in .env");
+                return res.status(500).json({ success: false, message: 'Gemini API Key is missing in environment variables.' });
+            }
             const genAI = new GoogleGenerativeAI(apiKey);
             const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
