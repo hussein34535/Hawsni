@@ -629,6 +629,41 @@ async function sendCustomAIEmail(toEmail, subject, htmlBody) {
     });
 }
 
+// ──────────────────────────────────────────────
+// 9. Out of Stock Alert (Admin)
+// ──────────────────────────────────────────────
+async function sendOutOfStockAlert(productName, sku, size, color) {
+    const variantDesc = [
+        size && size !== 'null' ? `مقاس: ${size}` : '',
+        color && color !== 'null' ? `لون: ${color}` : '',
+        sku && sku !== 'null' ? `SKU: ${sku}` : ''
+    ].filter(Boolean).join(' | ');
+
+    return _send({
+        to: ADMIN_EMAIL,
+        subject: `⚠️ تنبيه نفاذ مخزون: ${productName}`,
+        htmlContent: `
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e8e8e8;">
+            <div style="background: #dc3545; padding: 25px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 20px;">⚠️ نفاذ كمية منتج!</h1>
+            </div>
+            <div style="padding: 30px;">
+                <p>لقد نفذت الكمية الخاصة بالمنتج التالي في المخزن إثر آخر طلب شراء:</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0; border: 1px solid #ddd;">
+                    <h3 style="margin: 0 0 10px 0; color: #dc3545;">${productName}</h3>
+                    ${variantDesc ? `<p style="margin: 0; font-size: 14px; font-weight: bold;">${variantDesc}</p>` : ''}
+                </div>
+                <p>يرجى مراجعة لوحة التحكم وتحديث المخزون في أقرب وقت.</p>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="https://hwasibackend.vercel.app/admin/products" style="background: #dc3545; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold;">الذهاب للمنتجات</a>
+                </div>
+            </div>
+        </div>`
+    }).catch(err => {
+        console.error('Failed to send out of stock alert:', err);
+    });
+}
+
 module.exports = {
     sendOtpEmail,
     sendPasswordResetEmail,
@@ -638,4 +673,5 @@ module.exports = {
     sendNewOrderAdminEmail,
     sendNoAnswerEmail,
     sendCustomAIEmail,
+    sendOutOfStockAlert,
 };

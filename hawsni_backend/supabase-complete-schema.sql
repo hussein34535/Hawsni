@@ -252,6 +252,19 @@ CREATE TABLE IF NOT EXISTS products (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Product Variants
+CREATE TABLE IF NOT EXISTS product_variants (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  size TEXT,
+  color TEXT,
+  sku TEXT UNIQUE,
+  stock INTEGER DEFAULT 0 CHECK (stock >= 0),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(product_id, size, color)
+);
+
 -- Carts
 CREATE TABLE IF NOT EXISTS carts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

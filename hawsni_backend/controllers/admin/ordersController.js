@@ -378,6 +378,43 @@ class OrdersController {
             res.status(500).json({ success: false, message: err.message });
         }
     }
+
+    // Create Bosta Shipment
+    async createBostaShipment(req, res) {
+        try {
+            const { id } = req.params;
+            const bostaService = require('../../services/bostaService');
+
+            // Fetch the full order details from DB
+            const { data: order, error } = await supabase
+                .from('orders')
+                .select('*, users(name, phone, email), order_items(*)')
+                .eq('id', id)
+                .single();
+
+            if (error || !order) {
+                console.error('Order fetch error:', error);
+                return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+            }
+
+            if (order.bosta_id) {
+                return res.status(400).json({ success: false, message: 'هذا الطلب تم إرساله مسبقاً إلى بوسطة' });
+            }
+
+            // Call Bosta Service
+            const result = await bostaService.createShipment(order);
+
+            res.json({ 
+                success: true, 
+                message: 'تم إنشاء الشحنة بنجاح في بوسطة',
+                trackingNumber: result.trackingNumber 
+            });
+
+        } catch (err) {
+            console.error('Error creating Bosta shipment:', err);
+            res.status(500).json({ success: false, message: 'خطأ في إنشاء الشحنة: ' + err.message });
+        }
+    }
 }
 
 module.exports = new OrdersController();

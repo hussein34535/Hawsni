@@ -113,6 +113,54 @@ class OrderService {
             if (itemsError) throw itemsError;
 
             order.items = orderItems;
+
+            // ⚠️ 3. Decrement Stock & Send Alerts 
+            for (const item of orderItems) {
+                try {
+                    const qty = item.quantity || 1;
+                    const pid = item.product_id;
+                    const size = item.size || null;
+                    const color = item.color || null;
+
+                    let pName = 'منتج غير معروف';
+
+                    // 1. Decrement overall stock in products
+                    const { data: currentProduct } = await supabase.from('products').select('name, stock').eq('id', pid).single();
+                    if (currentProduct) {
+                        pName = currentProduct.name;
+                        const newStock = Math.max(0, (currentProduct.stock || 0) - qty);
+                        await supabase.from('products').update({ stock: newStock }).eq('id', pid);
+                        
+                        // Wait to send global if we do variants below
+                    }
+
+                    // 2. Decrement Specific Variant Stock
+                    let variantQuery = supabase.from('product_variants').select('*').eq('product_id', pid);
+                    
+                    if (size) variantQuery = variantQuery.eq('size', size);
+                    else variantQuery = variantQuery.is('size', null);
+                    
+                    if (color) variantQuery = variantQuery.eq('color', color);
+                    else variantQuery = variantQuery.is('color', null);
+
+                    const { data: variant } = await variantQuery.maybeSingle();
+
+                    if (variant) {
+                        const newVariantStock = Math.max(0, (variant.stock || 0) - qty);
+                        await supabase.from('product_variants').update({ stock: newVariantStock }).eq('id', variant.id);
+
+                        if (newVariantStock <= 0) {
+                            emailService.sendOutOfStockAlert(pName, variant.sku, variant.size, variant.color).catch(e => console.error(e));
+                        }
+                    } else if (currentProduct && Math.max(0, (currentProduct.stock || 0) - qty) <= 0) {
+                        // Global out of stock alert if no variants are tracked for this item
+                        emailService.sendOutOfStockAlert(pName, 'غير مسجل', size, color).catch(e => console.error(e));
+                    }
+
+                } catch (stockErr) {
+                    console.error('❌ Error decrementing stock for item:', stockErr);
+                }
+            }
         }
 
         // Send order confirmation email and admin notification (non-blocking)

@@ -149,7 +149,7 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                                 <div class="form-group">
                                     <label class="form-label">المقاسات</label>
-                                    <input type="text" name="sizes" class="form-control"
+                                    <input type="text" name="sizes" id="sizesInput" class="form-control"
                                         value="<%= product && product.sizes ? product.sizes.join(', ') : '' %>"
                                         placeholder="S, M, L, XL">
                                     <small class="text-muted">افصل بينها بفواصل</small>
@@ -288,6 +288,34 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Variants Management Section -->
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
+                        <h4 style="margin-bottom: 1rem;"><i class="fas fa-boxes"></i> المخزون والـ SKUs (حسب المقاس واللون)</h4>
+                        <p class="text-muted" style="font-size: 0.9em;">
+                            قم بإدخال المقاسات والألوان في الأعلى، ثم انقر على "توليد/تحديث الجدول" لإنشاء صف لكل مزيج وإدخال الكمية المتوفرة ورقم الـ SKU الخاص به.
+                        </p>
+                        <button type="button" class="btn btn-outline-primary mb-3" onclick="generateVariantsTable()">
+                            <i class="fas fa-sync-alt"></i> توليد / تحديث الجدول
+                        </button>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="variantsTable" style="display: none; background: white;">
+                                <thead style="background-color: var(--light-gray);">
+                                    <tr>
+                                        <th>المقاس</th>
+                                        <th>اللون</th>
+                                        <th>SKU (كود الصنف)</th>
+                                        <th>المخزون المتوفر</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows generated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" name="variants" id="variantsDataInput">
                     </div>
 
                     <div
@@ -965,6 +993,7 @@
             colors.splice(index, 1);
             updateColorsInput();
             renderColors();
+            if (typeof generateVariantsTable === 'function') generateVariantsTable();
         }
 
         function addColor() {
@@ -1003,7 +1032,128 @@
 
             updateColorsInput();
             renderColors();
+            if (typeof generateVariantsTable === 'function') generateVariantsTable();
         }
+
+        // === Variants Logic ===
+        let activeVariants = [];
+        
+        function parseSizes() {
+            const input = document.getElementById('sizesInput').value || '';
+            return input.split(/[,،]/).map(s => s.trim()).filter(s => s);
+        }
+
+        function buildCombinations() {
+            const currSizes = parseSizes();
+            const currColors = colors.map(c => c.color);
+            
+            const combinations = [];
+            
+            if (currSizes.length === 0 && currColors.length === 0) {
+            	// No variants selected
+                return [];
+            }
+            
+            if (currSizes.length > 0 && currColors.length === 0) {
+                currSizes.forEach(s => combinations.push({size: s, color: null}));
+            } else if (currSizes.length === 0 && currColors.length > 0) {
+                currColors.forEach(c => combinations.push({size: null, color: c}));
+            } else {
+                currSizes.forEach(s => {
+                    currColors.forEach(c => {
+                        combinations.push({size: s, color: c});
+                    });
+                });
+            }
+            return combinations;
+        }
+
+        function generateVariantsTable() {
+            const tbody = document.querySelector('#variantsTable tbody');
+            const combinations = buildCombinations();
+            
+            // Backup currently inputted data in table
+            const currentInputs = Array.from(tbody.querySelectorAll('tr')).map(tr => ({
+                size: tr.dataset.size,
+                color: tr.dataset.color,
+                sku: tr.querySelector('.variant-sku').value,
+                stock: tr.querySelector('.variant-stock').value
+            }));
+
+            // Identify initial load existing variants
+            const productDataEl = document.getElementById('server-product-data');
+            const existingProduct = productDataEl && productDataEl.getAttribute('data-product') !== 'null' ? JSON.parse(productDataEl.getAttribute('data-product')) : null;
+            const dbVariants = (existingProduct && existingProduct.product_variants) ? existingProduct.product_variants : [];
+
+            document.getElementById('variantsTable').style.display = combinations.length > 0 ? 'table' : 'none';
+            tbody.innerHTML = '';
+            activeVariants = [];
+
+            if (combinations.length === 0) {
+                updateVariantsInput();
+                return;
+            }
+
+            combinations.forEach((combo, idx) => {
+                const tr = document.createElement('tr');
+                tr.dataset.size = combo.size || '';
+                tr.dataset.color = combo.color || '';
+
+                // Try to find previously typed input
+                let matchedInput = currentInputs.find(c => c.size === (combo.size || '') && c.color === (combo.color || ''));
+                
+                // Try to find from DB on first load (if matchedInput is empty)
+                if (!matchedInput) {
+                    const matchedDb = dbVariants.find(v => (v.size || '') === (combo.size || '') && (v.color || '') === (combo.color || ''));
+                    if (matchedDb) {
+                        matchedInput = { sku: matchedDb.sku || '', stock: matchedDb.stock || 0 };
+                    }
+                }
+
+                const skuVal = matchedInput ? matchedInput.sku : '';
+                const stockVal = matchedInput ? matchedInput.stock : 0;
+
+                tr.innerHTML = `
+                    <td class="align-middle">${combo.size || '-'}</td>
+                    <td class="align-middle">
+                        ${combo.color ? `<div style="display:inline-block; width:15px; height:15px; border-radius:50%; background:${combo.color}; vertical-align:-2px; border:1px solid #ccc;"></div> <span dir="ltr">${combo.color}</span>` : '-'}
+                    </td>
+                    <td><input type="text" class="form-control variant-sku" placeholder="كود اختياري" value="${skuVal}" onchange="updateVariantsInput()"></td>
+                    <td><input type="number" class="form-control variant-stock" min="0" value="${stockVal}" onchange="updateVariantsInput()"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateVariantsInput();
+        }
+
+        function updateVariantsInput() {
+            const rows = document.querySelectorAll('#variantsTable tbody tr');
+            const result = [];
+            rows.forEach(tr => {
+                result.push({
+                    size: tr.dataset.size || null,
+                    color: tr.dataset.color || null,
+                    sku: tr.querySelector('.variant-sku').value,
+                    stock: tr.querySelector('.variant-stock').value
+                });
+            });
+            document.getElementById('variantsDataInput').value = JSON.stringify(result);
+        }
+
+        // On Load initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                generateVariantsTable();
+            }, 500); // Wait for sizes and colors to finish parsing
+
+            const sInput = document.getElementById('sizesInput');
+            if (sInput) {
+                sInput.addEventListener('input', () => {
+                    generateVariantsTable();
+                });
+            }
+        });
     </script>
 
     <%- include('partials/footer') %>

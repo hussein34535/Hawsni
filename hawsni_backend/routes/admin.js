@@ -59,6 +59,7 @@ router.post('/orders/bulk-delete', ordersController.bulkDelete);
 router.post('/orders/:id/no-answer', ordersController.sendNoAnswer);
 router.post('/orders/:id/generate-ai-email', ordersController.generateAIEmail);
 router.post('/orders/:id/send-ai-email', ordersController.sendAIEmail);
+router.post('/orders/:id/bosta-ship', ordersController.createBostaShipment);
 
 // Category Controller
 const CategoryController = require('../controllers/api/categoryController');

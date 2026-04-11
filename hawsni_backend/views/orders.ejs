@@ -339,6 +339,28 @@
                     <i class="fas fa-paper-plane"></i> إرسال هذا الإيميل للعميل
                 </button>
             </div>
+
+            <!-- Bosta Integration Box -->
+            <div style="padding: 16px 30px 24px; border-top: 1px solid #f0f0f0; background: #fafafa;">
+                <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #1e293b;"><i class="fas fa-truck" style="color:#e11d48;"></i> الشحن عبر بوسطة</h4>
+                
+                <div id="bostaNotSentBox" style="display: block;">
+                    <p style="font-size:13px; color:#64748b; margin-top:0;">إرسال تفاصيل هذا الطلب مباشرة إلى بوسطة لإنشاء بوليصة شحن.</p>
+                    <button id="sendBostaBtn" onclick="sendToBosta()" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #e11d48; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: inherit; width: 100%;">
+                        <i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة
+                    </button>
+                </div>
+
+                <div id="bostaSentBox" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-size: 13px; font-weight: bold; color: #1e3a8a;"><i class="fas fa-check-circle" style="color: #2563eb;"></i> تم إرسال الشحنة</span>
+                        <span style="font-size: 12px; background: #dbeafe; color: #1e40af; padding: 3px 8px; border-radius: 4px;" id="bostaTrackingNumber"></span>
+                    </div>
+                    <a id="bostaTrackingLink" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: white; color: #2563eb; border: 1px solid #93c5fd; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; transition: 0.2s; width: 100%;">
+                        <i class="fas fa-map-marker-alt"></i> تتبع الشحنة
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     <script id="orders-data" type="application/json">
@@ -379,6 +401,19 @@
             document.getElementById('aiPreviewBox').style.display = 'none';
             document.getElementById('aiEmailContent').innerHTML = '';
             document.getElementById('sendAiEmailBtn').style.display = 'none';
+
+            // Check Bosta state
+            if (order.bosta_id || order.tracking_number) {
+                document.getElementById('bostaNotSentBox').style.display = 'none';
+                document.getElementById('bostaSentBox').style.display = 'block';
+                document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + order.tracking_number;
+                document.getElementById('bostaTrackingLink').href = 'https://t.bosta.co/' + order.tracking_number;
+            } else {
+                document.getElementById('bostaNotSentBox').style.display = 'block';
+                document.getElementById('bostaSentBox').style.display = 'none';
+                document.getElementById('sendBostaBtn').disabled = false;
+                document.getElementById('sendBostaBtn').innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
+            }
 
             // Update Header & Badge
             document.getElementById('modalOrderId').textContent = 'طلب رقم #' + order.id.substring(0, 8);
@@ -834,6 +869,45 @@
             } catch (err) {
                 alert('حدث خطأ في الإرسال');
                 btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }
+        }
+
+        async function sendToBosta() {
+            if (!currentOrderId) return;
+            const btn = document.getElementById('sendBostaBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إرسال الطلب...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/orders/${currentOrderId}/bosta-ship`, {
+                    method: 'POST'
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Update Local Data Cache
+                    const orderIdx = ordersData.findIndex(o => o.id === currentOrderId);
+                    if (orderIdx > -1) {
+                        ordersData[orderIdx].tracking_number = data.trackingNumber;
+                    }
+                    
+                    // Update Modal UI successfully
+                    document.getElementById('bostaNotSentBox').style.display = 'none';
+                    document.getElementById('bostaSentBox').style.display = 'block';
+                    document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + data.trackingNumber;
+                    document.getElementById('bostaTrackingLink').href = 'https://t.bosta.co/' + data.trackingNumber;
+                    
+                    alert('تم إنشاء الشحنة في بوسطة بنجاح!');
+                } else {
+                    alert('خطأ: ' + data.message);
+                    btn.innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء إرسال الطلب لبوسطة');
+                btn.innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
                 btn.disabled = false;
             }
         }

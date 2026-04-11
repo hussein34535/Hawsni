@@ -426,6 +426,26 @@ class ProductController {
 
 
 
+            // Insert variants if any
+            if (req.body.variants) {
+                try {
+                    const variantsArr = JSON.parse(req.body.variants);
+                    if (Array.isArray(variantsArr) && variantsArr.length > 0) {
+                        const variantData = variantsArr.map(v => ({
+                            product_id: newProduct.id,
+                            size: v.size || null,
+                            color: v.color || null,
+                            sku: v.sku || null,
+                            stock: parseInt(v.stock) || 0
+                        }));
+                        const { error: variantError } = await supabase.from('product_variants').insert(variantData);
+                        if (variantError) console.error('❌ Error inserting variants:', variantError);
+                    }
+                } catch (e) {
+                    console.error('Error parsing variants:', e);
+                }
+            }
+
             if (categoryIdsToInsert && categoryIdsToInsert.length > 0) {
                 const links = categoryIdsToInsert.map(catId => ({
                     product_id: newProduct.id,
@@ -448,7 +468,7 @@ class ProductController {
         try {
             const { data: product } = await supabase
                 .from('products')
-                .select('*, product_category_links(category_id)')
+                .select('*, product_category_links(category_id), product_variants(*)')
                 .eq('id', req.params.id)
                 .single();
             const { data: categories } = await supabase.from('categories').select('*');
@@ -632,6 +652,32 @@ class ProductController {
                 const { error: linkError } = await supabase.from('product_category_links').insert(links);
                 if (linkError) {
                     console.error('❌ Error linking categories:', linkError);
+                }
+            }
+
+            // Sync variants if any
+            if (req.body.variants) {
+                try {
+                    const variantsArr = JSON.parse(req.body.variants);
+                    if (Array.isArray(variantsArr)) {
+                        // Remove existing
+                        await supabase.from('product_variants').delete().eq('product_id', req.params.id);
+
+                        // Insert new
+                        if (variantsArr.length > 0) {
+                            const variantData = variantsArr.map(v => ({
+                                product_id: req.params.id,
+                                size: v.size || null,
+                                color: v.color || null,
+                                sku: v.sku || null,
+                                stock: parseInt(v.stock) || 0
+                            }));
+                            const { error: variantError } = await supabase.from('product_variants').insert(variantData);
+                            if (variantError) console.error('❌ Error inserting variants during update:', variantError);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error parsing variants on update:', e);
                 }
             }
 
