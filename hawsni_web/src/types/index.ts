@@ -46,3 +46,4 @@ export interface Product {
     stock?: number;
     countInStock?: number;
     product_variants?: any[];
+}

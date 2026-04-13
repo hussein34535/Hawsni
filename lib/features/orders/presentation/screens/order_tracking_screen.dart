@@ -14,7 +14,6 @@ class OrderTrackingScreen extends StatefulWidget {
 }
 
 class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
-  List<Map<String, dynamic>> _trackingEvents = [];
   bool _isLoading = true;
   String _errorMessage = '';
 
@@ -40,8 +39,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
       if (trackingData != null && trackingData['events'] != null) {
         setState(() {
-          _trackingEvents =
-              List<Map<String, dynamic>>.from(trackingData['events']);
           _isLoading = false;
         });
       } else {
@@ -262,25 +259,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     );
   }
 
-  IconData _getStepIcon(String title) {
-    final lower = title.toLowerCase();
-    if (lower.contains('order') || lower.contains('طلب')) {
-      return Icons.shopping_bag_outlined;
-    }
-    if (lower.contains('confirm') || lower.contains('تأكيد')) {
-      return Icons.check_circle_outline;
-    }
-    if (lower.contains('process') || lower.contains('تجهيز')) {
-      return Icons.inventory_2_outlined;
-    }
-    if (lower.contains('ship') || lower.contains('شحن')) {
-      return Icons.local_shipping_outlined;
-    }
-    if (lower.contains('deliver') || lower.contains('توصيل')) {
-      return Icons.home_outlined;
-    }
-    return Icons.circle_outlined;
-  }
+
 
   Widget _buildDeliveryInfoRow(IconData icon, String label, String value) {
     return Row(

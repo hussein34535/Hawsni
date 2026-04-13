@@ -23,6 +23,7 @@ import 'package:hwasi_app/features/products/bloc/product_bloc.dart';
 import 'package:hwasi_app/features/products/bloc/product_event.dart';
 import 'package:hwasi_app/features/products/bloc/product_state.dart';
 import 'package:hwasi_app/features/products/data/services/product_service.dart';
+import 'package:hwasi_app/features/products/data/models/product_model.dart';
 import 'package:hwasi_app/features/products/presentation/widgets/related_products.dart';
 import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
 import 'package:hwasi_app/features/reviews/bloc/review_bloc.dart';
@@ -83,6 +84,8 @@ class DisplayData {
   final int stock;
   final bool isVtoEnabled;
 
+  final List<ProductVariant>? variants;
+
   DisplayData({
     required this.name,
     required this.price,
@@ -94,7 +97,7 @@ class DisplayData {
     required this.sizes,
     required this.colors,
     this.sizeGuide,
-    required this.blurHash,
+    this.blurHash,
     required this.stock,
     required this.isVtoEnabled,
     this.variants,
@@ -385,6 +388,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     int stock = 0;
     bool isVtoEnabled = true;
     List<ProductVariant>? variants;
+    String? blurHash = widget.blurHash;
 
     if (state is ProductDetailsLoaded) {
       name = state.product.name;
@@ -398,6 +402,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       sizeGuide = state.product.sizeGuide;
       isVtoEnabled = state.product.isVtoEnabled;
       variants = state.product.variants;
+      blurHash = state.product.blurHash;
       if ((state.product.images ?? []).isNotEmpty) {
         images = state.product.images!;
         imageUrl = images[0];
@@ -422,6 +427,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         sizes: sizes,
         colors: colors,
         sizeGuide: sizeGuide,
+        blurHash: blurHash,
         stock: stock,
         isVtoEnabled: isVtoEnabled,
         variants: variants);
