@@ -19,7 +19,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<OrderBloc>().add(LoadOrders());
+    // Only load if not already loaded (avoids race with bloc's own init)
+    final currentState = context.read<OrderBloc>().state;
+    if (currentState is! OrderLoaded && currentState is! OrderLoading) {
+      context.read<OrderBloc>().add(LoadOrders());
+    }
   }
 
   @override

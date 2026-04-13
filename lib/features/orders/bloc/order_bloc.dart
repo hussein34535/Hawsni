@@ -28,6 +28,8 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   }
 
   Future<void> _onLoadOrders(LoadOrders event, Emitter<OrderState> emit) async {
+    // Skip if already loading to avoid race conditions
+    if (state is OrderLoading) return;
     emit(OrderLoading());
     try {
       final orders = await _orderService.getUserOrders();

@@ -328,7 +328,11 @@ class AuthService {
       await prefs.setBool('isGuest', true);
     }
 
-    _authStateController.add(true); // Always return true (Guest or User)
+    // NOTE: We intentionally do NOT emit to authStateChanges here.
+    // OrderBloc self-initializes via AuthService.isAuthenticated() check in its constructor.
+    // Emitting here would trigger a duplicate LoadOrders call racing with the one
+    // already started by the bloc's constructor.
+    debugPrint('Token load complete. Authenticated: ${_token != null}');
   }
 
   // Check if user is authenticated
