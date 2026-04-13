@@ -12,11 +12,16 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     on<CreateOrder>(_onCreateOrder);
     on<ClearOrders>(_onClearOrders);
 
-    // Listen to auth changes
+    // If user already has a token when bloc is created (e.g. app restart), load immediately
+    if (AuthService.isAuthenticated()) {
+      add(LoadOrders());
+    }
+
+    // Listen to auth changes (login / logout events)
     AuthService.authStateChanges.listen((isAuthenticated) {
-      if (isAuthenticated) {
+      if (isAuthenticated && AuthService.isAuthenticated()) {
         add(LoadOrders());
-      } else {
+      } else if (!isAuthenticated) {
         add(ClearOrders());
       }
     });
