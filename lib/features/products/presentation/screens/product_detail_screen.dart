@@ -207,6 +207,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           isError: true);
       return;
     }
+    if (_selectedSize != null && _isSizeOutOfStock(_selectedSize!, data)) {
+      _toast(ctx, 'الكمية نفدت', isError: true);
+      return;
+    }
     if (data.colors.isNotEmpty && _selectedColor == null) {
       _toast(ctx, AppLocalizations.of(ctx)?.pleaseSelectColor ?? 'Select Color',
           isError: true);
@@ -1131,7 +1135,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   item.size == _selectedSize &&
                   item.color == _selectedColor);
             }
-            final isSoldOut = data.stock <= 0 && state is ProductDetailsLoaded;
+            final isSoldOut = (data.stock <= 0 && state is ProductDetailsLoaded) ||
+                (_selectedSize != null && _isSizeOutOfStock(_selectedSize!, data));
             final buttonText = isSoldOut
                 ? 'نفدت الكمية'
                 : (isAdded ? 'اذهب للسلة 🛒' : addToCartStr);

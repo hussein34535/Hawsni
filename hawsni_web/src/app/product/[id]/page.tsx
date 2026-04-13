@@ -311,6 +311,21 @@ export default function ProductPage() {
     // Determine real stock
     const stockCount = product?.stock ?? (product as any)?.countInStock ?? 0;
 
+    const isSizeOutOfStock = (s: string) => {
+        if (!product || !product.product_variants || product.product_variants.length === 0) {
+            return stockCount <= 0;
+        }
+        let variantsForSize = product.product_variants.filter((v: any) => v.size === s);
+        if (selectedColor) {
+            variantsForSize = variantsForSize.filter((v: any) => v.color === selectedColor || !v.color);
+        }
+        if (variantsForSize.length === 0) return stockCount <= 0;
+        return variantsForSize.every((v: any) => v.stock <= 0);
+    };
+
+    const currentStockOut = selectedSize ? isSizeOutOfStock(selectedSize) : (stockCount <= 0);
+
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -454,6 +469,11 @@ export default function ProductPage() {
             return;
         }
 
+        if (currentStockOut || isSizeOutOfStock(selectedSize)) {
+            showToast(isRTL ? 'الكمية نفدت' : 'Out of stock', 'error');
+            return;
+        }
+
         // Find the image for the selected color
         let selectedColorImage = safeImages[0] || '';
         if (selectedColor && product.colors) {
@@ -542,17 +562,7 @@ export default function ProductPage() {
         );
     }
 
-    const isSizeOutOfStock = (s: string) => {
-        if (!product.product_variants || product.product_variants.length === 0) {
-            return stockCount <= 0;
-        }
-        let variantsForSize = product.product_variants.filter((v: any) => v.size === s);
-        if (selectedColor) {
-            variantsForSize = variantsForSize.filter((v: any) => v.color === selectedColor || !v.color);
-        }
-        if (variantsForSize.length === 0) return stockCount <= 0;
-        return variantsForSize.every((v: any) => v.stock <= 0);
-    };
+
 
     return (
         <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
@@ -1023,10 +1033,10 @@ export default function ProductPage() {
                     </div>
 
                     <button
-                        onClick={stockCount <= 0 ? undefined : (isInCart ? () => router.push('/cart') : handleAddToCart)}
+                        onClick={currentStockOut ? undefined : (isInCart ? () => router.push('/cart') : handleAddToCart)}
                         className={`
                             flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
-                            ${stockCount <= 0
+                            ${currentStockOut
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : (!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
                                     ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
@@ -1034,7 +1044,7 @@ export default function ProductPage() {
                                         ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'
                                         : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
                         `}
-                        disabled={stockCount <= 0}
+                        disabled={currentStockOut}
                     >
                         <AnimatePresence mode="wait">
                             <motion.div
