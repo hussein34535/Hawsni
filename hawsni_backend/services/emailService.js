@@ -459,11 +459,11 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     }).join('');
 
     // Preheader helps control what shows in the notification preview on mobile/desktop
-    const preheader = `تبريكات! طلب جديد من ${customerName || 'عميل'} بقيمة ${Number(total).toLocaleString()} ج.م`;
+    const preheader = `طلب جديد بقيمة ${Number(total).toLocaleString()} ج.م من ${customerName || 'عميل'}`;
 
     return _send({
         to: ADMIN_EMAIL,
-        subject: `💰 طلب جديد #${orderNumber} — ${Number(total).toLocaleString()} ج.م`,
+        subject: `🔔 طلب جديد #${orderNumber} — ${Number(total).toLocaleString()} ج.م`,
         htmlContent: `
         <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 450px; margin: 0 auto; background: #ffffff; border-radius: 35px; overflow: hidden; border: 1px solid #f0f0f0; box-shadow: 0 15px 45px rgba(0,0,0,0.05);">
             
@@ -473,55 +473,48 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
             </div>
 
             <!-- Header Badge -->
-            <div style="background: #0E4435; padding: 50px 30px; text-align: center;">
-                <div style="background: rgba(255,255,255,0.12); width: 80px; height: 80px; border-radius: 28px; margin: 0 auto 20px auto; text-align: center;">
-                    <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
-                        <tr>
-                            <td align="center" valign="middle" style="font-size: 38px;">💰</td>
-                        </tr>
-                    </table>
-                </div>
-                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.5px;">وصلك طلب جديد!</h1>
-                <p style="color: rgba(255,255,255,0.5); margin: 6px 0 0 0; font-size: 13px; font-weight: 700;">رقم الطلب #${orderNumber}</p>
+            <div style="background: #202124; padding: 40px 30px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;">طلب جديد 🔔</h1>
+                <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0 0; font-size: 13px;">رقم الطلب #${orderNumber}</p>
             </div>
 
-            <div style="padding: 35px 30px;">
-                <!-- Main Badge Content -->
-                <div style="text-align: center; margin-bottom: 35px;">
-                    <p style="color: #bbb; font-size: 11px; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">إجمالي المبيعة</p>
-                    <h2 style="color: #0E4435; font-size: 48px; font-weight: 900; margin: 0; line-height: 1;">${Number(total).toLocaleString()} <span style="font-size: 14px; font-weight: 800;">ج.م</span></h2>
+            <div style="padding: 30px;">
+                <!-- Main Content -->
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <p style="color: #666; font-size: 13px; margin-bottom: 5px;">القيمة الإجمالية</p>
+                    <h2 style="color: #202124; font-size: 32px; font-weight: 700; margin: 0; line-height: 1;">${Number(total).toLocaleString()} <span style="font-size: 14px; font-weight: 600;">ج.م</span></h2>
                 </div>
 
                 <!-- Customer Minimal Info -->
-                <div style="background: #f8faf9; border-radius: 24px; padding: 22px; margin-bottom: 30px; border: 1px solid #edf2f0;">
+                <div style="background: #fafafa; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #eee;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr>
-                            <td style="padding: 6px 0; color: #999; font-size: 12px; font-weight: 700;">العميل</td>
-                            <td style="padding: 6px 0; color: #1a1a1a; font-size: 15px; font-weight: 900; text-align: left;">${customerName || '—'}</td>
+                            <td style="padding: 6px 0; color: #666; font-size: 13px;">العميل</td>
+                            <td style="padding: 6px 0; color: #202124; font-size: 14px; font-weight: 600; text-align: left;">${customerName || '—'}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 6px 0; color: #999; font-size: 12px; font-weight: 700;">المحافظة</td>
-                            <td style="padding: 6px 0; color: #1a1a1a; font-size: 14px; font-weight: 800; text-align: left;">${(shippingAddress && shippingAddress.state) || '—'}</td>
+                            <td style="padding: 6px 0; color: #666; font-size: 13px;">المحافظة</td>
+                            <td style="padding: 6px 0; color: #202124; font-size: 14px; font-weight: 600; text-align: left;">${(shippingAddress && shippingAddress.state) || '—'}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 6px 0; color: #999; font-size: 12px; font-weight: 700;">التواصل</td>
-                            <td style="padding: 6px 0; color: #0E4435; font-size: 14px; font-weight: 900; text-align: left; direction: ltr;">${(shippingAddress && shippingAddress.phone) || '—'}</td>
+                            <td style="padding: 6px 0; color: #666; font-size: 13px;">رقم الهاتف</td>
+                            <td style="padding: 6px 0; color: #202124; font-size: 14px; font-weight: 600; text-align: left; direction: ltr;">${(shippingAddress && shippingAddress.phone) || '—'}</td>
                         </tr>
                         ${order.notes ? `
                         <tr>
-                            <td style="padding: 12px 0 6px 0; color: #f59e0b; font-size: 11px; font-weight: 900; border-top: 1px solid #f0f0f0;" colspan="2">ملاحظات العميل:</td>
+                            <td style="padding: 12px 0 6px 0; color: #f59e0b; font-size: 12px; font-weight: 600; border-top: 1px solid #f0f0f0;" colspan="2">ملاحظات:</td>
                         </tr>
                         <tr>
-                            <td style="padding: 0 0 10px 0; color: #92400e; font-size: 13px; font-weight: 700; line-height: 1.5;" colspan="2">${order.notes}</td>
+                            <td style="padding: 0 0 10px 0; color: #92400e; font-size: 13px; line-height: 1.5;" colspan="2">${order.notes}</td>
                         </tr>
                         ` : ''}
                     </table>
                 </div>
 
                 <!-- Action Button -->
-                <div style="text-align: center; margin-bottom: 45px;">
-                    <a href="https://hwasibackend.vercel.app/orders" style="background: #0E4435; color: #ffffff; padding: 18px 45px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block; box-shadow: 0 12px 25px rgba(14,68,53,0.15);">
-                        فتح الطلبات 🖥️
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <a href="https://hwasibackend.vercel.app/admin/orders" style="background: #202124; color: #ffffff; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
+                        إدارة الطلب
                     </a>
                 </div>
 
