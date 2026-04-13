@@ -206,8 +206,7 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
                 <!-- Help Section -->
                 <div style="text-align: center; padding-top: 25px; border-top: 1px solid #f5f5f5;">
                     <p style="color: #999; font-size: 12px; line-height: 1.6; margin: 0;">
-                        هل لديك أي استفسار؟ تواصل معنا عبر إنستغرام 💖<br>
-                        <b>تنويه:</b> يرجى إبقاء الهاتف متاحاً لتأكيد الطلب.
+                        هل لديك أي استفسار؟ تواصل معنا عبر إنستغرام 💖
                     </p>
                 </div>
             </div>
