@@ -179,28 +179,7 @@ export default function OrderSuccessPage() {
                     </motion.div>
                 </div>
 
-                {/* 12-hour Contact Notice */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.45 }}
-                    className="bg-amber-50 border border-amber-200 rounded-[2rem] p-6 mb-6 flex gap-4 items-start"
-                    dir="rtl"
-                >
-                    <div className="w-11 h-11 bg-amber-100 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-xl">📞</span>
-                    </div>
-                    <div>
-                        <p className="text-sm font-black text-amber-800 mb-1">
-                            {isRTL ? 'ملاحظة هامة' : 'Important Note'}
-                        </p>
-                        <p className="text-xs text-amber-700 font-bold leading-relaxed">
-                            {isRTL
-                                ? 'قد يتواصل معكم أحد أفراد فريقنا خلال 12 ساعة للتأكد من بعض تفاصيل الطلب. نرجو الرد على أي اتصال أو رسالة لضمان وصول طلبكم في أسرع وقت ممكن.'
-                                : 'Our team may contact you within 12 hours to confirm some order details. Please respond to any call or message to ensure the fastest possible delivery.'}
-                        </p>
-                    </div>
-                </motion.div>
+
 
                 {/* Items Summary */}
                 <motion.section

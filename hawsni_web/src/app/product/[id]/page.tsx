@@ -542,6 +542,18 @@ export default function ProductPage() {
         );
     }
 
+    const isSizeOutOfStock = (s: string) => {
+        if (!product.product_variants || product.product_variants.length === 0) {
+            return stockCount <= 0;
+        }
+        let variantsForSize = product.product_variants.filter((v: any) => v.size === s);
+        if (selectedColor) {
+            variantsForSize = variantsForSize.filter((v: any) => v.color === selectedColor || !v.color);
+        }
+        if (variantsForSize.length === 0) return stockCount <= 0;
+        return variantsForSize.every((v: any) => v.stock <= 0);
+    };
+
     return (
         <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
 
@@ -829,15 +841,29 @@ export default function ProductPage() {
                                     </div>
                                     <div className="flex flex-wrap gap-1.5">
                                         {product.sizes.length > 1 ? (
-                                            product.sizes.map((s: string, i: number) => (
+                                            product.sizes.map((s: string, i: number) => {
+                                                const outOfStock = isSizeOutOfStock(s);
+                                                return (
                                                 <button
                                                     key={`${s}-${i}`}
-                                                    onClick={() => setSelectedSize(s)}
-                                                    className={`min-w-[3.5rem] h-10 px-3 rounded-xl border-2 font-black text-sm transition-all ${selectedSize === s ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' : 'border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-100'}`}
+                                                    onClick={() => { if(!outOfStock) setSelectedSize(s); }}
+                                                    disabled={outOfStock}
+                                                    className={`min-w-[3.5rem] relative overflow-hidden h-10 px-3 rounded-xl border-2 font-black text-sm transition-all ${
+                                                        outOfStock 
+                                                            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+                                                            : selectedSize === s 
+                                                                ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' 
+                                                                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                                                    }`}
                                                 >
                                                     {s}
+                                                    {outOfStock && (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <div className="w-full top-1/2 left-0 absolute h-[2px] bg-gray-400 -rotate-12 scale-150"></div>
+                                                        </div>
+                                                    )}
                                                 </button>
-                                            ))
+                                            )})
                                         ) : (
                                             <p className="font-black text-gray-900 bg-gray-50 px-5 py-2.5 rounded-2xl border border-gray-100 inline-block font-cairo">
                                                 {product.sizes[0]}

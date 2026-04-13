@@ -15,6 +15,7 @@ class ProductModel {
   final String? sizeGuide;
   final String? blurHash;
   final bool isVtoEnabled;
+  final List<ProductVariant>? variants;
 
   ProductModel({
     required this.id,
@@ -33,6 +34,7 @@ class ProductModel {
     this.sizeGuide,
     this.blurHash,
     this.isVtoEnabled = true,
+    this.variants,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -71,6 +73,11 @@ class ProductModel {
       images: json['images'] != null ? List<String>.from(json['images']) : null,
       sizeGuide: json['size_guide'] as String?,
       blurHash: json['blur_hash'] as String?,
+      variants: json['product_variants'] != null
+          ? (json['product_variants'] as List)
+              .map((v) => ProductVariant.fromJson(v))
+              .toList()
+          : null,
     );
   }
 
@@ -92,6 +99,40 @@ class ProductModel {
       if (sizeGuide != null) 'size_guide': sizeGuide,
       if (blurHash != null) 'blur_hash': blurHash,
       'is_vto_enabled': isVtoEnabled,
+      if (variants != null) 'product_variants': variants!.map((v) => v.toJson()).toList(),
     };
   }
 }
+
+class ProductVariant {
+  final String? sku;
+  final String? size;
+  final String? color;
+  final int stock;
+
+  ProductVariant({
+    this.sku,
+    this.size,
+    this.color,
+    this.stock = 0,
+  });
+
+  factory ProductVariant.fromJson(Map<String, dynamic> json) {
+    return ProductVariant(
+      sku: json['sku'] as String?,
+      size: json['size'] as String?,
+      color: json['color'] as String?,
+      stock: json['stock'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (sku != null) 'sku': sku,
+      if (size != null) 'size': size,
+      if (color != null) 'color': color,
+      'stock': stock,
+    };
+  }
+}
+

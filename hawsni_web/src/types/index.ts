@@ -45,4 +45,4 @@ export interface Product {
     size_guide?: string;
     stock?: number;
     countInStock?: number;
-}
+    product_variants?: any[];

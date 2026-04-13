@@ -94,9 +94,10 @@ class DisplayData {
     required this.sizes,
     required this.colors,
     this.sizeGuide,
-    this.blurHash,
+    required this.blurHash,
     required this.stock,
     required this.isVtoEnabled,
+    this.variants,
   });
 }
 
@@ -379,6 +380,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     String? sizeGuide;
     int stock = 0;
     bool isVtoEnabled = true;
+    List<ProductVariant>? variants;
 
     if (state is ProductDetailsLoaded) {
       name = state.product.name;
@@ -391,6 +393,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       colors = state.product.colors ?? [];
       sizeGuide = state.product.sizeGuide;
       isVtoEnabled = state.product.isVtoEnabled;
+      variants = state.product.variants;
       if ((state.product.images ?? []).isNotEmpty) {
         images = state.product.images!;
         imageUrl = images[0];
@@ -416,7 +419,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         colors: colors,
         sizeGuide: sizeGuide,
         stock: stock,
-        isVtoEnabled: isVtoEnabled);
+        isVtoEnabled: isVtoEnabled,
+        variants: variants);
   }
 
   @override
@@ -852,7 +856,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             ),
             const SizedBox(height: 16),
             if (data.sizes.length > 1)
-              _sizeRow(data.sizes)
+              _sizeRow(data.sizes, data)
             else
               Container(
                 padding:
@@ -1255,14 +1259,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     );
   }
 
-  Widget _sizeRow(List<String> sizes) {
+  bool _isSizeOutOfStock(String size, DisplayData data) {
+    if (data.variants == null || data.variants!.isEmpty) {
+      return data.stock <= 0;
+    }
+    var variantsForSize = data.variants!.where((v) => v.size == size).toList();
+    if (_selectedColor != null) {
+      variantsForSize = variantsForSize.where((v) => v.color == _selectedColor || v.color == null || v.color!.isEmpty).toList();
+    }
+    if (variantsForSize.isEmpty) return data.stock <= 0;
+    return variantsForSize.every((v) => v.stock <= 0);
+  }
+
+  Widget _sizeRow(List<String> sizes, DisplayData data) {
     return Wrap(
       spacing: 6,
       runSpacing: 6,
       children: sizes.map((s) {
         final isSel = _selectedSize == s;
+        final outOfStock = _isSizeOutOfStock(s, data);
+        
         return GestureDetector(
-          onTap: () {
+          onTap: outOfStock ? null : () {
             HapticFeedback.selectionClick();
             setState(() {
               _selectedSize = isSel ? null : s;
@@ -1272,17 +1290,35 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-                color: isSel ? Colors.black : Colors.white,
+                color: outOfStock ? Colors.grey.shade100 : (isSel ? Colors.black : Colors.white),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                    color: isSel ? Colors.black : Colors.grey.shade300,
+                    color: outOfStock ? Colors.grey.shade300 : (isSel ? Colors.black : Colors.grey.shade300),
                     width: 1.5)),
-            child: Text(s,
-                style: TextStyle(
-                    fontFamily: 'Cairo',
-                    color: isSel ? Colors.white : Colors.black,
-                    fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
-                    fontSize: 13)),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(s,
+                    style: TextStyle(
+                        fontFamily: 'Cairo',
+                        color: outOfStock ? Colors.grey.shade400 : (isSel ? Colors.white : Colors.black),
+                        fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
+                        fontSize: 13)),
+                if (outOfStock)
+                  Positioned.fill(
+                    child: Center(
+                      child: Transform.rotate(
+                        angle: -0.4,
+                        child: Container(
+                          width: double.infinity,
+                          height: 1.5,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       }).toList(),

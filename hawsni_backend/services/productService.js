@@ -64,7 +64,7 @@ class ProductService {
     async getProductById(id) {
         const { data, error } = await supabase
             .from('products')
-            .select('*, product_category_links(category_id, categories(name))')
+            .select('*, product_category_links(category_id, categories(name)), product_variants(*)')
             .eq('id', id)
             .single();
 
