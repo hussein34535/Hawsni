@@ -82,10 +82,22 @@ class BostaService {
                 description = description.substring(0, 197) + '...';
             }
 
+            const sizeOptions = options.size || 'MEDIUM';
+            const packageTypeMap = {
+                'SMALL': 'Small',
+                'MEDIUM': 'Medium',
+                'LARGE': 'Large'
+            };
+
+            // Calculate Product Value for Compensation (Price without shipping - 100)
+            const subtotal = parseFloat(orderData.total || 0) - parseFloat(orderData.shipping_fee || 0);
+            let declaredValue = Math.max(0, subtotal - 100);
+
             const payload = {
                 type: 10, // Package Delivery
                 specs: {
-                    size: options.size || 'MEDIUM',
+                    size: sizeOptions,
+                    packageType: packageTypeMap[sizeOptions] || 'Medium',
                     packageDetails: {
                         itemsCount: orderData.order_items?.length || 1,
                         description: description
@@ -93,6 +105,7 @@ class BostaService {
                 },
                 notes: orderData.notes || 'لا يوجد ملاحظات',
                 cod: parseFloat(orderData.total), // Cash on Delivery amount
+                declaredValue: declaredValue, // Insurance / Compensation Value
                 dropOffAddress: {
                     city: city,
                     firstLine: address,
