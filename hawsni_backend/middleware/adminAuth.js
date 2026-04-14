@@ -27,7 +27,10 @@ exports.adminProtect = async (req, res, next) => {
         if (authError || !authUser) {
             const refreshToken = req.cookies?.admin_refresh_token;
             if (refreshToken) {
-                const { data: refreshData, error: refreshError } = await supabase.auth.setSession({
+                // IMPORTANT: Use supabaseAuth (Anon client) here, NOT the service role supabase client,
+                // otherwise it mutates the global singleton in this Node instance and breaks RLS bypass!
+                const { supabaseAuth } = require('../config/supabase');
+                const { data: refreshData, error: refreshError } = await supabaseAuth.auth.setSession({
                     access_token: token || '',
                     refresh_token: refreshToken
                 });
