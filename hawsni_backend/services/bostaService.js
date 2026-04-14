@@ -15,21 +15,48 @@ class BostaService {
             
             // Map Hawsni structure to Bosta expected structure
             let shippingAddress = orderData.shipping_address;
+            
+            // Default fallback
             let city = 'القاهرة';
             let address = 'لا يوجد عنوان تفصيلي';
+            let extractedName = null;
+            let extractedPhone = null;
 
-            if (typeof shippingAddress === 'string') {
-                if (shippingAddress.trim().startsWith('{')) {
+            if (shippingAddress) {
+                // If it is a string that looks like JSON, parse it
+                if (typeof shippingAddress === 'string' && shippingAddress.trim().startsWith('{')) {
                     try {
                         shippingAddress = JSON.parse(shippingAddress);
                     } catch (e) {
-                        console.error('Failed to parse shipping address', e);
+                        console.error('Failed to parse shipping address string to JSON', e);
                     }
-                } else if (shippingAddress.includes(',')) {
-                    // Legacy string format fallback
+                }
+
+                if (typeof shippingAddress === 'object' && shippingAddress !== null) {
+                    // It's an object!
+                    extractedName = shippingAddress.name;
+                    extractedPhone = shippingAddress.phone;
+                    
+                    // Does it have structured state/city/street?
+                    if (shippingAddress.state || shippingAddress.city) {
+                        city = shippingAddress.state || shippingAddress.city;
+                        address = shippingAddress.street || shippingAddress.address || address;
+                    } 
+                    // Or does it just have a concatenated 'address' string?
+                    else if (shippingAddress.address && typeof shippingAddress.address === 'string') {
+                        let parts = shippingAddress.address.split(',').map(s => s.trim());
+                        if (parts.length >= 2) {
+                            city = parts[parts.length - 1]; // Governorate is usually last
+                            address = parts.slice(0, parts.length - 1).join(' - ');
+                        } else {
+                            address = shippingAddress.address;
+                        }
+                    }
+                } else if (typeof shippingAddress === 'string') {
+                    // Legacy naked string format
                     let parts = shippingAddress.split(',').map(s => s.trim());
                     if (parts.length >= 2) {
-                        city = parts[parts.length - 1]; // Governorates usually last
+                        city = parts[parts.length - 1];
                         address = parts.slice(0, parts.length - 1).join(' - ');
                     } else {
                         address = shippingAddress;
@@ -37,13 +64,8 @@ class BostaService {
                 }
             }
 
-            if (typeof shippingAddress === 'object' && shippingAddress !== null) {
-                city = shippingAddress.state || shippingAddress.city || city;
-                address = shippingAddress.street || shippingAddress.address || address;
-            }
-
-            const customerName = orderData.users?.name || (typeof shippingAddress === 'object' ? shippingAddress.name : null) || 'عميل هوسي';
-            const customerPhone = orderData.users?.phone || (typeof shippingAddress === 'object' ? shippingAddress.phone : null) || '';
+            const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
+            const customerPhone = orderData.users?.phone || extractedPhone || '';
 
             const payload = {
                 type: 10, // Package Delivery
