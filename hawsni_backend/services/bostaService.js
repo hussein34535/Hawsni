@@ -9,39 +9,58 @@ class BostaService {
      * Create a new shipment (Delivery) in Bosta
      * @param {Object} orderData The mapped order data from Hawsni
      */
-    async createShipment(orderData) {
+    async createShipment(orderData, options = {}) {
         try {
-            console.log(`[Bosta] Creating shipment for order ${orderData.order_number}...`);
+            console.log(`[Bosta] Creating shipment for order ${orderData.order_number || orderData.id}...`);
             
             // Map Hawsni structure to Bosta expected structure
             let shippingAddress = orderData.shipping_address;
+            let city = 'القاهرة';
+            let address = 'لا يوجد عنوان تفصيلي';
+
             if (typeof shippingAddress === 'string') {
-                try {
-                    shippingAddress = JSON.parse(shippingAddress);
-                } catch (e) {
-                    console.error('Failed to parse shipping address', e);
+                if (shippingAddress.trim().startsWith('{')) {
+                    try {
+                        shippingAddress = JSON.parse(shippingAddress);
+                    } catch (e) {
+                        console.error('Failed to parse shipping address', e);
+                    }
+                } else if (shippingAddress.includes(',')) {
+                    // Legacy string format fallback
+                    let parts = shippingAddress.split(',').map(s => s.trim());
+                    if (parts.length >= 2) {
+                        city = parts[parts.length - 1]; // Governorates usually last
+                        address = parts.slice(0, parts.length - 1).join(' - ');
+                    } else {
+                        address = shippingAddress;
+                    }
                 }
             }
 
-            const customerName = orderData.users?.name || shippingAddress.name || 'عميل هوسي';
-            const customerPhone = orderData.users?.phone || shippingAddress.phone || '';
-            const city = shippingAddress.state || 'Cairo';
-            const address = shippingAddress.street || 'لا يوجد عنوان تفصيلي';
+            if (typeof shippingAddress === 'object' && shippingAddress !== null) {
+                city = shippingAddress.state || shippingAddress.city || city;
+                address = shippingAddress.street || shippingAddress.address || address;
+            }
+
+            const customerName = orderData.users?.name || (typeof shippingAddress === 'object' ? shippingAddress.name : null) || 'عميل هوسي';
+            const customerPhone = orderData.users?.phone || (typeof shippingAddress === 'object' ? shippingAddress.phone : null) || '';
 
             const payload = {
-                type: 10, // 10 is Package Delivery depending on Bosta docs
+                type: 10, // Package Delivery
                 specs: {
+                    size: options.size || 'MEDIUM',
                     packageDetails: {
                         itemsCount: orderData.order_items?.length || 1,
-                        description: `Hawsni Order #${orderData.order_number}`
+                        description: `Hawsni Order #${orderData.order_number || orderData.id}`
                     }
                 },
                 notes: orderData.notes || 'لا يوجد ملاحظات',
                 cod: parseFloat(orderData.total), // Cash on Delivery amount
                 dropOffAddress: {
-                    city: city, // Needs to match Bosta's city list eventually, but string mapping is mostly okay.
+                    city: city,
                     firstLine: address,
                 },
+                allowToOpenPackage: options.allowToOpenPackage !== undefined ? options.allowToOpenPackage : true,
                 receiver: {
                     firstName: customerName.split(' ')[0] || 'Customer',
                     lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',

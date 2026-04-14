@@ -346,6 +346,22 @@
                 
                 <div id="bostaNotSentBox" style="display: block;">
                     <p style="font-size:13px; color:#64748b; margin-top:0;">إرسال تفاصيل هذا الطلب مباشرة إلى بوسطة لإنشاء بوليصة شحن.</p>
+                    
+                    <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                        <div>
+                            <label style="font-size: 13px; font-weight: bold; color: #334155;">حجم الشحنة:</label>
+                            <select id="bostaPackageSize" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; margin-top: 5px; font-family: inherit;">
+                                <option value="SMALL">صغيرة (Small)</option>
+                                <option value="MEDIUM" selected>متوسطة (Medium)</option>
+                                <option value="LARGE">كبيرة (Large)</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="bostaAllowOpen" checked style="width: 16px; height: 16px; cursor: pointer;">
+                            <label for="bostaAllowOpen" style="font-size: 13px; font-weight: bold; color: #334155; cursor: pointer;">السماح للعميل بفتح الشحنة؟</label>
+                        </div>
+                    </div>
+
                     <button id="sendBostaBtn" onclick="sendToBosta()" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #e11d48; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: inherit; width: 100%;">
                         <i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة
                     </button>
@@ -911,12 +927,22 @@
         async function sendToBosta() {
             if (!currentOrderId) return;
             const btn = document.getElementById('sendBostaBtn');
+            const sizeSelector = document.getElementById('bostaPackageSize');
+            const allowOpenCheck = document.getElementById('bostaAllowOpen');
+            
+            const payload = {
+                size: sizeSelector ? sizeSelector.value : 'MEDIUM',
+                allowToOpenPackage: allowOpenCheck ? allowOpenCheck.checked : true
+            };
+
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إرسال الطلب...';
             btn.disabled = true;
 
             try {
                 const res = await fetch(`/orders/${currentOrderId}/bosta-ship`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
                 const data = await res.json();
                 

@@ -401,8 +401,11 @@ class OrdersController {
                 return res.status(400).json({ success: false, message: 'هذا الطلب تم إرساله مسبقاً إلى بوسطة' });
             }
 
+            // Extract custom options from frontend
+            const { size, allowToOpenPackage } = req.body;
+
             // Call Bosta Service
-            const result = await bostaService.createShipment(order);
+            const result = await bostaService.createShipment(order, { size, allowToOpenPackage });
 
             res.json({ 
                 success: true, 
