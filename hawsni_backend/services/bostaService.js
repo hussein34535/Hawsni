@@ -4,6 +4,66 @@ const supabase = require('../config/supabase');
 const BOSTA_API_KEY = process.env.BOSTA_API_KEY;
 const BOSTA_BASE_URL = 'https://api.bosta.co/api/v0';
 
+// Bosta City Map: Arabic/English names -> { _id, name }
+// Source: GET /api/v0/cities + manual Arabic aliases from Hawsni addresses
+const BOSTA_CITIES_MAP = {
+    // Arabic governorate names
+    'الاسكندرية': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
+    'الإسكندرية': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
+    'اسكندرية': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
+    'أسيوط': { _id: '7mDPAohM3ArSZmWTm', name: 'Assuit' },
+    'اسيوط': { _id: '7mDPAohM3ArSZmWTm', name: 'Assuit' },
+    'أسوان': { _id: 'kLvZ5JY6LJPL5chzN', name: 'Aswan' },
+    'اسوان': { _id: 'kLvZ5JY6LJPL5chzN', name: 'Aswan' },
+    'بني سويف': { _id: 'Lzbbvtzz7D2CgE2PL', name: 'Bani Suif' },
+    'البحيرة': { _id: 'g3GchTSmCgR2JynsJ', name: 'Behira' },
+    'البحيره': { _id: 'g3GchTSmCgR2JynsJ', name: 'Behira' },
+    'القاهرة': { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' },
+    'القاهره': { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' },
+    'الدقهلية': { _id: 'RrDhS8YYsXAwZ9Zfo', name: 'Dakahlia' },
+    'الدقهليه': { _id: 'RrDhS8YYsXAwZ9Zfo', name: 'Dakahlia' },
+    'المنصورة': { _id: 'RrDhS8YYsXAwZ9Zfo', name: 'Dakahlia' }, // City in Dakahlia
+    'المنصوره': { _id: 'RrDhS8YYsXAwZ9Zfo', name: 'Dakahlia' },
+    'دمياط': { _id: 'qoZvYcZ8Cqji4pGp5', name: 'Damietta' },
+    'القليوبية': { _id: 'yp3atroeTwnyiBNKE', name: 'El Kalioubia' },
+    'القليوبيه': { _id: 'yp3atroeTwnyiBNKE', name: 'El Kalioubia' },
+    'الفيوم': { _id: 'BW5MiNxEirB7tuz2y', name: 'Fayoum' },
+    'الغربية': { _id: 'K3RwC677J8kJytdZD', name: 'Gharbia' },
+    'الغربيه': { _id: 'K3RwC677J8kJytdZD', name: 'Gharbia' },
+    'الجيزة': { _id: '0064Qb0OgcA', name: 'Giza' },
+    'الجيزه': { _id: '0064Qb0OgcA', name: 'Giza' },
+    'جيزة': { _id: '0064Qb0OgcA', name: 'Giza' },
+    'الإسماعيلية': { _id: 'PJqNriLtFtx2cfkKP', name: 'Ismailia' },
+    'الإسماعيليه': { _id: 'PJqNriLtFtx2cfkKP', name: 'Ismailia' },
+    'الاسماعيلية': { _id: 'PJqNriLtFtx2cfkKP', name: 'Ismailia' },
+    'كفر الشيخ': { _id: 'ByP7rFCjL6XzF6j4S', name: 'Kafr Alsheikh' },
+    'الأقصر': { _id: 'wgYEdH2WMzxGE2Ztp', name: 'Luxor' },
+    'الاقصر': { _id: 'wgYEdH2WMzxGE2Ztp', name: 'Luxor' },
+    'مرسي مطروح': { _id: 'KBpGiRZJMIx', name: 'Matrouh' },
+    'مطروح': { _id: 'KBpGiRZJMIx', name: 'Matrouh' },
+    'المنيا': { _id: 'si6eLnKjXqTFTMBj9', name: 'Menya' },
+    'المنوفية': { _id: 'ruBSjGBDX9wpRa3cc', name: 'Monufia' },
+    'المنوفيه': { _id: 'ruBSjGBDX9wpRa3cc', name: 'Monufia' },
+    'الوادي الجديد': { _id: 'w4yDVHVJWqa4HpbzA', name: 'New Valley' },
+    'الساحل الشمالي': { _id: '2hGtNLfRgqGrJjnW9', name: 'North Coast' },
+    'شمال سيناء': { _id: 'ZuCaDAVQlPT', name: 'North Sinai' },
+    'بور سعيد': { _id: 'skFtf6ZmKo8kBEBDK', name: 'Port Said' },
+    'قنا': { _id: 'vfTHTes3uGjAszgtg', name: 'Qena' },
+    'البحر الأحمر': { _id: 'r5TscLCNSjR2GimxQ', name: 'Red Sea' },
+    'البحر الاحمر': { _id: 'r5TscLCNSjR2GimxQ', name: 'Red Sea' },
+    'الشرقية': { _id: '6ExcoGbpYHnggP8JD', name: 'Sharqia' },
+    'الشرقيه': { _id: '6ExcoGbpYHnggP8JD', name: 'Sharqia' },
+    'الزقازيق': { _id: '6ExcoGbpYHnggP8JD', name: 'Sharqia' }, // City in Sharqia
+    'سوهاج': { _id: 'n3EENg2adhuR9xBZK', name: 'Sohag' },
+    'جنوب سيناء': { _id: 'nG_c44vHQht', name: 'South Sinai' },
+    'شرم الشيخ': { _id: 'nG_c44vHQht', name: 'South Sinai' },
+    'السويس': { _id: 'PickurJ5uJZ9rDTHW', name: 'Suez' },
+    // English names (fallback)
+    'Cairo': { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' },
+    'Alexandria': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
+    'Giza': { _id: '0064Qb0OgcA', name: 'Giza' },
+};
+
 class BostaService {
     /**
      * Create a new shipment (Delivery) in Bosta
@@ -64,6 +124,11 @@ class BostaService {
                 }
             }
 
+            // Resolve city to Bosta city object via map
+            const cityTrimmed = city.trim();
+            const bostaCity = BOSTA_CITIES_MAP[cityTrimmed] || { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' };
+            console.log(`[Bosta] Resolved city '${cityTrimmed}' -> ${bostaCity.name} (${bostaCity._id})`);
+
             const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
             const customerPhone = orderData.users?.phone || extractedPhone || '';
             
@@ -107,7 +172,7 @@ class BostaService {
                 cod: parseFloat(orderData.total), // Cash on Delivery amount
                 declaredValue: declaredValue, // Insurance / Compensation Value
                 dropOffAddress: {
-                    city: city,
+                    city: bostaCity,
                     firstLine: address,
                 },
                 allowToOpenPackage: options.allowToOpenPackage !== undefined ? options.allowToOpenPackage : true,
