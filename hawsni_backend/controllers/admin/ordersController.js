@@ -388,7 +388,7 @@ class OrdersController {
             // Fetch the full order details from DB
             const { data: order, error } = await supabase
                 .from('orders')
-                .select('*, users(name, phone, email), order_items(*)')
+                .select('*, users(name, phone, email), order_items(*, products(name))')
                 .eq('id', id)
                 .single();
 

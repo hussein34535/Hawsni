@@ -66,6 +66,21 @@ class BostaService {
 
             const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
             const customerPhone = orderData.users?.phone || extractedPhone || '';
+            
+            // Extract Product Names for Description
+            let productNames = [];
+            if (orderData.order_items && orderData.order_items.length > 0) {
+                productNames = orderData.order_items.map(item => {
+                    const p = item.products;
+                    return p && p.name ? p.name : (item.name || `Product ${item.product_id}`);
+                });
+            }
+            
+            let description = productNames.length > 0 ? productNames.join(' + ') : `Hawsni Order #${orderData.order_number || orderData.id}`;
+            // Limit to avoid Bosta validation error if characters exceed limit
+            if (description.length > 200) {
+                description = description.substring(0, 197) + '...';
+            }
 
             const payload = {
                 type: 10, // Package Delivery
@@ -73,7 +88,7 @@ class BostaService {
                     size: options.size || 'MEDIUM',
                     packageDetails: {
                         itemsCount: orderData.order_items?.length || 1,
-                        description: `Hawsni Order #${orderData.order_number || orderData.id}`
+                        description: description
                     }
                 },
                 notes: orderData.notes || 'لا يوجد ملاحظات',
