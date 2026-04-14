@@ -64,6 +64,51 @@ const BOSTA_CITIES_MAP = {
     'Giza': { _id: '0064Qb0OgcA', name: 'Giza' },
 };
 
+// Bosta Zone Map: Arabic city/area names -> { _id, name }
+// Zone = المدينة/المنطقة داخل المحافظة (sub-city level)
+const BOSTA_ZONES_MAP = {
+    // Cairo zones
+    'مدينة نصر': { _id: 'u15G2GQ0cMZ', name: 'Nasr City' },
+    'مدينه نصر': { _id: 'u15G2GQ0cMZ', name: 'Nasr City' },
+    'المعادي': { _id: 'aG5hnWoOlRq', name: 'Maadi' },
+    'مصر الجديدة': { _id: 'Ri5iX3JiMCk', name: 'Heliopolis' },
+    'مصر الجديده': { _id: 'Ri5iX3JiMCk', name: 'Heliopolis' },
+    'شبرا': { _id: 'v5D3DMEQ0CU', name: 'Shubra' },
+    'عين شمس': { _id: 'M9z2JzNRlBn', name: 'Ain Shams' },
+    'التجمع': { _id: 'ZvJhK8_a-_s', name: 'New Cairo' },
+    'التجمع الخامس': { _id: 'ZvJhK8_a-_s', name: 'New Cairo' },
+    'القاهرة الجديدة': { _id: 'ZvJhK8_a-_s', name: 'New Cairo' },
+    // Giza zones
+    'الشيخ زايد': { _id: 'K7HCdF8M0nO', name: 'Sheikh Zayed' },
+    '6 اكتوبر': { _id: 'YVIJmI56b5y', name: '6th Of October' },
+    '6 أكتوبر': { _id: 'YVIJmI56b5y', name: '6th Of October' },
+    'المهندسين': { _id: 'jDC0K4rC3jQ', name: 'Mohandessin' },
+    'الدقي': { _id: 'BLjDW8_fFkD', name: 'Dokki' },
+    'الهرم': { _id: 'j7t5AJ3Kpg9', name: 'Haram' },
+    // Dakahlia zones
+    'المنصورة': { _id: 'xricXU3FLaO', name: 'ElMansourah' },
+    'المنصوره': { _id: 'xricXU3FLaO', name: 'ElMansourah' },
+    'ميت غمر': { _id: 'u-m4fWScaJg', name: 'Mit Ghamr' },
+    // Sharqia zones
+    'الزقازيق': { _id: 'qj1cLDrTnYR', name: 'ElZakazik' },
+    'العاشر من رمضان': { _id: 'fRHQPnOXFO9', name: '10th Of Ramadan' },
+    '10 رمضان': { _id: 'fRHQPnOXFO9', name: '10th Of Ramadan' },
+    // Gharbia zones
+    'طنطا': { _id: 'jmLVGOoNIPl', name: 'Tanta' },
+    'المحلة': { _id: 'M5JhwnHOTDI', name: 'Mahalla' },
+    'المحله': { _id: 'M5JhwnHOTDI', name: 'Mahalla' },
+    'المحلة الكبرى': { _id: 'M5JhwnHOTDI', name: 'Mahalla' },
+    // Behira zones
+    'دمنهور': { _id: 'bBhkU8LYZBN', name: 'Damanhour' },
+    'كفر الدوار': { _id: 'DPlXWRQ5yCB', name: 'Kafr El Dawar' },
+    // Monufia zones
+    'شبين الكوم': { _id: 'l9N_Fzxvwvf', name: 'Shebin El Kom' },
+    // Kalioubia zones
+    'بنها': { _id: 'N1p7HNBaUmO', name: 'Banha' },
+    'شبرا الخيمة': { _id: 'bCvAmQfEPbS', name: 'Shobra El Kheima' },
+    'شبرا الخيمه': { _id: 'bCvAmQfEPbS', name: 'Shobra El Kheima' },
+};
+
 class BostaService {
     /**
      * Create a new shipment (Delivery) in Bosta
@@ -129,6 +174,22 @@ class BostaService {
             const bostaCity = BOSTA_CITIES_MAP[cityTrimmed] || { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' };
             console.log(`[Bosta] Resolved city '${cityTrimmed}' -> ${bostaCity.name} (${bostaCity._id})`);
 
+            // Extract zone (المنطقة = city within governorate)
+            // The zone is typically the second-to-last part of a comma-separated address
+            let bostaZone = null;
+            try {
+                let rawAddr = '';
+                if (typeof shippingAddress === 'string') rawAddr = shippingAddress;
+                else if (shippingAddress?.address) rawAddr = shippingAddress.address;
+                const addrParts = rawAddr.split(',').map(s => s.trim()).filter(Boolean);
+                if (addrParts.length >= 3) {
+                    // Try the second-to-last part as zone (city within governorate)
+                    const zoneName = addrParts[addrParts.length - 2];
+                    bostaZone = BOSTA_ZONES_MAP[zoneName] || null;
+                    if (bostaZone) console.log(`[Bosta] Resolved zone '${zoneName}' -> ${bostaZone.name}`);
+                }
+            } catch(e) { /* ignore */ }
+
             const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
             const customerPhone = orderData.users?.phone || extractedPhone || '';
             
@@ -173,6 +234,7 @@ class BostaService {
                 declaredValue: declaredValue, // Insurance / Compensation Value
                 dropOffAddress: {
                     city: bostaCity,
+                    ...(bostaZone ? { zone: bostaZone } : {}),
                     firstLine: address,
                 },
                 allowToOpenPackage: options.allowToOpenPackage !== undefined ? options.allowToOpenPackage : true,
