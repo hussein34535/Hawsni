@@ -12,7 +12,7 @@ export interface OrderItem {
 
 export interface OrderData {
     items: OrderItem[];
-    shippingAddress: string;
+    shippingAddress: any;
     paymentMethod: string;
     subtotal: number;
     shippingFee: number;

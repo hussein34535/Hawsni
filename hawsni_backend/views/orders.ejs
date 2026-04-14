@@ -450,15 +450,50 @@
                 cPhone = ship.phone || ship.guestPhone || cPhone;
                 cEmail = ship.email || ship.guestEmail || cEmail;
 
-                document.getElementById('shipState').textContent = ship.state || '-';
-                document.getElementById('shipCity').textContent = ship.city || '-';
-                document.getElementById('shipStreet').textContent = ship.street || ship.address || '-';
-                document.getElementById('modalAddressFull').textContent = ship.address || '-';
+                let displayState = ship.state || null;
+                let displayCity = ship.city || null;
+                let displayStreet = ship.street || null;
+                let fullAddress = ship.address || ship.shippingAddress || '-';
+
+                // Fallback parsing for older orders where we only saved a concatenated string
+                if (!displayState && !displayCity && fullAddress && typeof fullAddress === 'string' && fullAddress.includes(',')) {
+                    const parts = fullAddress.split(',').map(s => s.trim());
+                    if (parts.length >= 3) {
+                        displayStreet = parts.slice(0, -2).join(', ');
+                        displayCity = parts[parts.length - 2];
+                        displayState = parts[parts.length - 1];
+                    } else if (parts.length === 2) {
+                        displayStreet = parts[0];
+                        displayState = parts[1];
+                    }
+                }
+
+                document.getElementById('shipState').textContent = displayState || '-';
+                document.getElementById('shipCity').textContent = displayCity || '-';
+                document.getElementById('shipStreet').textContent = displayStreet || fullAddress;
+                document.getElementById('modalAddressFull').textContent = fullAddress;
             } else {
-                document.getElementById('shipState').textContent = '-';
-                document.getElementById('shipCity').textContent = '-';
-                document.getElementById('shipStreet').textContent = '-';
-                document.getElementById('modalAddressFull').textContent = ship || 'لا يوجد عنوان';
+                let displayState = '-';
+                let displayCity = '-';
+                let displayStreet = '-';
+                let fullAddress = ship || 'لا يوجد عنوان';
+
+                if (typeof fullAddress === 'string' && fullAddress.includes(',')) {
+                    const parts = fullAddress.split(',').map(s => s.trim());
+                    if (parts.length >= 3) {
+                        displayStreet = parts.slice(0, -2).join(', ');
+                        displayCity = parts[parts.length - 2];
+                        displayState = parts[parts.length - 1];
+                    } else if (parts.length === 2) {
+                        displayStreet = parts[0];
+                        displayState = parts[1];
+                    }
+                }
+
+                document.getElementById('shipState').textContent = displayState;
+                document.getElementById('shipCity').textContent = displayCity;
+                document.getElementById('shipStreet').textContent = displayStreet || fullAddress;
+                document.getElementById('modalAddressFull').textContent = fullAddress;
             }
 
             document.getElementById('modalCustomerName').textContent = cName;

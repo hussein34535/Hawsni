@@ -235,9 +235,19 @@ export default function CheckoutPage() {
                     size: item.size || undefined,
                     color: item.color || undefined
                 })),
-                shippingAddress: isAuthenticated
-                    ? addressId!
-                    : `${guestInfo.street}, ${guestInfo.city}, ${selectedGov}`,
+                shippingAddress: isAuthenticated && addressId
+                    ? {
+                        ...addresses.find(a => a._id === addressId),
+                        id: addressId,
+                        state: selectedGov,
+                        address: addresses.find(a => a._id === addressId)?.street || ''
+                    }
+                    : {
+                        street: guestInfo.street,
+                        city: guestInfo.city,
+                        state: selectedGov,
+                        address: `${guestInfo.street}, ${guestInfo.city}, ${selectedGov}`
+                    },
                 paymentMethod: 'Cash on Delivery',
                 subtotal,
                 shippingFee,
