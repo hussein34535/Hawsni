@@ -372,9 +372,14 @@
                         <span style="font-size: 13px; font-weight: bold; color: #1e3a8a;"><i class="fas fa-check-circle" style="color: #2563eb;"></i> تم إرسال الشحنة</span>
                         <span style="font-size: 12px; background: #dbeafe; color: #1e40af; padding: 3px 8px; border-radius: 4px;" id="bostaTrackingNumber"></span>
                     </div>
-                    <a id="bostaTrackingLink" href="#" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: white; color: #2563eb; border: 1px solid #93c5fd; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; transition: 0.2s; width: 100%;">
-                        <i class="fas fa-map-marker-alt"></i> تتبع الشحنة
-                    </a>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <a id="bostaTrackingLink" href="#" target="_blank" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 8px; background: white; color: #2563eb; border: 1px solid #93c5fd; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; transition: 0.2s;">
+                            <i class="fas fa-map-marker-alt"></i> تتبع الشحنة
+                        </a>
+                        <button onclick="showResendBosta()" style="flex: 1; border: 1px solid #cbd5e1; background: white; color: #64748b; padding: 8px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 12px;">
+                            <i class="fas fa-redo"></i> إعادة إرسال
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -424,6 +429,8 @@
                 document.getElementById('bostaSentBox').style.display = 'block';
                 document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + order.tracking_number;
                 document.getElementById('bostaTrackingLink').href = 'https://t.bosta.co/' + order.tracking_number;
+                document.getElementById('sendBostaBtn').disabled = false;
+                document.getElementById('sendBostaBtn').innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
             } else {
                 document.getElementById('bostaNotSentBox').style.display = 'block';
                 document.getElementById('bostaSentBox').style.display = 'none';
@@ -921,6 +928,13 @@
                 alert('حدث خطأ في الإرسال');
                 btn.innerHTML = origHTML;
                 btn.disabled = false;
+            }
+        }
+
+        function showResendBosta() {
+            if (confirm('هل أنت متأكد من إنشاء بوليصة شحن جديدة لهذا الطلب في بوسطة؟ \n(الضغط هنا سيفتح نافذة الإرسال لتقوم بتحديد الإعدادات مجدداً)')) {
+                document.getElementById('bostaSentBox').style.display = 'none';
+                document.getElementById('bostaNotSentBox').style.display = 'block';
             }
         }
 

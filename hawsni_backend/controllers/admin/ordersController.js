@@ -397,9 +397,7 @@ class OrdersController {
                 return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
             }
 
-            if (order.bosta_id) {
-                return res.status(400).json({ success: false, message: 'هذا الطلب تم إرساله مسبقاً إلى بوسطة' });
-            }
+            // Allow resending by skipping the block check
 
             // Extract custom options from frontend
             const { size, allowToOpenPackage } = req.body;
