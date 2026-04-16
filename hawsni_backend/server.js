@@ -104,6 +104,32 @@ app.use('/api/settings', publicSettingsRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 app.use('/api/webhooks', webhookRoutes);
 
+// ──────────────────────────────────────────────
+// Public Order Tracking Page
+// ──────────────────────────────────────────────
+app.get('/track-order', async (req, res) => {
+  try {
+    const { id } = req.query;
+    if (!id) return res.render('track-order', { order: null });
+
+    const supabase = require('./config/supabase');
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*, products(name, images))')
+      .eq('id', id)
+      .single();
+
+    if (error || !order) {
+      return res.render('track-order', { order: null });
+    }
+
+    return res.render('track-order', { order });
+  } catch (err) {
+    console.error('[Track Order] Error:', err);
+    return res.render('track-order', { order: null });
+  }
+});
+
 // SEO Routes (served at root)
 app.use('/', seoRoutes);
 
