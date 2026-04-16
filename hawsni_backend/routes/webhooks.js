@@ -10,14 +10,14 @@ router.post('/bosta', async (req, res) => {
         
         // Example Bosta payload: { deliveryId: '', trackingNumber: '', state: { value: 'DELIVERED', code: 45 } }
         // The structure may differ slightly based on Bosta API version, but these are typical fields.
-        const { deliveryId, trackingNumber, state, type } = req.body;
+        // Bosta payloads sometimes use _id instead of deliveryId
+        const actualDeliveryId = deliveryId || req.body._id;
         
-        // We must have something to identify the order
-        if (!deliveryId && !trackingNumber) {
+        if (!actualDeliveryId && !trackingNumber) {
             return res.status(400).json({ success: false, message: 'Missing identifiers' });
         }
 
-        // We only care about state updates, or maybe others
+        // We only care about state updates
         if (state && state.value) {
             const bostaState = state.value.toUpperCase();
             let hawsniStatus = null;
@@ -36,8 +36,8 @@ router.post('/bosta', async (req, res) => {
                 // Find order by Bosta ID or Tracking Number
                 let query = supabase.from('orders').select('*, users(name, email)');
                 
-                if (deliveryId) {
-                    query = query.eq('bosta_id', deliveryId);
+                if (actualDeliveryId) {
+                    query = query.eq('bosta_id', actualDeliveryId);
                 } else if (trackingNumber) {
                     query = query.eq('tracking_number', trackingNumber);
                 }
@@ -81,7 +81,7 @@ router.post('/bosta', async (req, res) => {
                         }
                     }
                 } else {
-                    console.log('[Bosta Webhook] Order not found for identifiers:', deliveryId, trackingNumber);
+                    console.log(`[Bosta Webhook] Order not found for Delivery ID: ${actualDeliveryId}, Tracking #: ${trackingNumber}`);
                 }
             }
         }
