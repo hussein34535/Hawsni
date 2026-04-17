@@ -74,7 +74,7 @@ class AIChatbotService {
                 const { data, error } = await supabase
                     .from('products')
                     .select('id, name, description, price, sizes, colors, in_stock')
-                    .ilike('name', \`%\${query}%\`)
+                    .ilike('name', `%${query}%`)
                     .limit(5);
 
                 if (error) throw error;
@@ -96,7 +96,7 @@ class AIChatbotService {
                 const { data, error } = await supabase
                     .from('orders')
                     .select('id, order_number, status, total, created_at')
-                    .ilike('shipping_address', \`%\${phone}%\`)
+                    .ilike('shipping_address', `%${phone}%`)
                     .order('created_at', { ascending: false })
                     .limit(3);
 
