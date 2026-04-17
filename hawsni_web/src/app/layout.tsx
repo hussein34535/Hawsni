@@ -59,6 +59,7 @@ import ToastContainer from "@/components/layout/ToastContainer";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import MicrosoftClarity from "@/components/analytics/MicrosoftClarity";
+import ChatWidget from "@/components/chat/ChatWidget";
 import { LanguageProvider } from "@/context/LanguageContext";
 
 export default function RootLayout({
@@ -79,6 +80,7 @@ export default function RootLayout({
           <FacebookPixel />
           <GoogleAnalytics />
           <MicrosoftClarity />
+          <ChatWidget />
         </LanguageProvider>
       </body>
     </html>
