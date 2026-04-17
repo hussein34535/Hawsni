@@ -260,6 +260,24 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- AI Email Box (Moved here based on request) -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-top: 16px;">
+                            <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #475569; font-weight: 800;"><i class="fas fa-magic" style="color: #8b5cf6;"></i> إيميل AI مخصص للتواصل</h5>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="aiEmailPrompt" placeholder="أكتب توجيه للذكاء الاصطناعي... (مثال: اعتذر عن التأخير وأبلغهم بشحن الطلب غداً)" style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.8rem; outline: none;">
+                                <button id="generateAiBtn" onclick="generateAiEmail()" style="background: #8b5cf6; color: white; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif;">
+                                    توليد رسالة
+                                </button>
+                            </div>
+                            <div id="aiPreviewBox" style="display: none; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 12px; max-height: 200px; overflow-y: auto;">
+                                <div id="aiEmailContent" style="font-size: 0.8rem; color: #334155;"></div>
+                            </div>
+                            <button id="sendAiEmailBtn" onclick="sendAiEmail()" style="display: none; width: 100%; justify-content: center; align-items: center; gap: 8px; background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif; margin-top: 12px;">
+                                <i class="fas fa-paper-plane"></i> إرسال الإيميل للعميل الآن
+                            </button>
+                        </div>
+
                     </div>
 
                     <!-- Right Column: Customer, Shipping & Actions -->
@@ -326,22 +344,7 @@
                                 <i class="fas fa-phone-slash"></i> إرسال تنبيه "لم يرد" للعميل
                             </button>
 
-                            <!-- AI Email Box -->
-                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
-                                <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #475569; font-weight: 800;"><i class="fas fa-magic" style="color: #8b5cf6;"></i> إيميل AI مخصص</h5>
-                                <div style="display: flex; gap: 8px;">
-                                    <input type="text" id="aiEmailPrompt" placeholder="الفكرة باختصار..." style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.8rem; outline: none;">
-                                    <button id="generateAiBtn" onclick="generateAiEmail()" style="background: #8b5cf6; color: white; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif;">
-                                        توليد
-                                    </button>
-                                </div>
-                                <div id="aiPreviewBox" style="display: none; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 12px; max-height: 150px; overflow-y: auto;">
-                                    <div id="aiEmailContent" style="font-size: 0.8rem;"></div>
-                                </div>
-                                <button id="sendAiEmailBtn" onclick="sendAiEmail()" style="display: none; width: 100%; justify-content: center; align-items: center; gap: 8px; background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif; margin-top: 12px;">
-                                    <i class="fas fa-paper-plane"></i> إرسال الإيميل
-                                </button>
-                            </div>
+                            <!-- AI Email Box (Moved to left column) -->
 
                             <!-- Bosta Shipping Box -->
                             <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 16px; padding: 16px;">

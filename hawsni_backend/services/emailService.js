@@ -198,7 +198,7 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
 
                 <!-- Track Button -->
                 <div style="text-align: center; margin-bottom: 40px;">
-                    <a href="https://hwasibackend.vercel.app/track-order?id=${order.id}" style="background: #ffffff; color: #0E4435; border: 2px solid #0E4435; padding: 16px 45px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block;">
+                    <a href="https://hwasi.com/track-order?id=${order.id}" style="background: #ffffff; color: #0E4435; border: 2px solid #0E4435; padding: 16px 45px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 15px; display: inline-block;">
                         📍 تتبع حالة طلبك
                     </a>
                 </div>
@@ -387,7 +387,7 @@ async function sendOrderStatusEmail(toEmail, userName, order, status) {
                 </div>
                 <!-- Track Button -->
                 <div style="text-align: center; margin: 20px 0;">
-                    <a href="https://hwasibackend.vercel.app/track-order?id=${orderId}" style="background: ${config.color}; color: #ffffff; padding: 14px 35px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 14px; display: inline-block; box-shadow: 0 4px 15px ${config.color}40;">
+                    <a href="https://hwasi.com/track-order?id=${orderId}" style="background: ${config.color}; color: #ffffff; padding: 14px 35px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 14px; display: inline-block; box-shadow: 0 4px 15px ${config.color}40;">
                         📍 تتبع طلبك
                     </a>
                 </div>
