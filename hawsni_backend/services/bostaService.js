@@ -1,5 +1,9 @@
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const supabase = require('../config/supabase');
+const aiService = require('./aiService');
+
+let cachedDistricts = null;
+const BOSTA_V2_URL = 'https://api.bosta.co/api/v2';
 
 const BOSTA_API_KEY = process.env.BOSTA_API_KEY;
 const BOSTA_BASE_URL = 'https://api.bosta.co/api/v0';
@@ -123,6 +127,65 @@ const BOSTA_ZONES_MAP = {
 
 class BostaService {
     /**
+     * Fetch all districts from Bosta v2 API and cache them
+     */
+    async getBostaDistricts() {
+        if (cachedDistricts) return cachedDistricts;
+        try {
+            console.log('[Bosta] Fetching latest districts from v2 API...');
+            const response = await fetch(`${BOSTA_V2_URL}/cities/getAllDistricts`, {
+                headers: { 'Authorization': BOSTA_API_KEY }
+            });
+            const result = await response.json();
+            if (result.success && result.data) {
+                cachedDistricts = result.data;
+                console.log(`[Bosta] Successfully cached ${cachedDistricts.length} cities with districts.`);
+                return cachedDistricts;
+            }
+        } catch (error) {
+            console.error('[Bosta] Failed to fetch districts from v2:', error.message);
+        }
+        return null;
+    }
+
+    /**
+     * Find the best matching Bosta ID for a given city and area name
+     */
+    async matchAddress(cityName, areaName) {
+        const districts = await this.getBostaDistricts();
+        if (!districts) return null;
+
+        // 1. Match City
+        const cityMatch = districts.find(c => 
+            c.cityName?.toLowerCase() === cityName?.toLowerCase() || 
+            c.cityOtherName === cityName ||
+            c.cityOtherName?.includes(cityName) ||
+            cityName?.includes(c.cityOtherName)
+        );
+
+        if (!cityMatch) return null;
+
+        // 2. Match Zone/District within city
+        let zoneMatch = null;
+        if (areaName && cityMatch.districts) {
+            // Exact or partial match
+            zoneMatch = cityMatch.districts.find(d => 
+                d.zoneName?.toLowerCase() === areaName?.toLowerCase() ||
+                d.zoneOtherName === areaName ||
+                d.districtName?.toLowerCase() === areaName?.toLowerCase() ||
+                d.districtOtherName === areaName ||
+                areaName?.includes(d.zoneOtherName) ||
+                d.zoneOtherName?.includes(areaName)
+            );
+        }
+
+        return {
+            city: { _id: cityMatch.cityId, name: cityMatch.cityName },
+            zone: zoneMatch ? { _id: zoneMatch.zoneId, name: zoneMatch.zoneName } : null
+        };
+    }
+
+    /**
      * Create a new shipment (Delivery) in Bosta
      * @param {Object} orderData The mapped order data from Hawsni
      */
@@ -181,26 +244,55 @@ class BostaService {
                 }
             }
 
-            // Resolve city to Bosta city object via map
-            const cityTrimmed = city.trim();
-            const bostaCity = BOSTA_CITIES_MAP[cityTrimmed] || { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' };
-            console.log(`[Bosta] Resolved city '${cityTrimmed}' -> ${bostaCity.name} (${bostaCity._id})`);
-
-            // Extract zone (المنطقة = city within governorate)
-            // The zone is typically the second-to-last part of a comma-separated address
+            // --- AI Parsing & Dynamic Matching Logic ---
+            let bostaCity = { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' }; // Default
             let bostaZone = null;
+
             try {
-                let rawAddr = '';
-                if (typeof shippingAddress === 'string') rawAddr = shippingAddress;
-                else if (shippingAddress?.address) rawAddr = shippingAddress.address;
-                const addrParts = rawAddr.split(',').map(s => s.trim()).filter(Boolean);
-                if (addrParts.length >= 3) {
-                    // Try the second-to-last part as zone (city within governorate)
-                    const zoneName = addrParts[addrParts.length - 2];
-                    bostaZone = BOSTA_ZONES_MAP[zoneName] || null;
-                    if (bostaZone) console.log(`[Bosta] Resolved zone '${zoneName}' -> ${bostaZone.name}`);
+                const fullAddressString = `${address}, ${city}`;
+                const aiResult = await aiService.parseAddress(fullAddressString);
+                
+                if (aiResult && aiResult.city) {
+                    console.log(`[Bosta-AI] Extracted names: City=${aiResult.city}, Zone=${aiResult.zone}`);
+                    const match = await this.matchAddress(aiResult.city, aiResult.zone);
+                    if (match) {
+                        bostaCity = match.city;
+                        bostaZone = match.zone;
+                        console.log(`[Bosta-AI] Dynamic Match Success: ${bostaCity.name} -> ${bostaZone?.name || 'No Zone'}`);
+                    }
                 }
-            } catch(e) { /* ignore */ }
+            } catch (aiError) {
+                console.error('[Bosta-AI] Parsing/Matching failed:', aiError.message);
+            }
+
+            // Fallback to manual City mapping 
+            if (!bostaCity._id || bostaCity._id === 'FceDyHXwpSYYF9zGW') {
+                const cityTrimmed = city.trim();
+                const manualCity = BOSTA_CITIES_MAP[cityTrimmed];
+                if (manualCity) {
+                    bostaCity = manualCity;
+                    console.log(`[Bosta-Manual] Resolved city via map: ${bostaCity.name}`);
+                }
+            }
+
+            // Fallback for Zone if not found by AI
+            if (!bostaZone) {
+                try {
+                    let rawAddr = '';
+                    if (typeof shippingAddress === 'string') rawAddr = shippingAddress;
+                    else if (shippingAddress?.address) rawAddr = shippingAddress.address;
+                    
+                    const addrParts = rawAddr.split(',').map(s => s.trim()).filter(Boolean);
+                    if (addrParts.length >= 2) {
+                        const zoneName = addrParts[addrParts.length - 2];
+                        const manualZone = BOSTA_ZONES_MAP[zoneName];
+                        if (manualZone) {
+                            bostaZone = manualZone;
+                            console.log(`[Bosta-Manual] Resolved zone via map: ${bostaZone.name}`);
+                        }
+                    }
+                } catch (e) { /* ignore fallback error */ }
+            }
 
             const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
             const customerPhone = orderData.users?.phone || extractedPhone || '';
