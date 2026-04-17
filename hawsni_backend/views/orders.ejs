@@ -51,6 +51,9 @@
                         <option value="Delivered">تم التوصيل</option>
                         <option value="Cancelled">ملغي</option>
                     </select>
+                    <label style="display:flex; align-items:center; gap:4px; margin:0; font-size: 0.85rem; font-weight:bold; color: #475569; cursor: pointer;">
+                        <input type="checkbox" id="bulkSkipEmail" style="width:16px; height:16px; cursor: pointer;"> بدون إرسال إيميل
+                    </label>
                     <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm">تطبيق</button>
                     <button onclick="bulkDelete()" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> حذف
                         المحدد</button>
@@ -222,6 +225,9 @@
                             <option value="Cancelled">ملغي</option>
                         </select>
                     </div>
+                    <label style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top:5px; font-size: 0.75rem; color:#64748b; cursor: pointer;">
+                        <input type="checkbox" id="modalSkipEmail" style="cursor: pointer;"> بدون إيميل
+                    </label>
                     <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
                 </div>
             </div>
@@ -606,13 +612,14 @@
             statusBadge.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحديث...';
             
             try {
+                const skipEmail = document.getElementById('modalSkipEmail').checked;
                 const res = await fetch(`/orders/${currentOrderId}/status`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ status: newStatus })
+                    body: JSON.stringify({ status: newStatus, skipEmail })
                 });
                 
                 const data = await res.json();
@@ -689,13 +696,14 @@
         async function bulkChangeStatus() {
             const ids = getSelectedIds();
             const status = document.getElementById('bulkStatusSelect').value;
+            const skipEmail = document.getElementById('bulkSkipEmail').checked;
             if (!ids.length || !status) return;
 
             try {
                 const res = await fetch('/orders/bulk-status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids, status })
+                    body: JSON.stringify({ ids, status, skipEmail })
                 });
                 const data = await res.json();
                 if (data.success) {

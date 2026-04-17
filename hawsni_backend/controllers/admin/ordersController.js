@@ -67,7 +67,7 @@ class OrdersController {
     async updateStatus(req, res) {
         try {
             const { id } = req.params;
-            const { status } = req.body;
+            const { status, skipEmail } = req.body;
 
             // Update and retrieve full data in ONE query
             const { data: order, error } = await supabase
@@ -115,7 +115,7 @@ class OrdersController {
                     }
                 }
 
-                if (customerEmail) {
+                if (customerEmail && skipEmail !== true && skipEmail !== 'true') {
                     emailService.sendOrderStatusEmail(customerEmail, customerName || 'عميلنا العزيز', order, status)
                         .catch(err => console.error('Background Email Error:', err));
                 }
@@ -130,7 +130,7 @@ class OrdersController {
     // Bulk update order status
     async bulkUpdateStatus(req, res) {
         try {
-            const { ids, status } = req.body;
+            const { ids, status, skipEmail } = req.body;
             if (!ids || !Array.isArray(ids) || ids.length === 0) {
                 return res.status(400).json({ success: false, message: 'لا توجد طلبات محددة' });
             }
@@ -153,8 +153,8 @@ class OrdersController {
 
             if (error) throw error;
 
-            // Send emails for bulk updates silently
-            if (data && data.length > 0) {
+            // Send emails for bulk updates silently if not skipped
+            if (data && data.length > 0 && skipEmail !== true && skipEmail !== 'true') {
                 data.forEach(order => {
                     try {
                         let customerEmail = order.users?.email;
