@@ -311,7 +311,7 @@ class OrdersController {
                 return res.status(500).json({ success: false, message: 'Gemini API Key is missing in environment variables.' });
             }
             const genAI = new GoogleGenerativeAI(apiKey);
-            const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+            const model = genAI.getGenerativeModel({ model: 'gemma-4-31b-it' });
 
             const systemInstruction = `
 أنت مساعد ذكاء اصطناعي لمتجر إلكتروني يسمى Hawsni للفخامة والأزياء.
