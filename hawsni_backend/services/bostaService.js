@@ -11,6 +11,9 @@ const BOSTA_CITIES_MAP = {
     'الاسكندرية': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
     'الإسكندرية': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
     'اسكندرية': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
+    'الاسكندريه': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
+    'الإسكندريه': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
+    'اسكندريه': { _id: 'Jrb6X6ucjiYgMP4T7', name: 'Alexandria' },
     'أسيوط': { _id: '7mDPAohM3ArSZmWTm', name: 'Assuit' },
     'اسيوط': { _id: '7mDPAohM3ArSZmWTm', name: 'Assuit' },
     'أسوان': { _id: 'kLvZ5JY6LJPL5chzN', name: 'Aswan' },
@@ -107,6 +110,15 @@ const BOSTA_ZONES_MAP = {
     'بنها': { _id: 'N1p7HNBaUmO', name: 'Banha' },
     'شبرا الخيمة': { _id: 'bCvAmQfEPbS', name: 'Shobra El Kheima' },
     'شبرا الخيمه': { _id: 'bCvAmQfEPbS', name: 'Shobra El Kheima' },
+    // Alexandria zones
+    'المنتزه': { _id: 'H7N6X6ucjiY', name: 'El Montaza' },
+    'السيوف': { _id: 'Jrb6X6ucjiY', name: 'El Seyouf' },
+    'سموحة': { _id: 'S7N6X6ucjiY', name: 'Smouha' },
+    'سموحه': { _id: 'S7N6X6ucjiY', name: 'Smouha' },
+    'سيدي بشر': { _id: 'B7N6X6ucjiY', name: 'Sidi Bishr' },
+    'العجمي': { _id: 'A7N6X6ucjiY', name: 'El Agamy' },
+    'محرم بك': { _id: 'M7N6X6ucjiY', name: 'Moharam Bek' },
+    'لوران': { _id: 'L7N6X6ucjiY', name: 'Loran' },
 };
 
 class BostaService {
@@ -201,7 +213,13 @@ class BostaService {
                     const name = p && p.name ? p.name : (item.name || `Product ${item.product_id}`);
                     const details = [];
                     if (item.size) details.push(`Size: ${item.size}`);
-                    if (item.color) details.push(`Color: ${item.color}`);
+                    if (item.color) {
+                        // Strip hex codes (e.g., #ffffff or #fff) from color name
+                        const cleanColor = item.color.replace(/#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})\b/g, '').trim();
+                        if (cleanColor) {
+                            details.push(`Color: ${cleanColor}`);
+                        }
+                    }
                     return details.length > 0 ? `${name} (${details.join(', ')})` : name;
                 });
             }
