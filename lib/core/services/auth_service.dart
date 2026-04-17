@@ -4,10 +4,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthService {
   static const String baseUrl = 'https://hwasibackend.vercel.app/api';
+  static const _secureStorage = FlutterSecureStorage();
   static String? _token;
   static Map<String, dynamic>? _userData;
 
@@ -57,9 +59,9 @@ class AuthService {
         _userData = data['user'];
         _isGuest = false; // Clear guest flag
 
-        // Save token and user data to shared preferences
+        // Save token and user data to secure storage and shared preferences
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', _token!);
+        await _secureStorage.write(key: 'token', value: _token);
         await prefs.setString('userData', json.encode(_userData));
         await prefs.remove('isGuest'); // Remove guest persistence
 
@@ -101,7 +103,7 @@ class AuthService {
           _userData = data['user'];
           _isGuest = false;
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', _token!);
+          await _secureStorage.write(key: 'token', value: _token);
           await prefs.setString('userData', json.encode(_userData));
           await prefs.remove('isGuest');
           updateFcmToken(); // Sync FCM token
@@ -138,7 +140,7 @@ class AuthService {
         _isGuest = false;
 
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', _token!);
+        await _secureStorage.write(key: 'token', value: _token);
         await prefs.setString('userData', json.encode(_userData));
         await prefs.remove('isGuest');
         _authStateController.add(true);
@@ -287,7 +289,7 @@ class AuthService {
     _isGuest = true;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
+    await _secureStorage.delete(key: 'token');
     await prefs.remove('userData');
     await prefs.setBool('isGuest', true); // Persist guest mode
 
@@ -300,10 +302,10 @@ class AuthService {
     // If the app allows guest usage, it might check isGuest.
   }
 
-  // Load token and user data from shared preferences
+  // Load token and user data from shared preferences/secure storage
   static Future<void> loadToken() async {
     final prefs = await SharedPreferences.getInstance();
-    _token = prefs.getString('token');
+    _token = await _secureStorage.read(key: 'token');
     final userDataString = prefs.getString('userData');
     _isGuest = prefs.getBool('isGuest') ?? false;
 
@@ -353,7 +355,7 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isGuest', true);
     // Ensure we don't have old tokens confusing things
-    await prefs.remove('token');
+    await _secureStorage.delete(key: 'token');
     await prefs.remove('userData');
 
     _authStateController
