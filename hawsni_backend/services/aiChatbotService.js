@@ -57,7 +57,12 @@ class AIChatbotService {
             systemInstruction: systemInstruction,
             tools: [
                 { functionDeclarations: [this.searchProductsTool, this.checkOrderStatusTool] }
-            ]
+            ],
+            generationConfig: {
+                thinkingConfig: {
+                    thinkingBudget: 0
+                }
+            }
         });
     }
 
@@ -93,12 +98,17 @@ class AIChatbotService {
                 if (phone.startsWith("+20")) phone = "0" + phone.substring(3);
                 
                 // Basic matching. For safety, only return status, total, and created_at.
+                // We search for the last 10 digits to handle 011... vs 11... vs +2011...
+                const searchPhone = phone.length >= 10 ? phone.substring(phone.length - 10) : phone;
+                
                 const { data, error } = await supabase
                     .from('orders')
                     .select('id, order_number, status, total, created_at')
-                    .ilike('shipping_address', `%${phone}%`)
+                    .ilike('shipping_address', `%${searchPhone}%`)
                     .order('created_at', { ascending: false })
                     .limit(3);
+
+                console.log(`[AI Bot] DB Search for "${searchPhone}" found ${data?.length || 0} orders`);
 
                 if (error) throw error;
 
@@ -163,11 +173,36 @@ class AIChatbotService {
                 }
                 
                 // Send the function results back to the AI so it can form the final answer
+                console.log(`[AI Bot] Sending function responses back to AI...`);
                 result = await chat.sendMessage(functionResponses);
                 response = result.response;
+                console.log(`[AI Bot] AI Response received after tool call.`);
             }
 
-            const text = response.text();
+            let text = "";
+            try {
+                const rawText = response.text();
+                // Strip any thinking tags that Gemma may still output
+                text = rawText
+                    .replace(/<channel>thought[\s\S]*?<\/channel>/gi, '')
+                    .replace(/<\|think\|>[\s\S]*?<\|\/?think\|>/gi, '')
+                    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+                    .trim();
+            } catch (e) {
+                console.warn("[AI Bot] Error getting text from response:", e);
+                // If it fails, maybe there's no text content
+                text = "";
+            }
+
+            if (!text) {
+                console.log("[AI Bot] AI returned empty text, trying to fallback...");
+                // If the AI didn't provide a verbal response after the tool, we might need to nudge it or use a default
+                if (response.functionCalls && response.functionCalls.length > 0) {
+                     text = "لقد استخرجت البيانات المطلوبة، هل تود معرفة تفاصيل أخرى؟";
+                } else {
+                     text = "عذراً، لم أستطع صياغة رد مناسب حالياً. كيف يمكنني مساعدتك؟";
+                }
+            }
             console.log(`[AI Bot] AI: ${text.substring(0, 100)}...`);
             
             // Return the updated history to the client

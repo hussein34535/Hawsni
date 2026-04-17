@@ -329,11 +329,14 @@ class OrdersController {
 النص المطلوب:
 "${prompt}"
 `;
-            // Request JSON output to completely block Gemma's text-based chain-of-thought
+            // Request JSON output and disable thinking to block Gemma's chain-of-thought
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: systemInstruction }] }],
                 generationConfig: {
                     responseMimeType: "application/json",
+                    thinkingConfig: {
+                        thinkingBudget: 0
+                    }
                 }
             });
             
