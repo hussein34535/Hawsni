@@ -8,6 +8,7 @@ import 'package:hwasi_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:hwasi_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:hwasi_app/features/wishlist/presentation/screens/wishlist_screen.dart';
 import 'package:hwasi_app/features/home/presentation/screens/home_screen.dart';
+import 'package:hwasi_app/features/chat/presentation/screens/chat_screen.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 
 class MainScreen extends StatefulWidget {
@@ -41,6 +42,7 @@ class _MainScreenState extends State<MainScreen> {
     if (isDesktop) {
       return Scaffold(
         backgroundColor: AppTheme.scaffoldBackgroundColor,
+        floatingActionButton: _buildChatFab(context),
         body: Column(
           children: [
             _buildDesktopHeader(context),
@@ -59,6 +61,7 @@ class _MainScreenState extends State<MainScreen> {
     if (l10n == null) return const SizedBox.shrink();
 
     return Scaffold(
+      floatingActionButton: _buildChatFab(context),
       body: IndexedStack(
         index: _currentIndex,
         children:
@@ -294,6 +297,23 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildChatFab(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: FloatingActionButton(
+        heroTag: 'chat_fab',
+        backgroundColor: AppTheme.primaryColor,
+        elevation: 6,
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ChatScreen()),
+          );
+        },
+        child: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 24),
       ),
     );
   }
