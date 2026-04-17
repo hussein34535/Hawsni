@@ -74,8 +74,9 @@ class OrderController {
                 if (!dbProduct) throw new Error(`Product not found: ${prodId}`);
 
                 let basePrice = parseFloat(dbProduct.price) || 0;
-                let itemDiscount = parseInt(dbProduct.discount) || 0;
-                let realPrice = Math.max(0, basePrice - itemDiscount);
+                let itemDiscount = parseFloat(dbProduct.discount) || 0;
+                let realPrice = Math.round(basePrice * (1 - (itemDiscount / 100)) * 100) / 100;
+                realPrice = Math.max(0, realPrice);
 
                 safeSubtotal += realPrice * (parseInt(item.quantity) || 1);
                 
