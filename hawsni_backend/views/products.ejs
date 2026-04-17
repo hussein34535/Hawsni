@@ -67,7 +67,7 @@
 
         <% if (products && products.length > 0) { %>
             <!-- Bulk Action Bar -->
-            <div id="bulkBar" class="hidden" style="background: var(--brand-light); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); padding: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+            <div id="bulkBar" class="hidden" style="background: var(--brand-light); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); padding: 12px; margin-bottom: 1.5rem; display: none; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span id="selectedCount" style="font-weight: 800; color: var(--brand-primary);">0 محدد</span>
                     <button onclick="clearSelection()" class="btn btn-secondary btn-sm" style="padding: 4px 8px;">
@@ -83,6 +83,12 @@
                     </select>
                     <button onclick="bulkChangeCategory()" class="btn btn-primary btn-sm" style="height: 36px;">
                         تطبيق
+                    </button>
+                    <button onclick="bulkToggleFeatured(true)" class="btn btn-secondary btn-sm" style="height: 36px;">
+                        <i class="fas fa-star"></i> تمييز
+                    </button>
+                    <button onclick="bulkToggleFeatured(false)" class="btn btn-secondary btn-sm" style="height: 36px;">
+                        <i class="far fa-star"></i> إزالة التمييز
                     </button>
                     <button onclick="bulkDelete()" class="btn btn-danger btn-sm" style="height: 36px;">
                         <i class="fas fa-trash"></i> حذف
@@ -161,8 +167,10 @@
             const bar = document.getElementById('bulkBar');
             document.getElementById('selectedCount').textContent = ids.length + ' محدد';
             if (ids.length > 0) {
+                bar.style.display = 'flex';
                 bar.classList.add('visible');
             } else {
+                bar.style.display = 'none';
                 bar.classList.remove('visible');
             }
             document.getElementById('selectAll').indeterminate =
@@ -224,6 +232,28 @@
                 const data = await res.json();
                 if (data.success) {
                     showToast('تم تغيير التصنيف بنجاح', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast(data.message || 'فشل التحديث', 'error');
+                }
+            } catch (e) {
+                showToast('حدث خطأ', 'error');
+            }
+        }
+
+        async function bulkToggleFeatured(isFeatured) {
+            const ids = getSelectedIds();
+            if (!ids.length) return showToast('اختر منتجات أولاً', 'error');
+
+            try {
+                const res = await fetch('/products/bulk-update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids, updates: { is_featured: isFeatured } })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('تم تحديث حالة التمييز بنجاح', 'success');
                     setTimeout(() => window.location.reload(), 1000);
                 } else {
                     showToast(data.message || 'فشل التحديث', 'error');
