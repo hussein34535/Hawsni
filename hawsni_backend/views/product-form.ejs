@@ -239,8 +239,9 @@
 
                             <div class="form-group">
                                 <label class="form-label">المخزون <span style="color: var(--danger);">*</span></label>
-                                <input type="number" name="stock" class="form-control" min="0"
+                                <input type="number" name="stock" id="mainStockInput" class="form-control" min="0"
                                     value="<%= product ? product.stock : 0 %>" required>
+                                <small id="stockSyncHint" class="text-muted" style="display:none; color: #8b5cf6 !important; font-weight: 600;"><i class="fas fa-link"></i> يتم حسابه تلقائياً من مجموع مخزون الـ Variants</small>
                             </div>
 
                             <div class="form-group">
@@ -1134,7 +1135,7 @@
                         ${combo.color ? `<div style="display:inline-block; width:15px; height:15px; border-radius:50%; background:${combo.color}; vertical-align:-2px; border:1px solid #ccc;"></div> <span dir="ltr">${combo.color}</span>` : '-'}
                     </td>
                     <td><input type="text" class="form-control variant-sku" placeholder="كود اختياري" value="${skuVal}" onchange="updateVariantsInput()"></td>
-                    <td><input type="number" class="form-control variant-stock" min="0" value="${stockVal}" onchange="updateVariantsInput()"></td>
+                    <td><input type="number" class="form-control variant-stock" min="0" value="${stockVal}" onchange="updateVariantsInput()" oninput="updateVariantsInput()"></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1145,15 +1146,34 @@
         function updateVariantsInput() {
             const rows = document.querySelectorAll('#variantsTable tbody tr');
             const result = [];
+            let totalStock = 0;
             rows.forEach(tr => {
+                const stockVal = parseInt(tr.querySelector('.variant-stock').value) || 0;
+                totalStock += stockVal;
                 result.push({
                     size: tr.dataset.size || null,
                     color: tr.dataset.color || null,
                     sku: tr.querySelector('.variant-sku').value,
-                    stock: tr.querySelector('.variant-stock').value
+                    stock: stockVal
                 });
             });
             document.getElementById('variantsDataInput').value = JSON.stringify(result);
+
+            // Auto-sync main stock with variant totals
+            const mainStockInput = document.getElementById('mainStockInput');
+            const stockSyncHint = document.getElementById('stockSyncHint');
+            if (rows.length > 0) {
+                mainStockInput.value = totalStock;
+                mainStockInput.readOnly = true;
+                mainStockInput.style.background = '#f1f5f9';
+                mainStockInput.style.cursor = 'not-allowed';
+                if (stockSyncHint) stockSyncHint.style.display = 'block';
+            } else {
+                mainStockInput.readOnly = false;
+                mainStockInput.style.background = '';
+                mainStockInput.style.cursor = '';
+                if (stockSyncHint) stockSyncHint.style.display = 'none';
+            }
         }
 
         // On Load initialization

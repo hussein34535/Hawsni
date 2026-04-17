@@ -420,6 +420,10 @@ class ProductController {
                         }));
                         const { error: variantError } = await supabase.from('product_variants').insert(variantData);
                         if (variantError) console.error('❌ Error inserting variants:', variantError);
+
+                        // Auto-sync main product stock = sum of variant stocks
+                        const totalVariantStock = variantData.reduce((sum, v) => sum + v.stock, 0);
+                        await supabase.from('products').update({ stock: totalVariantStock }).eq('id', newProduct.id);
                     }
                 } catch (e) {
                     console.error('Error parsing variants:', e);
@@ -654,6 +658,10 @@ class ProductController {
                             }));
                             const { error: variantError } = await supabase.from('product_variants').insert(variantData);
                             if (variantError) console.error('❌ Error inserting variants during update:', variantError);
+
+                            // Auto-sync main product stock = sum of variant stocks
+                            const totalVariantStock = variantData.reduce((sum, v) => sum + v.stock, 0);
+                            await supabase.from('products').update({ stock: totalVariantStock }).eq('id', req.params.id);
                         }
                     }
                 } catch (e) {
