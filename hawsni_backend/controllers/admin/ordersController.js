@@ -317,28 +317,38 @@ class OrdersController {
 أنت مساعد ذكاء اصطناعي لمتجر إلكتروني يسمى Hawsni للفخامة والأزياء.
 المطلوب منك تحويل النص البسيط التالي المكتوب من قبل الإدارة إلى رسالة بريد إلكتروني احترافية للعميل.
 
-القواعد الهامة لكتابة الإيميل:
-1. استخدم لغة عربية رسمية، ودودة وراقية تناسب متجر فخامة.
-2. اجعل الرسالة **قصيرة جداً ومباشرة في صلب الموضوع** بدون مقدمات أو حشو أو أسطر طويلة جداً. كُن واضحاً ومختصراً.
-3. استخدم تنسيق HTML البسيط (فقط <p> و <strong> و <ul> و <br>) بدون <html> ولا <body>.
-4. **هام جداً جداً:** يجب عليك وضع الإيميل النهائي فقط بداخل وسم <final_email>...</final_email>. لا تظهر طريقة تفكيرك أو مسودة قبلها أو بعدها للمستخدم بأي شكل.
+القواعد الهامة:
+1. استخدم لغة عربية رسمية وراقية.
+2. اجعل الرسالة قصيرة جداً ومباشرة.
+3. استخدم تنسيق HTML البسيط (فقط <p> و <strong> و <ul> و <br>).
+4. استخدم عملة (ج.م) وليس (ريال) لأننا في مصر.
 
-النص المطلوب تحويله للإيميل:
+يجب عليك إرجاع التنسيق كملف JSON فقط بدون أي نص آخر!
+مثال: {"html": "<p>رسالتك هنا...</p>"}
+
+النص المطلوب:
 "${prompt}"
 `;
-            const result = await model.generateContent(systemInstruction);
-            let responseText = result.response.text();
+            // Request JSON output to completely block Gemma's text-based chain-of-thought
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: systemInstruction }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                }
+            });
             
-            // Extract content within <final_email> tags if they exist (to filter out Gemma 4 thinking logs)
-            const match = responseText.match(/<final_email>([\s\S]*?)<\/final_email>/i);
-            if (match && match[1]) {
-                responseText = match[1];
+            const responseText = result.response.text();
+            let finalHtml = responseText;
+            
+            try {
+                // Parse the forced JSON response
+                const parsed = JSON.parse(responseText);
+                finalHtml = parsed.html || responseText;
+            } catch (e) {
+                console.error('Failed to parse AI JSON:', e);
             }
 
-            // Remove markdown codeblock around HTML if it exists
-            responseText = responseText.replace(/```html/gi, '').replace(/```/g, '').trim();
-
-            res.json({ success: true, generatedHtml: responseText });
+            res.json({ success: true, generatedHtml: finalHtml });
 
         } catch (err) {
             console.error('Error in AI Generation:', err);
