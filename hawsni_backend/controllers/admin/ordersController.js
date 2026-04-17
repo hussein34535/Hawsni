@@ -341,11 +341,32 @@ class OrdersController {
             let finalHtml = responseText;
             
             try {
-                // Parse the forced JSON response
-                const parsed = JSON.parse(responseText);
-                finalHtml = parsed.html || responseText;
+                // Gemma sometimes ignores JSON bounds and outputs markdown and thoughts
+                let jsonStr = responseText;
+                
+                // Attempt to extract from markdown codeblock if present
+                const mdMatch = responseText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/i);
+                if (mdMatch && mdMatch[1]) {
+                    jsonStr = mdMatch[1];
+                } else {
+                    // Find first { to avoid leading "thinking" text
+                    const firstBracket = responseText.indexOf('{');
+                    if (firstBracket !== -1) {
+                         // Find first matching } (assuming simple flat object)
+                        const firstEndBracket = responseText.indexOf('}', firstBracket);
+                        if (firstEndBracket !== -1) {
+                            jsonStr = responseText.substring(firstBracket, firstEndBracket + 1);
+                        }
+                    }
+                }
+
+                const parsed = JSON.parse(jsonStr);
+                finalHtml = parsed.html || jsonStr;
             } catch (e) {
-                console.error('Failed to parse AI JSON:', e);
+                // Extreme fallback: simple regex to find HTML inside the response
+                const fallbackMatch = responseText.match(/<br>|<p>|<strong>/) ? responseText.substring(responseText.indexOf('<')) : responseText;
+                finalHtml = fallbackMatch;
+                console.error('Failed to parse AI JSON. Fallback used.');
             }
 
             res.json({ success: true, generatedHtml: finalHtml });
