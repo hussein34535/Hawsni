@@ -168,7 +168,7 @@ class ProductController {
             const productData = {
                 name: req.body.name,
                 description: req.body.description,
-                price: parseFloat(req.body.price),
+                price: Math.round(parseFloat(req.body.price) * 100) / 100,
                 discount: parseInt(req.body.discount) || 0,
                 category_id: null, // Legacy field
                 category_ids: req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []),
@@ -233,7 +233,7 @@ class ProductController {
             const productData = {
                 name: req.body.name,
                 description: req.body.description,
-                price: parseFloat(req.body.price),
+                price: Math.round(parseFloat(req.body.price) * 100) / 100,
                 discount: parseInt(req.body.discount) || 0,
                 category_id: categoryIds[0] || null, // Sync with first category
                 category_ids: categoryIds,
@@ -387,7 +387,7 @@ class ProductController {
             const { data: newProduct, error } = await supabase.from('products').insert({
                 name,
                 description,
-                price: parseFloat(price),
+                price: Math.round(parseFloat(price) * 100) / 100,
                 discount: parseInt(discount) || 0,
                 stock: parseInt(stock) || 0,
                 category_id: categoryIdsToInsert[0] || null, // Sync with main table
@@ -606,7 +606,7 @@ class ProductController {
             const { error: updateError } = await supabase.from('products').update({
                 name,
                 description,
-                price: parseFloat(price),
+                price: Math.round(parseFloat(price) * 100) / 100,
                 discount: parseInt(discount) || 0,
                 stock: parseInt(stock) || 0,
                 category_id: categoryIdsToInsert[0] || null, // Sync with main table

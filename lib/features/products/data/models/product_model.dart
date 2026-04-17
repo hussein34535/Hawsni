@@ -42,7 +42,7 @@ class ProductModel {
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
+      price: double.parse(((json['price'] ?? 0).toDouble()).toStringAsFixed(2)),
       imageUrl: (json['images'] != null && (json['images'] as List).isNotEmpty)
           ? json['images'][0]
           : (json['image'] ?? ''),
