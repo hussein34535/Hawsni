@@ -320,8 +320,8 @@ class OrdersController {
 القواعد الهامة لكتابة الإيميل:
 1. استخدم لغة عربية رسمية، ودودة وراقية تناسب متجر فخامة.
 2. اجعل الرسالة **قصيرة جداً ومباشرة في صلب الموضوع** بدون مقدمات أو حشو أو أسطر طويلة جداً. كُن واضحاً ومختصراً.
-3. استخدم تنسيق HTML البسيط (فقط <p> و <strong> و <ul> و <br>) بدون <html> ولا <body> ولا \`\`\`html من حولها.
-4. اعطني فقط النص النهائي الذي سيصل للعميل كـ HTML، ولا تضف أي رد خارجي أو شروحات.
+3. استخدم تنسيق HTML البسيط (فقط <p> و <strong> و <ul> و <br>) بدون <html> ولا <body>.
+4. **هام جداً جداً:** يجب عليك وضع الإيميل النهائي فقط بداخل وسم <final_email>...</final_email>. لا تظهر طريقة تفكيرك أو مسودة قبلها أو بعدها للمستخدم بأي شكل.
 
 النص المطلوب تحويله للإيميل:
 "${prompt}"
@@ -329,10 +329,17 @@ class OrdersController {
             const result = await model.generateContent(systemInstruction);
             let responseText = result.response.text();
             
+            // Extract content within <final_email> tags if they exist (to filter out Gemma 4 thinking logs)
+            const match = responseText.match(/<final_email>([\s\S]*?)<\/final_email>/i);
+            if (match && match[1]) {
+                responseText = match[1];
+            }
+
             // Remove markdown codeblock around HTML if it exists
-            responseText = responseText.replace(/```html/g, '').replace(/```/g, '').trim();
+            responseText = responseText.replace(/```html/gi, '').replace(/```/g, '').trim();
 
             res.json({ success: true, generatedHtml: responseText });
+
         } catch (err) {
             console.error('Error in AI Generation:', err);
             res.status(500).json({ success: false, message: 'حدث خطأ أثناء توليد الرسالة: ' + err.message });
