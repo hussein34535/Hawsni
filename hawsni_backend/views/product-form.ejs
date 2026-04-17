@@ -216,9 +216,24 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="form-label">الخصم (%)</label>
-                                    <input type="number" name="discount" class="form-control" min="0" max="100"
-                                        value="<%= product ? product.discount : 0 %>">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <label class="form-label" style="margin-bottom: 0;">الخصم</label>
+                                        <div class="discount-type-toggle" style="display: flex; background: #f1f5f9; border-radius: 6px; padding: 2px;">
+                                            <button type="button" id="btnPercent" class="btn-toggle active" onclick="setDiscountMode('percent')" style="border: none; background: var(--primary); color: white; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">%</button>
+                                            <button type="button" id="btnPrice" class="btn-toggle" onclick="setDiscountMode('price')" style="border: none; background: transparent; color: #64748b; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">ج.م</button>
+                                        </div>
+                                    </div>
+                                    <div style="position: relative;">
+                                        <input type="number" id="discountInput" class="form-control" step="0.01" min="0" 
+                                            value="<%= product ? product.discount : 0 %>" oninput="handleDiscountInput()">
+                                        <input type="hidden" name="discount" id="hiddenDiscount" value="<%= product ? product.discount : 0 %>">
+                                        <span id="discountLabel" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;">%</span>
+                                    </div>
+                                    <small id="discountHint" class="text-muted" style="font-size: 0.7rem; display: block; margin-top: 4px; height: 1.2em;">
+                                        <% if (product && product.discount > 0) { %>
+                                            السعر بعد الخصم: <%= (product.price * (1 - product.discount/100)).toFixed(2) %> ج.م
+                                        <% } %>
+                                    </small>
                                 </div>
                             </div>
 
@@ -1154,6 +1169,58 @@
                 });
             }
         });
+
+        // Discount Management Logic
+        let discountMode = 'percent'; 
+
+        function setDiscountMode(mode) {
+            discountMode = mode;
+            const price = parseFloat(document.querySelector('input[name="price"]').value) || 0;
+            const currentDiscount = parseFloat(document.getElementById('hiddenDiscount').value) || 0;
+            const btnPercent = document.getElementById('btnPercent');
+            const btnPrice = document.getElementById('btnPrice');
+            const label = document.getElementById('discountLabel');
+            const input = document.getElementById('discountInput');
+
+            if (mode === 'percent') {
+                btnPercent.style.background = 'var(--primary)';
+                btnPercent.style.color = 'white';
+                btnPrice.style.background = 'transparent';
+                btnPrice.style.color = '#64748b';
+                label.textContent = '%';
+                input.value = currentDiscount;
+            } else {
+                btnPrice.style.background = 'var(--primary)';
+                btnPrice.style.color = 'white';
+                btnPercent.style.background = 'transparent';
+                btnPercent.style.color = '#64748b';
+                label.textContent = 'ج.م';
+                input.value = (price * (1 - currentDiscount / 100)).toFixed(2);
+            }
+            handleDiscountInput();
+        }
+
+        function handleDiscountInput() {
+            const price = parseFloat(document.querySelector('input[name="price"]').value) || 0;
+            const inputVal = parseFloat(document.getElementById('discountInput').value) || 0;
+            const hiddenInput = document.getElementById('hiddenDiscount');
+            const hint = document.getElementById('discountHint');
+
+            if (discountMode === 'percent') {
+                hiddenInput.value = inputVal;
+                const finalPrice = price * (1 - inputVal / 100);
+                hint.textContent = inputVal > 0 ? `السعر بعد الخصم: ${finalPrice.toFixed(2)} ج.م` : '';
+            } else {
+                if (price > 0) {
+                    const percentage = Math.max(0, Math.min(100, (1 - (inputVal / price)) * 100));
+                    hiddenInput.value = percentage;
+                    hint.textContent = inputVal > 0 ? `نسبة الخصم المحسوبة: ${percentage.toFixed(2)}%` : '';
+                } else {
+                    hiddenInput.value = 0;
+                    hint.textContent = 'أدخل سعر المنتج أولاً';
+                }
+            }
+        }
     </script>
 
     <%- include('partials/footer') %>

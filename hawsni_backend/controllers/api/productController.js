@@ -169,7 +169,7 @@ class ProductController {
                 name: req.body.name,
                 description: req.body.description,
                 price: Math.round(parseFloat(req.body.price) * 100) / 100,
-                discount: parseInt(req.body.discount) || 0,
+                discount: parseFloat(req.body.discount) || 0,
                 category_id: null, // Legacy field
                 category_ids: req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []),
                 stock: parseInt(req.body.stock) || 0,
@@ -234,7 +234,7 @@ class ProductController {
                 name: req.body.name,
                 description: req.body.description,
                 price: Math.round(parseFloat(req.body.price) * 100) / 100,
-                discount: parseInt(req.body.discount) || 0,
+                discount: parseFloat(req.body.discount) || 0,
                 category_id: categoryIds[0] || null, // Sync with first category
                 category_ids: categoryIds,
                 stock: parseInt(req.body.stock) || 0,
@@ -388,7 +388,7 @@ class ProductController {
                 name,
                 description,
                 price: Math.round(parseFloat(price) * 100) / 100,
-                discount: parseInt(discount) || 0,
+                discount: parseFloat(discount) || 0,
                 stock: parseInt(stock) || 0,
                 category_id: categoryIdsToInsert[0] || null, // Sync with main table
                 is_featured: is_featured === 'on',
@@ -607,7 +607,7 @@ class ProductController {
                 name,
                 description,
                 price: Math.round(parseFloat(price) * 100) / 100,
-                discount: parseInt(discount) || 0,
+                discount: parseFloat(discount) || 0,
                 stock: parseInt(stock) || 0,
                 category_id: categoryIdsToInsert[0] || null, // Sync with main table
                 is_featured: is_featured === 'on',

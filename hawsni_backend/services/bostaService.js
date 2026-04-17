@@ -193,19 +193,23 @@ class BostaService {
             const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
             const customerPhone = orderData.users?.phone || extractedPhone || '';
             
-            // Extract Product Names for Description
+            // Extract Product Names and Variants for Description
             let productNames = [];
             if (orderData.order_items && orderData.order_items.length > 0) {
                 productNames = orderData.order_items.map(item => {
                     const p = item.products;
-                    return p && p.name ? p.name : (item.name || `Product ${item.product_id}`);
+                    const name = p && p.name ? p.name : (item.name || `Product ${item.product_id}`);
+                    const details = [];
+                    if (item.size) details.push(`Size: ${item.size}`);
+                    if (item.color) details.push(`Color: ${item.color}`);
+                    return details.length > 0 ? `${name} (${details.join(', ')})` : name;
                 });
             }
             
             let description = productNames.length > 0 ? productNames.join(' + ') : `Hawsni Order #${orderData.order_number || orderData.id}`;
             // Limit to avoid Bosta validation error if characters exceed limit
-            if (description.length > 200) {
-                description = description.substring(0, 197) + '...';
+            if (description.length > 1000) { // Bosta usually allows up to 1000, but let's be safe
+                description = description.substring(0, 997) + '...';
             }
 
             const sizeOptions = options.size || 'MEDIUM';
