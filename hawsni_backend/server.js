@@ -31,6 +31,7 @@ const publicSettingsRoutes = require('./routes/publicSettings');
 const seoMiddleware = require('./middleware/seoMiddleware');
 const cloudinaryRoutes = require('./routes/cloudinary');
 const webhookRoutes = require('./routes/webhooks');
+const chatRoutes = require('./routes/chat');
 
 const app = express();
 
@@ -103,6 +104,7 @@ app.use('/api/vto', vtoRoutes);
 app.use('/api/settings', publicSettingsRoutes);
 app.use('/api/cloudinary', cloudinaryRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/chat', chatRoutes);
 
 // ──────────────────────────────────────────────
 // Public Order Tracking Page
