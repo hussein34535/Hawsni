@@ -192,37 +192,29 @@ class CartService {
   // --- Sync Guest Cart to Account ---
   Future<void> syncLocalCartToApi() async {
     try {
-      debugPrint('Syncing local cart to API...');
+      debugPrint('Syncing local cart to API in bulk...');
       final localItems = await _getLocalCart();
       if (localItems.isEmpty) return;
 
-      List<String> syncedItemIds = [];
+      final itemsPayload = localItems.map((item) => {
+        'productId': item.productId,
+        'quantity': item.quantity,
+        'size': item.size,
+        'color': item.color,
+      }).toList();
 
-      for (final item in localItems) {
-        try {
-          await addToCart(item.productId!, item.quantity,
-              size: item.size, color: item.color);
-          syncedItemIds.add(item.id); // Track successful syncs
-        } catch (e) {
-          debugPrint('Failed to sync item ${item.name}: $e');
-        }
-      }
+      final response = await ApiService.post('/cart/sync', {'items': itemsPayload});
 
-      // Only remove successfully synced items from local storage
-      if (syncedItemIds.length == localItems.length) {
-        // All synced successfully
+      if (response['success'] == true) {
+        // Clear local cart completely on success
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove(_localCartKey);
-        debugPrint('Local cart fully synced and cleared.');
+        debugPrint('Local cart fully synced and cleared via bulk sync.');
       } else {
-        // Partial sync: remove only what was synced
-        for (final id in syncedItemIds) {
-          await _removeFromLocalCart(id);
-        }
-        debugPrint('Partial local cart synced. Failed items retained.');
+        debugPrint('Failed to bulk sync local cart. Retaining for next attempt.');
       }
     } catch (e) {
-      debugPrint('Error syncing cart: $e');
+      debugPrint('Error bulk syncing cart: $e');
     }
   }
 

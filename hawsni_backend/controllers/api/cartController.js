@@ -28,6 +28,25 @@ class CartController {
         }
     }
 
+    async syncCart(req, res) {
+        try {
+            const { items } = req.body;
+            
+            if (!items || !Array.isArray(items)) {
+                return res.status(400).json({ success: false, message: 'Items array is required' });
+            }
+
+            if (items.length > 0) {
+                await CartService.syncCartItems(req.user.id, items);
+            }
+
+            const cart = await CartService.getCart(req.user.id);
+            res.json({ success: true, cart });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
     async updateCartItem(req, res) {
         try {
             const { quantity } = req.body;

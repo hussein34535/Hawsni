@@ -2,22 +2,6 @@ const ProductService = require('../../services/productService');
 const uploadToSupabase = require('../../utils/fileUpload');
 const supabase = require('../../config/supabase');
 
-// ─── Free Delivery Markup Helper ─────────────────────────────────────────────
-// When store setting `free_delivery_enabled` is on, adds 50 EGP to every
-// product price so the shipping cost is transparently embedded in the price.
-async function applyFreeDeliveryMarkup(products) {
-    try {
-        const { data: settings } = await supabase
-            .from('store_settings')
-            .select('free_delivery_enabled')
-            .single();
-        if (!settings?.free_delivery_enabled) return products;
-        const markup = p => ({ ...p, price: (parseFloat(p.price) || 0) + 50 });
-        return Array.isArray(products) ? products.map(markup) : markup(products);
-    } catch {
-        return products; // Fallback: return unchanged on any error
-    }
-}
 
 class ProductController {
     async getProducts(req, res) {
@@ -26,12 +10,11 @@ class ProductController {
             const filters = { category, search, minPrice, maxPrice, is_featured: featured };
 
             const products = await ProductService.getAllProducts(filters, sort);
-            const adjusted = await applyFreeDeliveryMarkup(products);
 
             res.json({
                 success: true,
-                count: adjusted.length,
-                products: adjusted
+                count: products.length,
+                products: products
             });
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -42,8 +25,7 @@ class ProductController {
     async getFeatured(req, res) {
         try {
             const products = await ProductService.getFeaturedProducts();
-            const adjusted = await applyFreeDeliveryMarkup(products);
-            res.json({ success: true, products: adjusted });
+            res.json({ success: true, products: products });
         } catch (error) {
             console.error('Error fetching featured products:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -58,8 +40,7 @@ class ProductController {
                 return res.status(404).json({ success: false, message: 'Product not found' });
             }
 
-            const [adjusted] = await applyFreeDeliveryMarkup([product]);
-            res.json({ success: true, product: adjusted });
+            res.json({ success: true, product: product });
         } catch (error) {
             console.error('Error fetching product:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -107,8 +88,7 @@ class ProductController {
                 }
             }
 
-            const adjusted = await applyFreeDeliveryMarkup(finalProducts);
-            res.json({ success: true, products: adjusted });
+            res.json({ success: true, products: finalProducts });
         } catch (error) {
             console.error('Error fetching related products:', error);
             res.status(500).json({ success: false, message: error.message });

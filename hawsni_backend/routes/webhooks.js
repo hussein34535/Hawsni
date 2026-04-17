@@ -6,11 +6,21 @@ const emailService = require('../services/emailService');
 // POST /api/webhooks/bosta
 router.post('/bosta', async (req, res) => {
     try {
+        // --- Security Check ---
+        const webhookSecret = process.env.BOSTA_WEBHOOK_SECRET;
+        if (webhookSecret) {
+            const authHeader = req.headers['authorization'];
+            if (!authHeader || authHeader !== `${webhookSecret}` && authHeader !== `Bearer ${webhookSecret}`) {
+                console.warn('[Bosta Webhook] 🚨 Unauthorized attempt from:', req.ip);
+                return res.status(401).json({ success: false, message: 'Unauthorized' });
+            }
+        } else {
+            console.warn('[Bosta Webhook] ⚠️ WARNING: BOSTA_WEBHOOK_SECRET is not set! Webhook is vulnerable.');
+        }
+
         console.log('[Bosta Webhook] Received event:', req.body);
         
-        // Example Bosta payload: { deliveryId: '', trackingNumber: '', state: { value: 'DELIVERED', code: 45 } }
-        // The structure may differ slightly based on Bosta API version, but these are typical fields.
-        // Bosta payloads sometimes use _id instead of deliveryId
+        const { deliveryId, trackingNumber, state } = req.body;
         const actualDeliveryId = deliveryId || req.body._id;
         
         if (!actualDeliveryId && !trackingNumber) {

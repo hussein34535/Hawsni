@@ -39,7 +39,7 @@ class OrderController {
 
     async createOrder(req, res) {
         try {
-            const { items, shippingAddress, paymentMethod, subtotal, discount, couponCode, notes, guestName, guestEmail, guestPhone, guestAlternativePhone } = req.body;
+            const { items, shippingAddress, paymentMethod, discount, couponCode, notes, guestName, guestEmail, guestPhone, guestAlternativePhone } = req.body;
 
             let finalShippingAddress = shippingAddress;
             if (typeof shippingAddress === 'string') {
@@ -58,16 +58,46 @@ class OrderController {
             if (guestAlternativePhone) finalShippingAddress.alternative_phone = guestAlternativePhone;
             if (guestEmail) finalShippingAddress.email = guestEmail;
 
+            // --- Server-side Price Security ---
+            if (!items || !Array.isArray(items) || items.length === 0) {
+                return res.status(400).json({ success: false, message: 'السلة فارغة' });
+            }
+
+            const productIds = items.map(item => item.product || item.productId || item.product_id);
+            const { data: dbProducts } = await supabase.from('products').select('id, price, discount').in('id', productIds);
+
+            let safeSubtotal = 0;
+            const safeItems = items.map(item => {
+                let prodId = item.product || item.productId || item.product_id;
+                let dbProduct = dbProducts?.find(p => p.id == prodId);
+                
+                if (!dbProduct) throw new Error(`Product not found: ${prodId}`);
+
+                let basePrice = parseFloat(dbProduct.price) || 0;
+                let itemDiscount = parseInt(dbProduct.discount) || 0;
+                let realPrice = Math.max(0, basePrice - itemDiscount);
+
+                safeSubtotal += realPrice * (parseInt(item.quantity) || 1);
+                
+                return {
+                    ...item,
+                    price: realPrice // Force server price
+                };
+            });
+
+            const shippingFee = parseFloat(req.body.shippingFee) || 0;
+            const orderDiscount = parseFloat(discount) || 0;
+
             const orderData = {
                 user_id: req.user ? req.user.id : null,
                 shipping_address: finalShippingAddress,
                 payment_method: paymentMethod,
-                subtotal: subtotal,
-                shipping_fee: req.body.shippingFee || 0,
-                discount: discount || 0,
+                subtotal: safeSubtotal,
+                shipping_fee: shippingFee,
+                discount: orderDiscount,
                 coupon_code: couponCode,
                 notes: notes || null,
-                total: req.body.total || Math.max(0, subtotal - (discount || 0) + (req.body.shippingFee || 0)),
+                total: Math.max(0, safeSubtotal + shippingFee - orderDiscount),
                 status: 'Processing'
             };
 
@@ -78,7 +108,7 @@ class OrderController {
                 ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress,
                 userAgent: req.headers['user-agent']
             };
-            const order = await OrderService.createOrder(orderData, items, guestInfo);
+            const order = await OrderService.createOrder(orderData, safeItems, guestInfo);
 
             res.status(201).json({ success: true, order });
         } catch (error) {

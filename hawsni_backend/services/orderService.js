@@ -124,17 +124,37 @@ class OrderService {
 
                     let pName = 'منتج غير معروف';
 
-                    // 1. Decrement overall stock in products
-                    const { data: currentProduct } = await supabase.from('products').select('name, stock').eq('id', pid).single();
-                    if (currentProduct) {
-                        pName = currentProduct.name;
-                        const newStock = Math.max(0, (currentProduct.stock || 0) - qty);
-                        await supabase.from('products').update({ stock: newStock }).eq('id', pid);
+                    // 1. Decrement overall stock in products with Optimistic Locking
+                    let stockUpdated = false;
+                    let retries = 3;
+                    let currentProduct = null;
+
+                    while (!stockUpdated && retries > 0) {
+                        const { data: pData } = await supabase.from('products').select('name, stock').eq('id', pid).single();
+                        currentProduct = pData;
                         
-                        // Wait to send global if we do variants below
+                        if (currentProduct) {
+                            pName = currentProduct.name;
+                            const newStock = Math.max(0, (currentProduct.stock || 0) - qty);
+                            
+                            const { data: updatedProduct } = await supabase
+                                .from('products')
+                                .update({ stock: newStock })
+                                .eq('id', pid)
+                                .eq('stock', currentProduct.stock) // ONLY if stock hasn't changed
+                                .select('id');
+                                
+                            if (updatedProduct && updatedProduct.length > 0) {
+                                stockUpdated = true;
+                            } else {
+                                retries--;
+                            }
+                        } else {
+                            break; // Product not found
+                        }
                     }
 
-                    // 2. Decrement Specific Variant Stock
+                    // 2. Decrement Specific Variant Stock with Optimistic Locking
                     let variantQuery = supabase.from('product_variants').select('*').eq('product_id', pid);
                     
                     if (size) variantQuery = variantQuery.eq('size', size);
@@ -146,13 +166,34 @@ class OrderService {
                     const { data: variant } = await variantQuery.maybeSingle();
 
                     if (variant) {
-                        const newVariantStock = Math.max(0, (variant.stock || 0) - qty);
-                        await supabase.from('product_variants').update({ stock: newVariantStock }).eq('id', variant.id);
+                        let variantUpdated = false;
+                        let varRetries = 3;
+                        let newVariantStock = 0;
 
-                        if (newVariantStock <= 0) {
+                        while (!variantUpdated && varRetries > 0) {
+                            const currentVarStock = varRetries === 3 ? variant.stock : (await variantQuery.maybeSingle()).data?.stock;
+                            if (currentVarStock === undefined) break;
+
+                            newVariantStock = Math.max(0, (currentVarStock || 0) - qty);
+                            
+                            const { data: updatedVar } = await supabase
+                                .from('product_variants')
+                                .update({ stock: newVariantStock })
+                                .eq('id', variant.id)
+                                .eq('stock', currentVarStock) // ONLY if stock hasn't changed
+                                .select('id');
+                                
+                            if (updatedVar && updatedVar.length > 0) {
+                                variantUpdated = true;
+                            } else {
+                                varRetries--;
+                            }
+                        }
+
+                        if (variantUpdated && newVariantStock <= 0) {
                             emailService.sendOutOfStockAlert(pName, variant.sku, variant.size, variant.color).catch(e => console.error(e));
                         }
-                    } else if (currentProduct && Math.max(0, (currentProduct.stock || 0) - qty) <= 0) {
+                    } else if (stockUpdated && currentProduct && Math.max(0, (currentProduct.stock || 0) - qty) <= 0) {
                         // Global out of stock alert if no variants are tracked for this item
                         emailService.sendOutOfStockAlert(pName, 'غير مسجل', size, color).catch(e => console.error(e));
                     }

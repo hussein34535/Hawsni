@@ -9,6 +9,9 @@ router.get('/', protect, CartController.getCart);
 // Add item to cart
 router.post('/items', protect, CartController.addToCart);
 
+// Sync multiple items to cart
+router.post('/sync', protect, CartController.syncCart);
+
 // Update cart item
 router.put('/items/:itemId', protect, CartController.updateCartItem);
 

@@ -123,6 +123,12 @@ class CartService {
         }
     }
 
+    async syncCartItems(userId, items) {
+        // Run all add operations in parallel using Promise.all for speed
+        const addPromises = items.map(item => this.addToCart(userId, item));
+        return Promise.all(addPromises);
+    }
+
     async updateCartItem(userId, itemId, quantity) {
         const cartId = await this._getOrCreateCart(userId);
 
