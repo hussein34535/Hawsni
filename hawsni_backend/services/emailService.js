@@ -444,12 +444,17 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     const orderNumber = order.order_number || String(order.id).substring(0, 6).toUpperCase();
     const total = order.total || order.total_amount || 0;
     const itemsHtml = (items || []).map(item => {
-        const itemName = item.name || '—';
+        const itemName = item.name || (item.products && item.products.name) || '—';
+        const itemSize = item.size ? `المقاس: ${item.size}` : '';
+        const itemColor = item.color ? `اللون: ${item.color}` : '';
+        const extras = [itemSize, itemColor].filter(Boolean).join(' | ');
+
         return `
         <tr>
             <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #444; font-size: 13px;">
                 <span style="font-weight: 700;">${itemName}</span>
                 <span style="color: #999; font-size: 11px;"> (الكمية: ${item.quantity})</span>
+                ${extras ? `<div style="color: #888; font-size: 11px; margin-top: 3px;">${extras}</div>` : ''}
             </td>
             <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; text-align: left; font-weight: 700; color: #0E4435; font-size: 13px;">
                 ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
@@ -459,6 +464,7 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
 
     // Preheader helps control what shows in the notification preview on mobile/desktop
     const preheader = `طلب جديد بقيمة ${Number(total).toLocaleString()} ج.م من ${customerName || 'عميل'}`;
+    const previewSpace = '&nbsp;&zwnj;'.repeat(100); // Forces Gmail to not preview the rest of the email
 
     return _send({
         to: ADMIN_EMAIL,
@@ -468,7 +474,7 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
             
             <!-- Invisible Preheader -->
             <div style="display: none; max-height: 0px; overflow: hidden; mso-hide: all;">
-                ${preheader}
+                ${preheader} ${previewSpace}
             </div>
 
             <!-- Header Badge -->
@@ -484,8 +490,24 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
                     <h2 style="color: #202124; font-size: 32px; font-weight: 700; margin: 0; line-height: 1;">${Number(total).toLocaleString()} <span style="font-size: 14px; font-weight: 600;">ج.م</span></h2>
                 </div>
 
+                <!-- Action Button -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <a href="https://hwasibackend.vercel.app/admin/orders" style="background: #202124; color: #ffffff; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
+                        إدارة الطلبات
+                    </a>
+                </div>
+
+                <!-- Product Details (Moved to bottom) -->
+                <div style="border-top: 1px solid #f0f0f0; padding-top: 25px; margin-bottom: 25px;">
+                    <h4 style="margin: 0 0 15px 0; font-size: 12px; font-weight: 900; color: #ccc; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">محتويات الشحنة</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        ${itemsHtml}
+                    </table>
+                </div>
+
                 <!-- Customer Minimal Info -->
-                <div style="background: #fafafa; border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #eee;">
+                <div style="background: #fafafa; border-radius: 12px; padding: 20px; border: 1px solid #eee;">
+                    <h4 style="margin: 0 0 15px 0; font-size: 12px; font-weight: 900; color: #ccc; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">بيانات العميل</h4>
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr>
                             <td style="padding: 6px 0; color: #666; font-size: 13px;">العميل</td>
@@ -494,6 +516,10 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
                         <tr>
                             <td style="padding: 6px 0; color: #666; font-size: 13px;">المحافظة</td>
                             <td style="padding: 6px 0; color: #202124; font-size: 14px; font-weight: 600; text-align: left;">${(shippingAddress && shippingAddress.state) || '—'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 6px 0; color: #666; font-size: 13px;">العنوان</td>
+                            <td style="padding: 6px 0; color: #202124; font-size: 14px; font-weight: 600; text-align: left;">${(shippingAddress && shippingAddress.address) || '—'}</td>
                         </tr>
                         <tr>
                             <td style="padding: 6px 0; color: #666; font-size: 13px;">رقم الهاتف</td>
@@ -507,21 +533,6 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
                             <td style="padding: 0 0 10px 0; color: #92400e; font-size: 13px; line-height: 1.5;" colspan="2">${order.notes}</td>
                         </tr>
                         ` : ''}
-                    </table>
-                </div>
-
-                <!-- Action Button -->
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <a href="https://hwasibackend.vercel.app/admin/orders" style="background: #202124; color: #ffffff; padding: 14px 40px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">
-                        إدارة الطلب
-                    </a>
-                </div>
-
-                <!-- Product Details (Moved to bottom) -->
-                <div style="border-top: 1px solid #f0f0f0; padding-top: 30px;">
-                    <h4 style="margin: 0 0 15px 0; font-size: 12px; font-weight: 900; color: #ccc; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">محتويات الشحنة</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        ${itemsHtml}
                     </table>
                 </div>
 
