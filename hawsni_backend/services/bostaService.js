@@ -255,6 +255,7 @@ class BostaService {
             // --- AI Parsing & Dynamic Matching Logic ---
             let bostaCity = { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' }; // Default
             let bostaZone = null;
+            let zoneFromStaticMap = false; // علامة عشان نعرف المصدر
 
             try {
                 // Combine what we have for AI to confirm or refine
@@ -284,10 +285,14 @@ class BostaService {
                 if (manualCity) bostaCity = manualCity;
             }
 
-            // Fallback for bostaZone if not found
+            // Fallback for bostaZone — الـ IDs هنا هي zoneId من v0 مش districtId من v2
+            // عشان كده نحطلها flag عشان نعرف نبعت districtName بدل districtId
             if (!bostaZone && area) {
                 const manualZone = BOSTA_ZONES_MAP[area.trim()];
-                if (manualZone) bostaZone = manualZone;
+                if (manualZone) {
+                    bostaZone = manualZone;
+                    zoneFromStaticMap = true; // مش نستخدم _id ده كـ districtId
+                }
             }
 
             const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
@@ -349,17 +354,22 @@ class BostaService {
                     phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
                 },
                 // بوسطة v2 API: city=String, cityId=ID المحافظة, districtId=ID المنطقة
-                // المحافظة بتظهر في الداشبورد بناءً على districtId مش city string
+                // لو البيانات جت من الـ Static Map، نبعت districtName بدل districtId
+                // لأن الـ _id في الـ Map دي هي zoneId قديمة من v0 مش districtId من v2
                 dropOffAddress: {
-                    city: bostaCity.name,                  // string — اسم المحافظة
-                    cityId: bostaCity._id,                 // ID المحافظة (مطلوب مع districtName)
-                    ...(bostaZone
-                        ? { districtId: bostaZone._id }    // ✅ الحقل الأساسي اللي بيحدد المنطقة والمحافظة
-                        : { districtName: area || bostaCity.name, } // fallback لو مفيش districtId
+                    city: bostaCity.name,
+                    cityId: bostaCity._id,
+                    ...(bostaZone && !zoneFromStaticMap
+                        ? { districtId: bostaZone._id }       // ✅ من الـ v2 API — districtId صح
+                        : bostaZone && zoneFromStaticMap
+                            ? { districtName: bostaZone.name } // ✅ من الـ Static Map — بعت الاسم
+                            : { districtName: area || city }   // ✅ آخر fallback
                     ),
-                    firstLine: address.length > 5 ? address : `${address} - ${bostaCity.name}`, // لازم > 5 حروف
+                    firstLine: address.length > 5 ? address : `${address} - ${bostaCity.name}`,
                 }
             };
+
+            console.log('[Bosta] Sending payload:', JSON.stringify(payload, null, 2));
 
             const response = await fetch(`${BOSTA_BASE_URL}/deliveries`, {
                 method: 'POST',
