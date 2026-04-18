@@ -51,7 +51,13 @@ export default function ChatWidget() {
 
       if (data.success) {
         setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
-        setHistory(data.history || []);
+        
+        // تنظيف التاريخ من أي أجزاء تفكير (thoughts) قبل حفظه في الـ State
+        const cleanHistory = (data.history || []).map((entry: any) => ({
+          ...entry,
+          parts: entry.parts.filter((p: any) => !p.thought)
+        }));
+        setHistory(cleanHistory);
       } else {
         setMessages(prev => [...prev, { sender: 'bot', text: 'عذراً، حدث خطأ. حاول تاني.' }]);
       }
