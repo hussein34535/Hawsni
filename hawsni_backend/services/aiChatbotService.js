@@ -233,7 +233,10 @@ class AIChatbotService {
             if (entry.role === 'model') {
                 return {
                     ...entry,
-                    parts: entry.parts.map(p => p.text ? { ...p, text: cleanModelText(p.text) } : p)
+                    parts: entry.parts
+                        .filter(p => !p.thought) // حذف أجزاء التفكير الداخلي تماماً
+                        .map(p => p.text ? { ...p, text: cleanModelText(p.text) } : p)
+                        .filter(p => p.text === undefined || p.text.trim().length > 0) // حذف النصوص الفاضية مع ترك الأدوات
                 };
             }
             return entry;
