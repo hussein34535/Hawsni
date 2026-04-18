@@ -1,4 +1,4 @@
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const supabase = require('../config/supabase');
 const aiService = require('./aiService');
 
@@ -156,8 +156,8 @@ class BostaService {
         if (!districts) return null;
 
         // 1. Match City
-        const cityMatch = districts.find(c => 
-            c.cityName?.toLowerCase() === cityName?.toLowerCase() || 
+        const cityMatch = districts.find(c =>
+            c.cityName?.toLowerCase() === cityName?.toLowerCase() ||
             c.cityOtherName === cityName ||
             c.cityOtherName?.includes(cityName) ||
             cityName?.includes(c.cityOtherName)
@@ -169,7 +169,7 @@ class BostaService {
         let zoneMatch = null;
         if (areaName && cityMatch.districts) {
             // Exact or partial match
-            zoneMatch = cityMatch.districts.find(d => 
+            zoneMatch = cityMatch.districts.find(d =>
                 d.zoneName?.toLowerCase() === areaName?.toLowerCase() ||
                 d.zoneOtherName === areaName ||
                 d.districtName?.toLowerCase() === areaName?.toLowerCase() ||
@@ -192,10 +192,10 @@ class BostaService {
     async createShipment(orderData, options = {}) {
         try {
             console.log(`[Bosta] Creating shipment for order ${orderData.order_number || orderData.id}...`);
-            
+
             // Map Hawsni structure to Bosta expected structure
             let shippingAddress = orderData.shipping_address;
-            
+
             let city = 'القاهرة'; // Default Governorate
             let area = null;       // Area/Zone
             let address = 'لا يوجد عنوان تفصيلي';
@@ -216,13 +216,13 @@ class BostaService {
                     // It's an object!
                     extractedName = shippingAddress.name;
                     extractedPhone = shippingAddress.phone;
-                    
+
                     // Does it have structured state/city/street?
                     if (shippingAddress.state && shippingAddress.city) {
                         city = shippingAddress.state;   // Typically the Governorate
                         area = shippingAddress.city;    // Typically the Area/District
                         address = shippingAddress.street || shippingAddress.address || address;
-                    } 
+                    }
                     else if (shippingAddress.state || shippingAddress.city) {
                         city = shippingAddress.state || shippingAddress.city;
                         address = shippingAddress.street || shippingAddress.address || address;
@@ -259,7 +259,7 @@ class BostaService {
                 // Combine what we have for AI to confirm or refine
                 const fullAddressString = `${address}, ${area ? area + ', ' : ''}${city}`;
                 const aiResult = await aiService.parseAddress(fullAddressString);
-                
+
                 // Use extracted area if AI didn't find one better
                 const finalCityName = aiResult?.city || city;
                 const finalAreaName = aiResult?.zone || area;
@@ -291,7 +291,7 @@ class BostaService {
 
             const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
             const customerPhone = orderData.users?.phone || extractedPhone || '';
-            
+
             // Extract Product Names and Variants for Description
             let productNames = [];
             if (orderData.order_items && orderData.order_items.length > 0) {
@@ -310,7 +310,7 @@ class BostaService {
                     return details.length > 0 ? `${name} (${details.join(', ')})` : name;
                 });
             }
-            
+
             let description = productNames.length > 0 ? productNames.join(' + ') : `Hawsni Order #${orderData.order_number || orderData.id}`;
             // Limit to avoid Bosta validation error if characters exceed limit
             if (description.length > 1000) { // Bosta usually allows up to 1000, but let's be safe
@@ -344,13 +344,13 @@ class BostaService {
                 notes: orderData.notes || 'لا يوجد ملاحظات',
                 receiver: {
                     firstName: customerName.split(' ')[0] || 'Customer',
-                    lastName: customerName.split(' ').slice(1).join(' ') || '.', // استخدام نقطة كـ fallback لو مفيش اسم تانى
-                    phone: customerPhone,
+                    lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',
+                    phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
                     email: orderData.users?.email || ''
                 },
                 dropOffAddress: {
-                    city: bostaCity.name, // بوسطة v0 بتفضل الاسم هنا مش الـ ID أحياناً أو كأوبجكت
-                    ...(bostaZone ? { zone: bostaZone.name } : {}),
+                    city: { _id: bostaCity._id, name: bostaCity.name },
+                    ...(bostaZone ? { zone: { _id: bostaZone._id, name: bostaZone.name } } : {}),
                     firstLine: address,
                 }
             };
@@ -376,7 +376,7 @@ class BostaService {
             // Save tracking number and bosta_id in our database
             const { error: updateError } = await supabase
                 .from('orders')
-                .update({ 
+                .update({
                     tracking_number: data.trackingNumber,
                     bosta_id: data._id
                 })
@@ -411,7 +411,7 @@ class BostaService {
             });
 
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.message || 'Failed to get AWB');
             }
