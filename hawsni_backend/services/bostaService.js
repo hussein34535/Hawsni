@@ -383,12 +383,12 @@ class BostaService {
                 },
                 // V2 API (Modern): Requires districtId instead of string matching
                 dropOffAddress: {
-                    city: { _id: bostaCity._id || bostaCity.cityId, name: bostaCity.name }, // V2 requires _id inside city object too
+                    city: { _id: bostaCity._id || bostaCity.cityId, name: bostaCity.name },
                     cityId: bostaCity._id || bostaCity.cityId,
                     ...(bostaZone && (bostaZone.districtId || bostaZone._id) ? { 
                         districtId: bostaZone.districtId || bostaZone._id 
                     } : {}),
-                    firstLine: address.length > 5 ? address : `${address} - ${bostaCity.name}`,
+                    firstLine: `${address} ${bostaZone ? '- ' + (bostaZone.name || bostaZone.districtName || bostaZone.zoneName || '') : ''} - ${bostaCity.name}`.replace(/\s+/g, ' '),
                 }
             };
 
