@@ -9,7 +9,7 @@ async function testGemma3Speed() {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemma-3-27b-it" });
+    const model = genAI.getGenerativeModel({ model: "gemma-2-27b-it" });
 
     console.log("🚀 Testing Gemma 3 27B Speed...");
     
