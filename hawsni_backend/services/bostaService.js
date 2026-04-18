@@ -347,8 +347,6 @@ class BostaService {
                     firstName: customerName.split(' ')[0] || 'Customer',
                     lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',
                     phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
-                    // لو مفيش إيميل، مش نبعته خالص عشان بوسطة مش بتقبل string فاضي
-                    ...(orderData.users?.email ? { email: orderData.users.email } : {})
                 },
                 // بوسطة v2 API: city=String, cityId=ID المحافظة, districtId=ID المنطقة
                 // المحافظة بتظهر في الداشبورد بناءً على districtId مش city string
