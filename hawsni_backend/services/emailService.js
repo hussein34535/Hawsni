@@ -6,18 +6,35 @@ const SENDER = process.env.SENDER_EMAIL || 'Hawsni <noreply@hwasi.com>';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hussona4635@gmail.com';
 
 /**
+ * Simple regex to validate email format, supporting both 'email@example.com' 
+ * and 'Name <email@example.com>'.
+ */
+function isValidEmail(email) {
+    if (!email || typeof email !== 'string') return false;
+    // Standard email regex
+    const simpleEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Name <email> regex
+    const nameEmailRegex = /^[^<>]+\s<[^\s@]+@[^\s@]+\.[^\s@]+>$/;
+    
+    return simpleEmailRegex.test(email.trim()) || nameEmailRegex.test(email.trim());
+}
+
+/**
  * Low-level Resend send helper.
  * @param {Object} opts – { to, subject, htmlContent }
  */
 async function _send({ to, subject, htmlContent }) {
-    // Sanitize the 'to' email: remove spaces and non-ASCII characters that cause 422 Error
-    const sanitizedTo = typeof to === 'string'
-        ? to.replace(/[^\x00-\x7F]/g, "").replace(/\s/g, "")
-        : to;
-
-    if (!sanitizedTo) {
-        console.error('❌ Resend email error: Invalid or empty email address provided');
+    if (!to) {
+        console.error('❌ Resend email error: No recipient provided');
         return null;
+    }
+
+    // Trim and sanitize: remove non-ASCII/control characters but keep meaningful spaces
+    let sanitizedTo = to.trim().replace(/[^\x20-\x7F]/g, "");
+
+    if (!isValidEmail(sanitizedTo)) {
+        console.error(`❌ Resend email error: Invalid email format provided: "${sanitizedTo}"`);
+        throw new Error(`Invalid email address: ${sanitizedTo}. Please ensure it follows the correct format.`);
     }
 
     const res = await fetch(RESEND_URL, {
