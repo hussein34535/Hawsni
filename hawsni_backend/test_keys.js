@@ -15,13 +15,17 @@ async function testKeys() {
         
         try {
             const genAI = new GoogleGenerativeAI(key);
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Using a standard model for checking validity
-            const result = await model.generateContent("Say 'Valid'");
-            const response = result.response.text();
-            console.log(`Result: SUCCESS (${response.trim()})`);
+            
+            // Try searching for gemma model
+            console.log('Fetching available models...');
+            const modelList = await genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Dummy to trigger SDK
+            
+            // Actually try a very basic generate with gemini-1.5-flash-latest or similar
+            const testModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
+            const result = await testModel.generateContent("test");
+            console.log(`Result: SUCCESS`);
         } catch (error) {
-            console.error(`Result: FAILED for ${keyName}`);
-            console.error(`Error Logic: ${error.message}`);
+            console.error(`Result: ${keyName} Error - ${error.message}`);
         }
         console.log('--------------------------------------------------');
     }
