@@ -381,12 +381,16 @@ class BostaService {
                     lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',
                     phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
                 },
-                // v0 API: city=String, zone=String (اختياري)
-                // نبعت zone بس لو جات من الـ v2 API الحي (matchAddress)
-                // لو جات من الـ Static Map → ممكن تطلع "Zone Not Found" فمش نبعتها
+                // V0 API: city and zone MUST be objects with _id and name
+                // {"city": {"_id":"...","name":"..."}, "zone": {"_id":"...","name":"..."}}
                 dropOffAddress: {
-                    city: bostaCity.name,
-                    ...(bostaZone && !zoneFromStaticMap ? { zone: bostaZone.name } : {}),
+                    city: { _id: bostaCity._id, name: bostaCity.name },
+                    ...(bostaZone ? { 
+                        zone: { 
+                            _id: bostaZone._id || bostaZone.districtId || bostaZone.zoneId, // Fallback through possible ID fields
+                            name: bostaZone.name || bostaZone.districtName || bostaZone.zoneName 
+                        } 
+                    } : {}),
                     firstLine: address.length > 5 ? address : `${address} - ${bostaCity.name}`,
                 }
             };
