@@ -270,26 +270,41 @@ class AIChatbotService {
             let text = "";
             try {
                 const rawText = response.text();
-                // --- AGGRESSIVE CLEANING FOR GEMMA 4 REASONING ---
+                // --- AGGRESSIVE CLEANING FOR GEMMA 4 REASONING & PLANNING ---
                 text = rawText
                     .replace(/<channel>thought[\s\S]*?<\/channel>/gi, '')
                     .replace(/<\|channel>thought<channel\|>/gi, '')
                     .replace(/<\|think\|>[\s\S]*?<\|\/?think\|>/gi, '')
                     .replace(/<think>[\s\S]*?<\/think>/gi, '')
-                    // Remove any lines starting with * or - that look like planning/reasoning
+                    
+                    // Remove English reasoning blocks (Common in Gemma 4)
+                    .replace(/^(The user said|User intent|I need to|Plan|Reasoning|Analysis|Context|Persona|Rules|Appropriate).*:?[\s\S]*?(\d+\.[\s\S]*?)*?(?=[\u0600-\u06FF])/gmi, '')
+                    
+                    // Remove any remaining leading English paragraphs that look like reasoning (if followed by Arabic)
+                    .replace(/^[a-zA-Z\s,.'":!?-]+(?=[\u0600-\u06FF])/gm, '')
+                    
+                    // Remove lines starting with * or - or numbers that look like planning steps
                     .replace(/^[*+-].*(\n|$)/gm, '')
-                    // Remove any leading placeholder reasoning phrases
-                    .replace(/^(User input|User intent|Context|Persona|Rules|Appropriate greeting|Response).*:.*(\n|$)/gmi, '')
+                    .replace(/^\d+\..*(\n|$)/gm, '')
+                    
                     // Remove the repetitive part where it says: * "Correct Arabic Response"
                     .replace(/^[* ]*".*?"(?=\s*[\u0600-\u06FF])/gm, '')
                     .trim();
 
                 // Final safety: If there's still a copy of the message in quotes at the start, remove it
-                if (text.startsWith('"') && text.includes('"\n')) {
-                    text = text.split('"\n').slice(1).join('"\n').trim();
-                } else if (text.startsWith('"') && text.match(/^".*?"/)) {
-                     // If it's just one quoted string followed by the same text
-                     text = text.replace(/^".*?"\s*/, '').trim();
+                if (text.startsWith('"')) {
+                    const firstQuoteEnd = text.indexOf('"', 1);
+                    if (firstQuoteEnd !== -1) {
+                        const potentialQuote = text.substring(1, firstQuoteEnd);
+                        const rest = text.substring(firstQuoteEnd + 1).trim();
+                        // If the quoted part is almost identical to the start of the rest, it's a duplicate
+                        if (rest.startsWith(potentialQuote.substring(0, 10))) {
+                            text = rest;
+                        } else if (text.match(/^".*?"\s*$/)) {
+                            // If it's JUST a quoted string, strip the quotes
+                            text = potentialQuote;
+                        }
+                    }
                 }
             } catch (e) {
                 console.warn("[AI Bot] Error getting text from response:", e);
