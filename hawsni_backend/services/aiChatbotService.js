@@ -274,7 +274,10 @@ class AIChatbotService {
         // ════════════════════════════════════════
         const formatterModel = this._getFormatterModel(instance);
 
-        const recentContext = cleanedHistory.slice(-2).map(h => `${h.role === 'user' ? 'العميل' : 'المساعد'}: ${h.parts[0].text}`).join('\n');
+        const recentContext = cleanedHistory.slice(-2).map(h => {
+            const text = h.parts.find(p => p.text)?.text || '';
+            return `${h.role === 'user' ? 'العميل' : 'المساعد'}: ${text}`;
+        }).join('\n');
         
         const formatterPrompt = toolData
             ? `سياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nبيانات النظام:\n${JSON.stringify(toolData, null, 2)}\n\nصغ رداً نهائياً بأسلوب يجمع الفخامة والوضوح باللغة العربية.`
