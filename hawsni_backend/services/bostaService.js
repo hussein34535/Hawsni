@@ -353,18 +353,11 @@ class BostaService {
                     lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',
                     phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
                 },
-                // بوسطة v2 API: city=String, cityId=ID المحافظة, districtId=ID المنطقة
-                // لو البيانات جت من الـ Static Map، نبعت districtName بدل districtId
-                // لأن الـ _id في الـ Map دي هي zoneId قديمة من v0 مش districtId من v2
+                // v0 API بتستخدم city=String و zone=String (مش districtId/cityId زي v2)
+                // ده الـ format اللي نجح في أول شحنة
                 dropOffAddress: {
                     city: bostaCity.name,
-                    cityId: bostaCity._id,
-                    ...(bostaZone && !zoneFromStaticMap
-                        ? { districtId: bostaZone._id }       // ✅ من الـ v2 API — districtId صح
-                        : bostaZone && zoneFromStaticMap
-                            ? { districtName: bostaZone.name } // ✅ من الـ Static Map — بعت الاسم
-                            : { districtName: area || city }   // ✅ آخر fallback
-                    ),
+                    ...(bostaZone ? { zone: bostaZone.name } : {}),
                     firstLine: address.length > 5 ? address : `${address} - ${bostaCity.name}`,
                 }
             };
