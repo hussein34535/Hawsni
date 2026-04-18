@@ -3,12 +3,24 @@ const supabase = require('../config/supabase');
 
 class AIChatbotService {
     constructor() {
-        if (!process.env.GEMINI_API_KEY) {
-            console.warn('[AI Bot] Warning: GEMINI_API_KEY is not set.');
+        // Collect all available Gemini API keys dynamically (GEMINI_API_KEY_1, _2, etc.)
+        this.apiKeys = Object.keys(process.env)
+            .filter(key => key.startsWith('GEMINI_API_KEY'))
+            .sort((a, b) => a.localeCompare(b)) // Ensure predictable order
+            .map(key => process.env[key])
+            .filter(key => !!key);
+
+        if (this.apiKeys.length === 0) {
+            console.warn('[AI Bot] Warning: No GEMINI_API_KEYs found in .env');
             return;
         }
-        this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+        console.log(`[AI Bot] Initialized with ${this.apiKeys.length} API keys for rotation: ${Object.keys(process.env).filter(k => k.startsWith('GEMINI_API_KEY')).join(', ')}`);
         
+        // Initialize multiple genAI instances, one for each key
+        this.genAIInstances = this.apiKeys.map(key => new GoogleGenerativeAI(key));
+        this.currentKeyIndex = 0;
+
         // Define the tools (functions) the AI can call
         this.searchProductsTool = {
             name: "search_products",
@@ -40,7 +52,7 @@ class AIChatbotService {
             }
         };
 
-        const systemInstruction = `
+        this.systemInstruction = `
 أنت المساعد الذكي الرسمي لمتجر Hawsni للفخامة والأزياء.
 مهمتك مساعدة العملاء في تصفح المنتجات ومعرفة حالات طلباتهم والإجابة على أي استفسارات تخص المتجر بلباقة واحترافية.
 
@@ -51,18 +63,25 @@ class AIChatbotService {
 4. **حماية الخصوصية:** في حالة الاستعلام عن الطلب، أعطِ العميل ملخصاً عن حالة طلبه (مؤكد، قيد المعالجة، في الطريق، إلخ) بدون عرض بيانات عنوانه أو معلوماته الخاصة كاملة.
 5. **الإجابات القصيرة:** اجعل ردودك مختصرة ومباشرة قدر الإمكان، لا تكتب فقرات طويلة جداً.
         `;
+    }
 
-        this.model = this.genAI.getGenerativeModel({ 
+    /**
+     * Gets the next available model instance (Rotating through API keys)
+     */
+    _getNextModel() {
+        const instance = this.genAIInstances[this.currentKeyIndex];
+        
+        // Rotate the index for the next call
+        this.currentKeyIndex = (this.currentKeyIndex + 1) % this.genAIInstances.length;
+        
+        console.log(`[AI Bot] Using Key #${this.currentKeyIndex + 1} for this request.`);
+
+        return instance.getGenerativeModel({ 
             model: "gemma-4-31b-it",
-            systemInstruction: systemInstruction,
+            systemInstruction: this.systemInstruction,
             tools: [
                 { functionDeclarations: [this.searchProductsTool, this.checkOrderStatusTool] }
-            ],
-            generationConfig: {
-                thinkingConfig: {
-                    thinkingBudget: 0
-                }
-            }
+            ]
         });
     }
 
@@ -173,12 +192,13 @@ class AIChatbotService {
      * Start or continue a chat session.
      */
     async handleChat(userMessage, history = []) {
-        if (!this.model) {
+        const model = this._getNextModel();
+        if (!model) {
             throw new Error("AI Model not initialized");
         }
 
         // Initialize chat with history
-        const chat = this.model.startChat({
+        const chat = model.startChat({
             history: history,
         });
 

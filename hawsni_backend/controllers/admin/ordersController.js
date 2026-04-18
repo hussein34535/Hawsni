@@ -304,13 +304,20 @@ class OrdersController {
             const { prompt } = req.body;
             if (!prompt) return res.status(400).json({ success: false, message: 'النص مطلوب' });
 
-            const { GoogleGenerativeAI } = require('@google/generative-ai');
-            const apiKey = process.env.GEMINI_API_KEY;
-            if (!apiKey) {
-                console.error("GEMINI_API_KEY is not defined in .env");
-                return res.status(500).json({ success: false, message: 'Gemini API Key is missing in environment variables.' });
+            // Dynamic Key Rotation logic
+            const keys = Object.keys(process.env)
+                .filter(key => key.startsWith('GEMINI_API_KEY'))
+                .map(key => process.env[key])
+                .filter(Boolean);
+            
+            const selectedKey = keys[Math.floor(Math.random() * keys.length)];
+
+            if (!selectedKey) {
+                console.error("No GEMINI_API_KEY found in environment");
+                return res.status(500).json({ success: false, message: 'AI API Configuration error.' });
             }
-            const genAI = new GoogleGenerativeAI(apiKey);
+
+            const genAI = new GoogleGenerativeAI(selectedKey);
             const model = genAI.getGenerativeModel({ model: 'gemma-4-31b-it' });
 
             const systemInstruction = `
@@ -329,14 +336,11 @@ class OrdersController {
 النص المطلوب:
 "${prompt}"
 `;
-            // Request JSON output and disable thinking to block Gemma's chain-of-thought
+
             const result = await model.generateContent({
                 contents: [{ role: 'user', parts: [{ text: systemInstruction }] }],
                 generationConfig: {
-                    responseMimeType: "application/json",
-                    thinkingConfig: {
-                        thinkingBudget: 0
-                    }
+                    responseMimeType: "application/json"
                 }
             });
             
