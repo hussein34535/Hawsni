@@ -383,7 +383,7 @@ class BostaService {
                 },
                 // V2 API (Modern): Requires districtId instead of string matching
                 dropOffAddress: {
-                    city: { name: bostaCity.name }, // Legacy field for safety, V2 uses ID
+                    city: { _id: bostaCity._id || bostaCity.cityId, name: bostaCity.name }, // V2 requires _id inside city object too
                     cityId: bostaCity._id || bostaCity.cityId,
                     ...(bostaZone && (bostaZone.districtId || bostaZone._id) ? { 
                         districtId: bostaZone.districtId || bostaZone._id 
