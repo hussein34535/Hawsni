@@ -328,31 +328,31 @@ class BostaService {
             const subtotal = parseFloat(orderData.total || 0) - parseFloat(orderData.shipping_fee || 0);
             let declaredValue = Math.max(0, subtotal - 100);
 
+            // بناء الـ Payload طبقات للهيكل اللى بوسطة بتطلبه (v0 API)
             const payload = {
                 type: 10, // Package Delivery
                 specs: {
                     size: sizeOptions,
-                    packageType: packageTypeMap[sizeOptions] || 'Medium',
                     packageDetails: {
                         itemsCount: orderData.order_items?.length || 1,
                         description: description
                     }
                 },
-                notes: orderData.notes || 'لا يوجد ملاحظات',
-                cod: parseFloat(orderData.total), // Cash on Delivery amount
-                declaredValue: declaredValue, // Insurance / Compensation Value
-                dropOffAddress: {
-                    city: bostaCity,
-                    ...(bostaZone ? { zone: bostaZone } : {}),
-                    firstLine: address,
-                },
+                cod: parseFloat(orderData.total || 0), // Cash on Delivery amount
+                businessReference: String(orderData.order_number || orderData.id),
                 allowToOpenPackage: options.allowToOpenPackage !== undefined ? options.allowToOpenPackage : true,
+                notes: orderData.notes || 'لا يوجد ملاحظات',
                 receiver: {
                     firstName: customerName.split(' ')[0] || 'Customer',
-                    lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',
+                    lastName: customerName.split(' ').slice(1).join(' ') || '.', // استخدام نقطة كـ fallback لو مفيش اسم تانى
                     phone: customerPhone,
+                    email: orderData.users?.email || ''
                 },
-                businessReference: String(orderData.order_number || orderData.id)
+                dropOffAddress: {
+                    city: bostaCity.name, // بوسطة v0 بتفضل الاسم هنا مش الـ ID أحياناً أو كأوبجكت
+                    ...(bostaZone ? { zone: bostaZone.name } : {}),
+                    firstLine: address,
+                }
             };
 
             const response = await fetch(`${BOSTA_BASE_URL}/deliveries`, {
