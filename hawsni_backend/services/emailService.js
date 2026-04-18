@@ -6,6 +6,48 @@ const SENDER = process.env.SENDER_EMAIL || 'Hawsni <noreply@hwasi.com>';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hussona4635@gmail.com';
 
 /**
+ * Smart Email Fixer: Predicts and repairs common email entry mistakes.
+ */
+function smartFixEmail(email) {
+    if (!email || typeof email !== 'string') return email;
+    let fixed = email.trim();
+
+    // Pattern 1: Handle "Name <username>" where username is incomplete
+    if (fixed.includes('<') && fixed.includes('>')) {
+        const match = fixed.match(/^(.*?)<(.*?)>$/);
+        if (match) {
+            const namePart = match[1];
+            const emailPart = smartFixEmail(match[2]); // Recursive fix for the inner part
+            return `${namePart}<${emailPart}>`;
+        }
+    }
+
+    // Pattern 2: Missing '@' entirely (Default to @gmail.com as requested)
+    if (!fixed.includes('@')) {
+        // Only fix if it looks like a username (no spaces in middle)
+        if (!/\s/.test(fixed)) {
+            return `${fixed}@gmail.com`;
+        }
+        return fixed;
+    }
+
+    // Pattern 3: Ends with '@' (e.g., 'user@')
+    if (fixed.endsWith('@')) {
+        return `${fixed}gmail.com`;
+    }
+
+    // Pattern 4: Missing '.com' or extension for common providers
+    const commonProviders = ['gmail', 'yahoo', 'outlook', 'hotmail', 'icloud'];
+    for (const provider of commonProviders) {
+        if (fixed.toLowerCase().endsWith(`@${provider}`)) {
+            return `${fixed}.com`;
+        }
+    }
+
+    return fixed;
+}
+
+/**
  * Simple regex to validate email format, supporting both 'email@example.com' 
  * and 'Name <email@example.com>'.
  */
@@ -13,8 +55,8 @@ function isValidEmail(email) {
     if (!email || typeof email !== 'string') return false;
     // Standard email regex
     const simpleEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    // Name <email> regex
-    const nameEmailRegex = /^[^<>]+\s<[^\s@]+@[^\s@]+\.[^\s@]+>$/;
+    // Name <email> regex: allow more flexibility in name
+    const nameEmailRegex = /^[^<>]*\s*<[^\s@]+@[^\s@]+\.[^\s@]+>$/;
     
     return simpleEmailRegex.test(email.trim()) || nameEmailRegex.test(email.trim());
 }
@@ -29,11 +71,14 @@ async function _send({ to, subject, htmlContent }) {
         return null;
     }
 
-    // Trim and sanitize: remove non-ASCII/control characters but keep meaningful spaces
-    let sanitizedTo = to.trim().replace(/[^\x20-\x7F]/g, "");
+    // 1. Apply Smart Fixer
+    let sanitizedTo = smartFixEmail(to);
+
+    // 2. Sanitize: remove non-ASCII/control characters but keep meaningful spaces
+    sanitizedTo = sanitizedTo.trim().replace(/[^\x20-\x7F]/g, "");
 
     if (!isValidEmail(sanitizedTo)) {
-        console.error(`❌ Resend email error: Invalid email format provided: "${sanitizedTo}"`);
+        console.error(`❌ Resend email error: Invalid email format after fixing: "${sanitizedTo}"`);
         throw new Error(`Invalid email address: ${sanitizedTo}. Please ensure it follows the correct format.`);
     }
 

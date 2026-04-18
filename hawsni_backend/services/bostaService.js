@@ -196,8 +196,8 @@ class BostaService {
             // Map Hawsni structure to Bosta expected structure
             let shippingAddress = orderData.shipping_address;
             
-            // Default fallback
-            let city = 'القاهرة';
+            let city = 'القاهرة'; // Default Governorate
+            let area = null;       // Area/Zone
             let address = 'لا يوجد عنوان تفصيلي';
             let extractedName = null;
             let extractedPhone = null;
@@ -218,16 +218,22 @@ class BostaService {
                     extractedPhone = shippingAddress.phone;
                     
                     // Does it have structured state/city/street?
-                    if (shippingAddress.state || shippingAddress.city) {
-                        city = shippingAddress.state || shippingAddress.city;
+                    if (shippingAddress.state && shippingAddress.city) {
+                        city = shippingAddress.state;   // Typically the Governorate
+                        area = shippingAddress.city;    // Typically the Area/District
                         address = shippingAddress.street || shippingAddress.address || address;
                     } 
+                    else if (shippingAddress.state || shippingAddress.city) {
+                        city = shippingAddress.state || shippingAddress.city;
+                        address = shippingAddress.street || shippingAddress.address || address;
+                    }
                     // Or does it just have a concatenated 'address' string?
                     else if (shippingAddress.address && typeof shippingAddress.address === 'string') {
                         let parts = shippingAddress.address.split(',').map(s => s.trim());
                         if (parts.length >= 2) {
                             city = parts[parts.length - 1]; // Governorate is usually last
-                            address = parts.slice(0, parts.length - 1).join(' - ');
+                            area = parts[parts.length - 2]; // Area is usually before governorate
+                            address = parts.slice(0, parts.length - 2).join(' - ') || parts.slice(0, parts.length - 1).join(' - ');
                         } else {
                             address = shippingAddress.address;
                         }
@@ -237,7 +243,8 @@ class BostaService {
                     let parts = shippingAddress.split(',').map(s => s.trim());
                     if (parts.length >= 2) {
                         city = parts[parts.length - 1];
-                        address = parts.slice(0, parts.length - 1).join(' - ');
+                        area = parts[parts.length - 2];
+                        address = parts.slice(0, parts.length - 2).join(' - ') || parts.slice(0, parts.length - 1).join(' - ');
                     } else {
                         address = shippingAddress;
                     }
@@ -249,49 +256,37 @@ class BostaService {
             let bostaZone = null;
 
             try {
-                const fullAddressString = `${address}, ${city}`;
+                // Combine what we have for AI to confirm or refine
+                const fullAddressString = `${address}, ${area ? area + ', ' : ''}${city}`;
                 const aiResult = await aiService.parseAddress(fullAddressString);
                 
-                if (aiResult && aiResult.city) {
-                    console.log(`[Bosta-AI] Extracted names: City=${aiResult.city}, Zone=${aiResult.zone}`);
-                    const match = await this.matchAddress(aiResult.city, aiResult.zone);
+                // Use extracted area if AI didn't find one better
+                const finalCityName = aiResult?.city || city;
+                const finalAreaName = aiResult?.zone || area;
+
+                if (finalCityName) {
+                    console.log(`[Bosta-AI] Matching: City=${finalCityName}, Zone=${finalAreaName || 'None'}`);
+                    const match = await this.matchAddress(finalCityName, finalAreaName);
                     if (match) {
                         bostaCity = match.city;
                         bostaZone = match.zone;
-                        console.log(`[Bosta-AI] Dynamic Match Success: ${bostaCity.name} -> ${bostaZone?.name || 'No Zone'}`);
+                        console.log(`[Bosta-AI] Match Success: ${bostaCity.name} -> ${bostaZone?.name || 'No Zone'}`);
                     }
                 }
             } catch (aiError) {
                 console.error('[Bosta-AI] Parsing/Matching failed:', aiError.message);
             }
 
-            // Fallback to manual City mapping 
-            if (!bostaCity._id || bostaCity._id === 'FceDyHXwpSYYF9zGW') {
-                const cityTrimmed = city.trim();
-                const manualCity = BOSTA_CITIES_MAP[cityTrimmed];
-                if (manualCity) {
-                    bostaCity = manualCity;
-                    console.log(`[Bosta-Manual] Resolved city via map: ${bostaCity.name}`);
-                }
+            // Fallback for bostaCity if not found or still Cairo while input was something else
+            if (bostaCity._id === 'FceDyHXwpSYYF9zGW' && city && !city.includes('القاهرة')) {
+                const manualCity = BOSTA_CITIES_MAP[city.trim()];
+                if (manualCity) bostaCity = manualCity;
             }
 
-            // Fallback for Zone if not found by AI
-            if (!bostaZone) {
-                try {
-                    let rawAddr = '';
-                    if (typeof shippingAddress === 'string') rawAddr = shippingAddress;
-                    else if (shippingAddress?.address) rawAddr = shippingAddress.address;
-                    
-                    const addrParts = rawAddr.split(',').map(s => s.trim()).filter(Boolean);
-                    if (addrParts.length >= 2) {
-                        const zoneName = addrParts[addrParts.length - 2];
-                        const manualZone = BOSTA_ZONES_MAP[zoneName];
-                        if (manualZone) {
-                            bostaZone = manualZone;
-                            console.log(`[Bosta-Manual] Resolved zone via map: ${bostaZone.name}`);
-                        }
-                    }
-                } catch (e) { /* ignore fallback error */ }
+            // Fallback for bostaZone if not found
+            if (!bostaZone && area) {
+                const manualZone = BOSTA_ZONES_MAP[area.trim()];
+                if (manualZone) bostaZone = manualZone;
             }
 
             const customerName = orderData.users?.name || extractedName || 'عميل هوسي';
