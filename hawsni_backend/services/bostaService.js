@@ -255,14 +255,16 @@ class BostaService {
             // --- AI Parsing & Dynamic Matching Logic ---
             let bostaCity = { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' }; // Default
             let bostaZone = null;
-            let zoneFromStaticMap = false; // علامة عشان نعرف المصدر
+            let zoneFromStaticMap = false;
 
             try {
-                // Combine what we have for AI to confirm or refine
-                const fullAddressString = `${address}, ${area ? area + ', ' : ''}${city}`;
-                const aiResult = await aiService.parseAddress(fullAddressString);
+                // نجيب القائمة الحقيقية من بوسطة أولاً
+                const districts = await this.getBostaDistricts();
 
-                // Use extracted area if AI didn't find one better
+                // نمرر القائمة للـ AI عشان يختار منها مباشرة
+                const fullAddressString = `${address}, ${area ? area + ', ' : ''}${city}`;
+                const aiResult = await aiService.parseAddress(fullAddressString, districts);
+
                 const finalCityName = aiResult?.city || city;
                 const finalAreaName = aiResult?.zone || area;
 
