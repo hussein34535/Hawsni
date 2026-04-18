@@ -4,9 +4,10 @@ const supabase = require('../config/supabase');
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
-const GEMMA_MODEL  = "gemma-4-31b-it"; 
-const MAX_RESULTS  = 5;
-const MAX_ORDERS   = 3;
+const REASONER_MODEL  = "gemma-4-31b-it"; 
+const FORMATTER_MODEL = "gemma-3-27b-it"; 
+const MAX_RESULTS     = 5;
+const MAX_ORDERS      = 3;
 
 const STATUS_MAP = {
     Pending:    'قيد الانتظار',
@@ -151,7 +152,7 @@ class AIChatbotService {
     // ── Model A: Gemma + Tools ─────────────────
     _getToolsModel(instance) {
         return instance.getGenerativeModel({
-            model:             GEMMA_MODEL,
+            model:             REASONER_MODEL,
             systemInstruction: TOOLS_SYSTEM,
             tools:             TOOLS,
         });
@@ -160,7 +161,7 @@ class AIChatbotService {
     // ── Model B: Gemma + JSON Formatter ────────
     _getFormatterModel(instance) {
         return instance.getGenerativeModel({
-            model:             GEMMA_MODEL,
+            model:             FORMATTER_MODEL,
             systemInstruction: FORMAT_SYSTEM,
             generationConfig:  { responseMimeType: "application/json" },
         });
@@ -232,7 +233,7 @@ class AIChatbotService {
             if (entry.role === 'model') {
                 return {
                     ...entry,
-                    parts: entry.parts.map(p => ({ ...p, text: cleanModelText(p.text) }))
+                    parts: entry.parts.map(p => p.text ? { ...p, text: cleanModelText(p.text) } : p)
                 };
             }
             return entry;
