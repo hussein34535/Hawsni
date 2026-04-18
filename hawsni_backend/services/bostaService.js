@@ -381,23 +381,20 @@ class BostaService {
                     lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',
                     phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
                 },
-                // V0 API: city and zone MUST be objects with _id and name
-                // {"city": {"_id":"...","name":"..."}, "zone": {"_id":"...","name":"..."}}
+                // V2 API (Modern): Requires districtId instead of string matching
                 dropOffAddress: {
-                    city: { _id: bostaCity._id, name: bostaCity.name },
-                    ...(bostaZone ? { 
-                        zone: { 
-                            _id: bostaZone._id || bostaZone.districtId || bostaZone.zoneId, // Fallback through possible ID fields
-                            name: bostaZone.name || bostaZone.districtName || bostaZone.zoneName 
-                        } 
+                    city: { name: bostaCity.name }, // Legacy field for safety, V2 uses ID
+                    cityId: bostaCity._id || bostaCity.cityId,
+                    ...(bostaZone && (bostaZone.districtId || bostaZone._id) ? { 
+                        districtId: bostaZone.districtId || bostaZone._id 
                     } : {}),
                     firstLine: address.length > 5 ? address : `${address} - ${bostaCity.name}`,
                 }
             };
 
-            console.log('[Bosta] Sending payload:', JSON.stringify(payload, null, 2));
+            console.log('[Bosta] Sending payload to V2:', JSON.stringify(payload, null, 2));
 
-            const response = await fetch(`${BOSTA_BASE_URL}/deliveries`, {
+            const response = await fetch(`${BOSTA_V2_URL}/deliveries`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
