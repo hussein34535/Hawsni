@@ -270,40 +270,46 @@ class AIChatbotService {
             let text = "";
             try {
                 const rawText = response.text();
-                // --- AGGRESSIVE CLEANING FOR GEMMA 4 REASONING & PLANNING ---
-                text = rawText
+                
+                // 1. Strip known technical tags
+                let cleaned = rawText
                     .replace(/<channel>thought[\s\S]*?<\/channel>/gi, '')
                     .replace(/<\|channel>thought<channel\|>/gi, '')
                     .replace(/<\|think\|>[\s\S]*?<\|\/?think\|>/gi, '')
-                    .replace(/<think>[\s\S]*?<\/think>/gi, '')
-                    
-                    // Remove English reasoning blocks (Common in Gemma 4)
-                    .replace(/^(The user said|User intent|I need to|Plan|Reasoning|Analysis|Context|Persona|Rules|Appropriate).*:?[\s\S]*?(\d+\.[\s\S]*?)*?(?=[\u0600-\u06FF])/gmi, '')
-                    
-                    // Remove any remaining leading English paragraphs that look like reasoning (if followed by Arabic)
-                    .replace(/^[a-zA-Z\s,.'":!?-]+(?=[\u0600-\u06FF])/gm, '')
-                    
-                    // Remove lines starting with * or - or numbers that look like planning steps
+                    .replace(/<think>[\s\S]*?<\/think>/gi, '');
+
+                // 2. Identify the core Arabic response
+                // Find the first Arabic character (\u0600-\u06FF)
+                const firstArabicIndex = cleaned.search(/[\u0600-\u06FF]/);
+                
+                if (firstArabicIndex !== -1) {
+                    // Check if there is significant reasoning text before the Arabic
+                    const beforeArabic = cleaned.substring(0, firstArabicIndex);
+                    if (beforeArabic.includes('*') || beforeArabic.toLowerCase().includes('plan') || beforeArabic.toLowerCase().includes('goal') || beforeArabic.length > 50) {
+                        // Strip everything before the Arabic starts
+                        cleaned = cleaned.substring(firstArabicIndex);
+                    }
+                }
+
+                // 3. Post-processing the identified text
+                text = cleaned
+                    // Remove leading/trailing quotes often added by the model in plans
+                    .replace(/^["'«](.*?)["'»]/, '$1')
+                    // Remove English translations in parentheses that follow Arabic: (And upon you be peace...)
+                    .replace(/[\u0600-\u06FF](\s*)\(.*?[a-zA-Z]{3,}.*?\)/g, (match) => match.charAt(0) + match.charAt(1).repeat(match.length > 2 ? 1 : 0)) // Keep the Arabic char, strip the rest
+                    .replace(/\((And|Peace|Welcome|How|I can).*?\)/gi, '')
+                    // Remove internal bullet points and reasoning headers that might have followed
                     .replace(/^[*+-].*(\n|$)/gm, '')
-                    .replace(/^\d+\..*(\n|$)/gm, '')
-                    
-                    // Remove the repetitive part where it says: * "Correct Arabic Response"
-                    .replace(/^[* ]*".*?"(?=\s*[\u0600-\u06FF])/gm, '')
+                    .replace(/^[a-zA-Z]+:.*(\n|$)/gm, '')
+                    .replace(/^\d+\..*(\n|$)/gm, '') 
                     .trim();
 
-                // Final safety: If there's still a copy of the message in quotes at the start, remove it
-                if (text.startsWith('"')) {
-                    const firstQuoteEnd = text.indexOf('"', 1);
-                    if (firstQuoteEnd !== -1) {
-                        const potentialQuote = text.substring(1, firstQuoteEnd);
-                        const rest = text.substring(firstQuoteEnd + 1).trim();
-                        // If the quoted part is almost identical to the start of the rest, it's a duplicate
-                        if (rest.startsWith(potentialQuote.substring(0, 10))) {
-                            text = rest;
-                        } else if (text.match(/^".*?"\s*$/)) {
-                            // If it's JUST a quoted string, strip the quotes
-                            text = potentialQuote;
-                        }
+                // If the regex above missed the parentheses
+                if (text.endsWith(')') && text.includes('(')) {
+                    const lastOpenParen = text.lastIndexOf('(');
+                    const insideParen = text.substring(lastOpenParen);
+                    if (/[a-zA-Z]/.test(insideParen)) {
+                        text = text.substring(0, lastOpenParen).trim();
                     }
                 }
             } catch (e) {
