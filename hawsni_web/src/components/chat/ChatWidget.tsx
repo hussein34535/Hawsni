@@ -42,7 +42,9 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/chat`, {
+      // بناء الرابط بذكاء لمنع تكرار /api لو موجودة بالفعل في المتغير البيئي
+      const baseUrl = API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`;
+      const res = await fetch(`${baseUrl}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, history })
