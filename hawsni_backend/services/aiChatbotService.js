@@ -270,23 +270,29 @@ class AIChatbotService {
             let text = "";
             try {
                 const rawText = response.text();
-                // Strip any thinking tags or verbose reasoning blocks
+                // --- AGGRESSIVE CLEANING FOR GEMMA 4 REASONING ---
                 text = rawText
                     .replace(/<channel>thought[\s\S]*?<\/channel>/gi, '')
+                    .replace(/<\|channel>thought<channel\|>/gi, '')
                     .replace(/<\|think\|>[\s\S]*?<\|\/?think\|>/gi, '')
                     .replace(/<think>[\s\S]*?<\/think>/gi, '')
-                    // Aggressive cleaning for Gemma 4 style internal analysis
-                    .replace(/^\* User (input|intent|intentions):[\s\S]*?\n\n/gmi, '')
-                    .replace(/^\* Context:[\s\S]*?\n\n/gmi, '')
-                    .replace(/^\* Persona:[\s\S]*?\n\n/gmi, '')
-                    .replace(/^\* Rules:[\s\S]*?\n\n/gmi, '')
-                    .replace(/^\* (Appropriate )?greeting:[\s\S]*?\n\n/gmi, '')
-                    .replace(/^\*.+?:[\s\S]*?\n(?=\*)/gm, '') // Remove intermediate bullet steps
-                    .replace(/^\*.+?:[\s\S]*?\n\n/gm, '') // Remove final bullet steps with double newline
+                    // Remove any lines starting with * or - that look like planning/reasoning
+                    .replace(/^[*+-].*(\n|$)/gm, '')
+                    // Remove any leading placeholder reasoning phrases
+                    .replace(/^(User input|User intent|Context|Persona|Rules|Appropriate greeting|Response).*:.*(\n|$)/gmi, '')
+                    // Remove the repetitive part where it says: * "Correct Arabic Response"
+                    .replace(/^[* ]*".*?"(?=\s*[\u0600-\u06FF])/gm, '')
                     .trim();
+
+                // Final safety: If there's still a copy of the message in quotes at the start, remove it
+                if (text.startsWith('"') && text.includes('"\n')) {
+                    text = text.split('"\n').slice(1).join('"\n').trim();
+                } else if (text.startsWith('"') && text.match(/^".*?"/)) {
+                     // If it's just one quoted string followed by the same text
+                     text = text.replace(/^".*?"\s*/, '').trim();
+                }
             } catch (e) {
                 console.warn("[AI Bot] Error getting text from response:", e);
-                // If it fails, maybe there's no text content
                 text = "";
             }
 
