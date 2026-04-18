@@ -287,13 +287,39 @@ class BostaService {
                 if (manualCity) bostaCity = manualCity;
             }
 
-            // Fallback for bostaZone — الـ IDs هنا هي zoneId من v0 مش districtId من v2
-            // عشان كده نحطلها flag عشان نعرف نبعت districtName بدل districtId
+            // Fallback for bostaZone — Static Map
             if (!bostaZone && area) {
                 const manualZone = BOSTA_ZONES_MAP[area.trim()];
                 if (manualZone) {
                     bostaZone = manualZone;
-                    zoneFromStaticMap = true; // مش نستخدم _id ده كـ districtId
+                    zoneFromStaticMap = true;
+                }
+            }
+
+            // ⭐ Last Resort: لو لسه محددناش منطقة والمدينة لسه القاهرة (الديفولت)
+            // ندي الـ AI العنوان الخام كاملاً ويبحث فيه من تلقاء نفسه
+            if (!bostaZone) {
+                try {
+                    const districts = cachedDistricts || await this.getBostaDistricts();
+                    // بنبعت العنوان الخام من قاعدة البيانات (مش المُعالج) عشان الـ AI يشوف كل تفاصيل المكان
+                    const rawAddress = typeof orderData.shipping_address === 'string'
+                        ? orderData.shipping_address
+                        : JSON.stringify(orderData.shipping_address);
+
+                    console.log('[Bosta-AI] Last resort: deep searching raw address...');
+                    const deepResult = await aiService.parseAddress(rawAddress, districts);
+
+                    if (deepResult?.city) {
+                        const deepMatch = await this.matchAddress(deepResult.city, deepResult.zone);
+                        if (deepMatch) {
+                            bostaCity = deepMatch.city;
+                            bostaZone = deepMatch.zone;
+                            zoneFromStaticMap = false;
+                            console.log(`[Bosta-AI] Deep Search Match: ${bostaCity.name} -> ${bostaZone?.name || 'No Zone'}`);
+                        }
+                    }
+                } catch (deepErr) {
+                    console.error('[Bosta-AI] Deep search failed:', deepErr.message);
                 }
             }
 
