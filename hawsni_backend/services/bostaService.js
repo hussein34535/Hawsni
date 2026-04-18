@@ -155,31 +155,39 @@ class BostaService {
         const districts = await this.getBostaDistricts();
         if (!districts) return null;
 
+        const normalizeArabic = (str) => {
+            if (!str) return '';
+            return str.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim();
+        };
+
+        const safeCity = normalizeArabic(cityName);
+        const safeArea = normalizeArabic(areaName);
+
         // 1. Match City
         const cityMatch = districts.find(c =>
             c.cityName?.toLowerCase() === cityName?.toLowerCase() ||
-            c.cityOtherName === cityName ||
-            c.cityOtherName?.includes(cityName) ||
-            cityName?.includes(c.cityOtherName)
+            normalizeArabic(c.cityOtherName) === safeCity ||
+            normalizeArabic(c.cityOtherName).includes(safeCity) ||
+            safeCity.includes(normalizeArabic(c.cityOtherName))
         );
 
         if (!cityMatch) return null;
 
         // 2. Match Zone/District within city
         let zoneMatch = null;
-        if (areaName && cityMatch.districts) {
-            // Exact or partial match
+        if (safeArea && cityMatch.districts) {
+            // Exact or partial match using normalized Arabic
             zoneMatch = cityMatch.districts.find(d =>
                 d.zoneName?.toLowerCase() === areaName?.toLowerCase() ||
-                d.zoneOtherName === areaName ||
+                normalizeArabic(d.zoneOtherName) === safeArea ||
                 d.districtName?.toLowerCase() === areaName?.toLowerCase() ||
-                d.districtOtherName === areaName ||
-                areaName?.includes(d.zoneOtherName) ||
-                d.zoneOtherName?.includes(areaName) ||
-                areaName?.includes(d.districtOtherName) ||
-                d.districtOtherName?.includes(areaName) ||
-                areaName?.toLowerCase().includes(d.districtName?.toLowerCase()) ||
-                d.districtName?.toLowerCase().includes(areaName?.toLowerCase())
+                normalizeArabic(d.districtOtherName) === safeArea ||
+                safeArea.includes(normalizeArabic(d.zoneOtherName)) ||
+                normalizeArabic(d.zoneOtherName).includes(safeArea) ||
+                safeArea.includes(normalizeArabic(d.districtOtherName)) ||
+                normalizeArabic(d.districtOtherName).includes(safeArea) ||
+                safeArea.toLowerCase().includes(d.districtName?.toLowerCase() || '') ||
+                (d.districtName?.toLowerCase() || '').includes(safeArea.toLowerCase())
             );
         }
 
