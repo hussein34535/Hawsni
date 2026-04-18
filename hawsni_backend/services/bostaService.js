@@ -175,7 +175,11 @@ class BostaService {
                 d.districtName?.toLowerCase() === areaName?.toLowerCase() ||
                 d.districtOtherName === areaName ||
                 areaName?.includes(d.zoneOtherName) ||
-                d.zoneOtherName?.includes(areaName)
+                d.zoneOtherName?.includes(areaName) ||
+                areaName?.includes(d.districtOtherName) ||
+                d.districtOtherName?.includes(areaName) ||
+                areaName?.toLowerCase().includes(d.districtName?.toLowerCase()) ||
+                d.districtName?.toLowerCase().includes(areaName?.toLowerCase())
             );
         }
 
