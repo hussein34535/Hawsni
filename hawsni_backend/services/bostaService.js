@@ -181,7 +181,8 @@ class BostaService {
 
         return {
             city: { _id: cityMatch.cityId, name: cityMatch.cityName },
-            zone: zoneMatch ? { _id: zoneMatch.zoneId, name: zoneMatch.zoneName } : null
+            // districtId هو اللي بوسطة بتستخدمه كـ primary key للمنطقة
+            zone: zoneMatch ? { _id: zoneMatch.districtId || zoneMatch.zoneId, name: zoneMatch.districtName || zoneMatch.zoneName } : null
         };
     }
 
@@ -348,10 +349,16 @@ class BostaService {
                     phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
                     email: orderData.users?.email || ''
                 },
+                // بوسطة v2 API: city=String, cityId=ID المحافظة, districtId=ID المنطقة
+                // المحافظة بتظهر في الداشبورد بناءً على districtId مش city string
                 dropOffAddress: {
-                    city: { _id: bostaCity._id, name: bostaCity.name },
-                    ...(bostaZone ? { zone: { _id: bostaZone._id, name: bostaZone.name } } : {}),
-                    firstLine: address,
+                    city: bostaCity.name,                  // string — اسم المحافظة
+                    cityId: bostaCity._id,                 // ID المحافظة (مطلوب مع districtName)
+                    ...(bostaZone
+                        ? { districtId: bostaZone._id }    // ✅ الحقل الأساسي اللي بيحدد المنطقة والمحافظة
+                        : { districtName: area || bostaCity.name, } // fallback لو مفيش districtId
+                    ),
+                    firstLine: address.length > 5 ? address : `${address} - ${bostaCity.name}`, // لازم > 5 حروف
                 }
             };
 
