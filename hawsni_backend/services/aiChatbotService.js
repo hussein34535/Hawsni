@@ -97,46 +97,76 @@ class AIChatbotService {
                 // Normalize phone (remove +20 if exists)
                 if (phone.startsWith("+20")) phone = "0" + phone.substring(3);
                 
-                // Basic matching. For safety, only return status, total, and created_at.
                 // We search for the last 10 digits to handle 011... vs 11... vs +2011...
                 const searchPhone = phone.length >= 10 ? phone.substring(phone.length - 10) : phone;
                 
-                const { data, error } = await supabase
+                // 1. First, find user(s) with this phone number in the users table
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('id')
+                    .ilike('phone', `%${searchPhone}%`);
+
+                if (userError) throw userError;
+
+                if (!userData || userData.length === 0) {
+                    // Fallback: search in shipping_address (handles guest orders or different formats)
+                    const { data: guestOrders, error: guestError } = await supabase
+                        .from('orders')
+                        .select('id, order_number, status, total, created_at')
+                        .ilike('shipping_address', `%${searchPhone}%`)
+                        .order('created_at', { ascending: false })
+                        .limit(3);
+                    
+                    if (guestError) throw guestError;
+                    
+                    if (!guestOrders || guestOrders.length === 0) {
+                        return { message: "لم نتمكن من العثور على أي طلبات مسجلة برقم الهاتف هذا." };
+                    }
+                    return guestOrders.map(order => this._formatOrderForAI(order));
+                }
+
+                // 2. Fetch orders for these user IDs
+                const userIds = userData.map(u => u.id);
+                const { data: orders, error: orderError } = await supabase
                     .from('orders')
                     .select('id, order_number, status, total, created_at')
-                    .ilike('shipping_address', `%${searchPhone}%`)
+                    .in('user_id', userIds)
                     .order('created_at', { ascending: false })
                     .limit(3);
 
-                console.log(`[AI Bot] DB Search for "${searchPhone}" found ${data?.length || 0} orders`);
+                if (orderError) throw orderError;
 
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    return { message: "لم نتمكن من العثور على أي طلبات متطابقة مع رقم الهاتف هذا." };
+                if (!orders || orders.length === 0) {
+                    return { message: "المستخدم موجود ولكن لا توجد طلبات مرتبطة بحسابه حالياً." };
                 }
 
-                // Translate status to Arabic safely before returning so AI understands it
-                const statusMap = {
-                    'Pending': 'قيد الانتظار',
-                    'Processing': 'جاري التجهيز',
-                    'Shipped': 'تم الشحن/مع المندوب',
-                    'Delivered': 'تم التوصيل',
-                    'Cancelled': 'ملغي'
-                };
-
-                return data.map(order => ({
-                    order_number: order.order_number || String(order.id).substring(0, 8),
-                    status: statusMap[order.status] || order.status,
-                    total_egp: order.total,
-                    date: new Date(order.created_at).toLocaleDateString('ar-EG')
-                }));
+                return orders.map(order => this._formatOrderForAI(order));
             }
         } catch (error) {
             console.error("[AI Bot] Tool Execution Error:", error);
             return { error: "حدث خطأ أثناء البحث في قاعدة البيانات." };
         }
         return { error: "الأداة غير معروفة." };
+    }
+
+    /**
+     * Helper to format order data for AI consumption.
+     */
+    _formatOrderForAI(order) {
+        const statusMap = {
+            'Pending': 'قيد الانتظار',
+            'Processing': 'جاري التجهيز',
+            'Shipped': 'تم الشحن/مع المندوب',
+            'Delivered': 'تم التوصيل',
+            'Cancelled': 'ملغي'
+        };
+
+        return {
+            order_number: order.order_number || String(order.id).substring(0, 8),
+            status: statusMap[order.status] || order.status,
+            total_egp: order.total,
+            date: new Date(order.created_at).toLocaleDateString('ar-EG')
+        };
     }
 
     /**
