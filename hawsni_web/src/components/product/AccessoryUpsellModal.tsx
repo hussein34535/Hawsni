@@ -166,8 +166,8 @@ export default function AccessoryUpsellModal({
                                 <ShoppingBag size={20} />
                                 <span>
                                     {selected.length > 0 
-                                        ? (isRTL ? `إضافة (${selected.length}) للسلة` : `Add (${selected.length}) to Cart`)
-                                        : (isRTL ? 'إضافة بدون إضافات' : 'Add without accessories')}
+                                        ? (isRTL ? `تأكيد وإضافة للسلة (${selected.length})` : `Confirm & Add (${selected.length})`)
+                                        : (isRTL ? 'إضافة القطعة الأصلية فقط' : 'Add Original Item Only')}
                                 </span>
                             </button>
                             
@@ -175,7 +175,7 @@ export default function AccessoryUpsellModal({
                                 onClick={onSkip}
                                 className="w-full py-4 text-gray-400 font-bold font-cairo text-sm hover:text-gray-900 transition-colors"
                             >
-                                {isRTL ? 'لا شكراً، اكتفيت بالقطعة الأصلية' : 'No thanks, just the original piece'}
+                                {isRTL ? 'تخطّي الإضافات' : 'Skip Add-ons'}
                             </button>
                         </div>
                     </motion.div>
