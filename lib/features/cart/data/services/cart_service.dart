@@ -41,7 +41,7 @@ class CartService {
   }
 
   Future<List<CartItem>> addToCart(String productId, int quantity,
-      {String? size, String? color}) async {
+      {String? size, String? color, List<dynamic>? accessories}) async {
     if (AuthService.isGuest) {
       // We need to fetch product details first to store them locally (Name, Price, Image)
       // This is a bit tricky since we only have productId.
@@ -64,6 +64,7 @@ class CartService {
             quantity: quantity,
             size: size,
             color: color,
+            accessories: accessories,
           );
           return _addToLocalCart(newItem);
         }
@@ -79,6 +80,7 @@ class CartService {
         'quantity': quantity,
         'size': size,
         'color': color,
+        'accessories': accessories,
       });
 
       if (response['success'] == true) {
@@ -201,6 +203,7 @@ class CartService {
         'quantity': item.quantity,
         'size': item.size,
         'color': item.color,
+        'accessories': item.accessories,
       }).toList();
 
       final response = await ApiService.post('/cart/sync', {'items': itemsPayload});

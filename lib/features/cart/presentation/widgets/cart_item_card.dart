@@ -15,6 +15,16 @@ class CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate total price including accessories
+    double basePrice = double.tryParse(item.price) ?? 0.0;
+    double accessoriesPrice = 0.0;
+    if (item.accessories != null) {
+      for (var acc in item.accessories!) {
+        accessoriesPrice += double.tryParse(acc['price']?.toString() ?? '0') ?? 0.0;
+      }
+    }
+    double totalPrice = basePrice + accessoriesPrice;
+
     return Dismissible(
       key: Key(item.id),
       direction: DismissDirection.endToStart,
@@ -118,12 +128,23 @@ class CartItemCard extends StatelessWidget {
                               color: AppTheme.textSecondary,
                             ),
                           ),
+                        if (item.accessories != null && item.accessories!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              '+ ${item.accessories!.map((a) => a['name']).join(', ')}',
+                              style: AppTheme.textTheme.bodySmall?.copyWith(
+                                color: AppTheme.primaryColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              '${item.price} ${AppLocalizations.of(context)?.currencySymbol ?? 'EGP'}',
+                              '${totalPrice.toStringAsFixed(2).replaceAll(RegExp(r'\.00$'), '')} ${AppLocalizations.of(context)?.currencySymbol ?? 'EGP'}',
                               style: AppTheme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.primaryColor,

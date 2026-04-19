@@ -58,6 +58,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         event.item.quantity,
         size: event.item.size,
         color: event.item.color,
+        accessories: event.item.accessories,
       );
       emit(CartLoaded(items: items));
     } on ApiException catch (e) {

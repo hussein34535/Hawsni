@@ -292,6 +292,7 @@ export default function ProductPage() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
+    const [selectedAccessories, setSelectedAccessories] = useState<{name: string, price: number, image_url: string}[]>([]);
     const [quantity, setQuantity] = useState(1);
     const [isFavorite, setIsFavorite] = useState(false);
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
@@ -305,7 +306,8 @@ export default function ProductPage() {
     const getItemCount = useCartStore((state) => state.getItemCount);
 
     // Derived state: check if current selection is in cart
-    const currentItemId = product ? `${product.id || product._id}_${selectedSize}_${selectedColor || 'default'}` : null;
+    const activeAccStr = selectedAccessories.map(a => a.name).join('_');
+    const currentItemId = product ? `${product.id || product._id}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}` : null;
     const isInCart = items.some((item) => item.id === currentItemId);
 
     // Determine real stock
@@ -324,6 +326,15 @@ export default function ProductPage() {
     };
 
     const currentStockOut = selectedSize ? isSizeOutOfStock(selectedSize) : (stockCount <= 0);
+
+    const toggleAccessory = (acc: any) => {
+        setSelectedAccessories(prev => {
+            if (prev.some(a => a.name === acc.name)) {
+                return prev.filter(a => a.name !== acc.name);
+            }
+            return [...prev, acc];
+        });
+    };
 
 
     useEffect(() => {
@@ -492,15 +503,18 @@ export default function ProductPage() {
         const discount = product.discount || 0;
         const finalPrice = discount > 0 ? product.price - (product.price * discount / 100) : product.price;
 
+        const activeAccStr = selectedAccessories.map(a => a.name).join('_');
+
         addItem({
-            id: `${prodId}_${selectedSize}_${selectedColor || 'default'}`,
+            id: `${prodId}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}`,
             productId: prodId,
             name: product.name,
             price: finalPrice,
             imageUrl: formatImageUrl(selectedColorImage),
             quantity: quantity,
             size: selectedSize,
-            color: selectedColor || undefined
+            color: selectedColor || undefined,
+            accessories: selectedAccessories
         });
 
         // Track AddToCart
@@ -909,8 +923,52 @@ export default function ProductPage() {
                                 </div>
                             ) : null}
 
+                            {/* Accessories Section */}
+                            {product.accessories && product.accessories.length > 0 && (
+                                <div className="mt-8 border-t border-gray-100 pt-6">
+                                    <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">
+                                        {isRTL ? 'إضافات مميزة' : 'Add-ons & Accessories'}
+                                    </h3>
+                                    <div className="flex flex-col gap-3">
+                                        {product.accessories.map((acc: any, i: number) => {
+                                            const isSelected = selectedAccessories.some(a => a.name === acc.name);
+                                            return (
+                                                <div 
+                                                    key={i} 
+                                                    onClick={() => toggleAccessory(acc)}
+                                                    className={`
+                                                    flex items-center gap-4 p-3 rounded-2xl border-2 transition-all cursor-pointer select-none
+                                                    ${isRTL ? 'flex-row-reverse' : 'flex-row'}
+                                                    ${isSelected ? 'border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/5' : 'border-gray-100 bg-white hover:border-gray-200'}
+                                                `}>
+                                                    {/* Image */}
+                                                    {acc.image_url && (
+                                                        <div className="w-14 h-14 bg-white rounded-xl border border-gray-100 overflow-hidden relative flex-shrink-0">
+                                                            <Image src={formatImageUrl(acc.image_url)} alt={acc.name} fill className="object-cover" />
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Info */}
+                                                    <div className={`flex-grow flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
+                                                        <span className="font-bold text-gray-800 font-cairo text-sm">{acc.name}</span>
+                                                        <span className="text-[var(--color-brand-primary)] font-black text-sm">
+                                                            + {acc.price} {isRTL ? 'ج.م' : 'EGP'}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Checkbox */}
+                                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors border ${isSelected ? 'bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)]' : 'bg-gray-50 border-gray-200'}`}>
+                                                        {isSelected && <Check size={14} className="text-white" strokeWidth={3} />}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Quantity & Actions - Visible on all screens now */}
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-4 mt-6">
                                 <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.quantity || 'Quantity'}</h3>
                                 <div className="flex items-center bg-white rounded-[16px] p-1 w-fit border border-gray-100 shadow-sm">
                                     <button

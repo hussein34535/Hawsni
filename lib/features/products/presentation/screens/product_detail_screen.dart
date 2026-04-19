@@ -235,7 +235,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   }
 
   void _finalizeAddToCart(BuildContext ctx, DisplayData data, String itemId, List<ProductAccessory> selectedAccessories) {
-    // Add Main Product
+    // Add Main Product 
+    final accessoriesJson = selectedAccessories.map((acc) => {
+      'name': acc.name,
+      'price': acc.price,
+      'image_url': acc.imageUrl,
+    }).toList();
+
     ctx.read<CartBloc>().add(AddToCart(CartItem(
           id: itemId,
           name: data.name,
@@ -245,6 +251,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           productId: widget.productId,
           size: _selectedSize,
           color: _selectedColor,
+          accessories: accessoriesJson.isNotEmpty ? accessoriesJson : null,
         )));
 
     ctx.read<AnalyticsService>().logAddToCart(
@@ -253,20 +260,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         itemCategory: 'Fashion',
         price: double.tryParse(data.price) ?? 0);
 
-    // Add Selected Accessories
     for (var acc in selectedAccessories) {
-      final accId = '${widget.productId}_acc_${acc.id ?? DateTime.now().millisecondsSinceEpoch}';
-      ctx.read<CartBloc>().add(AddToCart(CartItem(
-        id: accId,
-        name: '${data.name} - ${acc.name}',
-        price: acc.price.toString(),
-        imageUrl: acc.imageUrl ?? data.imageUrl,
-        quantity: _quantity, // Match main product quantity
-        productId: widget.productId,
-      )));
-      
       ctx.read<AnalyticsService>().logAddToCart(
-          itemId: accId,
+          itemId: '${widget.productId}_acc_${acc.name}',
           itemName: '${data.name} - ${acc.name}',
           itemCategory: 'Accessories',
           price: acc.price);

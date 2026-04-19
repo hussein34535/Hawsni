@@ -12,13 +12,13 @@ class CartController {
 
     async addToCart(req, res) {
         try {
-            const { productId, quantity, size, color } = req.body;
+            const { productId, quantity, size, color, accessories } = req.body;
 
             if (!productId || !quantity) {
                 return res.status(400).json({ success: false, message: 'Product ID and quantity are required' });
             }
 
-            await CartService.addToCart(req.user.id, { productId, quantity, size, color });
+            await CartService.addToCart(req.user.id, { productId, quantity, size, color, accessories });
 
             // Return updated cart
             const cart = await CartService.getCart(req.user.id);

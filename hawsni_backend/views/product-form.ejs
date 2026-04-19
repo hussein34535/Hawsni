@@ -790,11 +790,48 @@
                     }
                 }
 
-                // 4. Preserve perfect drag-and-drop sort order.
+                // 4. Handle Accessories Uploads
+                const accessoryRows = document.querySelectorAll('#accessoriesTable tbody tr');
+                if (accessoryRows.length > 0) {
+                    for (let i = 0; i < accessoryRows.length; i++) {
+                        const row = accessoryRows[i];
+                        const fileInput = row.querySelector('.acc-file');
+                        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> رفع صورة الملحق ${i + 1}...`;
+                            const file = fileInput.files[0];
+                            
+                            // Let's compress it just in case
+                            const compressedFile = await compressImage(file, 2); // max 2MB for accessories
+                            
+                            const signUrl = `/api/cloudinary/sign?folder=accessories`;
+                            const signRes = await fetch(signUrl);
+                            const signData = await signRes.json();
+                            
+                            const formData = new FormData();
+                            formData.append('file', compressedFile);
+                            formData.append('api_key', signData.api_key);
+                            formData.append('timestamp', signData.timestamp);
+                            formData.append('signature', signData.signature);
+                            formData.append('folder', signData.folder);
+                            
+                            const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`;
+                            const cloudRes = await fetch(uploadEndpoint, { method: 'POST', body: formData });
+                            const cloudData = await cloudRes.json();
+                            
+                            if (cloudData.secure_url) {
+                                row.querySelector('.acc-image').value = cloudData.secure_url;
+                            }
+                        }
+                    }
+                    // Sync the inputs into the JSON payload
+                    updateAccessoriesInput();
+                }
+
+                // 5. Preserve perfect drag-and-drop sort order.
                 // We map all imageState objects (which now all have real URLs)
                 const finalOrderedUrls = imageState.map(img => img.url);
 
-                // 5. Send the exact ordered sequence to the backend via 'image_urls'
+                // 6. Send the exact ordered sequence to the backend via 'image_urls'
                 document.getElementById('directUploadUrls').value = JSON.stringify(finalOrderedUrls);
 
                 // 6. Clear other inputs so backend 'updateProductAdmin' doesn't prepend or append duplicates
@@ -1233,9 +1270,12 @@
 
             tr.innerHTML = `
                 <td>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <img src="${imageUrl || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc;" onerror="this.src='https://via.placeholder.com/40'">
-                        <input type="text" class="form-control form-control-sm acc-image" value="${imageUrl}" placeholder="https://..." onchange="updateAccessoriesInput(); this.previousElementSibling.src = this.value || 'https://via.placeholder.com/40'">
+                    <div style="display: flex; gap: 10px; align-items: flex-start;">
+                        <img src="${imageUrl || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; flex-shrink:0;" onerror="this.src='https://via.placeholder.com/40'">
+                        <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1;">
+                            <input type="text" class="form-control form-control-sm acc-image" value="${imageUrl}" placeholder="رابط URL..." onchange="updateAccessoriesInput(); this.parentElement.previousElementSibling.src = this.value || 'https://via.placeholder.com/40'">
+                            <input type="file" class="form-control form-control-sm acc-file" accept="image/*" onchange="const img=this.parentElement.previousElementSibling; if(this.files[0]){img.src=URL.createObjectURL(this.files[0]);} this.previousElementSibling.value=''; updateAccessoriesInput();">
+                        </div>
                     </div>
                 </td>
                 <td><input type="text" class="form-control form-control-sm acc-name" placeholder="مثال: تغليف هدية فاخر" value="${name}" onchange="updateAccessoriesInput()"></td>

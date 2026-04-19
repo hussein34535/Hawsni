@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export interface CartItem {
-    id: string; // Composite ID: productId + size + color
+    id: string; // Composite ID: productId + size + color + accessories names
     productId: string;
     name: string;
     price: number;
@@ -12,6 +12,7 @@ export interface CartItem {
     quantity: number;
     size?: string | null;
     color?: string | null;
+    accessories?: { name: string; price: number; image_url: string }[];
 }
 
 interface CartState {
@@ -60,7 +61,10 @@ export const useCartStore = create<CartState>()(
             clearCart: () => set({ items: [] }),
 
             getTotal: () => {
-                return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
+                return get().items.reduce((total, item) => {
+                    const accessoriesPrice = item.accessories?.reduce((accTotal, acc) => accTotal + acc.price, 0) || 0;
+                    return total + (item.price + accessoriesPrice) * item.quantity;
+                }, 0);
             },
 
             getItemCount: () => {

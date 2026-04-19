@@ -39,6 +39,7 @@ class CartService {
                 quantity,
                 size,
                 color,
+                accessories,
                 product:products (
                     id,
                     name,
@@ -54,17 +55,21 @@ class CartService {
     }
 
     async addToCart(userId, itemData) {
-        const { productId, quantity, size, color } = itemData;
+        const { productId, quantity, size, color, accessories = [] } = itemData;
         const cartId = await this._getOrCreateCart(userId);
 
         // Check if item already exists in this cart
+        // When checking for existing items, we serialize accessories to properly compare
+        const accStr = JSON.stringify(accessories || []);
+        
         const { data: existingItems, error: fetchError } = await supabase
             .from('cart_items')
             .select('*')
             .eq('cart_id', cartId)
             .eq('product_id', productId)
             .eq('size', size || '') // Handle null/undefined size
-            .eq('color', color || ''); // Handle null/undefined color
+            .eq('color', color || '') // Handle null/undefined color
+            .eq('accessories', accStr);
 
         if (fetchError) throw new Error(fetchError.message);
 
@@ -82,6 +87,7 @@ class CartService {
                     quantity,
                     size,
                     color,
+                    accessories,
                     product:products (
                         id,
                         name,
@@ -102,13 +108,15 @@ class CartService {
                     product_id: productId,
                     quantity,
                     size: size || null,
-                    color: color || null
+                    color: color || null,
+                    accessories: accessories || []
                 })
                 .select(`
                     id,
                     quantity,
                     size,
                     color,
+                    accessories,
                     product:products (
                         id,
                         name,
@@ -143,6 +151,7 @@ class CartService {
                 quantity,
                 size,
                 color,
+                accessories,
                 product:products (
                     id,
                     name,
