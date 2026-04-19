@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Sparkles } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Environment variables
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
@@ -26,6 +27,7 @@ interface ChatMessage {
 }
 
 export default function ChatWidget() {
+  const { isRTL } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -317,9 +319,6 @@ export default function ChatWidget() {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
-  );
-}
     </>
   );
 }
