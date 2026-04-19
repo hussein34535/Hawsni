@@ -727,6 +727,8 @@ async function sendOutOfStockAlert(productName, sku, size, color) {
     }).catch(err => {
         console.error('Failed to send out of stock alert:', err);
     });
+}
+
 // ──────────────────────────────────────────────
 // 10. Live Chat Opened Notification
 // ──────────────────────────────────────────────
