@@ -16,6 +16,7 @@ class ProductModel {
   final String? blurHash;
   final bool isVtoEnabled;
   final List<ProductVariant>? variants;
+  final List<ProductAccessory>? accessories;
 
   ProductModel({
     required this.id,
@@ -35,6 +36,7 @@ class ProductModel {
     this.blurHash,
     this.isVtoEnabled = true,
     this.variants,
+    this.accessories,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -78,6 +80,11 @@ class ProductModel {
               .map((v) => ProductVariant.fromJson(v))
               .toList()
           : null,
+      accessories: json['accessories'] != null
+          ? (json['accessories'] as List)
+              .map((a) => ProductAccessory.fromJson(a))
+              .toList()
+          : null,
     );
   }
 
@@ -100,6 +107,7 @@ class ProductModel {
       if (blurHash != null) 'blur_hash': blurHash,
       'is_vto_enabled': isVtoEnabled,
       if (variants != null) 'product_variants': variants!.map((v) => v.toJson()).toList(),
+      if (accessories != null) 'accessories': accessories!.map((a) => a.toJson()).toList(),
     };
   }
 }
@@ -132,6 +140,38 @@ class ProductVariant {
       if (size != null) 'size': size,
       if (color != null) 'color': color,
       'stock': stock,
+    };
+  }
+}
+
+class ProductAccessory {
+  final String? id;
+  final String? name;
+  final String? imageUrl;
+  final double price;
+
+  ProductAccessory({
+    this.id,
+    this.name,
+    this.imageUrl,
+    this.price = 0,
+  });
+
+  factory ProductAccessory.fromJson(Map<String, dynamic> json) {
+    return ProductAccessory(
+      id: json['id']?.toString(),
+      name: json['name'] as String?,
+      imageUrl: json['image_url'] as String?,
+      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (imageUrl != null) 'image_url': imageUrl,
+      'price': price,
     };
   }
 }

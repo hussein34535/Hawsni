@@ -376,7 +376,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 32),
                         Text(
-                          'Hawsni',
+                          'hwasi',
                           style: AppTheme.textTheme.displaySmall?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

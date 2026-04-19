@@ -384,6 +384,16 @@ class ProductController {
                 categoryIdsToInsert = [categoryIdsToInsert];
             }
 
+            // Parse Accessories
+            let accessoriesArray = [];
+            if (req.body.accessories) {
+                try {
+                    accessoriesArray = typeof req.body.accessories === 'string' ? JSON.parse(req.body.accessories) : req.body.accessories;
+                } catch (e) {
+                    console.error('Error parsing accessories:', e);
+                }
+            }
+
             const { data: newProduct, error } = await supabase.from('products').insert({
                 name,
                 description,
@@ -395,6 +405,7 @@ class ProductController {
                 is_vto_enabled: is_vto_enabled === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
+                accessories: accessoriesArray.length > 0 ? accessoriesArray : null,
                 images: imageUrls,
                 size_guide: size_guide || ''
             }).select().single();
@@ -606,6 +617,16 @@ class ProductController {
                 categoryIdsToInsert = [categoryIdsToInsert];
             }
 
+            // Parse Accessories
+            let accessoriesArray = [];
+            if (req.body.accessories) {
+                try {
+                    accessoriesArray = typeof req.body.accessories === 'string' ? JSON.parse(req.body.accessories) : req.body.accessories;
+                } catch (e) {
+                    console.error('Error parsing accessories in update:', e);
+                }
+            }
+
             // Perform Update
             const { error: updateError } = await supabase.from('products').update({
                 name,
@@ -618,6 +639,7 @@ class ProductController {
                 is_vto_enabled: is_vto_enabled === 'on',
                 sizes: sizesArray.length > 0 ? sizesArray : null,
                 colors: colorsArray.length > 0 ? colorsArray : null,
+                accessories: accessoriesArray.length > 0 ? accessoriesArray : null,
                 images: imageUrls,
                 size_guide: size_guide || ''
             }).eq('id', req.params.id);

@@ -58,7 +58,7 @@ class WishlistScreen extends StatelessWidget {
                             .join('\n');
                         SharePlus.instance.share(
                           ShareParams(
-                              text: '🛍️ قائمة أمنياتي من Hawsni:\n\n$text'),
+                              text: '🛍️ قائمة أمنياتي من hwasi:\n\n$text'),
                         );
                       },
                     )

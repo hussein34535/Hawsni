@@ -16,7 +16,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<_ChatMessage> _messages = [
     _ChatMessage(
       sender: _Sender.bot,
-      text: 'مرحباً بك في Hawsni للفخامة والأزياء ✨\nكيف يمكنني مساعدتك؟ يمكنني البحث عن منتجات أو تتبع طلبك.',
+      text: 'مرحباً بك في hwasi للفخامة والأزياء ✨\nكيف يمكنني مساعدتك؟ يمكنني البحث عن منتجات أو تتبع طلبك.',
     ),
   ];
   List<Map<String, dynamic>> _history = [];
@@ -93,7 +93,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Text('✨', style: TextStyle(fontSize: 20)),
             SizedBox(width: 8),
             Text(
-              'مساعد Hawsni',
+              'مساعد hwasi',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,

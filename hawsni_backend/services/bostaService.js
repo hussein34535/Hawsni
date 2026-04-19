@@ -397,8 +397,8 @@ class BostaService {
                 dropOffAddress: {
                     city: { _id: bostaCity._id || bostaCity.cityId, name: bostaCity.name },
                     cityId: bostaCity._id || bostaCity.cityId,
-                    ...(bostaZone && (bostaZone.districtId || bostaZone._id) ? { 
-                        districtId: bostaZone.districtId || bostaZone._id 
+                    ...(bostaZone && (bostaZone.districtId || bostaZone._id) ? {
+                        districtId: bostaZone.districtId || bostaZone._id
                     } : {}),
                     firstLine: `${address} ${bostaZone ? '- ' + (bostaZone.name || bostaZone.districtName || bostaZone.zoneName || '') : ''} - ${bostaCity.name}`.replace(/\s+/g, ' '),
                 }

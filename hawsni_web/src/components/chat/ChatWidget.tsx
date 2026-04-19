@@ -12,7 +12,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { sender: 'bot', text: 'أهلاً بيك في Hawsni ✨\nإزاي أقدر أساعدك النهاردة؟ ممكن أساعدك تدور على منتج أو تتبع طلبك.' }
+    { sender: 'bot', text: 'أهلاً بيك في hwasi ✨\nإزاي أقدر أساعدك النهاردة؟ ممكن أساعدك تدور على منتج أو تتبع طلبك.' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -209,7 +209,7 @@ export default function ChatWidget() {
                 fontSize: 18,
               }}>✨</div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>مساعد Hawsni</div>
+                <div style={{ fontWeight: 700, fontSize: 15 }}>مساعد hwasi</div>
                 <div style={{ fontSize: 11, opacity: 0.75 }}>أونلاين • يرد فوراً</div>
               </div>
             </div>

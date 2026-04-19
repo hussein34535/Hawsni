@@ -85,6 +85,7 @@ class DisplayData {
   final bool isVtoEnabled;
 
   final List<ProductVariant>? variants;
+  final List<ProductAccessory>? accessories;
 
   DisplayData({
     required this.name,
@@ -101,6 +102,7 @@ class DisplayData {
     required this.stock,
     required this.isVtoEnabled,
     this.variants,
+    this.accessories,
   });
 }
 
@@ -224,6 +226,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     final itemId =
         '${widget.productId}${_selectedSize != null ? "_$_selectedSize" : ""}${_selectedColor != null ? "_$_selectedColor" : ""}';
 
+    if (data.accessories != null && data.accessories!.isNotEmpty) {
+      _showAccessoriesBottomSheet(ctx, data, itemId);
+      return;
+    }
+
+    _finalizeAddToCart(ctx, data, itemId, []);
+  }
+
+  void _finalizeAddToCart(BuildContext ctx, DisplayData data, String itemId, List<ProductAccessory> selectedAccessories) {
+    // Add Main Product
     ctx.read<CartBloc>().add(AddToCart(CartItem(
           id: itemId,
           name: data.name,
@@ -241,6 +253,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         itemCategory: 'Fashion',
         price: double.tryParse(data.price) ?? 0);
 
+    // Add Selected Accessories
+    for (var acc in selectedAccessories) {
+      final accId = '${widget.productId}_acc_${acc.id ?? DateTime.now().millisecondsSinceEpoch}';
+      ctx.read<CartBloc>().add(AddToCart(CartItem(
+        id: accId,
+        name: '${data.name} - ${acc.name}',
+        price: acc.price.toString(),
+        imageUrl: acc.imageUrl ?? data.imageUrl,
+        quantity: _quantity, // Match main product quantity
+        productId: widget.productId,
+      )));
+      
+      ctx.read<AnalyticsService>().logAddToCart(
+          itemId: accId,
+          itemName: '${data.name} - ${acc.name}',
+          itemCategory: 'Accessories',
+          price: acc.price);
+    }
+
     HapticFeedback.mediumImpact();
     _cartPop.forward(from: 0);
 
@@ -249,8 +280,215 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       _runAddToCartAnimation(data.imageUrl);
     }
 
-    _toast(ctx, AppLocalizations.of(ctx)?.addedToCart ?? 'Added to Cart',
+    _toast(ctx, AppLocalizations.of(ctx)?.addedToCart ?? 'تمت الإضافة للسلة',
         isSuccess: true);
+  }
+
+  void _showAccessoriesBottomSheet(BuildContext ctx, DisplayData data, String itemId) {
+    if (!mounted) return;
+    
+    // Local state for the bottom sheet
+    final Map<String, ProductAccessory> selectedAccs = {};
+    
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bCtx) {
+        return StatefulBuilder(
+          builder: (context, setStateSB) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20).copyWith(
+                  bottom: MediaQuery.of(bCtx).viewPadding.bottom + 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'أضف لمسة خاصة لطلبك 🎁',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'اختر من هذه الملحقات المميزة لإكمال طلبك.',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Accessories List
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(ctx).size.height * 0.4,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: data.accessories!.map((acc) {
+                          final isSelected = selectedAccs.containsKey(acc.id);
+                          return GestureDetector(
+                            onTap: () {
+                              setStateSB(() {
+                                if (isSelected) {
+                                  selectedAccs.remove(acc.id);
+                                } else {
+                                  selectedAccs[acc.id!] = acc;
+                                }
+                              });
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isSelected ? AppTheme.primaryColor.withValues(alpha: 0.05) : Colors.white,
+                                border: Border.all(
+                                  color: isSelected ? AppTheme.primaryColor : Colors.grey.shade200,
+                                  width: isSelected ? 2 : 1,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  if (acc.imageUrl != null && acc.imageUrl!.isNotEmpty)
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: CachedNetworkImage(
+                                        imageUrl: acc.imageUrl!,
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Container(color: Colors.grey.shade100),
+                                        errorWidget: (context, url, error) => Container(color: Colors.grey.shade100, child: const Icon(Icons.card_giftcard, color: Colors.grey)),
+                                      ),
+                                    )
+                                  else 
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade100,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(Icons.card_giftcard, color: Colors.grey),
+                                    ),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          acc.name ?? '',
+                                          style: const TextStyle(
+                                            fontFamily: 'Cairo',
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          '+ ${acc.price} ج.م',
+                                          style: TextStyle(
+                                            fontFamily: 'Cairo',
+                                            color: AppTheme.primaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                                      border: Border.all(
+                                        color: isSelected ? AppTheme.primaryColor : Colors.grey.shade300,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: isSelected 
+                                      ? const Icon(Icons.check, size: 16, color: Colors.white)
+                                      : null,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            Navigator.of(bCtx).pop();
+                            _finalizeAddToCart(ctx, data, itemId, []);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            side: BorderSide(color: Colors.grey.shade300),
+                          ),
+                          child: const Text('تخطي', style: TextStyle(fontFamily: 'Cairo', color: Colors.black54, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(bCtx).pop();
+                            _finalizeAddToCart(ctx, data, itemId, selectedAccs.values.toList());
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primaryColor,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text(
+                            selectedAccs.isEmpty ? 'المتابعة' : 'إضافة الملحقات والمتابعة', 
+                            style: const TextStyle(fontFamily: 'Cairo', color: Colors.white, fontWeight: FontWeight.bold)
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }
+        );
+      }
+    );
   }
 
   void _runAddToCartAnimation(String imageUrl) {
@@ -388,6 +626,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
     int stock = 0;
     bool isVtoEnabled = true;
     List<ProductVariant>? variants;
+    List<ProductAccessory>? accessories;
     String? blurHash = widget.blurHash;
 
     if (state is ProductDetailsLoaded) {
@@ -402,6 +641,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
       sizeGuide = state.product.sizeGuide;
       isVtoEnabled = state.product.isVtoEnabled;
       variants = state.product.variants;
+      accessories = state.product.accessories;
       blurHash = state.product.blurHash;
       if ((state.product.images ?? []).isNotEmpty) {
         images = state.product.images!;
@@ -430,7 +670,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
         blurHash: blurHash,
         stock: stock,
         isVtoEnabled: isVtoEnabled,
-        variants: variants);
+        variants: variants,
+        accessories: accessories);
   }
 
   @override
@@ -482,17 +723,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
                   final meta = MetaSEO();
 
                   // Basic Metas
-                  meta.author(author: 'Hawsni');
+                  meta.author(author: 'hwasi');
                   meta.description(
                       description: product.description.length > 150
                           ? '${product.description.substring(0, 147)}...'
                           : product.description);
                   meta.keywords(
                       keywords:
-                          '${product.name}, fashion, style, buy online, hawsni, ${product.category}');
+                          '${product.name}, fashion, style, buy online, hwasi, ${product.category}');
 
                   // Open Graph
-                  meta.ogTitle(ogTitle: '${product.name} | Hawsni');
+                  meta.ogTitle(ogTitle: '${product.name} | hwasi');
                   meta.ogDescription(
                       ogDescription: product.description.length > 150
                           ? '${product.description.substring(0, 147)}...'
@@ -501,7 +742,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
 
                   // Twitter
                   meta.twitterCard(twitterCard: TwitterCard.summaryLargeImage);
-                  meta.twitterTitle(twitterTitle: '${product.name} | Hawsni');
+                  meta.twitterTitle(twitterTitle: '${product.name} | hwasi');
                   meta.twitterDescription(
                       twitterDescription: product.description.length > 150
                           ? '${product.description.substring(0, 147)}...'
