@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        <%= title || 'hwasi Admin' %>
+        <%= locals.title || 'hwasi Admin' %>
     </title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/admin.css">
@@ -61,7 +61,7 @@
                 
                 <div class="nav-section">
                     <div class="nav-section-title">التواصل والدعم</div>
-                    <a href="/chat" class="nav-link <%= page === 'chat' ? 'active' : '' %>">
+                    <a href="/chat" class="nav-link <%= locals.page === 'chat' ? 'active' : '' %>">
                         <i class="fas fa-comment-dots" style="color:#0ea5e9;"></i>
                         <span>شات الدعم المباشر</span>
                     </a>
@@ -93,7 +93,7 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <h1 class="page-title">
-                        <%= pageTitle || title || 'لوحة التحكم' %>
+                        <%= locals.pageTitle || locals.title || 'لوحة التحكم' %>
                     </h1>
                 </div>
 
