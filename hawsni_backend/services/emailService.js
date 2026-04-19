@@ -791,6 +791,38 @@ async function sendCancellationRequestNotification(orderNumber, phone, reason, r
     }).catch(err => console.error('Failed to send cancellation alert:', err));
 }
 
+/**
+ * Send notification when a user requests a human agent
+ */
+async function sendHumanAgentRequestNotification(sessionId, reason) {
+    if (!resend) return;
+    const adminEmail = process.env.ADMIN_EMAIL || 'hussein34535@gmail.com';
+    
+    return resend.emails.send({
+        from: 'Hawsni Support <support@hawsni.com>',
+        to: adminEmail,
+        subject: `🚨 طلب تدخل بشري في الشات - جلسة ${sessionId.substring(0, 8)}`,
+        html: `
+            <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; padding: 20px;">
+                <h2 style="color: #ef4444; border-bottom: 2px solid #ef4444; padding-bottom: 10px;">🚨 تنبيه: العميل يطلب التحدث مع موظف</h2>
+                <p>البوت قام بتحويل المحادثة للموظفين البشريين بناءً على طلب العميل أو طبيعة الاستفسار.</p>
+                
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p><strong>كود الجلسة:</strong> ${sessionId}</p>
+                    <p><strong>السبب المذكور:</strong> ${reason || 'غير محدد'}</p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="https://hwasibackend.vercel.app/admin/chat" style="background: #0E4435; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">فتح لوحة التحكم والرد الآن</a>
+                </div>
+                
+                <p style="font-size: 12px; color: #64748b; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
+                    هذا التنبيه مرسل آلياً من نظام Hawsni Live Chat.
+                </p>
+            </div>`
+    }).catch(err => console.error('Failed to send human agent alert:', err));
+}
+
 module.exports = {
     sendOtpEmail,
     sendPasswordResetEmail,
@@ -803,4 +835,5 @@ module.exports = {
     sendOutOfStockAlert,
     sendNewChatNotification,
     sendCancellationRequestNotification,
+    sendHumanAgentRequestNotification,
 };

@@ -312,6 +312,9 @@ class AIChatbotService {
                 await supabase.from('chat_sessions')
                     .update({ status: 'human_requested' })
                     .eq('session_id', sessionId);
+                
+                // NEW: Notify admin via email
+                await emailService.sendHumanAgentRequestNotification(sessionId, args.reason);
                     
                 return { message: "تم تغيير حالة المحادثة إلى طلب دعم بشري." };
             }

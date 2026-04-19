@@ -217,7 +217,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         final isOptimistic = msg['isOptimistic'] == true;
 
                         return Align(
-                          alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
+                          alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
                           child: Container(
                             constraints: BoxConstraints(
                               maxWidth: MediaQuery.of(context).size.width * 0.8,
@@ -227,12 +227,12 @@ class _ChatScreenState extends State<ChatScreen> {
                             decoration: BoxDecoration(
                               color: isUser 
                                   ? AppTheme.primaryColor.withValues(alpha: isOptimistic ? 0.7 : 1.0) 
-                                  : isAdmin ? Colors.blue : Colors.white,
+                                  : isAdmin ? const Color(0xFF0EA5E9) : Colors.white,
                               borderRadius: BorderRadius.only(
                                 topLeft: const Radius.circular(14),
                                 topRight: const Radius.circular(14),
-                                bottomLeft: Radius.circular(isUser ? 4 : 14),
-                                bottomRight: Radius.circular(isUser ? 14 : 4),
+                                bottomLeft: Radius.circular(isUser ? 14 : 4),
+                                bottomRight: Radius.circular(isUser ? 4 : 14),
                               ),
                               border: isUser || isAdmin ? null : Border.all(color: const Color(0xFFE2E8F0)),
                               boxShadow: [
