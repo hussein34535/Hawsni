@@ -34,7 +34,7 @@ export interface Product {
     discount?: number;
     description: string;
     images: string[];
-    image?: string; // Summary thumbnail field
+    image?: string;
     category: string | Category;
     isFeatured: boolean;
     is_vto_enabled?: boolean;
@@ -46,4 +46,5 @@ export interface Product {
     stock?: number;
     countInStock?: number;
     product_variants?: any[];
+    accessories?: any[];
 }
