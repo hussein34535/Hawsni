@@ -300,6 +300,7 @@ export default function ProductPage() {
     const [isVTOOpen, setIsVTOOpen] = useState(false);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [isUpsellOpen, setIsUpsellOpen] = useState(false);
+    const [hasShownUpsell, setHasShownUpsell] = useState(false);
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
     const reviewsRef = useRef<HTMLDivElement>(null);
     const relatedSectionRef = useRef<HTMLDivElement>(null);
@@ -538,6 +539,7 @@ export default function ProductPage() {
 
         showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
         setIsUpsellOpen(false);
+        setHasShownUpsell(true);
     };
 
     const handleAddToCart = (e?: React.MouseEvent) => {
@@ -557,8 +559,8 @@ export default function ProductPage() {
             return;
         }
 
-        // UPSELL LOGIC: If accessories exist and none are selected, show modal
-        if (product.accessories && product.accessories.length > 0 && selectedAccessories.length === 0) {
+        // UPSELL LOGIC: If accessories exist and none are selected AND WE HAVEN'T SHOWN UPSELL YET
+        if (product.accessories && product.accessories.length > 0 && selectedAccessories.length === 0 && !hasShownUpsell) {
             setIsUpsellOpen(true);
             return;
         }
