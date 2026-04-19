@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageCircle, X, Send, Sparkles } from 'lucide-react';
 
 // Environment variables
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
@@ -28,9 +31,35 @@ export default function ChatWidget() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   
+  const pathname = usePathname();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Scroll tracking to hide/show FAB (Legendary UX)
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Show when scrolling up, hide when scrolling down
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // Hide on Checkout/Cart pages
+  const shouldHideCompletely = pathname.includes('/checkout') || pathname.includes('/cart');
+  if (shouldHideCompletely) return null;
 
   // 1. Initialize or Load Session and Fetch History
   useEffect(() => {
@@ -133,253 +162,164 @@ export default function ChatWidget() {
   return (
     <>
       <style jsx global>{`
-        .hwsni-chat-overlay {
+        .hwsni-chat-window {
           position: fixed;
           inset: 0;
           z-index: 100000;
           display: flex;
           flex-direction: column;
           background: #fff;
+          overflow: hidden;
         }
         @media (min-width: 640px) {
-          .hwsni-chat-overlay {
-            inset: auto 16px 90px auto;
+          .hwsni-chat-window {
+            inset: auto 24px 100px auto;
             width: 380px;
-            height: 540px;
-            border-radius: 20px;
-            box-shadow: 0 12px 48px rgba(0,0,0,0.18);
-            border: 1px solid #e2e8f0;
+            height: 600px;
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.05);
           }
         }
-        .hwsni-chat-overlay.entering {
-          animation: hwsniChatIn 0.25s ease-out forwards;
-        }
-        .hwsni-chat-overlay.exiting {
-          animation: hwsniChatOut 0.2s ease-in forwards;
-        }
-        @keyframes hwsniChatIn {
-          from { opacity: 0; transform: translateY(16px) scale(0.97); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes hwsniChatOut {
-          from { opacity: 1; transform: translateY(0) scale(1); }
-          to { opacity: 0; transform: translateY(16px) scale(0.97); }
-        }
-        .hwsni-fab {
-          position: fixed;
-          bottom: 80px;
-          right: 16px;
-          z-index: 99999;
-          width: 56px;
-          height: 56px;
-          border-radius: 50%;
-          background: #0E4435;
-          color: #fff;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 16px rgba(14,68,53,0.35);
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .hwsni-fab:hover {
-          transform: scale(1.08);
-          box-shadow: 0 6px 24px rgba(14,68,53,0.45);
-        }
-        .hwsni-fab:active {
-          transform: scale(0.95);
-        }
-        @media (min-width: 640px) {
-          .hwsni-fab { bottom: 24px; right: 24px; width: 60px; height: 60px; }
-        }
-        .hwsni-msg-row {
-          display: flex;
-          margin-bottom: 8px;
-        }
-        .hwsni-msg-row.user { justify-content: flex-end; }
-        .hwsni-msg-row.bot { justify-content: flex-start; }
-        .hwsni-msg-row.admin { justify-content: flex-start; } /* Admin looks like bot */
         .hwsni-bubble {
-          max-width: 82%;
-          padding: 10px 14px;
-          font-size: 13.5px;
-          line-height: 1.65;
+          max-width: 85%;
+          padding: 12px 16px;
+          font-size: 14px;
+          line-height: 1.6;
           word-break: break-word;
           direction: rtl;
         }
-        .hwsni-bubble.user {
-          background: #0E4435;
-          color: #fff;
-          border-radius: 14px 14px 6px 14px;
-        }
-        .hwsni-bubble.bot {
-          background: #f1f5f9;
-          color: #1e293b;
-          border-radius: 14px 14px 14px 6px;
-        }
-        .hwsni-bubble.admin {
-          background: #0ea5e9; /* distinct color for admin */
-          color: #fff;
-          border-radius: 14px 14px 14px 6px;
-        }
-        .hwsni-typing {
-          display: inline-flex;
-          gap: 4px;
-          padding: 10px 16px;
-          background: #f1f5f9;
-          border-radius: 14px 14px 14px 6px;
-        }
-        .hwsni-typing span {
-          width: 7px; height: 7px;
-          background: #94a3b8;
-          border-radius: 50%;
-          animation: hwsniBounce 1.2s infinite;
-        }
-        .hwsni-typing span:nth-child(2) { animation-delay: 0.15s; }
-        .hwsni-typing span:nth-child(3) { animation-delay: 0.3s; }
-        @keyframes hwsniBounce {
-          0%, 60%, 100% { transform: translateY(0); }
-          30% { transform: translateY(-6px); }
-        }
+        .hwsni-bubble.user { background: #0E4435; color: #fff; border-radius: 20px 20px 4px 20px; }
+        .hwsni-bubble.bot { background: #f3f4f6; color: #1f2937; border-radius: 20px 20px 20px 4px; }
+        .hwsni-bubble.admin { background: #0284c7; color: #fff; border-radius: 20px 20px 20px 4px; }
+        
+        .hwsni-typing { display: flex; gap: 4px; padding: 12px 16px; background: #f3f4f6; border-radius: 20px; width: fit-content; }
+        .hwsni-typing span { width: 6px; height: 6px; background: #9ca3af; border-radius: 50%; animation: hwsniBounce 1.4s infinite; }
+        .hwsni-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .hwsni-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes hwsniBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
       `}</style>
 
+      {/* FAB Button with Legendary Hide-on-Scroll */}
+      <AnimatePresence>
+        {!isOpen && isVisible && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0, opacity: 0, y: 20 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsOpen(true)}
+            className="fixed z-[9999] bg-[#0E4435] text-white flex items-center justify-center shadow-xl shadow-emerald-950/20"
+            style={{
+              bottom: pathname.includes('/product/') ? '120px' : '90px',
+              right: '20px',
+              width: '52px',
+              height: '52px',
+              borderRadius: '24px',
+            }}
+          >
+            <MessageCircle size={24} />
+            <motion.span 
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" 
+            />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* Chat Window */}
-      {isOpen && (
-        <div className="hwsni-chat-overlay entering">
-          {/* Header */}
-          <div style={{
-            background: '#0E4435',
-            color: '#fff',
-            padding: '14px 18px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexShrink: 0,
-            borderRadius: 'inherit',
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.15)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18,
-              }}>✨</div>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>فريق الدعم المباشر</div>
-                <div style={{ fontSize: 11, opacity: 0.75 }}>جاهزين نساعدك في أي وقت</div>
-              </div>
-            </div>
-            <button onClick={() => setIsOpen(false)} style={{
-              background: 'rgba(255,255,255,0.15)',
-              border: 'none', color: '#fff', cursor: 'pointer',
-              width: 32, height: 32, borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 18, lineHeight: 1,
-            }}>✕</button>
-          </div>
-
-          {/* Messages */}
-          <div style={{
-            flex: 1, overflowY: 'auto', padding: '16px 14px',
-            background: '#fff', direction: 'rtl',
-          }}>
-            {messages.length === 0 && !isLoading && (
-              <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: 13, marginTop: 20 }}>
-                جاري تحميل المحادثة...
-              </div>
-            )}
-            
-            {messages.map((msg, i) => (
-              <div key={msg.id || i} className={`hwsni-msg-row ${msg.sender_type}`}>
-                <div
-                  className={`hwsni-bubble ${msg.sender_type}`}
-                  style={{ opacity: msg.isOptimistic ? 0.7 : 1 }}
-                  dangerouslySetInnerHTML={{ __html: formatText(msg.content) }}
-                />
-              </div>
-            ))}
-
-            {isLoading && (
-              <div className="hwsni-msg-row bot">
-                <div className="hwsni-typing">
-                  <span /><span /><span />
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.95 }}
+            className="hwsni-chat-window"
+          >
+            {/* Header */}
+            <div className="bg-[#0E4435] px-6 py-5 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
+                  <Sparkles className="text-white w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-white font-black text-sm">{isRTL ? 'فريق هَوَسي' : 'Hawsni Support'}</h3>
+                  <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">
+                    {isRTL ? 'متاحون الآن لمساعدتك' : 'Online & Ready to Help'}
+                  </p>
                 </div>
               </div>
-            )}
+              <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors text-white">
+                <X size={20} />
+              </button>
+            </div>
 
-            <div ref={messagesEndRef} />
-          </div>
+            {/* Messages Body */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#fcfcfc] custom-scrollbar">
+              {messages.length === 0 && !isLoading && (
+                <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                    <MessageCircle className="text-gray-200 w-8 h-8" />
+                  </div>
+                  <p className="text-gray-400 text-xs font-bold leading-relaxed">
+                    {isRTL ? 'أهلاً بك! كيف يمكننا مساعدتك اليوم؟' : 'Welcome! How can we help you today?'}
+                  </p>
+                </div>
+              )}
 
-          {/* Input Bar */}
-          <div style={{
-            padding: '10px 14px',
-            background: '#fff',
-            borderTop: '1px solid #f1f5f9',
-            display: 'flex',
-            gap: 8,
-            flexShrink: 0,
-            direction: 'rtl',
-          }}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && sendMessage()}
-              disabled={isLoading}
-              placeholder="اكتب رسالتك هنا..."
-              style={{
-                flex: 1,
-                padding: '11px 14px',
-                border: '1.5px solid #e2e8f0',
-                borderRadius: 12,
-                outline: 'none',
-                fontFamily: 'inherit',
-                fontSize: 14,
-                background: '#fafafa',
-                transition: 'border-color 0.15s',
-              }}
-              onFocus={e => e.target.style.borderColor = '#0E4435'}
-              onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={isLoading || !input.trim()}
-              style={{
-                background: isLoading || !input.trim() ? '#94a3b8' : '#0E4435',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 12,
-                width: 44,
-                height: 44,
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.15s, transform 0.1s',
-                flexShrink: 0,
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
+              {messages.map((msg, i) => (
+                <motion.div 
+                  initial={{ opacity: 0, x: msg.sender_type === 'user' ? 20 : -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  key={msg.id || i} 
+                  className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div 
+                    className={`hwsni-bubble ${msg.sender_type}`}
+                    style={{ opacity: msg.isOptimistic ? 0.6 : 1 }}
+                    dangerouslySetInnerHTML={{ __html: formatText(msg.content) }}
+                  />
+                </motion.div>
+              ))}
 
-      {/* FAB Button */}
-      {!isOpen && (
-        <button className="hwsni-fab" onClick={() => setIsOpen(true)} aria-label="فتح الشات">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-          </svg>
-        </button>
-      )}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="hwsni-typing">
+                    <span /><span /><span />
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Footer */}
+            <div className="p-4 bg-white border-t border-gray-100 flex gap-3">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && sendMessage()}
+                disabled={isLoading}
+                placeholder={isRTL ? 'اكتب استفسارك هنا...' : 'Type your message...'}
+                className="flex-1 bg-gray-50 border-none rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-2 focus:ring-[#0E4435] transition-all outline-none"
+              />
+              <button
+                onClick={sendMessage}
+                disabled={isLoading || !input.trim()}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoading || !input.trim() ? 'bg-gray-100 text-gray-300' : 'bg-[#0E4435] text-white shadow-lg shadow-emerald-950/20 active:scale-90 hover:scale-105'}`}
+              >
+                <Send size={18} className={isRTL ? 'rotate-180' : ''} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
     </>
   );
 }
