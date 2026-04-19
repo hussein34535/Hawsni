@@ -161,6 +161,7 @@ const ProductVideoItem = ({ src }: { src: string }) => {
 const ReviewsSection = dynamic(() => import('@/components/product/ReviewsSection'), { ssr: false });
 const SizeGuideModal = dynamic(() => import('@/components/product/SizeGuideModal'), { ssr: false });
 const VirtualTryOnModal = dynamic(() => import('@/components/product/VirtualTryOnModal'), { ssr: false });
+const AccessoryUpsellModal = dynamic(() => import('@/components/product/AccessoryUpsellModal'), { ssr: false });
 import { FreeDeliveryBanner } from '@/components/products/FreeDeliveryBanner';
 const ImageLightbox = dynamic(() => import('@/components/common/ImageLightbox'), { ssr: false });
 import ProductCard from '@/components/products/ProductCard';
@@ -298,6 +299,7 @@ export default function ProductPage() {
     const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
     const [isVTOOpen, setIsVTOOpen] = useState(false);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const [isUpsellOpen, setIsUpsellOpen] = useState(false);
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
     const reviewsRef = useRef<HTMLDivElement>(null);
     const relatedSectionRef = useRef<HTMLDivElement>(null);
@@ -309,6 +311,20 @@ export default function ProductPage() {
     const activeAccStr = selectedAccessories.map(a => a.name).join('_');
     const currentItemId = product ? `${product.id || product._id}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}` : null;
     const isInCart = items.some((item) => item.id === currentItemId);
+
+    // Derived state: Total Price Calculation
+    const getBasePrice = () => {
+        if (!product) return 0;
+        const discount = product.discount || 0;
+        return discount > 0 ? product.price - (product.price * discount / 100) : product.price;
+    };
+
+    const getAccessoriesTotal = () => {
+        return selectedAccessories.reduce((total, acc) => total + acc.price, 0);
+    };
+
+    const finalUnitPrice = getBasePrice() + getAccessoriesTotal();
+    const totalPrice = finalUnitPrice * quantity;
 
     // Determine real stock
     const stockCount = product?.stock ?? (product as any)?.countInStock ?? 0;
@@ -468,22 +484,8 @@ export default function ProductPage() {
         setSelectedImage(index);
     }, []);
 
-    const handleAddToCart = (e: React.MouseEvent) => {
+    const performAddToCart = (selectedAccs: any[]) => {
         if (!product) return;
-        if (!selectedSize) {
-            showToast(isRTL ? 'يرجى اختيار المقاس' : 'Please select a size', 'error');
-            return;
-        }
-
-        if (product.colors && product.colors.length > 0 && !selectedColor) {
-            showToast(isRTL ? 'يرجى اختيار اللون' : 'Please select a color', 'error');
-            return;
-        }
-
-        if (currentStockOut || isSizeOutOfStock(selectedSize)) {
-            showToast(isRTL ? 'الكمية نفدت' : 'Out of stock', 'error');
-            return;
-        }
 
         // Find the image for the selected color
         let selectedColorImage = safeImages[0] || '';
@@ -500,21 +502,18 @@ export default function ProductPage() {
         }
 
         const prodId = product.id || product._id;
-        const discount = product.discount || 0;
-        const finalPrice = discount > 0 ? product.price - (product.price * discount / 100) : product.price;
-
-        const activeAccStr = selectedAccessories.map(a => a.name).join('_');
+        const activeAccStr = selectedAccs.map(a => a.name).join('_');
 
         addItem({
             id: `${prodId}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}`,
             productId: prodId,
             name: product.name,
-            price: finalPrice,
+            price: getBasePrice(), // Store base price separately, store calculates total
             imageUrl: formatImageUrl(selectedColorImage),
             quantity: quantity,
             size: selectedSize,
             color: selectedColor || undefined,
-            accessories: selectedAccessories
+            accessories: selectedAccs
         });
 
         // Track AddToCart
@@ -522,22 +521,49 @@ export default function ProductPage() {
             content_name: product.name,
             content_ids: [prodId],
             content_type: 'product',
-            value: finalPrice,
+            value: finalUnitPrice,
             currency: 'EGP',
             num_items: quantity
         });
         trackGAEvent('add_to_cart', {
             currency: 'EGP',
-            value: finalPrice * quantity,
+            value: totalPrice,
             items: [{
                 item_id: prodId,
                 item_name: product.name,
-                price: finalPrice,
+                price: finalUnitPrice,
                 quantity: quantity
             }]
         });
 
         showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
+        setIsUpsellOpen(false);
+    };
+
+    const handleAddToCart = (e?: React.MouseEvent) => {
+        if (!product) return;
+        if (!selectedSize) {
+            showToast(isRTL ? 'يرجى اختيار المقاس' : 'Please select a size', 'error');
+            return;
+        }
+
+        if (product.colors && product.colors.length > 0 && !selectedColor) {
+            showToast(isRTL ? 'يرجى اختيار اللون' : 'Please select a color', 'error');
+            return;
+        }
+
+        if (currentStockOut || isSizeOutOfStock(selectedSize)) {
+            showToast(isRTL ? 'الكمية نفدت' : 'Out of stock', 'error');
+            return;
+        }
+
+        // UPSELL LOGIC: If accessories exist and none are selected, show modal
+        if (product.accessories && product.accessories.length > 0 && selectedAccessories.length === 0) {
+            setIsUpsellOpen(true);
+            return;
+        }
+
+        performAddToCart(selectedAccessories);
     };
 
     const handleFavoriteClick = async () => {
@@ -1085,7 +1111,7 @@ export default function ProductPage() {
                             </motion.div>
                         )}
                         <span className="text-lg font-black text-white font-cairo">
-                            {(((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price) * quantity).toLocaleString()}
+                            {totalPrice.toLocaleString()}
                             <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                         </span>
                     </div>
@@ -1156,6 +1182,18 @@ export default function ProductPage() {
                 isOpen={isLightboxOpen}
                 onClose={() => setIsLightboxOpen(false)}
                 onNavigate={(index) => setSelectedImage(index)}
+            />
+
+            {/* Accessory Upsell Modal */}
+            <AccessoryUpsellModal 
+                isOpen={isUpsellOpen}
+                accessories={product.accessories || []}
+                productName={product.name}
+                isRTL={isRTL}
+                onClose={() => setIsUpsellOpen(false)}
+                onSkip={() => performAddToCart([])}
+                onAdd={(accs) => performAddToCart(accs)}
+                formatImageUrl={formatImageUrl}
             />
         </div>
     );
