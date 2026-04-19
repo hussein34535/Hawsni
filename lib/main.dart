@@ -23,6 +23,8 @@ import 'package:hwasi_app/features/address/data/services/address_service.dart';
 import 'package:hwasi_app/features/address/bloc/address_bloc.dart';
 import 'package:hwasi_app/features/address/bloc/address_event.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +52,12 @@ void main() async {
 
   // Load authentication token
   await AuthService.loadToken();
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: config.supabaseUrl,
+    anonKey: config.supabaseAnonKey,
+  );
 
   // Initialize notification service
   if (!kIsWeb) {

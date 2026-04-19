@@ -1,0 +1,304 @@
+<%- include('partials/header') %>
+<%- include('partials/sidebar') %>
+
+<!-- Initialize Supabase CDN (we need this for realtime in browser) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<div class="main-content">
+    <div class="header-actions" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h1 style="color: #1e293b; font-size: 24px; font-weight: 700; margin: 0;">💬 الدعم المباشر (الإنبوكس)</h1>
+        <div>
+            <span id="connection-status" class="badge" style="background:#f1f5f9; color:#64748b; padding: 6px 12px; border-radius: 20px;">جارٍ الاتصال...</span>
+        </div>
+    </div>
+
+    <div class="row" style="display: flex; height: 75vh; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden;">
+        
+        <!-- Sessions Sidebar -->
+        <div class="col-md-4" style="border-left: 1px solid #e2e8f0; padding: 0; display: flex; flex-direction: column; background: #f8fafc;">
+            <div style="padding: 16px; background: #fff; border-bottom: 1px solid #e2e8f0;">
+                <h3 style="margin: 0; font-size: 16px; color: #334155; font-weight: 700;">المحادثات النشطة</h3>
+            </div>
+            <div id="sessions-list" style="flex: 1; overflow-y: auto; padding: 12px;">
+                <!-- Sessions will be loaded here via JS -->
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="col-md-8" style="padding: 0; display: flex; flex-direction: column;">
+            
+            <!-- Chat Header -->
+            <div id="chat-header" style="padding: 16px 24px; background: #fff; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; min-height: 70px;">
+                <div id="chat-title" style="color: #94a3b8; font-size: 14px;">اختر محادثة للبدء</div>
+                <div id="chat-actions" style="display: none;">
+                    <button id="take-over-btn" class="btn btn-primary" style="background: #0E4435; border: none; padding: 8px 16px; border-radius: 8px;">استلام المحادثة (إيقاف البوت)</button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="messages-container" style="flex: 1; overflow-y: auto; padding: 24px; background: #fcfcfc; display: flex; flex-direction: column; gap: 12px;">
+                <!-- Messages will appear here -->
+            </div>
+
+            <!-- Input Area -->
+            <div id="chat-input-area" style="padding: 16px 24px; background: #fff; border-top: 1px solid #e2e8f0; display: none;">
+                <form id="chat-form" style="display: flex; gap: 12px;">
+                    <input type="text" id="chat-input" class="form-control" autocomplete="off" placeholder="اكتب ردك للعميل هنا..." style="flex: 1; padding: 12px 16px; border-radius: 12px; border: 1px solid #cbd5e1; outline: none; font-family: inherit;">
+                    <button type="submit" class="btn btn-primary" style="background: #0E4435; border: none; padding: 0 24px; border-radius: 12px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                        إرسال <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Environment Variables setup
+    const SUPABASE_URL = "<%= supabaseUrl %>";
+    const SUPABASE_ANON_KEY = "<%= supabaseAnonKey %>";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let activeSessionId = null;
+    let sessions = [];
+    let messages = [];
+
+    const sessionsListEl = document.getElementById('sessions-list');
+    const messagesContainerEl = document.getElementById('messages-container');
+    const chatTitleEl = document.getElementById('chat-title');
+    const chatActionsEl = document.getElementById('chat-actions');
+    const takeOverBtn = document.getElementById('take-over-btn');
+    const chatInputArea = document.getElementById('chat-input-area');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const statusBadge = document.getElementById('connection-status');
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        statusBadge.textContent = 'متصل بالأنظمة (Live)';
+        statusBadge.style.background = '#dcfce7';
+        statusBadge.style.color = '#15803d';
+
+        await fetchSessions();
+        subscribeToSessions();
+        subscribeToMessages();
+    });
+
+    async function fetchSessions() {
+        const { data, error } = await supabase
+            .from('chat_sessions')
+            .select('*')
+            .order('updated_at', { ascending: false });
+
+        if (error) return console.error(error);
+        sessions = data || [];
+        renderSessions();
+    }
+
+    function subscribeToSessions() {
+        supabase
+            .channel('public:chat_sessions')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions' }, payload => {
+                // Update local array
+                if (payload.eventType === 'INSERT') {
+                    sessions.unshift(payload.new);
+                } else if (payload.eventType === 'UPDATE') {
+                    const idx = sessions.findIndex(s => s.session_id === payload.new.session_id);
+                    if (idx > -1) {
+                        sessions[idx] = payload.new;
+                    }
+                    if (activeSessionId === payload.new.session_id) {
+                        updateChatHeader(payload.new);
+                    }
+                }
+                renderSessions();
+            })
+            .subscribe();
+    }
+
+    function subscribeToMessages() {
+        supabase
+            .channel('public:chat_messages')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+                if (payload.new.session_id === activeSessionId) {
+                    messages.push(payload.new);
+                    renderMessages();
+                    
+                    // Always jump to bottom on new message
+                    setTimeout(() => {
+                        messagesContainerEl.scrollTop = messagesContainerEl.scrollHeight;
+                    }, 50);
+                } else {
+                    // It belongs to a different session, we should fetch sessions to bubble it up
+                    // For now, updating updated_at handles it.
+                }
+            })
+            .subscribe();
+    }
+
+    function renderSessions() {
+        sessionsListEl.innerHTML = '';
+        sessions.forEach(s => {
+            let statusText = 'آلي 🤖';
+            let statusColor = '#94a3b8';
+            if (s.status === 'human_requested') { statusText = 'يطلب بشري 🚨'; statusColor = '#ef4444'; }
+            else if (s.status === 'human_active') { statusText = 'محادثة حية 👨‍💻'; statusColor = '#22c55e'; }
+
+            const div = document.createElement('div');
+            const isActive = activeSessionId === s.session_id;
+
+            div.style.cssText = `
+                padding: 16px;
+                background: ${isActive ? '#ffffff' : 'transparent'};
+                border: 1px solid ${isActive ? '#0E4435' : 'transparent'};
+                border-bottom: 1px solid #e2e8f0;
+                border-radius: 12px;
+                cursor: pointer;
+                margin-bottom: 8px;
+                transition: background 0.2s;
+            `;
+
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-weight: bold; font-size: 14px; color: #1e293b;">عميل #${s.session_id.substring(0,6)}</span>
+                    <span style="font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px; background: ${statusColor}20; color: ${statusColor};">${statusText}</span>
+                </div>
+                <div style="font-size: 12px; color: #64748b;">أنشئت منذ: ${new Date(s.created_at).toLocaleTimeString('ar-EG')}</div>
+            `;
+
+            div.onclick = () => loadSession(s.session_id);
+            sessionsListEl.appendChild(div);
+        });
+    }
+
+    async function loadSession(sessionId) {
+        activeSessionId = sessionId;
+        renderSessions();
+
+        messagesContainerEl.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 14px; margin-top: 20px;">جاري تحميل المحادثة...</div>';
+        
+        const session = sessions.find(s => s.session_id === sessionId);
+        updateChatHeader(session);
+
+        const { data, error } = await supabase
+            .from('chat_messages')
+            .select('*')
+            .eq('session_id', sessionId)
+            .order('created_at', { ascending: true });
+
+        if (!error) {
+            messages = data || [];
+            renderMessages();
+            setTimeout(() => { messagesContainerEl.scrollTop = messagesContainerEl.scrollHeight; }, 100);
+        }
+    }
+
+    function updateChatHeader(session) {
+        if (!session) return;
+        
+        chatTitleEl.innerHTML = `<h3 style="margin: 0; color: #1e293b; font-size: 16px; font-weight: bold;">عميل #${session.session_id.substring(0,8)}</h3>`;
+        chatActionsEl.style.display = 'block';
+
+        if (session.status === 'human_active') {
+            takeOverBtn.textContent = 'أنت تدير هذه المحادثة 👨‍💻';
+            takeOverBtn.style.background = '#f1f5f9';
+            takeOverBtn.style.color = '#1e293b';
+            takeOverBtn.style.pointerEvents = 'none';
+            chatInputArea.style.display = 'block';
+        } else {
+            takeOverBtn.textContent = 'استلام المحادثة (إيقاف البوت)';
+            takeOverBtn.style.background = '#0E4435';
+            takeOverBtn.style.color = '#fff';
+            takeOverBtn.style.pointerEvents = 'auto';
+            chatInputArea.style.display = 'none'; // Only show if taken over
+        }
+    }
+
+    takeOverBtn.onclick = async () => {
+        if (!activeSessionId) return;
+        takeOverBtn.textContent = 'جاري التنفيذ...';
+        await supabase
+            .from('chat_sessions')
+            .update({ status: 'human_active' })
+            .eq('session_id', activeSessionId);
+    };
+
+    function renderMessages() {
+        messagesContainerEl.innerHTML = '';
+        if (messages.length === 0) {
+            messagesContainerEl.innerHTML = '<div style="text-align: center; color: #94a3b8; font-size: 14px; margin-top: 20px;">لا توجد رسائل.</div>';
+            return;
+        }
+
+        messages.forEach(msg => {
+            const isUser = msg.sender_type === 'user';
+            const isBot = msg.sender_type === 'bot';
+            
+            let bg, color, align, name;
+            
+            if (isUser) {
+                bg = '#0E4435'; color = '#fff'; align = 'flex-end'; name = 'العميل';
+            } else if (isBot) {
+                bg = '#e2e8f0'; color = '#1e293b'; align = 'flex-start'; name = 'البوت 🤖';
+            } else { // admin
+                bg = '#2563eb'; color = '#fff'; align = 'flex-start'; name = 'أنت (الأدمن)';
+            }
+
+            const div = document.createElement('div');
+            div.style.cssText = `
+                display: flex;
+                flex-direction: column;
+                align-items: ${align};
+                max-width: 100%;
+            `;
+
+            div.innerHTML = `
+                <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px; padding: 0 4px;">${name}</div>
+                <div style="
+                    max-width: 75%;
+                    background: ${bg};
+                    color: ${color};
+                    padding: 12px 16px;
+                    border-radius: ${isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
+                    font-size: 14px;
+                    line-height: 1.5;
+                    white-space: pre-wrap;
+                ">${msg.content}</div>
+                <div style="font-size: 10px; color: #cbd5e1; margin-top: 4px; padding: 0 4px;">${new Date(msg.created_at).toLocaleTimeString('ar-EG')}</div>
+            `;
+            messagesContainerEl.appendChild(div);
+        });
+    }
+
+    chatForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const text = chatInput.value.trim();
+        if (!text || !activeSessionId) return;
+
+        chatInput.value = '';
+        
+        // Optimistic UI (handled mostly by realtime, but we can disable input)
+        chatInput.disabled = true;
+
+        const { error } = await supabase
+            .from('chat_messages')
+            .insert([{ session_id: activeSessionId, sender_type: 'admin', content: text }]);
+
+        if (error) alert('فشل الإرسال: ' + error.message);
+        chatInput.disabled = false;
+        chatInput.focus();
+    };
+
+</script>
+
+<style>
+    /* Custom Scrollbar for messages */
+    #messages-container::-webkit-scrollbar { width: 6px; }
+    #messages-container::-webkit-scrollbar-track { background: transparent; }
+    #messages-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    
+    #sessions-list::-webkit-scrollbar { width: 4px; }
+    #sessions-list::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 4px; }
+</style>
+
+<%- include('partials/footer') %>

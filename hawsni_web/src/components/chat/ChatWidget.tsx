@@ -1,24 +1,84 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+// Environment variables
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+
+// Supabase instance limit 1
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 interface ChatMessage {
-  sender: 'user' | 'bot';
-  text: string;
+  id?: number;
+  sender_type: 'user' | 'bot' | 'admin';
+  content: string;
+  created_at?: string;
+  isOptimistic?: boolean;
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app';
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { sender: 'bot', text: 'أهلاً بيك في hwasi ✨\nإزاي أقدر أساعدك النهاردة؟ ممكن أساعدك تدور على منتج أو تتبع طلبك.' }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [history, setHistory] = useState<Array<{ role: string; parts: Array<{ text: string }> }>>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // 1. Initialize or Load Session and Fetch History
+  useEffect(() => {
+    let sid = localStorage.getItem('hwasi_chat_session');
+    if (!sid) {
+      sid = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+      localStorage.setItem('hwasi_chat_session', sid);
+    }
+    setSessionId(sid);
+
+    if (isOpen) {
+      fetchSessionData(sid);
+    }
+  }, [isOpen]);
+
+  const fetchSessionData = async (sid: string) => {
+    try {
+      const res = await fetch(`${API_URL}/chat/session/${sid}`);
+      const data = await res.json();
+      if (data.success && data.messages) {
+        setMessages(data.messages);
+      }
+    } catch (e) {
+      console.error('Failed to load chat history', e);
+    }
+  };
+
+  // 2. Real-time Subscription to Supabase
+  useEffect(() => {
+    if (!sessionId) return;
+    
+    // Listen for new messages
+    const channel = supabase
+      .channel(`public:chat_messages:${sessionId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
+        (payload) => {
+          setMessages((prev) => {
+            // Prevent duplicate message if optimistic update already added it
+            if (prev.some(m => m.id === payload.new.id)) return prev;
+            return [...prev, payload.new as ChatMessage];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [sessionId]);
 
   // Auto-scroll to latest message
   useEffect(() => {
@@ -27,49 +87,39 @@ export default function ChatWidget() {
 
   // Focus input when chat opens
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
+    if (isOpen) setTimeout(() => inputRef.current?.focus(), 100);
   }, [isOpen]);
 
+  // 3. Send Message Handler
   const sendMessage = useCallback(async () => {
     const text = input.trim();
-    if (!text || isLoading) return;
+    if (!text || isLoading || !sessionId) return;
 
-    const userMsg: ChatMessage = { sender: 'user', text };
-    setMessages(prev => [...prev, userMsg]);
+    // Optimistic UI for user message
+    const optimisticMsg: ChatMessage = { sender_type: 'user', content: text, isOptimistic: true };
+    setMessages(prev => [...prev, optimisticMsg]);
     setInput('');
     setIsLoading(true);
 
     try {
-      // بناء الرابط بذكاء لمنع تكرار /api لو موجودة بالفعل في المتغير البيئي
-      const baseUrl = API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`;
-      const res = await fetch(`${baseUrl}/chat`, {
+      // API call to backend (will trigger bot if bot_active)
+      const res = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history })
+        body: JSON.stringify({ sessionId, message: text })
       });
       const data = await res.json();
 
-      if (data.success) {
-        setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
-        
-        // تنظيف التاريخ من أي أجزاء تفكير (thoughts) قبل حفظه في الـ State
-        const cleanHistory = (data.history || []).map((entry: any) => ({
-          ...entry,
-          parts: entry.parts.filter((p: any) => !p.thought)
-        }));
-        setHistory(cleanHistory);
-      } else {
-        setMessages(prev => [...prev, { sender: 'bot', text: 'عذراً، حدث خطأ. حاول تاني.' }]);
+      if (!data.success) {
+        setMessages(prev => [...prev, { sender_type: 'bot', content: 'عذراً، حدث خطأ. حاول تاني.' }]);
       }
     } catch {
-      setMessages(prev => [...prev, { sender: 'bot', text: 'مش قادر أتواصل مع السيرفر دلوقتي. حاول بعد شوية.' }]);
+      setMessages(prev => [...prev, { sender_type: 'bot', content: 'مش قادر أتواصل مع السيرفر دلوقتي. حاول بعد شوية.' }]);
     } finally {
       setIsLoading(false);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
-  }, [input, isLoading, history]);
+  }, [input, isLoading, sessionId]);
 
   const formatText = (text: string) => {
     return text
@@ -146,6 +196,7 @@ export default function ChatWidget() {
         }
         .hwsni-msg-row.user { justify-content: flex-end; }
         .hwsni-msg-row.bot { justify-content: flex-start; }
+        .hwsni-msg-row.admin { justify-content: flex-start; } /* Admin looks like bot */
         .hwsni-bubble {
           max-width: 82%;
           padding: 10px 14px;
@@ -162,6 +213,11 @@ export default function ChatWidget() {
         .hwsni-bubble.bot {
           background: #f1f5f9;
           color: #1e293b;
+          border-radius: 14px 14px 14px 6px;
+        }
+        .hwsni-bubble.admin {
+          background: #0ea5e9; /* distinct color for admin */
+          color: #fff;
           border-radius: 14px 14px 14px 6px;
         }
         .hwsni-typing {
@@ -209,8 +265,8 @@ export default function ChatWidget() {
                 fontSize: 18,
               }}>✨</div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>مساعد hwasi</div>
-                <div style={{ fontSize: 11, opacity: 0.75 }}>أونلاين • يرد فوراً</div>
+                <div style={{ fontWeight: 700, fontSize: 15 }}>فريق الدعم المباشر</div>
+                <div style={{ fontSize: 11, opacity: 0.75 }}>جاهزين نساعدك في أي وقت</div>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} style={{
@@ -227,11 +283,18 @@ export default function ChatWidget() {
             flex: 1, overflowY: 'auto', padding: '16px 14px',
             background: '#fff', direction: 'rtl',
           }}>
+            {messages.length === 0 && !isLoading && (
+              <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: 13, marginTop: 20 }}>
+                جاري تحميل المحادثة...
+              </div>
+            )}
+            
             {messages.map((msg, i) => (
-              <div key={i} className={`hwsni-msg-row ${msg.sender}`}>
+              <div key={msg.id || i} className={`hwsni-msg-row ${msg.sender_type}`}>
                 <div
-                  className={`hwsni-bubble ${msg.sender}`}
-                  dangerouslySetInnerHTML={{ __html: formatText(msg.text) }}
+                  className={`hwsni-bubble ${msg.sender_type}`}
+                  style={{ opacity: msg.isOptimistic ? 0.7 : 1 }}
+                  dangerouslySetInnerHTML={{ __html: formatText(msg.content) }}
                 />
               </div>
             ))}

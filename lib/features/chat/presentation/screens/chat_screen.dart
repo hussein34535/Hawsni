@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:hwasi_app/core/themes/app_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -13,16 +16,81 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final List<_ChatMessage> _messages = [
-    _ChatMessage(
-      sender: _Sender.bot,
-      text: 'مرحباً بك في hwasi للفخامة والأزياء ✨\nكيف يمكنني مساعدتك؟ يمكنني البحث عن منتجات أو تتبع طلبك.',
-    ),
-  ];
-  List<Map<String, dynamic>> _history = [];
+  
+  List<Map<String, dynamic>> _messages = [];
   bool _isLoading = false;
+  String? _sessionId;
+  RealtimeChannel? _subscription;
 
-  static const String _apiUrl = 'https://hwasibackend.vercel.app/api/chat';
+  static const String _sessionApiUrl = 'https://hwasibackend.vercel.app/api/chat/session';
+  static const String _chatApiUrl = 'https://hwasibackend.vercel.app/api/chat';
+
+  @override
+  void initState() {
+    super.initState();
+    _initSession();
+  }
+
+  Future<void> _initSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? sid = prefs.getString('hwasi_chat_session');
+    
+    if (sid == null) {
+      sid = const Uuid().v4();
+      await prefs.setString('hwasi_chat_session', sid);
+    }
+
+    setState(() {
+      _sessionId = sid;
+    });
+
+    await _fetchSessionHistory(sid!);
+    _subscribeToMessages(sid);
+  }
+
+  Future<void> _fetchSessionHistory(String sid) async {
+    try {
+      final response = await http.get(Uri.parse('$_sessionApiUrl/$sid'));
+      final data = jsonDecode(response.body);
+
+      if (data['success'] == true && data['messages'] != null) {
+        setState(() {
+          _messages = List<Map<String, dynamic>>.from(data['messages']);
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      debugPrint('Failed to fetch session: $e');
+    }
+  }
+
+  void _subscribeToMessages(String sid) {
+    _subscription = Supabase.instance.client
+        .channel('public:chat_messages:$sid')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'chat_messages',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq, 
+            column: 'session_id', 
+            value: sid,
+          ),
+          callback: (payload) {
+            final newMessage = payload.newRecord;
+            if (newMessage != null) {
+              setState(() {
+                // Check for optimism duplicate
+                if (!_messages.any((m) => m['id'] == newMessage['id'])) {
+                  _messages.add(newMessage);
+                }
+              });
+              _scrollToBottom();
+            }
+          },
+        )
+        .subscribe();
+  }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -38,37 +106,38 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty || _isLoading) return;
+    if (text.isEmpty || _isLoading || _sessionId == null) return;
 
+    // Optimistic UI
     setState(() {
-      _messages.add(_ChatMessage(sender: _Sender.user, text: text));
+      _messages.add({
+        'sender_type': 'user',
+        'content': text,
+        'isOptimistic': true,
+      });
       _isLoading = true;
     });
+    
     _controller.clear();
     _scrollToBottom();
 
     try {
       final response = await http.post(
-        Uri.parse(_apiUrl),
+        Uri.parse(_chatApiUrl),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'message': text, 'history': _history}),
+        body: jsonEncode({'message': text, 'sessionId': _sessionId}),
       );
 
       final data = jsonDecode(response.body);
 
-      if (data['success'] == true) {
+      if (data['success'] != true) {
         setState(() {
-          _messages.add(_ChatMessage(sender: _Sender.bot, text: data['reply'] ?? ''));
-          _history = List<Map<String, dynamic>>.from(data['history'] ?? []);
-        });
-      } else {
-        setState(() {
-          _messages.add(_ChatMessage(sender: _Sender.bot, text: 'عذراً، حدث خطأ. يرجى المحاولة لاحقاً.'));
+          _messages.add({'sender_type': 'bot', 'content': 'عذراً، حدث خطأ. يرجى المحاولة لاحقاً.'});
         });
       }
     } catch (e) {
       setState(() {
-        _messages.add(_ChatMessage(sender: _Sender.bot, text: 'لا يمكن الاتصال بالخادم الآن. يرجى المحاولة لاحقاً.'));
+        _messages.add({'sender_type': 'bot', 'content': 'لا يمكن الاتصال بالخادم الآن. يرجى المحاولة لاحقاً.'});
       });
     } finally {
       setState(() => _isLoading = false);
@@ -80,11 +149,16 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
+    _subscription?.unsubscribe();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_sessionId == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Row(
@@ -112,67 +186,75 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: Container(
               color: const Color(0xFFF8FAFC),
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: _messages.length + (_isLoading ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == _messages.length && _isLoading) {
-                    return const Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          'المساعد يكتب...',
-                          style: TextStyle(
-                            color: Color(0xFF64748B),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
+              child: _messages.isEmpty && !_isLoading
+                  ? const Center(
+                      child: Text('جاري التحميل...', style: TextStyle(color: Colors.grey)),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _messages.length + (_isLoading ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == _messages.length && _isLoading) {
+                          return const Align(
+                            alignment: Alignment.centerRight,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                'المساعد يكتب...',
+                                style: TextStyle(
+                                  color: Color(0xFF64748B),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
 
-                  final msg = _messages[index];
-                  final isUser = msg.sender == _Sender.user;
+                        final msg = _messages[index];
+                        final isUser = msg['sender_type'] == 'user';
+                        final isAdmin = msg['sender_type'] == 'admin';
+                        final isOptimistic = msg['isOptimistic'] == true;
 
-                  return Align(
-                    alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
-                    child: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8,
-                      ),
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isUser ? AppTheme.primaryColor : Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(14),
-                          topRight: const Radius.circular(14),
-                          bottomLeft: Radius.circular(isUser ? 4 : 14),
-                          bottomRight: Radius.circular(isUser ? 14 : 4),
-                        ),
-                        border: isUser ? null : Border.all(color: const Color(0xFFE2E8F0)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                        return Align(
+                          alignment: isUser ? Alignment.centerLeft : Alignment.centerRight,
+                          child: Container(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.8,
+                            ),
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isUser 
+                                  ? AppTheme.primaryColor.withValues(alpha: isOptimistic ? 0.7 : 1.0) 
+                                  : isAdmin ? Colors.blue : Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(14),
+                                topRight: const Radius.circular(14),
+                                bottomLeft: Radius.circular(isUser ? 4 : 14),
+                                bottomRight: Radius.circular(isUser ? 14 : 4),
+                              ),
+                              border: isUser || isAdmin ? null : Border.all(color: const Color(0xFFE2E8F0)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              msg['content'] ?? '',
+                              style: TextStyle(
+                                color: isUser || isAdmin ? Colors.white : const Color(0xFF1E293B),
+                                fontSize: 14,
+                                height: 1.6,
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: Text(
-                        msg.text,
-                        style: TextStyle(
-                          color: isUser ? Colors.white : const Color(0xFF1E293B),
-                          fontSize: 14,
-                          height: 1.6,
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ),
 
@@ -242,13 +324,4 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-}
-
-enum _Sender { user, bot }
-
-class _ChatMessage {
-  final _Sender sender;
-  final String text;
-
-  _ChatMessage({required this.sender, required this.text});
 }

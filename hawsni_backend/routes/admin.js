@@ -15,6 +15,7 @@ const shippingController = require('../controllers/admin/shippingController');
 const settingsController = require('../controllers/admin/settingsController');
 const adminAuthController = require('../controllers/admin/adminAuthController');
 const adminReviewsController = require('../controllers/admin/reviewsController');
+const adminChatController = require('../controllers/admin/adminChatController');
 const { adminProtect } = require('../middleware/adminAuth');
 
 // Auth Routes (Public for Admin)
@@ -96,5 +97,8 @@ router.post('/settings', settingsController.update);
 router.get('/reviews', adminReviewsController.index);
 router.post('/reviews', adminReviewsController.create);
 router.delete('/reviews/:id', adminReviewsController.delete);
+
+// Live Chat Inbox
+router.get('/chat', adminChatController.renderChatInbox);
 
 module.exports = router;

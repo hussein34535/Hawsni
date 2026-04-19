@@ -727,6 +727,66 @@ async function sendOutOfStockAlert(productName, sku, size, color) {
     }).catch(err => {
         console.error('Failed to send out of stock alert:', err);
     });
+// ──────────────────────────────────────────────
+// 10. Live Chat Opened Notification
+// ──────────────────────────────────────────────
+async function sendNewChatNotification(sessionId, firstMessage) {
+    return _send({
+        to: ADMIN_EMAIL,
+        subject: `💬 محادثة جديدة قد تحتاج تدخلك!`,
+        htmlContent: `
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e8e8e8;">
+            <div style="background: #2563eb; padding: 25px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 20px;">💬 محادثة جديدة مفتوحة</h1>
+            </div>
+            <div style="padding: 30px;">
+                <p>تم بدء جلسة محادثة جديدة مع الذكاء الاصطناعي الآن.</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0; border: 1px solid #ddd;">
+                    <p style="margin: 0; font-size: 14px; font-weight: bold;">أول رسالة من العميل:</p>
+                    <p style="margin: 8px 0 0 0; font-size: 14px; color: #555;">"${firstMessage}"</p>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="https://hwasibackend.vercel.app/admin/chat" style="background: #2563eb; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold;">متابعة الشات</a>
+                </div>
+            </div>
+        </div>`
+    }).catch(err => console.error('Failed to send chat alert:', err));
+}
+
+// ──────────────────────────────────────────────
+// 11. Order Cancellation Request (Admin)
+// ──────────────────────────────────────────────
+async function sendCancellationRequestNotification(orderNumber, phone, reason, reqId) {
+    return _send({
+        to: ADMIN_EMAIL,
+        subject: `⚠️ طلب إلغاء أوردر #${orderNumber}`,
+        htmlContent: `
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e8e8e8;">
+            <div style="background: #dc3545; padding: 25px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 20px;">⚠️ طلب إلغاء أوردر</h1>
+            </div>
+            <div style="padding: 30px;">
+                <p>قام البوت برفع طلب إلغاء للأوردر رقم <b>#${orderNumber}</b> بناءً على رغبة العميل.</p>
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold; width: 120px;">رقم الأوردر:</td>
+                        <td style="padding: 8px 0;">${orderNumber}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold;">رقم الهاتف:</td>
+                        <td style="padding: 8px 0;" dir="ltr">${phone}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold;">السبب المذكور:</td>
+                        <td style="padding: 8px 0;">${reason || 'غير محدد'}</td>
+                    </tr>
+                </table>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="https://hwasibackend.vercel.app/admin/orders" style="background: #dc3545; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold;">مراجعة الطلبات</a>
+                </div>
+            </div>
+        </div>`
+    }).catch(err => console.error('Failed to send cancellation alert:', err));
 }
 
 module.exports = {
@@ -739,4 +799,6 @@ module.exports = {
     sendNoAnswerEmail,
     sendCustomAIEmail,
     sendOutOfStockAlert,
+    sendNewChatNotification,
+    sendCancellationRequestNotification,
 };

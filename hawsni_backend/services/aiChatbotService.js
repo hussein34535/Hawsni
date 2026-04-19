@@ -43,6 +43,41 @@ const TOOLS = [{
                 },
                 required: ["phone_number"]
             }
+        },
+        {
+            name: "check_inventory",
+            description: "تحقق من المخزون الحالي لمنتج معين لمعرفة الكمية المتبقية.",
+            parameters: {
+                type: "object",
+                properties: {
+                    query: { type: "string", description: "اسم المنتج" }
+                },
+                required: ["query"]
+            }
+        },
+        {
+            name: "request_cancellation",
+            description: "قم بإنشاء طلب إلغاء لطلب معين إذا طلب العميل إلغاءه. يجب التأكد من امتلاكك رقم الهاتف ورقم الأوردر.",
+            parameters: {
+                type: "object",
+                properties: {
+                    order_number: { type: "string", description: "رقم الطلب المراد إلغاؤه" },
+                    phone_number: { type: "string", description: "رقم الهاتف المربوط بالطلب" },
+                    reason: { type: "string", description: "سبب الإلغاء الذي ذكره العميل" }
+                },
+                required: ["order_number", "phone_number"]
+            }
+        },
+        {
+            name: "request_human_agent",
+            description: "استدعِ موظف بشري إذا واجهت مشكلة معقدة أو غضب العميل أو لم تجد حلاً.",
+            parameters: {
+                type: "object",
+                properties: {
+                    reason: { type: "string", description: "لماذا تطلب الدعم البشري؟" }
+                },
+                required: ["reason"]
+            }
         }
     ]
 }];
@@ -195,7 +230,8 @@ class AIChatbotService {
     }
 
     // ── Tool execution ─────────────────────────
-    async _executeTool({ name, args }) {
+    async _executeTool({ name, args }, sessionId) {
+        const emailService = require('./emailService');
         console.log(`[AI Bot] 🔧 Executing Tool: ${name}`, args);
         try {
             if (name === 'search_products') {
@@ -243,6 +279,43 @@ class AIChatbotService {
                     ? guest.map(formatOrder)
                     : { message: 'لم نعثر على طلبات مسجلة بهذا الرقم.' };
             }
+
+            if (name === 'check_inventory') {
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('name, stock, price')
+                    .ilike('name', `%${args.query}%`)
+                    .limit(3);
+                if (error) throw error;
+                return data?.length ? data : { message: 'لا يوجد تتوفر معلومات حول هذا المنتج.' };
+            }
+
+            if (name === 'request_cancellation') {
+                const { order_number, phone_number, reason } = args;
+                
+                // Save logic
+                const { data, error } = await supabase
+                   .from('cancellation_requests')
+                   .insert([{ order_id: order_number, phone_number: phone_number, reason: reason }])
+                   .select().single();
+                   
+                if (!error) {
+                    await emailService.sendCancellationRequestNotification(order_number, phone_number, reason, data.id);
+                    return { message: "تم رفع طلب الإلغاء للإدارة بنجاح ليتم الموافقة عليه، وسيتم الرد عليكم." };
+                }
+                return { message: "حدث خطأ أثناء رفع طلب الإلغاء، يرجى استدعاء الدعم." };
+            }
+
+            if (name === 'request_human_agent') {
+                if (!sessionId) return { message: "لا تتوفر جلسة صحيحة للتحويل للبشري." };
+                // Update session
+                await supabase.from('chat_sessions')
+                    .update({ status: 'human_requested' })
+                    .eq('session_id', sessionId);
+                    
+                return { message: "تم تغيير حالة المحادثة إلى طلب دعم بشري." };
+            }
+
         } catch (err) {
             console.error('[AI Bot] Tool Error:', err);
             return { error: 'حدث خطأ أثناء جلب البيانات من النظام.' };
@@ -251,7 +324,7 @@ class AIChatbotService {
     }
 
     // ── Main entry ─────────────────────────────
-    async handleChat(userMessage, history = []) {
+    async handleChat(userMessage, history = [], sessionId = null) {
         const instance = this._getInstance();
         console.log(`[AI Bot] 💬 User: ${userMessage}`);
 
@@ -291,7 +364,7 @@ class AIChatbotService {
             const calls = response.functionCalls();
             const toolResponses = await Promise.all(
                 calls.map(async call => {
-                    const res = await this._executeTool(call);
+                    const res = await this._executeTool(call, sessionId);
                     toolData = res; 
                     return {
                         functionResponse: {
