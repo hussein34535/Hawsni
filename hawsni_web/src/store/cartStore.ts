@@ -12,7 +12,7 @@ export interface CartItem {
     quantity: number;
     size?: string | null;
     color?: string | null;
-    accessories?: { name: string; price: number; image_url: string }[];
+    accessories?: { name: string; name_ar?: string; price: number; image_url: string }[];
 }
 
 interface CartState {
@@ -62,7 +62,7 @@ export const useCartStore = create<CartState>()(
 
             getTotal: () => {
                 return get().items.reduce((total, item) => {
-                    const accessoriesPrice = item.accessories?.reduce((accTotal, acc) => accTotal + acc.price, 0) || 0;
+                    const accessoriesPrice = item.accessories?.reduce((accTotal, acc) => accTotal + (acc.price || 0), 0) || 0;
                     return total + (item.price + accessoriesPrice) * item.quantity;
                 }, 0);
             },
