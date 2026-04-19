@@ -8,8 +8,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// Supabase instance limit 1
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// Supabase instance — only created if credentials are available
+let supabase: ReturnType<typeof createClient> | null = null;
+if (SUPABASE_URL && SUPABASE_KEY) {
+  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+}
 
 interface ChatMessage {
   id?: number;
@@ -57,7 +60,7 @@ export default function ChatWidget() {
 
   // 2. Real-time Subscription to Supabase
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId || !supabase) return;
     
     // Listen for new messages
     const channel = supabase
@@ -76,7 +79,7 @@ export default function ChatWidget() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase!.removeChannel(channel);
     };
   }, [sessionId]);
 
