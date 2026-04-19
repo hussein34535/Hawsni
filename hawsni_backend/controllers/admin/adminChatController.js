@@ -4,6 +4,8 @@ class AdminChatController {
     async renderChatInbox(req, res) {
         try {
             res.render('chat-inbox', {
+                title: 'شات الدعم المباشر',
+                page: 'chat',
                 path: '/admin/chat',
                 user: req.user,
                 supabaseUrl: process.env.SUPABASE_URL,

@@ -202,17 +202,22 @@ export default function ChatWidget() {
         @keyframes hwsniBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
       `}</style>
 
-      {/* FAB Button with Legendary Hide-on-Scroll */}
+      {/* FAB Button with Legendary Tucked-away Hide-on-Scroll */}
       <AnimatePresence>
-        {!isOpen && isVisible && (
+        {!isOpen && (
           <motion.button
-            initial={{ scale: 0, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0, opacity: 0, y: 20 }}
-            whileHover={{ scale: 1.1 }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ 
+              scale: 1, 
+              opacity: isVisible ? 1 : 0.35, 
+              x: isVisible ? 0 : 40,
+              y: 0 
+            }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileHover={{ scale: isVisible ? 1.1 : 1, x: 0, opacity: 1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed z-[9999] bg-[#0E4435] text-white flex items-center justify-center shadow-xl shadow-emerald-950/20"
+            className="fixed z-[9999] bg-[#0E4435] text-white flex items-center justify-center shadow-xl shadow-emerald-950/20 backdrop-blur-sm"
             style={{
               bottom: pathname.includes('/product/') ? '120px' : '90px',
               right: '20px',
@@ -222,11 +227,13 @@ export default function ChatWidget() {
             }}
           >
             <MessageCircle size={24} />
-            <motion.span 
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" 
-            />
+            {isVisible && (
+              <motion.span 
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" 
+              />
+            )}
           </motion.button>
         )}
       </AnimatePresence>
