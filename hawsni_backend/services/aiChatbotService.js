@@ -149,6 +149,33 @@ class AIChatbotService {
         return inst;
     }
 
+    // ── Retry with all keys on 429 ─────────────
+    async _generateWithRetry(modelName, config, promptOrMessages, isChat = false, chatHistory = []) {
+        const totalKeys = this.genAIInstances.length;
+        let lastError;
+        for (let attempt = 0; attempt < totalKeys; attempt++) {
+            const instance = this._getInstance();
+            try {
+                const model = instance.getGenerativeModel({ ...config, model: modelName });
+                if (isChat) {
+                    const chat = model.startChat({ history: chatHistory });
+                    return await chat.sendMessage(promptOrMessages);
+                } else {
+                    return await model.generateContent(promptOrMessages);
+                }
+            } catch (err) {
+                lastError = err;
+                if (err.status === 429) {
+                    console.warn(`[AI Bot] ⚠️ Key ${attempt + 1}/${totalKeys} rate limited. Trying next key...`);
+                    await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+                    continue;
+                }
+                throw err; // Non-429 errors: throw immediately
+            }
+        }
+        throw lastError;
+    }
+
     // ── Model A: Gemma + Tools ─────────────────
     _getToolsModel(instance) {
         return instance.getGenerativeModel({
@@ -207,7 +234,7 @@ class AIChatbotService {
                 const { data: guest, error: ge } = await supabase
                     .from('orders')
                     .select('id, order_number, status, total, created_at')
-                    .ilike('shipping_address', `%${searchPhone}%`)
+                    .ilike('shipping_address->>phone', `%${searchPhone}%`)
                     .order('created_at', { ascending: false })
                     .limit(MAX_ORDERS);
                 if (ge) throw ge;
@@ -243,16 +270,22 @@ class AIChatbotService {
         });
 
         // ════════════════════════════════════════
-        //  STEP 1 — Model A: Reasoner & Tools
+        //  STEP 1 — Reasoner & Tools (with key retry)
         // ════════════════════════════════════════
-        const toolsModel = this._getToolsModel(instance);
-        const chat = toolsModel.startChat({ history: cleanedHistory });
-
-        let result   = await chat.sendMessage(userMessage);
+        const toolsConfig = { tools: TOOLS }; // systemInstruction removed for Gemma compatibility
+        
+        // Inject system instructions into the user prompt since Gemma doesn't support the systemInstruction flag
+        let promptWithInstructions = userMessage;
+        if (cleanedHistory.length === 0) {
+            promptWithInstructions = `تعليمات النظام:\n${TOOLS_SYSTEM}\n\nرسالة العميل:\n${userMessage}`;
+        }
+        
+        // Initial message via retry-aware helper
+        let result = await this._generateWithRetry(REASONER_MODEL, toolsConfig, promptWithInstructions, true, cleanedHistory);
         let response = result.response;
         let toolData = null;
 
-        // Tool-call loop
+        // Tool-call loop — continue chatting on same chat session from retry result
         let iterations = 0;
         while (response.functionCalls?.()?.length && iterations++ < 3) {
             const calls = response.functionCalls();
@@ -269,14 +302,19 @@ class AIChatbotService {
                 })
             );
 
-            result   = await chat.sendMessage(toolResponses);
+            // For tool follow-up, create new chat session with history (retry-wrapped)
+            const fullHistory = [
+                ...cleanedHistory,
+                { role: 'user',  parts: [{ text: userMessage }] },
+                { role: 'model', parts: result.response.candidates[0].content.parts },
+            ];
+            result   = await this._generateWithRetry(REASONER_MODEL, toolsConfig, toolResponses, true, fullHistory);
             response = result.response;
         }
 
         // ════════════════════════════════════════
-        //  STEP 2 — Model B: JSON Formatter
         // ════════════════════════════════════════
-        const formatterModel = this._getFormatterModel(instance);
+        const formatterConfig = {}; // Removing systemInstruction & json mimeType for Gemma compatibility
 
         const recentContext = cleanedHistory.slice(-2).map(h => {
             const text = h.parts.find(p => p.text)?.text || '';
@@ -284,23 +322,25 @@ class AIChatbotService {
         }).join('\n');
         
         const formatterPrompt = toolData
-            ? `سياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nبيانات النظام:\n${JSON.stringify(toolData, null, 2)}\n\nصغ رداً نهائياً بأسلوب يجمع الفخامة والوضوح باللغة العربية.`
-            : `سياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nأجب بأسلوب راقٍ ومباشر.`;
+            ? `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nبيانات النظام لتلحقها بالرد:\n${JSON.stringify(toolData, null, 2)}\n\nصغ رداً نهائياً بأسلوب يجمع الفخامة والوضوح باللغة العربية مع الالتزام التام بصيغة الـ JSON فقط.`
+            : `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nأجب بأسلوب راقٍ ومباشر مع الالتزام التام بصيغة الـ JSON فقط.`;
 
         let finalReply = '';
+        let rawText = '';
         try {
-            const fResult = await formatterModel.generateContent(formatterPrompt);
-            let rawText = fResult.response.text();
+            const fResult = await this._generateWithRetry(FORMATTER_MODEL, formatterConfig, formatterPrompt);
+            rawText = fResult.response.text();
             
             // تنظيف الـ JSON
-            rawText = rawText.replace(/```json/gi, '').replace(/```/gi, '').trim();
+            const cleanedText = rawText.replace(/```json/gi, '').replace(/```/gi, '').trim();
             
-            const parsed  = JSON.parse(rawText);
+            const parsed  = JSON.parse(cleanedText);
             finalReply    = parsed.reply || '';
         } catch (e) {
-            console.warn('[AI Bot] ⚠️ JSON parse failed, using regex fallback');
+            console.warn('[AI Bot] ⚠️ JSON parse failed. rawText:', rawText);
+            console.warn('[AI Bot] ⚠️ Parse error:', e);
             try {
-                const fResult = await formatterModel.generateContent(formatterPrompt);
+                const fResult = await this._generateWithRetry(FORMATTER_MODEL, formatterConfig, formatterPrompt);
                 const raw     = fResult.response.text();
                 const match   = raw.match(/"reply"\s*:\s*"([\s\S]*?)(?<!\\)"/);
                 finalReply    = match?.[1] ?? '';
