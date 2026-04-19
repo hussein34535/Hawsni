@@ -192,9 +192,18 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
             <td style="padding: 15px 12px; border-bottom: 1px solid #f8f8f8;">
                 <p style="margin: 0; font-weight: 800; color: #1a1a1a; font-size: 14px; line-height: 1.4;">${itemName}</p>
                 <p style="margin: 4px 0 0 0; color: #aaa; font-size: 11px; font-weight: 700;">${item.size || 'عادي'} | x${item.quantity}${item.color ? ' | ' + item.color : ''}</p>
+                ${item.accessories && item.accessories.length > 0 ? `
+                    <div style="margin-top: 4px;">
+                        ${item.accessories.map(acc => `
+                            <span style="display: inline-block; background: #f0faf5; color: #0E4435; font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-left: 4px; border: 1px solid #e0f2e9;">
+                                + ${acc.name_ar || acc.name}
+                            </span>
+                        `).join('')}
+                    </div>
+                ` : ''}
             </td>
             <td style="padding: 15px 0; border-bottom: 1px solid #f8f8f8; text-align: left; font-weight: 900; color: #0E4435; font-size: 14px;">
-                ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
+                ${((item.price + (item.accessories?.reduce((s, a) => s + (a.price || 0), 0) || 0)) * (item.quantity || 1)).toLocaleString()} ج.م
             </td>
         </tr>
     `;
@@ -517,9 +526,14 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
                 <span style="font-weight: 700;">${itemName}</span>
                 <span style="color: #999; font-size: 11px;"> (الكمية: ${item.quantity})</span>
                 ${extras ? `<div style="color: #888; font-size: 11px; margin-top: 3px;">${extras}</div>` : ''}
+                ${item.accessories && item.accessories.length > 0 ? `
+                    <div style="margin-top: 5px; color: #0E4435; font-size: 10px; font-weight: 600;">
+                        ${item.accessories.map(acc => `+ ${acc.name}`).join(' | ')}
+                    </div>
+                ` : ''}
             </td>
             <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; text-align: left; font-weight: 700; color: #0E4435; font-size: 13px;">
-                ${((item.price || 0) * (item.quantity || 1)).toLocaleString()} ج.م
+                ${((item.price + (item.accessories?.reduce((s, a) => s + (a.price || 0), 0) || 0)) * (item.quantity || 1)).toLocaleString()} ج.م
             </td>
         </tr>`;
     }).join('');

@@ -8,6 +8,7 @@ export interface OrderItem {
     image_url?: string;
     size?: string;
     color?: string;
+    accessories?: any[];
 }
 
 export interface OrderData {

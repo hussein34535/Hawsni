@@ -213,8 +213,20 @@ export default function OrderSuccessPage() {
                                     <p className="text-[11px] text-gray-400 font-bold">
                                         {isRTL ? 'الكمية:' : 'Qty:'} {item.quantity} | {item.size || (isRTL ? 'بدون مقاس' : 'No Size')}
                                     </p>
+                                    {item.accessories && item.accessories.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                            {item.accessories.map((acc: any, aidx: number) => (
+                                                <span 
+                                                    key={aidx}
+                                                    className="text-[9px] font-black bg-emerald-50 text-[#0E4435] px-1.5 py-0.5 rounded-md border border-emerald-100/50"
+                                                >
+                                                    + {isRTL ? acc.name_ar || acc.name : acc.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
                                     <p className="text-sm font-black text-[#0E4435] mt-1">
-                                        {item.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}
+                                        {((item.price + (item.accessories?.reduce((s: number, a: any) => s + (a.price || 0), 0) || 0))).toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}
                                     </p>
                                 </div>
                             </div>

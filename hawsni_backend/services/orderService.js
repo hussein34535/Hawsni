@@ -102,7 +102,8 @@ class OrderService {
                     quantity: item.quantity,
                     price: item.price,
                     size: item.size || null,
-                    color: item.color || null
+                    color: item.color || null,
+                    accessories: item.accessories || null
                 };
             }));
 

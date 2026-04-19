@@ -233,7 +233,8 @@ export default function CheckoutPage() {
                     quantity: item.quantity,
                     image_url: item.imageUrl,
                     size: item.size || undefined,
-                    color: item.color || undefined
+                    color: item.color || undefined,
+                    accessories: item.accessories || undefined
                 })),
                 shippingAddress: isAuthenticated && addressId
                     ? {

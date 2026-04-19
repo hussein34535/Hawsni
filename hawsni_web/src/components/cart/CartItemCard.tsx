@@ -35,16 +35,37 @@ export default function CartItemCard({ item }: { item: CartItem }) {
                     </button>
                 </div>
 
-                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight mb-2">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-tight mb-1">
                     {item.color && <span>{isRTL ? 'اللون' : 'Color'}: {item.color}</span>}
                     {item.size && <span>•</span>}
                     {item.size && <span>{isRTL ? 'المقاس' : 'Size'}: {item.size}</span>}
                 </div>
 
+                {/* Accessories List */}
+                {item.accessories && item.accessories.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                        {item.accessories.map((acc, idx) => (
+                            <span 
+                                key={idx}
+                                className="text-[9px] font-black bg-emerald-50 text-[#0E4435] px-1.5 py-0.5 rounded-md border border-emerald-100/50"
+                            >
+                                + {isRTL ? acc.name_ar || acc.name : acc.name}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
                 <div className="flex items-center justify-between">
-                    <span className="text-base font-black text-[#0E4435]">
-                        {item.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}
-                    </span>
+                    <div className="flex flex-col">
+                        <span className="text-base font-black text-[#0E4435]">
+                            {((item.price + (item.accessories?.reduce((sum, acc) => sum + (acc.price || 0), 0) || 0))).toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}
+                        </span>
+                        {item.accessories && item.accessories.length > 0 && (
+                            <span className="text-[9px] text-gray-400 font-bold -mt-1">
+                                {isRTL ? 'شامل الإضافات' : 'Inc. accessories'}
+                            </span>
+                        )}
+                    </div>
 
                     {/* Quantity Selector */}
                     <div className="flex items-center gap-3 bg-gray-50 p-0.5 rounded-lg border border-gray-100">
