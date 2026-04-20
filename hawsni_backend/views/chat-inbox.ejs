@@ -57,7 +57,7 @@
     const SUPABASE_URL = "<%= supabaseUrl %>";
     const SUPABASE_ANON_KEY = "<%= supabaseAnonKey %>";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const chatSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let activeSessionId = null;
     let sessions = [];
@@ -84,7 +84,7 @@
     });
 
     async function fetchSessions() {
-        const { data, error } = await supabase
+        const { data, error } = await chatSupabase
             .from('chat_sessions')
             .select('*')
             .order('updated_at', { ascending: false });
@@ -95,7 +95,7 @@
     }
 
     function subscribeToSessions() {
-        supabase
+        chatSupabase
             .channel('public:chat_sessions')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions' }, payload => {
                 // Update local array
@@ -116,7 +116,7 @@
     }
 
     function subscribeToMessages() {
-        supabase
+        chatSupabase
             .channel('public:chat_messages')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
                 if (payload.new.session_id === activeSessionId) {
@@ -179,7 +179,7 @@
         const session = sessions.find(s => s.session_id === sessionId);
         updateChatHeader(session);
 
-        const { data, error } = await supabase
+        const { data, error } = await chatSupabase
             .from('chat_messages')
             .select('*')
             .eq('session_id', sessionId)
@@ -216,7 +216,7 @@
     takeOverBtn.onclick = async () => {
         if (!activeSessionId) return;
         takeOverBtn.textContent = 'جاري التنفيذ...';
-        await supabase
+        await chatSupabase
             .from('chat_sessions')
             .update({ status: 'human_active' })
             .eq('session_id', activeSessionId);
@@ -279,7 +279,7 @@
         // Optimistic UI (handled mostly by realtime, but we can disable input)
         chatInput.disabled = true;
 
-        const { error } = await supabase
+        const { error } = await chatSupabase
             .from('chat_messages')
             .insert([{ session_id: activeSessionId, sender_type: 'admin', content: text }]);
 
