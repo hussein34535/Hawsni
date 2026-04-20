@@ -14,8 +14,8 @@ export default function Navbar() {
     const itemCount = useCartStore((state) => state.getItemCount());
     const [isCartOpen, setIsCartOpen] = useState(false);
 
-    // Hide Navbar on product detail pages to match Flutter app behavior
-    if (pathname.includes('/product/')) return null;
+    // Hide Navbar on product detail and checkout pages to match Flutter app behavior
+    if (pathname.includes('/product/') || pathname.includes('/checkout')) return null;
 
     return (
         <>

@@ -389,21 +389,7 @@ export default function CheckoutPage() {
 
     return (
         <div className="min-h-screen bg-[#FAFAFA] pb-24 text-right font-cairo" dir="ltr">
-            {/* Sticky Header */}
-            <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                    <button
-                        onClick={() => router.back()}
-                        className="w-10 h-10 bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-95"
-                    >
-                        {isRTL ? <ArrowRight className="w-5 h-5 text-gray-900" /> : <ArrowLeft className="w-5 h-5 text-gray-900" />}
-                    </button>
-                    <h1 className="text-lg font-black text-gray-900">
-                        {isRTL ? 'إتمام الشراء' : 'Checkout'}
-                    </h1>
-                    <div className="w-10"></div>
-                </div>
-            </header>
+
 
             {/* Main Content */}
 
@@ -440,27 +426,12 @@ export default function CheckoutPage() {
                                         const val = e.target.value;
                                         setGuestInfo({ ...guestInfo, phone: val });
                                         if (val.length === 11 && /^01[0125]\d{8}$/.test(val)) {
-                                            const sequence = ['guest-phone', 'guest-phone2', 'guest-email', 'guest-street'];
-                                            document.getElementById('guest-phone2')?.focus();
+                                            document.getElementById('guest-email')?.focus();
                                         }
                                     }}
                                     isValid={/^01[0125]\d{8}$/.test(guestInfo.phone)}
                                 />
-                                <CheckoutInput 
-                                    id="guest-phone2"
-                                    type="tel"
-                                    icon={Phone}
-                                    placeholder={isRTL ? 'رقم هاتف آخر (اختياري)' : 'Alternative Phone (Optional)'}
-                                    value={guestInfo.phone2}
-                                    onChange={e => {
-                                        const val = e.target.value;
-                                        setGuestInfo({ ...guestInfo, phone2: val });
-                                        if (val.length === 11 && /^01[0125]\d{8}$/.test(val)) {
-                                            document.getElementById('guest-email')?.focus();
-                                        }
-                                    }}
-                                    isValid={guestInfo.phone2.length === 11 && /^01[0125]\d{8}$/.test(guestInfo.phone2)}
-                                />
+
                                 <CheckoutInput 
                                     id="guest-email"
                                     type="email"
@@ -627,15 +598,7 @@ export default function CheckoutPage() {
                                             </button>
                                         ))}
                                     </div>
-                                    <CheckoutInput 
-                                        id="new-phone2"
-                                        type="tel"
-                                        icon={Phone}
-                                        placeholder={isRTL ? 'رقم هاتف آخر (اختياري)' : 'Alternative Phone (Optional)'}
-                                        value={newAddress.alternativePhone || ''}
-                                        onChange={e => setNewAddress({ ...newAddress, alternativePhone: e.target.value })}
-                                        isValid={!!newAddress.alternativePhone && /^01[0125]\d{8}$/.test(newAddress.alternativePhone)}
-                                    />
+
                                 </motion.div>
                             )}
                         </div>
