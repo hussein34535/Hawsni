@@ -15,15 +15,18 @@ class NotificationService {
      */
     async sendTelegramCall(text = 'هناك عميل ينتظر المساعدة في متجر هَوَسي') {
         try {
-            // Clean username: remove '@' if present
-            const cleanUser = this.telegramUser.replace('@', '');
+            // Ensure username starts with '@' as required by CallMeBot for calls
+            let telegramId = this.telegramUser.trim();
+            if (!telegramId.startsWith('@') && !telegramId.startsWith('+')) {
+                telegramId = '@' + telegramId;
+            }
+            
             const encodedText = encodeURIComponent(text);
             
-            // USING THE EXACT STANDARDIZED VOICE NAME FOR ARABIC
-            // ar-XA-Standard-A is the most reliable female voice for calls
-            const url = `https://api.callmebot.com/start.php?user=${cleanUser}&text=${encodedText}&lang=ar-XA-Standard-A`;
+            // USING THE EXACT STANDARDIZED VOICE NAME
+            const url = `https://api.callmebot.com/start.php?user=${telegramId}&text=${encodedText}&lang=ar-XA-Standard-A`;
             
-            console.log(`[NotificationService] 📞 Triggering Telegram VOICE CALL to ${cleanUser}...`);
+            console.log(`[NotificationService] 📞 Triggering Telegram VOICE CALL to ${telegramId}...`);
             const res = await fetch(url);
             const responseBody = await res.text();
             
