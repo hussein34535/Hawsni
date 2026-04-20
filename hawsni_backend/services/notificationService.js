@@ -25,13 +25,13 @@ class NotificationService {
             
             console.log(`[NotificationService] 📞 Triggering Telegram VOICE CALL to ${cleanUser}...`);
             const res = await fetch(url);
+            const responseBody = await res.text();
             
             if (res.ok) {
-                console.log('[NotificationService] ✅ Call API Request accepted.');
+                console.log(`[NotificationService] ✅ Call API Response: ${responseBody}`);
                 return true;
             } else {
-                const errText = await res.text();
-                console.error('[NotificationService] ❌ Call API Error:', errText);
+                console.error(`[NotificationService] ❌ Call API Error Status: ${res.status}, Body: ${responseBody}`);
                 return false;
             }
         } catch (error) {
