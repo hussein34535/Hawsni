@@ -23,8 +23,8 @@ class NotificationService {
 
             const encodedText = encodeURIComponent(text);
 
-            // Simplified lang to 'ar' for maximum compatibility with the voice engine
-            const url = `https://api.callmebot.com/start.php?user=${telegramId}&text=${encodedText}&lang=ar`;
+            // Using source=auth to ensure the voice engine is activated for authenticated users
+            const url = `https://api.callmebot.com/start.php?user=${telegramId}&text=${encodedText}&lang=ar&source=auth`;
 
             console.log(`[NotificationService] 📞 Triggering Telegram VOICE CALL to ${telegramId}...`);
             const res = await fetch(url);
