@@ -607,8 +607,11 @@
                 itemsList.appendChild(itemDiv);
             });
 
-            // Financials
-            const subtotal = (order.items || []).reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            // Financials — use order_items if available, fallback to subtotal field from DB
+            const allItems = order.order_items || order.items || [];
+            const subtotal = allItems.length > 0
+                ? allItems.reduce((acc, item) => acc + (parseFloat(item.price || 0) * parseInt(item.quantity || 1)), 0)
+                : parseFloat(order.subtotal || order.total || 0);
             document.getElementById('modalSubtotal').textContent = subtotal.toFixed(2) + ' ج.م';
 
             const discount = order.discount || 0;

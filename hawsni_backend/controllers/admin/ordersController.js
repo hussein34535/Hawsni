@@ -1,13 +1,14 @@
 const { supabaseAdmin: supabase } = require('../../config/supabase');
 const emailService = require('../../services/emailService');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 class OrdersController {
     // List all orders - with pagination
     async index(req, res) {
         try {
-            const { page = 1, limit = 20 } = req.query;
+            const { page = 1, limit = 1000 } = req.query;
             const pageNum = parseInt(page) || 1;
-            const limitNum = parseInt(limit) || 20;
+            const limitNum = Math.min(parseInt(limit) || 1000, 2000); // max 2000 at once
             const from = (pageNum - 1) * limitNum;
             const to = from + limitNum - 1;
 
@@ -62,18 +63,19 @@ class OrdersController {
                 }
             });
 
+            const totalCount = count || ordersWithProducts.length;
             res.render('orders', { 
                 orders: ordersWithProducts,
                 pagination: {
-                    total: count,
+                    total: totalCount,
                     page: pageNum,
                     limit: limitNum,
-                    totalPages: Math.ceil(count / limitNum)
+                    totalPages: Math.ceil(totalCount / limitNum)
                 }
             });
         } catch (err) {
             console.error('Error fetching orders:', err);
-            res.status(500).send('خطأ في تحميل الطلبات');
+            res.status(500).send('خطأ في تحميل الطلبات: ' + err.message);
         }
     }
 
@@ -351,9 +353,7 @@ class OrdersController {
                 finalHtml = responseText.replace(/```json|```/g, '').trim();
             }
 
-            res.json({ success: true, generatedHtml: finalHtml });
-
-            res.json({ success: true, generatedHtml: finalHtml });
+            return res.json({ success: true, generatedHtml: finalHtml });
 
         } catch (err) {
             console.error('Error in AI Generation:', err);
