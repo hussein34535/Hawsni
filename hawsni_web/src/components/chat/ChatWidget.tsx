@@ -223,7 +223,6 @@ export default function ChatWidget() {
             color: #1f2937; 
             border-radius: 20px 20px 20px 4px; 
           }
-          .hwsni-bubble.admin { background: #e0f2fe; border: 1px solid #bae6fd; }
           
           .hwsni-typing { display: flex; gap: 4px; padding: 12px 16px; background: #f3f4f6; border-radius: 20px; width: fit-content; }
           .hwsni-typing span { width: 6px; height: 6px; background: #9ca3af; border-radius: 50%; animation: hwsniBounce 1.4s infinite; }
@@ -321,7 +320,7 @@ export default function ChatWidget() {
                   >
                     <div 
                       className={`hwsni-bubble ${msg.sender_type}`}
-                      style={{ opacity: msg.isOptimistic ? 0.6 : 1 }}
+                      style={{ opacity: 1 }}
                       dangerouslySetInnerHTML={{ __html: formatText(msg.content) }}
                     />
                   </motion.div>
