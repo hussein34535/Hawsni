@@ -4,8 +4,8 @@ const supabase = require('../config/supabase');
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
-const REASONER_MODEL  = "gemma-4-31b-it"; 
-const FORMATTER_MODEL = "gemma-3-27b-it"; 
+const REASONER_MODEL  = "gemini-1.5-pro"; 
+const FORMATTER_MODEL = "gemini-1.5-flash"; 
 const MAX_RESULTS     = 5;
 const MAX_ORDERS      = 3;
 
@@ -164,7 +164,7 @@ class AIChatbotService {
             .filter(k => k.startsWith('GEMINI_API_KEY'))
             .sort((a, b) => a.localeCompare(b))
             .map(k => process.env[k])
-            .filter(Boolean);
+            .filter(key => key && key.startsWith('AIza'));
 
         if (!this.apiKeys.length) {
             console.warn('[AI Bot] ⚠️ No GEMINI_API_KEYs found in .env');
@@ -348,16 +348,13 @@ class AIChatbotService {
         // ════════════════════════════════════════
         //  STEP 1 — Reasoner & Tools (with key retry)
         // ════════════════════════════════════════
-        const toolsConfig = { tools: TOOLS }; // systemInstruction removed for Gemma compatibility
-        
-        // Inject system instructions into the user prompt since Gemma doesn't support the systemInstruction flag
-        let promptWithInstructions = userMessage;
-        if (cleanedHistory.length === 0) {
-            promptWithInstructions = `تعليمات النظام:\n${TOOLS_SYSTEM}\n\nرسالة العميل:\n${userMessage}`;
-        }
+        const toolsConfig = { 
+            tools: TOOLS,
+            systemInstruction: TOOLS_SYSTEM 
+        };
         
         // Initial message via retry-aware helper
-        let result = await this._generateWithRetry(REASONER_MODEL, toolsConfig, promptWithInstructions, true, cleanedHistory);
+        let result = await this._generateWithRetry(REASONER_MODEL, toolsConfig, userMessage, true, cleanedHistory);
         let response = result.response;
         let toolData = null;
 
@@ -389,8 +386,12 @@ class AIChatbotService {
         }
 
         // ════════════════════════════════════════
+        //  STEP 2 — Formatter (JSON Output)
         // ════════════════════════════════════════
-        const formatterConfig = {}; // Removing systemInstruction & json mimeType for Gemma compatibility
+        const formatterConfig = {
+            systemInstruction: FORMAT_SYSTEM,
+            generationConfig: { responseMimeType: "application/json" }
+        };
 
         const recentContext = cleanedHistory.slice(-2).map(h => {
             const text = h.parts.find(p => p.text)?.text || '';
@@ -398,8 +399,8 @@ class AIChatbotService {
         }).join('\n');
         
         const formatterPrompt = toolData
-            ? `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nبيانات النظام لتلحقها بالرد:\n${JSON.stringify(toolData, null, 2)}\n\nصغ رداً نهائياً بأسلوب يجمع الفخامة والوضوح باللغة العربية مع الالتزام التام بصيغة الـ JSON فقط.`
-            : `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nأجب بأسلوب راقٍ ومباشر مع الالتزام التام بصيغة الـ JSON فقط.`;
+            ? `سياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nبيانات النظام لتلحقها بالرد:\n${JSON.stringify(toolData, null, 2)}\n\nصغ رداً نهائياً بأسلوب يجمع الفخامة والوضوح باللغة العربية مع الالتزام التام بصيغة الـ JSON فقط.`
+            : `سياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nأجب بأسلوب راقٍ ومباشر مع الالتزام التام بصيغة الـ JSON فقط.`;
 
         let finalReply = '';
         let rawText = '';
