@@ -3,6 +3,7 @@ const router = express.Router();
 const AuthController = require('../controllers/api/authController');
 const { protect } = require('../middleware/auth');
 const { userRegistrationSchema, loginSchema } = require('../middleware/validation');
+const { body } = require('express-validator');
 
 // @route   POST /api/auth/register
 // @desc    Register new user
