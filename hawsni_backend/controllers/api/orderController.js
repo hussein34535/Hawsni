@@ -106,7 +106,7 @@ class OrderController {
                 guestName: guestName || finalShippingAddress.name,
                 guestEmail: guestEmail || finalShippingAddress.email,
                 guestPhone: guestPhone || finalShippingAddress.phone,
-                ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+                ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress,
                 userAgent: req.headers['user-agent']
             };
             const order = await OrderService.createOrder(orderData, safeItems, guestInfo);
