@@ -23,6 +23,11 @@ router.get('/admin/login', adminAuthController.renderLogin);
 router.post('/admin/login', adminAuthController.login);
 router.get('/admin/logout', adminAuthController.logout);
 
+// Redirect /admin to /dashboard
+router.get('/admin', (req, res) => {
+    res.redirect('/dashboard');
+});
+
 // Apply protection to all following routes
 router.use(adminProtect);
 

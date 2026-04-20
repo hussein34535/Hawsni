@@ -4,8 +4,8 @@ const supabase = require('../config/supabase');
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
-const REASONER_MODEL  = "gemini-1.5-pro"; 
-const FORMATTER_MODEL = "gemini-1.5-flash"; 
+const REASONER_MODEL  = "gemma-4-31b-it"; 
+const FORMATTER_MODEL = "gemma-3-27b-it"; 
 const MAX_RESULTS     = 5;
 const MAX_ORDERS      = 3;
 
@@ -348,13 +348,14 @@ class AIChatbotService {
         // ════════════════════════════════════════
         //  STEP 1 — Reasoner & Tools (with key retry)
         // ════════════════════════════════════════
-        const toolsConfig = { 
-            tools: TOOLS,
-            systemInstruction: TOOLS_SYSTEM 
-        };
+        const toolsConfig = { tools: TOOLS }; 
         
-        // Initial message via retry-aware helper
-        let result = await this._generateWithRetry(REASONER_MODEL, toolsConfig, userMessage, true, cleanedHistory);
+        let promptWithInstructions = userMessage;
+        if (cleanedHistory.length === 0) {
+            promptWithInstructions = `تعليمات النظام:\n${TOOLS_SYSTEM}\n\nرسالة العميل:\n${userMessage}`;
+        }
+        
+        let result = await this._generateWithRetry(REASONER_MODEL, toolsConfig, promptWithInstructions, true, cleanedHistory);
         let response = result.response;
         let toolData = null;
 
@@ -385,13 +386,7 @@ class AIChatbotService {
             response = result.response;
         }
 
-        // ════════════════════════════════════════
-        //  STEP 2 — Formatter (JSON Output)
-        // ════════════════════════════════════════
-        const formatterConfig = {
-            systemInstruction: FORMAT_SYSTEM,
-            generationConfig: { responseMimeType: "application/json" }
-        };
+        const formatterConfig = {}; 
 
         const recentContext = cleanedHistory.slice(-2).map(h => {
             const text = h.parts.find(p => p.text)?.text || '';
@@ -399,8 +394,8 @@ class AIChatbotService {
         }).join('\n');
         
         const formatterPrompt = toolData
-            ? `سياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nبيانات النظام لتلحقها بالرد:\n${JSON.stringify(toolData, null, 2)}\n\nصغ رداً نهائياً بأسلوب يجمع الفخامة والوضوح باللغة العربية مع الالتزام التام بصيغة الـ JSON فقط.`
-            : `سياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nأجب بأسلوب راقٍ ومباشر مع الالتزام التام بصيغة الـ JSON فقط.`;
+            ? `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nبيانات النظام لتلحقها بالرد:\n${JSON.stringify(toolData, null, 2)}\n\nصغ رداً نهائياً بأسلوب يجمع الفخامة والوضوح باللغة العربية مع الالتزام التام بصيغة الـ JSON فقط.`
+            : `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nأجب بأسلوب راقٍ ومباشر مع الالتزام التام بصيغة الـ JSON فقط.`;
 
         let finalReply = '';
         let rawText = '';
