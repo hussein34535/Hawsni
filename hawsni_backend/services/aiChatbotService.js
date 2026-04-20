@@ -308,15 +308,25 @@ class AIChatbotService {
 
             if (name === 'request_human_agent') {
                 if (!sessionId) return { message: "لا تتوفر جلسة صحيحة للتحويل للبشري." };
-                // Update session
+                const notificationService = require('./notificationService');
+                
+                // Update session status in DB
                 await supabase.from('chat_sessions')
                     .update({ status: 'human_requested' })
                     .eq('session_id', sessionId);
                 
-                // NEW: Notify admin via email
+                // 1. Notify via Email (Legacy)
                 await emailService.sendHumanAgentRequestNotification(sessionId, args.reason);
+                
+                // 2. Trigger REAL Telegram Call (New)
+                const callText = `عميل يطلب مساعدتك في متجر هَوَسي. السبب: ${args.reason || 'غير محدد'}`;
+                await notificationService.sendTelegramCall(callText);
+
+                // 3. Send Telegram Text with session info
+                const textMsg = `🚨 *طلب دعم بشري جديد!*\n\n📍 الجلسة: \`${sessionId}\`\n❓ السبب: ${args.reason || 'غير محدد'}\n\nيرجى الدخول للوحة التحكم للرد.`;
+                await notificationService.sendTelegramText(textMsg);
                     
-                return { message: "تم تغيير حالة المحادثة إلى طلب دعم بشري." };
+                return { message: "تم إرسال تنبيه بالمكالمة الهاتفية للإدارة وجاري تحويلك." };
             }
 
         } catch (err) {

@@ -34,6 +34,10 @@ class ChatController {
                 await supabase.from('chat_messages').insert([
                     { session_id: sessionId, sender_type: 'bot', content: greetingStr }
                 ]);
+
+                // Notify Admin about new chat session
+                const notificationService = require('../../services/notificationService');
+                notificationService.sendTelegramText(`✨ *عميل جديد بدأ الشات!* \n📍 الجلسة: \`${sessionId}\``);
             }
 
             // Fetch all messages
