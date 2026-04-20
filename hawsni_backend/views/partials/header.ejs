@@ -83,6 +83,18 @@
                     </a>
                 </div>
             </nav>
+
+            <!-- Logout at bottom of sidebar -->
+            <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
+                <a href="/admin/logout" 
+                   onclick="return confirm('هل أنت متأكد من تسجيل الخروج؟')"
+                   style="display:flex; align-items:center; gap:10px; color:#f87171; text-decoration:none; padding:10px 12px; border-radius:10px; font-weight:700; font-size:0.9rem; transition:background 0.2s;"
+                   onmouseover="this.style.background='rgba(239,68,68,0.15)'" 
+                   onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
+            </div>
         </aside>
 
         <!-- Main Content -->
@@ -98,9 +110,13 @@
                 </div>
 
                 <div class="topbar-actions">
-                    <a href="/" target="_blank" class="btn btn-secondary">
+                    <a href="https://hwasi.com" target="_blank" class="btn btn-secondary">
                         <i class="fas fa-external-link-alt"></i>
                         عرض المتجر
+                    </a>
+                    <a href="/admin/logout" class="btn btn-danger" style="display:flex;align-items:center;gap:6px;" onclick="return confirm('هل أنت متأكد من تسجيل الخروج؟')">
+                        <i class="fas fa-sign-out-alt"></i>
+                        خروج
                     </a>
                 </div>
             </div>
