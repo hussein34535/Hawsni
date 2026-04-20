@@ -77,19 +77,16 @@ app.set('views', path.join(__dirname, 'views'));
 // Middleware
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, or SSR)
-    if (!origin) return callback(null, true);
+    // Allow requests with no origin (mobile apps, curl, SSR)
+    if (!origin || origin === 'null') return callback(null, true);
 
-    // All allowed origins — both dev and prod combined for simplicity
+    // All allowed origins — both dev and prod combined
     const allowedOrigins = [
-      // Production domains
       'https://hawsni.com',
       'https://www.hawsni.com',
       'https://hwasi.com',
       'https://www.hwasi.com',
-      // Vercel deploy URLs
       'https://hwasibackend.vercel.app',
-      // Local development
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:3002',
@@ -98,9 +95,8 @@ const corsOptions = {
       'http://127.0.0.1:3002',
     ];
 
-    // Also allow any Vercel preview/deploy URLs dynamically
-    const isVercelPreview = /^https:\/\/[a-z0-9-]+-[a-z0-9]+-[a-z0-9]+\.vercel\.app$/.test(origin) ||
-                            origin.endsWith('.vercel.app');
+    // Allow any Vercel preview/deploy URLs dynamically
+    const isVercelPreview = origin.endsWith('.vercel.app');
 
     if (allowedOrigins.includes(origin) || isVercelPreview) {
       callback(null, true);
@@ -113,7 +109,10 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'CSRF-Token']
 };
-app.use(cors(corsOptions));
+// Apply CORS only to /api/ routes — SSR admin pages don't need it
+app.use('/api/', cors(corsOptions));
+// Also handle preflight for /api/
+app.options('/api/*', cors(corsOptions));
 app.use(express.json({ limit: '4mb' }));
 app.use(express.urlencoded({ extended: true, limit: '4mb' }));
 app.use(methodOverride('_method'));

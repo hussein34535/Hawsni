@@ -415,6 +415,7 @@
     </script>
     <script>
         const ordersData = JSON.parse(document.getElementById('orders-data').textContent || '[]');
+        const CSRF_TOKEN = '<%= csrfToken %>';
         const sMap = {
             'Processing': 'warning',
             'In Transit': 'info',
@@ -645,7 +646,8 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
                     },
                     body: JSON.stringify({ status: newStatus, skipEmail })
                 });
@@ -730,7 +732,7 @@
             try {
                 const res = await fetch('/orders/bulk-status', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify({ ids, status, skipEmail })
                 });
                 const data = await res.json();
@@ -754,7 +756,7 @@
                 try {
                     const res = await fetch('/orders/bulk-delete', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                         body: JSON.stringify({ ids })
                     });
                     const data = await res.json();
@@ -789,7 +791,7 @@
                 try {
                     const res = await fetch(`/orders/${orderId}/delete`, {
                         method: 'POST',
-                        headers: { 'Accept': 'application/json' }
+                        headers: { 'Accept': 'application/json', 'X-CSRF-Token': CSRF_TOKEN }
                     });
 
                     console.log(`Frontend: Delete response status: ${res.status}`);
@@ -844,7 +846,10 @@
             btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
             btn.disabled = true;
             try {
-                const res = await fetch(`/orders/${currentOrderId}/no-answer`, { method: 'POST' });
+                const res = await fetch(`/orders/${currentOrderId}/no-answer`, { 
+                    method: 'POST',
+                    headers: { 'X-CSRF-Token': CSRF_TOKEN }
+                });
                 const data = await res.json();
                 if (data.success) {
                     btn.innerHTML = '<span>✅</span><span>تم الإرسال!</span>';
@@ -881,7 +886,7 @@
             try {
                 const res = await fetch(`/orders/${currentOrderId}/generate-ai-email`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify({ prompt })
                 });
 
@@ -935,7 +940,7 @@
             try {
                 const res = await fetch(`/orders/${currentOrderId}/send-ai-email`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify({ htmlContent: currentGeneratedHtml })
                 });
 
@@ -986,7 +991,7 @@
             try {
                 const res = await fetch(`/orders/${currentOrderId}/bosta-ship`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify(payload)
                 });
                 const data = await res.json();
