@@ -372,7 +372,7 @@
                             <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 16px; padding: 16px;">
                                 <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #e11d48; font-weight: 800;"><i class="fas fa-truck-fast"></i> الشحن (بوسطة)</h5>
                                 
-                                <div id="bostaNotSentBox" style="display: block;">
+                                <div id="bostaNotSentBox" style="display: none;">
                                     <div style="margin-bottom: 12px;">
                                         <select id="bostaPackageSize" style="width: 100%; padding: 8px; border: 1px solid #fda4af; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.85rem; color: #be123c; background: #fff;">
                                             <option value="SMALL">حجم صغير (مجوهرات/إكسسوار)</option>
@@ -1241,19 +1241,18 @@
             height: 100%;
             background: rgba(15, 23, 42, 0.4);
             backdrop-filter: blur(12px);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 2000;
             opacity: 0;
-            pointer-events: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 20px;
         }
 
         .modal.active {
+            display: flex;
             opacity: 1;
-            pointer-events: auto;
         }
 
         .modal-content {
