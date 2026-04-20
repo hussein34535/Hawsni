@@ -488,6 +488,9 @@ export default function ProductPage() {
     const performAddToCart = (selectedAccs: any[]) => {
         if (!product) return;
 
+        // Update local state so UI reflects the selection (price, isInCart, etc)
+        setSelectedAccessories(selectedAccs);
+
         // Find the image for the selected color
         let selectedColorImage = safeImages[0] || '';
         if (selectedColor && product.colors) {
