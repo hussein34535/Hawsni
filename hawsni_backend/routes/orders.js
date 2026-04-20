@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const OrderController = require('../controllers/api/orderController');
 const { protect, protectOptional } = require('../middleware/auth');
+const { orderSchema } = require('../middleware/validation');
 const supabase = require('../config/supabase');
 
 // Get user orders
 router.get('/', protect, OrderController.getUserOrders);
 
 // Create order
-router.post('/', protectOptional, OrderController.createOrder);
+router.post('/', protectOptional, orderSchema, OrderController.createOrder);
 
 // Update order status (Admin)
 router.put('/:id/status', protect, OrderController.updateStatus);

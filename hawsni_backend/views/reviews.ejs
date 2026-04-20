@@ -23,6 +23,7 @@
                             </div>
                             <div style="padding:1.5rem;">
                                 <form method="POST" action="/reviews">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
                                     <div class="form-group">
                                         <label class="form-label">المنتج</label>

@@ -8,6 +8,7 @@
         </div>
 
         <form method="POST" action="/settings">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <!-- General Info -->
             <div class="card" style="margin-bottom: 1.5rem;">
                 <div class="card-header">

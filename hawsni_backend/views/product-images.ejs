@@ -15,6 +15,7 @@
             <!-- Upload New Images -->
             <form action="/products/<%= product.id %>/images" method="POST" enctype="multipart/form-data"
                 style="margin-bottom: 2rem;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="form-group">
                     <label class="form-label">إضافة صور جديدة (حتى 5 صور)</label>
                     <input type="file" name="images" class="form-control" multiple accept="image/*" required
@@ -34,6 +35,7 @@
 
             <% if (product && product.images && product.images.length> 0) { %>
                 <form action="/products/<%= product.id %>/images/reorder" method="POST" id="reorderForm">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="imageOrder" id="imageOrderInput">
 
                     <div id="imageSortable"

@@ -81,19 +81,32 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'http://127.0.0.1:3002',
-      'https://hwasibackend.vercel.app',
-      'https://hawsni.com',
-      'https://www.hawsni.com',
-      'https://hwasi.com',
-      'https://www.hwasi.com'
-    ].filter(Boolean);
+    // Environment-aware origins
+    const isProd = process.env.NODE_ENV === 'production';
+    let allowedOrigins = [];
+
+    if (isProd) {
+      // Strict origins for production
+      allowedOrigins = [
+        'https://hwasibackend.vercel.app',
+        'https://hawsni.com',
+        'https://www.hawsni.com',
+        'https://hwasi.com',
+        'https://www.hwasi.com'
+      ];
+    } else {
+      // Allow localhost ONLY in development
+      allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:3002',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001',
+        'http://127.0.0.1:3002',
+        'https://hwasibackend.vercel.app', // keep vercel even in dev for testing
+        'https://hawsni.com'
+      ];
+    }
 
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -103,13 +116,23 @@ const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'CSRF-Token']
 };
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '4mb' }));
 app.use(express.urlencoded({ extended: true, limit: '4mb' }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// CSRF Protection specific for SSR (EJS) Admin UI
+const csurf = require('csurf');
+const csrfProtection = csurf({ 
+    cookie: { 
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict'
+    } 
+});
 
 // Import admin storage protection
 const { adminProtect } = require('./middleware/adminAuth');
@@ -161,9 +184,18 @@ app.get('/track-order', async (req, res) => {
 // SEO Routes (served at root)
 app.use('/', seoRoutes);
 
+// Make CSRF token available to all EJS templates
+app.use((req, res, next) => {
+    // Only generate/pass CSRF token for routes expecting HTML
+    if (req.csrfToken) {
+        res.locals.csrfToken = req.csrfToken();
+    }
+    next();
+});
+
 // Admin / Dashboard Routes - Apply Protection Globally at Mount
-app.use('/api/admin', adminProtect, adminRoutes);
-app.use('/', adminRoutes); // adminProtect is also inside adminRoutes.js, but this is a double layer
+app.use('/api/admin', adminProtect, csrfProtection, adminRoutes);
+app.use('/', csrfProtection, adminRoutes); // adminProtect is also inside adminRoutes.js, but this is a double layer
 
 // Root redirect
 app.get('/', (req, res) => {

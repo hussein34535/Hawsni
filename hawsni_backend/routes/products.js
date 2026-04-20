@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ProductController = require('../controllers/api/productController');
 const upload = require('../middleware/upload');
+const { productSchema } = require('../middleware/validation');
 
 // @route   GET /api/products/search
 // @desc    Search products
@@ -31,12 +32,12 @@ router.get('/:id/related', ProductController.getRelatedProducts);
 // @route   POST /api/products
 // @desc    Create product (Admin only)
 // @access  Private/Admin
-router.post('/', upload.array('images', 5), ProductController.createProduct);
+router.post('/', upload.array('images', 5), productSchema, ProductController.createProduct);
 
 // @route   PUT /api/products/:id
 // @desc    Update product (Admin only)
 // @access  Private/Admin
-router.put('/:id', upload.array('images', 5), ProductController.updateProduct);
+router.put('/:id', upload.array('images', 5), productSchema, ProductController.updateProduct);
 
 // @route   DELETE /api/products/:id
 // @desc    Delete product (Admin only)

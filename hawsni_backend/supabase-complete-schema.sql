@@ -218,6 +218,10 @@ CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_wishlist_items_wishlist ON wishlist_items(wishlist_id);
 CREATE INDEX IF NOT EXISTS idx_categories_sort_order ON categories(sort_order);
 
+-- Phase 1 Added Indexes
+CREATE INDEX IF NOT EXISTS idx_orders_status_date ON orders(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_products_category_active ON products(category_id, is_active);
+
 -- -------------------------------------------------------------
 -- AUTOMATION (TRIGGERS)
 -- -------------------------------------------------------------

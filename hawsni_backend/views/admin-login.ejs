@@ -239,6 +239,7 @@
             <% } %>
 
             <form action="/admin/login" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="form-group">
                     <label class="form-label">البريد الإلكتروني</label>
                     <div class="input-wrapper">

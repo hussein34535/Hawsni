@@ -103,6 +103,7 @@
 
         <form action="/products<%= product ? '/' + product.id : '' %>" method="POST"
             onsubmit="return handleProductSubmit(event)" id="productForm">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
             <% if (product) { %>
                 <input type="hidden" name="_method" value="PUT">

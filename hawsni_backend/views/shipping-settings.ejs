@@ -21,6 +21,7 @@
     </style>
 
     <form method="POST" action="/shipping">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <!-- Global Settings -->
         <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-header">

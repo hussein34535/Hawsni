@@ -308,6 +308,7 @@
         <div class="card">
             <h2>معلومات المنتج</h2>
             <form method="POST" action="/products/<%= product.id %>" enctype="multipart/form-data">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="hidden" name="_method" value="PUT">
                 <div class="form-row">
                     <div class="form-group">

@@ -167,6 +167,7 @@
                                     <td onclick="event.stopPropagation()">
                                         <div class="action-cell">
                                             <form method="POST" action="/orders/<%= order.id %>/status">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                                 <select name="status" class="status-select select-<%= sClass %>"
                                                     onchange="this.form.submit()">
                                                     <% if (!['Processing', 'In Transit', 'Delivered', 'Cancelled'].includes(order.status)) { %>

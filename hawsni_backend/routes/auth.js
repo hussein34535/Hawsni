@@ -1,16 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { body } = require('express-validator');
 const AuthController = require('../controllers/api/authController');
 const { protect } = require('../middleware/auth');
+const { userRegistrationSchema, loginSchema } = require('../middleware/validation');
 
 // @route   POST /api/auth/register
 // @desc    Register new user
-router.post('/register', [
-  body('name').notEmpty().withMessage('Name is required'),
-  body('email').isEmail().withMessage('Please provide a valid email'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
-], AuthController.register);
+router.post('/register', userRegistrationSchema, AuthController.register);
 
 // @route   POST /api/auth/verify-otp
 // @desc    Verify OTP and complete registration
@@ -18,10 +14,7 @@ router.post('/verify-otp', AuthController.verifyOtp);
 
 // @route   POST /api/auth/login
 // @desc    Login user
-router.post('/login', [
-  body('email').isEmail().withMessage('Valid email required'),
-  body('password').exists().withMessage('Password required')
-], AuthController.login);
+router.post('/login', loginSchema, AuthController.login);
 
 // @route   POST /api/auth/forgot-password
 // @desc    Send password reset email
