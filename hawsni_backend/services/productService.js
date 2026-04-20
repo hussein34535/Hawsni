@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 
 class ProductService {
     async getAllProducts(filters = {}, sort = null, page = 1, limit = 20) {
