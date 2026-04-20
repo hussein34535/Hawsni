@@ -194,7 +194,6 @@ export default function ChatWidget() {
             flex-direction: column;
             background: #fff;
             overflow: hidden;
-            direction: ${isRTL ? 'rtl' : 'ltr'};
           }
           @media (min-width: 640px) {
             .hwsni-chat-window {
@@ -212,16 +211,17 @@ export default function ChatWidget() {
             font-size: 14px;
             line-height: 1.6;
             word-break: break-word;
+            direction: rtl;
           }
           .hwsni-bubble.user { 
             background: #0E4435; 
             color: #fff; 
-            border-radius: ${isRTL ? '20px 20px 4px 20px' : '20px 20px 20px 4px'}; 
+            border-radius: 20px 20px 4px 20px; 
           }
           .hwsni-bubble.bot, .hwsni-bubble.admin { 
             background: #f3f4f6; 
             color: #1f2937; 
-            border-radius: ${isRTL ? '20px 20px 20px 4px' : '20px 20px 4px 20px'}; 
+            border-radius: 20px 20px 20px 4px; 
           }
           .hwsni-bubble.admin { background: #e0f2fe; border: 1px solid #bae6fd; }
           
@@ -232,7 +232,7 @@ export default function ChatWidget() {
           @keyframes hwsniBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
         `}</style>
   
-        {/* FAB Button with Legendary Tucked-away Hide-on-Scroll */}
+        {/* FAB Button - Fixed to Right */}
         <AnimatePresence>
           {!isOpen && (
             <motion.button
@@ -240,7 +240,7 @@ export default function ChatWidget() {
               animate={{ 
                 scale: 1, 
                 opacity: isVisible ? 1 : 0.4, 
-                x: isVisible ? 0 : (isRTL ? -40 : 40),
+                x: isVisible ? 0 : 40,
                 y: 0 
               }}
               exit={{ scale: 0, opacity: 0 }}
@@ -250,8 +250,7 @@ export default function ChatWidget() {
               className="fixed z-[9999] bg-[#0E4435] text-white flex items-center justify-center shadow-xl shadow-emerald-950/20"
               style={{
                 bottom: pathname.includes('/product/') ? '120px' : '90px',
-                right: isRTL ? 'auto' : '20px',
-                left: isRTL ? '20px' : 'auto',
+                right: '20px',
                 width: '56px',
                 height: '56px',
                 borderRadius: '24px',
@@ -277,21 +276,9 @@ export default function ChatWidget() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 40, scale: 0.95 }}
               className="hwsni-chat-window"
-              dir={isRTL ? 'rtl' : 'ltr'}
             >
-              {/* Header */}
+              {/* Header - Swapped X and Name as requested */}
               <div className="bg-[#0E4435] px-6 py-5 flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
-                    <Sparkles className="text-white w-5 h-5" />
-                  </div>
-                  <div className="text-right">
-                    <h3 className="text-white font-black text-sm">{isRTL ? 'فريق هَوَسي' : 'Hawsni Support'}</h3>
-                    <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">
-                      {isRTL ? 'متاحون الآن لمساعدتك' : 'Online & Ready to Help'}
-                    </p>
-                  </div>
-                </div>
                 <button 
                   onClick={() => setIsOpen(false)} 
                   className="p-2 hover:bg-white/10 rounded-full transition-colors text-white"
@@ -299,6 +286,17 @@ export default function ChatWidget() {
                 >
                   <X size={20} />
                 </button>
+                <div className="flex items-center gap-3 text-right">
+                  <div className="text-right">
+                    <h3 className="text-white font-black text-sm">{isRTL ? 'فريق هَوَسي' : 'Hawsni Support'}</h3>
+                    <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">
+                      {isRTL ? 'متاحون الآن لمساعدتك' : 'Online & Ready to Help'}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
+                    <Sparkles className="text-white w-5 h-5" />
+                  </div>
+                </div>
               </div>
   
               {/* Messages Body */}
@@ -341,6 +339,13 @@ export default function ChatWidget() {
   
               {/* Input Footer */}
               <div className="p-4 bg-white border-t border-gray-100 flex gap-3">
+                <button
+                  onClick={sendMessage}
+                  disabled={isLoading || !input.trim()}
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoading || !input.trim() ? 'bg-gray-100 text-gray-300' : 'bg-[#0E4435] text-white shadow-lg shadow-emerald-950/20 active:scale-90 hover:scale-105'}`}
+                >
+                  <Send size={18} className={isRTL ? 'rotate-0' : ''} />
+                </button>
                 <input
                   ref={inputRef}
                   type="text"
@@ -350,15 +355,8 @@ export default function ChatWidget() {
                   disabled={isLoading}
                   placeholder={isRTL ? 'اكتب استفسارك هنا...' : 'Type your message...'}
                   className="flex-1 bg-gray-50 border-none rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-2 focus:ring-[#0E4435] transition-all outline-none text-right"
-                  style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+                  dir="rtl"
                 />
-                <button
-                  onClick={sendMessage}
-                  disabled={isLoading || !input.trim()}
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoading || !input.trim() ? 'bg-gray-100 text-gray-300' : 'bg-[#0E4435] text-white shadow-lg shadow-emerald-950/20 active:scale-90 hover:scale-105'}`}
-                >
-                  <Send size={18} className={isRTL ? 'rotate-180' : ''} />
-                </button>
               </div>
             </motion.div>
           )}
