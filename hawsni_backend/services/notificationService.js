@@ -16,7 +16,8 @@ class NotificationService {
     async sendTelegramCall(text = 'هناك عميل ينتظر المساعدة في متجر هَوَسي') {
         try {
             const encodedText = encodeURIComponent(text);
-            const url = `https://api.callmebot.com/start.php?user=${this.telegramUser}&text=${encodedText}&lang=ar-SA`;
+            // ar-XA-Standard-B is a high-quality Arabic Standard voice supported by CallMeBot
+            const url = `https://api.callmebot.com/start.php?user=${this.telegramUser}&text=${encodedText}&lang=ar-XA-Standard-B&cc=no`;
             
             console.log(`[NotificationService] 📞 Triggering Telegram Call to ${this.telegramUser}...`);
             const res = await fetch(url);

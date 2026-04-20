@@ -435,8 +435,8 @@ class AIChatbotService {
         }).join('\n');
         
         const formatterPrompt = toolData
-            ? `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nبيانات النظام لتلحقها بالرد:\n${JSON.stringify(toolData, null, 2)}\n\nصغ رداً نهائياً بأسلوب يجمع الفخامة والوضوح باللغة العربية مع الالتزام التام بصيغة الـ JSON فقط.`
-            : `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nأجب بأسلوب راقٍ ومباشر مع الالتزام التام بصيغة الـ JSON فقط.`;
+            ? `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nبيانات النظام (للاطلاع الداخلي فقط - ممنوع إظهارها للعميل):\n${JSON.stringify(toolData, null, 2)}\n\nرسالة العميل الحالية: "${userMessage}"\n\nالمطلوب: صغ رداً نهائياً بالعامية المصرية الراقية يتفاعل مع العميل باستخدام المعلومات أعلاه، مع الالتزام التام بصيغة الـ JSON فقط. تذكر: لا تذكر كود JSON أو رموز تقنية في حقل الـ reply.`
+            : `${FORMAT_SYSTEM}\n\nسياق المحادثة السابقة:\n${recentContext}\n\nرسالة العميل الحالية: "${userMessage}"\n\nالمطلوب: أجب بأسلوب راقٍ ومباشر مع الالتزام بصيغة الـ JSON فقط.`;
 
         let finalReply = '';
         let rawText = '';
