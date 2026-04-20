@@ -193,6 +193,8 @@ class ChatController {
             ]);
             return res.status(500).json({ success: false, error: 'حدث خطأ غير متوقع' });
         }
+    }
+
     /**
      * POST /api/chat/reset
      * Request body: { sessionId: "string" }
