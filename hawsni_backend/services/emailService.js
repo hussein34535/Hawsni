@@ -809,14 +809,12 @@ async function sendCancellationRequestNotification(orderNumber, phone, reason, r
  * Send notification when a user requests a human agent
  */
 async function sendHumanAgentRequestNotification(sessionId, reason) {
-    if (!resend) return;
     const adminEmail = process.env.ADMIN_EMAIL || 'hussein34535@gmail.com';
     
-    return resend.emails.send({
-        from: 'Hawsni Support <support@hawsni.com>',
+    return _send({
         to: adminEmail,
         subject: `🚨 طلب تدخل بشري في الشات - جلسة ${sessionId.substring(0, 8)}`,
-        html: `
+        htmlContent: `
             <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px; padding: 20px;">
                 <h2 style="color: #ef4444; border-bottom: 2px solid #ef4444; padding-bottom: 10px;">🚨 تنبيه: العميل يطلب التحدث مع موظف</h2>
                 <p>البوت قام بتحويل المحادثة للموظفين البشريين بناءً على طلب العميل أو طبيعة الاستفسار.</p>

@@ -164,7 +164,7 @@ class AIChatbotService {
             .filter(k => k.startsWith('GEMINI_API_KEY'))
             .sort((a, b) => a.localeCompare(b))
             .map(k => process.env[k])
-            .filter(key => key && key.startsWith('AIza'));
+            .filter(key => key && (key.startsWith('AIza') || key.startsWith('AQ.')));
 
         if (!this.apiKeys.length) {
             console.warn('[AI Bot] ⚠️ No GEMINI_API_KEYs found in .env');
