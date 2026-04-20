@@ -203,6 +203,27 @@
                     <p>لا توجد طلبات حتى الآن</p>
                 </div>
                 <% } %>
+        
+        <!-- Pagination UI -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding: 20px;">
+                <% if (pagination.page > 1) { %>
+                    <a href="/orders?page=<%= pagination.page - 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                        <i class="fas fa-chevron-right" style="margin-left: 5px;"></i> السابق
+                    </a>
+                <% } %>
+
+                <div class="pagination-info" style="font-weight: bold; color: #64748b; font-size: 0.9rem;">
+                    صفحة <%= pagination.page %> من <%= pagination.totalPages %>
+                </div>
+
+                <% if (pagination.page < pagination.totalPages) { %>
+                    <a href="/orders?page=<%= pagination.page + 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                        التالي <i class="fas fa-chevron-left" style="margin-right: 5px;"></i>
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
     </div>
 
     <!-- Order Details Modal -->

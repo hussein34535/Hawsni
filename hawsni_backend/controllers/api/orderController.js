@@ -1,4 +1,4 @@
-const supabase = require('../../config/supabase');
+const { supabaseAdmin: supabase } = require('../../config/supabase');
 const OrderService = require('../../services/orderService');
 
 class OrderController {
