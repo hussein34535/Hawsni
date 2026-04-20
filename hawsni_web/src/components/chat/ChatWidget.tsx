@@ -62,7 +62,6 @@ export default function ChatWidget() {
 
   // Hide on Checkout/Cart pages
   const shouldHideCompletely = pathname.includes('/checkout') || pathname.includes('/cart');
-  if (shouldHideCompletely) return null;
 
   // 1. Initialize or Load Session and Fetch History
   useEffect(() => {
@@ -208,6 +207,8 @@ export default function ChatWidget() {
         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
         .replace(/\n/g, '<br/>');
     };
+
+    if (shouldHideCompletely) return null;
 
     return (
       <>

@@ -61,6 +61,7 @@ import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import MicrosoftClarity from "@/components/analytics/MicrosoftClarity";
 import ChatWidget from "@/components/chat/ChatWidget";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { Suspense } from "react";
 
 export default function RootLayout({
   children,
@@ -78,8 +79,12 @@ export default function RootLayout({
           <BottomNav />
           <ToastContainer />
           <FacebookPixel />
-          <GoogleAnalytics />
-          <MicrosoftClarity />
+          <Suspense fallback={null}>
+            <GoogleAnalytics />
+          </Suspense>
+          <Suspense fallback={null}>
+            <MicrosoftClarity />
+          </Suspense>
           <ChatWidget />
         </LanguageProvider>
       </body>

@@ -59,11 +59,13 @@ export default function CheckoutPage() {
     const [guestInfo, setGuestInfo] = useState({ name: '', phone: '', phone2: '', email: '', street: '', city: '' });
 
     // Coupon states
-    const [couponCode, setCouponCode] = useState('');
-    const [isCouponApplied, setIsCouponApplied] = useState(false);
-    const [couponDiscount, setCouponDiscount] = useState(0);
-    const [couponType, setCouponType] = useState<'percentage' | 'fixed'>('percentage');
     const [notes, setNotes] = useState('');
+
+    // Bosta Cascaded States
+    const [governorates, setGovernorates] = useState<any[]>([]);
+    const [districts, setDistricts] = useState<any[]>([]);
+    const [selectedGovId, setSelectedGovId] = useState('');
+    const [selectedDistrictId, setSelectedDistrictId] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -109,27 +111,45 @@ export default function CheckoutPage() {
         };
         fetchData();
 
-        // Track InitiateCheckout
-        trackEvent('InitiateCheckout', {
-            content_type: 'product',
-            contents: items.map(item => ({
-                id: item.productId,
-                quantity: item.quantity
-            })),
-            value: getTotal(),
-            currency: 'EGP'
-        });
-        trackGAEvent('begin_checkout', {
-            currency: 'EGP',
-            value: getTotal(),
-            items: items.map(item => ({
-                item_id: item.productId,
-                item_name: item.name,
-                price: item.price,
-                quantity: item.quantity
-            }))
         });
     }, []);
+
+    // Fetch Bosta Cities
+    useEffect(() => {
+        const fetchGovs = async () => {
+            try {
+                const axios = (await import('@/lib/axios')).default;
+                const res = await axios.get('/shipping/cities');
+                if (res.data.success) {
+                    setGovernorates(res.data.cities || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch governorates:', err);
+            }
+        };
+        fetchGovs();
+    }, []);
+
+    // Fetch Bosta Districts when city changes
+    useEffect(() => {
+        if (!selectedGovId) {
+            setDistricts([]);
+            setSelectedDistrictId('');
+            return;
+        }
+        const fetchDistricts = async () => {
+            try {
+                const axios = (await import('@/lib/axios')).default;
+                const res = await axios.get(`/shipping/districts/${selectedGovId}`);
+                if (res.data.success) {
+                    setDistricts(res.data.districts || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch districts:', err);
+            }
+        };
+        fetchDistricts();
+    }, [selectedGovId]);
 
     const subtotal = getTotal();
 
@@ -241,12 +261,14 @@ export default function CheckoutPage() {
                         ...addresses.find(a => a._id === addressId),
                         id: addressId,
                         state: selectedGov,
+                        districtId: selectedDistrictId || undefined,
                         address: addresses.find(a => a._id === addressId)?.street || ''
                     }
                     : {
                         street: guestInfo.street,
                         city: guestInfo.city,
                         state: selectedGov,
+                        districtId: selectedDistrictId || undefined,
                         address: `${guestInfo.street}, ${guestInfo.city}, ${selectedGov}`
                     },
                 paymentMethod: 'Cash on Delivery',
@@ -393,19 +415,39 @@ export default function CheckoutPage() {
                                         placeholder={isRTL ? 'اسم الشارع / رقم العقار' : 'Street Address'}
                                         className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
                                     />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <input
-                                            type="text" value={guestInfo.city}
-                                            onChange={e => setGuestInfo({ ...guestInfo, city: e.target.value })}
-                                            placeholder={isRTL ? 'المدينة' : 'City'}
-                                            className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
-                                        />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <select
-                                            value={selectedGov} onChange={e => setSelectedGov(e.target.value)}
+                                            value={selectedGovId} 
+                                            onChange={e => {
+                                                const gov = governorates.find(g => g.id === e.target.value);
+                                                setSelectedGovId(e.target.value);
+                                                setSelectedGov(gov ? gov.arabicName : '');
+                                            }}
                                             className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
                                         >
                                             <option value="">{isRTL ? 'اختر المحافظة' : 'Select Governorate'}</option>
-                                            {egyptGovernorates.map(gov => <option key={gov} value={gov}>{gov}</option>)}
+                                            {governorates.map(gov => (
+                                                <option key={gov.id} value={gov.id}>
+                                                    {isRTL ? gov.arabicName : gov.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            value={selectedDistrictId}
+                                            onChange={e => {
+                                                const dist = districts.find(d => d.id === e.target.value);
+                                                setSelectedDistrictId(e.target.value);
+                                                setGuestInfo({ ...guestInfo, city: dist ? dist.arabicName : '' });
+                                            }}
+                                            disabled={!selectedGovId}
+                                            className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm disabled:opacity-50"
+                                        >
+                                            <option value="">{isRTL ? 'اختر المنطقة / الحي' : 'Select area / district'}</option>
+                                            {districts.map(dist => (
+                                                <option key={dist.id} value={dist.id}>
+                                                    {isRTL ? dist.arabicName : dist.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -424,19 +466,39 @@ export default function CheckoutPage() {
                                         placeholder={isRTL ? 'اسم الشارع / رقم العقار الجديد' : 'New Street Address'}
                                         className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
                                     />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <input
-                                            type="text" value={newAddress.city}
-                                            onChange={e => setNewAddress({ ...newAddress, city: e.target.value })}
-                                            placeholder={isRTL ? 'المدينة' : 'City'}
-                                            className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
-                                        />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <select
-                                            value={selectedGov} onChange={e => setSelectedGov(e.target.value)}
+                                            value={selectedGovId} 
+                                            onChange={e => {
+                                                const gov = governorates.find(g => g.id === e.target.value);
+                                                setSelectedGovId(e.target.value);
+                                                setSelectedGov(gov ? gov.arabicName : '');
+                                            }}
                                             className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm"
                                         >
                                             <option value="">{isRTL ? 'اختر المحافظة' : 'Select Governorate'}</option>
-                                            {egyptGovernorates.map(gov => <option key={gov} value={gov}>{gov}</option>)}
+                                            {governorates.map(gov => (
+                                                <option key={gov.id} value={gov.id}>
+                                                    {isRTL ? gov.arabicName : gov.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            value={selectedDistrictId}
+                                            onChange={e => {
+                                                const dist = districts.find(d => d.id === e.target.value);
+                                                setSelectedDistrictId(e.target.value);
+                                                setNewAddress({ ...newAddress, city: dist ? dist.arabicName : '' });
+                                            }}
+                                            disabled={!selectedGovId}
+                                            className="w-full bg-gray-50 border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-[#0E4435] outline-none font-bold text-sm disabled:opacity-50"
+                                        >
+                                            <option value="">{isRTL ? 'اختر المنطقة / الحي' : 'Select area / district'}</option>
+                                            {districts.map(dist => (
+                                                <option key={dist.id} value={dist.id}>
+                                                    {isRTL ? dist.arabicName : dist.name}
+                                                </option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="flex gap-2 mb-4">

@@ -227,26 +227,43 @@ class BostaService {
 
         const normalizeArabic = (str) => {
             if (!str) return '';
-            return str.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim();
+            return str.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ').trim();
         };
 
         const safeCity = normalizeArabic(cityName);
         const safeArea = normalizeArabic(areaName);
 
-        // 1. Match City
-        const cityMatch = districts.find(c =>
+        // 1. Match City (Governorate)
+        let cityMatch = districts.find(c =>
             c.cityName?.toLowerCase() === cityName?.toLowerCase() ||
             normalizeArabic(c.cityOtherName) === safeCity ||
             normalizeArabic(c.cityOtherName).includes(safeCity) ||
             safeCity.includes(normalizeArabic(c.cityOtherName))
         );
 
+        // 2. Deep Search fallback: if no city match, try to find the area in ANY city
+        if (!cityMatch && safeArea) {
+            console.log(`[Bosta-Match] City '${cityName}' not found. Deep searching area '${areaName}' across all cities...`);
+            for (const c of districts) {
+                const foundInDistricts = (c.districts || []).find(d => 
+                    normalizeArabic(d.districtOtherName) === safeArea ||
+                    normalizeArabic(d.zoneOtherName) === safeArea ||
+                    normalizeArabic(d.districtOtherName).includes(safeArea) ||
+                    safeArea.includes(normalizeArabic(d.districtOtherName))
+                );
+                if (foundInDistricts) {
+                    cityMatch = c;
+                    console.log(`[Bosta-Match] Deep Match Found! Area '${areaName}' belongs to city: ${c.cityName}`);
+                    break;
+                }
+            }
+        }
+
         if (!cityMatch) return null;
 
-        // 2. Match Zone/District within city
+        // 3. Match Zone/District within the (found) city
         let zoneMatch = null;
         if (safeArea && cityMatch.districts) {
-            // Exact or partial match using normalized Arabic
             zoneMatch = cityMatch.districts.find(d =>
                 d.zoneName?.toLowerCase() === areaName?.toLowerCase() ||
                 normalizeArabic(d.zoneOtherName) === safeArea ||
@@ -255,16 +272,13 @@ class BostaService {
                 safeArea.includes(normalizeArabic(d.zoneOtherName)) ||
                 normalizeArabic(d.zoneOtherName).includes(safeArea) ||
                 safeArea.includes(normalizeArabic(d.districtOtherName)) ||
-                normalizeArabic(d.districtOtherName).includes(safeArea) ||
-                safeArea.toLowerCase().includes(d.districtName?.toLowerCase() || '') ||
-                (d.districtName?.toLowerCase() || '').includes(safeArea.toLowerCase())
+                normalizeArabic(d.districtOtherName).includes(safeArea)
             );
         }
 
         return {
-            city: { _id: cityMatch.cityId, name: cityMatch.cityName },
-            // districtId هو اللي بوسطة بتستخدمه كـ primary key للمنطقة
-            zone: zoneMatch ? { _id: zoneMatch.districtId || zoneMatch.zoneId, name: zoneMatch.districtName || zoneMatch.zoneName } : null
+            city: { _id: cityMatch.cityId || cityMatch._id, name: cityMatch.cityName },
+            zone: zoneMatch ? { _id: zoneMatch.districtId || zoneMatch.zoneId || zoneMatch._id, name: zoneMatch.districtName || zoneMatch.zoneName } : null
         };
     }
 
@@ -480,6 +494,10 @@ class BostaService {
                     firstName: customerName.split(' ')[0] || 'Customer',
                     lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',
                     phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
+                    // Add secondary phone if available
+                    ...(shippingAddress.alternative_phone || shippingAddress.guestAlternativePhone ? {
+                        secondPhone: (shippingAddress.alternative_phone || shippingAddress.guestAlternativePhone).replace(/\s+/g, '').replace(/^\+20/, '0')
+                    } : {})
                 },
                 // V2 API (Modern): Requires districtId instead of string matching
                 dropOffAddress: {
