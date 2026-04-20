@@ -405,21 +405,7 @@ export default function CheckoutPage() {
                 </div>
             </header>
 
-            {/* Progress Bar - Subconscious UX */}
-            <div className="max-w-5xl mx-auto px-4 mt-4">
-                <div className="bg-white rounded-full h-2 w-full overflow-hidden border border-gray-100 flex shadow-inner">
-                    <motion.div 
-                        initial={{ width: '40%' }}
-                        animate={{ width: isProcessing ? '95%' : (guestInfo.name && guestInfo.phone ? '75%' : '50%') }}
-                        className="bg-gradient-to-r from-emerald-400 to-[#0E4435] h-full"
-                    />
-                </div>
-                <div className="flex justify-between mt-2 px-1">
-                    <span className="text-[10px] font-black text-[#0E4435] uppercase tracking-tighter">{isRTL ? 'السلة' : 'Cart'}</span>
-                    <span className="text-[10px] font-black text-[#0E4435] uppercase tracking-tighter">{isRTL ? 'العنوان' : 'Address'}</span>
-                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-tighter">{isRTL ? 'التأكيد' : 'Confirm'}</span>
-                </div>
-            </div>
+            {/* Main Content */}
 
             <main className="max-w-5xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
 
@@ -479,7 +465,7 @@ export default function CheckoutPage() {
                                     id="guest-email"
                                     type="email"
                                     icon={Mail}
-                                    placeholder={isRTL ? 'البريد الإلكتروني (اختياري)' : 'Email (Optional)'}
+                                    placeholder={isRTL ? 'البريد الإلكتروني (ننصح به)' : 'Email (Recommended)'}
                                     value={guestInfo.email}
                                     onChange={e => setGuestInfo({ ...guestInfo, email: e.target.value })}
                                     isValid={!!guestInfo.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestInfo.email)}
