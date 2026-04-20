@@ -30,7 +30,7 @@ class ChatController {
                 session = newSession;
 
                 // Create initial bot greeting
-                const greetingStr = 'أهلاً بيك في hwasi ✨\\nإزاي أقدر أساعدك النهاردة؟ ممكن أساعدك تدور على منتج أو تتبع طلبك.';
+                const greetingStr = 'أهلاً بك في هَوَسي ✨\nنسعد بخدمتك.. كيف يمكننا مساعدتك اليوم؟';
                 await supabase.from('chat_messages').insert([
                     { session_id: sessionId, sender_type: 'bot', content: greetingStr }
                 ]);
