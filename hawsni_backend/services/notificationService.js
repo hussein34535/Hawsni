@@ -20,16 +20,16 @@ class NotificationService {
             if (!telegramId.startsWith('@') && !telegramId.startsWith('+')) {
                 telegramId = '@' + telegramId;
             }
-            
+
             const encodedText = encodeURIComponent(text);
-            
-            // USING THE EXACT STANDARDIZED VOICE NAME
-            const url = `https://api.callmebot.com/start.php?user=${telegramId}&text=${encodedText}&lang=ar-XA-Standard-A`;
-            
+
+            // Simplified lang to 'ar' for maximum compatibility with the voice engine
+            const url = `https://api.callmebot.com/start.php?user=${telegramId}&text=${encodedText}&lang=ar`;
+
             console.log(`[NotificationService] 📞 Triggering Telegram VOICE CALL to ${telegramId}...`);
             const res = await fetch(url);
             const responseBody = await res.text();
-            
+
             if (res.ok) {
                 console.log(`[NotificationService] ✅ Call API Response: ${responseBody}`);
                 return true;
@@ -51,7 +51,7 @@ class NotificationService {
         try {
             const encodedText = encodeURIComponent(text);
             const url = `https://api.callmebot.com/text.php?user=${this.telegramUser}&text=${encodedText}`;
-            
+
             console.log(`[NotificationService] 💬 Sending Telegram Text to ${this.telegramUser}...`);
             const res = await fetch(url);
 
