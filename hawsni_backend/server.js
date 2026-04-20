@@ -75,42 +75,37 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
-// Middleware
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
+    // Allow requests with no origin (like mobile apps, curl, or SSR)
     if (!origin) return callback(null, true);
-    
-    // Environment-aware origins
-    const isProd = process.env.NODE_ENV === 'production';
-    let allowedOrigins = [];
 
-    if (isProd) {
-      // Strict origins for production
-      allowedOrigins = [
-        'https://hwasibackend.vercel.app',
-        'https://hawsni.com',
-        'https://www.hawsni.com',
-        'https://hwasi.com',
-        'https://www.hwasi.com'
-      ];
-    } else {
-      // Allow localhost ONLY in development
-      allowedOrigins = [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'http://localhost:3002',
-        'http://127.0.0.1:3000',
-        'http://127.0.0.1:3001',
-        'http://127.0.0.1:3002',
-        'https://hwasibackend.vercel.app', // keep vercel even in dev for testing
-        'https://hawsni.com'
-      ];
-    }
+    // All allowed origins — both dev and prod combined for simplicity
+    const allowedOrigins = [
+      // Production domains
+      'https://hawsni.com',
+      'https://www.hawsni.com',
+      'https://hwasi.com',
+      'https://www.hwasi.com',
+      // Vercel deploy URLs
+      'https://hwasibackend.vercel.app',
+      // Local development
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3002',
+    ];
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // Also allow any Vercel preview/deploy URLs dynamically
+    const isVercelPreview = /^https:\/\/[a-z0-9-]+-[a-z0-9]+-[a-z0-9]+\.vercel\.app$/.test(origin) ||
+                            origin.endsWith('.vercel.app');
+
+    if (allowedOrigins.includes(origin) || isVercelPreview) {
       callback(null, true);
     } else {
+      console.warn(`[CORS] Blocked origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
