@@ -116,6 +116,12 @@ class ChatController {
             // Remove the latest user message from history because we pass it directly
             formattedHistory.pop();
 
+            // CRITICAL FIX: Gemini/Gemma history must start with a 'user' message.
+            // If the first message is from the 'model' (like our bot greeting), we must remove it.
+            while (formattedHistory.length > 0 && formattedHistory[0].role === 'model') {
+                formattedHistory.shift();
+            }
+
             // Call the AI Service
             const aiResponse = await aiChatbotService.handleChat(message, formattedHistory || [], sessionId); // Pass sessionId for advanced tools
 
