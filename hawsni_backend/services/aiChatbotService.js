@@ -315,18 +315,24 @@ class AIChatbotService {
                     .update({ status: 'human_requested' })
                     .eq('session_id', sessionId);
                 
-                // 1. Notify via Email (Legacy)
-                await emailService.sendHumanAgentRequestNotification(sessionId, args.reason);
-                
-                // 2. Trigger REAL Telegram Call (New)
-                const callText = `عميل يطلب مساعدتك في متجر هَوَسي. السبب: ${args.reason || 'غير محدد'}`;
-                await notificationService.sendTelegramCall(callText);
+                // 1. Trigger REAL Telegram Call (High Priority)
+                try {
+                    const callText = `عميل يطلب مساعدتك في متجر هَوَسي. السبب: ${args.reason || 'غير محدد'}`;
+                    await notificationService.sendTelegramCall(callText);
+                } catch (e) { console.error('Telegram Call Warning:', e.message); }
 
-                // 3. Send Telegram Text with session info
-                const textMsg = `🚨 *طلب دعم بشري جديد!*\n\n📍 الجلسة: \`${sessionId}\`\n❓ السبب: ${args.reason || 'غير محدد'}\n\nيرجى الدخول للوحة التحكم للرد.`;
-                await notificationService.sendTelegramText(textMsg);
+                // 2. Send Telegram Text with session info
+                try {
+                    const textMsg = `🚨 *طلب دعم بشري جديد!*\n\n📍 الجلسة: \`${sessionId}\`\n❓ السبب: ${args.reason || 'غير محدد'}\n\nيرجى الدخول للوحة التحكم للرد.`;
+                    await notificationService.sendTelegramText(textMsg);
+                } catch (e) { console.error('Telegram Text Warning:', e.message); }
+
+                // 3. Notify via Email (Fallback/Record)
+                try {
+                    await emailService.sendHumanAgentRequestNotification(sessionId, args.reason);
+                } catch (e) { console.error('Email Notification Warning:', e.message); }
                     
-                return { message: "تم إرسال تنبيه بالمكالمة الهاتفية للإدارة وجاري تحويلك." };
+                return { message: "جاري طلب مكالمة هاتفية للإدارة وتحويلك للدعم الفني." };
             }
 
         } catch (err) {

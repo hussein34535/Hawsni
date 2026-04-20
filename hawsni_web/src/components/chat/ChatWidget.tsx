@@ -338,13 +338,6 @@ export default function ChatWidget() {
   
               {/* Input Footer */}
               <div className="p-4 bg-white border-t border-gray-100 flex gap-3">
-                <button
-                  onClick={sendMessage}
-                  disabled={isLoading || !input.trim()}
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoading || !input.trim() ? 'bg-gray-100 text-gray-300' : 'bg-[#0E4435] text-white shadow-lg shadow-emerald-950/20 active:scale-90 hover:scale-105'}`}
-                >
-                  <Send size={18} className={isRTL ? 'rotate-0' : ''} />
-                </button>
                 <input
                   ref={inputRef}
                   type="text"
@@ -356,6 +349,13 @@ export default function ChatWidget() {
                   className="flex-1 bg-gray-50 border-none rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-2 focus:ring-[#0E4435] transition-all outline-none text-right"
                   dir="rtl"
                 />
+                <button
+                  onClick={sendMessage}
+                  disabled={isLoading || !input.trim()}
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isLoading || !input.trim() ? 'bg-gray-100 text-gray-300' : 'bg-[#0E4435] text-white shadow-lg shadow-emerald-950/20 active:scale-90 hover:scale-105'}`}
+                >
+                  <Send size={18} className={isRTL ? 'rotate-0' : ''} />
+                </button>
               </div>
             </motion.div>
           )}
