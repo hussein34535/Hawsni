@@ -111,7 +111,6 @@ export default function CheckoutPage() {
         };
         fetchData();
 
-        });
     }, []);
 
     // Fetch Bosta Cities
