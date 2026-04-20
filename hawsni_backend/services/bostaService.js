@@ -8,6 +8,23 @@ const BOSTA_V2_URL = 'https://api.bosta.co/api/v2';
 const BOSTA_API_KEY = process.env.BOSTA_API_KEY;
 const BOSTA_BASE_URL = 'https://api.bosta.co/api/v0';
 
+// Bosta Status Mapping: ID -> Arabic Status Text
+const BOSTA_STATUS_MAP = {
+    10: 'تم استلام طلب الشحن (بانتظار المندوب)',
+    21: 'تم استلام الشحنة من المتجر',
+    30: 'الشحنة في الطريق للمستودع',
+    41: 'في الطريق للمستودع الرئيسي',
+    42: 'الشحنة وصلت المستودع',
+    43: 'الشحنة في الطريق للتوصيل لمحافظتك',
+    44: 'الشحنة في عهدة مندوب التوصيل الآن',
+    45: 'تم التسليم بنجاح ✅',
+    46: 'قيد المرتجع (جارٍ الإرجاع للمحل)',
+    47: 'مشكلة في التوصيل (يرجى مراجعة الموقع)',
+    48: 'في انتظار رد من العميل',
+    49: 'تم إلغاء الشحنة ❌',
+    50: 'تم الإرجاع للمحل بنجاح'
+};
+
 // Bosta City Map: Arabic/English names -> { _id, name }
 // Source: GET /api/v0/cities + manual Arabic aliases from Hawsni addresses
 const BOSTA_CITIES_MAP = {
@@ -149,6 +166,59 @@ class BostaService {
     }
 
     /**
+     * Get a clean list of all Governorates (Cities) for dropdowns
+     */
+    async getFormattedCities() {
+        const data = await this.getBostaDistricts();
+        if (!data) return [];
+        return data.map(city => ({
+            id: city.cityId || city._id,
+            name: city.cityName,
+            arabicName: city.cityOtherName || city.cityName
+        })).sort((a, b) => a.arabicName.localeCompare(b.arabicName, 'ar'));
+    }
+
+    /**
+     * Get districts for a specific city ID
+     */
+    async getDistrictsByCity(cityId) {
+        const data = await this.getBostaDistricts();
+        if (!data) return [];
+        const city = data.find(c => (c.cityId || c._id) === cityId);
+        if (!city || !city.districts) return [];
+        
+        return city.districts.map(d => ({
+            id: d.districtId || d.zoneId || d._id,
+            name: d.districtName || d.zoneName,
+            arabicName: d.districtOtherName || d.zoneOtherName || d.districtName
+        })).sort((a, b) => a.arabicName.localeCompare(b.arabicName, 'ar'));
+    }
+
+    /**
+     * Get real-time status and lifecycle of a delivery
+     */
+    async getDeliveryDetails(trackingNumber) {
+        try {
+            console.log(`[Bosta] Fetching details for Tracking # ${trackingNumber}...`);
+            const response = await fetch(`${BOSTA_V2_URL}/deliveries/business/${trackingNumber}`, {
+                headers: { 'Authorization': BOSTA_API_KEY }
+            });
+            const result = await response.json();
+            
+            if (response.ok && result) {
+                // Add human readable status
+                const statusCode = result.state?.code || result.status;
+                result.arabicStatus = BOSTA_STATUS_MAP[statusCode] || 'حالة غير معروفة';
+                return result;
+            }
+            return null;
+        } catch (error) {
+            console.error('[Bosta] Error tracking delivery:', error.message);
+            return null;
+        }
+    }
+
+    /**
      * Find the best matching Bosta ID for a given city and area name
      */
     async matchAddress(cityName, areaName) {
@@ -267,26 +337,44 @@ class BostaService {
             // --- AI Parsing & Dynamic Matching Logic ---
             let bostaCity = { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' }; // Default
             let bostaZone = null;
-            let zoneFromStaticMap = false;
 
             try {
-                // نجيب القائمة الحقيقية من بوسطة أولاً
-                const districts = await this.getBostaDistricts();
+                // ⭐ PRIORITY 1: Check for explicit Bosta IDs from Cascaded Dropdowns
+                if (shippingAddress.districtId) {
+                    const districtsData = await this.getBostaDistricts();
+                    if (districtsData) {
+                        for (const c of districtsData) {
+                            const d = (c.districts || []).find(dist => (dist.districtId || dist.zoneId || dist._id) === shippingAddress.districtId);
+                            if (d) {
+                                bostaCity = { _id: c.cityId || c._id, name: c.cityName };
+                                bostaZone = { _id: d.districtId || d.zoneId || d._id, name: d.districtName || d.zoneName };
+                                console.log(`[Bosta] Precise ID Match: ${bostaCity.name} -> ${bostaZone.name}`);
+                                break;
+                            }
+                        }
+                    }
+                }
 
-                // نمرر القائمة للـ AI عشان يختار منها مباشرة
-                const fullAddressString = `${address}, ${area ? area + ', ' : ''}${city}`;
-                const aiResult = await aiService.parseAddress(fullAddressString, districts);
+                // ⭐ PRIORITY 2: If no explicit IDs, use AI to parse and match
+                if (!bostaZone) {
+                    // نجيب القائمة الحقيقية من بوسطة أولاً
+                    const districts = await this.getBostaDistricts();
 
-                const finalCityName = aiResult?.city || city;
-                const finalAreaName = aiResult?.zone || area;
+                    // نمرر القائمة للـ AI عشان يختار منها مباشرة
+                    const fullAddressString = `${address}, ${area ? area + ', ' : ''}${city}`;
+                    const aiResult = await aiService.parseAddress(fullAddressString, districts);
 
-                if (finalCityName) {
-                    console.log(`[Bosta-AI] Matching: City=${finalCityName}, Zone=${finalAreaName || 'None'}`);
-                    const match = await this.matchAddress(finalCityName, finalAreaName);
-                    if (match) {
-                        bostaCity = match.city;
-                        bostaZone = match.zone;
-                        console.log(`[Bosta-AI] Match Success: ${bostaCity.name} -> ${bostaZone?.name || 'No Zone'}`);
+                    const finalCityName = aiResult?.city || city;
+                    const finalAreaName = aiResult?.zone || area;
+
+                    if (finalCityName) {
+                        console.log(`[Bosta-AI] Matching: City=${finalCityName}, Zone=${finalAreaName || 'None'}`);
+                        const match = await this.matchAddress(finalCityName, finalAreaName);
+                        if (match) {
+                            bostaCity = match.city;
+                            bostaZone = match.zone;
+                            console.log(`[Bosta-AI] Match Success: ${bostaCity.name} -> ${bostaZone?.name || 'No Zone'}`);
+                        }
                     }
                 }
             } catch (aiError) {
@@ -397,10 +485,15 @@ class BostaService {
                 dropOffAddress: {
                     city: { _id: bostaCity._id || bostaCity.cityId, name: bostaCity.name },
                     cityId: bostaCity._id || bostaCity.cityId,
-                    ...(bostaZone && (bostaZone.districtId || bostaZone._id) ? {
-                        districtId: bostaZone.districtId || bostaZone._id
+                    // Priority: Explicit districtId from input > matched bostaZone
+                    ...(shippingAddress.districtId || (bostaZone && (bostaZone.districtId || bostaZone._id)) ? {
+                        districtId: shippingAddress.districtId || bostaZone.districtId || bostaZone._id
                     } : {}),
                     firstLine: `${address} ${bostaZone ? '- ' + (bostaZone.name || bostaZone.districtName || bostaZone.zoneName || '') : ''} - ${bostaCity.name}`.replace(/\s+/g, ' '),
+                    // Detailed address fields for Bosta internal mapping
+                    ...(shippingAddress.buildingNumber ? { buildingNumber: String(shippingAddress.buildingNumber) } : {}),
+                    ...(shippingAddress.floor ? { floor: String(shippingAddress.floor) } : {}),
+                    ...(shippingAddress.apartment ? { apartment: String(shippingAddress.apartment) } : {}),
                 }
             };
 
@@ -416,20 +509,26 @@ class BostaService {
             });
 
             const data = await response.json();
+            console.log('[Bosta] API Response Status:', response.status);
+            console.log('[Bosta] Full Response Data:', JSON.stringify(data, null, 2));
 
             if (!response.ok) {
                 console.error('[Bosta] Error response:', data);
                 throw new Error(data.message || 'Failed to create Bosta shipment');
             }
 
-            console.log(`[Bosta] Successfully created shipment: Tracking # ${data.trackingNumber}`);
+            // Extract tracking info (Bosta v2 might return it top-level or inside a data object)
+            const trackingNumber = data.trackingNumber || (data.data && data.data.trackingNumber);
+            const bostaId = data._id || data.id || (data.data && (data.data._id || data.data.id));
+
+            console.log(`[Bosta] Successfully created shipment: Tracking # ${trackingNumber}`);
 
             // Save tracking number and bosta_id in our database
             const { error: updateError } = await supabase
                 .from('orders')
                 .update({
-                    tracking_number: data.trackingNumber,
-                    bosta_id: data._id
+                    tracking_number: trackingNumber,
+                    bosta_id: bostaId
                 })
                 .eq('id', orderData.id);
 
