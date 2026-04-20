@@ -95,12 +95,13 @@ class ChatController {
                 .select().single();
             if (insertErr) throw insertErr;
 
-            // 2. If status is human_active or human_requested, do NOT let AI answer
-            if (session.status === 'human_active' || session.status === 'human_requested') {
+            // 2. If status is human_active or closed, bot is silenced.
+            if (session.status === 'human_active' || session.status === 'closed') {
+                console.log(`[Chat] 🤖 Bot is silenced for session ${sessionId} (Status: ${session.status})`);
                 return res.status(200).json({
                     success: true,
                     botSkipped: true,
-                    reply: '', // Handled by realtime on client
+                    reply: '', // Handled by manual intervention
                 });
             }
 
