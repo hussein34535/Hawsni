@@ -19,11 +19,13 @@ class ChatController {
                 .eq('session_id', sessionId)
                 .single();
 
+            const now = new Date();
+
             // Create if it doesn't exist
             if (sessionErr || !session) {
                 const { data: newSession, error: insertErr } = await supabase
                     .from('chat_sessions')
-                    .insert([{ session_id: sessionId, status: 'bot_active' }])
+                    .insert([{ session_id: sessionId, status: 'bot_active', last_active_at: now.toISOString() }])
                     .select().single();
                 
                 if (insertErr) throw insertErr;
@@ -38,9 +40,55 @@ class ChatController {
                 // Notify Admin about new chat session
                 const notificationService = require('../../services/notificationService');
                 notificationService.sendTelegramText(`✨ *عميل جديد بدأ الشات!* \n📍 الجلسة: \`${sessionId}\``);
+            } else {
+                // SESSION EXISTS: Check Expiry (24 hours)
+                const lastActive = new Date(session.last_active_at || session.created_at);
+                const diffHours = (now.getTime() - lastActive.getTime()) / (1000 * 3600);
+
+                if (diffHours >= 24) {
+                    console.log(`[Chat] ⏳ Session ${sessionId} expired (${diffHours.toFixed(1)}h). Summarizing...`);
+                    
+                    // 1. Fetch current messages for summary
+                    const { data: oldMsgs } = await supabase
+                        .from('chat_messages')
+                        .select('*')
+                        .eq('session_id', sessionId)
+                        .order('created_at', { ascending: true });
+
+                    if (oldMsgs && oldMsgs.length > 5) {
+                        const formattedHistory = oldMsgs.map(m => ({
+                            role: m.sender_type === 'user' ? 'user' : 'model',
+                            parts: [{ text: m.content }]
+                        }));
+                        const newSummary = await aiChatbotService.summarizeChat(formattedHistory);
+                        
+                        // 2. Update session with summary and reset status
+                        await supabase.from('chat_sessions')
+                            .update({ 
+                                summary: newSummary, 
+                                last_active_at: now.toISOString(),
+                                status: 'bot_active' 
+                            })
+                            .eq('session_id', sessionId);
+                        
+                        // 3. Clear old messages to save space
+                        await supabase.from('chat_messages').delete().eq('session_id', sessionId);
+
+                        // 4. Send fresh greeting
+                        const greetingStr = 'أهلاً بك مجدداً في هَوَسي ✨\nكيف يمكنني مساعدتك اليوم؟';
+                        await supabase.from('chat_messages').insert([
+                            { session_id: sessionId, sender_type: 'bot', content: greetingStr }
+                        ]);
+                    } else {
+                        // Just update time if not enough history to summarize
+                        await supabase.from('chat_sessions')
+                            .update({ last_active_at: now.toISOString() })
+                            .eq('session_id', sessionId);
+                    }
+                }
             }
 
-            // Fetch all messages
+            // Fetch all current messages
             const { data: messages, error: msgsErr } = await supabase
                 .from('chat_messages')
                 .select('*')
@@ -105,32 +153,27 @@ class ChatController {
                 });
             }
 
-            // 3. Status is bot_active. Compile history from DB
-            const { data: messages } = await supabase
+            // 3. Get AI Response
+            const { data: history } = await supabase
                 .from('chat_messages')
                 .select('*')
                 .eq('session_id', sessionId)
-                .order('created_at', { ascending: true });
+                .order('created_at', { ascending: true })
+                .limit(20);
 
-            // Format for Gemini format
-            const formattedHistory = (messages || []).map(m => ({
+            const formattedHistory = history?.map(m => ({
                 role: m.sender_type === 'user' ? 'user' : 'model',
                 parts: [{ text: m.content }]
-            })).filter(m => m.parts[0].text); // skip empty
+            }));
 
-            // Remove the latest user message from history because we pass it directly
-            formattedHistory.pop();
+            // Pass the summary from session for persistent context
+            const aiResponse = await aiChatbotService.handleChat(message, formattedHistory || [], sessionId, session.summary);
 
-            // CRITICAL FIX: Gemini/Gemma history must start with a 'user' message.
-            // If the first message is from the 'model' (like our bot greeting), we must remove it.
-            while (formattedHistory.length > 0 && formattedHistory[0].role === 'model') {
-                formattedHistory.shift();
-            }
+            // 4. Update last_active_at and Insert AI response
+            await supabase.from('chat_sessions')
+                .update({ last_active_at: new Date().toISOString() })
+                .eq('session_id', sessionId);
 
-            // Call the AI Service
-            const aiResponse = await aiChatbotService.handleChat(message, formattedHistory || [], sessionId); // Pass sessionId for advanced tools
-
-            // Insert AI response to DB
             if (aiResponse && aiResponse.reply) {
                 await supabase.from('chat_messages').insert([
                      { session_id: sessionId, sender_type: 'bot', content: aiResponse.reply }
@@ -149,6 +192,54 @@ class ChatController {
                 { session_id: req.body?.sessionId, sender_type: 'bot', content: 'حدث خطأ، يرجى المحاولة لاحقاً.' }
             ]);
             return res.status(500).json({ success: false, error: 'حدث خطأ غير متوقع' });
+        }
+    /**
+     * POST /api/chat/reset
+     * Request body: { sessionId: "string" }
+     */
+    async resetSession(req, res) {
+        try {
+            const { sessionId } = req.body;
+            if (!sessionId) return res.status(400).json({ success: false, error: 'Session ID required' });
+
+            // 1. Fetch messages for summary
+            const { data: oldMsgs } = await supabase
+                .from('chat_messages')
+                .select('*')
+                .eq('session_id', sessionId)
+                .order('created_at', { ascending: true });
+
+            let newSummary = "";
+            if (oldMsgs && oldMsgs.length > 3) {
+                const formattedHistory = oldMsgs.map(m => ({
+                    role: m.sender_type === 'user' ? 'user' : 'model',
+                    parts: [{ text: m.content }]
+                }));
+                newSummary = await aiChatbotService.summarizeChat(formattedHistory);
+            }
+
+            // 2. Update session with summary and reset activity
+            await supabase.from('chat_sessions')
+                .update({ 
+                    summary: newSummary, 
+                    last_active_at: new Date().toISOString(),
+                    status: 'bot_active' 
+                })
+                .eq('session_id', sessionId);
+            
+            // 3. Clear old messages
+            await supabase.from('chat_messages').delete().eq('session_id', sessionId);
+
+            // 4. Send fresh greeting
+            const greetingStr = 'تمت إعادة تعيين الدردشة بنجاح. كيف يمكنني مساعدتك اليوم؟';
+            await supabase.from('chat_messages').insert([
+                { session_id: sessionId, sender_type: 'bot', content: greetingStr }
+            ]);
+
+            return res.status(200).json({ success: true, message: 'Chat reset successful' });
+        } catch (error) {
+            console.error('[ChatController resetSession] Error:', error);
+            return res.status(500).json({ success: false, error: 'حدث خطأ أثناء إعادة التعيين' });
         }
     }
 }

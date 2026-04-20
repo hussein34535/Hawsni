@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Sparkles, Settings, RotateCcw } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 // Environment variables
@@ -36,6 +36,7 @@ export default function ChatWidget() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   
+   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const pathname = usePathname();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -136,8 +137,33 @@ export default function ChatWidget() {
 
     // Focus input when chat opens
     useEffect(() => {
-      if (isOpen) setTimeout(() => inputRef.current?.focus(), 200);
+      if (isOpen) {
+        setTimeout(() => inputRef.current?.focus(), 200);
+        setIsSettingsOpen(false); // Close settings when chat opens
+      }
     }, [isOpen]);
+
+    const handleReset = async () => {
+      if (!sessionId) return;
+      if (!window.confirm(isRTL ? 'هل أنت متأكد من رغبتك في إعادة تعيين الدردشة؟' : 'Are you sure you want to reset the chat?')) return;
+      
+      setIsLoading(true);
+      setIsSettingsOpen(false);
+      try {
+        const res = await fetch(`${API_URL}/chat/reset`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        });
+        if (res.ok) {
+          fetchSessionData(sessionId);
+        }
+      } catch (e) {
+        console.error('Reset failed', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
     // 3. Send Message Handler
     const sendMessage = useCallback(async () => {
@@ -277,14 +303,43 @@ export default function ChatWidget() {
               className="hwsni-chat-window"
             >
               {/* Header - Swapped X and Name as requested */}
-              <div className="bg-[#0E4435] px-6 py-5 flex items-center justify-between flex-shrink-0">
-                <button 
-                  onClick={() => setIsOpen(false)} 
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors text-white"
-                  aria-label="Close"
-                >
-                  <X size={20} />
-                </button>
+              <div className="bg-[#0E4435] px-6 py-5 flex items-center justify-between flex-shrink-0 relative">
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={() => setIsOpen(false)} 
+                    className="p-2 hover:bg-white/10 rounded-full transition-colors text-white"
+                    aria-label="Close"
+                  >
+                    <X size={20} />
+                  </button>
+                  <button 
+                    onClick={() => setIsSettingsOpen(!isSettingsOpen)} 
+                    className={`p-2 hover:bg-white/10 rounded-full transition-colors ${isSettingsOpen ? 'bg-white/20 text-white' : 'text-white/70'}`}
+                    aria-label="Settings"
+                  >
+                    <Settings size={18} />
+                  </button>
+                </div>
+
+                <AnimatePresence>
+                  {isSettingsOpen && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute top-16 left-6 z-50 bg-white shadow-xl rounded-2xl p-2 border border-black/5 min-w-[160px]"
+                    >
+                      <button 
+                        onClick={handleReset}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition-colors text-left"
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                      >
+                        <RotateCcw size={16} />
+                        <span>{isRTL ? 'إعادة تعيين الشات' : 'Reset Chat'}</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 <div className="flex items-center gap-3 text-right">
                   <div className="text-right">
                     <h3 className="text-white font-black text-sm">{isRTL ? 'فريق هَوَسي' : 'Hawsni Support'}</h3>

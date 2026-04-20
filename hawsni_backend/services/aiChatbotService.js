@@ -102,11 +102,18 @@ const FORMAT_SYSTEM = `
 1. يجب أن ترد دائماً بـ JSON object يحتوي مفتاح "reply" فقط.
 2. لا تكتب أي شيء خارج كائن الـ JSON. 
 3. الرد داخل "reply" يجب أن يكون بالعربية النظيفة، راقياً، مختصراً، ومباشراً.
-4. إذا تم توفير بيانات من النظام، اعرضها بوضوح للعميل.
-5. لا تفصح أبداً عن بيانات شخصية كاملة للعملاء.
+4. إذا لم يذكر العميل اسمه في المحادثة الحالية (أو الملخص)، اطلب منه اسمه بلطف في أول فرصة "لتنظيم الخدمة".
+5. إذا تم توفير بيانات من النظام، اعرضها بوضوح للعميل.
+6. لا تفصح أبداً عن بيانات شخصية كاملة للعملاء.
 
 مثال للرد الصحيح:
-{"reply": "وعليكم السلام، أهلاً بك في hwasi. كيف يمكنني مساعدتك اليوم؟"}
+{"reply": "وعليكم السلام، أهلاً بك في hwasi. ممكن أتشرف بحضرتك؟ وكيف يمكنني مساعدتك اليوم؟"}
+`.trim();
+
+// الموديل الثالث: الملخص (يختصر المحادثة)
+const SUMMARIZER_SYSTEM = `
+أنت خبير في تلخيص محادثات العملاء لمتجر أزياء. 
+مهمتك: استخراج أهم البيانات (اسم العميل، المنتجات التي أعجبته، مقاساته، ذوقه) في سطرين فقط لمساعدة البوت في المرة القادمة.
 `.trim();
 
 // ─────────────────────────────────────────────
@@ -342,8 +349,26 @@ class AIChatbotService {
         return { error: 'أداة غير معروفة.' };
     }
 
+    // ── AI Summarization ───────────────────────
+    async summarizeChat(history = []) {
+        if (!history.length) return "";
+        try {
+            const instance = this._getInstance();
+            const model = instance.getGenerativeModel({ 
+                model: FORMATTER_MODEL, 
+                systemInstruction: SUMMARIZER_SYSTEM 
+            });
+            const textHistory = history.map(h => `${h.role}: ${h.parts[0].text}`).join('\n');
+            const result = await model.generateContent(`لخص البيانات التالية للعميل:\n${textHistory}`);
+            return result.response.text().trim();
+        } catch (err) {
+            console.error('[AI Bot] Summarization Error:', err);
+            return "";
+        }
+    }
+
     // ── Main entry ─────────────────────────────
-    async handleChat(userMessage, history = [], sessionId = null) {
+    async handleChat(userMessage, history = [], sessionId = null, summary = null) {
         const instance = this._getInstance();
         console.log(`[AI Bot] 💬 User: ${userMessage}`);
 
