@@ -161,10 +161,16 @@ class ChatController {
                 .order('created_at', { ascending: true })
                 .limit(20);
 
-            const formattedHistory = history?.map(m => ({
+            const formattedHistory = (history || []).map(m => ({
                 role: m.sender_type === 'user' ? 'user' : 'model',
                 parts: [{ text: m.content }]
-            }));
+            })).filter(m => m.parts[0].text); // skip empty
+
+            // CRITICAL FIX: Google AI requires history to start with a 'user' message.
+            // Since our first message is usually a bot greeting, we must remove leading model messages.
+            while (formattedHistory.length > 0 && formattedHistory[0].role === 'model') {
+                formattedHistory.shift();
+            }
 
             // Pass the summary from session for persistent context
             const aiResponse = await aiChatbotService.handleChat(message, formattedHistory || [], sessionId, session.summary);
