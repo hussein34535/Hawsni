@@ -184,18 +184,19 @@ app.get('/track-order', async (req, res) => {
 // SEO Routes (served at root)
 app.use('/', seoRoutes);
 
-// Make CSRF token available to all EJS templates
-app.use((req, res, next) => {
-    // Only generate/pass CSRF token for routes expecting HTML
-    if (req.csrfToken) {
+// CSRF Token Injector Middleware
+const injectCsrfToken = (req, res, next) => {
+    if (typeof req.csrfToken === 'function') {
         res.locals.csrfToken = req.csrfToken();
+    } else {
+        res.locals.csrfToken = ''; // Fallback for routes without CSRF
     }
     next();
-});
+};
 
-// Admin / Dashboard Routes - Apply Protection Globally at Mount
-app.use('/api/admin', adminProtect, csrfProtection, adminRoutes);
-app.use('/', csrfProtection, adminRoutes); // adminProtect is also inside adminRoutes.js, but this is a double layer
+// Admin / Dashboard Routes - Apply Protection and Injection
+app.use('/api/admin', adminProtect, csrfProtection, injectCsrfToken, adminRoutes);
+app.use('/', csrfProtection, injectCsrfToken, adminRoutes);
 
 // Root redirect
 app.get('/', (req, res) => {
