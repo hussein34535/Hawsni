@@ -1,0 +1,26 @@
+<div class="card" style="text-align: center; padding: 4rem 2rem; max-width: 600px; margin: 4rem auto;">
+    <div style="font-size: 5rem; margin-bottom: 1.5rem;">⚠️</div>
+    <h1 style="color: #e74c3c; margin-bottom: 1rem;">عفواً، حدث خطأ ما</h1>
+    
+    <div style="background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <p style="font-size: 1.1rem; color: #742a2a; font-weight: 500;">
+            <%= message %>
+        </p>
+        <% if (typeof error !== 'undefined' && error.status) { %>
+            <p style="margin-top: 0.5rem; color: #a94442; font-size: 0.9rem;">
+                كود الخطأ: <%= error.status %>
+            </p>
+        <% } %>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="/dashboard" class="btn btn-primary btn-lg">العودة للوحة التحكم</a>
+        <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg">الرجوع للخلف</button>
+    </div>
+
+    <% if (process.env.NODE_ENV === 'development' && typeof error !== 'undefined' && error.stack) { %>
+        <div style="margin-top: 3rem; text-align: left; background: #2d3436; color: #dfe6e9; padding: 1rem; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.8rem;">
+            <pre><%= error.stack %></pre>
+        </div>
+    <% } %>
+</div>

@@ -204,10 +204,34 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
+  const status = err.status || 500;
+  const message = err.message || 'Server Error';
+
+  console.error(`[${new Date().toISOString()}] Error ${status}: ${message}`);
+  if (process.env.NODE_ENV !== 'production') {
+      console.error(err.stack);
+  }
+
+  // Check if request expects HTML (browser/Admin UI)
+  const isHtmlRequest = req.headers.accept && req.headers.accept.includes('text/html');
+
+  if (isHtmlRequest) {
+    try {
+      return res.status(status).render('error', {
+        message: message,
+        error: process.env.NODE_ENV === 'development' ? err : { status }
+      });
+    } catch (renderError) {
+      // Last resort if rendering fails
+      return res.status(status).send(`<h1>Error ${status}</h1><p>${message}</p>`);
+    }
+  }
+
+  // Default to JSON response for API or other requests
+  res.status(status).json({
     success: false,
-    message: err.message || 'Server Error'
+    message: message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 
