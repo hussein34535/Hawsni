@@ -47,9 +47,11 @@ class AdminAuthController {
             }
 
             // 3. Set Cookies (Access Token + Refresh Token)
+            const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
             const cookieOptions = {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: isSecure,
+                sameSite: isSecure ? 'None' : 'Lax',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             };
 

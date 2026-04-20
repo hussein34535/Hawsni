@@ -27,8 +27,6 @@ exports.adminProtect = async (req, res, next) => {
         if (authError || !authUser) {
             const refreshToken = req.cookies?.admin_refresh_token;
             if (refreshToken) {
-                // IMPORTANT: Use supabaseAuth (Anon client) here, NOT the service role supabase client,
-                // otherwise it mutates the global singleton in this Node instance and breaks RLS bypass!
                 const { supabaseAuth } = require('../config/supabase');
                 const { data: refreshData, error: refreshError } = await supabaseAuth.auth.setSession({
                     access_token: token || '',
@@ -36,11 +34,12 @@ exports.adminProtect = async (req, res, next) => {
                 });
 
                 if (!refreshError && refreshData.session) {
-                    // Update cookies with new tokens
+                    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
                     const cookieOptions = {
                         httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production',
-                        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+                        secure: isSecure,
+                        sameSite: isSecure ? 'None' : 'Lax',
+                        maxAge: 7 * 24 * 60 * 60 * 1000
                     };
                     res.cookie('admin_token', refreshData.session.access_token, cookieOptions);
                     res.cookie('admin_refresh_token', refreshData.session.refresh_token, cookieOptions);
