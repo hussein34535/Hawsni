@@ -6,15 +6,14 @@ const supabase = require('../../config/supabase');
 class ProductController {
     async getProducts(req, res) {
         try {
-            const { category, search, minPrice, maxPrice, sort, featured } = req.query;
+            const { category, search, minPrice, maxPrice, sort, featured, page, limit } = req.query;
             const filters = { category, search, minPrice, maxPrice, is_featured: featured };
 
-            const products = await ProductService.getAllProducts(filters, sort);
+            const result = await ProductService.getAllProducts(filters, sort, page, limit);
 
             res.json({
                 success: true,
-                count: products.length,
-                products: products
+                ...result
             });
         } catch (error) {
             console.error('Error fetching products:', error);

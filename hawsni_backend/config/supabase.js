@@ -8,12 +8,13 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Missing Supabase credentials in .env file');
-  console.error('Please add SUPABASE_URL and SUPABASE_ANON_KEY');
+  const errorMsg = '❌ CRITICAL ERROR: Missing Supabase credentials in .env file. Application cannot start.';
+  console.error(errorMsg);
+  throw new Error(errorMsg);
 }
 
-// Service Role client — for admin ops (bypasses RLS, updateUserById, etc.)
-const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseKey, {
+// Anon Key client — for general use (enforces RLS)
+const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
@@ -23,8 +24,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey || supabaseKey, {
   },
 });
 
-// Anon Key client — for user authentication (signInWithPassword)
-const supabaseAuth = createClient(supabaseUrl, supabaseKey, {
+// Service Role client — for admin/backend-only operations (bypasses RLS)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey || supabaseKey, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
@@ -35,4 +36,5 @@ const supabaseAuth = createClient(supabaseUrl, supabaseKey, {
 });
 
 module.exports = supabase;
-module.exports.supabaseAuth = supabaseAuth;
+module.exports.supabaseAdmin = supabaseAdmin;
+module.exports.supabaseAuth = supabase; // Maintaining backward compat with some files

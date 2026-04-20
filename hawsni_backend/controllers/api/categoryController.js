@@ -1,4 +1,4 @@
-const supabase = require('../../config/supabase');
+const { supabaseAdmin: supabase } = require('../../config/supabase');
 const uploadToSupabase = require('../../utils/fileUpload');
 const CategoryService = require('../../services/categoryService');
 

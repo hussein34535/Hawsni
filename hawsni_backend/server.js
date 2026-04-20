@@ -47,46 +47,72 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disabled for SSR/EJS compatibility, can be tuned later
 }));
 
-// Rate limiting
-const limiter = rateLimit({
+// Rate limiting configurations
+const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  max: 50, // Strict limit for auth/sensitive actions
   standardHeaders: true,
   legacyHeaders: false,
-  message: { success: false, message: 'Too many requests, please try again later.' }
+  message: { success: false, message: 'Too many attempts, please try again after 15 minutes.' }
 });
 
-// Apply rate limiter to all api routes
-app.use('/api/', limiter);
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // Balanced limit for general browsing
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests, please slow down.' }
+});
+
+// Apply rate limiters selectively
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/orders', authLimiter); // Protect checkout/order creation
+app.use('/api/', generalLimiter); // Apply general limit to all other API routes
 
 // View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
+// Middleware
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001',
-    'http://127.0.0.1:3002',
-    'https://hwasibackend.vercel.app',
-    'https://hawsni.com',
-    'https://www.hawsni.com',
-    'https://hwasi.com',
-    'https://www.hwasi.com'
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3002',
+      'https://hwasibackend.vercel.app',
+      'https://hawsni.com',
+      'https://www.hawsni.com',
+      'https://hwasi.com',
+      'https://www.hwasi.com'
+    ].filter(Boolean);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 };
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '4mb' }));
 app.use(express.urlencoded({ extended: true, limit: '4mb' }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Import admin storage protection
+const { adminProtect } = require('./middleware/adminAuth');
 
 // General API Routes
 app.use('/api/auth', authRoutes);
@@ -135,9 +161,9 @@ app.get('/track-order', async (req, res) => {
 // SEO Routes (served at root)
 app.use('/', seoRoutes);
 
-// Admin / Dashboard Routes
-app.use('/api/admin', adminRoutes);
-app.use('/', adminRoutes);
+// Admin / Dashboard Routes - Apply Protection Globally at Mount
+app.use('/api/admin', adminProtect, adminRoutes);
+app.use('/', adminRoutes); // adminProtect is also inside adminRoutes.js, but this is a double layer
 
 // Root redirect
 app.get('/', (req, res) => {

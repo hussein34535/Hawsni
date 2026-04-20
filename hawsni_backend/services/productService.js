@@ -1,14 +1,18 @@
 const supabase = require('../config/supabase');
 
 class ProductService {
-    async getAllProducts(filters = {}, sort = null) {
+    async getAllProducts(filters = {}, sort = null, page = 1, limit = 20) {
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 20;
+        const from = (pageNum - 1) * limitNum;
+        const to = from + limitNum - 1;
+
         let query = supabase
             .from('products')
-            .select('*, product_category_links(category_id, categories(name))')
+            .select('*, product_category_links(category_id, categories(name))', { count: 'exact' })
             .eq('is_active', true);
 
         if (filters.category) {
-            // Find products linked to this category in the join table
             const { data: linkedProducts, error: linkError } = await supabase
                 .from('product_category_links')
                 .select('product_id')
@@ -40,13 +44,14 @@ class ProductService {
         } else if (sort === 'price_desc') {
             query = query.order('price', { ascending: false });
         } else {
-            // Default sort: Newest first
             query = query.order('created_at', { ascending: false });
         }
 
-        const { data, error } = await query;
+        // Apply range for pagination
+        const { data, error, count } = await query.range(from, to);
+        
         if (error) throw error;
-        return data;
+        return { products: data, total: count, page: pageNum, limit: limitNum };
     }
 
     async getFeaturedProducts(limit = 10) {

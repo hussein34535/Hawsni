@@ -1,11 +1,17 @@
-const supabase = require('../../config/supabase');
+const { supabaseAdmin: supabase } = require('../../config/supabase');
 const emailService = require('../../services/emailService');
 
 class OrdersController {
-    // List all orders - single query with join (no N+1 problem)
+    // List all orders - with pagination
     async index(req, res) {
         try {
-            const { data: orders, error: ordersError } = await supabase
+            const { page = 1, limit = 20 } = req.query;
+            const pageNum = parseInt(page) || 1;
+            const limitNum = parseInt(limit) || 20;
+            const from = (pageNum - 1) * limitNum;
+            const to = from + limitNum - 1;
+
+            const { data: orders, error: ordersError, count } = await supabase
                 .from('orders')
                 .select(`
                     *,
@@ -14,8 +20,9 @@ class OrdersController {
                         *,
                         products(id, name, images, price)
                     )
-                `)
-                .order('created_at', { ascending: false });
+                `, { count: 'exact' })
+                .order('created_at', { ascending: false })
+                .range(from, to);
 
             if (ordersError) throw ordersError;
 
@@ -37,7 +44,6 @@ class OrdersController {
                         order.product_name = firstProduct?.name || firstItem.name || 'منتج غير معروف';
                         order.items_count = items.length;
                         
-                        // Ensure all item prices are numbers
                         order.items = items.map(item => ({
                             ...item,
                             price: parseFloat(item.price || 0)
@@ -56,7 +62,15 @@ class OrdersController {
                 }
             });
 
-            res.render('orders', { orders: ordersWithProducts });
+            res.render('orders', { 
+                orders: ordersWithProducts,
+                pagination: {
+                    total: count,
+                    page: pageNum,
+                    limit: limitNum,
+                    totalPages: Math.ceil(count / limitNum)
+                }
+            });
         } catch (err) {
             console.error('Error fetching orders:', err);
             res.status(500).send('خطأ في تحميل الطلبات');
@@ -196,31 +210,17 @@ class OrdersController {
     async deleteOrder(req, res) {
         try {
             const { id } = req.params;
-            console.log(`Backend: Received request to delete order ${id}`);
-
-            // Delete order items first (or rely on Cascade)
-            console.log(`Backend: Deleting order items for order ${id}...`);
-            const { error: itemsError } = await supabase
-                .from('order_items')
-                .delete()
-                .eq('order_id', id);
-
-            if (itemsError) {
-                console.error(`Backend: Error deleting items for order ${id}:`, itemsError);
-                throw itemsError;
-            }
-            console.log(`Backend: Order items deleted successfully for order ${id}`);
-
-            // Delete order
             console.log(`Backend: Deleting order ${id}...`);
-            const { error: orderError } = await supabase
+
+            // Delete order (Order items will be deleted automatically via ON DELETE CASCADE)
+            const { error } = await supabase
                 .from('orders')
                 .delete()
                 .eq('id', id);
 
-            if (orderError) {
-                console.error(`Backend: Error deleting order ${id}:`, orderError);
-                throw orderError;
+            if (error) {
+                console.error(`Backend: Error deleting order ${id}:`, error);
+                throw error;
             }
 
             console.log(`Backend: Order ${id} deleted successfully`);
@@ -239,15 +239,7 @@ class OrdersController {
                 return res.status(400).json({ success: false, message: 'لا توجد طلبات محددة' });
             }
 
-            // Delete order items first
-            const { error: itemsError } = await supabase
-                .from('order_items')
-                .delete()
-                .in('order_id', ids);
-
-            if (itemsError) throw itemsError;
-
-            // Delete orders
+            // Delete orders (CASCADE will handle order_items)
             const { error: ordersError } = await supabase
                 .from('orders')
                 .delete()
@@ -318,7 +310,19 @@ class OrdersController {
             }
 
             const genAI = new GoogleGenerativeAI(selectedKey);
-            const model = genAI.getGenerativeModel({ model: 'gemma-4-31b-it' });
+            const model = genAI.getGenerativeModel({ 
+                model: 'gemini-1.5-flash',
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "object",
+                        properties: {
+                            html: { type: "string" }
+                        },
+                        required: ["html"]
+                    }
+                }
+            });
 
             const systemInstruction = `
 أنت مساعد ذكاء اصطناعي لمتجر إلكتروني يسمى Hawsni للفخامة والأزياء.
@@ -330,51 +334,24 @@ class OrdersController {
 3. استخدم تنسيق HTML البسيط (فقط <p> و <strong> و <ul> و <br>).
 4. استخدم عملة (ج.م) وليس (ريال) لأننا في مصر.
 
-يجب عليك إرجاع التنسيق كملف JSON فقط بدون أي نص آخر!
-مثال: {"html": "<p>رسالتك هنا...</p>"}
-
-النص المطلوب:
-"${prompt}"
+يجب أن تكون الاستجابة بصيغة JSON تحتوي على مفتاح "html" فقط.
+النص المطلوب: "${prompt}"
 `;
 
-            const result = await model.generateContent({
-                contents: [{ role: 'user', parts: [{ text: systemInstruction }] }],
-                generationConfig: {
-                    responseMimeType: "application/json"
-                }
-            });
-            
+            const result = await model.generateContent(systemInstruction);
             const responseText = result.response.text();
-            let finalHtml = responseText;
             
+            let finalHtml = '';
             try {
-                // Gemma sometimes ignores JSON bounds and outputs markdown and thoughts
-                let jsonStr = responseText;
-                
-                // Attempt to extract from markdown codeblock if present
-                const mdMatch = responseText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/i);
-                if (mdMatch && mdMatch[1]) {
-                    jsonStr = mdMatch[1];
-                } else {
-                    // Find first { to avoid leading "thinking" text
-                    const firstBracket = responseText.indexOf('{');
-                    if (firstBracket !== -1) {
-                         // Find first matching } (assuming simple flat object)
-                        const firstEndBracket = responseText.indexOf('}', firstBracket);
-                        if (firstEndBracket !== -1) {
-                            jsonStr = responseText.substring(firstBracket, firstEndBracket + 1);
-                        }
-                    }
-                }
-
-                const parsed = JSON.parse(jsonStr);
-                finalHtml = parsed.html || jsonStr;
+                const parsed = JSON.parse(responseText);
+                finalHtml = parsed.html || responseText;
             } catch (e) {
-                // Extreme fallback: simple regex to find HTML inside the response
-                const fallbackMatch = responseText.match(/<br>|<p>|<strong>/) ? responseText.substring(responseText.indexOf('<')) : responseText;
-                finalHtml = fallbackMatch;
-                console.error('Failed to parse AI JSON. Fallback used.');
+                console.error('Failed to parse AI JSON:', e);
+                // Last resort fallback
+                finalHtml = responseText.replace(/```json|```/g, '').trim();
             }
+
+            res.json({ success: true, generatedHtml: finalHtml });
 
             res.json({ success: true, generatedHtml: finalHtml });
 

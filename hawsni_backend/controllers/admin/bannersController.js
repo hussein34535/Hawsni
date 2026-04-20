@@ -1,4 +1,4 @@
-const supabase = require('../../config/supabase');
+const { supabaseAdmin: supabase } = require('../../config/supabase');
 const { uploadToSupabase } = require('../../utils/fileUpload');
 
 class BannersController {
@@ -34,14 +34,14 @@ class BannersController {
             } = req.body;
             let finalImageUrl = image_url;
 
-            // Priority 1: Direct Upload URL from Cloudinary
+            // Priority 1: Direct link provided from form
             if (req.body.banner_image_url && req.body.banner_image_url.trim()) {
                 finalImageUrl = req.body.banner_image_url.trim();
             }
-            // Priority 2: File upload via Multer (fallback - uploads to Cloudinary)
+            // Priority 2: File upload via Supabase Storage
             else if (req.file) {
                 const result = await uploadToSupabase(req.file, 'banners');
-                finalImageUrl = result.url;
+                finalImageUrl = result ? (result.url || result) : null;
             }
 
             // Validate we have an image URL
@@ -120,14 +120,14 @@ class BannersController {
             } = req.body;
             let finalImageUrl = image_url;
 
-            // Priority 1: Direct Upload URL from Cloudinary
+            // Priority 1: Direct link provided from form
             if (req.body.banner_image_url && req.body.banner_image_url.trim()) {
                 finalImageUrl = req.body.banner_image_url.trim();
             }
-            // Priority 2: File upload via Multer (fallback - uploads to Cloudinary)
+            // Priority 2: File upload via Supabase Storage
             else if (req.file) {
                 const result = await uploadToSupabase(req.file, 'banners');
-                finalImageUrl = result.url;
+                finalImageUrl = result ? (result.url || result) : null;
             }
 
             // Validate we have an image URL
