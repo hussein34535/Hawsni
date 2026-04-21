@@ -487,13 +487,10 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 {isUpsellOpen && (
                     <AccessoryUpsellModal 
                         isOpen={isUpsellOpen} 
-                        onClose={() => performAddToCart([])}
-                        onSkip={() => performAddToCart([])} 
-                        onAdd={performAddToCart}
+                        onClose={() => performAddToCart([])} 
+                        onConfirm={performAddToCart}
                         accessories={product.accessories || []}
-                        productName={product.name}
                         isRTL={isRTL}
-                        formatImageUrl={formatImageUrl}
                     />
                 )}
             </AnimatePresence>

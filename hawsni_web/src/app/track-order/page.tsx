@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ArrowLeft,
@@ -17,7 +17,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { checkoutService } from '@/services/checkoutService';
 import { motion, AnimatePresence } from 'framer-motion';
 
-function TrackOrderContent() {
+export default function TrackOrderPage() {
     const { isRTL } = useLanguage();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -26,7 +26,7 @@ function TrackOrderContent() {
     const [order, setOrder] = useState<any>(null);
     const [error, setError] = useState('');
 
-    const handleTrack = useCallback(async (idToTrack?: string) => {
+    const handleTrack = async (idToTrack?: string) => {
         const id = idToTrack || orderId;
         if (!id) return;
 
@@ -46,14 +46,14 @@ function TrackOrderContent() {
         } finally {
             setIsTracking(false);
         }
-    }, [orderId, isRTL]);
+    };
 
     useEffect(() => {
         const id = searchParams.get('id');
         if (id) {
             handleTrack(id);
         }
-    }, [searchParams, handleTrack]);
+    }, [searchParams]);
 
     const getStatusIndex = (status: string) => {
         const statuses = ['Processing', 'Shipped', 'Delivered'];
@@ -193,13 +193,5 @@ function TrackOrderContent() {
                 </AnimatePresence>
             </main>
         </div>
-    );
-}
-
-export default function TrackOrderPage() {
-    return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="w-10 h-10 border-4 border-[#0E4435] border-t-transparent rounded-full animate-spin"></div></div>}>
-            <TrackOrderContent />
-        </Suspense>
     );
 }
