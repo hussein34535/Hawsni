@@ -488,8 +488,8 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                     <AccessoryUpsellModal 
                         isOpen={isUpsellOpen} 
                         onClose={() => performAddToCart([])} 
-                        onConfirm={(accs) => performAddToCart(accs)}
-                        accessories={product.accessories}
+                        onConfirm={performAddToCart}
+                        accessories={product.accessories || []}
                         isRTL={isRTL}
                     />
                 )}
