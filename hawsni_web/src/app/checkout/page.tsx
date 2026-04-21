@@ -438,16 +438,6 @@ export default function CheckoutPage() {
           <div className="lg:col-span-5 space-y-6">
             <OrderReceipt subtotal={subtotal} shippingFee={shippingFee} discount={couponDiscount} total={total} couponApplied={isCouponApplied} selectedGov={selectedGov} deliveryEstimate={{ min: deliveryMin, max: deliveryMax }} />
             
-            <div className="bg-white rounded-[28px] border border-gray-100 p-6 shadow-sm">
-              <div className="flex gap-3">
-                <input type="text" placeholder={isRTL ? 'أدخل كود الخصم' : 'Promo code'} value={couponCode} onChange={(e) => setCouponCode(e.target.value)} disabled={isCouponApplied} dir={isRTL ? 'rtl' : 'ltr'} className="flex-1 h-14 bg-gray-50 rounded-2xl px-5 text-sm font-black outline-none border border-transparent focus:border-[#0E4435] disabled:opacity-50" />
-                {isCouponApplied ? (
-                  <button onClick={() => { setIsCouponApplied(false); setCouponCode(''); setCouponDiscount(0); }} className="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-100 transition-colors"><X size={20} /></button>
-                ) : (
-                  <button onClick={handleApplyCoupon} className="px-6 h-14 bg-[#0E4435] text-white rounded-2xl font-black text-sm hover:bg-black transition-all active:scale-95">{isRTL ? 'تفعيل' : 'Apply'}</button>
-                )}
-              </div>
-            </div>
 
             <button onClick={handlePlaceOrder} disabled={isProcessing} className={`hidden lg:flex w-full h-16 bg-[#0E4435] text-white rounded-[22px] font-black text-lg items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 active:scale-[0.98] transition-all ${isProcessing ? 'opacity-60 cursor-wait' : 'hover:bg-[#0b3328]'}`}>
               {isProcessing ? <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" /> : <><CreditCard size={22} /> <span>{isRTL ? 'تأكيد وشحن الطلب' : 'Confirm Order'}</span></>}
