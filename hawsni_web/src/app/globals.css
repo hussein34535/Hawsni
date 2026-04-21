@@ -32,11 +32,34 @@
   --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.12);
   --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.15);
 
-  /* Border Radius */
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 20px;
-  --radius-xl: 24px;
+  /* Animations */
+  @keyframes mesh-slow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  --animate-mesh-slow: mesh-slow 25s ease infinite;
+
+  /* Glassmorphism Tokens */
+  --glass-bg: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(12px);
+}
+
+@layer utilities {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(14, 68, 53, 0.05);
+  }
+
+  .mesh-gradient-bg {
+    background: linear-gradient(-45deg, #0E4435, #1B4D3E, #D4AF37, #FFFFFF);
+    background-size: 400% 400%;
+    animation: mesh-slow 25s ease infinite;
+  }
 }
 
 @layer base {

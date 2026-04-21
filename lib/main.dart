@@ -24,7 +24,6 @@ import 'package:hwasi_app/features/address/bloc/address_bloc.dart';
 import 'package:hwasi_app/features/address/bloc/address_event.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,10 +36,7 @@ void main() async {
   // We rely on the native font-family definition 'Cairo' which is also preloaded in index.html
 
   // Initialize App Configuration - Using PRODUCTION server (Vercel)
-  print('-------------------------------------------');
-  print('🚀 STARTING APP - FORCING CONNECTION TO VERCEL');
-  print('🚀 URL: https://hwasibackend.vercel.app/api');
-  print('-------------------------------------------');
+  // Initialize App Configuration - Using PRODUCTION server (Vercel)
 
   final config = ProdConfig();
   ApiService.initialize(config);
@@ -67,7 +63,7 @@ void main() async {
   // Catch and log uncaught errors to prevent black screen
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
-    print('FLUTTER ERROR: ${details.exception}');
+    debugPrint('FLUTTER ERROR: ${details.exception}');
   };
 
   runApp(

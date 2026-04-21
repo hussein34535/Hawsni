@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 
 class OrderService {
@@ -5,7 +6,7 @@ class OrderService {
     try {
       return await ApiService.getUserOrders();
     } catch (e) {
-      print('Error fetching user orders: $e');
+      debugPrint('Error fetching user orders: $e');
       rethrow;
     }
   }
@@ -15,7 +16,7 @@ class OrderService {
     try {
       return await ApiService.createOrder(orderData);
     } catch (e) {
-      print('Error creating order: $e');
+      debugPrint('Error creating order: $e');
       rethrow;
     }
   }
@@ -24,7 +25,7 @@ class OrderService {
     try {
       return await ApiService.getOrderTracking(orderId);
     } catch (e) {
-      print('Error fetching order tracking: $e');
+      debugPrint('Error fetching order tracking: $e');
       rethrow;
     }
   }

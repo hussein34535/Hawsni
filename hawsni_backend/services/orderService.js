@@ -244,7 +244,7 @@ class OrderService {
             emailService.sendNewOrderAdminEmail({
                 order,
                 customerName,
-                customerEmail,
+                customerEmail: customerEmail || guestInfo.guestEmail,
                 items: order.items || items,
                 shippingAddress: orderData.shipping_address
             }).catch(err => console.error('Admin order notification failed:', err));
@@ -256,10 +256,10 @@ class OrderService {
             }
 
             metaService.trackPurchase(order, {
-                email: customerEmail,
-                phone: shipping?.phone,
-                name: customerName,
-                ip: guestInfo.ipAddress, // Ensure this is passed from controller
+                email: customerEmail || guestInfo.guestEmail,
+                phone: shipping?.phone || guestInfo.guestPhone,
+                name: customerName || guestInfo.guestName,
+                ip: guestInfo.ipAddress,
                 userAgent: guestInfo.userAgent
             }).catch(err => console.error('Meta CAPI Purchase tracking failed:', err));
 

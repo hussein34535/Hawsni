@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
@@ -45,7 +46,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         throw Exception('No tracking data available');
       }
     } catch (e) {
-      print('Error loading tracking data: $e');
+      debugPrint('Error loading tracking data: $e');
       setState(() {
         _isLoading = false;
         _errorMessage =

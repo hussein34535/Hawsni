@@ -188,7 +188,7 @@ class _HeroCarouselState extends State<HeroCarousel> {
                               onPressed: () {
                                 if (buttonLink != null &&
                                     buttonLink.isNotEmpty) {
-                                  print('Navigate to: $buttonLink');
+                                  // Navigate logic would go here
                                 }
                               },
                               style: ElevatedButton.styleFrom(

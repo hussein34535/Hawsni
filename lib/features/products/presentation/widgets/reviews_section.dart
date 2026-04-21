@@ -53,12 +53,9 @@ class ReviewsSection extends StatelessWidget {
                         color: AppTheme.textPrimary,
                         fontFamily: 'Playfair Display')),
                 if (state is ReviewLoaded) ...[
-                  if (!state.reviews.any((r) {
-                    print(
-                        'CHECK MATCH: ReviewUser=${r.userId} vs AuthUser=${AuthService.userId}');
-                    return r.userId.toString().trim() ==
-                        AuthService.userId.toString().trim();
-                  }))
+                  if (!state.reviews.any((r) =>
+                      r.userId.toString().trim() ==
+                      AuthService.userId.toString().trim()))
                     TextButton.icon(
                       onPressed: () => _showAddReviewDialog(context),
                       icon: const Icon(Icons.edit,

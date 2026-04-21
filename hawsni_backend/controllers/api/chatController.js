@@ -12,35 +12,41 @@ class ChatController {
             const { sessionId } = req.params;
             if (!sessionId) return res.status(400).json({ success: false, error: 'Session ID required' });
 
-            // Fetch session
-            let { data: session, error: sessionErr } = await supabase
+            const now = new Date().toISOString();
+
+            // 1. Get or Create session using upsert with onConflict
+            // We use upsert primarily to handle the race condition of multiple simultaneous 'get' requests.
+            const { data: session, error: upsertErr } = await supabase
                 .from('chat_sessions')
-                .select('*')
-                .eq('session_id', sessionId)
+                .upsert(
+                    { session_id: sessionId, status: 'bot_active', last_active_at: now },
+                    { onConflict: 'session_id', ignoreDuplicates: true } // ignoreDuplicates: true means it won't overwrite existing
+                )
+                .select()
                 .single();
 
-            const now = new Date();
+            if (upsertErr) throw upsertErr;
 
-            // Create if it doesn't exist
-            if (sessionErr || !session) {
-                const { data: newSession, error: insertErr } = await supabase
-                    .from('chat_sessions')
-                    .insert([{ session_id: sessionId, status: 'bot_active', last_active_at: now.toISOString() }])
-                    .select().single();
-                
-                if (insertErr) throw insertErr;
-                session = newSession;
+            // 2. Check if this is a BRAND NEW session (created just now)
+            // If created_at is very close to last_active_at (which we just set to 'now'), it's new.
+            // Or better: Check if chat_messages for this session exist.
+            const { count: msgCount } = await supabase
+                .from('chat_messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('session_id', sessionId);
 
-                // Create initial bot greeting
+            if (msgCount === 0) {
+                // Initialize new session
                 const greetingStr = 'أهلاً بك في هَوَسي ✨\nنسعد بخدمتك.. كيف يمكننا مساعدتك اليوم؟';
                 await supabase.from('chat_messages').insert([
                     { session_id: sessionId, sender_type: 'bot', content: greetingStr }
                 ]);
 
-                // Notify Admin about new chat session
+                // Notify Admin
                 const notificationService = require('../../services/notificationService');
                 notificationService.sendTelegramText(`✨ *عميل جديد بدأ الشات!* \n📍 الجلسة: \`${sessionId}\``);
             } else {
+                // SESSION EXISTS: Check Expiry (24 hours)
                 // SESSION EXISTS: Check Expiry (24 hours)
                 const lastActive = new Date(session.last_active_at || session.created_at);
                 const diffHours = (now.getTime() - lastActive.getTime()) / (1000 * 3600);

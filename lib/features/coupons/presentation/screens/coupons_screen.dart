@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -69,7 +70,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading coupons: $e');
+      debugPrint('Error loading coupons: $e');
       setState(() {
         _isLoading = false;
         _hasError = true;

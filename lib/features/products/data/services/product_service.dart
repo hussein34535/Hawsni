@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/features/products/data/models/product_model.dart';
 
@@ -21,7 +23,7 @@ class ProductService {
         throw Exception(data['message'] ?? 'Failed to load products');
       }
     } catch (e) {
-      print('Error fetching products: $e');
+      debugPrint('Error fetching products: $e');
       rethrow;
     }
   }
@@ -36,7 +38,7 @@ class ProductService {
         throw Exception(data['message'] ?? 'Failed to load product');
       }
     } catch (e) {
-      print('Error fetching product: $e');
+      debugPrint('Error fetching product: $e');
       rethrow;
     }
   }
@@ -52,7 +54,7 @@ class ProductService {
         throw Exception(data['message'] ?? 'Failed to load featured products');
       }
     } catch (e) {
-      print('Error fetching featured products: $e');
+      debugPrint('Error fetching featured products: $e');
       rethrow;
     }
   }

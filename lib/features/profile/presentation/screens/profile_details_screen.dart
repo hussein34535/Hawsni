@@ -58,7 +58,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         });
       }
     } catch (e) {
-      print('Error loading user profile: $e');
+      debugPrint('Error loading user profile: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;

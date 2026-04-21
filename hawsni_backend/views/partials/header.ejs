@@ -16,7 +16,7 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <a href="/dashboard" class="sidebar-brand">
+                <a href="/admin/dashboard" class="sidebar-brand">
                     <i class="fas fa-gem" style="font-size: 2rem;"></i>
                     <h1>hwasi <span>Admin</span></h1>
                 </a>
@@ -25,7 +25,7 @@
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <div class="nav-section-title">القائمة الرئيسية</div>
-                    <a href="/dashboard" class="nav-link <%= page === 'dashboard' ? 'active' : '' %>">
+                    <a href="/admin/dashboard" class="nav-link <%= page === 'dashboard' ? 'active' : '' %>">
                         <i class="fas fa-home"></i>
                         <span>لوحة التحكم</span>
                     </a>
@@ -33,15 +33,15 @@
 
                 <div class="nav-section">
                     <div class="nav-section-title">إدارة المتجر</div>
-                    <a href="/products" class="nav-link <%= page === 'products' ? 'active' : '' %>">
+                    <a href="/admin/products" class="nav-link <%= page === 'products' ? 'active' : '' %>">
                         <i class="fas fa-box"></i>
                         <span>المنتجات</span>
                     </a>
-                    <a href="/categories" class="nav-link <%= page === 'categories' ? 'active' : '' %>">
+                    <a href="/admin/categories" class="nav-link <%= page === 'categories' ? 'active' : '' %>">
                         <i class="fas fa-tags"></i>
                         <span>التصنيفات</span>
                     </a>
-                    <a href="/banners" class="nav-link <%= page === 'banners' ? 'active' : '' %>">
+                    <a href="/admin/banners" class="nav-link <%= page === 'banners' ? 'active' : '' %>">
                         <i class="fas fa-images"></i>
                         <span>البنرات</span>
                     </a>
@@ -49,11 +49,11 @@
 
                 <div class="nav-section">
                     <div class="nav-section-title">الطلبات والعملاء</div>
-                    <a href="/orders" class="nav-link <%= page === 'orders' ? 'active' : '' %>">
+                    <a href="/admin/orders" class="nav-link <%= page === 'orders' ? 'active' : '' %>">
                         <i class="fas fa-shopping-cart"></i>
                         <span>الطلبات</span>
                     </a>
-                    <a href="/users" class="nav-link <%= page === 'users' ? 'active' : '' %>">
+                    <a href="/admin/users" class="nav-link <%= page === 'users' ? 'active' : '' %>">
                         <i class="fas fa-users"></i>
                         <span>المستخدمين</span>
                     </a>
@@ -61,11 +61,11 @@
                 
                 <div class="nav-section">
                     <div class="nav-section-title">التواصل والدعم</div>
-                    <a href="/chat" class="nav-link <%= locals.page === 'chat' ? 'active' : '' %>">
+                    <a href="/admin/chat" class="nav-link <%= locals.page === 'chat' ? 'active' : '' %>">
                         <i class="fas fa-comment-dots" style="color:#0ea5e9;"></i>
                         <span>شات الدعم المباشر</span>
                     </a>
-                    <a href="/reviews" class="nav-link <%= page === 'reviews' ? 'active' : '' %>">
+                    <a href="/admin/reviews" class="nav-link <%= page === 'reviews' ? 'active' : '' %>">
                         <i class="fas fa-star" style="color:#F59E0B;"></i>
                         <span>التقييمات</span>
                     </a>
@@ -73,11 +73,11 @@
 
                 <div class="nav-section">
                     <div class="nav-section-title">الإعدادات</div>
-                    <a href="/settings" class="nav-link <%= page === 'settings' ? 'active' : '' %>">
+                    <a href="/admin/settings" class="nav-link <%= page === 'settings' ? 'active' : '' %>">
                         <i class="fas fa-cog"></i>
                         <span>إعدادات المتجر</span>
                     </a>
-                    <a href="/shipping" class="nav-link <%= page === 'shipping' ? 'active' : '' %>">
+                    <a href="/admin/shipping" class="nav-link <%= page === 'shipping' ? 'active' : '' %>">
                         <i class="fas fa-truck"></i>
                         <span>إعدادات الشحن</span>
                     </a>

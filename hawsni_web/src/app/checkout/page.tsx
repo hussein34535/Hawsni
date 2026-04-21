@@ -20,6 +20,7 @@ import {
   Truck,
   ChevronDown,
   CreditCard,
+  ShieldCheck,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
@@ -31,6 +32,85 @@ import { couponService } from '@/services/couponService';
 import { authService } from '@/services/authService';
 
 import OrderReceipt from '@/components/checkout/OrderReceipt';
+import MeshBackground from '@/components/checkout/MeshBackground';
+
+// ─── Beautiful Progress Indicator ───────────────────────
+function StepIndicator({ currentStep, isRTL }: { currentStep: number; isRTL: boolean }) {
+  const steps = [
+    { label: isRTL ? 'الشحن' : 'Shipping', icon: MapPin },
+    { label: isRTL ? 'الدفع' : 'Payment', icon: CreditCard },
+    { label: isRTL ? 'المراجعة' : 'Review', icon: Check },
+  ];
+
+  return (
+    <div className="flex items-center justify-between gap-2 mb-10 px-4">
+      {steps.map((step, idx) => (
+        <div key={idx} className="flex-1 flex items-center gap-2">
+          {/* Node */}
+          <div className={`relative flex items-center justify-center w-10 h-10 rounded-2xl transition-all duration-500 ${
+            idx <= currentStep ? 'bg-[#0E4435] text-white shadow-lg shadow-emerald-950/20' : 'bg-white text-gray-300 border border-gray-100'
+          }`}>
+            <step.icon size={18} />
+            {idx < steps.length - 1 && (
+              <div className={`absolute top-1/2 -translate-y-1/2 w-full h-[2px] ${isRTL ? '-right-full' : '-left-full'} ${
+                idx < currentStep ? 'bg-[#0E4435]' : 'bg-gray-100'
+              }`} />
+            )}
+          </div>
+          {/* Label (Desktop Only) */}
+          <span className={`hidden md:block text-[11px] font-black uppercase tracking-widest ${
+            idx <= currentStep ? 'text-[#0E4435]' : 'text-gray-300'
+          }`}>
+            {step.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Summary Card Wrapper ───────────────────────────────
+function SummaryCard({ 
+  title, 
+  icon: Icon, 
+  onEdit, 
+  children 
+}: { 
+  title: string; 
+  icon: any; 
+  onEdit: () => void;
+  children: React.ReactNode;
+}) {
+  const { isRTL } = useLanguage();
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.99 }}
+      className="bg-white/40 backdrop-blur-md rounded-[24px] border border-white/60 p-5 flex items-center justify-between group hover:bg-white/70 transition-all cursor-pointer shadow-sm shadow-[#0E4435]/5"
+      onClick={onEdit}
+    >
+      <div className="flex items-center gap-4">
+        <motion.div 
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20"
+        >
+          <Check size={20} strokeWidth={3} />
+        </motion.div>
+        <div>
+          <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">{title}</h4>
+          <div className="text-sm font-bold text-gray-900">{children}</div>
+        </div>
+      </div>
+      <button className="text-[10px] font-black text-emerald-600 uppercase tracking-widest px-3 py-1.5 rounded-xl hover:bg-emerald-50 transition-all">
+        {isRTL ? 'تعديل' : 'Edit'}
+      </button>
+    </motion.div>
+  );
+}
 
 // ─── Beautiful Input (ENLARGED) ─────────────────────────
 function Input({
@@ -69,7 +149,7 @@ function Input({
         disabled={disabled}
         placeholder={placeholder}
         dir={isRTL ? 'rtl' : 'ltr'}
-        className={`w-full h-14 bg-white rounded-2xl text-[15px] font-bold text-gray-900 placeholder:text-gray-300 outline-none border border-gray-100 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all disabled:opacity-50 ${
+        className={`w-full h-14 bg-white/50 backdrop-blur-sm rounded-2xl text-[15px] font-bold text-gray-900 placeholder:text-gray-400 outline-none border border-white/60 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all disabled:opacity-50 ${
           isRTL ? 'pr-12 pl-5 text-right' : 'pl-12 pr-5 text-left'
         }`}
       />
@@ -98,9 +178,9 @@ function Select({
         onChange={onChange}
         disabled={disabled}
         dir={isRTL ? 'rtl' : 'ltr'}
-        className={`w-full h-14 bg-white rounded-2xl text-[15px] font-bold text-gray-900 outline-none border border-gray-100 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all appearance-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+        className={`w-full h-14 bg-white/50 backdrop-blur-sm rounded-2xl text-[15px] font-bold text-gray-900 outline-none border border-white/60 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all appearance-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
           isRTL ? 'pr-5 pl-12 text-right' : 'pl-5 pr-12 text-left'
-        } ${!value ? 'text-gray-300' : ''}`}
+        } ${!value ? 'text-gray-400' : ''}`}
       >
         {children}
       </select>
@@ -126,7 +206,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-[28px] border border-gray-100 p-7 space-y-5 shadow-sm">
+    <div className="bg-white/60 backdrop-blur-md rounded-[32px] border border-white/60 p-7 space-y-6 shadow-sm shadow-[#0E4435]/5">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-[#0E4435]/5 rounded-2xl flex items-center justify-center">
           <Icon size={20} className="text-[#0E4435]" />
@@ -144,6 +224,16 @@ export default function CheckoutPage() {
   const { items, getTotal, clearCart } = useCartStore();
   const { isRTL, t } = useLanguage();
   const { showToast } = useToastStore();
+
+  const [activeStep, setActiveStep] = useState(0);
+  const nextStep = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveStep((prev) => Math.min(prev + 1, 2));
+  };
+  const prevStep = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveStep((prev) => Math.max(prev - 1, 0));
+  };
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -340,122 +430,273 @@ export default function CheckoutPage() {
   if (items.length === 0 && !isProcessing) return null;
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-cairo pb-32 lg:pb-10" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Premium Header (Enlarged) */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
+    <div className="min-h-screen font-cairo pb-32 lg:pb-10 relative" dir={isRTL ? 'rtl' : 'ltr'}>
+      <MeshBackground />
+
+      {/* Modern Header */}
+      <header className="sticky top-0 z-50 bg-white/40 backdrop-blur-md border-b border-white/20">
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <button onClick={() => router.back()} className="w-11 h-11 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 active:scale-90 transition-all">
+          <button onClick={() => activeStep > 0 ? prevStep() : router.back()} className="w-11 h-11 rounded-2xl bg-white/50 flex items-center justify-center text-gray-500 hover:bg-white hover:text-[#0E4435] transition-all border border-white/50 active:scale-95">
             {isRTL ? <ArrowRight size={22} /> : <ArrowLeft size={22} />}
           </button>
+          
           <div className="flex flex-col items-center">
-            <h1 className="text-xl font-black text-gray-900 tracking-tight">
-              {isRTL ? 'إتمام الشراء' : 'Checkout'}
+            <h1 className="text-lg font-black text-gray-900 tracking-tight">
+              {isRTL ? 'إتمام الشراء الآمن' : 'Secure Checkout'}
             </h1>
-            <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{isRTL ? 'اتصال آمن' : 'Secure Connection'}</span>
-            </div>
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
+              <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+              {isRTL ? 'خطوة ' : 'Step '} {activeStep + 1} {isRTL ? ' من 3' : ' of 3'}
+            </p>
           </div>
-          <div className="w-11 h-11 rounded-2xl bg-[#0E4435]/5 flex items-center justify-center text-[#0E4435]">
+
+          <div className="w-11 h-11 rounded-2xl bg-[#0E4435] flex items-center justify-center text-white shadow-lg shadow-emerald-950/20">
             <Lock size={18} />
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="max-w-6xl mx-auto px-6 py-10 relative z-10">
+        {/* Progress Bar Component */}
+        <StepIndicator currentStep={activeStep} isRTL={isRTL} />
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Main Content (Inputs) */}
+          {/* Left Column: Progressing Forms */}
           <div className="lg:col-span-7 space-y-6">
             
-            <Section title={isRTL ? 'بيانات العميل' : 'Customer Info'} icon={User}>
-              {isAuthenticated ? (
-                <div className="bg-emerald-50/40 border border-emerald-100/50 rounded-2xl p-5 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                    <Check size={24} strokeWidth={3} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-black text-emerald-800">{isRTL ? 'تم تسجيل الدخول بنجاح' : 'Authenticated'}</p>
-                    <p className="text-xs font-bold text-emerald-600/70">{isRTL ? 'بياناتك محفوظة وآمنة' : 'Your data is secured'}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <Input icon={User} placeholder={isRTL ? 'الاسم بالكامل' : 'Full Name'} value={guestInfo.name} onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })} />
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input icon={Phone} type="tel" placeholder={isRTL ? 'رقم الهاتف' : 'Phone Number'} value={guestInfo.phone} onChange={(e) => setGuestInfo({ ...guestInfo, phone: e.target.value })} />
-                    <Input icon={Phone} type="tel" placeholder={isRTL ? 'رقم هاتف بديل' : 'Alt Phone'} value={guestInfo.phone2} onChange={(e) => setGuestInfo({ ...guestInfo, phone2: e.target.value })} />
-                  </div>
-                  <Input icon={Mail} type="email" placeholder={isRTL ? 'البريد الإلكتروني (اختياري)' : 'Email (Optional)'} value={guestInfo.email} onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })} />
-                </div>
-              )}
-            </Section>
+            {/* STEP 1: SHIPPING & INFO */}
+            {activeStep === 0 ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-6"
+              >
+                <Section title={isRTL ? 'بيانات العميل' : 'Customer Info'} icon={User}>
+                  {isAuthenticated ? (
+                    <div className="bg-emerald-50/40 border border-emerald-100/50 rounded-2xl p-5 flex items-center gap-4">
+                      <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                        <Check size={24} strokeWidth={3} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-emerald-800">{isRTL ? 'تم تسجيل الدخول بنجاح' : 'Authenticated'}</p>
+                        <p className="text-xs font-bold text-emerald-600/70">{isRTL ? 'بياناتك محفوظة وآمنة' : 'Your data is secured'}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Input icon={User} placeholder={isRTL ? 'الاسم بالكامل' : 'Full Name'} value={guestInfo.name} onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input icon={Phone} type="tel" placeholder={isRTL ? 'رقم الهاتف' : 'Phone Number'} value={guestInfo.phone} onChange={(e) => setGuestInfo({ ...guestInfo, phone: e.target.value })} />
+                        <Input icon={Phone} type="tel" placeholder={isRTL ? 'رقم هاتف بديل' : 'Alt Phone'} value={guestInfo.phone2} onChange={(e) => setGuestInfo({ ...guestInfo, phone2: e.target.value })} />
+                      </div>
+                      <Input icon={Mail} type="email" placeholder={isRTL ? 'البريد الإلكتروني (اختياري)' : 'Email (Optional)'} value={guestInfo.email} onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })} />
+                    </div>
+                  )}
+                </Section>
 
-            <Section title={isRTL ? 'عنوان الشحن' : 'Shipping Address'} icon={MapPin}>
-              {isAuthenticated && addresses.length > 0 && !isAddingNewAddress ? (
-                <div className="grid grid-cols-1 gap-3">
-                  {addresses.map((addr) => (
-                    <button key={addr._id} onClick={() => { setSelectedAddressId(addr._id); setSelectedGov(addr.state || ''); }} className={`group p-5 rounded-[22px] border-2 text-right transition-all flex items-center gap-4 ${selectedAddressId === addr._id ? 'border-[#0E4435] bg-emerald-50/30' : 'border-gray-50 hover:border-gray-200 bg-white'}`}>
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${selectedAddressId === addr._id ? 'bg-[#0E4435] text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200'}`}>
-                        {addr.type === 'home' ? <Home size={20} /> : <Briefcase size={20} />}
+                <Section title={isRTL ? 'عنوان الشحن' : 'Shipping Address'} icon={MapPin}>
+                  {isAuthenticated && addresses.length > 0 && !isAddingNewAddress ? (
+                    <div className="grid grid-cols-1 gap-3">
+                      {addresses.map((addr) => (
+                        <button key={addr._id} onClick={() => { setSelectedAddressId(addr._id); setSelectedGov(addr.state || ''); }} className={`group p-5 rounded-[22px] border-2 text-right transition-all flex items-center gap-4 ${selectedAddressId === addr._id ? 'border-[#0E4435] bg-white' : 'border-white/50 bg-white/30 hover:bg-white/50'}`}>
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${selectedAddressId === addr._id ? 'bg-[#0E4435] text-white' : 'bg-white/50 text-gray-400 group-hover:bg-white'}`}>
+                            {addr.type === 'home' ? <Home size={20} /> : <Briefcase size={20} />}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-[15px] font-black text-gray-900">{addr.street}</p>
+                            <p className="text-xs font-bold text-gray-400">{addr.state}, {addr.city}</p>
+                          </div>
+                          {selectedAddressId === addr._id && <div className="w-6 h-6 bg-[#0E4435] rounded-full flex items-center justify-center text-white"><Check size={14} strokeWidth={3} /></div>}
+                        </button>
+                      ))}
+                      <button onClick={() => setIsAddingNewAddress(true)} className="p-4 rounded-2xl border-2 border-dashed border-gray-300 text-gray-400 font-black text-sm flex items-center justify-center gap-2 hover:border-[#0E4435] hover:text-[#0E4435] transition-all bg-white/20">
+                        <Plus size={20} /> {isRTL ? 'إضافة عنوان جديد' : 'New Address'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Select value={selectedGovId} onChange={(e) => { const gov = governorates.find(g => g.id === e.target.value); setSelectedGovId(e.target.value); setSelectedDistrictId(''); setSelectedGov(gov ? gov.arabicName : ''); }}>
+                          <option value="">{isRTL ? 'المحافظة' : 'Governorate'}</option>
+                          {governorates.map(gov => <option key={gov.id} value={gov.id}>{isRTL ? gov.arabicName : gov.name}</option>)}
+                        </Select>
+                        <Select value={selectedDistrictId} onChange={(e) => { const dist = districts.find(d => d.id === e.target.value); setSelectedDistrictId(e.target.value); if(!isAuthenticated) setGuestInfo({...guestInfo, city: dist?.arabicName || ''}); else setNewAddress({...newAddress, city: dist?.arabicName || ''}); }} disabled={!selectedGovId}>
+                          <option value="">{isRTL ? 'المنطقة / المركز' : 'District'}</option>
+                          {districts.map(dist => <option key={dist.id} value={dist.id}>{isRTL ? dist.arabicName : dist.name}</option>)}
+                        </Select>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-[15px] font-black text-gray-900">{addr.street}</p>
-                        <p className="text-xs font-bold text-gray-400">{addr.state}, {addr.city}</p>
-                      </div>
-                      {selectedAddressId === addr._id && <div className="w-6 h-6 bg-[#0E4435] rounded-full flex items-center justify-center text-white"><Check size={14} strokeWidth={3} /></div>}
+                      <Input icon={MapPin} placeholder={isRTL ? 'تفاصيل العنوان (شارع، مبنى، رقم الشقة)' : 'Street, Building, Flat...'} value={isAuthenticated ? newAddress.street : guestInfo.street} onChange={(e) => isAuthenticated ? setNewAddress({...newAddress, street: e.target.value}) : setGuestInfo({...guestInfo, street: e.target.value})} />
+                    </div>
+                  )}
+                </Section>
+
+                <button 
+                  onClick={nextStep} 
+                  className="w-full h-16 bg-[#0E4435] text-white rounded-[22px] font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 active:scale-95 transition-all hover:bg-[#0b3328]"
+                >
+                  <span>{isRTL ? 'متابعة للدفع' : 'Continue to Payment'}</span>
+                  {isRTL ? <ArrowLeft size={22} /> : <ArrowRight size={22} />}
+                </button>
+              </motion.div>
+            ) : (
+              /* Summary Step 1 */
+              <SummaryCard title={isRTL ? 'بيانات الشحن' : 'Shipping Info'} icon={MapPin} onEdit={() => setActiveStep(0)}>
+                {isAuthenticated ? (
+                  addresses.find(a => a._id === (selectedAddressId || addresses[0]?._id))?.street || isRTL ? 'عنوان محفوظ' : 'Saved Address'
+                ) : (
+                  guestInfo.name + ' - ' + selectedGov
+                )}
+              </SummaryCard>
+            )}
+
+            {/* STEP 2: PAYMENT & NOTES */}
+            {activeStep === 1 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-6"
+              >
+                <Section title={isRTL ? 'طريقة الدفع' : 'Payment Method'} icon={CreditCard}>
+                  <div className="p-5 rounded-[22px] border-2 border-[#0E4435] bg-white flex items-center gap-4">
+                    <div className="w-12 h-12 bg-[#0E4435] rounded-xl flex items-center justify-center text-white">
+                      <ShoppingBag size={20} />
+                    </div>
+                    <div>
+                      <p className="text-[15px] font-black text-gray-900">{isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}</p>
+                      <p className="text-xs font-bold text-gray-400">{isRTL ? 'ادفع كاش للمندوب عند وصول الطلب' : 'Pay cash to the courier'}</p>
+                    </div>
+                  </div>
+                </Section>
+
+                <Section title={isRTL ? 'ملاحظات إضافية' : 'Order Notes'} icon={Tag}>
+                  <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={isRTL ? 'مثال: "اتصل بي قبل الوصول" أو "بجوار صيدلية كذا"' : 'e.g. Call before arrival...'} rows={3} dir={isRTL ? 'rtl' : 'ltr'} className="w-full bg-white/50 rounded-2xl p-5 text-[15px] font-bold text-gray-900 outline-none border border-white/50 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all placeholder:text-gray-400 resize-none" />
+                </Section>
+
+                <div className="bg-white/30 backdrop-blur-sm rounded-[24px] border border-white/50 p-5 space-y-4">
+                  <p className="text-xs font-black text-gray-500 uppercase tracking-widest">{isRTL ? 'لديك كود خصم؟' : 'Have a coupon?'}</p>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      placeholder={isRTL ? 'ادخل الكود هنا' : 'Enter code'}
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      className="flex-1 h-12 bg-white rounded-xl px-4 text-sm font-bold border border-gray-100 outline-none focus:border-[#0E4435]"
+                    />
+                    <button onClick={handleApplyCoupon} className="h-12 px-6 bg-[#0E4435] text-white rounded-xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all hover:bg-[#0b3328]">
+                      {isRTL ? 'تطبيق' : 'Apply'}
                     </button>
-                  ))}
-                  <button onClick={() => setIsAddingNewAddress(true)} className="p-4 rounded-2xl border-2 border-dashed border-gray-100 text-gray-300 font-black text-sm flex items-center justify-center gap-2 hover:border-[#0E4435] hover:text-[#0E4435] transition-all">
-                    <Plus size={20} /> {isRTL ? 'إضافة عنوان جديد' : 'New Address'}
-                  </button>
-                </div>
-              ) : null}
-
-              {(!isAuthenticated || isAddingNewAddress || addresses.length === 0) && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select value={selectedGovId} onChange={(e) => { const gov = governorates.find(g => g.id === e.target.value); setSelectedGovId(e.target.value); setSelectedDistrictId(''); setSelectedGov(gov ? gov.arabicName : ''); }}>
-                      <option value="">{isRTL ? 'المحافظة' : 'Governorate'}</option>
-                      {governorates.map(gov => <option key={gov.id} value={gov.id}>{isRTL ? gov.arabicName : gov.name}</option>)}
-                    </Select>
-                    <Select value={selectedDistrictId} onChange={(e) => { const dist = districts.find(d => d.id === e.target.value); setSelectedDistrictId(e.target.value); if(!isAuthenticated) setGuestInfo({...guestInfo, city: dist?.arabicName || ''}); else setNewAddress({...newAddress, city: dist?.arabicName || ''}); }} disabled={!selectedGovId}>
-                      <option value="">{isRTL ? 'المنطقة / المركز' : 'District'}</option>
-                      {districts.map(dist => <option key={dist.id} value={dist.id}>{isRTL ? dist.arabicName : dist.name}</option>)}
-                    </Select>
                   </div>
-                  <Input icon={MapPin} placeholder={isRTL ? 'تفاصيل العنوان (شارع، مبنى، رقم الشقة)' : 'Street, Building, Flat...'} value={isAuthenticated ? newAddress.street : guestInfo.street} onChange={(e) => isAuthenticated ? setNewAddress({...newAddress, street: e.target.value}) : setGuestInfo({...guestInfo, street: e.target.value})} />
                 </div>
-              )}
-            </Section>
 
-            <Section title={isRTL ? 'ملاحظات إضافية' : 'Order Notes'} icon={Tag}>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={isRTL ? 'مثال: "اتصل بي قبل الوصول" أو "بجوار صيدلية كذا"' : 'e.g. Call before arrival...'} rows={3} dir={isRTL ? 'rtl' : 'ltr'} className="w-full bg-white rounded-2xl p-5 text-[15px] font-bold text-gray-900 outline-none border border-gray-100 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all placeholder:text-gray-300 resize-none" />
-            </Section>
+                <button 
+                  onClick={nextStep} 
+                  className="w-full h-16 bg-[#0E4435] text-white rounded-[22px] font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 active:scale-95 transition-all hover:bg-[#0b3328]"
+                >
+                  <span>{isRTL ? 'مراجعة الطلب' : 'Review Order'}</span>
+                  {isRTL ? <ArrowLeft size={22} /> : <ArrowRight size={22} />}
+                </button>
+              </motion.div>
+            )}
+
+            {activeStep > 1 && (
+               <SummaryCard title={isRTL ? 'طريقة الدفع' : 'Payment'} icon={CreditCard} onEdit={() => setActiveStep(1)}>
+                  {isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}
+               </SummaryCard>
+            )}
+
+            {/* STEP 3: REVIEW (GLASSMORHISM) */}
+            {activeStep === 2 && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="glass-card rounded-[32px] p-8 space-y-8 relative overflow-hidden"
+              >
+                {/* Glow Effect */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[60px] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-gold-500/5 blur-[60px] pointer-events-none" />
+
+                <div className="text-center space-y-4 relative z-10">
+                  <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="w-16 h-16 bg-emerald-500 rounded-3xl flex items-center justify-center text-white mx-auto shadow-2xl shadow-emerald-500/30"
+                  >
+                    <Check size={32} strokeWidth={3} />
+                  </motion.div>
+                  <h3 className="text-2xl font-black text-gray-900">{isRTL ? 'أنت على وشك الانتهاء!' : 'Almost Done!'}</h3>
+                  <p className="text-sm font-bold text-gray-500">{isRTL ? 'يرجى مراجعة تفاصيل طلبك قبل التأكيد النهائي' : 'Please review your items one last time'}</p>
+                </div>
+
+                <div className="space-y-4 relative z-10">
+                  <div className="flex items-center justify-between p-5 bg-white/50 rounded-2xl border border-white/60 shadow-sm">
+                    <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{isRTL ? 'العنوان' : 'Address'}</p>
+                    <p className="text-sm font-black text-gray-900">{selectedGov}, {isAuthenticated ? (addresses.find(a => a._id === selectedAddressId)?.street || '') : guestInfo.street}</p>
+                  </div>
+                  <div className="flex items-center justify-between p-5 bg-white/50 rounded-2xl border border-white/60 shadow-sm">
+                    <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{isRTL ? 'وسيلة الدفع' : 'Payment'}</p>
+                    <p className="text-sm font-black text-gray-900">{isRTL ? 'كاش عند الاستلام' : 'COD'}</p>
+                  </div>
+                </div>
+
+                <motion.button 
+                  whileHover={{ y: -3, boxShadow: "0 20px 40px rgba(14, 68, 53, 0.2)" }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handlePlaceOrder} 
+                  disabled={isProcessing} 
+                  className={`w-full h-20 bg-[#0E4435] text-white rounded-[28px] font-black text-xl flex items-center justify-center gap-4 shadow-2xl shadow-emerald-950/40 transition-all ${isProcessing ? 'opacity-60 cursor-wait' : 'hover:bg-[#0b3328] relative z-10'}`}
+                >
+                  {isProcessing ? (
+                    <div className="w-7 h-7 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <CreditCard size={26} />
+                      <span>{isRTL ? 'تأكيد وشحن الطلب الآن' : 'Place Order Now'}</span>
+                    </>
+                  )}
+                </motion.button>
+              </motion.div>
+            )}
+
           </div>
 
           {/* Side Content (Receipt) */}
           <div className="lg:col-span-5 space-y-6">
             <OrderReceipt subtotal={subtotal} shippingFee={shippingFee} discount={couponDiscount} total={total} couponApplied={isCouponApplied} selectedGov={selectedGov} deliveryEstimate={{ min: deliveryMin, max: deliveryMax }} />
             
-
-            <button onClick={handlePlaceOrder} disabled={isProcessing} className={`hidden lg:flex w-full h-16 bg-[#0E4435] text-white rounded-[22px] font-black text-lg items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 active:scale-[0.98] transition-all ${isProcessing ? 'opacity-60 cursor-wait' : 'hover:bg-[#0b3328]'}`}>
-              {isProcessing ? <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" /> : <><CreditCard size={22} /> <span>{isRTL ? 'تأكيد وشحن الطلب' : 'Confirm Order'}</span></>}
-            </button>
+            {/* Desktop Quick Hint */}
+            <div className="hidden lg:block bg-white/20 backdrop-blur-sm border border-white/50 p-6 rounded-[24px]">
+               <div className="flex gap-4">
+                  <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600">
+                     <ShieldCheck size={20} />
+                  </div>
+                  <div className="flex-1">
+                     <p className="text-[11px] font-black text-gray-900 uppercase tracking-tight mb-1">{isRTL ? 'ضمان هوسي' : 'Hawsni Guarantee'}</p>
+                     <p className="text-[10px] font-bold text-gray-500 leading-relaxed">{isRTL ? 'جميع منتجاتنا أصلية وتخضع لرقابة جودة صارمة قبل الشحن.' : 'Original products with strict quality control before shipping.'}</p>
+                  </div>
+               </div>
+            </div>
           </div>
         </div>
       </main>
 
       {/* Mobile Bar (ENLARGED) */}
       <div className="lg:hidden fixed bottom-6 left-6 right-6 z-50">
-        <button onClick={handlePlaceOrder} disabled={isProcessing} className="w-full h-16 bg-[#0E4435] text-white rounded-[22px] font-black text-base flex items-center justify-between px-6 shadow-2xl shadow-emerald-950/40 active:scale-95 transition-all">
+        <button 
+          onClick={activeStep === 2 ? handlePlaceOrder : nextStep} 
+          disabled={isProcessing} 
+          className="w-full h-16 bg-[#0E4435] text-white rounded-[24px] font-black text-base flex items-center justify-between px-6 shadow-2xl shadow-emerald-950/40 active:scale-95 transition-all backdrop-blur-md border border-white/10"
+        >
           <div className="text-right">
-            <p className="text-[10px] text-white/50 uppercase leading-none mb-1">{isRTL ? 'إجمالي الدفع' : 'Pay'}</p>
+            <p className="text-[10px] text-white/50 uppercase leading-none mb-1">{isRTL ? 'الإجمالي' : 'Total'}</p>
             <p className="text-lg leading-none">{Math.round(total).toLocaleString()} <span className="text-xs">EGP</span></p>
           </div>
           <div className="flex items-center gap-2">
-            <span>{isProcessing ? '...' : (isRTL ? 'تأكيد' : 'Confirm')}</span>
-            <ArrowLeft size={20} strokeWidth={3} className={isRTL ? '' : 'rotate-180'} />
+            <span>{isProcessing ? '...' : (activeStep === 2 ? (isRTL ? 'تأكيد' : 'Confirm') : (isRTL ? 'التالي' : 'Next'))}</span>
+            {isRTL ? <ArrowLeft size={20} strokeWidth={3} /> : <ArrowRight size={20} strokeWidth={3} />}
           </div>
         </button>
       </div>

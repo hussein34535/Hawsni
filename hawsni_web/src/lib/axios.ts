@@ -19,10 +19,25 @@ apiClient.interceptors.request.use((config) => {
 
 // Handle 401 — try to refresh token or redirect to login
 let isRefreshing = false;
+
 apiClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // Check for HTML response when expecting JSON
+        const contentType = response.headers['content-type'];
+        if (contentType && contentType.includes('text/html')) {
+            console.error('⚠️ Received HTML response from API instead of JSON');
+            return Promise.reject({
+                message: 'السيرفر يواجه مشكلة حالياً، يرجى المحاولة لاحقاً.',
+                isHtmlError: true,
+                response
+            });
+        }
+        return response;
+    },
     async (error) => {
-        if (error.response?.status === 401 && typeof window !== 'undefined') {
+        const { response, config } = error;
+
+        if (response?.status === 401 && typeof window !== 'undefined') {
             const refreshToken = localStorage.getItem('refresh_token');
 
             if (refreshToken && !isRefreshing) {
@@ -38,12 +53,14 @@ apiClient.interceptors.response.use(
                             localStorage.setItem('refresh_token', res.data.refresh_token);
                         }
                         // Retry original request
-                        error.config.headers.Authorization = `Bearer ${res.data.token}`;
-                        isRefreshing = false;
-                        return apiClient(error.config);
+                        if (config) {
+                            config.headers.Authorization = `Bearer ${res.data.token}`;
+                            isRefreshing = false;
+                            return apiClient(config);
+                        }
                     }
-                } catch {
-                    // Refresh failed
+                } catch (refreshErr) {
+                    console.error('Token refresh failed:', refreshErr);
                 }
                 isRefreshing = false;
             }
@@ -52,12 +69,14 @@ apiClient.interceptors.response.use(
             localStorage.removeItem('token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
-
-            // We only clear local storage on 401 to ensure the user is logged out system-wide.
-            // We DO NOT force a window.location redirect here, as it breaks the UX for guests
-            // on pages that might make background auth-checks (like product pages).
-            // Protected routes should handle redirects individually based on auth state.
         }
+
+        // Handle Non-JSON (HTML) errors like Vercel Lambda timeouts or 500s
+        const contentType = response?.headers['content-type'];
+        if (contentType && contentType.includes('text/html')) {
+            error.message = 'حدث خطأ في النظام؛ السيرفر غير قادر على معالجة الطلب حالياً.';
+        }
+
         return Promise.reject(error);
     }
 );

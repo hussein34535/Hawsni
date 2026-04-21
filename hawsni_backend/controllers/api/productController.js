@@ -1,6 +1,7 @@
 const ProductService = require('../../services/productService');
 const uploadToSupabase = require('../../utils/fileUpload');
 const supabase = require('../../config/supabase');
+const { cleanImageUrls } = require('../../utils/imageUtils');
 
 
 class ProductController {
@@ -44,6 +45,77 @@ class ProductController {
             console.error('Error fetching product:', error);
             res.status(500).json({ success: false, message: error.message });
         }
+    }
+
+    /**
+     * Internal helper to parse and sanitize product data from both API and Admin requests.
+     */
+    _parseProductPayload(req, existingImages = []) {
+        const body = req.body;
+        
+        // 1. Image URLs
+        let rawUrls = [...existingImages];
+        if (body.image_urls) {
+            const urls = typeof body.image_urls === 'string' ? JSON.parse(body.image_urls) : body.image_urls;
+            rawUrls = Array.isArray(urls) ? [...rawUrls, ...urls] : [...rawUrls, urls];
+        }
+        if (body.retained_images) {
+             try { rawUrls = JSON.parse(body.retained_images); } catch(e) {}
+        }
+        if (body.scraped_images) {
+            try {
+                const scraped = JSON.parse(body.scraped_images);
+                if (Array.isArray(scraped)) rawUrls = [...rawUrls, ...scraped];
+            } catch (e) {}
+        }
+        
+        // Use central utility for URLs
+        const cloudName = process.env.CLOUDINARY_NAME || 'hwasibackend';
+        const imageUrls = cleanImageUrls(rawUrls, cloudName);
+
+        // 2. Sizes
+        let sizesArray = [];
+        if (body.sizes) {
+            const sizesString = Array.isArray(body.sizes) ? body.sizes.join(',') : String(body.sizes);
+            sizesArray = sizesString.split(/[,،]/).map(s => s.trim()).filter(s => s);
+        }
+
+        // 3. Colors
+        let colorsArray = [];
+        if (body.colors) {
+            try {
+                let parsed = typeof body.colors === 'string' ? JSON.parse(body.colors) : body.colors;
+                if (Array.isArray(parsed)) {
+                    colorsArray = parsed.map(c => (typeof c === 'string' ? { color: c, imageIndex: null } : c));
+                }
+            } catch (e) {
+                colorsArray = String(body.colors).split(',').map(c => ({ color: c.trim(), imageIndex: null })).filter(c => c.color);
+            }
+        }
+
+        // 4. Categories
+        let categoryIds = body.category_ids || (body.category_id ? [body.category_id] : []);
+        if (!Array.isArray(categoryIds)) categoryIds = [categoryIds];
+
+        // 5. Booleans (Handle 'on', 'true', true)
+        const isTrue = (val) => val === 'on' || val === 'true' || val === true;
+
+        return {
+            name: body.name,
+            description: body.description,
+            price: Math.round(parseFloat(body.price || 0) * 100) / 100,
+            discount: parseFloat(body.discount || 0) || 0,
+            stock: parseInt(body.stock || 0) || 0,
+            category_id: categoryIds[0] || null,
+            category_ids: categoryIds,
+            is_featured: isTrue(body.is_featured),
+            is_vto_enabled: isTrue(body.is_vto_enabled) || (body.is_vto_enabled === undefined),
+            sizes: sizesArray.length > 0 ? sizesArray : null,
+            colors: colorsArray.length > 0 ? colorsArray : null,
+            accessories: body.accessories ? (typeof body.accessories === 'string' ? JSON.parse(body.accessories) : body.accessories) : null,
+            images: imageUrls,
+            size_guide: body.size_guide || ''
+        };
     }
 
     async getRelatedProducts(req, res) {
@@ -96,91 +168,19 @@ class ProductController {
 
     async createProduct(req, res) {
         try {
-            // Helper to ensure absolute URLs
-            const ensureAbsoluteUrl = (url) => {
-                if (!url || typeof url !== 'string') return url;
-                if (url.startsWith('http')) return url;
-                const cloudName = process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'hwasibackend'; 
-                if (url.match(/^[a-z0-9_]+(\.[a-z0-9]+)?$/i)) {
-                    return `https://res.cloudinary.com/${cloudName}/image/upload/${url}`;
-                }
-                return url;
-            };
-
-            let rawImageUrls = [];
-            // Priority 1: Direct URLs from Cloudinary (Direct Upload)
-            if (req.body.image_urls) {
-                const urls = typeof req.body.image_urls === 'string'
-                    ? JSON.parse(req.body.image_urls)
-                    : req.body.image_urls;
-                rawImageUrls = Array.isArray(urls) ? urls : [urls];
-            }
-            // Priority 2: Traditional file upload via Multer (fallback)
-            else if (req.files && req.files.length > 0) {
-                const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                const results = await Promise.all(uploadPromises);
-                rawImageUrls = results.map(r => r.url);
+            // Priority: File upload if present (overrides/appends to body URLs)
+            let uploadedUrls = [];
+            if (req.files && req.files.length > 0) {
+                const results = await Promise.all(req.files.map(f => uploadToSupabase(f, 'products')));
+                uploadedUrls = results.map(r => r.url);
             }
 
-            // Sanitize all URLs
-            const imageUrls = rawImageUrls.map(ensureAbsoluteUrl).filter(url => url);
-
-            let sizes = [];
-            let colors = [];
-
-            if (req.body.sizes) {
-                sizes = Array.isArray(req.body.sizes) ? req.body.sizes : req.body.sizes.split(',').map(s => s.trim());
+            const productData = this._parseProductPayload(req);
+            if (uploadedUrls.length > 0) {
+                productData.images = [...productData.images, ...uploadedUrls];
             }
-
-            if (req.body.colors) {
-                try {
-                    // Try to parse as JSON (new format with image mapping)
-                    let parsedColors = typeof req.body.colors === 'string' ? JSON.parse(req.body.colors) : req.body.colors;
-
-                    // Handle case where colors might be an array of stringified objects
-                    if (Array.isArray(parsedColors)) {
-                        colors = parsedColors.map(c => {
-                            if (typeof c === 'string') {
-                                // Try to parse if it's a stringified object
-                                try {
-                                    const parsed = JSON.parse(c);
-                                    return parsed.color ? parsed : { color: c, imageIndex: null };
-                                } catch {
-                                    // It's just a color string
-                                    return { color: c, imageIndex: null };
-                                }
-                            } else if (c && typeof c === 'object' && c.color) {
-                                // Already a proper object
-                                return c;
-                            }
-                            return { color: c, imageIndex: null };
-                        });
-                    } else {
-                        colors = [];
-                    }
-                } catch (e) {
-                    // Fallback to old format (comma-separated strings)
-                    colors = req.body.colors.split(',').map(c => ({ color: c.trim(), imageIndex: null }));
-                }
-            }
-
-            const productData = {
-                name: req.body.name,
-                description: req.body.description,
-                price: Math.round(parseFloat(req.body.price) * 100) / 100,
-                discount: parseFloat(req.body.discount) || 0,
-                category_id: null, // Legacy field
-                category_ids: req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []),
-                stock: parseInt(req.body.stock) || 0,
-                is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
-                is_vto_enabled: req.body.is_vto_enabled === 'on' || req.body.is_vto_enabled === 'true' || req.body.is_vto_enabled === true || (req.body.is_vto_enabled === undefined && true), // fallback for old payloads
-                sizes: sizes,
-                colors: colors,
-                images: imageUrls
-            };
 
             const product = await ProductService.createProduct(productData);
-
             res.status(201).json({ success: true, product });
         } catch (error) {
             console.error('Error creating product:', error);
@@ -190,62 +190,24 @@ class ProductController {
 
     async updateProduct(req, res) {
         try {
-            // Get current product to preserve existing images
             const currentProduct = await ProductService.getProductById(req.params.id);
-
             if (!currentProduct) {
                 return res.status(404).json({ success: false, message: 'Product not found' });
             }
 
-            let imageUrls = currentProduct.images || [];
-
-            // Priority 1: Direct URLs from Cloudinary (Direct Upload)
-            if (req.body.image_urls) {
-                const urls = typeof req.body.image_urls === 'string'
-                    ? JSON.parse(req.body.image_urls)
-                    : req.body.image_urls;
-                const newUrls = Array.isArray(urls) ? urls : [urls];
-                imageUrls = [...imageUrls, ...newUrls];
-            }
-            // Priority 2: Traditional file upload via Multer (fallback)
-            else if (req.files && req.files.length > 0) {
-                const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                const results = await Promise.all(uploadPromises);
-                const newImageUrls = results.map(r => r.url);
-                imageUrls = [...imageUrls, ...newImageUrls];
+            let uploadedUrls = [];
+            if (req.files && req.files.length > 0) {
+                const results = await Promise.all(req.files.map(f => uploadToSupabase(f, 'products')));
+                uploadedUrls = results.map(r => r.url);
             }
 
-            let sizes = [];
-            let colors = [];
-
-            if (req.body.sizes) {
-                sizes = Array.isArray(req.body.sizes) ? req.body.sizes : req.body.sizes.split(',').map(s => s.trim());
+            // For updates, existing images come from currentProduct or body (if sorting)
+            const productData = this._parseProductPayload(req, currentProduct.images || []);
+            if (uploadedUrls.length > 0) {
+                productData.images = [...productData.images, ...uploadedUrls];
             }
-
-            if (req.body.colors) {
-                colors = Array.isArray(req.body.colors) ? req.body.colors : req.body.colors.split(',').map(c => c.trim());
-            }
-
-            let categoryIds = req.body.category_ids || (req.body.category_id ? [req.body.category_id] : []);
-            if (!Array.isArray(categoryIds)) categoryIds = [categoryIds];
-
-            const productData = {
-                name: req.body.name,
-                description: req.body.description,
-                price: Math.round(parseFloat(req.body.price) * 100) / 100,
-                discount: parseFloat(req.body.discount) || 0,
-                category_id: categoryIds[0] || null, // Sync with first category
-                category_ids: categoryIds,
-                stock: parseInt(req.body.stock) || 0,
-                is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
-                is_vto_enabled: req.body.is_vto_enabled === 'on' || req.body.is_vto_enabled === 'true' || req.body.is_vto_enabled === true,
-                sizes: sizes,
-                colors: colors,
-                images: imageUrls
-            };
 
             const product = await ProductService.updateProduct(req.params.id, productData);
-
             res.json({ success: true, product });
         } catch (error) {
             console.error('Error updating product:', error);
@@ -315,122 +277,60 @@ class ProductController {
 
     async createProductAdmin(req, res) {
         try {
-            const { name, description, price, discount, category_id, stock, is_featured, is_vto_enabled, sizes, size_guide } = req.body;
-
             console.log('📦 CreateProductAdmin Called. Files:', req.files ? req.files.length : 'No files');
-
-            let imageUrls = [];
-
-            // Priority 1: Direct URLs from Cloudinary
-            if (req.body.image_urls) {
-                const urls = typeof req.body.image_urls === 'string'
-                    ? JSON.parse(req.body.image_urls)
-                    : req.body.image_urls;
-                imageUrls = Array.isArray(urls) ? urls : [urls];
-                console.log('✅ Direct upload URLs received:', imageUrls);
-            }
-            // Priority 2: Traditional Multer upload (fallback)
-            else if (req.files && req.files.length > 0) {
-                try {
-                    const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                    const results = await Promise.all(uploadPromises);
-                    imageUrls = results.map(r => r.url);
-                    console.log('✅ All images uploaded via Cloudinary:', imageUrls);
-                } catch (imgError) {
-                    console.error('❌ Error uploading images to Cloudinary:', imgError);
-                    return res.status(500).send(`خطأ في رفع الصور: ${imgError.message}`);
-                }
+            
+            let uploadedUrls = [];
+            if (req.files && req.files.length > 0) {
+                const results = await Promise.all(req.files.map(f => uploadToSupabase(f, 'products')));
+                uploadedUrls = results.map(r => r.url);
             }
 
-            // Handle scraped images
-            if (req.body.scraped_images) {
-                try {
-                    const scraped = JSON.parse(req.body.scraped_images);
-                    if (Array.isArray(scraped)) imageUrls = [...imageUrls, ...scraped];
-                } catch (e) {
-                    console.error('Error parsing scraped images:', e);
-                }
-            }
-
-            // Parse Sizes — support Arabic comma ، and English comma ,
-            // Parse Sizes — support Arabic comma ، and English comma ,
-            let sizesArray = [];
-            if (sizes) {
-                // Ensure we handle both string input and array input (join first to handle mixed cases)
-                const sizesString = Array.isArray(sizes) ? sizes.join(',') : String(sizes);
-                sizesArray = sizesString.split(/[,،]/).map(s => s.trim()).filter(s => s);
-            }
-
-            // Parse Colors
-            let colorsArray = [];
-            if (req.body.colors) {
-                try {
-                    let parsedColors = typeof req.body.colors === 'string' ? JSON.parse(req.body.colors) : req.body.colors;
-                    if (Array.isArray(parsedColors)) {
-                        colorsArray = parsedColors.map(c => {
-                            if (typeof c === 'string') return { color: c, imageIndex: null };
-                            return c; // Assuming it's already { color, imageIndex }
-                        });
-                    }
-                } catch (e) {
-                    colorsArray = typeof req.body.colors === 'string' ? req.body.colors.split(',').map(c => ({ color: c.trim(), imageIndex: null })) : [];
-                }
-            }
-
-            // Handle Categories mapping
-            let categoryIdsToInsert = req.body.category_ids || (category_id ? [category_id] : []);
-            if (categoryIdsToInsert && !Array.isArray(categoryIdsToInsert)) {
-                categoryIdsToInsert = [categoryIdsToInsert];
-            }
-
-            // Parse Accessories
-            let accessoriesArray = [];
-            if (req.body.accessories) {
-                try {
-                    accessoriesArray = typeof req.body.accessories === 'string' ? JSON.parse(req.body.accessories) : req.body.accessories;
-                } catch (e) {
-                    console.error('Error parsing accessories:', e);
-                }
+            const productData = this._parseProductPayload(req);
+            if (uploadedUrls.length > 0) {
+                productData.images = [...productData.images, ...uploadedUrls];
             }
 
             const { data: newProduct, error } = await supabase.from('products').insert({
-                name,
-                description,
-                price: Math.round(parseFloat(price) * 100) / 100,
-                discount: parseFloat(discount) || 0,
-                stock: parseInt(stock) || 0,
-                category_id: categoryIdsToInsert[0] || null, // Sync with main table
-                is_featured: is_featured === 'on',
-                is_vto_enabled: is_vto_enabled === 'on',
-                sizes: sizesArray.length > 0 ? sizesArray : null,
-                colors: colorsArray.length > 0 ? colorsArray : null,
-                accessories: accessoriesArray.length > 0 ? accessoriesArray : null,
-                images: imageUrls,
-                size_guide: size_guide || ''
+                name: productData.name,
+                description: productData.description,
+                price: productData.price,
+                discount: productData.discount,
+                stock: productData.stock,
+                category_id: productData.category_id,
+                is_featured: productData.is_featured,
+                is_vto_enabled: productData.is_vto_enabled,
+                sizes: productData.sizes,
+                colors: productData.colors,
+                accessories: productData.accessories,
+                images: productData.images,
+                size_guide: productData.size_guide
             }).select().single();
 
-            if (error) {
-                console.error('❌ Supabase error:', error);
-                return res.status(500).send(`خطأ في إضافة المنتج: ${error.message}`);
+            if (error) throw error;
+
+            // Sync Category Links
+            if (productData.category_ids.length > 0) {
+                const links = productData.category_ids.map(catId => ({
+                    product_id: newProduct.id,
+                    category_id: catId
+                }));
+                await supabase.from('product_category_links').insert(links);
             }
 
-
-
-            // Insert variants if any
+            // Sync Variants
             if (req.body.variants) {
                 try {
-                    const variantsArr = JSON.parse(req.body.variants);
+                    const variantsArr = typeof req.body.variants === 'string' ? JSON.parse(req.body.variants) : req.body.variants;
                     if (Array.isArray(variantsArr) && variantsArr.length > 0) {
                         const variantData = variantsArr.map(v => ({
                             product_id: newProduct.id,
                             size: v.size || null,
                             color: v.color || null,
                             sku: v.sku || null,
-                            stock: parseInt(v.stock) || 0
+                            stock: parseInt(v.stock || 0)
                         }));
-                        const { error: variantError } = await supabase.from('product_variants').insert(variantData);
-                        if (variantError) console.error('❌ Error inserting variants:', variantError);
-
+                        await supabase.from('product_variants').insert(variantData);
+                        
                         // Auto-sync main product stock = sum of variant stocks
                         const totalVariantStock = variantData.reduce((sum, v) => sum + v.stock, 0);
                         await supabase.from('products').update({ stock: totalVariantStock }).eq('id', newProduct.id);
@@ -440,20 +340,9 @@ class ProductController {
                 }
             }
 
-            if (categoryIdsToInsert && categoryIdsToInsert.length > 0) {
-                const links = categoryIdsToInsert.map(catId => ({
-                    product_id: newProduct.id,
-                    category_id: catId
-                }));
-                const { error: linkError } = await supabase.from('product_category_links').insert(links);
-                if (linkError) {
-                    console.error('❌ Error linking categories:', linkError);
-                }
-            }
-
-            res.redirect('/products');
+            res.redirect('/admin/products');
         } catch (err) {
-            console.error('❌ Server error:', err);
+            console.error('❌ Server error in createProductAdmin:', err);
             res.status(500).send(`خطأ في السيرفر: ${err.message}`);
         }
     }
@@ -483,204 +372,68 @@ class ProductController {
 
     async updateProductAdmin(req, res) {
         try {
-            const { name, description, price, discount, category_id, stock, is_featured, is_vto_enabled, sizes, colors, size_guide } = req.body;
             console.log('🔄 UpdateProductAdmin Called for ID:', req.params.id);
-            console.log('📂 Files received:', req.files ? req.files.length : 'None');
-            console.log('📦 Raw Sizes:', req.body.sizes);
-            console.log('📦 Raw Colors:', req.body.colors);
-            console.log('📦 Raw Sizes:', req.body.sizes);
-            console.log('📦 Raw Colors:', req.body.colors);
+            
+            const { data: currentProduct } = await supabase.from('products').select('images').eq('id', req.params.id).single();
+            if (!currentProduct) return res.status(404).send('المنتج غير موجود');
 
-            // Helper to ensure absolute URLs (Fix for ERR_CONNECTION_RESET)
-            const ensureAbsoluteUrl = (url, cloudName = 'hwasibackend') => {
-                if (!url || typeof url !== 'string') return url;
-                if (url.startsWith('http')) return url;
-                // If it's a relative path starting with a Cloudinary public ID, prepend the base URL
-                if (url.match(/^[a-z0-9_]+(\.[a-z0-9]+)?$/i)) {
-                    return `https://res.cloudinary.com/${cloudName}/image/upload/${url}`;
-                }
-                return url;
-            };
-
-            // 1. Get current product data
-            const { data: currentProduct } = await supabase.from('products').select('images, sizes, colors').eq('id', req.params.id).single();
-
-            // 2. Identify the correct Cloudinary account from existing data
-            let detectedCloudName = process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME || 'hwasibackend';
-            const allPossibleImages = [...(currentProduct?.images || []), ...(req.body.image_urls ? (typeof req.body.image_urls === 'string' ? JSON.parse(req.body.image_urls) : req.body.image_urls) : [])];
-            const sampleUrl = allPossibleImages.find(u => typeof u === 'string' && u.includes('res.cloudinary.com/'));
-            if (sampleUrl) {
-                const match = sampleUrl.match(/res\.cloudinary\.com\/([^/]+)\//);
-                if (match && match[1]) detectedCloudName = match[1];
-            }
-            console.log('☁️ Detected Cloudinary Name:', detectedCloudName);
-
-            // SOURCE OF TRUTH: The final sequence from the frontend
-            let finalImageUrls = [];
-
-            // Case A: Frontend sent the final ordered sequence (Direct Upload or Sort)
-            if (req.body.image_urls) {
-                try {
-                    const urls = typeof req.body.image_urls === 'string'
-                        ? JSON.parse(req.body.image_urls)
-                        : req.body.image_urls;
-                    finalImageUrls = Array.isArray(urls) ? urls : [urls];
-                    console.log('✅ Final image sequence received (Direct/Sort):', finalImageUrls.length);
-                } catch (e) {
-                    console.error('Error parsing image_urls:', e);
-                }
-            } 
-            // Case B: Traditional files uploaded (Fallback)
-            else if (req.files && req.files.length > 0) {
-                try {
-                    // Start with retained images
-                    let retained = [];
-                    if (req.body.retained_images) {
-                        retained = JSON.parse(req.body.retained_images);
-                    } else {
-                        retained = currentProduct?.images || [];
-                    }
-                    
-                    const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
-                    const results = await Promise.all(uploadPromises);
-                    const newUploaded = results.map(r => r.url);
-                    finalImageUrls = [...retained, ...newUploaded];
-                    console.log('✅ Traditional upload added to retained:', newUploaded.length);
-                } catch (imgErr) {
-                    console.error('❌ Check Cloudinary Error in Update:', imgErr);
-                    return res.status(500).send(`خطأ في رفع الصور: ${imgErr.message}`);
-                }
-            }
-            // Case C: Just retained images (Sort or simple edit)
-            else if (req.body.retained_images) {
-                try {
-                    finalImageUrls = JSON.parse(req.body.retained_images);
-                } catch (e) {
-                    finalImageUrls = currentProduct?.images || [];
-                }
-            } else {
-                finalImageUrls = currentProduct?.images || [];
+            let uploadedUrls = [];
+            if (req.files && req.files.length > 0) {
+                const results = await Promise.all(req.files.map(f => uploadToSupabase(f, 'products')));
+                uploadedUrls = results.map(r => r.url);
             }
 
-            // SANITIZATION: Fix broken relative URLs using the detected cloud name
-            let imageUrls = finalImageUrls.map(url => ensureAbsoluteUrl(url, detectedCloudName)).filter(url => url);
-            console.log('🖼️ Final sanitized image count:', imageUrls.length);
-
-            // Parse sizes — support Arabic comma ، and English comma ,
-            let sizesArray = [];
-            let colorsArray = [];
-
-            if (sizes) {
-                // Ensure we handle both string input and array input (join first to handle mixed cases)
-                const sizesString = Array.isArray(sizes) ? sizes.join(',') : String(sizes);
-                console.log('📏 Processing Sizes String:', sizesString);
-                sizesArray = sizesString.split(/[,،]/).map(s => s.trim()).filter(s => s);
-                console.log('📏 Parsed Sizes Array:', sizesArray);
-            }
-
-            if (colors) {
-                try {
-                    // Try to parse as JSON (new format with image mapping)
-                    let parsedColors = typeof colors === 'string' ? JSON.parse(colors) : colors;
-
-                    // Handle case where colors might be an array of stringified objects
-                    if (Array.isArray(parsedColors)) {
-                        colorsArray = parsedColors.map(c => {
-                            if (typeof c === 'string') {
-                                // Try to parse if it's a stringified object
-                                try {
-                                    const parsed = JSON.parse(c);
-                                    return parsed.color ? parsed : { color: c, imageIndex: null };
-                                } catch {
-                                    // It's just a color string
-                                    return { color: c, imageIndex: null };
-                                }
-                            } else if (c && typeof c === 'object' && c.color) {
-                                // Already a proper object
-                                return c;
-                            }
-                            return { color: c, imageIndex: null };
-                        });
-                    } else {
-                        colorsArray = [];
-                    }
-                } catch (e) {
-                    // Fallback to old format (comma-separated strings)
-                    colorsArray = typeof colors === 'string' ? colors.split(',').map(c => ({ color: c.trim(), imageIndex: null })).filter(c => c.color) : colors;
-                }
-            }
-
-            // Handle Categories mapping Update
-            let categoryIdsToInsert = req.body.category_ids || (category_id ? [category_id] : []);
-            if (categoryIdsToInsert && !Array.isArray(categoryIdsToInsert)) {
-                categoryIdsToInsert = [categoryIdsToInsert];
-            }
-
-            // Parse Accessories
-            let accessoriesArray = [];
-            if (req.body.accessories) {
-                try {
-                    accessoriesArray = typeof req.body.accessories === 'string' ? JSON.parse(req.body.accessories) : req.body.accessories;
-                } catch (e) {
-                    console.error('Error parsing accessories in update:', e);
-                }
+            const productData = this._parseProductPayload(req, currentProduct.images || []);
+            if (uploadedUrls.length > 0) {
+                productData.images = [...productData.images, ...uploadedUrls];
             }
 
             // Perform Update
             const { error: updateError } = await supabase.from('products').update({
-                name,
-                description,
-                price: Math.round(parseFloat(price) * 100) / 100,
-                discount: parseFloat(discount) || 0,
-                stock: parseInt(stock) || 0,
-                category_id: categoryIdsToInsert[0] || null, // Sync with main table
-                is_featured: is_featured === 'on',
-                is_vto_enabled: is_vto_enabled === 'on',
-                sizes: sizesArray.length > 0 ? sizesArray : null,
-                colors: colorsArray.length > 0 ? colorsArray : null,
-                accessories: accessoriesArray.length > 0 ? accessoriesArray : null,
-                images: imageUrls,
-                size_guide: size_guide || ''
+                name: productData.name,
+                description: productData.description,
+                price: productData.price,
+                discount: productData.discount,
+                stock: productData.stock,
+                category_id: productData.category_id,
+                is_featured: productData.is_featured,
+                is_vto_enabled: productData.is_vto_enabled,
+                sizes: productData.sizes,
+                colors: productData.colors,
+                accessories: productData.accessories,
+                images: productData.images,
+                size_guide: productData.size_guide
             }).eq('id', req.params.id);
 
             if (updateError) throw updateError;
 
-            // Remove old links
+            // Sync Category Links (Remove old, insert new)
             await supabase.from('product_category_links').delete().eq('product_id', req.params.id);
-
-            // Insert new links
-            if (categoryIdsToInsert && categoryIdsToInsert.length > 0) {
-                const links = categoryIdsToInsert.map(catId => ({
+            if (productData.category_ids.length > 0) {
+                const links = productData.category_ids.map(catId => ({
                     product_id: req.params.id,
                     category_id: catId
                 }));
-                const { error: linkError } = await supabase.from('product_category_links').insert(links);
-                if (linkError) {
-                    console.error('❌ Error linking categories:', linkError);
-                }
+                await supabase.from('product_category_links').insert(links);
             }
 
-            // Sync variants if any
+            // Sync Variants
             if (req.body.variants) {
                 try {
-                    const variantsArr = JSON.parse(req.body.variants);
+                    const variantsArr = typeof req.body.variants === 'string' ? JSON.parse(req.body.variants) : req.body.variants;
                     if (Array.isArray(variantsArr)) {
-                        // Remove existing
                         await supabase.from('product_variants').delete().eq('product_id', req.params.id);
-
-                        // Insert new
                         if (variantsArr.length > 0) {
                             const variantData = variantsArr.map(v => ({
                                 product_id: req.params.id,
                                 size: v.size || null,
                                 color: v.color || null,
                                 sku: v.sku || null,
-                                stock: parseInt(v.stock) || 0
+                                stock: parseInt(v.stock || 0)
                             }));
-                            const { error: variantError } = await supabase.from('product_variants').insert(variantData);
-                            if (variantError) console.error('❌ Error inserting variants during update:', variantError);
-
-                            // Auto-sync main product stock = sum of variant stocks
+                            await supabase.from('product_variants').insert(variantData);
+                            
+                            // Auto-sync main product stock
                             const totalVariantStock = variantData.reduce((sum, v) => sum + v.stock, 0);
                             await supabase.from('products').update({ stock: totalVariantStock }).eq('id', req.params.id);
                         }
@@ -690,24 +443,9 @@ class ProductController {
                 }
             }
 
-            // Verify Persistence
-            // const { data: updatedProduct } = await supabase.from('products').select('sizes, colors').eq('id', req.params.id).single();
-
-            res.redirect('/products');
-            // res.json({
-            //     success: true,
-            //     message: 'Debug Verification: Data updated in Database?',
-            //     sentToDb: {
-            //         sizes: sizesArray.length > 0 ? sizesArray : null,
-            //     },
-            //     readFromDb: {
-            //         sizes: updatedProduct?.sizes,
-            //         colors: updatedProduct?.colors
-            //     },
-            //     match: JSON.stringify(sizesArray) === JSON.stringify(updatedProduct?.sizes)
-            // });
+            res.redirect('/admin/products');
         } catch (err) {
-            console.error('❌ Server error:', err);
+            console.error('❌ Server error in updateProductAdmin:', err);
             res.status(500).send(`خطأ في السيرفر: ${err.message}`);
         }
     }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hwasi_app/features/products/bloc/product_event.dart';
 import 'package:hwasi_app/features/products/bloc/product_state.dart';
@@ -42,7 +43,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         relatedProducts = allRelated.where((p) => p.id != product.id).toList();
       } catch (e) {
         // Silently fail for related products, don't block main product load
-        print('Error fetching related products: $e');
+        debugPrint('Error fetching related products: $e');
       }
 
       emit(ProductDetailsLoaded(product, relatedProducts: relatedProducts));

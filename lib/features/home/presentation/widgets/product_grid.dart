@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
@@ -42,7 +43,7 @@ class _ProductGridState extends State<ProductGrid> {
         });
       }
     } catch (e) {
-      print('Error loading products: $e');
+      debugPrint('Error loading products: $e');
       // Check if the widget is still mounted before calling setState
       if (mounted) {
         setState(() {

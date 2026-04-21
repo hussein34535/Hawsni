@@ -37,6 +37,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
     setState(() => _isLoading = true);
     try {
       final addressesData = await ApiService.getAddresses();
+      if (!mounted) return;
 
       setState(() {
         _addresses = addressesData
@@ -54,7 +55,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print("Error loading addresses: $e");
+      debugPrint("Error loading addresses: $e");
       setState(() => _isLoading = false);
     }
   }
@@ -181,6 +182,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
             onPressed: () async {
               Navigator.pop(context);
               final success = await ApiService.deleteAddress(address.id);
+              if (!mounted) return;
               if (success) {
                 _loadAddresses();
               }

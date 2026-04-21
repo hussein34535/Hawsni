@@ -49,92 +49,34 @@ async function fetchClarityData() {
 class DashboardController {
     async getDashboard(req, res) {
         try {
-            // 1. Get Counts
-            const { count: productsCount } = await supabase
-                .from('products')
-                .select('*', { count: 'exact', head: true });
-
-            const { count: categoriesCount } = await supabase
-                .from('categories')
-                .select('*', { count: 'exact', head: true });
-
-            const { count: ordersCount } = await supabase
-                .from('orders')
-                .select('*', { count: 'exact', head: true });
-
-            const { count: usersCount } = await supabase
-                .from('users')
-                .select('*', { count: 'exact', head: true });
-
-            const { count: bannersCount } = await supabase
-                .from('banners')
-                .select('*', { count: 'exact', head: true });
-
-            // 2. Calculate Revenue
-            const { data: revenueData } = await supabase
-                .from('orders')
-                .select('total');
-
-            const totalRevenue = revenueData
-                ? revenueData.reduce((sum, order) => sum + (parseFloat(order.total) || 0), 0)
-                : 0;
-
-            // 3. Get Recent Products
-            const { data: recentProducts } = await supabase
-                .from('products')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(5);
-
-            // 4. Get Recent Orders
-            const { data: recentOrders } = await supabase
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(5);
-
-            // 5. Get Order Stats
-            const { data: orderStats } = await supabase
-                .from('orders')
-                .select('status');
-
-            const statusCounts = {
-                'Processing': 0,
-                'Shipped': 0,
-                'Delivered': 0,
-                'Cancelled': 0
-            };
-
-            if (orderStats) {
-                orderStats.forEach(order => {
-                    const status = order.status || 'Processing';
-                    if (statusCounts[status] !== undefined) {
-                        statusCounts[status]++;
-                    } else if (status === 'In Transit') {
-                        statusCounts['Shipped']++;
-                    }
-                });
+            // 1. Fetch Aggregated Stats via Supabase RPC (O(1) Network Request)
+            const { data: stats, error } = await supabase.rpc('get_dashboard_stats');
+            
+            if (error) {
+                console.error('❌ RPC Error falling back to manual fetch:', error);
+                // Fallback logic could go here if needed, but we aim for RPC stability
+                throw error;
             }
 
-            // 6. Get Clarity Insights
+            // 2. Get Clarity Insights (Cached)
             const clarityInsights = await fetchClarityData();
 
             res.render('dashboard', {
-                productsCount: productsCount || 0,
-                categoriesCount: categoriesCount || 0,
-                ordersCount: ordersCount || 0,
-                usersCount: usersCount || 0,
-                bannersCount: bannersCount || 0,
-                revenue: totalRevenue.toFixed(2),
-                products: recentProducts || [],
-                orders: recentOrders || [],
-                chartData: statusCounts,
+                productsCount: stats.productsCount || 0,
+                categoriesCount: stats.categoriesCount || 0,
+                ordersCount: stats.ordersCount || 0,
+                usersCount: stats.usersCount || 0,
+                bannersCount: stats.bannersCount || 0,
+                revenue: (stats.revenue || 0).toFixed(2),
+                products: stats.recentProducts || [],
+                orders: stats.recentOrders || [],
+                chartData: stats.statusCounts || {},
                 clarityInsights: clarityInsights
             });
 
         } catch (err) {
             console.error('Dashboard Error:', err);
-            res.status(500).send("خطأ في تحميل لوحة التحكم");
+            res.status(500).send("خطأ في تحميل لوحة التحكم - تأكد من تنفيذ الـ RPC في قاعدة البيانات");
         }
     }
 }

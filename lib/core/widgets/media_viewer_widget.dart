@@ -111,7 +111,7 @@ class _MediaViewerWidgetState extends State<MediaViewerWidget> {
         ),
         // Overlay to wash it out elegantly
         Positioned.fill(
-          child: Container(color: Colors.white.withOpacity(0.5)),
+          child: Container(color: Colors.white.withValues(alpha: 0.5)),
         ),
         // Foreground focused item
         foreground,

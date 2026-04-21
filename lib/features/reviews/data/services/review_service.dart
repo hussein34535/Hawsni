@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/features/reviews/data/models/review_model.dart';
 
@@ -9,7 +10,7 @@ class ReviewService {
       final List<dynamic> reviewsJson = data['reviews'] ?? [];
       return reviewsJson.map((json) => ReviewModel.fromJson(json)).toList();
     } catch (e) {
-      print('Error fetching reviews: $e');
+      debugPrint('Error fetching reviews: $e');
       rethrow;
     }
   }
@@ -29,7 +30,7 @@ class ReviewService {
       );
       return ReviewModel.fromJson(data['review']);
     } catch (e) {
-      print('Error creating review: $e');
+      debugPrint('Error creating review: $e');
       rethrow;
     }
   }
@@ -38,7 +39,7 @@ class ReviewService {
     try {
       await ApiService.delete('/reviews/$reviewId');
     } catch (e) {
-      print('Error deleting review: $e');
+      debugPrint('Error deleting review: $e');
       rethrow;
     }
   }

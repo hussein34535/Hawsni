@@ -50,17 +50,28 @@ app.use(helmet({
 // Rate limiting configurations
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Strict limit for auth/sensitive actions
+  max: 10, // Strict limit for auth/sensitive actions (5-10 per 15 min)
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    if (forwarded) return forwarded.split(',')[0].trim();
+    return req.ip || 'unknown';
+  },
   message: { success: false, message: 'Too many attempts, please try again after 15 minutes.' }
 });
 
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // Balanced limit for general browsing
+  windowMs: 1 * 60 * 1000, // 1 minute window
+  max: 30, // Conservative safeguard for Serverless (approx 30 req/min per IP)
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    if (forwarded) return forwarded.split(',')[0].trim();
+    return req.ip || 'unknown';
+  },
+  skip: (req) => req.path === '/health',
   message: { success: false, message: 'Too many requests, please slow down.' }
 });
 
@@ -81,7 +92,7 @@ const corsOptions = {
     if (!origin || origin === 'null') return callback(null, true);
 
     // All allowed origins — both dev and prod combined
-    const allowedOrigins = [
+    const ALLOWED_ORIGINS = new Set([
       'https://hawsni.com',
       'https://www.hawsni.com',
       'https://hwasi.com',
@@ -93,15 +104,17 @@ const corsOptions = {
       'http://127.0.0.1:3000',
       'http://127.0.0.1:3001',
       'http://127.0.0.1:3002',
-    ];
+    ]);
 
-    // Allow any Vercel preview/deploy URLs dynamically
-    const isVercelPreview = origin.endsWith('.vercel.app');
+    // Strict Vercel Preview Regex
+    const VERCEL_PREVIEW_REGEX = /^https:\/\/[a-z0-9-]+\.vercel\.app$/;
 
-    if (allowedOrigins.includes(origin) || isVercelPreview) {
+    if (!origin || origin === 'null') return callback(null, true);
+
+    if (ALLOWED_ORIGINS.has(origin) || VERCEL_PREVIEW_REGEX.test(origin)) {
       callback(null, true);
     } else {
-      console.warn(`[CORS] Blocked origin: ${origin}`);
+      console.warn(`[CORS] Blocked: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -189,8 +202,11 @@ const injectCsrfToken = (req, res, next) => {
 };
 
 // Admin / Dashboard Routes - Apply Protection and Injection
-app.use('/api/admin', adminProtect, csrfProtection, injectCsrfToken, adminRoutes);
-app.use('/', csrfProtection, injectCsrfToken, adminRoutes);
+// Mounted at /admin to separate from root and public APIs
+app.use('/admin', adminProtect, csrfProtection, injectCsrfToken, adminRoutes);
+
+// Root redirect for backward compatibility or simple entry
+app.get('/dashboard', (req, res) => res.redirect('/admin/dashboard'));
 
 // Root redirect
 app.get('/', (req, res) => {

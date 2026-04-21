@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 
 class CouponService {
@@ -13,7 +14,7 @@ class CouponService {
       );
       return data;
     } catch (e) {
-      print('Error validating coupon: $e');
+      debugPrint('Error validating coupon: $e');
       return null;
     }
   }
@@ -24,7 +25,7 @@ class CouponService {
       final data = await ApiService.get('/coupons', includeAuth: true);
       return data['coupons'] ?? [];
     } catch (e) {
-      print('Error fetching coupons: $e');
+      debugPrint('Error fetching coupons: $e');
       return [];
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hwasi_app/features/home/presentation/widgets/category_card.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
@@ -30,7 +31,7 @@ class _CategoryListState extends State<CategoryList> {
         });
       }
     } catch (e) {
-      print('Error loading categories: $e');
+      debugPrint('Error loading categories: $e');
       // Check if the widget is still mounted before calling setState
       if (mounted) {
         setState(() {

@@ -44,7 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _sessionId = sid;
     });
 
-    await _fetchSessionHistory(sid!);
+    await _fetchSessionHistory(sid);
     _subscribeToMessages(sid);
   }
 

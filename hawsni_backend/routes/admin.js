@@ -19,13 +19,14 @@ const adminChatController = require('../controllers/admin/adminChatController');
 const { adminProtect } = require('../middleware/adminAuth');
 
 // Auth Routes (Public for Admin)
-router.get('/admin/login', adminAuthController.renderLogin);
-router.post('/admin/login', adminAuthController.login);
-router.get('/admin/logout', adminAuthController.logout);
+// These will be available at /admin/login and /admin/logout
+router.get('/login', adminAuthController.renderLogin);
+router.post('/login', adminAuthController.login);
+router.get('/logout', adminAuthController.logout);
 
-// Redirect /admin to /dashboard
-router.get('/admin', (req, res) => {
-    res.redirect('/dashboard');
+// Redirect /admin to /admin/dashboard
+router.get('/', (req, res) => {
+    res.redirect('/admin/dashboard');
 });
 
 // Apply protection to all following routes

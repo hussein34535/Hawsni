@@ -50,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
-      print('Error refreshing user profile: $e');
+      debugPrint('Error refreshing user profile: $e');
     }
   }
 
