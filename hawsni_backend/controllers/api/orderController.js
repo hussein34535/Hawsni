@@ -39,7 +39,7 @@ class OrderController {
 
     async createOrder(req, res) {
         try {
-            const { items, shippingAddress, paymentMethod, discount, couponCode, notes, guestName, guestEmail, guestPhone, guestAlternativePhone } = req.body;
+            const { items, shippingAddress, paymentMethod, discount, couponCode, notes, guestName, guestEmail, guestPhone, guestAlternativePhone, conversionEventId } = req.body;
 
             let finalShippingAddress = shippingAddress;
             if (typeof shippingAddress === 'string') {
@@ -179,7 +179,8 @@ class OrderController {
                 guestEmail: guestEmail || finalShippingAddress.email,
                 guestPhone: guestPhone || finalShippingAddress.phone,
                 ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress,
-                userAgent: req.headers['user-agent']
+                userAgent: req.headers['user-agent'],
+                conversionEventId: conversionEventId || null, // From frontend for Meta CAPI dedup
             };
             const order = await OrderService.createOrder(orderData, safeItems, guestInfo);
 

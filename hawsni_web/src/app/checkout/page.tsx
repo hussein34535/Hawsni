@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { trackEvent } from '@/components/analytics/FacebookPixel';
 import {
   ArrowLeft,
   ArrowRight,
@@ -34,7 +35,7 @@ import { authService } from '@/services/authService';
 import OrderReceipt from '@/components/checkout/OrderReceipt';
 import MeshBackground from '@/components/checkout/MeshBackground';
 
-// ─── Beautiful Progress Indicator ───────────────────────
+// ─── Premium Step Indicator ────────────────────────────
 function StepIndicator({ currentStep, isRTL }: { currentStep: number; isRTL: boolean }) {
   const steps = [
     { label: isRTL ? 'الشحن' : 'Shipping', icon: MapPin },
@@ -43,28 +44,51 @@ function StepIndicator({ currentStep, isRTL }: { currentStep: number; isRTL: boo
   ];
 
   return (
-    <div className="flex items-center justify-between gap-2 mb-10 px-4">
-      {steps.map((step, idx) => (
-        <div key={idx} className="flex-1 flex items-center gap-2">
-          {/* Node */}
-          <div className={`relative flex items-center justify-center w-10 h-10 rounded-2xl transition-all duration-500 ${
-            idx <= currentStep ? 'bg-[#0E4435] text-white shadow-lg shadow-emerald-950/20' : 'bg-white text-gray-300 border border-gray-100'
-          }`}>
-            <step.icon size={18} />
+    <div className="flex items-center justify-between mb-10 px-2">
+      {steps.map((step, idx) => {
+        const isActive = idx === currentStep;
+        const isDone = idx < currentStep;
+        return (
+          <div key={idx} className="flex-1 flex items-center">
+            <div className="flex flex-col items-center gap-1.5 relative z-10">
+              <motion.div
+                animate={{
+                  scale: isActive ? 1.15 : 1,
+                  backgroundColor: isDone ? '#10b981' : isActive ? '#0E4435' : '#ffffff',
+                  boxShadow: isActive
+                    ? '0 0 0 6px rgba(14,68,53,0.08), 0 8px 20px rgba(14,68,53,0.2)'
+                    : isDone
+                    ? '0 4px 12px rgba(16,185,129,0.25)'
+                    : '0 2px 8px rgba(0,0,0,0.06)',
+                }}
+                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                className="w-11 h-11 rounded-2xl flex items-center justify-center border border-white/60 backdrop-blur-sm"
+              >
+                {isDone ? (
+                  <Check size={18} strokeWidth={3} className="text-white" />
+                ) : (
+                  <step.icon size={18} className={isActive ? 'text-white' : 'text-gray-300'} />
+                )}
+              </motion.div>
+              <span className={`hidden md:block text-[10px] font-black uppercase tracking-widest transition-colors ${
+                isActive ? 'text-[#0E4435]' : isDone ? 'text-emerald-500' : 'text-gray-300'
+              }`}>
+                {step.label}
+              </span>
+            </div>
             {idx < steps.length - 1 && (
-              <div className={`absolute top-1/2 -translate-y-1/2 w-full h-[2px] ${isRTL ? '-right-full' : '-left-full'} ${
-                idx < currentStep ? 'bg-[#0E4435]' : 'bg-gray-100'
-              }`} />
+              <div className="flex-1 mx-3 h-[2px] rounded-full overflow-hidden bg-gray-100">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-[#0E4435] rounded-full"
+                  initial={{ width: '0%' }}
+                  animate={{ width: idx < currentStep ? '100%' : '0%' }}
+                  transition={{ duration: 0.5, ease: 'easeInOut' }}
+                />
+              </div>
             )}
           </div>
-          {/* Label (Desktop Only) */}
-          <span className={`hidden md:block text-[11px] font-black uppercase tracking-widest ${
-            idx <= currentStep ? 'text-[#0E4435]' : 'text-gray-300'
-          }`}>
-            {step.label}
-          </span>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -226,14 +250,25 @@ export default function CheckoutPage() {
   const { showToast } = useToastStore();
 
   const [activeStep, setActiveStep] = useState(0);
-  const nextStep = () => {
+  // Unique event ID for Meta Pixel deduplication with CAPI
+  const [conversionEventId] = useState(() => `web_checkout_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`);
+
+  const nextStep = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    setActiveStep((prev) => Math.min(prev + 1, 2));
-  };
-  const prevStep = () => {
+    setActiveStep((prev) => {
+      const next = Math.min(prev + 1, 2);
+      // Track AddPaymentInfo when moving from Shipping (0) → Payment (1)
+      if (prev === 0) {
+        trackEvent('AddPaymentInfo', { currency: 'EGP' }, { eventID: conversionEventId });
+      }
+      return next;
+    });
+  }, [conversionEventId]);
+
+  const prevStep = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setActiveStep((prev) => Math.max(prev - 1, 0));
-  };
+  }, []);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -276,7 +311,16 @@ export default function CheckoutPage() {
 
   // ─── Data Fetching ────────────────────────────────────
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    // Track InitiateCheckout on page mount
+    trackEvent('InitiateCheckout', {
+      currency: 'EGP',
+      num_items: items.length,
+    }, { eventID: conversionEventId });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     setIsAuthenticated(!!token);
 
     const fetchData = async () => {
@@ -408,6 +452,7 @@ export default function CheckoutPage() {
         if (addrRes.success) addressId = addrRes.address._id;
       }
       const result = await checkoutService.placeOrder({
+        conversionEventId,
         items: items.map(i => ({ 
           product: i.productId, 
           name: i.name, 
@@ -464,13 +509,16 @@ export default function CheckoutPage() {
           
           {/* Left Column: Progressing Forms */}
           <div className="lg:col-span-7 space-y-6">
-            
+
+            <AnimatePresence mode="wait">
             {/* STEP 1: SHIPPING & INFO */}
             {activeStep === 0 ? (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+              <motion.div
+                key="step-0"
+                initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="space-y-6"
               >
                 <Section title={isRTL ? 'بيانات العميل' : 'Customer Info'} icon={User}>
@@ -553,10 +601,12 @@ export default function CheckoutPage() {
 
             {/* STEP 2: PAYMENT & NOTES */}
             {activeStep === 1 && (
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+              <motion.div
+                key="step-1"
+                initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
                 className="space-y-6"
               >
                 <Section title={isRTL ? 'طريقة الدفع' : 'Payment Method'} icon={CreditCard}>
@@ -607,12 +657,15 @@ export default function CheckoutPage() {
                </SummaryCard>
             )}
 
-            {/* STEP 3: REVIEW (GLASSMORHISM) */}
+            {/* STEP 3: REVIEW (GLASSMORPHISM) */}
             {activeStep === 2 && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.98 }}
+              <motion.div
+                key="step-2"
+                initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="glass-card rounded-[32px] p-8 space-y-8 relative overflow-hidden"
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="bg-white/50 backdrop-blur-xl rounded-[32px] p-8 space-y-8 relative overflow-hidden border border-white/60 shadow-xl shadow-[#0E4435]/5"
               >
                 {/* Glow Effect */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[60px] pointer-events-none" />
@@ -660,6 +713,7 @@ export default function CheckoutPage() {
                 </motion.button>
               </motion.div>
             )}
+            </AnimatePresence>
 
           </div>
 

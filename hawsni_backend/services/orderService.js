@@ -260,7 +260,8 @@ class OrderService {
                 phone: shipping?.phone || guestInfo.guestPhone,
                 name: customerName || guestInfo.guestName,
                 ip: guestInfo.ipAddress,
-                userAgent: guestInfo.userAgent
+                userAgent: guestInfo.userAgent,
+                eventId: guestInfo.conversionEventId, // For Browser Pixel deduplication
             }).catch(err => console.error('Meta CAPI Purchase tracking failed:', err));
 
         } catch (emailErr) {

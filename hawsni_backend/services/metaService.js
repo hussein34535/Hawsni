@@ -70,8 +70,9 @@ class MetaService {
                         event_name: 'Purchase',
                         event_time: Math.floor(Date.now() / 1000),
                         action_source: 'website',
-                        event_id: `order_${order.id}`,
-                        event_source_url: 'https://hawsni.com/checkout/success',
+                        // Use frontend eventId for deduplication with Browser Pixel, fallback to order id
+                        event_id: customerInfo.eventId || `order_${order.id}`,
+                        event_source_url: 'https://hawsni.com/checkout',
                         user_data: userData,
                         custom_data: {
                             value: order.total_amount || order.total,

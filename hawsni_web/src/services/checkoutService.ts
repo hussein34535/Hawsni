@@ -25,6 +25,7 @@ export interface OrderData {
     guestAlternativePhone?: string;
     guestEmail?: string;
     notes?: string;
+    conversionEventId?: string; // For Meta CAPI deduplication
 }
 
 export const checkoutService = {
