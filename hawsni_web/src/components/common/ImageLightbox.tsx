@@ -473,7 +473,6 @@ export default function ImageLightbox({
                                     img={img}
                                     idx={idx}
                                     currentIndex={currentIndex}
-                                    scrollX={scrollX}
                                     windowWidth={windowWidth}
                                     zoom={zoom}
                                     springX={springX}
