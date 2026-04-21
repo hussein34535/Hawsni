@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { motion, useMotionValue, useSpring, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Download, Play, Pause, Maximize } from 'lucide-react';
 import { useToastStore } from '@/store/toastStore';
 
@@ -16,7 +16,7 @@ interface LightboxImageProps {
     img: string;
     idx: number;
     currentIndex: number;
-    scrollX: any;
+
     windowWidth: number;
     zoom: number;
     springX: any;
@@ -36,7 +36,6 @@ function LightboxImage({
     img,
     idx,
     currentIndex,
-    scrollX,
     windowWidth,
     zoom,
     springX,
@@ -258,8 +257,7 @@ export default function ImageLightbox({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Scroll state for animations
-    const { scrollX } = useScroll({ container: scrollContainerRef });
+
 
     // MotionValues for zoomed image dragging
     const translateX = useMotionValue(0);

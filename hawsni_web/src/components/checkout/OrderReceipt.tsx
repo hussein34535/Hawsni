@@ -14,9 +14,6 @@ export default function OrderReceipt({
   shippingFee: number;
   discount: number;
   total: number;
-  couponApplied: boolean;
-  selectedGov: string;
-  deliveryEstimate: { min: number; max: number };
 }) {
   const { items } = useCartStore();
   const { isRTL } = useLanguage();
@@ -40,7 +37,7 @@ export default function OrderReceipt({
 
       {/* Items Section */}
       <div className="px-6 py-4 space-y-4 max-h-[340px] overflow-y-auto scrollbar-hide">
-        {items.map((item, idx) => (
+        {items.map((item) => (
           <div 
             key={item.id} 
             className="group flex items-center gap-4 py-2 first:pt-0"
@@ -51,9 +48,6 @@ export default function OrderReceipt({
                   src={item.imageUrl}
                   alt={item.name}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder.png';
-                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
