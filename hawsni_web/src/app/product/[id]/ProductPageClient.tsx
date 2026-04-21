@@ -392,10 +392,6 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
             showToast(isRTL ? 'يرجى اختيار المقاس' : 'Please select a size', 'error');
             return;
         }
-        if (product?.accessories && product.accessories.length > 0 && selectedAccessories.length === 0 && !hasShownUpsell) {
-            setIsUpsellOpen(true);
-            return;
-        }
         performAddToCart(selectedAccessories);
     };
 
@@ -460,8 +456,6 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                             </div>
                         </div>
 
-                        <FreeDeliveryBanner isRTL={isRTL} />
-
                         <div className="mt-8 space-y-6">
                             <div>
                                 <h3 className="text-sm font-black text-gray-900 mb-4">{isRTL ? 'اختر المقاس' : 'Select Size'}</h3>
@@ -477,8 +471,6 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                 {isRTL ? 'إضافة إلى السلة' : 'Add to Cart'}
                             </button>
                         </div>
-
-                        <FAQAccordion isRTL={isRTL} />
                     </div>
                 </div>
             </main>
