@@ -86,19 +86,86 @@ class OrderController {
                 };
             });
 
-            const shippingFee = parseFloat(req.body.shippingFee) || 0;
-            const orderDiscount = parseFloat(discount) || 0;
+            // --- Server-side Shipping Fee Verification ---
+            let verifiedShippingFee = 0;
+            try {
+                const { data: settingsArray } = await supabase
+                    .from('shipping_settings')
+                    .select('*')
+                    .order('updated_at', { ascending: false })
+                    .limit(1);
+
+                const shippingConfig = settingsArray && settingsArray.length > 0 ? settingsArray[0] : null;
+
+                if (shippingConfig) {
+                    const gov = finalShippingAddress.state || finalShippingAddress.city || '';
+                    const govSettings = shippingConfig.governorate_settings?.[gov];
+                    const threshold = shippingConfig.free_shipping_threshold || 0;
+
+                    if (threshold > 0 && safeSubtotal >= threshold) {
+                        verifiedShippingFee = 0;
+                    } else if (govSettings) {
+                        verifiedShippingFee = parseFloat(govSettings.cost) || 0;
+                    } else {
+                        verifiedShippingFee = parseFloat(shippingConfig.delivery_cost) || 0;
+                    }
+                }
+            } catch (err) {
+                console.error('Shipping verification error:', err);
+                verifiedShippingFee = parseFloat(req.body.shippingFee) || 0;
+            }
+
+            const finalShippingFee = Math.round(verifiedShippingFee * 100) / 100;
+
+            // --- Server-side Coupon Validation ---
+            let orderDiscount = 0;
+            if (couponCode) {
+                try {
+                    const { data: coupon } = await supabase
+                        .from('coupons')
+                        .select('*')
+                        .eq('code', couponCode.toUpperCase().trim())
+                        .eq('is_active', true)
+                        .single();
+
+                    if (coupon) {
+                        const now = new Date();
+                        const expiresAt = new Date(coupon.expires_at);
+
+                        if (expiresAt > now) {
+                            if (!coupon.max_uses || (coupon.used_count || 0) < coupon.max_uses) {
+                                if (coupon.discount_type === 'percentage') {
+                                    orderDiscount = (safeSubtotal * (parseFloat(coupon.discount) / 100));
+                                } else {
+                                    orderDiscount = Math.min(parseFloat(coupon.discount), safeSubtotal);
+                                }
+
+                                // Increment usage (non-blocking for speed, but ideally tracked)
+                                supabase.from('coupons')
+                                    .update({ used_count: (coupon.used_count || 0) + 1 })
+                                    .eq('id', coupon.id)
+                                    .then(({ error }) => { if(error) console.error('Error incrementing coupon:', error); });
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error('Coupon validation error:', err);
+                    orderDiscount = 0;
+                }
+            }
+
+            const finalDiscount = Math.round(orderDiscount * 100) / 100;
 
             const orderData = {
                 user_id: req.user ? req.user.id : null,
                 shipping_address: finalShippingAddress,
                 payment_method: paymentMethod,
-                subtotal: safeSubtotal,
-                shipping_fee: shippingFee,
-                discount: orderDiscount,
-                coupon_code: couponCode,
+                subtotal: Math.round(safeSubtotal * 100) / 100,
+                shipping_fee: finalShippingFee,
+                discount: finalDiscount,
+                coupon_code: couponCode || null,
                 notes: notes || null,
-                total: Math.max(0, safeSubtotal + shippingFee - orderDiscount),
+                total: Math.round(Math.max(0, safeSubtotal + finalShippingFee - finalDiscount) * 100) / 100,
                 status: 'Processing'
             };
 

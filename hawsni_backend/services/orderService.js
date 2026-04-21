@@ -99,8 +99,8 @@ class OrderService {
                     product_id: prodId,
                     name: item.name,
                     image_url: finalImage,
-                    quantity: item.quantity,
-                    price: item.price,
+                    quantity: Math.round(item.quantity || 1), // Force Integer
+                    price: Math.round((item.price || 0) * 100) / 100,
                     size: item.size || null,
                     color: item.color || null,
                     accessories: item.accessories || null
@@ -136,7 +136,8 @@ class OrderService {
                         
                         if (currentProduct) {
                             pName = currentProduct.name;
-                            const newStock = Math.max(0, (currentProduct.stock || 0) - qty);
+                            const qtyInt = Math.round(qty);
+                            const newStock = Math.max(0, (parseInt(currentProduct.stock) || 0) - qtyInt);
                             
                             const { data: updatedProduct } = await supabase
                                 .from('products')
