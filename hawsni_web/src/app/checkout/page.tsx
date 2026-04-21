@@ -1,14 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   ArrowRight,
   MapPin,
-  Truck,
-  CreditCard,
-  CheckCircle2,
   Check,
   Home,
   Briefcase,
@@ -20,6 +17,8 @@ import {
   Tag,
   Lock,
   ShoppingBag,
+  Truck,
+  ChevronDown,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
@@ -30,10 +29,9 @@ import { checkoutService, OrderData } from '@/services/checkoutService';
 import { couponService } from '@/services/couponService';
 import { authService } from '@/services/authService';
 
-import CheckoutSteps from '@/components/checkout/CheckoutSteps';
 import OrderReceipt from '@/components/checkout/OrderReceipt';
 
-// ─── Clean Input ────────────────────────────────────────
+// ─── Beautiful Input ────────────────────────────────────
 function Input({
   icon: Icon,
   placeholder,
@@ -54,11 +52,13 @@ function Input({
   const { isRTL } = useLanguage();
 
   return (
-    <div className="relative">
-      <div className={`absolute top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none ${
-        isRTL ? 'right-4' : 'left-4'
-      }`}>
-        <Icon size={18} />
+    <div className="relative group">
+      <div
+        className={`absolute top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none group-focus-within:text-[#0E4435] transition-colors ${
+          isRTL ? 'right-4' : 'left-4'
+        }`}
+      >
+        <Icon size={17} />
       </div>
       <input
         id={id}
@@ -68,10 +68,73 @@ function Input({
         disabled={disabled}
         placeholder={placeholder}
         dir={isRTL ? 'rtl' : 'ltr'}
-        className={`w-full h-12 bg-gray-50 rounded-xl text-sm font-bold text-gray-900 placeholder:text-gray-300 outline-none border border-transparent focus:border-gray-200 focus:bg-white transition-all disabled:opacity-50 ${
-          isRTL ? 'pr-11 pl-4 text-right' : 'pl-11 pr-4 text-left'
+        className={`w-full h-11 bg-white rounded-xl text-[13px] font-bold text-gray-900 placeholder:text-gray-300 outline-none border border-gray-100 focus:border-[#0E4435] focus:ring-2 focus:ring-[#0E4435]/5 transition-all disabled:opacity-50 ${
+          isRTL ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4 text-left'
         }`}
       />
+    </div>
+  );
+}
+
+// ─── Beautiful Select ───────────────────────────────────
+function Select({
+  value,
+  onChange,
+  children,
+  disabled = false,
+  placeholder,
+}: {
+  value: string;
+  onChange: (e: any) => void;
+  children: React.ReactNode;
+  disabled?: boolean;
+  placeholder?: string;
+}) {
+  const { isRTL } = useLanguage();
+
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        dir={isRTL ? 'rtl' : 'ltr'}
+        className={`w-full h-11 bg-white rounded-xl text-[13px] font-bold text-gray-900 outline-none border border-gray-100 focus:border-[#0E4435] focus:ring-2 focus:ring-[#0E4435]/5 transition-all appearance-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+          isRTL ? 'pr-4 pl-10 text-right' : 'pl-4 pr-10 text-left'
+        } ${!value ? 'text-gray-300' : ''}`}
+      >
+        {children}
+      </select>
+      <div
+        className={`absolute top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none ${
+          isRTL ? 'left-3' : 'right-3'
+        }`}
+      >
+        <ChevronDown size={16} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Section Card ───────────────────────────────────────
+function Section({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon: any;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-4">
+      <div className="flex items-center gap-2.5">
+        <div className="w-8 h-8 bg-[#0E4435]/5 rounded-lg flex items-center justify-center">
+          <Icon size={16} className="text-[#0E4435]" />
+        </div>
+        <h3 className="text-sm font-black text-gray-900">{title}</h3>
+      </div>
+      {children}
     </div>
   );
 }
@@ -83,7 +146,6 @@ export default function CheckoutPage() {
   const { isRTL, t } = useLanguage();
   const { showToast } = useToastStore();
 
-  const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -233,7 +295,6 @@ export default function CheckoutPage() {
   }, [shippingSettings, freeDeliveryActive, selectedGov, subtotal]);
 
   const { cost: shippingFee, min: deliveryMin, max: deliveryMax } = calculateShipping;
-  // Safety rounding for total
   const total = Math.round((subtotal - couponDiscount + shippingFee) * 100) / 100;
 
   // ─── Coupon ───────────────────────────────────────────
@@ -245,27 +306,51 @@ export default function CheckoutPage() {
         setIsCouponApplied(true);
         const discount = res.coupon.discountAmount;
         if (res.coupon.discountType === 'percentage') {
-          // IMPORTANT: Fixing float precision issue "19.9999999996"
           const calculatedDiscount = subtotal * (discount / 100);
           setCouponDiscount(Math.round(calculatedDiscount * 100) / 100);
         } else {
           setCouponDiscount(discount);
         }
-        showToast(
-          isRTL ? 'تم تطبيق كود الخصم ✅' : 'Coupon applied ✅',
-          'success'
-        );
+        showToast(isRTL ? 'تم تطبيق كود الخصم ✅' : 'Coupon applied ✅', 'success');
       }
     } catch {
-      showToast(
-        isRTL ? 'كود الخصم غير صالح' : 'Invalid coupon',
-        'error'
-      );
+      showToast(isRTL ? 'كود الخصم غير صالح' : 'Invalid coupon', 'error');
     }
   };
 
   // ─── Place Order ──────────────────────────────────────
   const handlePlaceOrder = async () => {
+    // Validation
+    if (!isAuthenticated) {
+      if (guestInfo.name.length < 3) {
+        showToast(isRTL ? 'يرجى إدخال اسم صحيح' : 'Please enter a valid name', 'error');
+        return;
+      }
+      if (!/^01[0125]\d{8}$/.test(guestInfo.phone)) {
+        showToast(isRTL ? 'رقم الهاتف غير صحيح' : 'Invalid phone number', 'error');
+        return;
+      }
+    }
+
+    if (!selectedGovId) {
+      showToast(isRTL ? 'يرجى اختيار المحافظة' : 'Select a governorate', 'error');
+      return;
+    }
+    if (!selectedDistrictId) {
+      showToast(isRTL ? 'يرجى اختيار المنطقة' : 'Select a district', 'error');
+      return;
+    }
+
+    const streetToValidate = isAuthenticated && isAddingNewAddress
+      ? newAddress.street
+      : guestInfo.street;
+    if (!isAuthenticated || isAddingNewAddress) {
+      if (streetToValidate.length < 5) {
+        showToast(isRTL ? 'يرجى كتابة العنوان بالتفصيل' : 'Enter detailed address', 'error');
+        return;
+      }
+    }
+
     setIsProcessing(true);
     try {
       let addressId = selectedAddressId;
@@ -281,18 +366,12 @@ export default function CheckoutPage() {
         if (saveAddrRes.success) addressId = saveAddrRes.address._id;
       }
 
-      // Final Rounding for DB Safety
-      const finalSubtotal = Math.round(subtotal * 100) / 100;
-      const finalShipping = Math.round(shippingFee * 100) / 100;
-      const finalDiscount = Math.round(couponDiscount * 100) / 100;
-      const finalTotal = Math.round(total * 100) / 100;
-
       const orderData: OrderData = {
         items: items.map((item) => ({
           product: item.productId,
           name: item.name,
           price: Math.round(item.price * 100) / 100,
-          quantity: Math.round(item.quantity), // Ensure INTEGER for DB
+          quantity: Math.round(item.quantity),
           image_url: item.imageUrl,
           size: item.size || undefined,
           color: item.color || undefined,
@@ -315,10 +394,10 @@ export default function CheckoutPage() {
                 address: `${guestInfo.street}, ${guestInfo.city}, ${selectedGov}`,
               },
         paymentMethod: 'Cash on Delivery',
-        subtotal: finalSubtotal,
-        shippingFee: finalShipping,
-        discount: finalDiscount,
-        totalAmount: finalTotal,
+        subtotal: Math.round(subtotal * 100) / 100,
+        shippingFee: Math.round(shippingFee * 100) / 100,
+        discount: Math.round(couponDiscount * 100) / 100,
+        totalAmount: Math.round(total * 100) / 100,
         couponCode: isCouponApplied ? couponCode : undefined,
         ...(!isAuthenticated
           ? {
@@ -346,465 +425,237 @@ export default function CheckoutPage() {
     }
   };
 
-  // ─── Validation ───────────────────────────────────────
-  const validateStep = (step: number) => {
-    if (step === 1) {
-      if (isAuthenticated) return true;
-      if (guestInfo.name.length < 3) {
-        showToast(isRTL ? 'يرجى إدخال اسم صحيح' : 'Please enter a valid name', 'error');
-        return false;
-      }
-      if (!/^01[0125]\d{8}$/.test(guestInfo.phone)) {
-        showToast(isRTL ? 'رقم الهاتف غير صحيح' : 'Invalid phone number', 'error');
-        return false;
-      }
-    }
-    if (step === 2) {
-      if (!selectedGovId) {
-        showToast(isRTL ? 'يرجى اختيار المحافظة' : 'Select a governorate', 'error');
-        return false;
-      }
-      if (!selectedDistrictId) {
-        showToast(isRTL ? 'يرجى اختيار المنطقة' : 'Select a district', 'error');
-        return false;
-      }
-      if (!isAuthenticated && guestInfo.street.length < 5) {
-        showToast(isRTL ? 'يرجى كتابة العنوان بالتفصيل' : 'Enter detailed address', 'error');
-        return false;
-      }
-      if (isAuthenticated && isAddingNewAddress && newAddress.street.length < 5) {
-        showToast(isRTL ? 'يرجى كتابة العنوان بالتفصيل' : 'Enter detailed address', 'error');
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const nextStep = () => {
-    if (validateStep(currentStep)) setCurrentStep((prev) => prev + 1);
-  };
-  const prevStep = () => setCurrentStep((prev) => prev - 1);
-
   if (items.length === 0 && !isProcessing) return null;
 
-  const CHECKOUT_STEPS = [
-    { id: 1, label: 'Contact', labelAr: 'البيانات', icon: User },
-    { id: 2, label: 'Shipping', labelAr: 'العنوان', icon: MapPin },
-    { id: 3, label: 'Review', labelAr: 'التأكيد', icon: CheckCircle2 },
-  ];
-
-  // ─── Select Style ─────────────────────────────────────
-  const getSelectClass = () => {
-    const base = 'w-full h-12 bg-gray-50 rounded-xl px-4 text-sm font-bold outline-none border border-transparent focus:border-gray-200 focus:bg-white transition-all appearance-none cursor-pointer';
-    return `${base} ${isRTL ? 'text-right' : 'text-left'}`;
-  };
-
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-cairo" dir="rtl">
+    <div className="min-h-screen bg-[#F8F9FA] font-cairo pb-28 lg:pb-8" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <button
-            onClick={() => (currentStep > 1 ? prevStep() : router.back())}
-            className="w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center text-gray-600 active:scale-95 transition-transform"
+            onClick={() => router.back()}
+            className="w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500 active:scale-95 transition-transform"
           >
             {isRTL ? <ArrowRight size={18} /> : <ArrowLeft size={18} />}
           </button>
+          <h1 className="text-base font-black text-gray-900">
+            {isRTL ? 'إتمام الطلب' : 'Checkout'}
+          </h1>
           <div className="flex items-center gap-1.5">
-            <Lock size={13} className="text-emerald-600" />
-            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-              {isRTL ? 'دفع آمن' : 'Secure Checkout'}
+            <Lock size={12} className="text-emerald-500" />
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              {isRTL ? 'آمن' : 'Secure'}
             </span>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
-        <CheckoutSteps currentStep={currentStep} steps={CHECKOUT_STEPS} />
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* ─── Form Side ──────────────────────────────── */}
-          <div className="lg:col-span-7">
-            <AnimatePresence mode="wait">
-              {/* STEP 1: Contact Info */}
-              {currentStep === 1 && (
-                <motion.section
-                  key="step1"
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h2 className="text-xl font-black text-gray-900">
-                      {isRTL ? 'بيانات التواصل' : 'Contact Info'}
-                    </h2>
-                    <p className="text-sm text-gray-400 font-bold mt-1">
-                      {isRTL
-                        ? 'هنحتاج البيانات دي عشان نتابع معاك طلبك'
-                        : 'We need this to follow up on your order'}
-                    </p>
+      <main className="max-w-5xl mx-auto px-4 py-6 pb-24 lg:pb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+          {/* ─── Form Column ─────────────────────────────── */}
+          <div className="lg:col-span-3 space-y-4">
+            {/* Contact Section */}
+            <Section title={isRTL ? 'بيانات التواصل' : 'Contact Info'} icon={User}>
+              {isAuthenticated ? (
+                <div className="bg-emerald-50/60 rounded-xl p-3 flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+                    <Check size={14} strokeWidth={3} />
                   </div>
-
-                  {isAuthenticated ? (
-                    <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
-                        <CheckCircle2 size={20} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-black text-emerald-800">
-                          {isRTL ? 'أهلاً بيك! مسجل دخول' : 'Welcome back! Logged in'}
-                        </p>
-                        <p className="text-xs text-emerald-600/70 font-bold">
-                          {isRTL
-                            ? 'ممكن تكمل للعنوان على طول'
-                            : 'You can proceed to address directly'}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <Input
-                        id="guest-name"
-                        icon={User}
-                        placeholder={isRTL ? 'الاسم بالكامل' : 'Full Name'}
-                        value={guestInfo.name}
-                        onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })}
-                      />
-                      <div className="grid grid-cols-2 gap-3">
-                        <Input
-                          id="guest-phone"
-                          type="tel"
-                          icon={Phone}
-                          placeholder={isRTL ? 'رقم الموبايل' : 'Phone'}
-                          value={guestInfo.phone}
-                          onChange={(e) => setGuestInfo({ ...guestInfo, phone: e.target.value })}
-                        />
-                        <Input
-                          id="guest-phone2"
-                          type="tel"
-                          icon={Phone}
-                          placeholder={isRTL ? 'رقم بديل (اختياري)' : 'Alt Phone'}
-                          value={guestInfo.phone2}
-                          onChange={(e) => setGuestInfo({ ...guestInfo, phone2: e.target.value })}
-                        />
-                      </div>
-                      <Input
-                        id="guest-email"
-                        type="email"
-                        icon={Mail}
-                        placeholder={isRTL ? 'البريد الإلكتروني' : 'Email'}
-                        value={guestInfo.email}
-                        onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
-                      />
-                    </div>
-                  )}
-
-                  <button
-                    onClick={nextStep}
-                    className="w-full h-12 bg-[#0E4435] text-white rounded-xl font-black text-sm shadow-lg shadow-emerald-950/10 active:scale-[0.98] transition-all"
-                  >
-                    {isRTL ? 'متابعة' : 'Continue'}
-                  </button>
-                </motion.section>
-              )}
-
-              {/* STEP 2: Address */}
-              {currentStep === 2 && (
-                <motion.section
-                  key="step2"
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h2 className="text-xl font-black text-gray-900">
-                      {isRTL ? 'عنوان التوصيل' : 'Delivery Address'}
-                    </h2>
-                    <p className="text-sm text-gray-400 font-bold mt-1">
-                      {isRTL
-                        ? 'هنبعتلك طلبك على العنوان ده'
-                        : "We'll ship your order to this address"}
-                    </p>
-                  </div>
-
-                  {isAuthenticated ? (
-                    <div className="space-y-4">
-                      {/* Saved Addresses */}
-                      <div className="space-y-2">
-                        {addresses.map((addr) => (
-                          <div
-                            key={addr._id}
-                            onClick={() => {
-                              setSelectedAddressId(addr._id);
-                              setSelectedGov(addr.state || '');
-                              setIsAddingNewAddress(false);
-                            }}
-                            className={`
-                              p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-3
-                              ${selectedAddressId === addr._id && !isAddingNewAddress
-                                ? 'border-[#0E4435] bg-emerald-50/30'
-                                : 'border-gray-100 bg-white hover:border-gray-200'}
-                            `}
-                          >
-                            <div className="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center text-[#0E4435]">
-                              {addr.type === 'home' ? <Home size={18} /> : <Briefcase size={18} />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-emerald-600 uppercase">
-                                {isRTL ? (addr.type === 'home' ? 'منزل' : 'مكتب') : addr.type}
-                              </p>
-                              <p className="text-sm font-bold text-gray-900 truncate">
-                                {addr.street}
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                {addr.state}, {addr.city}
-                              </p>
-                            </div>
-                            {selectedAddressId === addr._id && !isAddingNewAddress && (
-                              <div className="w-5 h-5 bg-[#0E4435] rounded-full flex items-center justify-center text-white flex-shrink-0">
-                                <Check size={12} strokeWidth={3} />
-                              </div>
-                            )}
-                          </div>
-                        ))}
-
-                        {/* Add New */}
-                        <button
-                          onClick={() => setIsAddingNewAddress(true)}
-                          className={`
-                            w-full p-4 rounded-xl border-2 border-dashed transition-all flex items-center justify-center gap-2
-                            ${isAddingNewAddress
-                              ? 'border-[#0E4435] text-[#0E4435] bg-emerald-50/20'
-                              : 'border-gray-200 text-gray-400 hover:border-gray-300'}
-                          `}
-                        >
-                          <Plus size={16} />
-                          <span className="text-sm font-bold">
-                            {isRTL ? 'عنوان جديد' : 'New Address'}
-                          </span>
-                        </button>
-                      </div>
-
-                      {/* New Address Form */}
-                      {isAddingNewAddress && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          className="space-y-3 pt-4 border-t border-gray-100"
-                        >
-                          <div className="grid grid-cols-2 gap-3">
-                            <select
-                              value={selectedGovId}
-                              onChange={(e) => {
-                                const gov = governorates.find((g) => g.id === e.target.value);
-                                setSelectedGovId(e.target.value);
-                                setSelectedDistrictId('');
-                                setSelectedGov(gov ? gov.arabicName : '');
-                              }}
-                              className={getSelectClass()}
-                            >
-                              <option value="">{isRTL ? 'المحافظة' : 'Governorate'}</option>
-                              {governorates.map((gov) => (
-                                <option key={gov.id} value={gov.id}>
-                                  {isRTL ? gov.arabicName : gov.name}
-                                </option>
-                              ))}
-                            </select>
-                            <select
-                              value={selectedDistrictId}
-                              onChange={(e) => {
-                                const dist = districts.find((d) => d.id === e.target.value);
-                                setSelectedDistrictId(e.target.value);
-                                setNewAddress({ ...newAddress, city: dist ? dist.arabicName : '' });
-                              }}
-                              disabled={!selectedGovId}
-                              className={`${getSelectClass()} disabled:opacity-30`}
-                            >
-                              <option value="">{isRTL ? 'المنطقة' : 'District'}</option>
-                              {districts.map((dist) => (
-                                <option key={dist.id} value={dist.id}>
-                                  {isRTL ? dist.arabicName : dist.name}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <Input
-                            id="new-street"
-                            icon={MapPin}
-                            placeholder={isRTL ? 'العنوان بالتفصيل' : 'Detailed Address'}
-                            value={newAddress.street}
-                            onChange={(e) =>
-                              setNewAddress({ ...newAddress, street: e.target.value })
-                            }
-                          />
-                          <div className="flex gap-2">
-                            {(['home', 'office', 'other'] as const).map((type) => (
-                              <button
-                                key={type}
-                                onClick={() => setNewAddress({ ...newAddress, type })}
-                                className={`
-                                  flex-1 h-10 rounded-lg text-xs font-bold transition-all
-                                  ${newAddress.type === type
-                                    ? 'bg-[#0E4435] text-white'
-                                    : 'bg-gray-50 text-gray-400 border border-gray-100'}
-                                `}
-                              >
-                                {isRTL
-                                  ? type === 'home'
-                                    ? 'منزل'
-                                    : type === 'office'
-                                      ? 'مكتب'
-                                      : 'آخر'
-                                  : type}
-                              </button>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </div>
-                  ) : (
-                    /* Guest Address Form */
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <select
-                          value={selectedGovId}
-                          onChange={(e) => {
-                            const gov = governorates.find((g) => g.id === e.target.value);
-                            setSelectedGovId(e.target.value);
-                            setSelectedDistrictId('');
-                            setSelectedGov(gov ? gov.arabicName : '');
-                          }}
-                          className={getSelectClass()}
-                        >
-                          <option value="">{isRTL ? 'المحافظة' : 'Governorate'}</option>
-                          {governorates.map((gov) => (
-                            <option key={gov.id} value={gov.id}>
-                              {isRTL ? gov.arabicName : gov.name}
-                            </option>
-                          ))}
-                        </select>
-                        <select
-                          value={selectedDistrictId}
-                          onChange={(e) => {
-                            const dist = districts.find((d) => d.id === e.target.value);
-                            setSelectedDistrictId(e.target.value);
-                            setGuestInfo({ ...guestInfo, city: dist ? dist.arabicName : '' });
-                          }}
-                          disabled={!selectedGovId}
-                          className={`${getSelectClass()} disabled:opacity-30`}
-                        >
-                          <option value="">{isRTL ? 'المنطقة' : 'District'}</option>
-                          {districts.map((dist) => (
-                            <option key={dist.id} value={dist.id}>
-                              {isRTL ? dist.arabicName : dist.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <Input
-                        id="guest-street"
-                        icon={MapPin}
-                        placeholder={isRTL ? 'تفاصيل العنوان (شارع، مبنى، شقة)' : 'Address details'}
-                        value={guestInfo.street}
-                        onChange={(e) => setGuestInfo({ ...guestInfo, street: e.target.value })}
-                      />
-                    </div>
-                  )}
-
-                  <button
-                    onClick={nextStep}
-                    className="w-full h-12 bg-[#0E4435] text-white rounded-xl font-black text-sm shadow-lg shadow-emerald-950/10 active:scale-[0.98] transition-all"
-                  >
-                    {isRTL ? 'متابعة' : 'Continue'}
-                  </button>
-                </motion.section>
-              )}
-
-              {/* STEP 3: Review */}
-              {currentStep === 3 && (
-                <motion.section
-                  key="step3"
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h2 className="text-xl font-black text-gray-900">
-                      {isRTL ? 'مراجعة الطلب' : 'Review Order'}
-                    </h2>
-                    <p className="text-sm text-gray-400 font-bold mt-1">
-                      {isRTL
-                        ? 'تأكد إن كل حاجة صح قبل التأكيد'
-                        : 'Make sure everything is correct before confirming'}
-                    </p>
-                  </div>
-
-                  {/* Summary Cards */}
+                  <p className="text-xs font-bold text-emerald-700">
+                    {isRTL ? 'مسجل دخول - ممكن تكمل على طول' : 'Logged in - proceed directly'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Input
+                    icon={User}
+                    placeholder={isRTL ? 'الاسم بالكامل' : 'Full Name'}
+                    value={guestInfo.name}
+                    onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })}
+                  />
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white rounded-xl border border-gray-100 p-4">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">
-                        {isRTL ? 'الاسم' : 'Name'}
-                      </p>
-                      <p className="text-sm font-black text-gray-900 truncate">
-                        {isAuthenticated ? (isRTL ? 'مسجل دخول' : 'Logged In') : guestInfo.name}
-                      </p>
-                    </div>
-                    <div className="bg-white rounded-xl border border-gray-100 p-4">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">
-                        {isRTL ? 'التوصيل لـ' : 'Shipping To'}
-                      </p>
-                      <p className="text-sm font-black text-gray-900 truncate">{selectedGov}</p>
-                    </div>
-                  </div>
-
-                  {/* Notes */}
-                  <div>
-                    <label className="text-xs font-bold text-gray-400 block mb-1.5">
-                      {isRTL ? 'ملاحظات (اختياري)' : 'Notes (optional)'}
-                    </label>
-                    <textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder={
-                        isRTL
-                          ? 'مثال: بجوار مسجد كذا...'
-                          : 'e.g. Near the mosque...'
-                      }
-                      rows={3}
-                      className="w-full bg-gray-50 rounded-xl p-3 text-sm font-bold outline-none border border-transparent focus:border-gray-200 focus:bg-white transition-all placeholder:text-gray-300 resize-none"
+                    <Input
+                      icon={Phone}
+                      type="tel"
+                      placeholder={isRTL ? 'رقم الموبايل' : 'Phone'}
+                      value={guestInfo.phone}
+                      onChange={(e) => setGuestInfo({ ...guestInfo, phone: e.target.value })}
+                    />
+                    <Input
+                      icon={Phone}
+                      type="tel"
+                      placeholder={isRTL ? 'رقم بديل' : 'Alt Phone'}
+                      value={guestInfo.phone2}
+                      onChange={(e) => setGuestInfo({ ...guestInfo, phone2: e.target.value })}
                     />
                   </div>
-
-                  {/* Confirm Button */}
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={isProcessing}
-                    className={`
-                      w-full h-14 bg-[#0E4435] text-white rounded-xl font-black text-base
-                      shadow-lg shadow-emerald-950/10 active:scale-[0.98] transition-all
-                      flex items-center justify-center gap-2
-                      ${isProcessing ? 'opacity-60 cursor-wait' : ''}
-                    `}
-                  >
-                    {isProcessing ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <span>{isRTL ? 'تأكيد الطلب' : 'Confirm Order'}</span>
-                        {isRTL ? <ArrowLeft size={18} /> : <ArrowRight size={18} />}
-                      </>
-                    )}
-                  </button>
-                </motion.section>
+                  <Input
+                    icon={Mail}
+                    type="email"
+                    placeholder={isRTL ? 'البريد الإلكتروني' : 'Email'}
+                    value={guestInfo.email}
+                    onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
+                  />
+                </div>
               )}
-            </AnimatePresence>
+            </Section>
+
+            {/* Address Section */}
+            <Section title={isRTL ? 'عنوان التوصيل' : 'Delivery Address'} icon={MapPin}>
+              {isAuthenticated && addresses.length > 0 && !isAddingNewAddress ? (
+                <div className="space-y-2">
+                  {addresses.map((addr) => (
+                    <div
+                      key={addr._id}
+                      onClick={() => {
+                        setSelectedAddressId(addr._id);
+                        setSelectedGov(addr.state || '');
+                      }}
+                      className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-3 ${
+                        selectedAddressId === addr._id
+                          ? 'border-[#0E4435] bg-emerald-50/20'
+                          : 'border-gray-50 hover:border-gray-200'
+                      }`}
+                    >
+                      <div className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center text-[#0E4435]">
+                        {addr.type === 'home' ? <Home size={14} /> : <Briefcase size={14} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-gray-900 truncate">{addr.street}</p>
+                        <p className="text-[10px] text-gray-400">{addr.state}, {addr.city}</p>
+                      </div>
+                      {selectedAddressId === addr._id && (
+                        <div className="w-5 h-5 bg-[#0E4435] rounded-full flex items-center justify-center text-white flex-shrink-0">
+                          <Check size={10} strokeWidth={3} />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setIsAddingNewAddress(true)}
+                    className="w-full p-2.5 rounded-xl border border-dashed border-gray-200 text-gray-400 text-xs font-bold flex items-center justify-center gap-1.5 hover:border-[#0E4435] hover:text-[#0E4435] transition-colors"
+                  >
+                    <Plus size={14} />
+                    {isRTL ? 'عنوان جديد' : 'New Address'}
+                  </button>
+                </div>
+              ) : null}
+
+              {/* Address Form (Guest or New Address) */}
+              {(!isAuthenticated || isAddingNewAddress || addresses.length === 0) && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Select
+                      value={selectedGovId}
+                      onChange={(e: any) => {
+                        const gov = governorates.find((g) => g.id === e.target.value);
+                        setSelectedGovId(e.target.value);
+                        setSelectedDistrictId('');
+                        setSelectedGov(gov ? gov.arabicName : '');
+                      }}
+                    >
+                      <option value="">{isRTL ? 'المحافظة' : 'Governorate'}</option>
+                      {governorates.map((gov) => (
+                        <option key={gov.id} value={gov.id}>
+                          {isRTL ? gov.arabicName : gov.name}
+                        </option>
+                      ))}
+                    </Select>
+                    <Select
+                      value={selectedDistrictId}
+                      onChange={(e: any) => {
+                        const dist = districts.find((d) => d.id === e.target.value);
+                        setSelectedDistrictId(e.target.value);
+                        if (!isAuthenticated) {
+                          setGuestInfo({ ...guestInfo, city: dist ? dist.arabicName : '' });
+                        } else {
+                          setNewAddress({ ...newAddress, city: dist ? dist.arabicName : '' });
+                        }
+                      }}
+                      disabled={!selectedGovId}
+                    >
+                      <option value="">{isRTL ? 'المنطقة' : 'District'}</option>
+                      {districts.map((dist) => (
+                        <option key={dist.id} value={dist.id}>
+                          {isRTL ? dist.arabicName : dist.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <Input
+                    icon={MapPin}
+                    placeholder={isRTL ? 'تفاصيل العنوان (شارع، مبنى)' : 'Address details'}
+                    value={isAuthenticated ? newAddress.street : guestInfo.street}
+                    onChange={(e) => {
+                      if (isAuthenticated) {
+                        setNewAddress({ ...newAddress, street: e.target.value });
+                      } else {
+                        setGuestInfo({ ...guestInfo, street: e.target.value });
+                      }
+                    }}
+                  />
+                  {isAuthenticated && isAddingNewAddress && (
+                    <div className="flex gap-2">
+                      {(['home', 'office', 'other'] as const).map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => setNewAddress({ ...newAddress, type })}
+                          className={`flex-1 h-9 rounded-lg text-[11px] font-bold transition-all ${
+                            newAddress.type === type
+                              ? 'bg-[#0E4435] text-white'
+                              : 'bg-gray-50 text-gray-400 border border-gray-100'
+                          }`}
+                        >
+                          {isRTL
+                            ? type === 'home'
+                              ? 'منزل'
+                              : type === 'office'
+                                ? 'مكتب'
+                                : 'آخر'
+                            : type}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Delivery Estimate */}
+              {selectedGov && shippingFee > 0 && (
+                <div className="flex items-center gap-2 bg-amber-50/60 rounded-lg p-2.5">
+                  <Truck size={14} className="text-amber-500 flex-shrink-0" />
+                  <p className="text-[11px] text-amber-700 font-bold">
+                    {isRTL
+                      ? `التوصيل خلال ${deliveryMin}-${deliveryMax} أيام عمل`
+                      : `Delivery in ${deliveryMin}-${deliveryMax} business days`}
+                  </p>
+                </div>
+              )}
+              {selectedGov && shippingFee === 0 && (
+                <div className="flex items-center gap-2 bg-emerald-50/60 rounded-lg p-2.5">
+                  <Truck size={14} className="text-emerald-500 flex-shrink-0" />
+                  <p className="text-[11px] text-emerald-700 font-bold">
+                    {isRTL ? '🎉 الشحن مجاني!' : '🎉 Free Shipping!'}
+                  </p>
+                </div>
+              )}
+            </Section>
+
+            {/* Notes Section */}
+            <Section title={isRTL ? 'ملاحظات' : 'Notes'} icon={Tag}>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder={isRTL ? 'مثال: بجوار مسجد كذا...' : 'e.g. Near the mosque...'}
+                rows={2}
+                dir={isRTL ? 'rtl' : 'ltr'}
+                className="w-full bg-white rounded-xl p-3 text-[13px] font-bold text-gray-900 outline-none border border-gray-100 focus:border-[#0E4435] focus:ring-2 focus:ring-[#0E4435]/5 transition-all placeholder:text-gray-300 resize-none"
+              />
+            </Section>
           </div>
 
-          {/* ─── Receipt Side ───────────────────────────── */}
-          <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-20">
+          {/* ─── Receipt Column ──────────────────────────── */}
+          <div className="lg:col-span-2 space-y-4 lg:sticky lg:top-20">
             <OrderReceipt
               subtotal={subtotal}
               shippingFee={shippingFee}
@@ -817,20 +668,17 @@ export default function CheckoutPage() {
 
             {/* Coupon */}
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Tag size={14} className={isCouponApplied ? 'text-emerald-600' : 'text-gray-300'} />
-                <span className="text-sm font-bold text-gray-900">
-                  {isRTL ? 'كود خصم' : 'Coupon Code'}
-                </span>
-              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder={isRTL ? 'الكود هنا...' : 'Enter code...'}
+                  placeholder={isRTL ? 'كود الخصم' : 'Coupon code'}
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
                   disabled={isCouponApplied}
-                  className="flex-1 h-10 bg-gray-50 rounded-lg px-3 text-sm font-bold outline-none border border-transparent focus:border-gray-200 disabled:opacity-50"
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                  className={`flex-1 h-10 bg-gray-50 rounded-lg px-3 text-xs font-bold outline-none border border-transparent focus:border-[#0E4435] disabled:opacity-50 ${
+                    isRTL ? 'text-right' : 'text-left'
+                  }`}
                 />
                 {isCouponApplied ? (
                   <button
@@ -841,7 +689,7 @@ export default function CheckoutPage() {
                     }}
                     className="w-10 h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 transition-colors"
                   >
-                    <X size={16} />
+                    <X size={14} />
                   </button>
                 ) : (
                   <button
@@ -854,60 +702,63 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Trust Badges */}
-            <div className="flex gap-3">
-              <div className="flex-1 bg-white rounded-xl border border-gray-100 p-3 text-center">
-                <Truck size={18} className="mx-auto mb-1 text-emerald-600" />
-                <p className="text-[10px] font-bold text-gray-400">
+            {/* Desktop CTA */}
+            <button
+              onClick={handlePlaceOrder}
+              disabled={isProcessing}
+              className={`hidden lg:flex w-full h-14 bg-[#0E4435] text-white rounded-2xl font-black text-base items-center justify-center gap-2 shadow-lg shadow-emerald-950/10 active:scale-[0.98] transition-all ${
+                isProcessing ? 'opacity-60 cursor-wait' : 'hover:bg-[#0b352a]'
+              }`}
+            >
+              {isProcessing ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <ShoppingBag size={18} />
+                  <span>{isRTL ? 'تأكيد الطلب' : 'Place Order'}</span>
+                </>
+              )}
+            </button>
+
+            {/* Trust */}
+            <div className="hidden lg:flex gap-3">
+              <div className="flex-1 flex items-center gap-2 bg-white rounded-xl border border-gray-100 p-3">
+                <Truck size={14} className="text-emerald-500" />
+                <span className="text-[10px] font-bold text-gray-400">
                   {isRTL ? 'توصيل سريع' : 'Fast Delivery'}
-                </p>
+                </span>
               </div>
-              <div className="flex-1 bg-white rounded-xl border border-gray-100 p-3 text-center">
-                <ShoppingBag size={18} className="mx-auto mb-1 text-emerald-600" />
-                <p className="text-[10px] font-bold text-gray-400">
-                  {isRTL ? 'منتجات أصلية' : 'Original Items'}
-                </p>
+              <div className="flex-1 flex items-center gap-2 bg-white rounded-xl border border-gray-100 p-3">
+                <Lock size={14} className="text-emerald-500" />
+                <span className="text-[10px] font-bold text-gray-400">
+                  {isRTL ? 'دفع آمن' : 'Secure Pay'}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </main>
 
-      {/* ─── Mobile Bottom Bar ─────────────────────────── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 z-40">
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
-            <p className="text-[10px] font-bold text-gray-400">{isRTL ? 'الإجمالي' : 'Total'}</p>
-            <p className="text-lg font-black text-[#0E4435]">
-              {Math.round(total).toLocaleString()}{' '}
-              <span className="text-[10px] font-bold">{isRTL ? 'ج.م' : 'EGP'}</span>
-            </p>
-          </div>
-          <button
-            onClick={currentStep < 3 ? nextStep : handlePlaceOrder}
-            disabled={isProcessing}
-            className="h-12 px-8 bg-[#0E4435] text-white rounded-xl font-black text-sm flex items-center gap-2 active:scale-95 transition-all shadow-lg shadow-emerald-950/10"
-          >
-            {isProcessing ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <>
-                <span>
-                  {currentStep < 3
-                    ? isRTL
-                      ? 'متابعة'
-                      : 'Continue'
-                    : isRTL
-                      ? 'تأكيد'
-                      : 'Confirm'}
-                </span>
-                {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
-              </>
-            )}
-          </button>
-        </div>
+      {/* ─── Mobile Sticky CTA ──────────────────────────── */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-100 px-4 py-3 z-50">
+        <button
+          onClick={handlePlaceOrder}
+          disabled={isProcessing}
+          className={`w-full h-12 bg-[#0E4435] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/10 active:scale-[0.98] transition-all ${
+            isProcessing ? 'opacity-60' : ''
+          }`}
+        >
+          {isProcessing ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <span>{isRTL ? 'تأكيد الطلب' : 'Place Order'}</span>
+              <span className="text-white/60">•</span>
+              <span>{Math.round(total).toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
 }
-

@@ -130,22 +130,27 @@ class OrderController {
 
                     if (coupon) {
                         const now = new Date();
-                        const expiresAt = new Date(coupon.expires_at);
+                        const expiresAt = coupon.expires_at ? new Date(coupon.expires_at) : null;
+                        
+                        // Coupon is valid if: no expiry date OR not expired yet
+                        const isNotExpired = !expiresAt || expiresAt > now;
+                        const isWithinUsageLimit = !coupon.max_uses || (coupon.used_count || 0) < coupon.max_uses;
 
-                        if (expiresAt > now) {
-                            if (!coupon.max_uses || (coupon.used_count || 0) < coupon.max_uses) {
-                                if (coupon.discount_type === 'percentage') {
-                                    orderDiscount = (safeSubtotal * (parseFloat(coupon.discount) / 100));
-                                } else {
-                                    orderDiscount = Math.min(parseFloat(coupon.discount), safeSubtotal);
-                                }
+                        if (isNotExpired && isWithinUsageLimit) {
+                            const discountVal = parseFloat(coupon.discount_amount || coupon.discount || 0);
+                            const discountType = coupon.discount_type || 'percentage';
 
-                                // Increment usage (non-blocking for speed, but ideally tracked)
-                                supabase.from('coupons')
-                                    .update({ used_count: (coupon.used_count || 0) + 1 })
-                                    .eq('id', coupon.id)
-                                    .then(({ error }) => { if(error) console.error('Error incrementing coupon:', error); });
+                            if (discountType === 'percentage') {
+                                orderDiscount = (safeSubtotal * (discountVal / 100));
+                            } else {
+                                orderDiscount = Math.min(discountVal, safeSubtotal);
                             }
+
+                            // Increment usage
+                            supabase.from('coupons')
+                                .update({ used_count: (coupon.used_count || 0) + 1 })
+                                .eq('id', coupon.id)
+                                .then(({ error }) => { if(error) console.error('Error incrementing coupon:', error); });
                         }
                     }
                 } catch (err) {
