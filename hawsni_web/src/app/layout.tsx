@@ -63,6 +63,7 @@ import ChatWidget from "@/components/chat/ChatWidget";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Suspense } from "react";
 import MainLayout from "@/components/layout/MainLayout";
+import GlobalJsonLd from "@/components/seo/GlobalJsonLd";
 
 export default function RootLayout({
   children,
@@ -87,6 +88,7 @@ export default function RootLayout({
             <MicrosoftClarity />
           </Suspense>
           <ChatWidget />
+          <GlobalJsonLd />
         </LanguageProvider>
       </body>
     </html>

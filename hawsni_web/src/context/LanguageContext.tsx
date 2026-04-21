@@ -48,8 +48,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         document.documentElement.lang = language;
     }, [language]);
 
-    if (!mounted) return null;
-
+    // Remove the !mounted return null for SEO purposes
+    // This allows SSR to render the content for search engines
+    
     return (
         <LanguageContext.Provider value={{ language, t, setLanguage, isRTL }}>
             <div className={language === 'ar' ? 'font-arabic' : 'font-sans'}>

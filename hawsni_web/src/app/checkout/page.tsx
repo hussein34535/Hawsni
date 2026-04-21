@@ -1,759 +1,504 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { trackEvent } from '@/components/analytics/FacebookPixel';
 import {
-  ArrowLeft,
-  ArrowRight,
-  MapPin,
-  Check,
-  Home,
-  Briefcase,
-  Plus,
-  X,
-  Phone,
-  User,
-  Mail,
-  Tag,
-  Lock,
-  ShoppingBag,
-  Truck,
-  ChevronDown,
-  CreditCard,
-  ShieldCheck,
+  ArrowLeft, ArrowRight, MapPin, Check, Lock, Phone,
+  User, Mail, Tag, ShoppingBag, Truck, ChevronDown, Shield,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import { useToastStore } from '@/store/toastStore';
 import { useLanguage } from '@/context/LanguageContext';
 import { addressService, Address } from '@/services/addressService';
-import { checkoutService, OrderData } from '@/services/checkoutService';
+import { checkoutService } from '@/services/checkoutService';
 import { couponService } from '@/services/couponService';
-import { authService } from '@/services/authService';
-
-import OrderReceipt from '@/components/checkout/OrderReceipt';
 import MeshBackground from '@/components/checkout/MeshBackground';
 
-// ─── Premium Step Indicator ────────────────────────────
-function StepIndicator({ currentStep, isRTL }: { currentStep: number; isRTL: boolean }) {
-  const steps = [
-    { label: isRTL ? 'الشحن' : 'Shipping', icon: MapPin },
-    { label: isRTL ? 'الدفع' : 'Payment', icon: CreditCard },
-    { label: isRTL ? 'المراجعة' : 'Review', icon: Check },
-  ];
+// ─── Governorates data ────────────────────────────────────
+const GOVERNORATES = [
+  { id: 'cairo', name: 'Cairo', arabicName: 'القاهرة' },
+  { id: 'giza', name: 'Giza', arabicName: 'الجيزة' },
+  { id: 'alexandria', name: 'Alexandria', arabicName: 'الإسكندرية' },
+  { id: 'dakahlia', name: 'Dakahlia', arabicName: 'الدقهلية' },
+  { id: 'red_sea', name: 'Red Sea', arabicName: 'البحر الأحمر' },
+  { id: 'beheira', name: 'Beheira', arabicName: 'البحيرة' },
+  { id: 'fayoum', name: 'Fayoum', arabicName: 'الفيوم' },
+  { id: 'gharbiya', name: 'Gharbiya', arabicName: 'الغربية' },
+  { id: 'ismailia', name: 'Ismailia', arabicName: 'الإسماعيلية' },
+  { id: 'menofia', name: 'Menofia', arabicName: 'المنوفية' },
+  { id: 'minya', name: 'Minya', arabicName: 'المنيا' },
+  { id: 'qaliubiya', name: 'Qaliubiya', arabicName: 'القليوبية' },
+  { id: 'new_valley', name: 'New Valley', arabicName: 'الوادي الجديد' },
+  { id: 'north_sinai', name: 'North Sinai', arabicName: 'شمال سيناء' },
+  { id: 'suez', name: 'Suez', arabicName: 'السويس' },
+  { id: 'aswan', name: 'Aswan', arabicName: 'أسوان' },
+  { id: 'assiut', name: 'Assiut', arabicName: 'أسيوط' },
+  { id: 'beni_suef', name: 'Beni Suef', arabicName: 'بني سويف' },
+  { id: 'port_said', name: 'Port Said', arabicName: 'بور سعيد' },
+  { id: 'damietta', name: 'Damietta', arabicName: 'دمياط' },
+  { id: 'sharqia', name: 'Sharqia', arabicName: 'الشرقية' },
+  { id: 'south_sinai', name: 'South Sinai', arabicName: 'جنوب سيناء' },
+  { id: 'kafr_el_sheikh', name: 'Kafr El Sheikh', arabicName: 'كفر الشيخ' },
+  { id: 'matruh', name: 'Matruh', arabicName: 'مطروح' },
+  { id: 'luxor', name: 'Luxor', arabicName: 'الأقصر' },
+  { id: 'qena', name: 'Qena', arabicName: 'قنا' },
+  { id: 'sohag', name: 'Sohag', arabicName: 'سوهاج' },
+];
 
-  return (
-    <div className="flex items-center justify-between mb-10 px-2">
-      {steps.map((step, idx) => {
-        const isActive = idx === currentStep;
-        const isDone = idx < currentStep;
-        return (
-          <div key={idx} className="flex-1 flex items-center">
-            <div className="flex flex-col items-center gap-1.5 relative z-10">
-              <motion.div
-                animate={{
-                  scale: isActive ? 1.15 : 1,
-                  backgroundColor: isDone ? '#10b981' : isActive ? '#0E4435' : '#ffffff',
-                  boxShadow: isActive
-                    ? '0 0 0 6px rgba(14,68,53,0.08), 0 8px 20px rgba(14,68,53,0.2)'
-                    : isDone
-                    ? '0 4px 12px rgba(16,185,129,0.25)'
-                    : '0 2px 8px rgba(0,0,0,0.06)',
-                }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                className="w-11 h-11 rounded-2xl flex items-center justify-center border border-white/60 backdrop-blur-sm"
-              >
-                {isDone ? (
-                  <Check size={18} strokeWidth={3} className="text-white" />
-                ) : (
-                  <step.icon size={18} className={isActive ? 'text-white' : 'text-gray-300'} />
-                )}
-              </motion.div>
-              <span className={`hidden md:block text-[10px] font-black uppercase tracking-widest transition-colors ${
-                isActive ? 'text-[#0E4435]' : isDone ? 'text-emerald-500' : 'text-gray-300'
-              }`}>
-                {step.label}
-              </span>
-            </div>
-            {idx < steps.length - 1 && (
-              <div className="flex-1 mx-3 h-[2px] rounded-full overflow-hidden bg-gray-100">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-[#0E4435] rounded-full"
-                  initial={{ width: '0%' }}
-                  animate={{ width: idx < currentStep ? '100%' : '0%' }}
-                  transition={{ duration: 0.5, ease: 'easeInOut' }}
-                />
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Summary Card Wrapper ───────────────────────────────
-function SummaryCard({ 
-  title, 
-  icon: Icon, 
-  onEdit, 
-  children 
-}: { 
-  title: string; 
-  icon: any; 
-  onEdit: () => void;
-  children: React.ReactNode;
-}) {
-  const { isRTL } = useLanguage();
-  return (
-    <motion.div 
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.99 }}
-      className="bg-white/40 backdrop-blur-md rounded-[24px] border border-white/60 p-5 flex items-center justify-between group hover:bg-white/70 transition-all cursor-pointer shadow-sm shadow-[#0E4435]/5"
-      onClick={onEdit}
-    >
-      <div className="flex items-center gap-4">
-        <motion.div 
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20"
-        >
-          <Check size={20} strokeWidth={3} />
-        </motion.div>
-        <div>
-          <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">{title}</h4>
-          <div className="text-sm font-bold text-gray-900">{children}</div>
-        </div>
-      </div>
-      <button className="text-[10px] font-black text-emerald-600 uppercase tracking-widest px-3 py-1.5 rounded-xl hover:bg-emerald-50 transition-all">
-        {isRTL ? 'تعديل' : 'Edit'}
-      </button>
-    </motion.div>
-  );
-}
-
-// ─── Beautiful Input (ENLARGED) ─────────────────────────
-function Input({
-  icon: Icon,
-  placeholder,
-  value,
-  onChange,
-  type = 'text',
-  id,
-  disabled = false,
+// ─── Input Component ──────────────────────────────────────
+function Field({
+  label, required, recommended, icon: Icon, children,
 }: {
-  icon: any;
-  placeholder: string;
-  value: string;
-  onChange: (e: any) => void;
-  type?: string;
-  id?: string;
-  disabled?: boolean;
-}) {
-  const { isRTL } = useLanguage();
-
-  return (
-    <div className="relative group">
-      <div
-        className={`absolute top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none group-focus-within:text-[#0E4435] transition-colors ${
-          isRTL ? 'right-5' : 'left-5'
-        }`}
-      >
-        <Icon size={20} />
-      </div>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        placeholder={placeholder}
-        dir={isRTL ? 'rtl' : 'ltr'}
-        className={`w-full h-14 bg-white/50 backdrop-blur-sm rounded-2xl text-[15px] font-bold text-gray-900 placeholder:text-gray-400 outline-none border border-white/60 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all disabled:opacity-50 ${
-          isRTL ? 'pr-12 pl-5 text-right' : 'pl-12 pr-5 text-left'
-        }`}
-      />
-    </div>
-  );
-}
-
-// ─── Beautiful Select (ENLARGED) ────────────────────────
-function Select({
-  value,
-  onChange,
-  children,
-  disabled = false,
-}: {
-  value: string;
-  onChange: (e: any) => void;
-  children: React.ReactNode;
-  disabled?: boolean;
-}) {
-  const { isRTL } = useLanguage();
-
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        dir={isRTL ? 'rtl' : 'ltr'}
-        className={`w-full h-14 bg-white/50 backdrop-blur-sm rounded-2xl text-[15px] font-bold text-gray-900 outline-none border border-white/60 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all appearance-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-          isRTL ? 'pr-5 pl-12 text-right' : 'pl-5 pr-12 text-left'
-        } ${!value ? 'text-gray-400' : ''}`}
-      >
-        {children}
-      </select>
-      <div
-        className={`absolute top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none ${
-          isRTL ? 'left-4' : 'right-4'
-        }`}
-      >
-        <ChevronDown size={20} />
-      </div>
-    </div>
-  );
-}
-
-// ─── Section Card (ENLARGED) ────────────────────────────
-function Section({
-  title,
-  icon: Icon,
-  children,
-}: {
-  title: string;
-  icon: any;
-  children: React.ReactNode;
+  label: string; required?: boolean; recommended?: boolean; icon?: any; children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white/60 backdrop-blur-md rounded-[32px] border border-white/60 p-7 space-y-6 shadow-sm shadow-[#0E4435]/5">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-[#0E4435]/5 rounded-2xl flex items-center justify-center">
-          <Icon size={20} className="text-[#0E4435]" />
-        </div>
-        <h3 className="text-base font-black text-gray-900 uppercase tracking-tight">{title}</h3>
-      </div>
+    <div className="flex flex-col gap-1.5">
+      <label className="text-[13px] font-bold text-gray-500 flex items-center gap-1">
+        {label}
+        {required && <span className="text-red-400">*</span>}
+        {recommended && <span className="text-[11px] text-emerald-600 font-black bg-emerald-50 px-1.5 py-0.5 rounded-md">ينصح به</span>}
+      </label>
       {children}
     </div>
   );
 }
 
-// ─── Main Page ──────────────────────────────────────────
+function Input({ icon: Icon, ...props }: any) {
+  return (
+    <div className="relative">
+      {Icon && <Icon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />}
+      <input
+        {...props}
+        className={`w-full h-12 bg-white border border-gray-200 rounded-2xl text-[15px] font-bold text-gray-900 placeholder:text-gray-300 outline-none focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all ${Icon ? 'pl-11 pr-4' : 'px-4'}`}
+      />
+    </div>
+  );
+}
+
+function Select({ children, ...props }: any) {
+  return (
+    <div className="relative">
+      <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none" />
+      <select
+        {...props}
+        className="w-full h-12 bg-white border border-gray-200 rounded-2xl text-[15px] font-bold text-gray-900 px-4 pr-10 outline-none focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all appearance-none"
+      >
+        {children}
+      </select>
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, getTotal, clearCart } = useCartStore();
-  const { isRTL, t } = useLanguage();
+  const { items, clearCart } = useCartStore();
   const { showToast } = useToastStore();
+  const { isRTL } = useLanguage();
 
-  const [activeStep, setActiveStep] = useState(0);
-  // Unique event ID for Meta Pixel deduplication with CAPI
-  const [conversionEventId] = useState(() => `web_checkout_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`);
+  const [conversionEventId] = useState(() => `web_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`);
 
-  const nextStep = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setActiveStep((prev) => {
-      const next = Math.min(prev + 1, 2);
-      // Track AddPaymentInfo when moving from Shipping (0) → Payment (1)
-      if (prev === 0) {
-        trackEvent('AddPaymentInfo', { currency: 'EGP' }, { eventID: conversionEventId });
-      }
-      return next;
-    });
-  }, [conversionEventId]);
-
-  const prevStep = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setActiveStep((prev) => Math.max(prev - 1, 0));
-  }, []);
-
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  // Address & Shipping
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  const [shippingSettings, setShippingSettings] = useState<any>(null);
-  const [freeDeliveryActive, setFreeDeliveryActive] = useState(false);
-  const [selectedGov, setSelectedGov] = useState('');
-  const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
-  const [newAddress, setNewAddress] = useState<{
-    street: string;
-    city: string;
-    type: 'home' | 'office' | 'other';
-    alternativePhone?: string;
-  }>({ street: '', city: '', type: 'home', alternativePhone: '' });
-
-  // Guest Info
-  const [guestInfo, setGuestInfo] = useState({
-    name: '',
-    phone: '',
-    phone2: '',
-    email: '',
-    street: '',
-    city: '',
-  });
+  // Guest info
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [phone2, setPhone2] = useState('');
+  const [email, setEmail] = useState('');
+  const [govId, setGovId] = useState('');
+  const [street, setStreet] = useState('');
+  const [notes, setNotes] = useState('');
 
   // Coupon
   const [couponCode, setCouponCode] = useState('');
-  const [isCouponApplied, setIsCouponApplied] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
-  const [notes, setNotes] = useState('');
+  const [couponApplied, setCouponApplied] = useState(false);
 
-  // Bosta
-  const [governorates, setGovernorates] = useState<any[]>([]);
-  const [districts, setDistricts] = useState<any[]>([]);
-  const [selectedGovId, setSelectedGovId] = useState('');
-  const [selectedDistrictId, setSelectedDistrictId] = useState('');
+  // Auth
+  const [isAuth, setIsAuth] = useState(false);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
 
-  // ─── Data Fetching ────────────────────────────────────
+  // Shipping
+  const [shippingFee, setShippingFee] = useState(0);
+  const [processing, setProcessing] = useState(false);
+
+  const selectedGov = GOVERNORATES.find(g => g.id === govId);
+
+  // Pricing
+  const subtotal = useMemo(() => items.reduce((s, i) => s + i.price * i.quantity, 0), [items]);
+  const total = Math.max(0, subtotal + shippingFee - couponDiscount);
+
+  // Track InitiateCheckout
   useEffect(() => {
-    // Track InitiateCheckout on page mount
-    trackEvent('InitiateCheckout', {
-      currency: 'EGP',
-      num_items: items.length,
-    }, { eventID: conversionEventId });
+    trackEvent('InitiateCheckout', { currency: 'EGP', num_items: items.length }, { eventID: conversionEventId });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Fetch auth & addresses
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    setIsAuthenticated(!!token);
-
-    const fetchData = async () => {
-      try {
-        const settingsRes = await checkoutService.getShippingSettings();
-        setShippingSettings(settingsRes.settings);
-
-        try {
-          const pubRes = await import('@/lib/axios').then((m) =>
-            m.default.get('/settings/public')
-          );
-          setFreeDeliveryActive(!!pubRes.data?.data?.free_delivery_enabled);
-        } catch {}
-
-        if (token) {
-          try {
-            const profile = await authService.getProfile();
-            if (profile.success && profile.user) {
-              setGuestInfo((prev) => ({ ...prev, email: profile.user.email || '' }));
-            }
-          } catch {}
-
-          const addrRes = await addressService.getAddresses();
-          const addrs = addrRes.addresses || [];
-          setAddresses(addrs);
-          if (addrs.length > 0) {
-            const defaultAddr = addrs.find((a) => a.isDefault) || addrs[0];
-            setSelectedAddressId(defaultAddr._id);
-            setSelectedGov(defaultAddr.state || '');
-            setIsAddingNewAddress(false);
-          } else {
-            setIsAddingNewAddress(true);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
+    if (!token) return;
+    setIsAuth(true);
+    addressService.getAddresses().then(r => {
+      if (r.success && r.addresses.length > 0) {
+        setAddresses(r.addresses);
+        setSelectedAddressId(r.addresses[0]._id);
       }
-    };
-    fetchData();
+    }).catch(() => {});
   }, []);
 
+  // Fetch shipping fee
   useEffect(() => {
-    const fetchGovs = async () => {
-      try {
-        const axios = (await import('@/lib/axios')).default;
-        const res = await axios.get('/shipping/cities');
-        if (res.data.success) setGovernorates(res.data.cities || []);
-      } catch {}
-    };
-    fetchGovs();
-  }, []);
+    checkoutService.getShippingSettings().then(r => {
+      const cfg = r.settings;
+      if (!cfg) return;
+      const gov = selectedGov?.arabicName || '';
+      const govCfg = cfg.governorate_settings?.[gov];
+      const threshold = cfg.free_shipping_threshold || 0;
+      if (threshold > 0 && subtotal >= threshold) setShippingFee(0);
+      else if (govCfg) setShippingFee(parseFloat(govCfg.cost) || 0);
+      else setShippingFee(parseFloat(cfg.delivery_cost) || 0);
+    }).catch(() => {});
+  }, [govId, subtotal, selectedGov]);
 
-  useEffect(() => {
-    if (!selectedGovId) {
-      setDistricts([]);
-      setSelectedDistrictId('');
-      return;
-    }
-    const fetchDistricts = async () => {
-      try {
-        const axios = (await import('@/lib/axios')).default;
-        const res = await axios.get(`/shipping/districts/${selectedGovId}`);
-        if (res.data.success) setDistricts(res.data.districts || []);
-      } catch {}
-    };
-    fetchDistricts();
-  }, [selectedGovId]);
-
-  // ─── Calculations ─────────────────────────────────────
-  const subtotal = getTotal();
-  const calculateShipping = useMemo(() => {
-    if (freeDeliveryActive) return { cost: 0, min: 1, max: 2 };
-    if (!shippingSettings) return { cost: 0, min: 3, max: 7 };
-    const threshold = shippingSettings.free_shipping_threshold || 0;
-    const govSettings = shippingSettings.governorate_settings || {};
-    let currentGov = null;
-    if (selectedGov) {
-      currentGov = govSettings[selectedGov];
-      if (!currentGov) {
-        const searchKey = Object.keys(govSettings).find((k) => k.trim() === selectedGov.trim() || k.includes(selectedGov) || selectedGov.includes(k));
-        if (searchKey) currentGov = govSettings[searchKey];
-      }
-    }
-    if (!selectedGov) return { cost: 0, min: 1, max: 3 };
-    const cost = threshold > 0 && subtotal >= threshold ? 0 : currentGov ? currentGov.cost : shippingSettings.delivery_cost || 100;
-    const min = currentGov ? currentGov.days_min : shippingSettings.default_days_min || 3;
-    const max = currentGov ? currentGov.days_max : shippingSettings.default_days_max || 7;
-    return { cost, min, max };
-  }, [shippingSettings, freeDeliveryActive, selectedGov, subtotal]);
-
-  const { cost: shippingFee, min: deliveryMin, max: deliveryMax } = calculateShipping;
-  const total = Math.round((subtotal - couponDiscount + shippingFee) * 100) / 100;
-
-  // ─── Coupon ───────────────────────────────────────────
-  const handleApplyCoupon = async () => {
-    if (!couponCode) return;
+  const handleCoupon = useCallback(async () => {
+    if (!couponCode.trim()) return;
     try {
-      const res = await couponService.validateCoupon(couponCode);
-      if (res.success && res.coupon) {
-        setIsCouponApplied(true);
-        const discountVal = res.coupon.discountAmount;
-        if (res.coupon.discountType === 'percentage') {
-          setCouponDiscount(Math.round((subtotal * (discountVal / 100)) * 100) / 100);
+      const r = await couponService.validateCoupon(couponCode);
+      if (r.success && r.coupon) {
+        const coupon = r.coupon;
+        
+        // Check min order amount
+        if (coupon.minOrderAmount && subtotal < coupon.minOrderAmount) {
+          showToast(`أقل مبلغ لتفعيل الكود هو ${coupon.minOrderAmount} ج.م`, 'error');
+          return;
+        }
+
+        let discount = 0;
+        if (coupon.discountType === 'percentage') {
+          discount = (subtotal * coupon.discountAmount) / 100;
         } else {
-          setCouponDiscount(discountVal);
+          discount = coupon.discountAmount;
         }
-        showToast(isRTL ? 'تم تطبيق كود الخصم ✅' : 'Coupon applied ✅', 'success');
-      }
-    } catch {
-      showToast(isRTL ? 'كود الخصم غير صالح' : 'Invalid coupon', 'error');
-    }
-  };
 
-  // ─── Place Order ──────────────────────────────────────
-  const handlePlaceOrder = async () => {
-    if (!isAuthenticated) {
-      if (guestInfo.name.length < 3) { showToast(isRTL ? 'يرجى إدخال اسم صحيح' : 'Valid name required', 'error'); return; }
-      if (!/^01[0125]\d{8}$/.test(guestInfo.phone)) { showToast(isRTL ? 'رقم الهاتف غير صحيح' : 'Invalid phone', 'error'); return; }
-    }
-    if (!selectedGovId || !selectedDistrictId) { showToast(isRTL ? 'يرجى اختيار العنوان' : 'Address required', 'error'); return; }
-    
-    setIsProcessing(true);
-    try {
-      let addressId = selectedAddressId;
-      if (isAuthenticated && isAddingNewAddress) {
-        const addrRes = await addressService.addAddress({
-          street: newAddress.street, city: newAddress.city, state: selectedGov, country: 'Egypt', type: newAddress.type, isDefault: addresses.length === 0,
-        });
-        if (addrRes.success) addressId = addrRes.address._id;
+        setCouponDiscount(discount);
+        setCouponApplied(true);
+        showToast('تم تطبيق الكوبون ✓', 'success');
       }
+    } catch (err: any) { 
+      showToast(err || 'كوبون غير صالح', 'error'); 
+    }
+  }, [couponCode, subtotal, showToast]);
+
+  const handleOrder = async () => {
+    // Validation
+    if (!isAuth) {
+      if (!name.trim()) return showToast('ادخل اسمك', 'error');
+      if (!phone.trim() || phone.length < 10) return showToast('ادخل رقم هاتف صحيح', 'error');
+      if (!govId) return showToast('اختر المحافظة', 'error');
+      if (!street.trim()) return showToast('ادخل عنوانك', 'error');
+    } else {
+      if (!selectedAddressId && !govId) return showToast('اختر عنوان الشحن', 'error');
+    }
+
+    setProcessing(true);
+    trackEvent('Purchase', { currency: 'EGP', value: total }, { eventID: conversionEventId });
+
+    try {
+      const shippingAddress = isAuth && selectedAddressId
+        ? { ...addresses.find(a => a._id === selectedAddressId), state: selectedGov?.arabicName || '' }
+        : { street, state: selectedGov?.arabicName || '', city: selectedGov?.arabicName || '', address: `${street}, ${selectedGov?.arabicName}` };
+
       const result = await checkoutService.placeOrder({
         conversionEventId,
-        items: items.map(i => ({ 
-          product: i.productId, 
-          name: i.name, 
-          price: i.price, 
-          quantity: i.quantity, 
-          image_url: i.imageUrl, 
-          size: i.size ?? undefined, 
-          color: i.color ?? undefined 
-        })),
-        shippingAddress: isAuthenticated && addressId ? { ...addresses.find(a => a._id === addressId), id: addressId, state: selectedGov, districtId: selectedDistrictId, address: addresses.find(a => a._id === addressId)?.street || '' }
-          : { street: guestInfo.street, city: guestInfo.city, state: selectedGov, districtId: selectedDistrictId, address: `${guestInfo.street}, ${guestInfo.city}, ${selectedGov}` },
-        paymentMethod: 'Cash on Delivery', subtotal, shippingFee, discount: couponDiscount, totalAmount: total, couponCode: isCouponApplied ? couponCode : undefined,
-        ...(!isAuthenticated ? { guestName: guestInfo.name, guestPhone: guestInfo.phone, guestAlternativePhone: guestInfo.phone2, guestEmail: guestInfo.email }
-          : { guestAlternativePhone: newAddress.alternativePhone, guestEmail: guestInfo.email }), notes: notes || undefined,
+        items: items.map(i => ({ product: i.productId, name: i.name, price: i.price, quantity: i.quantity, image_url: i.imageUrl, size: i.size ?? undefined, color: i.color ?? undefined })),
+        shippingAddress,
+        paymentMethod: 'Cash on Delivery',
+        subtotal,
+        shippingFee,
+        discount: couponDiscount,
+        totalAmount: total,
+        couponCode: couponApplied ? couponCode : undefined,
+        ...(!isAuth ? { guestName: name, guestPhone: phone, guestAlternativePhone: phone2 || undefined, guestEmail: email || undefined } : {}),
+        notes: notes || undefined,
       });
-      if (result.success) { clearCart(); router.push(`/order-success/${result.order.id || result.order._id}`); }
-    } catch (e: any) { showToast(e.message || 'Error', 'error'); } finally { setIsProcessing(false); }
+
+      if (result.success) {
+        clearCart();
+        router.push(`/order-success/${result.order.id || result.order._id}`);
+      }
+    } catch (e: any) {
+      showToast(e.message || 'حدث خطأ', 'error');
+    } finally {
+      setProcessing(false);
+    }
   };
 
-  if (items.length === 0 && !isProcessing) return null;
+  if (items.length === 0 && !processing) return null;
 
   return (
-    <div className="min-h-screen font-cairo pb-32 lg:pb-10 relative" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen font-cairo pb-24 relative" dir="ltr">
       <MeshBackground />
 
-      {/* Modern Header */}
-      <header className="sticky top-0 z-50 bg-white/40 backdrop-blur-md border-b border-white/20">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <button onClick={() => activeStep > 0 ? prevStep() : router.back()} className="w-11 h-11 rounded-2xl bg-white/50 flex items-center justify-center text-gray-500 hover:bg-white hover:text-[#0E4435] transition-all border border-white/50 active:scale-95">
-            {isRTL ? <ArrowRight size={22} /> : <ArrowLeft size={22} />}
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <button
+            onClick={() => router.back()}
+            className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-all active:scale-95"
+          >
+            <ArrowLeft size={18} />
           </button>
-          
-          <div className="flex flex-col items-center">
-            <h1 className="text-lg font-black text-gray-900 tracking-tight">
-              {isRTL ? 'إتمام الشراء الآمن' : 'Secure Checkout'}
-            </h1>
-            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-              <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-              {isRTL ? 'خطوة ' : 'Step '} {activeStep + 1} {isRTL ? ' من 3' : ' of 3'}
-            </p>
+          <div className="flex items-center gap-2">
+            <Lock size={14} className="text-emerald-600" />
+            <span className="text-[13px] font-black text-gray-700">إتمام الشراء الآمن</span>
           </div>
-
-          <div className="w-11 h-11 rounded-2xl bg-[#0E4435] flex items-center justify-center text-white shadow-lg shadow-emerald-950/20">
-            <Lock size={18} />
-          </div>
+          <div className="w-9" />
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-10 relative z-10">
-        {/* Progress Bar Component */}
-        <StepIndicator currentStep={activeStep} isRTL={isRTL} />
-
+      <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* Left Column: Progressing Forms */}
-          <div className="lg:col-span-7 space-y-6">
 
-            <AnimatePresence mode="wait">
-            {/* STEP 1: SHIPPING & INFO */}
-            {activeStep === 0 ? (
-              <motion.div
-                key="step-0"
-                initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="space-y-6"
-              >
-                <Section title={isRTL ? 'بيانات العميل' : 'Customer Info'} icon={User}>
-                  {isAuthenticated ? (
-                    <div className="bg-emerald-50/40 border border-emerald-100/50 rounded-2xl p-5 flex items-center gap-4">
-                      <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                        <Check size={24} strokeWidth={3} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-black text-emerald-800">{isRTL ? 'تم تسجيل الدخول بنجاح' : 'Authenticated'}</p>
-                        <p className="text-xs font-bold text-emerald-600/70">{isRTL ? 'بياناتك محفوظة وآمنة' : 'Your data is secured'}</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <Input icon={User} placeholder={isRTL ? 'الاسم بالكامل' : 'Full Name'} value={guestInfo.name} onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })} />
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input icon={Phone} type="tel" placeholder={isRTL ? 'رقم الهاتف' : 'Phone Number'} value={guestInfo.phone} onChange={(e) => setGuestInfo({ ...guestInfo, phone: e.target.value })} />
-                        <Input icon={Phone} type="tel" placeholder={isRTL ? 'رقم هاتف بديل' : 'Alt Phone'} value={guestInfo.phone2} onChange={(e) => setGuestInfo({ ...guestInfo, phone2: e.target.value })} />
-                      </div>
-                      <Input icon={Mail} type="email" placeholder={isRTL ? 'البريد الإلكتروني (اختياري)' : 'Email (Optional)'} value={guestInfo.email} onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })} />
-                    </div>
-                  )}
-                </Section>
+          {/* ── LEFT: FORM ── */}
+          <div className="lg:col-span-7 space-y-5">
 
-                <Section title={isRTL ? 'عنوان الشحن' : 'Shipping Address'} icon={MapPin}>
-                  {isAuthenticated && addresses.length > 0 && !isAddingNewAddress ? (
-                    <div className="grid grid-cols-1 gap-3">
-                      {addresses.map((addr) => (
-                        <button key={addr._id} onClick={() => { setSelectedAddressId(addr._id); setSelectedGov(addr.state || ''); }} className={`group p-5 rounded-[22px] border-2 text-right transition-all flex items-center gap-4 ${selectedAddressId === addr._id ? 'border-[#0E4435] bg-white' : 'border-white/50 bg-white/30 hover:bg-white/50'}`}>
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${selectedAddressId === addr._id ? 'bg-[#0E4435] text-white' : 'bg-white/50 text-gray-400 group-hover:bg-white'}`}>
-                            {addr.type === 'home' ? <Home size={20} /> : <Briefcase size={20} />}
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-[15px] font-black text-gray-900">{addr.street}</p>
-                            <p className="text-xs font-bold text-gray-400">{addr.state}, {addr.city}</p>
-                          </div>
-                          {selectedAddressId === addr._id && <div className="w-6 h-6 bg-[#0E4435] rounded-full flex items-center justify-center text-white"><Check size={14} strokeWidth={3} /></div>}
-                        </button>
-                      ))}
-                      <button onClick={() => setIsAddingNewAddress(true)} className="p-4 rounded-2xl border-2 border-dashed border-gray-300 text-gray-400 font-black text-sm flex items-center justify-center gap-2 hover:border-[#0E4435] hover:text-[#0E4435] transition-all bg-white/20">
-                        <Plus size={20} /> {isRTL ? 'إضافة عنوان جديد' : 'New Address'}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Select value={selectedGovId} onChange={(e) => { const gov = governorates.find(g => g.id === e.target.value); setSelectedGovId(e.target.value); setSelectedDistrictId(''); setSelectedGov(gov ? gov.arabicName : ''); }}>
-                          <option value="">{isRTL ? 'المحافظة' : 'Governorate'}</option>
-                          {governorates.map(gov => <option key={gov.id} value={gov.id}>{isRTL ? gov.arabicName : gov.name}</option>)}
-                        </Select>
-                        <Select value={selectedDistrictId} onChange={(e) => { const dist = districts.find(d => d.id === e.target.value); setSelectedDistrictId(e.target.value); if(!isAuthenticated) setGuestInfo({...guestInfo, city: dist?.arabicName || ''}); else setNewAddress({...newAddress, city: dist?.arabicName || ''}); }} disabled={!selectedGovId}>
-                          <option value="">{isRTL ? 'المنطقة / المركز' : 'District'}</option>
-                          {districts.map(dist => <option key={dist.id} value={dist.id}>{isRTL ? dist.arabicName : dist.name}</option>)}
-                        </Select>
-                      </div>
-                      <Input icon={MapPin} placeholder={isRTL ? 'تفاصيل العنوان (شارع، مبنى، رقم الشقة)' : 'Street, Building, Flat...'} value={isAuthenticated ? newAddress.street : guestInfo.street} onChange={(e) => isAuthenticated ? setNewAddress({...newAddress, street: e.target.value}) : setGuestInfo({...guestInfo, street: e.target.value})} />
-                    </div>
-                  )}
-                </Section>
+            {/* Customer Info */}
+            <div className="bg-white rounded-3xl border border-gray-100 p-6 space-y-4 shadow-sm">
+              <h2 className="text-[15px] font-black text-gray-900 flex items-center gap-2">
+                <User size={16} className="text-[#0E4435]" />
+                بيانات العميل
+              </h2>
 
-                <button 
-                  onClick={nextStep} 
-                  className="w-full h-16 bg-[#0E4435] text-white rounded-[22px] font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 active:scale-95 transition-all hover:bg-[#0b3328]"
-                >
-                  <span>{isRTL ? 'متابعة للدفع' : 'Continue to Payment'}</span>
-                  {isRTL ? <ArrowLeft size={22} /> : <ArrowRight size={22} />}
-                </button>
-              </motion.div>
-            ) : (
-              /* Summary Step 1 */
-              <SummaryCard title={isRTL ? 'بيانات الشحن' : 'Shipping Info'} icon={MapPin} onEdit={() => setActiveStep(0)}>
-                {isAuthenticated ? (
-                  addresses.find(a => a._id === (selectedAddressId || addresses[0]?._id))?.street || isRTL ? 'عنوان محفوظ' : 'Saved Address'
-                ) : (
-                  guestInfo.name + ' - ' + selectedGov
-                )}
-              </SummaryCard>
-            )}
-
-            {/* STEP 2: PAYMENT & NOTES */}
-            {activeStep === 1 && (
-              <motion.div
-                key="step-1"
-                initial={{ opacity: 0, x: isRTL ? -30 : 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isRTL ? 30 : -30 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="space-y-6"
-              >
-                <Section title={isRTL ? 'طريقة الدفع' : 'Payment Method'} icon={CreditCard}>
-                  <div className="p-5 rounded-[22px] border-2 border-[#0E4435] bg-white flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#0E4435] rounded-xl flex items-center justify-center text-white">
-                      <ShoppingBag size={20} />
-                    </div>
-                    <div>
-                      <p className="text-[15px] font-black text-gray-900">{isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}</p>
-                      <p className="text-xs font-bold text-gray-400">{isRTL ? 'ادفع كاش للمندوب عند وصول الطلب' : 'Pay cash to the courier'}</p>
-                    </div>
+              {isAuth && addresses.length > 0 ? (
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center">
+                    <Check size={16} strokeWidth={3} className="text-white" />
                   </div>
-                </Section>
+                  <div>
+                    <p className="text-sm font-black text-emerald-800">تم تسجيل الدخول</p>
+                    <p className="text-xs font-bold text-emerald-600/70">بياناتك محفوظة</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Field label="الاسم بالكامل" required>
+                    <Input icon={User} placeholder="مثال: أحمد محمد" value={name} onChange={(e: any) => setName(e.target.value)} />
+                  </Field>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Field label="رقم الهاتف" required>
+                      <Input icon={Phone} type="tel" placeholder="01XXXXXXXXX" value={phone} onChange={(e: any) => setPhone(e.target.value)} />
+                    </Field>
+                    <Field label="رقم بديل" >
+                      <Input icon={Phone} type="tel" placeholder="اختياري" value={phone2} onChange={(e: any) => setPhone2(e.target.value)} />
+                    </Field>
+                  </div>
+                  <Field label="البريد الإلكتروني" recommended>
+                    <Input icon={Mail} type="email" placeholder="example@email.com" value={email} onChange={(e: any) => setEmail(e.target.value)} />
+                  </Field>
+                </div>
+              )}
+            </div>
 
-                <Section title={isRTL ? 'ملاحظات إضافية' : 'Order Notes'} icon={Tag}>
-                  <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={isRTL ? 'مثال: "اتصل بي قبل الوصول" أو "بجوار صيدلية كذا"' : 'e.g. Call before arrival...'} rows={3} dir={isRTL ? 'rtl' : 'ltr'} className="w-full bg-white/50 rounded-2xl p-5 text-[15px] font-bold text-gray-900 outline-none border border-white/50 focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all placeholder:text-gray-400 resize-none" />
-                </Section>
+            {/* Shipping Address */}
+            <div className="bg-white rounded-3xl border border-gray-100 p-6 space-y-4 shadow-sm">
+              <h2 className="text-[15px] font-black text-gray-900 flex items-center gap-2">
+                <MapPin size={16} className="text-[#0E4435]" />
+                عنوان الشحن
+              </h2>
 
-                <div className="bg-white/30 backdrop-blur-sm rounded-[24px] border border-white/50 p-5 space-y-4">
-                  <p className="text-xs font-black text-gray-500 uppercase tracking-widest">{isRTL ? 'لديك كود خصم؟' : 'Have a coupon?'}</p>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      placeholder={isRTL ? 'ادخل الكود هنا' : 'Enter code'}
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      className="flex-1 h-12 bg-white rounded-xl px-4 text-sm font-bold border border-gray-100 outline-none focus:border-[#0E4435]"
-                    />
-                    <button onClick={handleApplyCoupon} className="h-12 px-6 bg-[#0E4435] text-white rounded-xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all hover:bg-[#0b3328]">
-                      {isRTL ? 'تطبيق' : 'Apply'}
+              {isAuth && addresses.length > 0 ? (
+                <div className="space-y-2">
+                  {addresses.map(addr => (
+                    <button
+                      key={addr._id}
+                      onClick={() => setSelectedAddressId(addr._id)}
+                      className={`w-full p-4 rounded-2xl border-2 text-left transition-all flex items-center gap-3 ${selectedAddressId === addr._id ? 'border-[#0E4435] bg-emerald-50/50' : 'border-gray-100 bg-gray-50/50 hover:border-gray-200'}`}
+                    >
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${selectedAddressId === addr._id ? 'bg-[#0E4435] text-white' : 'bg-white text-gray-400'}`}>
+                        <MapPin size={14} />
+                      </div>
+                      <div className="flex-1 text-right">
+                        <p className="text-sm font-black text-gray-900">{addr.street}</p>
+                        <p className="text-xs font-bold text-gray-400">{addr.state}, {addr.city}</p>
+                      </div>
+                      {selectedAddressId === addr._id && (
+                        <div className="w-5 h-5 bg-[#0E4435] rounded-full flex items-center justify-center">
+                          <Check size={11} strokeWidth={3} className="text-white" />
+                        </div>
+                      )}
                     </button>
-                  </div>
+                  ))}
                 </div>
+              ) : (
+                <div className="space-y-3">
+                  <Field label="المحافظة" required>
+                    <Select value={govId} onChange={(e: any) => setGovId(e.target.value)}>
+                      <option value="">اختر المحافظة</option>
+                      {GOVERNORATES.map(g => (
+                        <option key={g.id} value={g.id}>{g.arabicName}</option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="العنوان بالتفصيل" required>
+                    <Input icon={MapPin} placeholder="الشارع، المبنى، رقم الشقة..." value={street} onChange={(e: any) => setStreet(e.target.value)} />
+                  </Field>
+                </div>
+              )}
+            </div>
 
-                <button 
-                  onClick={nextStep} 
-                  className="w-full h-16 bg-[#0E4435] text-white rounded-[22px] font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20 active:scale-95 transition-all hover:bg-[#0b3328]"
+            {/* Notes */}
+            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+              <h2 className="text-[15px] font-black text-gray-900 mb-4 flex items-center gap-2">
+                <Tag size={16} className="text-[#0E4435]" />
+                ملاحظات (اختياري)
+              </h2>
+              <textarea
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder='مثال: "اتصل بي قبل الوصول"'
+                rows={2}
+                dir="rtl"
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-[14px] font-bold text-gray-900 outline-none focus:border-[#0E4435] focus:ring-4 focus:ring-[#0E4435]/5 transition-all placeholder:text-gray-300 resize-none"
+              />
+            </div>
+
+            {/* Coupon */}
+            <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm">
+              <p className="text-[13px] font-black text-gray-500 mb-3">لديك كود خصم؟</p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="ادخل الكود"
+                  value={couponCode}
+                  onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                  disabled={couponApplied}
+                  className="flex-1 h-11 bg-gray-50 border border-gray-100 rounded-xl px-4 text-sm font-bold text-gray-900 outline-none focus:border-[#0E4435] transition-all placeholder:text-gray-300 disabled:opacity-50"
+                />
+                <button
+                  onClick={handleCoupon}
+                  disabled={couponApplied || !couponCode.trim()}
+                  className="h-11 px-5 bg-[#0E4435] text-white rounded-xl font-black text-sm active:scale-95 transition-all hover:bg-[#0b3328] disabled:opacity-40"
                 >
-                  <span>{isRTL ? 'مراجعة الطلب' : 'Review Order'}</span>
-                  {isRTL ? <ArrowLeft size={22} /> : <ArrowRight size={22} />}
+                  {couponApplied ? '✓' : 'تطبيق'}
                 </button>
-              </motion.div>
-            )}
+              </div>
+            </div>
+          </div>
 
-            {activeStep > 1 && (
-               <SummaryCard title={isRTL ? 'طريقة الدفع' : 'Payment'} icon={CreditCard} onEdit={() => setActiveStep(1)}>
-                  {isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}
-               </SummaryCard>
-            )}
-
-            {/* STEP 3: REVIEW (GLASSMORPHISM) */}
-            {activeStep === 2 && (
-              <motion.div
-                key="step-2"
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.35, ease: 'easeOut' }}
-                className="bg-white/50 backdrop-blur-xl rounded-[32px] p-8 space-y-8 relative overflow-hidden border border-white/60 shadow-xl shadow-[#0E4435]/5"
-              >
-                {/* Glow Effect */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[60px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-32 h-32 bg-gold-500/5 blur-[60px] pointer-events-none" />
-
-                <div className="text-center space-y-4 relative z-10">
-                  <motion.div 
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="w-16 h-16 bg-emerald-500 rounded-3xl flex items-center justify-center text-white mx-auto shadow-2xl shadow-emerald-500/30"
-                  >
-                    <Check size={32} strokeWidth={3} />
-                  </motion.div>
-                  <h3 className="text-2xl font-black text-gray-900">{isRTL ? 'أنت على وشك الانتهاء!' : 'Almost Done!'}</h3>
-                  <p className="text-sm font-bold text-gray-500">{isRTL ? 'يرجى مراجعة تفاصيل طلبك قبل التأكيد النهائي' : 'Please review your items one last time'}</p>
+          {/* ── RIGHT: ORDER SUMMARY ── */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden sticky top-24">
+              {/* Items */}
+              <div className="px-6 py-5 border-b border-gray-50">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-[14px] font-black text-gray-900">طلبك</h3>
+                  <span className="text-[11px] font-black text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">
+                    {items.length} منتج
+                  </span>
                 </div>
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {items.map(item => (
+                    <div key={item.id} className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ShoppingBag size={16} className="text-gray-300" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 text-right">
+                        <p className="text-sm font-black text-gray-900 truncate">{item.name}</p>
+                        <p className="text-xs font-bold text-gray-400">× {item.quantity} {item.size && `· ${item.size}`}</p>
+                      </div>
+                      <span className="text-sm font-black text-gray-800 flex-shrink-0">
+                        {Math.round(item.price * item.quantity).toLocaleString()} <span className="text-[10px] text-gray-400">ج.م</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-                <div className="space-y-4 relative z-10">
-                  <div className="flex items-center justify-between p-5 bg-white/50 rounded-2xl border border-white/60 shadow-sm">
-                    <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{isRTL ? 'العنوان' : 'Address'}</p>
-                    <p className="text-sm font-black text-gray-900">{selectedGov}, {isAuthenticated ? (addresses.find(a => a._id === selectedAddressId)?.street || '') : guestInfo.street}</p>
+              {/* Pricing */}
+              <div className="px-6 py-5 space-y-3">
+                <div className="flex justify-between text-sm text-gray-500 font-bold">
+                  <span>{Math.round(subtotal).toLocaleString()} ج.م</span>
+                  <span>المجموع الفرعي</span>
+                </div>
+                <div className="flex justify-between text-sm font-bold">
+                  <span className={shippingFee === 0 ? 'text-emerald-600 font-black' : 'text-gray-500'}>
+                    {shippingFee === 0 ? 'مجاناً' : `${Math.round(shippingFee).toLocaleString()} ج.م`}
+                  </span>
+                  <span className="text-gray-500 flex items-center gap-1">
+                    <Truck size={13} />
+                    الشحن
+                  </span>
+                </div>
+                {couponDiscount > 0 && (
+                  <div className="flex justify-between text-sm font-black text-emerald-600">
+                    <span>-{Math.round(couponDiscount).toLocaleString()} ج.م</span>
+                    <span>خصم الكوبون</span>
                   </div>
-                  <div className="flex items-center justify-between p-5 bg-white/50 rounded-2xl border border-white/60 shadow-sm">
-                    <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{isRTL ? 'وسيلة الدفع' : 'Payment'}</p>
-                    <p className="text-sm font-black text-gray-900">{isRTL ? 'كاش عند الاستلام' : 'COD'}</p>
+                )}
+
+                {/* Total */}
+                <div className="pt-4 border-t border-gray-100 flex justify-between items-baseline">
+                  <div className="text-right">
+                    <span className="text-3xl font-black text-[#0E4435]">{Math.round(total).toLocaleString()}</span>
+                    <span className="text-xs font-black text-gray-400 ml-1">ج.م</span>
+                  </div>
+                  <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">الإجمالي</span>
+                </div>
+              </div>
+
+              {/* Payment method */}
+              <div className="px-6 pb-4">
+                <div className="bg-gray-50 rounded-2xl p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#0E4435] rounded-xl flex items-center justify-center">
+                    <ShoppingBag size={14} className="text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-black text-gray-700">الدفع عند الاستلام</p>
+                    <p className="text-[10px] font-bold text-gray-400">Cash on Delivery</p>
                   </div>
                 </div>
+              </div>
 
-                <motion.button 
-                  whileHover={{ y: -3, boxShadow: "0 20px 40px rgba(14, 68, 53, 0.2)" }}
+              {/* Place Order Button */}
+              <div className="px-6 pb-6">
+                <motion.button
+                  whileHover={{ y: -2, boxShadow: '0 16px 32px rgba(14,68,53,0.2)' }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={handlePlaceOrder} 
-                  disabled={isProcessing} 
-                  className={`w-full h-20 bg-[#0E4435] text-white rounded-[28px] font-black text-xl flex items-center justify-center gap-4 shadow-2xl shadow-emerald-950/40 transition-all ${isProcessing ? 'opacity-60 cursor-wait' : 'hover:bg-[#0b3328] relative z-10'}`}
+                  onClick={handleOrder}
+                  disabled={processing}
+                  className={`w-full h-14 bg-[#0E4435] text-white rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 transition-all ${processing ? 'opacity-60 cursor-wait' : 'hover:bg-[#0b3328]'}`}
                 >
-                  {isProcessing ? (
-                    <div className="w-7 h-7 border-4 border-white border-t-transparent rounded-full animate-spin" />
+                  {processing ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
-                      <CreditCard size={26} />
-                      <span>{isRTL ? 'تأكيد وشحن الطلب الآن' : 'Place Order Now'}</span>
+                      <Lock size={16} />
+                      تأكيد الطلب
+                      <ArrowLeft size={16} />
                     </>
                   )}
                 </motion.button>
-              </motion.div>
-            )}
-            </AnimatePresence>
 
-          </div>
-
-          {/* Side Content (Receipt) */}
-          <div className="lg:col-span-5 space-y-6">
-            <OrderReceipt subtotal={subtotal} shippingFee={shippingFee} discount={couponDiscount} total={total} couponApplied={isCouponApplied} selectedGov={selectedGov} deliveryEstimate={{ min: deliveryMin, max: deliveryMax }} />
-            
-            {/* Desktop Quick Hint */}
-            <div className="hidden lg:block bg-white/20 backdrop-blur-sm border border-white/50 p-6 rounded-[24px]">
-               <div className="flex gap-4">
-                  <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600">
-                     <ShieldCheck size={20} />
-                  </div>
-                  <div className="flex-1">
-                     <p className="text-[11px] font-black text-gray-900 uppercase tracking-tight mb-1">{isRTL ? 'ضمان هوسي' : 'Hawsni Guarantee'}</p>
-                     <p className="text-[10px] font-bold text-gray-500 leading-relaxed">{isRTL ? 'جميع منتجاتنا أصلية وتخضع لرقابة جودة صارمة قبل الشحن.' : 'Original products with strict quality control before shipping.'}</p>
-                  </div>
-               </div>
+                <div className="flex items-center justify-center gap-1.5 mt-3">
+                  <Shield size={12} className="text-gray-300" />
+                  <p className="text-[10px] font-bold text-gray-400 text-center">
+                    بياناتك آمنة ومحمية · هوسي
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
       </main>
-
-      {/* Mobile Bar (ENLARGED) */}
-      <div className="lg:hidden fixed bottom-6 left-6 right-6 z-50">
-        <button 
-          onClick={activeStep === 2 ? handlePlaceOrder : nextStep} 
-          disabled={isProcessing} 
-          className="w-full h-16 bg-[#0E4435] text-white rounded-[24px] font-black text-base flex items-center justify-between px-6 shadow-2xl shadow-emerald-950/40 active:scale-95 transition-all backdrop-blur-md border border-white/10"
-        >
-          <div className="text-right">
-            <p className="text-[10px] text-white/50 uppercase leading-none mb-1">{isRTL ? 'الإجمالي' : 'Total'}</p>
-            <p className="text-lg leading-none">{Math.round(total).toLocaleString()} <span className="text-xs">EGP</span></p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>{isProcessing ? '...' : (activeStep === 2 ? (isRTL ? 'تأكيد' : 'Confirm') : (isRTL ? 'التالي' : 'Next'))}</span>
-            {isRTL ? <ArrowLeft size={20} strokeWidth={3} /> : <ArrowRight size={20} strokeWidth={3} />}
-          </div>
-        </button>
-      </div>
     </div>
   );
 }
