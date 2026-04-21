@@ -12,7 +12,10 @@ import {
     ShoppingBag,
     Clock,
     MapPin,
-    ExternalLink
+    ExternalLink,
+    Receipt,
+    ChevronLeft,
+    Check
 } from 'lucide-react';
 import { checkoutService } from '@/services/checkoutService';
 import { useLanguage } from '@/context/LanguageContext';
@@ -47,16 +50,14 @@ export default function OrderSuccessPage() {
 
     useEffect(() => {
         if (order && !loading) {
-            // Send client-side Purchase event to Meta Pixel (de-duplicated by event_id on backend CAPI)
             trackEvent('Purchase', {
                 value: order.total_amount || order.total,
                 currency: 'EGP',
                 content_ids: order.order_items ? order.order_items.map((item: any) => item.product_id) : [],
                 content_type: 'product',
                 num_items: order.order_items ? order.order_items.reduce((acc: number, item: any) => acc + item.quantity, 0) : 0
-            }, { eventID: `order_${order.id}` }); // This eventID matches the one sent by the CAPI server
+            }, { eventID: `order_${order.id}` });
 
-            // Send Purchase event to GA4
             trackGAEvent('purchase', {
                 transaction_id: order.id,
                 value: order.total_amount || order.total,
@@ -89,204 +90,226 @@ export default function OrderSuccessPage() {
     if (!order) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAFAFA] p-6 text-center">
-                <h1 className="text-2xl font-black mb-4">{isRTL ? 'الطلب غير موجود' : 'Order Not Found'}</h1>
-                <button onClick={() => router.push('/')} className="px-8 py-3 bg-black text-white rounded-2xl font-bold">
+                <h1 className="text-2xl font-black mb-4 font-cairo">{isRTL ? 'الطلب غير موجود' : 'Order Not Found'}</h1>
+                <button onClick={() => router.push('/')} className="px-8 py-3 bg-black text-white rounded-2xl font-bold font-cairo">
                     {isRTL ? 'العودة للرئيسية' : 'Return Home'}
                 </button>
             </div>
         );
     }
 
-    // Determine delivery days
     const gov = typeof order.shipping_address === 'object' ? order.shipping_address.state : '';
     const govSettings = shippingSettings?.governorate_settings?.[gov];
     const minDays = govSettings?.days_min || shippingSettings?.default_days_min || 3;
     const maxDays = govSettings?.days_max || shippingSettings?.default_days_max || 5;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] pb-20 font-cairo" dir="ltr">
-            <main className="max-w-2xl mx-auto px-6 pt-12">
-
-                {/* Header Section */}
-                <div className="text-center mb-10">
-                    <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                        className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6"
-                    >
-                        <CheckCircle2 className="w-12 h-12 text-[#0E4435]" />
-                    </motion.div>
-
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-3xl font-black text-gray-900 mb-3"
-                    >
-                        {isRTL ? 'شكراً لطلبك!' : 'Thank you for your order!'}
-                    </motion.h1>
-
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="text-gray-500 font-bold"
-                    >
-                        {isRTL
-                            ? `تم استلام طلبك رقم #${order.id?.toUpperCase().substring(0, 8)} بنجاح. سنرسل لك إشعاراً بمجرد شحنه.`
-                            : `Order #${order.id?.toUpperCase().substring(0, 8)} received successfully. We'll notify you once it's shipped.`}
-                    </motion.p>
-                </div>
-
-                {/* Info Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                    <motion.div
-                        initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="bg-white p-6 rounded-[2rem] border border-gray-100 flex items-center gap-4 shadow-sm"
-                    >
-                        <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-[#0E4435]">
-                            <Truck className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">
-                                {isRTL ? 'التوصيل المتوقع' : 'Estimated Delivery'}
-                            </p>
-                            <p className="text-sm font-black text-gray-900 leading-none">
-                                {isRTL ? `${minDays} - ${maxDays} أيام عمل` : `${minDays} - ${maxDays} Working Days`}
-                            </p>
-                        </div>
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: isRTL ? -20 : 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="bg-white p-6 rounded-[2rem] border border-gray-100 flex items-center gap-4 shadow-sm"
-                    >
-                        <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-emerald-600">
-                            <Clock className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-none mb-1">
-                                {isRTL ? 'حالة الطلب' : 'Order Status'}
-                            </p>
-                            <p className="text-sm font-black text-gray-900 leading-none">
-                                {isRTL ? 'قيد المعالجة' : 'Processing'}
-                            </p>
-                        </div>
-                    </motion.div>
-                </div>
-
-
-
-                {/* Items Summary */}
-                <motion.section
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="bg-white rounded-[2.5rem] p-8 border border-gray-100 mb-8 shadow-sm"
+        <div className="min-h-screen bg-[#FAFAFA] pb-24 font-cairo" dir={isRTL ? 'rtl' : 'ltr'}>
+            
+            {/* Header / Nav */}
+            <nav className="h-20 bg-white/50 backdrop-blur-md border-b border-gray-100 flex items-center px-6 sticky top-0 z-50">
+                <button 
+                    onClick={() => router.push('/')}
+                    className="flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-colors font-black text-xs uppercase tracking-widest"
                 >
-                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-50">
-                        <div className="flex items-center gap-3">
-                            <ShoppingBag className="w-6 h-6 text-[#0E4435]" />
-                            <h2 className="text-lg font-black text-gray-900">{isRTL ? 'ملخص المنتجات' : 'Items Summary'}</h2>
+                    {isRTL ? <ChevronLeft className="rotate-180" /> : <ChevronLeft />}
+                    {isRTL ? 'العودة للتسوق' : 'Back to Shopping'}
+                </button>
+            </nav>
+
+            <main className="max-w-4xl mx-auto px-6 pt-12 md:pt-20">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    
+                    {/* Left Side: Success Message */}
+                    <div className="lg:col-span-7 space-y-10">
+                        <section className="space-y-6">
+                            <motion.div
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ type: "spring", damping: 15 }}
+                                className="w-20 h-20 bg-emerald-500 rounded-[2rem] flex items-center justify-center text-white shadow-2xl shadow-emerald-500/30"
+                            >
+                                <Check size={40} strokeWidth={4} />
+                            </motion.div>
+                            
+                            <div className="space-y-4">
+                                <motion.h1 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="text-4xl md:text-6xl font-black text-gray-900 leading-tight"
+                                >
+                                    {isRTL ? 'تم تأكيد طلبك بنجاح!' : 'Order confirmed successfully!'}
+                                </motion.h1>
+                                <motion.p 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-gray-400 font-bold text-lg md:text-xl leading-relaxed"
+                                >
+                                    {isRTL 
+                                        ? `رقم الطلب #${order.id?.toUpperCase().substring(0, 8)}. نحن الآن نجهز طلبك بكل حب لنرسله إليك في أسرع وقت.` 
+                                        : `Order #${order.id?.toUpperCase().substring(0, 8)}. We are preparing your items with love to ship them as soon as possible.`}
+                                </motion.p>
+                            </div>
+                        </section>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="p-8 bg-white rounded-[2rem] border border-gray-100 flex flex-col gap-4 shadow-sm"
+                            >
+                                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-[#0E4435]">
+                                    <Truck size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">
+                                        {isRTL ? 'التوصيل المتوقع' : 'Delivery Estimate'}
+                                    </h4>
+                                    <p className="text-lg font-black text-gray-900">
+                                        {isRTL ? `${minDays} - ${maxDays} أيام عمل` : `${minDays} - ${maxDays} Working Days`}
+                                    </p>
+                                </div>
+                            </motion.div>
+
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.4 }}
+                                className="p-8 bg-white rounded-[2rem] border border-gray-100 flex flex-col gap-4 shadow-sm"
+                            >
+                                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                                    <MapPin size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">
+                                        {isRTL ? 'عنوان الشحن' : 'Shipping To'}
+                                    </h4>
+                                    <p className="text-lg font-black text-gray-900 line-clamp-1">
+                                        {order.shipping_address?.street || order.shipping_address?.city || order.shipping_address?.state || 'Address Saved'}
+                                    </p>
+                                </div>
+                            </motion.div>
                         </div>
-                        <span className="bg-gray-50 px-4 py-1.5 rounded-full text-xs font-black text-gray-400">
-                            {order.order_items?.length} {isRTL ? 'منتجات' : 'Items'}
-                        </span>
+
+                        <div className="pt-6">
+                            <button 
+                                onClick={() => router.push(`/track-order?id=${order.id}`)}
+                                className="w-full md:w-auto px-10 py-5 bg-[#0E4435] text-white rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/10 hover:scale-[1.02] active:scale-95 transition-all"
+                            >
+                                <span>{isRTL ? 'تتبع الطلب الآن' : 'Track Order Now'}</span>
+                                <ExternalLink size={20} />
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                        {order.order_items?.map((item: any, idx: number) => (
-                            <div key={idx} className="flex gap-4 items-center">
-                                <div className="w-20 h-24 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-100 p-2">
-                                    <img
-                                        src={formatImageUrl(item.products?.images?.[0] || item.image_url)}
-                                        alt={item.name}
-                                        className="w-full h-full object-contain mix-blend-multiply"
-                                    />
+                    {/* Right Side: Order Receipt Style */}
+                    <div className="lg:col-span-5">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="bg-white rounded-[2.5rem] shadow-2xl shadow-black/[0.02] border border-gray-100 overflow-hidden relative"
+                        >
+                            {/* Receipt Cut Effect */}
+                            <div className="absolute top-0 left-0 w-full flex justify-center gap-1 -translate-y-1/2">
+                                {[...Array(15)].map((_, i) => (
+                                    <div key={i} className="w-4 h-4 rounded-full bg-[#FAFAFA]" />
+                                ))}
+                            </div>
+
+                            <div className="p-8">
+                                <div className="flex items-center gap-3 mb-8 border-b border-gray-50 pb-5">
+                                    <Receipt className="text-gray-300" />
+                                    <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">
+                                        {isRTL ? 'تفاصيل الطلب' : 'Order Summary'}
+                                    </h2>
                                 </div>
-                                <div className="flex-1">
-                                    <h4 className="font-black text-gray-900 text-sm mb-1 leading-snug">{item.name}</h4>
-                                    <p className="text-[11px] text-gray-400 font-bold">
-                                        {isRTL ? 'الكمية:' : 'Qty:'} {item.quantity} | {item.size || (isRTL ? 'بدون مقاس' : 'No Size')}
-                                    </p>
-                                    {item.accessories && item.accessories.length > 0 && (
-                                        <div className="flex flex-wrap gap-1 mt-1">
-                                            {item.accessories.map((acc: any, aidx: number) => (
-                                                <span 
-                                                    key={aidx}
-                                                    className="text-[9px] font-black bg-emerald-50 text-[#0E4435] px-1.5 py-0.5 rounded-md border border-emerald-100/50"
-                                                >
-                                                    + {isRTL ? acc.name_ar || acc.name : acc.name}
-                                                </span>
-                                            ))}
+
+                                <div className="space-y-6">
+                                    {order.order_items?.map((item: any, idx: number) => (
+                                        <div key={idx} className="flex gap-4 items-center">
+                                            <div className="w-16 h-20 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 p-1">
+                                                <img 
+                                                    src={formatImageUrl(item.products?.images?.[0] || item.image_url)}
+                                                    alt={item.name}
+                                                    className="w-full h-full object-contain mix-blend-multiply"
+                                                />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-black text-gray-900 text-sm truncate">{item.name}</h4>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
+                                                    {isRTL ? 'الكمية:' : 'Qty:'} {item.quantity} | {item.size || 'Standard'}
+                                                </p>
+                                                <p className="text-sm font-black text-[#0E4435] mt-1">
+                                                    {item.price?.toLocaleString()} EGP
+                                                </p>
+                                            </div>
                                         </div>
-                                    )}
-                                    <p className="text-sm font-black text-[#0E4435] mt-1">
-                                        {((item.price + (item.accessories?.reduce((s: number, a: any) => s + (a.price || 0), 0) || 0))).toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}
-                                    </p>
+                                    ))}
+
+                                    <div className="pt-6 mt-6 border-t-2 border-dashed border-gray-100 space-y-3">
+                                        <div className="flex justify-between items-center text-sm font-bold text-gray-400">
+                                            <span>{isRTL ? 'المجموع الفرعي' : 'Subtotal'}</span>
+                                            <span className="text-gray-900">{(order.subtotal || 0).toLocaleString()} EGP</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm font-bold text-gray-400">
+                                            <span>{isRTL ? 'الشحن' : 'Shipping'}</span>
+                                            <span className="text-gray-900">{(order.shipping_fee || 0).toLocaleString()} EGP</span>
+                                        </div>
+                                        {order.discount > 0 && (
+                                            <div className="flex justify-between items-center text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
+                                                <span>{isRTL ? 'خصم مطبق' : 'Discount Applied'}</span>
+                                                <span>-{(order.discount || 0).toLocaleString()} EGP</span>
+                                            </div>
+                                        )}
+                                        <div className="pt-4 flex justify-between items-end">
+                                            <div>
+                                                <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">
+                                                    {isRTL ? 'القيمة الإجمالية' : 'Total Amount'}
+                                                </span>
+                                                <span className="text-xs font-black text-[#0E4435] bg-emerald-50 px-2 py-0.5 rounded-md">
+                                                    {isRTL ? 'الدفع عند الاستلام' : 'Paid by COD'}
+                                                </span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="text-3xl font-black text-[#0E4435] leading-none">
+                                                    {(order.total_amount || order.total)?.toLocaleString()}
+                                                </span>
+                                                <span className="text-[10px] font-black text-[#0E4435] block uppercase">EGP</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        ))}
+
+                            {/* Serrated edge bottom */}
+                            <div className="h-4 w-full bg-[#FAFAFA] flex items-end">
+                                <div className="w-full h-2 bg-white flex justify-around" style={{ clipPath: 'polygon(0% 100%, 5% 0%, 10% 100%, 15% 0%, 20% 100%, 25% 0%, 30% 100%, 35% 0%, 40% 100%, 45% 0%, 50% 100%, 55% 0%, 60% 100%, 65% 0%, 70% 100%, 75% 0%, 80% 100%, 85% 0%, 90% 100%, 95% 0%, 100% 100%)' }}></div>
+                            </div>
+                        </motion.div>
                     </div>
-
-                    <div className="mt-8 pt-6 border-t border-gray-50 flex justify-between items-center">
-                        <span className="text-gray-400 font-bold">{isRTL ? 'إجمالي المبلغ' : 'Total Amount'}</span>
-                        <div className="text-right">
-                            <span className="text-2xl font-black text-[#0E4435]">
-                                {(order.total_amount || order.total)?.toLocaleString()}
-                            </span>
-                            <span className="text-xs font-bold text-[#0E4435] ml-1">{isRTL ? 'ج.م' : 'EGP'}</span>
-                        </div>
-                    </div>
-                </motion.section>
-
-                {/* Actions */}
-                <div className="space-y-4">
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => router.push(`/track-order?id=${order.id}`)}
-                        className="w-full py-5 bg-[#0E4435] text-white rounded-[2rem] font-black text-lg flex items-center justify-center gap-3 shadow-xl shadow-emerald-950/20"
-                    >
-                        <span>{isRTL ? 'تتبع طلبك الآن' : 'Track Your Order Now'}</span>
-                        <ExternalLink className="w-5 h-5" />
-                    </motion.button>
-
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => router.push('/')}
-                        className="w-full py-5 bg-white text-gray-900 border border-gray-100 rounded-[2rem] font-black text-lg flex items-center justify-center gap-3 shadow-sm"
-                    >
-                        <Home className="w-5 h-5" />
-                        <span>{isRTL ? 'العودة للتسوق' : 'Continue Shopping'}</span>
-                    </motion.button>
                 </div>
 
-                <p className="mt-12 text-center text-xs text-gray-400 font-bold leading-relaxed px-10">
-                    {isRTL
-                        ? 'سيصلك بريد إلكتروني يحتوي على تفاصيل الطلب وكود التتبع بمجرد تجهيز الشحنة.'
-                        : 'You will receive an email with order details and tracking code once the shipment is prepared.'}
-                </p>
-
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="mt-20 text-center space-y-4"
+                >
+                    <p className="text-xs text-gray-400 font-black uppercase tracking-widest leading-loose max-w-md mx-auto">
+                        {isRTL 
+                            ? 'لقد تم إرسال تفاصيل الطلب كاملة إلى بريدك الإلكتروني. شكراً لثقتك في هوسني.' 
+                            : 'Full order details have been sent to your email. Thank you for trusting Hawsni.'}
+                    </p>
+                    <div className="flex justify-center items-center gap-6 opacity-30 grayscale pt-4">
+                        <ShoppingBag size={20} />
+                        <Package size={20} />
+                        <CheckCircle2 size={20} />
+                    </div>
+                </motion.div>
             </main>
-
-            <style jsx global>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #eee;
-                    border-radius: 10px;
-                }
-            `}</style>
         </div>
     );
 }
