@@ -1,39 +1,88 @@
-'use client';
-
-import { useParams } from 'next/navigation';
+import { Metadata } from 'next';
 import { productService } from '@/services/productService';
-import { useEffect, useState } from 'react';
 import ProductPageClient from './ProductPageClient';
 import { Product } from '@/types';
 
-export default function ProductPage() {
-  const params = useParams();
-  const id = params.id as string;
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+interface Props {
+  params: Promise<{ id: string }>;
+}
 
-  useEffect(() => {
-    if (id) {
-      productService.getProductById(id).then(res => {
-        if (res.success) {
-          setProduct(res.product);
-        }
-        setLoading(false);
-      });
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const res = await productService.getProductById(id);
+    if (!res.success || !res.product) {
+      return { title: 'Product Not Found | Hwasi' };
     }
-  }, [id]);
+    const product = res.product;
+    const finalPrice = product.discount 
+      ? product.price - (product.price * product.discount / 100) 
+      : product.price;
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-[#0E4435] border-t-transparent rounded-full animate-spin"></div>
-    </div>
+    const title = `${product.name} | هوسي للأزياء`;
+    const description = `اشتري ${product.name} الآن بسعر ${finalPrice} ج.م. جودة متميزة وتصاميم فريدة من هوسي للأزياء.`;
+    
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        images: product.images?.[0] ? [{ url: product.images[0] }] : [],
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: product.images?.[0] ? [product.images[0]] : [],
+      }
+    };
+  } catch (error) {
+    return { title: 'Hwasi - Premium Fashion' };
+  }
+}
+
+export default async function ProductPage({ params }: Props) {
+  const { id } = await params;
+  const res = await productService.getProductById(id);
+  const product = res.product as Product;
+
+  // JSON-LD Structured Data for Google
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product?.name,
+    image: product?.images,
+    description: `Shop ${product?.name} at Hwasi. Premium quality fashion in Egypt.`,
+    sku: product?.id || product?._id,
+    brand: {
+      '@type': 'Brand',
+      name: 'Hwasi'
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `https://hwasi.com/product/${id}`,
+      priceCurrency: 'EGP',
+      price: product?.discount 
+        ? product.price - (product.price * product.discount / 100) 
+        : product.price,
+      availability: (product?.stock ?? 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: product?.rating || '5.0',
+      reviewCount: product?.num_reviews || '1'
+    }
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <ProductPageClient initialProduct={product} />
+    </>
   );
-
-  if (!product) return (
-    <div className="min-h-screen flex items-center justify-center font-cairo">
-      <p>المنتج غير موجود</p>
-    </div>
-  );
-
-  return <ProductPageClient initialProduct={product} />;
 }
