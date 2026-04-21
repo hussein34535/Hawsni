@@ -62,6 +62,7 @@ import MicrosoftClarity from "@/components/analytics/MicrosoftClarity";
 import ChatWidget from "@/components/chat/ChatWidget";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Suspense } from "react";
+import MainLayout from "@/components/layout/MainLayout";
 
 export default function RootLayout({
   children,
@@ -70,12 +71,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${cairo.variable} font-cairo min-h-screen flex flex-col bg-[var(--color-bg-secondary)] pb-20 md:pb-0`}>
+      <body className={`${cairo.variable} font-cairo min-h-screen flex flex-col bg-[var(--color-bg-secondary)]`}>
         <LanguageProvider>
           <Navbar />
-          <main className="flex-1 max-w-7xl mx-auto w-full pt-20">
+          <MainLayout>
             {children}
-          </main>
+          </MainLayout>
           <BottomNav />
           <ToastContainer />
           <FacebookPixel />
