@@ -44,6 +44,7 @@ export interface Product {
     num_reviews?: number;
     size_guide?: string;
     stock?: number;
+    stock_count?: number;
     countInStock?: number;
     product_variants?: any[];
     accessories?: any[];
