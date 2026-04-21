@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { trackEvent } from '@/components/analytics/FacebookPixel';
 import {
   ArrowLeft, MapPin, Check, Lock, Phone,
-  User, Mail, Tag, ShoppingBag, Truck, ChevronDown, Shield, Sparkles
+  User, Mail, Tag, ShoppingBag, Truck, ChevronDown, Shield, Sparkles, Search
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
@@ -25,11 +25,11 @@ const GOVERNORATES = [
   { id: 'red_sea', name: 'Red Sea', arabicName: 'البحر الأحمر' },
   { id: 'beheira', name: 'Beheira', arabicName: 'البحيرة' },
   { id: 'fayoum', name: 'Fayoum', arabicName: 'الفيوم' },
-  { id: 'gharbiya', name: 'Gharbiya', arabicName: 'الغربية' },
+  { id: 'gharbia', name: 'Gharbia', arabicName: 'الغربية' },
   { id: 'ismailia', name: 'Ismailia', arabicName: 'الإسماعيلية' },
-  { id: 'menofia', name: 'Menofia', arabicName: 'المنوفية' },
+  { id: 'monufia', name: 'Monufia', arabicName: 'المنوفية' },
   { id: 'minya', name: 'Minya', arabicName: 'المنيا' },
-  { id: 'qaliubiya', name: 'Qaliubiya', arabicName: 'القليوبية' },
+  { id: 'qalyubia', name: 'Qalyubia', arabicName: 'القليوبية' },
   { id: 'new_valley', name: 'New Valley', arabicName: 'الوادي الجديد' },
   { id: 'north_sinai', name: 'North Sinai', arabicName: 'شمال سيناء' },
   { id: 'suez', name: 'Suez', arabicName: 'السويس' },
@@ -98,7 +98,15 @@ export default function CheckoutPage() {
   const [phone, setPhone] = useState('');
   const [phone2, setPhone2] = useState('');
   const [email, setEmail] = useState('');
+  const [shippingSettings, setShippingSettings] = useState<any>(null);
   const [govId, setGovId] = useState('');
+  const [cityId, setCityId] = useState('');
+  const [govSearch, setGovSearch] = useState('');
+    return GOVERNORATES.filter(g => 
+      g.arabicName.includes(govSearch) || 
+      g.name.toLowerCase().includes(govSearch.toLowerCase())
+    );
+  }, [govSearch]);
   const [street, setStreet] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -322,16 +330,50 @@ export default function CheckoutPage() {
                   ))}
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-5">
+                  {/* Governorate */}
                   <div>
                     <label className="text-xs font-bold text-gray-500 mb-1.5 block">المحافظة <span className="text-red-400">*</span></label>
-                    <Select value={govId} onChange={(e: any) => setGovId(e.target.value)}>
-                      <option value="">اختر المحافظة</option>
-                      {GOVERNORATES.map(g => (
-                        <option key={g.id} value={g.id}>{g.arabicName}</option>
-                      ))}
-                    </Select>
+                    <div className="space-y-2">
+                      <Input 
+                        icon={Search} 
+                        placeholder="ابحث عن المحافظة..." 
+                        value={govSearch} 
+                        onChange={(e: any) => setGovSearch(e.target.value)} 
+                      />
+                      <Select value={govId} onChange={(e: any) => { setGovId(e.target.value); setCityId(''); setCitySearch(''); }}>
+                        <option value="">اختر المحافظة</option>
+                        {governorates.map((g: any) => (
+                          <option key={g._id} value={g._id}>{g.name}</option>
+                        ))}
+                      </Select>
+                    </div>
                   </div>
+
+                  {/* City / Area */}
+                  <AnimatePresence>
+                    {govId && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                        className="space-y-2"
+                      >
+                        <label className="text-xs font-bold text-gray-500 mb-1.5 block">المدينة / المنطقة <span className="text-red-400">*</span></label>
+                        <Input 
+                          icon={Search} 
+                          placeholder="ابحث عن المدينة أو المنطقة..." 
+                          value={citySearch} 
+                          onChange={(e: any) => setCitySearch(e.target.value)} 
+                        />
+                        <Select value={cityId} onChange={(e: any) => setCityId(e.target.value)}>
+                          <option value="">اختر المدينة/المنطقة</option>
+                          {cities.map((c: any) => (
+                            <option key={c._id} value={c._id}>{c.name}</option>
+                          ))}
+                        </Select>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div>
                     <label className="text-xs font-bold text-gray-500 mb-1.5 block">العنوان بالتفصيل <span className="text-red-400">*</span></label>
                     <Input icon={MapPin} placeholder="الشارع، المبنى، رقم الشقة..." value={street} onChange={(e: any) => setStreet(e.target.value)} />
