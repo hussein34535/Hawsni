@@ -63,7 +63,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct: 
         }
         addItem({
             id: `${product.id}_${selectedSize || 'default'}`,
-            productId: product.id,
+            productId: product.id || '',
             name: product.name,
             price: product.discount ? product.price - (product.price * product.discount / 100) : product.price,
             imageUrl: formatImageUrl(product.images?.[0] || ''),
