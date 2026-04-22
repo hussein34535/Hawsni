@@ -78,15 +78,13 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           callback: (payload) {
             final newMessage = payload.newRecord;
-            if (newMessage != null) {
-              setState(() {
+            setState(() {
                 // Check for optimism duplicate
                 if (!_messages.any((m) => m['id'] == newMessage['id'])) {
                   _messages.add(newMessage);
                 }
               });
               _scrollToBottom();
-            }
           },
         )
         .subscribe();

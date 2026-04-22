@@ -282,8 +282,8 @@ class _FullScreenImageGalleryState extends State<FullScreenImageGallery> {
         ),
       );
       _transformationController.value = Matrix4.identity()
-        ..translate(-position.dx * (_scale - 1), -position.dy * (_scale - 1))
-        ..scale(_scale);
+        ..translateByDouble(-position.dx * (_scale - 1), -position.dy * (_scale - 1))
+        ..scaleByDouble(_scale);
     }
   }
 }

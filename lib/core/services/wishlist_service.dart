@@ -81,7 +81,7 @@ class WishlistService extends ChangeNotifier {
       final List<dynamic> data = await ApiService.getWishlist();
       _items = data.map((json) => WishlistItem.fromJson(json)).toList();
     } catch (e) {
-      print("Wishlist fetch error: $e");
+      debugPrint("Wishlist fetch error: $e");
     } finally {
       _isLoading = false;
       notifyListeners();

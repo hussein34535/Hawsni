@@ -139,10 +139,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       const SizedBox(height: 8),
                       Text(
                         AppLocalizations.of(context)!.startShoppingToSeeOrders,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 14,
-                          color: Colors.grey[500],
+                          color: Colors.grey,
                         ),
                         textAlign: TextAlign.center,
                       ),

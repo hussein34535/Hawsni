@@ -10,9 +10,7 @@ import 'package:hwasi_app/features/address/bloc/address_bloc.dart';
 import 'package:hwasi_app/features/address/bloc/address_event.dart';
 import 'package:hwasi_app/features/address/bloc/address_state.dart';
 import 'package:hwasi_app/features/address/data/models/address_model.dart';
-import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
-import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:hwasi_app/core/services/coupon_service.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
@@ -673,7 +671,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
         const SizedBox(height: 12),
         // Governorate Dropdown
         DropdownButtonFormField<String>(
-          value: _stateController.text.isNotEmpty && egyptGovernorates.contains(_stateController.text)
+          initialValue: _stateController.text.isNotEmpty && egyptGovernorates.contains(_stateController.text)
               ? _stateController.text
               : null,
           isExpanded: true,
