@@ -399,6 +399,9 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
         performAddToCart(selectedAccessories);
     };
 
+    const currentStockOut = (product.stock_count || 0) <= 0;
+    const stockCount = product.stock_count || 0;
+
     return (
         <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
             <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/10 to-transparent pointer-events-none h-24 pt-2`}>
@@ -472,13 +475,21 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                 </div>
                             </div>
                             
-                            <button onClick={handleAddToCart} className="w-full h-14 bg-[#0E4435] text-white rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-xl shadow-[#0E4435]/20 active:scale-95 transition-all">
+                            <button 
+                                onClick={currentStockOut ? undefined : handleAddToCart} 
+                                className={`w-full h-14 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all ${currentStockOut ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#0E4435] text-white shadow-[#0E4435]/20'}`}
+                                disabled={currentStockOut}
+                            >
                                 <ShoppingBag size={20} />
-                                {isRTL ? 'إضافة إلى السلة' : 'Add to Cart'}
+                                {currentStockOut ? (isRTL ? 'نفدت الكمية' : 'Out of Stock') : (isRTL ? 'إضافة إلى السلة' : 'Add to Cart')}
                             </button>
                         </div>
 
                         <FAQAccordion isRTL={isRTL} />
+
+                        <div className="pt-10 border-t border-gray-100">
+                            <ReviewsSection productId={productId} />
+                        </div>
                     </div>
                 </div>
             </main>
@@ -487,10 +498,13 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 {isUpsellOpen && (
                     <AccessoryUpsellModal 
                         isOpen={isUpsellOpen} 
-                        onClose={() => performAddToCart([])} 
-                        onConfirm={performAddToCart}
+                        onClose={() => setIsUpsellOpen(false)}
+                        onSkip={() => performAddToCart([])} 
+                        onAdd={performAddToCart}
                         accessories={product.accessories || []}
+                        productName={product.name}
                         isRTL={isRTL}
+                        formatImageUrl={formatImageUrl}
                     />
                 )}
             </AnimatePresence>
