@@ -19,44 +19,6 @@ import { Product } from '@/types';
 import { wishlistService } from '@/services/wishlistService';
 import dynamic from 'next/dynamic';
 
-const LowStockBanner = ({ stock, isRTL }: { stock: number, isRTL: boolean }) => {
-    if (stock <= 0 || stock > 15) return null;
-    return (
-        <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#FFF8E6] border border-[#FFE7A0] rounded-[1.5rem] py-3 px-5 flex items-center justify-center gap-2 mb-6 w-fit mx-auto shadow-sm"
-        >
-            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-orange-500 shadow-sm flex-shrink-0">
-                <Flame size={14} fill="currentColor" />
-            </div>
-            <div className="text-center flex items-center gap-1">
-                <p className="text-xs font-black text-orange-900 font-cairo">
-                    {isRTL ? 'الكمية محدودة!' : 'Limited Quantity!'}
-                </p>
-                <p className="text-xs font-bold text-orange-800 font-cairo">
-                    {isRTL ? `باقي ${stock} قطع فقط` : `Only ${stock} left`}
-                </p>
-            </div>
-        </motion.div>
-    );
-};
-
-const RatingStars = ({ rating = 4.9, count = 1200, isRTL }: { rating?: number, count?: number, isRTL: boolean }) => {
-    return (
-        <div className="flex items-center justify-center gap-1.5 mb-2">
-            <div className="flex gap-0.5 text-amber-400" dir="ltr">
-                {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} fill={i < Math.floor(rating) ? 'currentColor' : 'none'} strokeWidth={1.5} />
-                ))}
-            </div>
-            <span className="text-xs font-bold text-gray-500 font-cairo">
-                {rating.toFixed(1)} ({count.toLocaleString()} {isRTL ? 'تقييم' : 'reviews'})
-            </span>
-        </div>
-    );
-};
-
 const ProductVideoItem = ({ src }: { src: string }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -424,8 +386,10 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
     };
 
     const currentStockOut = (product.stock_count || 0) <= 0;
+    const stockCount = product.stock_count || 0;
+
     return (
-        <div className="w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
             <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/10 to-transparent pointer-events-none h-24 pt-2`}>
                 <button onClick={() => router.back()} className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 pointer-events-auto active:scale-95 transition-transform">
                     {isRTL ? <ArrowRight size={20} className="text-white" /> : <ArrowLeft size={20} className="text-white" />}
@@ -466,63 +430,35 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                         </div>
                     </div>
 
-                    <div className="p-6 md:p-10 text-center flex flex-col items-center">
-                        <div className="flex flex-col items-center text-center gap-2 mb-8 w-full">
-                            <h1 className="text-3xl font-black text-gray-900 font-cairo leading-tight tracking-tight px-4">{product.name}</h1>
-                            
-                            <RatingStars rating={product.rating || 4.9} count={product.num_reviews || 1200} isRTL={isRTL} />
-
-                            <div className="flex flex-col items-center mt-2">
-                                {product.discount ? (
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-base text-gray-400 line-through font-bold">{product.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
-                                        <span className="bg-red-500 text-white text-[11px] font-black px-2 py-0.5 rounded-lg">-{product.discount}%</span>
+                    <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className="flex flex-col gap-6 mb-10">
+                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight mb-2.5">{product.name}</h1>
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex flex-col">
+                                    {product.discount ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-gray-400 line-through font-bold">{product.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
+                                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md">-{product.discount}%</span>
+                                        </div>
+                                    ) : null}
+                                    <div className={`flex items-baseline gap-1 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
+                                        <span>{Math.round(getBasePrice()).toLocaleString()}</span>
+                                        <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
-                                ) : null}
-                                <div className={`flex items-baseline gap-1 font-black text-3xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
-                                    <span>{Math.round(getBasePrice()).toLocaleString()}</span>
-                                    <span className="text-sm uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <LowStockBanner stock={product.stock_count || 0} isRTL={isRTL} />
-
                         <FreeDeliveryBanner isRTL={isRTL} />
 
-                        <div className="mt-8 space-y-8 flex flex-col items-center">
-                            <div className="w-full">
-                                <h3 className="text-sm font-black text-gray-900 mb-4 font-cairo text-center">{isRTL ? 'اختر المقاس' : 'Select Size'}</h3>
-                                <div className="flex flex-wrap gap-3 justify-center">
+                        <div className="mt-8 space-y-6">
+                            <div>
+                                <h3 className="text-sm font-black text-gray-900 mb-4 font-cairo">{isRTL ? 'اختر المقاس' : 'Select Size'}</h3>
+                                <div className="flex flex-wrap gap-3">
                                     {product.sizes?.map(size => (
-                                        <button 
-                                            key={size} 
-                                            onClick={() => setSelectedSize(size)} 
-                                            className={`h-14 min-w-[3.5rem] px-6 rounded-2xl font-black text-sm transition-all duration-300 transform active:scale-95 ${selectedSize === size ? 'bg-gray-950 text-white shadow-xl shadow-gray-900/20' : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-300 hover:bg-gray-50'}`}
-                                        >
-                                            {size}
-                                        </button>
+                                        <button key={size} onClick={() => setSelectedSize(size)} className={`h-12 px-6 rounded-xl font-black text-sm transition-all ${selectedSize === size ? 'bg-[#0E4435] text-white' : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-200'}`}>{size}</button>
                                     ))}
                                 </div>
-                            </div>
-
-                            <div className="flex flex-col gap-3 justify-center w-full mt-4 items-center">
-                                <button 
-                                    onClick={() => setIsSizeGuideOpen(true)} 
-                                    className="flex items-center justify-center gap-2 px-8 py-3 bg-white text-gray-700 rounded-full font-bold text-sm font-cairo hover:bg-gray-50 transition-all active:scale-95 border border-gray-100 shadow-sm w-fit"
-                                >
-                                    <Ruler size={16} />
-                                    {isRTL ? 'جدول المقاسات' : 'Size Guide'}
-                                </button>
-                                {product.is_vto_enabled && (
-                                    <button 
-                                        onClick={() => setIsVTOOpen(true)} 
-                                        className="flex items-center justify-center gap-2 px-8 py-3 bg-indigo-50 text-indigo-600 rounded-full font-bold text-sm font-cairo hover:bg-indigo-100 transition-all active:scale-95 w-fit"
-                                    >
-                                        <Maximize size={16} />
-                                        {isRTL ? 'قياس افتراضي' : 'Virtual Try-On'}
-                                    </button>
-                                )}
                             </div>
                         </div>
 
@@ -586,18 +522,18 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                     >
                         <AnimatePresence mode="wait">
                             <motion.div
-                                key={currentStockOut ? 'out_of_stock' : isInCart ? 'go_to_cart' : 'add_to_cart'}
+                                key={isInCart ? 'go_to_cart' : 'add_to_cart'}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
                                 className="flex items-center gap-2"
                             >
-                                {!currentStockOut && <ShoppingBag size={18} />}
+                                <ShoppingBag size={18} />
                                 <span className="font-cairo">
-                                    {currentStockOut
-                                        ? (isRTL ? 'نفدت الكمية' : 'Out of Stock')
+                                    {stockCount <= 0
+                                        ? 'نفدت الكمية'
                                         : isInCart
-                                            ? (isRTL ? 'الذهاب للسلة' : 'Go to Cart')
+                                            ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
                                             : (t.product?.add_to_cart || 'Add to Cart')}
                                 </span>
                             </motion.div>
