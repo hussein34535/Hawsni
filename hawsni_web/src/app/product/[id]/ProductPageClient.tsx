@@ -20,22 +20,22 @@ import { wishlistService } from '@/services/wishlistService';
 import dynamic from 'next/dynamic';
 
 const LowStockBanner = ({ stock, isRTL }: { stock: number, isRTL: boolean }) => {
-    if (stock <= 0 || stock > 10) return null;
+    if (stock <= 0 || stock > 15) return null;
     return (
         <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-center gap-3 mb-8 w-full max-w-md mx-auto shadow-sm"
+            className="bg-[#FFF8E6] border border-[#FFE7A0] rounded-[1.5rem] py-3 px-5 flex items-center justify-center gap-2 mb-6 w-fit mx-auto shadow-sm"
         >
-            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 flex-shrink-0">
-                <Flame size={20} fill="currentColor" />
+            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center text-orange-500 shadow-sm flex-shrink-0">
+                <Flame size={14} fill="currentColor" />
             </div>
-            <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-                <p className="text-sm font-black text-orange-950 font-cairo leading-tight">
+            <div className="text-center flex items-center gap-1">
+                <p className="text-xs font-black text-orange-900 font-cairo">
                     {isRTL ? 'الكمية محدودة!' : 'Limited Quantity!'}
                 </p>
-                <p className="text-xs font-bold text-orange-800/70 font-cairo">
-                    {isRTL ? `متبقي ${stock} فقط في المخزون` : `Only ${stock} left in stock`}
+                <p className="text-xs font-bold text-orange-800 font-cairo">
+                    {isRTL ? `باقي ${stock} قطع فقط` : `Only ${stock} left`}
                 </p>
             </div>
         </motion.div>
@@ -45,13 +45,13 @@ const LowStockBanner = ({ stock, isRTL }: { stock: number, isRTL: boolean }) => 
 const RatingStars = ({ rating = 4.9, count = 1200, isRTL }: { rating?: number, count?: number, isRTL: boolean }) => {
     return (
         <div className="flex items-center justify-center gap-1.5 mb-2">
-            <div className={`flex gap-0.5 text-amber-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className="flex gap-0.5 text-amber-400" dir="ltr">
                 {[...Array(5)].map((_, i) => (
                     <Star key={i} size={14} fill={i < Math.floor(rating) ? 'currentColor' : 'none'} strokeWidth={1.5} />
                 ))}
             </div>
             <span className="text-xs font-bold text-gray-500 font-cairo">
-                {rating} ({count.toLocaleString()} {isRTL ? 'تقييم' : 'reviews'})
+                {rating.toFixed(1)} ({count.toLocaleString()} {isRTL ? 'تقييم' : 'reviews'})
             </span>
         </div>
     );
@@ -424,10 +424,8 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
     };
 
     const currentStockOut = (product.stock_count || 0) <= 0;
-    const stockCount = product.stock_count || 0;
-
     return (
-        <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
+        <div className="w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/10 to-transparent pointer-events-none h-24 pt-2`}>
                 <button onClick={() => router.back()} className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 pointer-events-auto active:scale-95 transition-transform">
                     {isRTL ? <ArrowRight size={20} className="text-white" /> : <ArrowLeft size={20} className="text-white" />}
@@ -468,8 +466,8 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                         </div>
                     </div>
 
-                    <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        <div className="flex flex-col items-center text-center gap-2 mb-8">
+                    <div className="p-6 md:p-10 text-center flex flex-col items-center">
+                        <div className="flex flex-col items-center text-center gap-2 mb-8 w-full">
                             <h1 className="text-3xl font-black text-gray-900 font-cairo leading-tight tracking-tight px-4">{product.name}</h1>
                             
                             <RatingStars rating={product.rating || 4.9} count={product.num_reviews || 1200} isRTL={isRTL} />
@@ -508,23 +506,23 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 justify-center w-full">
+                            <div className="flex flex-col gap-3 justify-center w-full mt-4 items-center">
+                                <button 
+                                    onClick={() => setIsSizeGuideOpen(true)} 
+                                    className="flex items-center justify-center gap-2 px-8 py-3 bg-white text-gray-700 rounded-full font-bold text-sm font-cairo hover:bg-gray-50 transition-all active:scale-95 border border-gray-100 shadow-sm w-fit"
+                                >
+                                    <Ruler size={16} />
+                                    {isRTL ? 'جدول المقاسات' : 'Size Guide'}
+                                </button>
                                 {product.is_vto_enabled && (
                                     <button 
                                         onClick={() => setIsVTOOpen(true)} 
-                                        className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-indigo-50 text-indigo-600 rounded-2xl font-black text-sm font-cairo hover:bg-indigo-100 transition-all active:scale-95 max-w-[180px]"
+                                        className="flex items-center justify-center gap-2 px-8 py-3 bg-indigo-50 text-indigo-600 rounded-full font-bold text-sm font-cairo hover:bg-indigo-100 transition-all active:scale-95 w-fit"
                                     >
-                                        <Maximize size={18} />
+                                        <Maximize size={16} />
                                         {isRTL ? 'قياس افتراضي' : 'Virtual Try-On'}
                                     </button>
                                 )}
-                                <button 
-                                    onClick={() => setIsSizeGuideOpen(true)} 
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-gray-50 text-gray-600 rounded-2xl font-black text-sm font-cairo hover:bg-gray-100 transition-all active:scale-95 border border-gray-100 max-w-[180px]"
-                                >
-                                    <Ruler size={18} />
-                                    {isRTL ? 'جدول المقاسات' : 'Size Guide'}
-                                </button>
                             </div>
                         </div>
 
@@ -588,18 +586,18 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                     >
                         <AnimatePresence mode="wait">
                             <motion.div
-                                key={isInCart ? 'go_to_cart' : 'add_to_cart'}
+                                key={currentStockOut ? 'out_of_stock' : isInCart ? 'go_to_cart' : 'add_to_cart'}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
                                 className="flex items-center gap-2"
                             >
-                                <ShoppingBag size={18} />
+                                {!currentStockOut && <ShoppingBag size={18} />}
                                 <span className="font-cairo">
-                                    {stockCount <= 0
-                                        ? 'نفدت الكمية'
+                                    {currentStockOut
+                                        ? (isRTL ? 'نفدت الكمية' : 'Out of Stock')
                                         : isInCart
-                                            ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
+                                            ? (isRTL ? 'الذهاب للسلة' : 'Go to Cart')
                                             : (t.product?.add_to_cart || 'Add to Cart')}
                                 </span>
                             </motion.div>
