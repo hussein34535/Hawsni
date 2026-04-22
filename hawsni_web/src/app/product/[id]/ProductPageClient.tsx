@@ -195,16 +195,16 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
 
     const faqs = [
         {
-            question: isRTL ? '┘à╪¬┘ë ┘è╪╡┘ä ╪╖┘ä╪¿┘è╪ƒ' : 'When will my order arrive?',
-            answer: isRTL ? '┘è╪╡┘ä ╪╖┘ä╪¿┘â ╪«┘ä╪º┘ä 2 ╪Ñ┘ä┘ë 5 ╪ú┘è╪º┘à ╪╣┘à┘ä ╪¬┘é╪▒┘è╪¿╪º┘ï ╪¡╪│╪¿ ┘à┘ê┘é╪╣┘â.' : 'Your order will arrive within 2 to 5 business days depending on your location.'
+            question: isRTL ? 'متى يصل طلبي؟' : 'When will my order arrive?',
+            answer: isRTL ? 'يصل طلبك خلال 2 إلى 5 أيام عمل تقريباً حسب موقعك.' : 'Your order will arrive within 2 to 5 business days depending on your location.'
         },
         {
-            question: isRTL ? '┘ç┘ä ┘è┘à┘â┘å┘å┘è ╪Ñ╪▒╪¼╪º╪╣ ╪ú┘ê ╪º╪│╪¬╪¿╪»╪º┘ä ╪º┘ä┘à┘å╪¬╪¼╪ƒ' : 'Can I return or exchange the product?',
-            answer: isRTL ? '┘å╪╣┘à╪î ┘å┘ê┘ü╪▒ ╪«╪»┘à╪⌐ ╪º┘ä╪º╪│╪¬╪▒╪¼╪º╪╣ ┘ê╪º┘ä╪º╪│╪¬╪¿╪»╪º┘ä ╪«┘ä╪º┘ä 14 ┘è┘ê┘à╪º┘ï ┘à┘å ╪º╪│╪¬┘ä╪º┘à ╪º┘ä╪╖┘ä╪¿ ╪¿╪┤╪▒╪╖ ╪¿┘é╪º╪í ╪º┘ä┘à┘å╪¬╪¼ ┘ü┘è ╪¡╪º┘ä╪¬┘ç ╪º┘ä╪ú╪╡┘ä┘è╪⌐.' : 'Yes, we offer returns and exchanges within 14 days of receiving the order, provided the product is in its original condition.'
+            question: isRTL ? 'هل يمكنني إرجاع أو استبدال المنتج؟' : 'Can I return or exchange the product?',
+            answer: isRTL ? 'نعم، نوفر خدمة الاسترجاع والاستبدال خلال 14 يوماً من استلام الطلب بشرط بقاء المنتج في حالته الأصلية.' : 'Yes, we offer returns and exchanges within 14 days of receiving the order, provided the product is in its original condition.'
         },
         {
-            question: isRTL ? '┘ç┘ä ┘è┘ê╪¼╪» ┘à╪╣╪º┘è┘å╪⌐ ┘é╪¿┘ä ╪º┘ä╪º╪│╪¬┘ä╪º┘à╪ƒ' : 'Can I inspect the order upon delivery?',
-            answer: isRTL ? '┘å╪╣┘à╪î ┘à╪¬╪º╪¡ ┘à╪╣╪º┘è┘å╪⌐ ┘ä┘ä┘à┘å╪¬╪¼ ┘ä┘ä╪¬╪ú┘â╪» ┘à┘å ╪¼┘ê╪»╪¬┘ç ┘ê┘à╪╖╪º╪¿┘é╪¬┘ç ┘ä╪╖┘ä╪¿┘â. ╪Ñ╪░╪º ┘â╪º┘å ┘ç┘å╪º┘â ╪ú┘è ╪«╪╖╪ú ╪ú┘ê ╪╣┘è╪¿╪î ┘ä╪º ╪¬╪¬╪¡┘à┘ä┘è┘å ╪ú┘è ╪▒╪│┘ê┘à. ╪ú┘à╪º ┘ä╪ú┘è ╪│╪¿╪¿ ╪ó╪«╪▒╪î ┘è╪¬┘à ╪»┘ü╪╣ 50 ╪¼┘å┘è┘ç╪º┘ï ┘à╪╡╪º╪▒┘è┘ü ╪┤╪¡┘å ┘ä╪┤╪▒┘â╪⌐ ╪º┘ä╪¬┘ê╪╡┘è┘ä.' : 'Yes, you can inspect the product upon delivery. If there are any defects or errors, you pay nothing. For any other reason, a 50 EGP shipping fee applies.'
+            question: isRTL ? 'هل يوجد معاينة قبل الاستلام؟' : 'Can I inspect the order upon delivery?',
+            answer: isRTL ? 'نعم، متاح معاينة للمنتج للتأكد من جودته ومطابقته لطلبك. إذا كان هناك أي خطأ أو عيب، لا تتحملين أي رسوم. أما لأي سبب آخر، يتم دفع 50 جنيهاً مصاريف شحن لشركة التوصيل.' : 'Yes, you can inspect the product upon delivery. If there are any defects or errors, you pay nothing. For any other reason, a 50 EGP shipping fee applies.'
         }
     ];
 
@@ -212,7 +212,7 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
         <div className="mt-10 pt-8 border-t border-gray-100">
             <h4 className="text-base font-black text-gray-900 mb-6 font-cairo flex items-center gap-2">
                 <Info size={18} className="text-[var(--color-brand-primary)]" />
-                {isRTL ? '┘à╪╣┘ä┘ê┘à╪º╪¬ ╪¬┘ç┘à┘â' : 'Important Information'}
+                {isRTL ? 'معلومات تهمك' : 'Important Information'}
             </h4>
             <div className="flex flex-col gap-4">
                 {faqs.map((faq, index) => {
@@ -382,14 +382,14 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
             num_items: quantity
         });
 
-        showToast(isRTL ? '╪¬┘à╪¬ ╪º┘ä╪Ñ╪╢╪º┘ü╪⌐ ╪Ñ┘ä┘ë ╪º┘ä╪│┘ä╪⌐' : 'Added to cart successfully', 'success');
+        showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
         setIsUpsellOpen(false);
         setHasShownUpsell(true);
     };
 
     const handleAddToCart = () => {
         if (!selectedSize) {
-            showToast(isRTL ? '┘è╪▒╪¼┘ë ╪º╪«╪¬┘è╪º╪▒ ╪º┘ä┘à┘é╪º╪│' : 'Please select a size', 'error');
+            showToast(isRTL ? 'يرجى اختيار المقاس' : 'Please select a size', 'error');
             return;
         }
         if (product?.accessories && product.accessories.length > 0 && selectedAccessories.length === 0 && !hasShownUpsell) {
@@ -448,13 +448,13 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                 <div className="flex flex-col">
                                     {product.discount ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-gray-400 line-through font-bold">{product.price.toLocaleString()} {isRTL ? '╪¼.┘à' : 'EGP'}</span>
+                                            <span className="text-sm text-gray-400 line-through font-bold">{product.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
                                             <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md">-{product.discount}%</span>
                                         </div>
                                     ) : null}
                                     <div className={`flex items-baseline gap-1 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
                                         <span>{Math.round(getBasePrice()).toLocaleString()}</span>
-                                        <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? '╪¼.┘à' : 'EGP'}</span>
+                                        <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -464,7 +464,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
 
                         <div className="mt-8 space-y-6">
                             <div>
-                                <h3 className="text-sm font-black text-gray-900 mb-4">{isRTL ? '╪º╪«╪¬╪▒ ╪º┘ä┘à┘é╪º╪│' : 'Select Size'}</h3>
+                                <h3 className="text-sm font-black text-gray-900 mb-4">{isRTL ? 'اختر المقاس' : 'Select Size'}</h3>
                                 <div className="flex flex-wrap gap-3">
                                     {product.sizes?.map(size => (
                                         <button key={size} onClick={() => setSelectedSize(size)} className={`h-12 px-6 rounded-xl font-black text-sm transition-all ${selectedSize === size ? 'bg-[#0E4435] text-white' : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-200'}`}>{size}</button>
@@ -474,7 +474,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                             
                             <button onClick={handleAddToCart} className="w-full h-14 bg-[#0E4435] text-white rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-xl shadow-[#0E4435]/20 active:scale-95 transition-all">
                                 <ShoppingBag size={20} />
-                                {isRTL ? '╪Ñ╪╢╪º┘ü╪⌐ ╪Ñ┘ä┘ë ╪º┘ä╪│┘ä╪⌐' : 'Add to Cart'}
+                                {isRTL ? 'إضافة إلى السلة' : 'Add to Cart'}
                             </button>
                         </div>
 
@@ -487,13 +487,13 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 {isUpsellOpen && (
                     <AccessoryUpsellModal 
                         isOpen={isUpsellOpen} 
-                        onClose={() => performAddToCart([])}
-                        onSkip={() => performAddToCart([])} 
-                        onAdd={performAddToCart}
-                        accessories={product.accessories || []}
+                        onClose={() => performAddToCart([])} 
+                        onAdd={(accs) => performAddToCart(accs)}
+                        onSkip={() => performAddToCart([])}
                         productName={product.name}
-                        isRTL={isRTL}
                         formatImageUrl={formatImageUrl}
+                        accessories={product.accessories || []}
+                        isRTL={isRTL}
                     />
                 )}
             </AnimatePresence>
