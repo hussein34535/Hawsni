@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -195,16 +195,16 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
 
     const faqs = [
         {
-            question: isRTL ? 'متى يصل طلبي؟' : 'When will my order arrive?',
-            answer: isRTL ? 'يصل طلبك خلال 2 إلى 5 أيام عمل تقريباً حسب موقعك.' : 'Your order will arrive within 2 to 5 business days depending on your location.'
+            question: isRTL ? 'Ù…ØªÙ‰ ÙŠØµÙ„ Ø·Ù„Ø¨ÙŠØŸ' : 'When will my order arrive?',
+            answer: isRTL ? 'ÙŠØµÙ„ Ø·Ù„Ø¨Ùƒ Ø®Ù„Ø§Ù„ 2 Ø¥Ù„Ù‰ 5 Ø£ÙŠØ§Ù… Ø¹Ù…Ù„ ØªÙ‚Ø±ÙŠØ¨Ø§Ù‹ Ø­Ø³Ø¨ Ù…ÙˆÙ‚Ø¹Ùƒ.' : 'Your order will arrive within 2 to 5 business days depending on your location.'
         },
         {
-            question: isRTL ? 'هل يمكنني إرجاع أو استبدال المنتج؟' : 'Can I return or exchange the product?',
-            answer: isRTL ? 'نعم، نوفر خدمة الاسترجاع والاستبدال خلال 14 يوماً من استلام الطلب بشرط بقاء المنتج في حالته الأصلية.' : 'Yes, we offer returns and exchanges within 14 days of receiving the order, provided the product is in its original condition.'
+            question: isRTL ? 'Ù‡Ù„ ÙŠÙ…ÙƒÙ†Ù†ÙŠ Ø¥Ø±Ø¬Ø§Ø¹ Ø£Ùˆ Ø§Ø³ØªØ¨Ø¯Ø§Ù„ Ø§Ù„Ù…Ù†ØªØ¬ØŸ' : 'Can I return or exchange the product?',
+            answer: isRTL ? 'Ù†Ø¹Ù…ØŒ Ù†ÙˆÙØ± Ø®Ø¯Ù…Ø© Ø§Ù„Ø§Ø³ØªØ±Ø¬Ø§Ø¹ ÙˆØ§Ù„Ø§Ø³ØªØ¨Ø¯Ø§Ù„ Ø®Ù„Ø§Ù„ 14 ÙŠÙˆÙ…Ø§Ù‹ Ù…Ù† Ø§Ø³ØªÙ„Ø§Ù… Ø§Ù„Ø·Ù„Ø¨ Ø¨Ø´Ø±Ø· Ø¨Ù‚Ø§Ø¡ Ø§Ù„Ù…Ù†ØªØ¬ ÙÙŠ Ø­Ø§Ù„ØªÙ‡ Ø§Ù„Ø£ØµÙ„ÙŠØ©.' : 'Yes, we offer returns and exchanges within 14 days of receiving the order, provided the product is in its original condition.'
         },
         {
-            question: isRTL ? 'هل يوجد معاينة قبل الاستلام؟' : 'Can I inspect the order upon delivery?',
-            answer: isRTL ? 'نعم، متاح معاينة للمنتج للتأكد من جودته ومطابقته لطلبك. إذا كان هناك أي خطأ أو عيب، لا تتحملين أي رسوم. أما لأي سبب آخر، يتم دفع 50 جنيهاً مصاريف شحن لشركة التوصيل.' : 'Yes, you can inspect the product upon delivery. If there are any defects or errors, you pay nothing. For any other reason, a 50 EGP shipping fee applies.'
+            question: isRTL ? 'Ù‡Ù„ ÙŠÙˆØ¬Ø¯ Ù…Ø¹Ø§ÙŠÙ†Ø© Ù‚Ø¨Ù„ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…ØŸ' : 'Can I inspect the order upon delivery?',
+            answer: isRTL ? 'Ù†Ø¹Ù…ØŒ Ù…ØªØ§Ø­ Ù…Ø¹Ø§ÙŠÙ†Ø© Ù„Ù„Ù…Ù†ØªØ¬ Ù„Ù„ØªØ£ÙƒØ¯ Ù…Ù† Ø¬ÙˆØ¯ØªÙ‡ ÙˆÙ…Ø·Ø§Ø¨Ù‚ØªÙ‡ Ù„Ø·Ù„Ø¨Ùƒ. Ø¥Ø°Ø§ ÙƒØ§Ù† Ù‡Ù†Ø§Ùƒ Ø£ÙŠ Ø®Ø·Ø£ Ø£Ùˆ Ø¹ÙŠØ¨ØŒ Ù„Ø§ ØªØªØ­Ù…Ù„ÙŠÙ† Ø£ÙŠ Ø±Ø³ÙˆÙ…. Ø£Ù…Ø§ Ù„Ø£ÙŠ Ø³Ø¨Ø¨ Ø¢Ø®Ø±ØŒ ÙŠØªÙ… Ø¯ÙØ¹ 50 Ø¬Ù†ÙŠÙ‡Ø§Ù‹ Ù…ØµØ§Ø±ÙŠÙ Ø´Ø­Ù† Ù„Ø´Ø±ÙƒØ© Ø§Ù„ØªÙˆØµÙŠÙ„.' : 'Yes, you can inspect the product upon delivery. If there are any defects or errors, you pay nothing. For any other reason, a 50 EGP shipping fee applies.'
         }
     ];
 
@@ -212,7 +212,7 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
         <div className="mt-10 pt-8 border-t border-gray-100">
             <h4 className="text-base font-black text-gray-900 mb-6 font-cairo flex items-center gap-2">
                 <Info size={18} className="text-[var(--color-brand-primary)]" />
-                {isRTL ? 'معلومات تهمك' : 'Important Information'}
+                {isRTL ? 'Ù…Ø¹Ù„ÙˆÙ…Ø§Øª ØªÙ‡Ù…Ùƒ' : 'Important Information'}
             </h4>
             <div className="flex flex-col gap-4">
                 {faqs.map((faq, index) => {
@@ -368,14 +368,14 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
             num_items: quantity
         });
 
-        showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
+        showToast(isRTL ? 'ØªÙ…Øª Ø§Ù„Ø¥Ø¶Ø§ÙØ© Ø¥Ù„Ù‰ Ø§Ù„Ø³Ù„Ø©' : 'Added to cart successfully', 'success');
         setIsUpsellOpen(false);
         setHasShownUpsell(true);
     };
 
     const handleAddToCart = () => {
         if (!selectedSize) {
-            showToast(isRTL ? 'يرجى اختيار المقاس' : 'Please select a size', 'error');
+            showToast(isRTL ? 'ÙŠØ±Ø¬Ù‰ Ø§Ø®ØªÙŠØ§Ø± Ø§Ù„Ù…Ù‚Ø§Ø³' : 'Please select a size', 'error');
             return;
         }
         if (product?.accessories && product.accessories.length > 0 && selectedAccessories.length === 0 && !hasShownUpsell) {
@@ -437,13 +437,13 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                 <div className="flex flex-col">
                                     {product.discount ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-gray-400 line-through font-bold">{product.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
+                                            <span className="text-sm text-gray-400 line-through font-bold">{product.price.toLocaleString()} {isRTL ? 'Ø¬.Ù…' : 'EGP'}</span>
                                             <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md">-{product.discount}%</span>
                                         </div>
                                     ) : null}
                                     <div className={`flex items-baseline gap-1 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
                                         <span>{Math.round(getBasePrice()).toLocaleString()}</span>
-                                        <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
+                                        <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'Ø¬.Ù…' : 'EGP'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -453,7 +453,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
 
                         <div className="mt-8 space-y-6">
                             <div>
-                                <h3 className="text-sm font-black text-gray-900 mb-4 font-cairo">{isRTL ? 'اختر المقاس' : 'Select Size'}</h3>
+                                <h3 className="text-sm font-black text-gray-900 mb-4 font-cairo">{isRTL ? 'Ø§Ø®ØªØ± Ø§Ù„Ù…Ù‚Ø§Ø³' : 'Select Size'}</h3>
                                 <div className="flex flex-wrap gap-3">
                                     {product.sizes?.map(size => (
                                         <button key={size} onClick={() => setSelectedSize(size)} className={`h-12 px-6 rounded-xl font-black text-sm transition-all ${selectedSize === size ? 'bg-[#0E4435] text-white' : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-200'}`}>{size}</button>
@@ -502,7 +502,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                         )}
                         <span className="text-lg font-black text-white font-cairo">
                             {totalPrice.toLocaleString()}
-                            <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
+                            <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'Ø¬.Ù…' : 'EGP'}</span>
                         </span>
                     </div>
 
@@ -531,9 +531,9 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                 <ShoppingBag size={18} />
                                 <span className="font-cairo">
                                     {stockCount <= 0
-                                        ? 'نفدت الكمية'
+                                        ? 'Ù†ÙØ¯Øª Ø§Ù„ÙƒÙ…ÙŠØ©'
                                         : isInCart
-                                            ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
+                                            ? (isRTL ? 'Ø°Ù‡Ø§Ø¨ Ù„Ù„Ø­Ù‚ÙŠØ¨Ø©' : 'Go to Cart')
                                             : (t.product?.add_to_cart || 'Add to Cart')}
                                 </span>
                             </motion.div>
