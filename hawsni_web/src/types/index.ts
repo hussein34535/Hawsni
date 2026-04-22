@@ -48,4 +48,5 @@ export interface Product {
     countInStock?: number;
     product_variants?: any[];
     accessories?: any[];
+    video_url?: string;
 }

@@ -369,7 +369,8 @@ class _ProductCardState extends State<ProductCard> {
                           Padding(
                             padding: const EdgeInsets.only(bottom: 4.0),
                             child: Row(
-                              children: widget.colors!.take(5).map((c) {
+                              children: [
+                                ...widget.colors!.take(5).map((c) {
                                 String colorCode = '';
                                 String? variantImage;
                                 if (c is Map) {
@@ -468,7 +469,7 @@ class _ProductCardState extends State<ProductCard> {
                                     ),
                                   ),
                                 );
-                              }).toList(),
+                              }),
                               if (widget.colors!.length > 4)
                                 Text(
                                   '+${widget.colors!.length - 4}',

@@ -46,7 +46,7 @@ const ProductVideoItem = ({ src }: { src: string }) => {
             } else if (videoRef.current.requestFullscreen) {
                 videoRef.current.requestFullscreen();
             } else if ((videoRef.current as any).webkitRequestFullscreen) {
-                (videoRef.current as any).webkitRequestFullscreen();
+                (videoRef.current as any).webkitRequestFullscreen(); // iOS
             }
         }
     };
@@ -108,6 +108,7 @@ const ProductVideoItem = ({ src }: { src: string }) => {
                 }}
             />
             
+            {/* Modern Play/Pause Overlay (Center) - Only shows when initially paused */}
             <AnimatePresence>
                 {!isPlaying && !showControls && (
                     <motion.div 
@@ -123,6 +124,7 @@ const ProductVideoItem = ({ src }: { src: string }) => {
                 )}
             </AnimatePresence>
 
+            {/* Bottom Control Bar */}
             <AnimatePresence>
                 {(showControls || !isPlaying) && (
                     <motion.div 
@@ -172,6 +174,17 @@ const formatImageUrl = (url: string) => {
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
 };
 
+const getThumbnailUrl = (url: string | null) => {
+    if (!url) return null;
+    if (url.includes('cloudinary.com')) {
+        const parts = url.split('/upload/');
+        if (parts.length === 2) {
+            return `${parts[0]}/upload/c_fill,w_100,h_100,q_auto,f_auto/${parts[1]}`;
+        }
+    }
+    return url;
+};
+
 const parseColors = (colors: any[] | undefined) => {
     if (!colors) return [];
     return colors.map(c => {
@@ -218,18 +231,41 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
                 {faqs.map((faq, index) => {
                     const isOpen = openIndex === index;
                     return (
-                        <div key={index} className={`rounded-2xl border transition-all duration-300 group ${isOpen ? 'bg-white border-[var(--color-brand-primary)]/30 shadow-xl shadow-[var(--color-brand-primary)]/5' : 'bg-gray-50/40 border-gray-100 hover:border-gray-200 hover:bg-gray-50/80'}`}>
-                            <button onClick={() => setOpenIndex(isOpen ? null : index)} className={`w-full flex items-center justify-between p-5 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                <span className={`font-black text-sm font-cairo transition-colors ${isOpen ? 'text-[var(--color-brand-primary)]' : 'text-gray-700'}`}>{faq.question}</span>
-                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isOpen ? 'bg-[var(--color-brand-primary)] text-white rotate-180' : 'bg-white text-gray-400 group-hover:text-gray-600'}`}>
+                        <div 
+                            key={index} 
+                            className={`
+                                rounded-2xl border transition-all duration-300 group
+                                ${isOpen 
+                                    ? 'bg-white border-[var(--color-brand-primary)]/30 shadow-xl shadow-[var(--color-brand-primary)]/5' 
+                                    : 'bg-gray-50/40 border-gray-100 hover:border-gray-200 hover:bg-gray-50/80'}
+                            `}
+                        >
+                            <button
+                                onClick={() => setOpenIndex(isOpen ? null : index)}
+                                className={`w-full flex items-center justify-between p-5 transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
+                            >
+                                <span className={`font-black text-sm font-cairo transition-colors ${isOpen ? 'text-[var(--color-brand-primary)]' : 'text-gray-700'}`}>
+                                    {faq.question}
+                                </span>
+                                <div className={`
+                                    w-8 h-8 rounded-xl flex items-center justify-center transition-all
+                                    ${isOpen ? 'bg-[var(--color-brand-primary)] text-white rotate-180' : 'bg-white text-gray-400 group-hover:text-gray-600'}
+                                `}>
                                     <ChevronDown size={16} strokeWidth={3} />
                                 </div>
                             </button>
                             <AnimatePresence>
                                 {isOpen && (
-                                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}>
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                    >
                                         <div className={`px-5 pb-5 text-sm font-bold text-gray-500 font-cairo leading-relaxed opacity-90 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                            <div className="pt-3 border-t border-gray-50">{faq.answer}</div>
+                                            <div className="pt-3 border-t border-gray-50">
+                                                {faq.answer}
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
@@ -242,19 +278,16 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
     );
 };
 
-interface ProductPageClientProps {
-    initialProduct: Product;
-}
-
-export default function ProductPageClient({ initialProduct }: ProductPageClientProps) {
+export default function ProductPageClient({ initialProduct }: { initialProduct?: Product }) {
     const params = useParams();
     const router = useRouter();
     const productId = params.id as string;
     const { t, isRTL } = useLanguage();
     const { showToast } = useToastStore();
 
-    const [product, setProduct] = useState<Product>(initialProduct);
+    const [product, setProduct] = useState<Product | null>(initialProduct || null);
     const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(!initialProduct);
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -266,14 +299,16 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [isUpsellOpen, setIsUpsellOpen] = useState(false);
     const [hasShownUpsell, setHasShownUpsell] = useState(false);
-    
-    const sliderRef = useRef<HTMLDivElement>(null);
+    const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
     const reviewsRef = useRef<HTMLDivElement>(null);
+    const relatedSectionRef = useRef<HTMLDivElement>(null);
     const items = useCartStore((state) => state.items);
     const addItem = useCartStore((state) => state.addItem);
     const getItemCount = useCartStore((state) => state.getItemCount);
 
-    const isInCart = product ? items.some((item) => item.id.startsWith(product.id || (product as any)._id)) : false;
+    const activeAccStr = selectedAccessories.map(a => a.name).join('_');
+    const currentItemId = product ? `${product.id || product._id}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}` : null;
+    const isInCart = items.some((item) => item.id === currentItemId);
 
     const getBasePrice = () => {
         if (!product) return 0;
@@ -281,10 +316,101 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
         return discount > 0 ? product.price - (product.price * discount / 100) : product.price;
     };
 
-    const finalUnitPrice = getBasePrice() + selectedAccessories.reduce((total, acc) => total + acc.price, 0);
+    const getAccessoriesTotal = () => {
+        return selectedAccessories.reduce((total, acc) => total + acc.price, 0);
+    };
+
+    const finalUnitPrice = getBasePrice() + getAccessoriesTotal();
     const totalPrice = finalUnitPrice * quantity;
 
+    const stockCount = product?.stock ?? (product as any)?.countInStock ?? 0;
+
+    const isSizeOutOfStock = (s: string) => {
+        if (!product || !product.product_variants || product.product_variants.length === 0) {
+            return stockCount <= 0;
+        }
+        let variantsForSize = product.product_variants.filter((v: any) => v.size === s);
+        if (selectedColor) {
+            variantsForSize = variantsForSize.filter((v: any) => v.color === selectedColor || !v.color);
+        }
+        if (variantsForSize.length === 0) return stockCount <= 0;
+        return variantsForSize.every((v: any) => v.stock <= 0);
+    };
+
+    const currentStockOut = selectedSize ? isSizeOutOfStock(selectedSize) : (stockCount <= 0);
+
+    const toggleAccessory = (acc: any) => {
+        setSelectedAccessories(prev => {
+            if (prev.some(a => a.name === acc.name)) {
+                return prev.filter(a => a.name !== acc.name);
+            }
+            return [...prev, acc];
+        });
+    };
+
+
     useEffect(() => {
+        const fetchProduct = async () => {
+            if (initialProduct && product) {
+                 // Auto-select size if only one
+                 const sizes = product.sizes ?? [];
+                 if (sizes.length === 1) {
+                     setSelectedSize(sizes[0]);
+                 }
+
+                 // Auto-select color if only one
+                 const colors = (product as any).colors ?? [];
+                 if (colors.length === 1) {
+                     const parsed = parseColors(colors);
+                     if (parsed[0]?.color) {
+                         setSelectedColor(parsed[0].color);
+                     }
+                 }
+                 return;
+            }
+            try {
+                const data = await productService.getProductById(productId);
+                if (data.success) {
+                    setProduct(data.product);
+                    const sizes = data.product.sizes ?? [];
+                    if (sizes.length === 1) {
+                        setSelectedSize(sizes[0]);
+                    }
+
+                    const colors = (data.product as any).colors ?? [];
+                    if (colors.length === 1) {
+                        const parsed = parseColors(colors);
+                        if (parsed[0]?.color) {
+                            setSelectedColor(parsed[0].color);
+                        }
+                    }
+
+                    const discount = data.product.discount || 0;
+                    const finalPrice = discount > 0 ? data.product.price - (data.product.price * discount / 100) : data.product.price;
+                    trackEvent('ViewContent', {
+                        content_name: data.product.name,
+                        content_ids: [data.product.id || data.product._id],
+                        content_type: 'product',
+                        value: finalPrice,
+                        currency: 'EGP'
+                    });
+                    trackGAEvent('view_item', {
+                        currency: 'EGP',
+                        value: finalPrice,
+                        items: [{
+                            item_id: data.product.id || data.product._id,
+                            item_name: data.product.name,
+                            price: finalPrice
+                        }]
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to fetch product:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         const fetchRelated = async () => {
             try {
                 const res = await productService.getRelatedProducts(productId);
@@ -293,6 +419,11 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 console.error('Failed to fetch related products:', error);
             }
         };
+
+        if (productId) {
+            fetchProduct();
+            fetchRelated();
+        }
 
         const checkWishlist = async () => {
             try {
@@ -303,33 +434,39 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 console.error('Failed to check wishlist:', error);
             }
         };
-
-        if (productId) {
-            fetchRelated();
-            checkWishlist();
-            
-            const discount = initialProduct.discount || 0;
-            const finalPrice = discount > 0 ? initialProduct.price - (initialProduct.price * discount / 100) : initialProduct.price;
-            trackEvent('ViewContent', {
-                content_name: initialProduct.name,
-                content_ids: [initialProduct.id || (initialProduct as any)._id],
-                content_type: 'product',
-                value: finalPrice,
-                currency: 'EGP'
-            });
-            trackGAEvent('view_item', {
-                currency: 'EGP',
-                value: finalPrice,
-                items: [{
-                    item_id: initialProduct.id || (initialProduct as any)._id,
-                    item_name: initialProduct.name,
-                    price: finalPrice
-                }]
-            });
-        }
+        checkWishlist();
     }, [productId, initialProduct]);
 
     const safeImages = Array.isArray(product?.images) ? product.images : [];
+
+    useEffect(() => {
+        if (safeImages.length > 1 && typeof window !== 'undefined') {
+            const seen = localStorage.getItem('hwasi_seen_gallery_swipe');
+            if (!seen) {
+                const showTimer = setTimeout(() => {
+                    setShowGallerySwipeHint(true);
+                    localStorage.setItem('hwasi_seen_gallery_swipe', '1');
+                    setTimeout(() => setShowGallerySwipeHint(false), 3000);
+                }, 800);
+                return () => clearTimeout(showTimer);
+            }
+        }
+    }, [safeImages.length]);
+
+    useEffect(() => {
+        if (isInCart && relatedProducts.length > 0) {
+            const timer = setTimeout(() => {
+                relatedSectionRef.current?.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 600);
+            return () => clearTimeout(timer);
+        }
+    }, [isInCart, relatedProducts.length]);
+
+    const galleryRef = useRef<HTMLDivElement>(null);
+    const sliderRef = useRef<HTMLDivElement>(null);
 
     const handleGalleryScroll = useCallback(() => {
         if (!sliderRef.current) return;
@@ -341,20 +478,44 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
         }
     }, [selectedImage, safeImages.length]);
 
+    const scrollToImage = useCallback((index: number) => {
+        if (!sliderRef.current) return;
+        sliderRef.current.scrollTo({
+            left: index * sliderRef.current.offsetWidth,
+            behavior: 'smooth'
+        });
+        setSelectedImage(index);
+    }, []);
+
     const performAddToCart = (selectedAccs: any[]) => {
         if (!product) return;
+
+        setSelectedAccessories(selectedAccs);
+
         let selectedColorImage = safeImages[0] || '';
-        const prodId = product.id || (product as any)._id;
+        if (selectedColor && product.colors) {
+            const parsedColors = parseColors(product.colors);
+            const colorData = parsedColors.find(c => c.color === selectedColor);
+            if (colorData) {
+                if (colorData.image) {
+                    selectedColorImage = colorData.image;
+                } else if (colorData.imageIndex !== undefined && safeImages[colorData.imageIndex]) {
+                    selectedColorImage = safeImages[colorData.imageIndex];
+                }
+            }
+        }
+
+        const prodId = product.id || product._id;
         const activeAccStr = selectedAccs.map(a => a.name).join('_');
 
         addItem({
             id: `${prodId}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}`,
             productId: prodId,
             name: product.name,
-            price: getBasePrice(),
+            price: getBasePrice(), 
             imageUrl: formatImageUrl(selectedColorImage),
             quantity: quantity,
-            size: selectedSize || undefined,
+            size: selectedSize,
             color: selectedColor || undefined,
             accessories: selectedAccs
         });
@@ -367,224 +528,539 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
             currency: 'EGP',
             num_items: quantity
         });
+        trackGAEvent('add_to_cart', {
+            currency: 'EGP',
+            value: totalPrice,
+            items: [{
+                item_id: prodId,
+                item_name: product.name,
+                price: finalUnitPrice,
+                quantity: quantity
+            }]
+        });
 
         showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
         setIsUpsellOpen(false);
         setHasShownUpsell(true);
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = (e?: React.MouseEvent) => {
+        if (!product) return;
         if (!selectedSize) {
             showToast(isRTL ? 'يرجى اختيار المقاس' : 'Please select a size', 'error');
             return;
         }
-        if (product?.accessories && product.accessories.length > 0 && selectedAccessories.length === 0 && !hasShownUpsell) {
+
+        if (product.colors && product.colors.length > 0 && !selectedColor) {
+            showToast(isRTL ? 'يرجى اختيار اللون' : 'Please select a color', 'error');
+            return;
+        }
+
+        if (currentStockOut || isSizeOutOfStock(selectedSize)) {
+            showToast(isRTL ? 'الكمية نفدت' : 'Out of stock', 'error');
+            return;
+        }
+
+        if (product.accessories && product.accessories.length > 0 && selectedAccessories.length === 0 && !hasShownUpsell) {
             setIsUpsellOpen(true);
             return;
         }
+
         performAddToCart(selectedAccessories);
     };
 
-    const currentStockOut = (product.stock_count || 0) <= 0;
-    const stockCount = product.stock_count || 0;
+    const handleFavoriteClick = async () => {
+        if (!product) return;
+        
+        try {
+            if (isFavorite) {
+                await wishlistService.removeFromWishlist(product.id || product._id);
+                setIsFavorite(false);
+                showToast(isRTL ? 'تم الإزالة من المفضلة' : 'Removed from favorites', 'success');
+            } else {
+                await wishlistService.addToWishlist(product);
+                setIsFavorite(true);
+                showToast(isRTL ? 'تم الإضافة للمفضلة' : 'Added to favorites', 'success');
+            }
+        } catch (error) {
+            console.error('Wishlist operation failed:', error);
+            showToast(isRTL ? 'فشلت العملية' : 'Operation failed', 'error');
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="w-full bg-[#FAFAFA] min-h-screen flex justify-center items-center">
+                <div className="h-12 w-12 border-4 border-[var(--color-brand-primary)] border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    if (!product) {
+        return (
+            <div className="w-full bg-[#FAFAFA] min-h-screen flex flex-col items-center justify-center p-4">
+                <h2 className="text-2xl font-bold mb-4">{t.search.no_results}</h2>
+                <button onClick={() => router.back()} className="text-[var(--color-brand-primary)] font-bold">{t.common.cancel}</button>
+            </div>
+        );
+    }
+
+
 
     return (
         <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
+
+            {/* Header / AppBar - Transparent Overlay */}
             <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/10 to-transparent pointer-events-none h-24 pt-2`}>
-                <button onClick={() => router.back()} className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 pointer-events-auto active:scale-95 transition-transform">
+                <button
+                    onClick={() => router.back()}
+                    className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 pointer-events-auto active:scale-95 transition-transform"
+                >
                     {isRTL ? <ArrowRight size={20} className="text-white" /> : <ArrowLeft size={20} className="text-white" />}
                 </button>
                 <div className={`flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} gap-2 pointer-events-auto`}>
-                    <button onClick={async () => {
-                        if (isFavorite) {
-                            await wishlistService.removeFromWishlist(product.id || (product as any)._id);
-                            setIsFavorite(false);
-                        } else {
-                            await wishlistService.addToWishlist(product);
-                            setIsFavorite(true);
-                        }
-                    }} className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 active:scale-95 transition-transform">
+                    <button
+                        onClick={handleFavoriteClick}
+                        className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 active:scale-95 transition-transform"
+                    >
                         <Heart size={20} className={isFavorite ? 'fill-red-500 text-red-500' : 'text-white'} />
                     </button>
-                    <button onClick={() => router.push('/cart')} className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 active:scale-95 transition-transform relative">
+                    <button
+                        onClick={() => router.push('/cart')}
+                        className="w-10 h-10 bg-black/30 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/10 active:scale-95 transition-transform relative"
+                    >
                         <ShoppingBag size={20} className="text-white" />
-                        {getItemCount() > 0 && <span className="absolute -top-1 -right-1 bg-[var(--color-brand-primary)] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-black/10 shadow-lg">{getItemCount()}</span>}
+                        {getItemCount() > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-[var(--color-brand-primary)] text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-black/10 shadow-lg">
+                                {getItemCount()}
+                            </span>
+                        )}
                     </button>
                 </div>
             </div>
 
             <main className="max-w-7xl mx-auto pb-40">
                 <div className="grid grid-cols-1 lg:grid-cols-2">
-                    <div className="relative aspect-[4/3.2] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group">
-                        <div ref={sliderRef} onScroll={handleGalleryScroll} className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar" style={{ scrollSnapType: 'x mandatory' }}>
+
+                    <div
+                        ref={galleryRef}
+                        className="relative aspect-[4/4] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group"
+                    >
+                        <div
+                            ref={sliderRef}
+                            onScroll={handleGalleryScroll}
+                            className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
+                            style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}
+                        >
                             {safeImages.map((img: string, i: number) => {
-                                const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(img) || img.includes('/video/upload/');
+                                const lowerImg = img.toLowerCase();
+                                const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lowerImg) || lowerImg.includes('/video/upload/');
                                 return (
-                                    <div key={i} className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in overflow-hidden snap-center snap-always" onClick={() => setIsLightboxOpen(true)}>
+                                    <div
+                                        key={`img-${i}`}
+                                        className="min-w-full h-full relative flex-shrink-0 cursor-zoom-in overflow-hidden snap-center snap-always"
+                                        onClick={() => setIsLightboxOpen(true)}
+                                    >
+                                        <div className={`absolute inset-0 pointer-events-none z-0 flex items-center justify-center bg-white ${selectedImage !== i ? 'hidden' : 'opacity-100 transition-opacity duration-300'}`}>
+                                            {isVideo ? (
+                                                <video
+                                                    src={formatImageUrl(img)}
+                                                    className="w-full h-full object-cover blur-2xl opacity-40 scale-[1.15]"
+                                                    muted playsInline autoPlay loop
+                                                />
+                                            ) : (
+                                                <Image
+                                                    src={formatImageUrl(img)}
+                                                    alt=""
+                                                    fill
+                                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                                    className="object-cover blur-2xl opacity-40 scale-[1.15]"
+                                                />
+                                            )}
+                                        </div>
+
                                         <div className="absolute inset-0 z-10 flex items-center justify-center">
-                                            {isVideo ? <ProductVideoItem src={formatImageUrl(img)} /> : <Image src={formatImageUrl(img)} alt={product.name} fill priority={i === 0} sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover select-none" />}
+                                            {isVideo ? (
+                                                <ProductVideoItem src={formatImageUrl(img)} />
+                                            ) : (
+                                                <Image
+                                                    src={formatImageUrl(img)}
+                                                    alt={`${product.name} - ${i + 1}`}
+                                                    fill
+                                                    priority={i === 0}
+                                                    sizes="(max-width: 1024px) 100vw, 50vw"
+                                                    className="object-cover select-none"
+                                                />
+                                            )}
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
+
+                        {safeImages.length > 1 && selectedImage > 0 && (
+                            <button
+                                onClick={() => scrollToImage(selectedImage - 1)}
+                                className="hidden lg:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 backdrop-blur-md rounded-full items-center justify-center shadow-lg hover:bg-white transition-colors z-10"
+                            >
+                                <ArrowLeft size={18} />
+                            </button>
+                        )}
+                        {safeImages.length > 1 && selectedImage < safeImages.length - 1 && (
+                            <button
+                                onClick={() => scrollToImage(selectedImage + 1)}
+                                className="hidden lg:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/70 backdrop-blur-md rounded-full items-center justify-center shadow-lg hover:bg-white transition-colors z-10"
+                            >
+                                <ArrowRight size={18} />
+                            </button>
+                        )}
+
+                        <AnimatePresence>
+                            {showGallerySwipeHint && safeImages.length > 1 && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
+                                >
+                                    <div className="bg-black/50 text-white px-6 py-4 rounded-full backdrop-blur-md flex items-center gap-3 shadow-lg">
+                                        <motion.div
+                                            animate={{ x: [15, -15, 15] }}
+                                            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                                        >
+                                            <Hand size={28} />
+                                        </motion.div>
+                                        <span className="font-cairo font-bold text-sm">{isRTL ? 'اسحب لليسار لعرض المزيد' : 'Swipe left for more'}</span>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    <div className={`px-5 pt-5 pb-4 md:px-10 md:pt-8 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        <div className="flex flex-col gap-2.5 mb-5">
-                            <h1 className="text-xl font-black text-gray-900 font-cairo leading-tight tracking-tight">{product.name}</h1>
+                    <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className="flex flex-col gap-6 mb-10">
+                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight mb-2.5">{product.name}</h1>
+                            
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex flex-col">
                                     {product.discount ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-gray-400 line-through font-bold">{product.price.toLocaleString()} {isRTL ? 'ج.م' : 'EGP'}</span>
-                                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md">-{product.discount}%</span>
+                                            <span className="text-sm text-gray-400 line-through font-bold">
+                                                {product.price.toLocaleString('en-US')} {isRTL ? 'ج.م' : 'EGP'}
+                                            </span>
+                                            <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md" dir="ltr">
+                                                -{product.discount}%
+                                            </span>
                                         </div>
                                     ) : null}
-                                    <div className={`flex items-baseline gap-1 font-black text-[1.6rem] ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
-                                        <span>{Math.round(getBasePrice()).toLocaleString()}</span>
-                                        <span className="text-[11px] uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
+                                    <div className={`flex items-baseline gap-1 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
+                                        <span>{((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
+                                        <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
                                 </div>
-                                <button onClick={() => {
-                                    reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                }} className="flex flex-col items-end gap-1 hover:opacity-80 transition-opacity">
-                                    <div className="flex items-center gap-1">
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <Star key={star} size={14} className="text-yellow-400" />
-                                        ))}
-                                        <span className="font-black text-gray-900 ml-1 text-sm">0.0</span>
+
+                                <div 
+                                    className={`flex flex-col gap-1 cursor-pointer group ${isRTL ? 'items-start' : 'items-end'}`}
+                                    onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                                >
+                                    <div className="flex items-center gap-2" dir="ltr">
+                                        <div className="flex gap-0.5 text-amber-400">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
+                                            ))}
+                                        </div>
+                                        <span className="text-sm font-black text-gray-900">
+                                            {product.rating?.toFixed(1) || '0.0'}
+                                        </span>
                                     </div>
-                                    <span className="text-gray-400 font-bold text-xs">
-                                        ({isRTL ? 'عرض التقييمات (0)' : '0 Reviews'})
+                                    <span className={`text-[11px] font-bold text-gray-400 group-hover:text-[var(--color-brand-primary)] transition-colors ${isRTL ? 'text-right' : 'text-left'}`}>
+                                        {isRTL ? `(${product.num_reviews || 0}) عرض التقييمات` : `View Reviews (${product.num_reviews || 0})`}
                                     </span>
-                                </button>
+                                </div>
                             </div>
                         </div>
 
                         <FreeDeliveryBanner isRTL={isRTL} />
 
-                        <div className="mt-4 space-y-4">
-                            <div>
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-sm font-black text-gray-900 font-cairo">{isRTL ? 'المقاس' : 'Size'}</h3>
-                                    <button
-                                        onClick={() => setIsSizeGuideOpen(true)}
-                                        className="flex items-center gap-1.5 px-4 py-2 bg-[#0E4435] text-white rounded-full text-xs font-black font-cairo shadow hover:bg-[#0a3028] active:scale-95 transition-all"
-                                    >
-                                        <Ruler size={13} />
-                                        {isRTL ? 'دليل المقاسات' : 'Size Guide'}
-                                    </button>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {product.sizes?.map(size => (
-                                        <button key={size} onClick={() => setSelectedSize(size)} className={`h-9 px-4 rounded-xl font-black text-xs transition-all active:scale-95 ${selectedSize === size ? 'bg-[#0E4435] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300 shadow-sm'}`}>{size}</button>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {stockCount > 0 && stockCount <= 15 && (
-                                <div className="w-full bg-orange-50/80 rounded-2xl p-4 flex items-center gap-3 border border-orange-100">
-                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm flex-shrink-0">
-                                        <Flame size={16} className="text-orange-500 fill-orange-500" />
+                        {product.is_vto_enabled !== false && (
+                            <motion.div
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setIsVTOOpen(true)}
+                                className={`mb-8 p-4 rounded-3xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+                            >
+                                <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl" />
+                                <div className={`flex items-center gap-4 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row text-right'}`}>
+                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/5 border border-purple-50">
+                                        <Flame size={24} className="text-purple-600" />
                                     </div>
-                                    <p className="text-orange-900 font-black text-sm font-cairo">
-                                        {isRTL ? `الكمية محدودة! باق ${stockCount} قطع فقط` : `Limited Quantity! Only ${stockCount} left`}
-                                    </p>
+                                    <div>
+                                        <h4 className="font-black text-gray-900 font-cairo text-base">{t.product?.vto_banner || (isRTL ? 'جرب القطعة دي دلوقتي' : 'Try this piece now')}</h4>
+                                        <p className="text-[11px] text-gray-400 font-bold font-cairo">{t.product?.vto_desc || (isRTL ? 'شوف شكلها عليك بالذكاء الاصطناعي' : 'See how it looks on you with AI')}</p>
+                                    </div>
+                                </div>
+                                <div className={isRTL ? 'rotate-180' : ''}>
+                                    <ChevronRight size={20} className="text-purple-300 group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </motion.div>
+                        )}
+
+                        <div className="space-y-10">
+                            {product.colors && product.colors.length > 1 && (
+                                <div>
+                                    <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
+                                    <div className={`flex flex-wrap gap-2 pb-4 pt-2 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                                        {parseColors(product.colors).map((c, i) => {
+                                            const rawImage = c.image
+                                                ? formatImageUrl(c.image)
+                                                : (c.imageIndex !== undefined && product.images?.[c.imageIndex]
+                                                    ? formatImageUrl(product.images[c.imageIndex])
+                                                    : null);
+
+                                            const thumbImage = getThumbnailUrl(rawImage);
+
+                                            return (
+                                                <button
+                                                    key={`${c.color}-${i}`}
+                                                    onClick={() => {
+                                                        setSelectedColor(c.color);
+                                                        if (c.imageIndex !== undefined && c.imageIndex !== null && c.imageIndex >= 0) {
+                                                            scrollToImage(c.imageIndex);
+                                                            if (galleryRef.current) {
+                                                                const rect = galleryRef.current.getBoundingClientRect();
+                                                                if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                                                                    galleryRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                                }
+                                                            }
+                                                        }
+                                                    }}
+                                                    className={`
+                                                        w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 p-[3px] border-2 group relative
+                                                        ${selectedColor === c.color
+                                                            ? 'border-[var(--color-brand-primary)] shadow-md shadow-[var(--color-brand-primary)]/20 scale-110'
+                                                            : 'border-transparent bg-gray-50 hover:border-gray-300 hover:scale-105'}
+                                                    `}
+                                                    title={c.color}
+                                                >
+                                                    <div className="w-full h-full rounded-full overflow-hidden relative bg-white flex items-center justify-center shadow-inner">
+                                                        {thumbImage ? (
+                                                            <Image
+                                                                src={thumbImage}
+                                                                alt={c.color}
+                                                                fill
+                                                                className="object-cover"
+                                                                sizes="56px"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-[10px] text-gray-400 font-bold px-1 text-center font-cairo leading-tight">{c.color}</span>
+                                                        )}
+                                                        {selectedColor === c.color && (
+                                                            <div className="absolute inset-0 bg-black/10 flex items-center justify-center backdrop-blur-[1px]">
+                                                                <Check size={18} className="text-white drop-shadow-md" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             )}
-                         </div>
 
-                        {/* Accessories Section */}
-                        {product.accessories && product.accessories.length > 0 && (
-                            <div className="mt-5">
-                                <h3 className="text-sm font-black text-gray-900 mb-3 font-cairo">
-                                    {isRTL ? 'إضافات مميزة' : 'Featured Add-ons'}
-                                </h3>
-                                <div className="flex flex-col gap-2">
-                                    {product.accessories.map((acc: any, idx: number) => {
-                                        const accName = typeof acc === 'string' ? acc : acc.name;
-                                        const accPrice = typeof acc === 'string' ? 0 : acc.price;
-                                        const accImage = typeof acc === 'string' ? '' : acc.image_url;
-                                        const isSelected = selectedAccessories.some(a => a.name === accName);
-                                        return (
-                                            <button
-                                                key={idx}
-                                                onClick={() => {
-                                                    if (isSelected) {
-                                                        setSelectedAccessories(prev => prev.filter(a => a.name !== accName));
-                                                    } else {
-                                                        setSelectedAccessories(prev => [...prev, { name: accName, price: accPrice, image_url: accImage }]);
-                                                    }
-                                                }}
-                                                className={`flex items-center justify-between p-3 rounded-2xl border transition-all active:scale-95 ${isSelected ? 'bg-[#0E4435]/5 border-[#0E4435]/30' : 'bg-white border-gray-100 hover:border-gray-200'}`}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'bg-[#0E4435] border-[#0E4435]' : 'border-gray-300'}`}>
-                                                        {isSelected && <Check size={11} className="text-white" strokeWidth={3} />}
-                                                    </div>
-                                                    {accImage ? (
-                                                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
-                                                            <img src={formatImageUrl(accImage)} alt={accName} className="w-full h-full object-cover" />
+                            {product.sizes && product.sizes.length > 0 && (
+                                <div>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.sizes || 'Sizes'}</h3>
+                                        <button
+                                            onClick={() => setIsSizeGuideOpen(true)}
+                                            className="text-[11px] font-black text-[var(--color-brand-primary)] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)]/5 hover:bg-[var(--color-brand-primary)]/10 transition-colors"
+                                        >
+                                            <Ruler size={14} />
+                                            <span>{t.product?.size_guide || (isRTL ? 'دليل المقاسات' : 'Size Guide')}</span>
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {product.sizes.length > 1 ? (
+                                            product.sizes.map((s: string, i: number) => {
+                                                const outOfStock = isSizeOutOfStock(s);
+                                                return (
+                                                <button
+                                                    key={`${s}-${i}`}
+                                                    onClick={() => { if(!outOfStock) setSelectedSize(s); }}
+                                                    disabled={outOfStock}
+                                                    className={`min-w-[3.5rem] relative overflow-hidden h-10 px-3 rounded-xl border-2 font-black text-sm transition-all ${
+                                                        outOfStock 
+                                                            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+                                                            : selectedSize === s 
+                                                                ? 'border-[var(--color-brand-primary)] bg-white text-[var(--color-brand-primary)] shadow-md scale-105' 
+                                                                : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                                                    }`}
+                                                >
+                                                    {s}
+                                                    {outOfStock && (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <div className="w-full top-1/2 left-0 absolute h-[2px] bg-gray-400 -rotate-12 scale-150"></div>
                                                         </div>
-                                                    ) : null}
-                                                    <div className={`text-right ${isRTL ? '' : 'text-left'}`}>
-                                                        <p className="font-black text-gray-900 text-sm font-cairo">{accName}</p>
-                                                        {accPrice > 0 && <p className="text-[#0E4435] font-black text-xs">+{accPrice} {isRTL ? 'ج.م' : 'EGP'}</p>}
+                                                    )}
+                                                </button>
+                                            )})
+                                        ) : (
+                                            <p className="font-black text-gray-900 bg-gray-50 px-5 py-2.5 rounded-2xl border border-gray-100 inline-block font-cairo">
+                                                {product.sizes[0]}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {stockCount > 0 && stockCount < 50 ? (
+                                <div className="p-4 rounded-[20px] bg-amber-50 border border-amber-100/50 flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                        <motion.div
+                                            animate={{ scale: [1, 1.1, 1] }}
+                                            transition={{ duration: 1.5, repeat: Infinity }}
+                                        >
+                                            <Flame size={16} className="text-amber-500 fill-amber-500" />
+                                        </motion.div>
+                                    </div>
+                                    <span className="text-xs font-black text-amber-900 font-cairo">
+                                        {t.product?.low_stock?.replace('{count}', stockCount.toString()) || (isRTL ? `الكمية محدودة! باق ${stockCount} قطع فقط` : `Limited Stock! Only ${stockCount} left`)}
+                                    </span>
+                                </div>
+                            ) : stockCount <= 0 ? (
+                                <div className="p-4 rounded-[20px] bg-red-50 border border-red-100/50 flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                        <ShoppingBag size={16} className="text-red-500" />
+                                    </div>
+                                    <span className="text-xs font-black text-red-900 font-cairo">
+                                        نفدت الكمية
+                                    </span>
+                                </div>
+                            ) : null}
+
+                            {product.accessories && product.accessories.length > 0 && (
+                                <div className="mt-8 border-t border-gray-100 pt-6">
+                                    <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">
+                                        {isRTL ? 'إضافات مميزة' : 'Add-ons & Accessories'}
+                                    </h3>
+                                    <div className="flex flex-col gap-3">
+                                        {product.accessories.map((acc: any, i: number) => {
+                                            const isSelected = selectedAccessories.some(a => a.name === acc.name);
+                                            return (
+                                                <div 
+                                                    key={i} 
+                                                    onClick={() => toggleAccessory(acc)}
+                                                    className={`
+                                                    flex items-center gap-4 p-3 rounded-2xl border-2 transition-all cursor-pointer select-none
+                                                    ${isRTL ? 'flex-row-reverse' : 'flex-row'}
+                                                    ${isSelected ? 'border-[var(--color-brand-primary)] bg-[var(--color-brand-primary)]/5' : 'border-gray-100 bg-white hover:border-gray-200'}
+                                                `}>
+                                                    {acc.image_url && (
+                                                        <div className="w-14 h-14 bg-white rounded-xl border border-gray-100 overflow-hidden relative flex-shrink-0">
+                                                            <Image src={formatImageUrl(acc.image_url)} alt={acc.name} fill className="object-cover" />
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <div className={`flex-grow flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
+                                                        <span className="font-bold text-gray-800 font-cairo text-sm">{acc.name}</span>
+                                                        <span className="text-[var(--color-brand-primary)] font-black text-sm">
+                                                            + {acc.price} {isRTL ? 'ج.م' : 'EGP'}
+                                                        </span>
+                                                    </div>
+
+                                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-colors border ${isSelected ? 'bg-[var(--color-brand-primary)] border-[var(--color-brand-primary)]' : 'bg-gray-50 border-gray-200'}`}>
+                                                        {isSelected && <Check size={14} className="text-white" strokeWidth={3} />}
                                                     </div>
                                                 </div>
-                                            </button>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex flex-col gap-4 mt-6">
+                                <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.quantity || 'Quantity'}</h3>
+                                <div className="flex items-center bg-white rounded-[16px] p-1 w-fit border border-gray-100 shadow-sm">
+                                    <button
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-gray-50 rounded-xl"
+                                    >
+                                        <Minus size={16} strokeWidth={3} />
+                                    </button>
+                                    <span className="w-12 text-center font-black text-lg text-gray-900">{quantity}</span>
+                                    <button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-950 transition-colors bg-gray-50 rounded-xl"
+                                    >
+                                        <Plus size={16} strokeWidth={3} />
+                                    </button>
                                 </div>
                             </div>
-                        )}
 
-                        {/* Quantity Section */}
-                        <div className="mt-5">
-                            <h3 className="text-sm font-black text-gray-900 mb-3 font-cairo">
-                                {isRTL ? 'الكمية' : 'Quantity'}
-                            </h3>
-                            <div className="flex items-center gap-1">
-                                <button
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-300 active:scale-95 transition-all shadow-sm"
-                                >
-                                    <Minus size={16} />
-                                </button>
-                                <span className="w-12 text-center font-black text-gray-900 text-base">{quantity}</span>
-                                <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-300 active:scale-95 transition-all shadow-sm"
-                                >
-                                    <Plus size={16} />
-                                </button>
-                            </div>
-                        </div>
+                            <AnimatePresence>
+                                {isInCart && relatedProducts.length > 0 && (
+                                    <motion.div
+                                        ref={relatedSectionRef}
+                                        initial={{ opacity: 0, height: 0, y: -20, marginBottom: 0 }}
+                                        animate={{ opacity: 1, height: 'auto', y: 0, marginBottom: 32 }}
+                                        exit={{ opacity: 0, height: 0, y: -20, marginBottom: 0 }}
+                                        transition={{ duration: 0.6, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                        className="overflow-hidden mt-8"
+                                    >
+                                        <div className="p-5 border border-gray-100 bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.02]">
+                                            <h3 className="text-xl font-black text-gray-900 font-cairo text-center mb-6">
+                                                {isRTL ? 'منتجات أخرى قد تعجبك' : 'Other products you might like'}
+                                            </h3>
+                                            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-5">
+                                                {relatedProducts.slice(0, 2).map((p) => (
+                                                    <ProductCard key={p.id || p._id} product={p} />
+                                                ))}
+                                            </div>
+                                            <div className="flex justify-center">
+                                                <button 
+                                                    onClick={() => {
+                                                        let catId = '';
+                                                        if (typeof product.category === 'string') {
+                                                            catId = product.category;
+                                                        } else if (product.category && typeof product.category === 'object') {
+                                                            catId = (product.category as any)._id || (product.category as any).id;
+                                                        }
+                                                        
+                                                        if (!catId) {
+                                                            const anyProduct = product as any;
+                                                            catId = anyProduct?.category_id || (anyProduct?.category_ids && anyProduct.category_ids[0]);
+                                                        }
+                                                        
+                                                        router.push(catId ? `/search?category=${catId}` : '/search');
+                                                    }}
+                                                    className="inline-flex items-center gap-2 text-[var(--color-brand-primary)] font-bold text-sm bg-white border border-gray-100 px-6 py-2.5 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm font-cairo"
+                                                >
+                                                    <span>{isRTL ? 'عرض المزيد' : 'View More'}</span>
+                                                    {isRTL ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
-                        {/* Product Description */}
-                        {product.description && (
-                            <div className="mt-5">
-                                <h3 className="text-sm font-black text-gray-900 mb-3 font-cairo flex items-center gap-2">
-                                    <Info size={15} className="text-[#0E4435]" />
-                                    {isRTL ? 'التفاصيل' : 'Details'}
-                                </h3>
-                                <p className={`text-sm text-gray-500 font-bold font-cairo leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
+                            <div className="pt-8 border-t border-gray-100">
+                                <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.description || 'Details'}</h3>
+                                <p className="text-gray-500 leading-relaxed font-bold font-cairo text-sm opacity-70">
                                     {product.description}
                                 </p>
+                                <FAQAccordion isRTL={isRTL} />
                             </div>
-                        )}
 
-                        <FAQAccordion isRTL={isRTL} />
 
-                        <div ref={reviewsRef} className="pt-10 border-t border-gray-100">
-                            <ReviewsSection productId={productId} />
+                            <div ref={reviewsRef} className="pt-10 border-t border-gray-100">
+                                <ReviewsSection productId={productId} />
+                            </div>
                         </div>
                     </div>
                 </div>
             </main>
 
-            {/* FLOATING CAPSULE FOOTER */}
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
@@ -655,6 +1131,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 </motion.div>
             </div>
 
+
             <SizeGuideModal
                 isOpen={isSizeGuideOpen}
                 onClose={() => setIsSizeGuideOpen(false)}
@@ -664,8 +1141,8 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
             <VirtualTryOnModal
                 isOpen={isVTOOpen}
                 onClose={() => setIsVTOOpen(false)}
-                productImages={parseColors(product.colors).length > 0
-                    ? parseColors(product.colors).map(c =>
+                productImages={parseColors((product as any).colors).length > 0
+                    ? parseColors((product as any).colors).map(c =>
                         (c.imageIndex !== undefined && c.imageIndex !== null && safeImages[c.imageIndex])
                             ? safeImages[c.imageIndex]
                             : safeImages[0]
@@ -683,34 +1160,16 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 onNavigate={(index) => setSelectedImage(index)}
             />
 
-            <AnimatePresence>
-                {isUpsellOpen && (
-                    <AccessoryUpsellModal 
-                        isOpen={isUpsellOpen} 
-                        onClose={() => performAddToCart([])}
-                        onSkip={() => performAddToCart([])} 
-                        onAdd={performAddToCart}
-                        accessories={product.accessories || []}
-                        productName={product.name}
-                        isRTL={isRTL}
-                        formatImageUrl={formatImageUrl}
-                    />
-                )}
-            </AnimatePresence>
-            
-            {/* Added Related Products Section at the end of content before the fixed footer */}
-            {relatedProducts.length > 0 && (
-                <div className="max-w-7xl mx-auto px-5 pb-10">
-                    <h3 className="text-lg font-black text-gray-900 mb-6 font-cairo">
-                        {isRTL ? 'منتجات قد تعجبك' : 'Related Products'}
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {relatedProducts.map((p) => (
-                            <ProductCard key={p.id} product={p} />
-                        ))}
-                    </div>
-                </div>
-            )}
+            <AccessoryUpsellModal 
+                isOpen={isUpsellOpen}
+                accessories={product.accessories || []}
+                productName={product.name}
+                isRTL={isRTL}
+                onClose={() => setIsUpsellOpen(false)}
+                onSkip={() => performAddToCart([])}
+                onAdd={(accs) => performAddToCart(accs)}
+                formatImageUrl={formatImageUrl}
+            />
         </div>
     );
 }
