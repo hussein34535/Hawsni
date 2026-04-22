@@ -281,9 +281,11 @@ class _FullScreenImageGalleryState extends State<FullScreenImageGallery> {
           MediaQuery.of(context).size.height / 2,
         ),
       );
-      _transformationController.value = Matrix4.identity()
-        ..translateByDouble(-position.dx * (_scale - 1), -position.dy * (_scale - 1))
-        ..scaleByDouble(_scale);
+      // Matrix4 scale and translate
+      final matrix = Matrix4.identity();
+      matrix.translate(-position.dx * (_scale - 1), -position.dy * (_scale - 1));
+      matrix.scale(_scale);
+      _transformationController.value = matrix;
     }
   }
 }

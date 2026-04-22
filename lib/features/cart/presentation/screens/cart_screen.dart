@@ -15,27 +15,59 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackgroundColor,
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
           l10n.shoppingBag,
           style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
-            fontSize: 20,
+            fontFamily: 'Cairo',
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF1A1A1A),
+            fontSize: 18,
           ),
         ),
         centerTitle: true,
-        backgroundColor: AppTheme.scaffoldBackgroundColor,
+        backgroundColor: const Color(0xFFFAFAFA),
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppTheme.textPrimary),
+        automaticallyImplyLeading: false,
+        leadingWidth: 70,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+          child: Center(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  isRTL ? Icons.arrow_forward_ios : Icons.arrow_back_ios_new,
+                  size: 20,
+                  color: const Color(0xFF1A1A1A),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
       body: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
           if (state is CartLoading) {
             return const Center(
-              child: CircularProgressIndicator(color: AppTheme.primaryColor),
+              child: CircularProgressIndicator(color: Color(0xFF0E4435)),
             );
           }
 
@@ -47,24 +79,24 @@ class CartScreen extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                      decoration: const BoxDecoration(
+                        color: Colors.transparent,
                         shape: BoxShape.circle,
-                        boxShadow: AppTheme.shadowMedium,
                       ),
                       child: const Icon(
                         Icons.shopping_bag_outlined,
-                        size: 64,
-                        color: AppTheme.primaryColor,
+                        size: 80,
+                        color: Color(0xFF0E4435),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     Text(
                       l10n.yourBagIsEmpty,
                       style: const TextStyle(
+                        fontFamily: 'Cairo',
                         fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF1A1A1A),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -73,9 +105,33 @@ class CartScreen extends StatelessWidget {
                       child: Text(
                         l10n.startExploring,
                         textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          color: Colors.grey[400],
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0E4435),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        elevation: 10,
+                        shadowColor: const Color(0xFF0E4435).withOpacity(0.3),
+                      ),
+                      child: Text(
+                        isRTL ? 'استكشف الآن' : 'Start Exploring',
                         style: const TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 16,
+                          fontFamily: 'Cairo',
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
@@ -86,10 +142,16 @@ class CartScreen extends StatelessWidget {
 
             double total = state.items.fold(
               0,
-              (sum, item) =>
-                  sum +
-                  (double.parse(item.price.replaceAll(RegExp(r'[^0-9.]'), '')) *
-                      item.quantity),
+              (sum, item) {
+                double base = double.tryParse(item.price) ?? 0.0;
+                double accs = 0.0;
+                if (item.accessories != null) {
+                  for (var a in item.accessories!) {
+                    accs += double.tryParse(a['price']?.toString() ?? '0') ?? 0.0;
+                  }
+                }
+                return sum + ((base + accs) * item.quantity);
+              },
             );
 
             if (ResponsiveLayout.isDesktop(context)) {
@@ -100,20 +162,20 @@ class CartScreen extends StatelessWidget {
               children: [
                 // Cart Items List
                 ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 180),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 180),
                   itemCount: state.items.length,
                   separatorBuilder: (context, index) =>
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 4),
                   itemBuilder: (context, index) {
                     return CartItemCard(item: state.items[index]);
                   },
                 ),
 
-                // Floating Receipt Summary
+                // Fixed Summary (Bottom Sheet Style)
                 Positioned(
-                  bottom: 24,
-                  left: 24,
-                  right: 24,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
                   child: _buildSummaryCard(context, total, l10n),
                 ),
               ],
@@ -166,63 +228,91 @@ class CartScreen extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: AppTheme.shadowFloating,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.total,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-              Text(
-                '${total.toStringAsFixed(2)} ${l10n.currencySymbol}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
-                ),
-              ),
-            ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 30,
+            offset: const Offset(0, -10),
           ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const CheckoutScreen(),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.total,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey,
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
                 ),
-                elevation: 0,
-              ),
-              child: Text(
-                l10n.checkout,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      total.toStringAsFixed(0),
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      l10n.currencySymbol,
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const CheckoutScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0E4435),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  l10n.checkout,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

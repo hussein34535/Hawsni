@@ -444,8 +444,8 @@ class _ProductCardState extends State<ProductCard> {
                                     });
                                   },
                                   child: Container(
-                                    width: 14,
-                                    height: 14,
+                                    width: 22,
+                                    height: 22,
                                     margin: const EdgeInsets.only(right: 6),
                                     decoration: BoxDecoration(
                                       color: color,
@@ -454,14 +454,14 @@ class _ProductCardState extends State<ProductCard> {
                                         color: isSelected
                                             ? AppTheme.primaryColor
                                             : Colors.grey[300]!,
-                                        width: isSelected ? 1.5 : 0.5,
+                                        width: isSelected ? 2.0 : 0.5,
                                       ),
                                       boxShadow: isSelected
                                           ? [
                                               BoxShadow(
                                                 color: AppTheme.primaryColor
-                                                    .withValues(alpha: 0.3),
-                                                blurRadius: 4,
+                                                    .withValues(alpha: 0.4),
+                                                blurRadius: 6,
                                               )
                                             ]
                                           : null,
@@ -469,42 +469,58 @@ class _ProductCardState extends State<ProductCard> {
                                   ),
                                 );
                               }).toList(),
-                            ),
+                              if (widget.colors!.length > 4)
+                                Text(
+                                  '+${widget.colors!.length - 4}',
+                                  style: const TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                            ],
                           ),
+                        ),
 
                         // 3. Price
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(
-                              child: Text.rich(
-                                TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: widget.price.split('.')[0],
-                                      style: const TextStyle(
-                                        fontFamily: 'Cairo',
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.primaryColor,
-                                      ),
-                                    ),
-                                    const TextSpan(text: ' '),
-                                    TextSpan(
-                                      text: AppLocalizations.of(context)!
-                                          .currencySymbol,
-                                      style: const TextStyle(
-                                        fontFamily: 'Cairo',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.primaryColor,
-                                      ),
-                                    ),
-                                  ],
+                            if (widget.discount > 0 && widget.originalPrice != null)
+                              Text(
+                                '${widget.originalPrice} ${AppLocalizations.of(context)!.currencySymbol}',
+                                style: const TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.lineThrough,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  widget.price.split('.')[0],
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: widget.discount > 0 ? Colors.red : AppTheme.primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  AppLocalizations.of(context)!.currencySymbol,
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: widget.discount > 0 ? Colors.red : AppTheme.primaryColor,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

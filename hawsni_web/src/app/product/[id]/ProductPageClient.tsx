@@ -584,7 +584,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 </div>
             </main>
 
-            {/* FLOATING CAPSULE FOOTER (Matches Flutter _buildGlassActionPill) */}
+            {/* FLOATING CAPSULE FOOTER */}
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
@@ -697,6 +697,20 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                     />
                 )}
             </AnimatePresence>
+            
+            {/* Added Related Products Section at the end of content before the fixed footer */}
+            {relatedProducts.length > 0 && (
+                <div className="max-w-7xl mx-auto px-5 pb-10">
+                    <h3 className="text-lg font-black text-gray-900 mb-6 font-cairo">
+                        {isRTL ? 'منتجات قد تعجبك' : 'Related Products'}
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {relatedProducts.map((p) => (
+                            <ProductCard key={p.id} product={p} />
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

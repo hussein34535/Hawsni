@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,12 +19,11 @@ class _SearchScreenState extends State<SearchScreen> {
   List<dynamic> _searchResults = [];
   bool _isLoading = false;
   bool _showFilters = false;
-  // RangeValues _priceRange = const RangeValues(0, 1000);
   String? _selectedCategory;
   List<dynamic> _categories = [];
   double _minPrice = 0;
   double _maxPrice = 5000;
-  String _sortBy = 'newest'; // newest, price_asc, price_desc, rating
+  String _sortBy = 'newest';
 
   @override
   void initState() {
@@ -90,7 +88,6 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     try {
-      // Build query parameters
       final queryParams = <String, String>{};
       if (searchTerm.isNotEmpty) queryParams['q'] = searchTerm;
       if (_selectedCategory != null) {
@@ -114,7 +111,6 @@ class _SearchScreenState extends State<SearchScreen> {
           _saveSearchHistory(searchTerm);
         }
       } else {
-        // Handle error
         setState(() {
           _searchResults = [];
         });
@@ -142,92 +138,105 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  List<String> _suggestions = [];
-
-  void _updateSuggestions(String query) {
-    setState(() {
-      _suggestions = [
-        ..._searchHistory.where(
-          (term) => term.toLowerCase().contains(query.toLowerCase()),
-        ),
-        ..._categories
-            .where(
-              (cat) => cat['name'].toString().toLowerCase().contains(
-                    query.toLowerCase(),
-                  ),
-            )
-            .map((cat) => cat['name'].toString()),
-      ].take(10).toList();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isRTL = Directionality.of(context) == TextDirection.rtl;
+
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackgroundColor,
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        backgroundColor: AppTheme.scaffoldBackgroundColor,
+        backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
-          onPressed: () => Navigator.pop(context),
+        automaticallyImplyLeading: false,
+        leadingWidth: 60,
+        leading: Center(
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                isRTL ? Icons.arrow_forward_ios : Icons.arrow_back_ios_new,
+                size: 18,
+                color: const Color(0xFF1A1A1A),
+              ),
+            ),
+          ),
         ),
         title: Container(
-          height: 40,
+          height: 44,
           decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFFF5F5F5),
+            borderRadius: BorderRadius.circular(22),
           ),
           child: TextField(
             controller: _searchController,
-            style: const TextStyle(color: AppTheme.textPrimary),
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1A1A1A),
+            ),
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               hintText: AppLocalizations.of(context)!.searchPlaceholder,
-              hintStyle: TextStyle(color: Colors.grey[500]),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
+              hintStyle: TextStyle(
+                fontFamily: 'Cairo',
+                color: Colors.grey[500],
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
               ),
+              border: InputBorder.none,
+              prefixIcon: Icon(Icons.search, size: 20, color: Colors.grey[400]),
+              contentPadding: const EdgeInsets.symmetric(vertical: 10),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      icon: const Icon(Icons.close_rounded,
+                          size: 18, color: Colors.grey),
                       onPressed: () {
                         _searchController.clear();
                         setState(() {
                           _searchResults = [];
-                          _suggestions = [];
                         });
                       },
                     )
                   : null,
             ),
-            onChanged: (value) {
-              if (value.isEmpty) {
-                setState(() {
-                  _suggestions = [];
-                  _searchResults = [];
-                });
-              } else {
-                _updateSuggestions(value);
-              }
-            },
             onSubmitted: (value) => _performSearch(value),
           ),
         ),
         actions: [
-          IconButton(
-            icon: Icon(
-              Icons.filter_list,
-              color:
-                  _showFilters ? AppTheme.primaryColor : AppTheme.textPrimary,
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0, left: 12.0),
+            child: GestureDetector(
+              onTap: () => setState(() => _showFilters = !_showFilters),
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.tune_rounded,
+                  color: _showFilters
+                      ? const Color(0xFF0E4435)
+                      : const Color(0xFF1A1A1A),
+                  size: 24,
+                ),
+              ),
             ),
-            onPressed: () {
-              setState(() {
-                _showFilters = !_showFilters;
-              });
-            },
           ),
         ],
       ),
@@ -237,59 +246,27 @@ class _SearchScreenState extends State<SearchScreen> {
           Expanded(
             child: _isLoading
                 ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.primaryColor,
-                      ),
-                    ),
+                    child: CircularProgressIndicator(color: Color(0xFF0E4435)),
                   )
-                : _suggestions.isNotEmpty && _searchResults.isEmpty
-                    ? _buildSuggestionsList()
-                    : _searchResults.isNotEmpty
-                        ? _buildResultsGrid()
-                        : _searchController.text.isEmpty && !_showFilters
-                            ? _buildSearchHistory()
-                            : _buildEmptyState(),
+                : _searchResults.isNotEmpty
+                    ? _buildResultsGrid()
+                    : _searchController.text.isEmpty && !_showFilters
+                        ? _buildSearchHistory()
+                        : _buildEmptyState(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSuggestionsList() {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: _suggestions.length,
-      itemBuilder: (context, index) {
-        final suggestion = _suggestions[index];
-        return ListTile(
-          leading: const Icon(Icons.search, color: Colors.grey),
-          title: Text(
-            suggestion,
-            style: const TextStyle(color: AppTheme.textPrimary),
-          ),
-          onTap: () {
-            _searchController.text = suggestion;
-            _performSearch(suggestion);
-            setState(() => _suggestions = []);
-          },
-        );
-      },
-    );
-  }
-
   Widget _buildFilters() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border(
+            bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.1))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,39 +275,45 @@ class _SearchScreenState extends State<SearchScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppLocalizations.of(context)!.filters,
+                l10n.filters,
                 style: const TextStyle(
+                  fontFamily: 'Cairo',
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                  fontFamily: 'Playfair Display',
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF1A1A1A),
                 ),
               ),
               TextButton(
                 onPressed: _clearFilters,
                 child: Text(
-                  AppLocalizations.of(context)!.clearAll,
-                  style: const TextStyle(color: AppTheme.primaryColor),
+                  l10n.clearAll,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    color: Color(0xFF0E4435),
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           if (_categories.isNotEmpty) ...[
-            Text(
-              AppLocalizations.of(context)!.category,
-              style: const TextStyle(
-                color: AppTheme.textPrimary,
-                fontWeight: FontWeight.w500,
+            const Text(
+              'التصنيف',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w900,
+                fontSize: 14,
+                color: Color(0xFF1A1A1A),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 _buildFilterChip(
-                  AppLocalizations.of(context)!.all,
+                  l10n.all,
                   _selectedCategory == null,
                   () => setState(() => _selectedCategory = null),
                 ),
@@ -348,13 +331,15 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
           ],
-          Text(
-            AppLocalizations.of(context)!.priceRange,
-            style: const TextStyle(
-              color: AppTheme.textPrimary,
-              fontWeight: FontWeight.w500,
+          const Text(
+            'نطاق السعر',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w900,
+              fontSize: 14,
+              color: Color(0xFF1A1A1A),
             ),
           ),
           RangeSlider(
@@ -362,8 +347,8 @@ class _SearchScreenState extends State<SearchScreen> {
             min: 0,
             max: 5000,
             divisions: 50,
-            activeColor: AppTheme.primaryColor,
-            inactiveColor: Colors.grey[300],
+            activeColor: const Color(0xFF0E4435),
+            inactiveColor: Colors.grey[200],
             onChanged: (values) => setState(() {
               _minPrice = values.start;
               _maxPrice = values.end;
@@ -372,26 +357,31 @@ class _SearchScreenState extends State<SearchScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${_minPrice.round()} EGP',
-                style: const TextStyle(color: AppTheme.textSecondary),
-              ),
-              Text(
-                '${_maxPrice.round()} EGP',
-                style: const TextStyle(color: AppTheme.textSecondary),
-              ),
+              Text('${_minPrice.round()} ج.م',
+                  style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey)),
+              Text('${_maxPrice.round()} ج.م',
+                  style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey)),
             ],
           ),
-          const SizedBox(height: 16),
-          // Sort By
+          const SizedBox(height: 20),
           const Text(
             'ترتيب حسب',
             style: TextStyle(
-              color: AppTheme.textPrimary,
-              fontWeight: FontWeight.w500,
+              fontFamily: 'Cairo',
+              fontWeight: FontWeight.w900,
+              fontSize: 14,
+              color: Color(0xFF1A1A1A),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -402,11 +392,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   () => setState(() => _sortBy = 'price_asc')),
               _buildFilterChip('الأغلى', _sortBy == 'price_desc',
                   () => setState(() => _sortBy = 'price_desc')),
-              _buildFilterChip('التقييم', _sortBy == 'rating',
-                  () => setState(() => _sortBy = 'rating')),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -415,16 +403,20 @@ class _SearchScreenState extends State<SearchScreen> {
                 setState(() => _showFilters = false);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
+                backgroundColor: const Color(0xFF0E4435),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                elevation: 0,
               ),
               child: Text(
-                AppLocalizations.of(context)!.applyFilters,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                l10n.applyFilters,
+                style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16),
               ),
             ),
           ),
@@ -437,19 +429,20 @@ class _SearchScreenState extends State<SearchScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.grey[100],
+          color: isSelected ? const Color(0xFF0E4435) : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppTheme.primaryColor : Colors.transparent,
-          ),
+              color: isSelected ? const Color(0xFF0E4435) : Colors.transparent),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : AppTheme.textPrimary,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontFamily: 'Cairo',
+            color: isSelected ? Colors.white : const Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w900,
+            fontSize: 12,
           ),
         ),
       ),
@@ -457,40 +450,58 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSearchHistory() {
+    final l10n = AppLocalizations.of(context)!;
     if (_searchHistory.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.history, size: 64, color: Colors.grey),
+            Icon(Icons.search_rounded, size: 64, color: Colors.grey[200]),
             const SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.noSearchHistory,
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
+              l10n.searchPlaceholder,
+              style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 16,
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.bold),
             ),
           ],
         ),
       );
     }
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       itemCount: _searchHistory.length,
       itemBuilder: (context, index) {
         final term = _searchHistory[index];
-        return ListTile(
-          leading: const Icon(Icons.history, color: Colors.grey),
-          title: Text(
-            term,
-            style: const TextStyle(color: AppTheme.textPrimary),
+        return Container(
+          decoration: BoxDecoration(
+            border: Border(
+                bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.05))),
           ),
-          trailing: IconButton(
-            icon: const Icon(Icons.close, size: 18, color: Colors.grey),
-            onPressed: () => _removeSearchTerm(term),
+          child: ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(Icons.history_rounded,
+                size: 20, color: Colors.grey[400]),
+            title: Text(
+              term,
+              style: const TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Color(0xFF1A1A1A),
+              ),
+            ),
+            trailing: IconButton(
+              icon: Icon(Icons.close_rounded, size: 16, color: Colors.grey[300]),
+              onPressed: () => _removeSearchTerm(term),
+            ),
+            onTap: () {
+              _searchController.text = term;
+              _performSearch(term);
+            },
           ),
-          onTap: () {
-            _searchController.text = term;
-            _performSearch(term);
-          },
         );
       },
     );
@@ -501,11 +512,16 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.search_off, size: 64, color: Colors.grey),
+          Icon(Icons.search_off_rounded, size: 80, color: Colors.grey[200]),
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context)!.noProductsFound,
-            style: const TextStyle(fontSize: 18, color: Colors.grey),
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF1A1A1A),
+            ),
           ),
         ],
       ),
@@ -514,12 +530,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _buildResultsGrid() {
     return GridView.builder(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        MediaQuery.of(context).padding.bottom + 60,
-      ),
+      padding: const EdgeInsets.all(20),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.65,
@@ -532,20 +543,22 @@ class _SearchScreenState extends State<SearchScreen> {
         final images = product['images'] as List?;
         final imageUrl = images != null && images.isNotEmpty
             ? '${ApiService.baseUrl}${images[0]}'
-            : 'https://picsum.photos/300?random=$index';
+            : '';
 
         return ProductCard(
-          id: product['id']?.toString() ?? 'search_product_$index',
+          id: product['id']?.toString() ?? '',
           imageUrl: imageUrl,
-          name: product['name'] ?? 'No Name',
-          price: product['price']?.toString() ?? '0.00',
+          name: product['name'] ?? '',
+          price: product['price']?.toString() ?? '0',
           rating: (product['rating'] as num?)?.toDouble() ?? 0.0,
           reviewCount: (product['reviewCount'] as num?)?.toInt() ?? 0,
-          screenId: 'search', // Updated
+          screenId: 'search',
           colors: product['colors'] is List ? product['colors'] : null,
           sizes: product['sizes'] != null
               ? List<String>.from(product['sizes'])
               : null,
+          discount: (product['discount'] as num?)?.toInt() ?? 0,
+          originalPrice: product['originalPrice']?.toString(),
         );
       },
     );
