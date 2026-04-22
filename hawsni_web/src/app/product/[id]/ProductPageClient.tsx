@@ -415,7 +415,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
 
             <main className="max-w-7xl mx-auto pb-40">
                 <div className="grid grid-cols-1 lg:grid-cols-2">
-                    <div className="relative aspect-[4/4] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group">
+                    <div className="relative aspect-[4/3.2] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group">
                         <div ref={sliderRef} onScroll={handleGalleryScroll} className="w-full h-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar" style={{ scrollSnapType: 'x mandatory' }}>
                             {safeImages.map((img: string, i: number) => {
                                 const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(img) || img.includes('/video/upload/');
@@ -430,9 +430,9 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                         </div>
                     </div>
 
-                    <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        <div className="flex flex-col gap-6 mb-10">
-                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight mb-2.5">{product.name}</h1>
+                    <div className={`px-5 pt-5 pb-4 md:px-10 md:pt-8 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className="flex flex-col gap-2.5 mb-5">
+                            <h1 className="text-xl font-black text-gray-900 font-cairo leading-tight tracking-tight">{product.name}</h1>
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex flex-col">
                                     {product.discount ? (
@@ -441,9 +441,9 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                             <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md">-{product.discount}%</span>
                                         </div>
                                     ) : null}
-                                    <div className={`flex items-baseline gap-1 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
+                                    <div className={`flex items-baseline gap-1 font-black text-[1.6rem] ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
                                         <span>{Math.round(getBasePrice()).toLocaleString()}</span>
-                                        <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
+                                        <span className="text-[11px] uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
                                 </div>
                                 <button onClick={() => {
@@ -464,21 +464,21 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
 
                         <FreeDeliveryBanner isRTL={isRTL} />
 
-                        <div className="mt-8 space-y-6">
+                        <div className="mt-4 space-y-4">
                             <div>
-                                <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center justify-between mb-3">
                                     <h3 className="text-sm font-black text-gray-900 font-cairo">{isRTL ? 'المقاس' : 'Size'}</h3>
                                     <button
                                         onClick={() => setIsSizeGuideOpen(true)}
-                                        className="flex items-center gap-2 px-3 py-1.5 bg-[#0E4435]/5 text-[#0E4435] rounded-lg text-sm font-bold font-cairo hover:bg-[#0E4435]/10 transition-colors"
+                                        className="flex items-center gap-1.5 px-4 py-2 bg-[#0E4435] text-white rounded-full text-xs font-black font-cairo shadow hover:bg-[#0a3028] active:scale-95 transition-all"
                                     >
-                                        <Ruler size={16} />
+                                        <Ruler size={13} />
                                         {isRTL ? 'دليل المقاسات' : 'Size Guide'}
                                     </button>
                                 </div>
-                                <div className="flex flex-wrap gap-3">
+                                <div className="flex flex-wrap gap-2">
                                     {product.sizes?.map(size => (
-                                        <button key={size} onClick={() => setSelectedSize(size)} className={`h-12 px-6 rounded-xl font-black text-sm transition-all ${selectedSize === size ? 'bg-[#0E4435] text-white' : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-200 shadow-sm'}`}>{size}</button>
+                                        <button key={size} onClick={() => setSelectedSize(size)} className={`h-9 px-4 rounded-xl font-black text-xs transition-all active:scale-95 ${selectedSize === size ? 'bg-[#0E4435] text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300 shadow-sm'}`}>{size}</button>
                                     ))}
                                 </div>
                             </div>
