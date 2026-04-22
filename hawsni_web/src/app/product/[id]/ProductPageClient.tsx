@@ -446,6 +446,19 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                         <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
                                 </div>
+                                <button onClick={() => {
+                                    reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }} className="flex flex-col items-end gap-1 hover:opacity-80 transition-opacity">
+                                    <div className="flex items-center gap-1">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <Star key={star} size={14} className="text-yellow-400" />
+                                        ))}
+                                        <span className="font-black text-gray-900 ml-1 text-sm">0.0</span>
+                                    </div>
+                                    <span className="text-gray-400 font-bold text-xs">
+                                        ({isRTL ? 'عرض التقييمات (0)' : '0 Reviews'})
+                                    </span>
+                                </button>
                             </div>
                         </div>
 
@@ -453,13 +466,33 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
 
                         <div className="mt-8 space-y-6">
                             <div>
-                                <h3 className="text-sm font-black text-gray-900 mb-4 font-cairo">{isRTL ? 'اختر المقاس' : 'Select Size'}</h3>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-sm font-black text-gray-900 font-cairo">{isRTL ? 'المقاس' : 'Size'}</h3>
+                                    <button
+                                        onClick={() => setIsSizeGuideOpen(true)}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-[#0E4435]/5 text-[#0E4435] rounded-lg text-sm font-bold font-cairo hover:bg-[#0E4435]/10 transition-colors"
+                                    >
+                                        <Ruler size={16} />
+                                        {isRTL ? 'دليل المقاسات' : 'Size Guide'}
+                                    </button>
+                                </div>
                                 <div className="flex flex-wrap gap-3">
                                     {product.sizes?.map(size => (
-                                        <button key={size} onClick={() => setSelectedSize(size)} className={`h-12 px-6 rounded-xl font-black text-sm transition-all ${selectedSize === size ? 'bg-[#0E4435] text-white' : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-200'}`}>{size}</button>
+                                        <button key={size} onClick={() => setSelectedSize(size)} className={`h-12 px-6 rounded-xl font-black text-sm transition-all ${selectedSize === size ? 'bg-[#0E4435] text-white' : 'bg-white border border-gray-100 text-gray-500 hover:border-gray-200 shadow-sm'}`}>{size}</button>
                                     ))}
                                 </div>
                             </div>
+                            
+                            {stockCount > 0 && stockCount <= 15 && (
+                                <div className="w-full bg-orange-50/80 rounded-2xl p-4 flex items-center gap-3 border border-orange-100">
+                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm flex-shrink-0">
+                                        <Flame size={16} className="text-orange-500 fill-orange-500" />
+                                    </div>
+                                    <p className="text-orange-900 font-black text-sm font-cairo">
+                                        {isRTL ? `الكمية محدودة! باق ${stockCount} قطع فقط` : `Limited Quantity! Only ${stockCount} left`}
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <FAQAccordion isRTL={isRTL} />
