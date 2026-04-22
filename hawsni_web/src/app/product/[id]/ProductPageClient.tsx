@@ -493,7 +493,87 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                                     </p>
                                 </div>
                             )}
+                         </div>
+
+                        {/* Accessories Section */}
+                        {product.accessories && product.accessories.length > 0 && (
+                            <div className="mt-5">
+                                <h3 className="text-sm font-black text-gray-900 mb-3 font-cairo">
+                                    {isRTL ? 'إضافات مميزة' : 'Featured Add-ons'}
+                                </h3>
+                                <div className="flex flex-col gap-2">
+                                    {product.accessories.map((acc: any, idx: number) => {
+                                        const accName = typeof acc === 'string' ? acc : acc.name;
+                                        const accPrice = typeof acc === 'string' ? 0 : acc.price;
+                                        const accImage = typeof acc === 'string' ? '' : acc.image_url;
+                                        const isSelected = selectedAccessories.some(a => a.name === accName);
+                                        return (
+                                            <button
+                                                key={idx}
+                                                onClick={() => {
+                                                    if (isSelected) {
+                                                        setSelectedAccessories(prev => prev.filter(a => a.name !== accName));
+                                                    } else {
+                                                        setSelectedAccessories(prev => [...prev, { name: accName, price: accPrice, image_url: accImage }]);
+                                                    }
+                                                }}
+                                                className={`flex items-center justify-between p-3 rounded-2xl border transition-all active:scale-95 ${isSelected ? 'bg-[#0E4435]/5 border-[#0E4435]/30' : 'bg-white border-gray-100 hover:border-gray-200'}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? 'bg-[#0E4435] border-[#0E4435]' : 'border-gray-300'}`}>
+                                                        {isSelected && <Check size={11} className="text-white" strokeWidth={3} />}
+                                                    </div>
+                                                    {accImage ? (
+                                                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
+                                                            <img src={formatImageUrl(accImage)} alt={accName} className="w-full h-full object-cover" />
+                                                        </div>
+                                                    ) : null}
+                                                    <div className={`text-right ${isRTL ? '' : 'text-left'}`}>
+                                                        <p className="font-black text-gray-900 text-sm font-cairo">{accName}</p>
+                                                        {accPrice > 0 && <p className="text-[#0E4435] font-black text-xs">+{accPrice} {isRTL ? 'ج.م' : 'EGP'}</p>}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Quantity Section */}
+                        <div className="mt-5">
+                            <h3 className="text-sm font-black text-gray-900 mb-3 font-cairo">
+                                {isRTL ? 'الكمية' : 'Quantity'}
+                            </h3>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-300 active:scale-95 transition-all shadow-sm"
+                                >
+                                    <Minus size={16} />
+                                </button>
+                                <span className="w-12 text-center font-black text-gray-900 text-base">{quantity}</span>
+                                <button
+                                    onClick={() => setQuantity(quantity + 1)}
+                                    className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-300 active:scale-95 transition-all shadow-sm"
+                                >
+                                    <Plus size={16} />
+                                </button>
+                            </div>
                         </div>
+
+                        {/* Product Description */}
+                        {product.description && (
+                            <div className="mt-5">
+                                <h3 className="text-sm font-black text-gray-900 mb-3 font-cairo flex items-center gap-2">
+                                    <Info size={15} className="text-[#0E4435]" />
+                                    {isRTL ? 'التفاصيل' : 'Details'}
+                                </h3>
+                                <p className={`text-sm text-gray-500 font-bold font-cairo leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
+                                    {product.description}
+                                </p>
+                            </div>
+                        )}
 
                         <FAQAccordion isRTL={isRTL} />
 
