@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -487,10 +487,13 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                 {isUpsellOpen && (
                     <AccessoryUpsellModal 
                         isOpen={isUpsellOpen} 
-                        onClose={() => performAddToCart([])} 
-                        onConfirm={performAddToCart}
+                        onClose={() => performAddToCart([])}
+                        onSkip={() => performAddToCart([])} 
+                        onAdd={performAddToCart}
                         accessories={product.accessories || []}
+                        productName={product.name}
                         isRTL={isRTL}
+                        formatImageUrl={formatImageUrl}
                     />
                 )}
             </AnimatePresence>
