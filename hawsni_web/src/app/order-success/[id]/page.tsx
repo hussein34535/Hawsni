@@ -32,7 +32,7 @@ export default function OrderSuccessPage() {
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                const res = await checkoutService.getOrderById(id as string);
+                const res = await checkoutService.getOrder(id as string);
                 if (res.success) setOrder(res.order);
             } catch (err) {
                 console.error(err);
@@ -75,7 +75,7 @@ export default function OrderSuccessPage() {
                         animate={{ scale: 1, rotate: 0 }}
                         className="w-24 h-24 md:w-32 md:h-32 bg-emerald-500 rounded-[2.5rem] mx-auto mb-8 flex items-center justify-center text-white shadow-2xl shadow-emerald-500/30 relative"
                     >
-                        <Check size={48} md:size={64} strokeWidth={4} />
+                        <Check className="w-12 h-12 md:w-16 md:h-16" strokeWidth={4} />
                         <motion.div 
                             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                             transition={{ duration: 2, repeat: Infinity }}
