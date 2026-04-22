@@ -116,7 +116,7 @@ const ProductVideoItem = ({ src }: { src: string }) => {
                         exit={{ opacity: 0, scale: 1.2 }}
                         className="absolute inset-0 flex items-center justify-center bg-black/10"
                     >
-                        <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-white/40">
+                        <div className="w-16 h-16 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border border-white/40 transform transition-transform hover:scale-110 active:scale-95">
                             <Play className="w-8 h-8 text-white ml-1 drop-shadow-md" fill="currentColor" />
                         </div>
                     </motion.div>
@@ -170,6 +170,24 @@ const formatImageUrl = (url: string) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
     const baseUrl = apiUrl.replace(/\/api$/, '');
     return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+};
+
+const parseColors = (colors: any[] | undefined) => {
+    if (!colors) return [];
+    return colors.map(c => {
+        if (typeof c === 'string') {
+            try {
+                const cleaned = c.trim();
+                if (cleaned.startsWith('{')) {
+                    return JSON.parse(cleaned);
+                }
+                return { color: cleaned };
+            } catch (e) {
+                return { color: c };
+            }
+        }
+        return c;
+    });
 };
 
 const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
@@ -235,8 +253,10 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
     const { t, isRTL } = useLanguage();
     const { showToast } = useToastStore();
 
+    // Use initialProduct from Server Component - No more double fetching!
     const [product, setProduct] = useState<Product>(initialProduct);
     const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(false); // No more loading spinner needed for main data
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -248,9 +268,9 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
     const [isUpsellOpen, setIsUpsellOpen] = useState(false);
     const [hasShownUpsell, setHasShownUpsell] = useState(false);
+    const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
     
-    const sliderRef = useRef<HTMLDivElement>(null);
-    const reviewsRef = useRef<HTMLDivElement>(null);
+    const relatedSectionRef = useRef<HTMLDivElement>(null);
     const items = useCartStore((state) => state.items);
     const addItem = useCartStore((state) => state.addItem);
     const getItemCount = useCartStore((state) => state.getItemCount);
@@ -290,6 +310,7 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
             fetchRelated();
             checkWishlist();
             
+            // Track ViewContent using initial data
             const discount = initialProduct.discount || 0;
             const finalPrice = discount > 0 ? initialProduct.price - (initialProduct.price * discount / 100) : initialProduct.price;
             trackEvent('ViewContent', {
@@ -313,6 +334,8 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
 
     const safeImages = Array.isArray(product?.images) ? product.images : [];
 
+    const sliderRef = useRef<HTMLDivElement>(null);
+
     const handleGalleryScroll = useCallback(() => {
         if (!sliderRef.current) return;
         const scrollLeft = sliderRef.current.scrollLeft;
@@ -322,6 +345,15 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
             setSelectedImage(newIndex);
         }
     }, [selectedImage, safeImages.length]);
+
+    const scrollToImage = useCallback((index: number) => {
+        if (!sliderRef.current) return;
+        sliderRef.current.scrollTo({
+            left: index * sliderRef.current.offsetWidth,
+            behavior: 'smooth'
+        });
+        setSelectedImage(index);
+    }, []);
 
     const performAddToCart = (selectedAccs: any[]) => {
         if (!product) return;
@@ -366,9 +398,6 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
         }
         performAddToCart(selectedAccessories);
     };
-
-    const currentStockOut = (product.stock_count || 0) <= 0;
-    const stockCount = product.stock_count || 0;
 
     return (
         <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
@@ -450,82 +479,18 @@ export default function ProductPageClient({ initialProduct }: ProductPageClientP
                         </div>
 
                         <FAQAccordion isRTL={isRTL} />
-
-                        <div ref={reviewsRef} className="pt-10 border-t border-gray-100">
-                            <ReviewsSection productId={productId} />
-                        </div>
                     </div>
                 </div>
             </main>
 
-            {/* FLOATING CAPSULE FOOTER */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
-                <motion.div
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] flex items-center justify-between border border-white/10"
-                >
-                    <div className="flex flex-col px-6">
-                        <span className="text-lg font-black text-white font-cairo">
-                            {totalPrice.toLocaleString()}
-                            <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
-                        </span>
-                    </div>
-
-                    <button
-                        onClick={currentStockOut ? undefined : (isInCart ? () => router.push('/cart') : handleAddToCart)}
-                        className={`
-                            flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95
-                            ${currentStockOut
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : isInCart
-                                    ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'
-                                    : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
-                        `}
-                        disabled={currentStockOut}
-                    >
-                        <ShoppingBag size={18} />
-                        <span className="font-cairo">
-                            {stockCount <= 0
-                                ? 'نفدت الكمية'
-                                : isInCart
-                                    ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
-                                    : (isRTL ? 'إضافة إلى السلة' : 'Add to Cart')}
-                        </span>
-                    </button>
-                </motion.div>
-            </div>
-
-            <SizeGuideModal 
-                isOpen={isSizeGuideOpen} 
-                onClose={() => setIsSizeGuideOpen(false)} 
-                sizeGuide={product.size_guide} 
-            />
-            <VirtualTryOnModal 
-                isOpen={isVTOOpen} 
-                onClose={() => setIsVTOOpen(false)} 
-                productId={product.id || ''} 
-                productImages={product.images.map(formatImageUrl)}
-                productName={product.name}
-            />
-            <ImageLightbox 
-                isOpen={isLightboxOpen} 
-                onClose={() => setIsLightboxOpen(false)} 
-                images={product.images.map(formatImageUrl)} 
-                currentIndex={selectedImage}
-                onNavigate={(idx) => setSelectedImage(idx)}
-            />
             <AnimatePresence>
                 {isUpsellOpen && (
                     <AccessoryUpsellModal 
                         isOpen={isUpsellOpen} 
-                        onClose={() => setIsUpsellOpen(false)}
-                        onSkip={() => performAddToCart([])} 
-                        onAdd={performAddToCart}
+                        onClose={() => performAddToCart([])} 
+                        onConfirm={performAddToCart}
                         accessories={product.accessories || []}
-                        productName={product.name}
                         isRTL={isRTL}
-                        formatImageUrl={formatImageUrl}
                     />
                 )}
             </AnimatePresence>
