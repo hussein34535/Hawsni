@@ -19,51 +19,8 @@ class CartScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
-      appBar: AppBar(
-        title: Text(
-          l10n.shoppingBag,
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.w900,
-            color: Color(0xFF1A1A1A),
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFFFAFAFA),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        leadingWidth: 70,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-          child: Center(
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  isRTL ? Icons.arrow_forward_ios : Icons.arrow_back_ios_new,
-                  size: 20,
-                  color: const Color(0xFF1A1A1A),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-      body: BlocBuilder<CartBloc, CartState>(
+      body: SafeArea(
+        child: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
           if (state is CartLoading) {
             return const Center(

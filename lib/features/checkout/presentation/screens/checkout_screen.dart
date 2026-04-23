@@ -745,6 +745,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     return Column(
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: TextFormField(
@@ -753,19 +754,21 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                 textDirection: TextDirection.ltr,
                 style: const TextStyle(fontFamily: 'Cairo', fontSize: 15, letterSpacing: 1),
                 decoration: _inputDecoration('أدخل كود الخصم', Icons.confirmation_number_outlined).copyWith(
-                  fillColor: _isCouponApplied ? Colors.green.withValues(alpha: 0.05) : const Color(0xFFF7F7F7),
+                  fillColor: _isCouponApplied ? Colors.green.withValues(alpha: 0.05) : Colors.white,
                 ),
               ),
             ),
             const SizedBox(width: 10),
-            GestureDetector(
-              onTap: _isCouponApplied ? _removeCoupon : (_isCouponValidating ? null : _validateCoupon),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                decoration: BoxDecoration(
-                  color: _isCouponApplied ? Colors.red.withValues(alpha: 0.08) : Colors.black,
-                  borderRadius: BorderRadius.circular(12),
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isCouponApplied ? _removeCoupon : (_isCouponValidating ? null : _validateCoupon),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isCouponApplied ? Colors.red.withValues(alpha: 0.08) : Colors.black,
+                  foregroundColor: _isCouponApplied ? Colors.red : Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                 ),
                 child: _isCouponValidating
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
@@ -1008,12 +1011,12 @@ class _CheckoutScreenState extends State<CheckoutScreen>
       labelStyle: const TextStyle(fontFamily: 'Cairo', color: Colors.grey, fontSize: 14),
       prefixIcon: Icon(icon, color: Colors.black54, size: 20),
       filled: true,
-      fillColor: const Color(0xFFF7F7F7),
+      fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFEEEEEE))),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.black, width: 1.5)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.red)),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: Colors.grey.shade400, width: 1)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: Colors.grey.shade300, width: 1)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Colors.black, width: 1)),
+      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: const BorderSide(color: Colors.red)),
     );
   }
 }

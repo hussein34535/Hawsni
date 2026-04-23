@@ -131,8 +131,7 @@
                         <input type="checkbox" name="free_delivery_enabled" id="free_delivery_enabled"
                             <%=settings.free_delivery_enabled ? 'checked' : '' %>
                         style="width:20px;height:20px;accent-color:#1DBF73;"
-                        onchange="var l=document.getElementById('freeDeliveryLabel');l.textContent=this.checked?'✅
-                        مفعّل':'❌ معطّل';l.style.color=this.checked?'#1DBF73':'#999';">
+                        onchange="var l=document.getElementById('freeDeliveryLabel');l.textContent=this.checked?'✅ مفعّل':'❌ معطّل';l.style.color=this.checked?'#1DBF73':'#999';">
                         <span id="freeDeliveryLabel"
                             style="font-weight:bold;font-size:1rem;color:<%- settings.free_delivery_enabled ? '#1DBF73' : '#999' %>;">
                             <%=settings.free_delivery_enabled ? '✅ مفعّل' : '❌ معطّل' %>

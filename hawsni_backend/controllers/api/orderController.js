@@ -267,7 +267,7 @@ class OrderController {
     async updateStatusAdmin(req, res) {
         try {
             const { status } = req.body;
-            await supabase.from('orders').update({ status }).eq('id', req.params.id);
+            await OrderService.updateOrderStatus(req.params.id, status);
             res.redirect('/orders');
         } catch (error) {
             console.error('Error updating order status:', error);

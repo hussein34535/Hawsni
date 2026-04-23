@@ -272,6 +272,20 @@ class OrderService {
     }
 
     async updateOrderStatus(id, status) {
+        // Fetch current order to check previous status
+        const { data: currentOrder, error: fetchErr } = await supabase
+            .from('orders')
+            .select('status')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr) throw fetchErr;
+
+        // If changing to Cancelled and it wasn't Cancelled before, restore stock
+        if (status === 'Cancelled' && currentOrder.status !== 'Cancelled') {
+            await this.restoreOrderStock(id);
+        }
+
         const updateData = { status };
         if (status === 'Delivered') {
             updateData.delivered_at = new Date();
@@ -321,15 +335,48 @@ class OrderService {
         return data;
     }
 
-    async cancelOrder(id) {
-        const { data, error } = await supabase
-            .from('orders')
-            .update({ status: 'Cancelled' })
-            .eq('id', id)
-            .select()
-            .single();
+    async restoreOrderStock(orderId) {
+        try {
+            const { data: order } = await supabase
+                .from('orders')
+                .select('*, order_items(*)')
+                .eq('id', orderId)
+                .single();
+                
+            if (!order || !order.order_items) return;
+            
+            for (const item of order.order_items) {
+                const qty = item.quantity || 1;
+                const pid = item.product_id;
+                const size = item.size || null;
+                const color = item.color || null;
+                
+                // 1. Increment overall product stock
+                const { data: pData } = await supabase.from('products').select('stock').eq('id', pid).single();
+                if (pData) {
+                    await supabase.from('products').update({ stock: (parseInt(pData.stock) || 0) + qty }).eq('id', pid);
+                }
+                
+                // 2. Increment variant stock
+                let variantQuery = supabase.from('product_variants').select('id, stock').eq('product_id', pid);
+                if (size) variantQuery = variantQuery.eq('size', size);
+                else variantQuery = variantQuery.is('size', null);
+                
+                if (color) variantQuery = variantQuery.eq('color', color);
+                else variantQuery = variantQuery.is('color', null);
+                
+                const { data: variant } = await variantQuery.maybeSingle();
+                if (variant) {
+                    await supabase.from('product_variants').update({ stock: (parseInt(variant.stock) || 0) + qty }).eq('id', variant.id);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error restoring stock for order:', error);
+        }
+    }
 
-        if (error) throw error;
+    async cancelOrder(id) {
+        await this.updateOrderStatus(id, 'Cancelled');
     }
 
     async linkGuestOrders(userId, email, phone) {

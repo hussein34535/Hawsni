@@ -43,6 +43,8 @@ export default function ChatWidget() {
 
   // Scroll tracking to hide/show FAB (Legendary UX)
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
@@ -54,10 +56,25 @@ export default function ChatWidget() {
       }
       
       setLastScrollY(currentScrollY);
+
+      // Hide automatically after 2 seconds of scroll inactivity
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsVisible(false);
+      }, 2000);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    // Initial hide after 2 seconds
+    timeoutId = setTimeout(() => {
+      setIsVisible(false);
+    }, 2000);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
   }, [lastScrollY]);
 
   // Hide on Checkout/Cart pages
