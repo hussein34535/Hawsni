@@ -61,17 +61,38 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   // Shipping
   Map<String, dynamic>? _shippingSettings;
 
+  List<dynamic> _governorates = [];
+  List<dynamic> _districts = [];
+  String? _selectedGovId;
+  String? _selectedDistrictId;
+
   bool get _isGuest => AuthService.token == null;
 
   @override
   void initState() {
     super.initState();
     _fetchShippingSettings();
+    _fetchGovernorates();
     if (!_isGuest) {
       context.read<AddressBloc>().add(LoadAddresses());
     } else {
       _isAddingAddress = true;
     }
+  }
+
+  Future<void> _fetchGovernorates() async {
+    final govs = await ApiService.getCities();
+    if (mounted) setState(() => _governorates = govs);
+  }
+
+  Future<void> _fetchDistricts(String govId) async {
+    setState(() {
+      _districts = [];
+      _selectedDistrictId = null;
+      _cityController.clear();
+    });
+    final dists = await ApiService.getDistricts(govId);
+    if (mounted) setState(() => _districts = dists);
   }
 
   Future<void> _fetchShippingSettings() async {
@@ -136,28 +157,10 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   // ─── Shipping ──────────────────────────────────────────────────────────────
 
   Map<String, dynamic> _getShippingDetails(String governorate, double subtotal) {
-    if (_shippingSettings == null) return {'cost': 0.0, 'days_min': 3, 'days_max': 7};
-    final freeThreshold = (_shippingSettings!['free_shipping_threshold'] ?? 0).toDouble();
-    if (freeThreshold > 0 && subtotal >= freeThreshold) {
-      return {
-        'cost': 0.0,
-        'days_min': _shippingSettings!['default_days_min'] ?? 3,
-        'days_max': _shippingSettings!['default_days_max'] ?? 7,
-      };
-    }
-    final govSettings = _shippingSettings!['governorate_settings'] as Map<String, dynamic>? ?? {};
-    if (governorate.isNotEmpty && govSettings.containsKey(governorate)) {
-      final custom = govSettings[governorate] as Map<String, dynamic>;
-      return {
-        'cost': (custom['cost'] ?? 0).toDouble(),
-        'days_min': custom['days_min'] ?? 3,
-        'days_max': custom['days_max'] ?? 7,
-      };
-    }
     return {
-      'cost': (_shippingSettings!['delivery_cost'] ?? 0).toDouble(),
-      'days_min': _shippingSettings!['default_days_min'] ?? 3,
-      'days_max': _shippingSettings!['default_days_max'] ?? 7,
+      'cost': 90.0,
+      'days_min': 3,
+      'days_max': 7,
     };
   }
 
@@ -232,6 +235,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
         'phone': _isGuest ? _phoneController.text : (AuthService.userData?['phone'] ?? _phoneController.text),
         'street': _streetController.text,
         'city': _cityController.text,
+        'districtId': _selectedDistrictId,
         'state': _stateController.text,
         'address': '${_streetController.text}, ${_cityController.text}, ${_stateController.text}',
       };
@@ -657,31 +661,58 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   Widget _buildAddressFields({bool showSaveButton = false}) {
     return Column(
       children: [
-        _buildCleanField(
-          controller: _streetController,
-          label: 'الشارع والرقم',
-          icon: Icons.home_outlined,
-        ),
-        const SizedBox(height: 12),
-        _buildCleanField(
-          controller: _cityController,
-          label: 'المدينة / الحي',
-          icon: Icons.location_city_outlined,
-        ),
-        const SizedBox(height: 12),
         // Governorate Dropdown
         DropdownButtonFormField<String>(
-          initialValue: _stateController.text.isNotEmpty && egyptGovernorates.contains(_stateController.text)
-              ? _stateController.text
-              : null,
+          value: _selectedGovId,
           isExpanded: true,
           decoration: _inputDecoration('المحافظة', Icons.map_outlined),
-          items: egyptGovernorates
-              .map((g) => DropdownMenuItem(value: g, child: Text(g, style: const TextStyle(fontFamily: 'Cairo', fontSize: 14))))
-              .toList(),
-          onChanged: (v) => setState(() => _stateController.text = v ?? ''),
+          items: _governorates.isNotEmpty 
+              ? _governorates.map((g) => DropdownMenuItem<String>(value: g['id']?.toString(), child: Text(g['arabicName'] ?? g['name'], style: const TextStyle(fontFamily: 'Cairo', fontSize: 14)))).toList()
+              : egyptGovernorates.map((g) => DropdownMenuItem<String>(value: g, child: Text(g, style: const TextStyle(fontFamily: 'Cairo', fontSize: 14)))).toList(),
+          onChanged: (v) {
+            setState(() {
+              _selectedGovId = v;
+              if (_governorates.isNotEmpty) {
+                 final govMap = _governorates.firstWhere((g) => g['id'].toString() == v, orElse: () => {});
+                 _stateController.text = govMap['arabicName'] ?? v ?? '';
+                 if (v != null) _fetchDistricts(v);
+              } else {
+                 _stateController.text = v ?? '';
+              }
+            });
+          },
           validator: (v) => v == null || v.isEmpty ? 'اختر المحافظة' : null,
           icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
+        ),
+        const SizedBox(height: 12),
+        // District Dropdown
+        if (_districts.isNotEmpty)
+          DropdownButtonFormField<String>(
+            value: _selectedDistrictId,
+            isExpanded: true,
+            decoration: _inputDecoration('المنطقة / المدينة', Icons.location_city_outlined),
+            items: _districts.map((d) => DropdownMenuItem<String>(value: d['id']?.toString(), child: Text(d['arabicName'] ?? d['name'], style: const TextStyle(fontFamily: 'Cairo', fontSize: 14)))).toList(),
+            onChanged: (v) {
+              setState(() {
+                _selectedDistrictId = v;
+                final distMap = _districts.firstWhere((d) => d['id'].toString() == v, orElse: () => {});
+                _cityController.text = distMap['arabicName'] ?? v ?? '';
+              });
+            },
+            validator: (v) => v == null || v.isEmpty ? 'اختر المنطقة / المدينة' : null,
+            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.black54),
+          )
+        else
+          _buildCleanField(
+            controller: _cityController,
+            label: 'المدينة / الحي',
+            icon: Icons.location_city_outlined,
+          ),
+        const SizedBox(height: 12),
+        _buildCleanField(
+          controller: _streetController,
+          label: 'الشارع ورقم المبنى',
+          icon: Icons.home_outlined,
         ),
         if (showSaveButton && !_isGuest) ...[
           const SizedBox(height: 12),

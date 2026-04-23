@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { memo } from 'react';
 
-export default function MeshBackground() {
+const MeshBackground = memo(function MeshBackground() {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-[#fafafa]">
       {/* Mesh Blobs */}
@@ -51,4 +52,6 @@ export default function MeshBackground() {
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] opacity-[0.03]" />
     </div>
   );
-}
+});
+
+export default MeshBackground;

@@ -99,8 +99,31 @@ export default function CheckoutPage() {
   const [phone2, setPhone2] = useState('');
   const [email, setEmail] = useState('');
   const [govId, setGovId] = useState('');
+  const [districtId, setDistrictId] = useState('');
   const [street, setStreet] = useState('');
   const [notes, setNotes] = useState('');
+
+  const [governorates, setGovernorates] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+
+  // Fetch Cities (Governorates)
+  useEffect(() => {
+    checkoutService.getCities().then(res => {
+      if (res.success) setGovernorates(res.cities);
+    }).catch(() => {});
+  }, []);
+
+  // Fetch Districts when Governorate changes
+  useEffect(() => {
+    if (govId) {
+      setDistrictId('');
+      checkoutService.getDistricts(govId).then(res => {
+        if (res.success) setDistricts(res.districts);
+      }).catch(() => {});
+    } else {
+      setDistricts([]);
+    }
+  }, [govId]);
 
   // Coupon
   const [couponCode, setCouponCode] = useState('');
@@ -116,7 +139,8 @@ export default function CheckoutPage() {
   const [shippingFee, setShippingFee] = useState(0);
   const [processing, setProcessing] = useState(false);
 
-  const selectedGov = GOVERNORATES.find(g => g.id === govId);
+  const selectedGov = governorates.find(g => g.id === govId);
+  const selectedDistrict = districts.find(d => d.id === districtId);
 
   // Pricing calculation
   const subtotal = useMemo(() => items.reduce((s, i) => s + i.price * i.quantity, 0), [items]);
@@ -143,17 +167,8 @@ export default function CheckoutPage() {
 
   // Fetch shipping fee
   useEffect(() => {
-    checkoutService.getShippingSettings().then(r => {
-      const cfg = r.settings;
-      if (!cfg) return;
-      const gov = selectedGov?.arabicName || '';
-      const govCfg = cfg.governorate_settings?.[gov];
-      const threshold = cfg.free_shipping_threshold || 0;
-      if (threshold > 0 && subtotal >= threshold) setShippingFee(0);
-      else if (govCfg) setShippingFee(parseFloat(govCfg.cost) || 0);
-      else setShippingFee(parseFloat(cfg.delivery_cost) || 0);
-    }).catch(() => { });
-  }, [govId, subtotal, selectedGov]);
+    setShippingFee(90);
+  }, []);
 
   const handleCoupon = useCallback(async () => {
     if (!couponCode.trim()) return;
@@ -183,6 +198,7 @@ export default function CheckoutPage() {
       if (!name.trim()) return showToast('ادخل اسمك', 'error');
       if (!phone.trim() || phone.length < 10) return showToast('ادخل رقم هاتف صحيح', 'error');
       if (!govId) return showToast('اختر المحافظة', 'error');
+      if (!districtId) return showToast('اختر المنطقة / المدينة', 'error');
       if (!street.trim()) return showToast('ادخل عنوانك', 'error');
     } else {
       if (!selectedAddressId && !govId) return showToast('اختر عنوان الشحن', 'error');
@@ -194,7 +210,13 @@ export default function CheckoutPage() {
     try {
       const shippingAddress = isAuth && selectedAddressId
         ? { ...addresses.find(a => a._id === selectedAddressId), state: selectedGov?.arabicName || '' }
-        : { street, state: selectedGov?.arabicName || '', city: selectedGov?.arabicName || '', address: `${street}, ${selectedGov?.arabicName}` };
+        : { 
+            street, 
+            state: selectedGov?.arabicName || '', 
+            city: selectedDistrict?.arabicName || '', 
+            districtId: districtId,
+            address: `${street}, ${selectedDistrict?.arabicName || ''}, ${selectedGov?.arabicName || ''}` 
+          };
 
       const result = await checkoutService.placeOrder({
         conversionEventId,
@@ -327,11 +349,22 @@ export default function CheckoutPage() {
                     <label className="text-xs font-bold text-gray-500 mb-1.5 block">المحافظة <span className="text-red-400">*</span></label>
                     <Select value={govId} onChange={(e: any) => setGovId(e.target.value)}>
                       <option value="">اختر المحافظة</option>
-                      {GOVERNORATES.map(g => (
+                      {governorates.map(g => (
                         <option key={g.id} value={g.id}>{g.arabicName}</option>
                       ))}
                     </Select>
                   </div>
+                  {districts.length > 0 && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                      <label className="text-xs font-bold text-gray-500 mb-1.5 block">المنطقة / المدينة <span className="text-red-400">*</span></label>
+                      <Select value={districtId} onChange={(e: any) => setDistrictId(e.target.value)}>
+                        <option value="">اختر المنطقة</option>
+                        {districts.map(d => (
+                          <option key={d.id} value={d.id}>{d.arabicName}</option>
+                        ))}
+                      </Select>
+                    </motion.div>
+                  )}
                   <div>
                     <label className="text-xs font-bold text-gray-500 mb-1.5 block">العنوان بالتفصيل <span className="text-red-400">*</span></label>
                     <Input icon={MapPin} placeholder="الشارع، المبنى، رقم الشقة..." value={street} onChange={(e: any) => setStreet(e.target.value)} />

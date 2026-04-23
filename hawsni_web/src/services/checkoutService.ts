@@ -38,6 +38,24 @@ export const checkoutService = {
         }
     },
 
+    getCities: async (): Promise<{ success: boolean; cities: any[] }> => {
+        try {
+            const response = await apiClient.get('/shipping/cities');
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to load cities';
+        }
+    },
+
+    getDistricts: async (cityId: string): Promise<{ success: boolean; districts: any[] }> => {
+        try {
+            const response = await apiClient.get(`/shipping/districts/${cityId}`);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to load districts';
+        }
+    },
+
     placeOrder: async (orderData: OrderData): Promise<{ success: boolean; order: any }> => {
         try {
             const response = await apiClient.post('/orders', orderData);

@@ -432,4 +432,32 @@ class ApiService {
       return null;
     }
   }
+
+  // Get Cities (Governorates)
+  static Future<List<dynamic>> getCities() async {
+    try {
+      final data = await get('/shipping/cities', includeAuth: false);
+      if (data['success'] == true) {
+        return data['cities'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching cities: $e');
+      return [];
+    }
+  }
+
+  // Get Districts (Zones)
+  static Future<List<dynamic>> getDistricts(String cityId) async {
+    try {
+      final data = await get('/shipping/districts/$cityId', includeAuth: false);
+      if (data['success'] == true) {
+        return data['districts'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching districts: $e');
+      return [];
+    }
+  }
 }

@@ -5,8 +5,8 @@ import { usePathname } from 'next/navigation';
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
-  // Conditionally hide padding on checkout and product pages
-  const isMinimalLayout = pathname.includes('/checkout') || pathname.includes('/product/');
+  // Conditionally hide padding on checkout, product, and cart pages
+  const isMinimalLayout = pathname.includes('/checkout') || pathname.includes('/product/') || pathname.includes('/cart');
 
   return (
     <main 
