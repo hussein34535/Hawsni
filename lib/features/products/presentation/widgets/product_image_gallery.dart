@@ -43,7 +43,7 @@ class _ProductImageGalleryState extends State<ProductImageGallery> {
             _openFullScreenGallery(context);
           },
           child: Container(
-            height: 350,
+            height: 480,
             width: double.infinity,
             color: Colors.white,
             child: PageView.builder(

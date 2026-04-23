@@ -18,7 +18,7 @@ export default function CartPage() {
     return (
         <div className="w-full min-h-screen bg-[#FAFAFA]">
             {/* Header */}
-            <div className="sticky top-0 z-30 bg-[#FAFAFA]/80 backdrop-blur-md px-6 py-6 flex items-center justify-between">
+            <div dir={isRTL ? 'rtl' : 'ltr'} className="sticky top-0 z-30 bg-[#FAFAFA]/80 backdrop-blur-md px-6 py-6 flex items-center justify-between">
                 <button
                     onClick={() => router.back()}
                     className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-gray-900 active:scale-95 transition-all"

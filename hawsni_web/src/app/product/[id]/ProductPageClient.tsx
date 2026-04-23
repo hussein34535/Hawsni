@@ -644,7 +644,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
                     <div
                         ref={galleryRef}
-                        className="relative aspect-[4/4] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group"
+                        className="relative aspect-[4/5] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group"
                     >
                         <div
                             ref={sliderRef}
