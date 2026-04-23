@@ -62,10 +62,10 @@ const StepHeader = ({ icon: Icon, step, title }: { icon: any; step: number; titl
 function Input({ icon: Icon, ...props }: any) {
   return (
     <div className="relative group">
-      {Icon && <Icon size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#0E4435] transition-colors pointer-events-none" />}
+      {Icon && <Icon size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors pointer-events-none" />}
       <input
         {...props}
-        className={`w-full h-12 bg-gray-50/80 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 placeholder:text-gray-400 outline-none focus:bg-white focus:border-[#0E4435] focus:ring-2 focus:ring-[#0E4435]/10 transition-all ${Icon ? 'pr-11 pl-4' : 'px-4'}`}
+        className={`w-full h-12 bg-white border border-gray-300 rounded-md text-sm font-semibold text-gray-800 placeholder:text-gray-400 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all ${Icon ? 'pr-11 pl-4' : 'px-4'}`}
       />
     </div>
   );
@@ -74,10 +74,10 @@ function Input({ icon: Icon, ...props }: any) {
 function Select({ children, ...props }: any) {
   return (
     <div className="relative group">
-      <ChevronDown size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#0E4435] transition-colors pointer-events-none" />
+      <ChevronDown size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors pointer-events-none" />
       <select
         {...props}
-        className="w-full h-12 bg-gray-50/80 border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 px-4 pl-10 outline-none focus:bg-white focus:border-[#0E4435] focus:ring-2 focus:ring-[#0E4435]/10 transition-all appearance-none"
+        className="w-full h-12 bg-white border border-gray-300 rounded-md text-sm font-semibold text-gray-800 px-4 pl-10 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all appearance-none"
       >
         {children}
       </select>
@@ -355,7 +355,7 @@ export default function CheckoutPage() {
                     onChange={e => setNotes(e.target.value)}
                     placeholder='مثال: "اتصل بي قبل الوصول"'
                     rows={2}
-                    className="w-full bg-gray-50/80 border border-gray-200 rounded-xl p-3 text-sm font-semibold text-gray-800 outline-none focus:bg-white focus:border-[#0E4435] focus:ring-2 focus:ring-[#0E4435]/10 transition-all placeholder:text-gray-400 resize-none"
+                    className="w-full bg-white border border-gray-300 rounded-md p-3 text-sm font-semibold text-gray-800 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all placeholder:text-gray-400 resize-none"
                   />
                 </div>
 
@@ -371,12 +371,12 @@ export default function CheckoutPage() {
                       value={couponCode}
                       onChange={e => setCouponCode(e.target.value.toUpperCase())}
                       disabled={couponApplied}
-                      className="flex-1 h-12 bg-gray-50/80 border border-gray-200 rounded-xl px-4 text-sm font-bold text-gray-800 outline-none focus:bg-white focus:border-[#0E4435] transition-all placeholder:text-gray-400 disabled:opacity-50"
+                      className="flex-1 h-12 bg-white border border-gray-300 rounded-md px-4 text-sm font-bold text-gray-800 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all placeholder:text-gray-400 disabled:opacity-50"
                     />
                     <button
                       onClick={handleCoupon}
                       disabled={couponApplied || !couponCode.trim()}
-                      className="h-12 px-6 bg-gray-900 text-white rounded-xl font-black text-sm active:scale-95 transition-all hover:bg-black disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="h-12 px-6 bg-black text-white rounded-md font-black text-sm active:scale-95 transition-all hover:bg-gray-900 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       {couponApplied ? '✓ تم' : 'تطبيق'}
                     </button>

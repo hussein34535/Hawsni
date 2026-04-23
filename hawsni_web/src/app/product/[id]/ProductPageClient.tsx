@@ -213,11 +213,11 @@ const FAQAccordion = ({ isRTL }: { isRTL: boolean }) => {
         },
         {
             question: isRTL ? 'هل يمكنني إرجاع أو استبدال المنتج؟' : 'Can I return or exchange the product?',
-            answer: isRTL ? 'نعم، نوفر خدمة الاسترجاع والاستبدال خلال 14 يوماً من استلام الطلب بشرط بقاء المنتج في حالته الأصلية.' : 'Yes, we offer returns and exchanges within 14 days of receiving the order, provided the product is in its original condition.'
+            answer: isRTL ? 'نعم، نوفر خدمة الاسترجاع والاستبدال خلال 14 يوماً من استلام الطلب بشرط بقاء المنتج في حالته الأصلية مع دفع مصاريف الاسترجاع او الاستبدال.' : 'Yes, we offer returns and exchanges within 14 days of receiving the order, provided the product is in its original condition (shipping fees apply).'
         },
         {
             question: isRTL ? 'هل يوجد معاينة قبل الاستلام؟' : 'Can I inspect the order upon delivery?',
-            answer: isRTL ? 'نعم، متاح معاينة للمنتج للتأكد من جودته ومطابقته لطلبك. إذا كان هناك أي خطأ أو عيب، لا تتحملين أي رسوم. أما لأي سبب آخر، يتم دفع 50 جنيهاً مصاريف شحن لشركة التوصيل.' : 'Yes, you can inspect the product upon delivery. If there are any defects or errors, you pay nothing. For any other reason, a 50 EGP shipping fee applies.'
+            answer: isRTL ? 'نعم، متاح معاينة للمنتج للتأكد من جودته ومطابقته لطلبك. إذا كان هناك أي خطأ أو عيب، لا تتحملين أي رسوم. أما لأي سبب آخر، يتم دفع مصاريف الشحن لشركة التوصيل.' : 'Yes, you can inspect the product upon delivery. If there are any defects or errors, you pay nothing. For any other reason, a shipping fee applies.'
         }
     ];
 
