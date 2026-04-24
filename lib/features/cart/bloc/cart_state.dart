@@ -1,0 +1,117 @@
+import 'package:equatable/equatable.dart';
+
+class CartItem extends Equatable {
+  final String id;
+  final String name;
+  final String price;
+  final String imageUrl;
+  final int quantity;
+  final String? size;
+  final String? color;
+  final String? productId;
+  final String? blurHash;
+  final List<dynamic>? accessories;
+
+  const CartItem({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+    required this.quantity,
+    this.size,
+    this.color,
+    this.productId,
+    this.blurHash,
+    this.accessories,
+  });
+
+  CartItem copyWith({
+    String? id,
+    String? name,
+    String? price,
+    String? imageUrl,
+    int? quantity,
+    String? size,
+    String? color,
+    String? productId,
+    String? blurHash,
+    List<dynamic>? accessories,
+  }) {
+    return CartItem(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      price: price ?? this.price,
+      imageUrl: imageUrl ?? this.imageUrl,
+      quantity: quantity ?? this.quantity,
+      size: size ?? this.size,
+      color: color ?? this.color,
+      productId: productId ?? this.productId,
+      blurHash: blurHash ?? this.blurHash,
+      accessories: accessories ?? this.accessories,
+    );
+  }
+
+  @override
+  List<Object?> get props =>
+      [id, name, price, imageUrl, quantity, size, color, productId, blurHash, accessories];
+
+  // For Local Storage serialization
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'imageUrl': imageUrl,
+      'quantity': quantity,
+      'size': size,
+      'color': color,
+      'productId': productId,
+      'blurHash': blurHash,
+      'accessories': accessories,
+    };
+  }
+
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      name: json['name'] ?? '',
+      price: json['price'] ?? '0',
+      imageUrl: json['imageUrl'] ?? '',
+      quantity: json['quantity'] ?? 1,
+      size: json['size'],
+      color: json['color'],
+      productId: json['productId'],
+      blurHash: json['blurHash'] ?? json['blur_hash'],
+      accessories: json['accessories'],
+    );
+  }
+}
+
+abstract class CartState extends Equatable {
+  const CartState();
+  @override
+  List<Object> get props => [];
+}
+
+class CartLoading extends CartState {}
+
+class CartLoaded extends CartState {
+  final List<CartItem> items;
+  const CartLoaded({this.items = const []});
+  @override
+  List<Object> get props => [items];
+}
+
+class CartError extends CartState {
+  final String message;
+  const CartError(this.message);
+  @override
+  List<Object> get props => [message];
+}
+
+class CartAuthError extends CartState {
+  final String message;
+  const CartAuthError(this.message);
+  @override
+  List<Object> get props => [message];
+}

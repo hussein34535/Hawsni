@@ -1,0 +1,167 @@
+const { supabaseAdmin: supabase } = require('../config/supabase');
+
+class ProductService {
+    async getAllProducts(filters = {}, sort = null, page = 1, limit = 20) {
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 20;
+        const from = (pageNum - 1) * limitNum;
+        const to = from + limitNum - 1;
+
+        let query = supabase
+            .from('products')
+            .select('*, product_category_links(category_id, categories(name))', { count: 'exact' })
+            .eq('is_active', true);
+
+        if (filters.category) {
+            const { data: linkedProducts, error: linkError } = await supabase
+                .from('product_category_links')
+                .select('product_id')
+                .eq('category_id', filters.category);
+
+            if (linkError) throw linkError;
+            const productIds = linkedProducts.map(lp => lp.product_id);
+            query = query.in('id', productIds);
+        }
+
+        if (filters.search) {
+            query = query.ilike('name', `%${filters.search}%`);
+        }
+
+        if (filters.minPrice) {
+            query = query.gte('price', parseFloat(filters.minPrice));
+        }
+
+        if (filters.maxPrice) {
+            query = query.lte('price', parseFloat(filters.maxPrice));
+        }
+
+        if (filters.is_featured !== undefined) {
+            query = query.eq('is_featured', filters.is_featured === 'true' || filters.is_featured === true);
+        }
+
+        if (sort === 'price_asc') {
+            query = query.order('price', { ascending: true });
+        } else if (sort === 'price_desc') {
+            query = query.order('price', { ascending: false });
+        } else {
+            query = query.order('created_at', { ascending: false });
+        }
+
+        // Apply range for pagination
+        const { data, error, count } = await query.range(from, to);
+        
+        if (error) throw error;
+        return { products: data, total: count, page: pageNum, limit: limitNum };
+    }
+
+    async getFeaturedProducts(limit = 10) {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*, product_category_links(category_id, categories(name))')
+            .eq('is_featured', true)
+            .eq('is_active', true)
+            .limit(limit);
+
+        if (error) throw error;
+        return data;
+    }
+
+    async getProductById(id) {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*, product_category_links(category_id, categories(name)), product_variants(*)')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async createProduct(productData) {
+        const { category_ids, ...restOfData } = productData;
+
+        // Ensure category_id is synced for backward compatibility
+        if (category_ids && Array.isArray(category_ids) && category_ids.length > 0) {
+            restOfData.category_id = category_ids[0];
+        }
+
+        const { data: product, error } = await supabase
+            .from('products')
+            .insert(restOfData)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        if (category_ids && Array.isArray(category_ids) && category_ids.length > 0) {
+            const links = category_ids.map(catId => ({
+                product_id: product.id,
+                category_id: catId
+            }));
+            const { error: linkError } = await supabase
+                .from('product_category_links')
+                .insert(links);
+
+            if (linkError) throw linkError;
+        }
+
+        return product;
+    }
+
+    async updateProduct(id, productData) {
+        const { category_ids, ...restOfData } = productData;
+
+        // Ensure category_id is synced for backward compatibility
+        if (category_ids && Array.isArray(category_ids)) {
+            restOfData.category_id = category_ids[0] || null;
+        }
+
+        const { data: product, error } = await supabase
+            .from('products')
+            .update(restOfData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        if (category_ids && Array.isArray(category_ids)) {
+            // Remove old links
+            const { error: deleteError } = await supabase
+                .from('product_category_links')
+                .delete()
+                .eq('product_id', id);
+
+            if (deleteError) throw deleteError;
+
+            // Add new links
+            if (category_ids.length > 0) {
+                const links = category_ids.map(catId => ({
+                    product_id: id,
+                    category_id: catId
+                }));
+                const { error: linkError } = await supabase
+                    .from('product_category_links')
+                    .insert(links);
+
+                if (linkError) throw linkError;
+            }
+        }
+
+        return product;
+    }
+
+    async deleteProduct(id) {
+        const { data, error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+}
+
+module.exports = new ProductService();

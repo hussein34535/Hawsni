@@ -1,0 +1,115 @@
+<%- include('partials/header', { title: 'الرئيسية' , pageTitle: 'الرئيسية' , page: 'dashboard' }) %>
+
+    <!-- Quick Access Grid -->
+    <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--dark); margin-bottom: 1rem;">
+            <i class="fas fa-th-large" style="color: var(--primary-color); margin-left: 8px;"></i>
+            الوصول السريع
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <a href="/products" style="text-decoration: none;">
+                <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.25rem 0.75rem; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: var(--primary-light); color: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.3rem;">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div style="font-weight: 700; color: var(--dark-gray); font-size: 0.85rem;">المنتجات</div>
+                </div>
+            </a>
+            <a href="/orders" style="text-decoration: none;">
+                <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.25rem 0.75rem; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: #fef3c7; color: var(--warning); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.3rem;">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div style="font-weight: 700; color: var(--dark-gray); font-size: 0.85rem;">الطلبات</div>
+                </div>
+            </a>
+            <a href="/categories" style="text-decoration: none;">
+                <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.25rem 0.75rem; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: #d1fae5; color: var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.3rem;">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div style="font-weight: 700; color: var(--dark-gray); font-size: 0.85rem;">التصنيفات</div>
+                </div>
+            </a>
+            <a href="/users" style="text-decoration: none;">
+                <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.25rem 0.75rem; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: #dbeafe; color: var(--info); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.3rem;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div style="font-weight: 700; color: var(--dark-gray); font-size: 0.85rem;">المستخدمين</div>
+                </div>
+            </a>
+            <a href="/banners" style="text-decoration: none;">
+                <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.25rem 0.75rem; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: #fee2e2; color: var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.3rem;">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <div style="font-weight: 700; color: var(--dark-gray); font-size: 0.85rem;">البنرات</div>
+                </div>
+            </a>
+            <a href="/settings" style="text-decoration: none;">
+                <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.25rem 0.75rem; text-align: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="width: 48px; height: 48px; border-radius: 14px; background: #f1f5f9; color: var(--medium-gray); display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.3rem;">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div style="font-weight: 700; color: var(--dark-gray); font-size: 0.85rem;">الإعدادات</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--dark); margin-bottom: 1rem;">
+            <i class="fas fa-chart-bar" style="color: var(--success); margin-left: 8px;"></i>
+            نظرة سريعة
+        </h2>
+        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr) !important;">
+            <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 900; color: var(--dark);"><%= productsCount || 0 %></div>
+                        <div style="font-size: 0.8rem; font-weight: 600; color: var(--medium-gray);">منتج</div>
+                    </div>
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--primary-light); color: var(--primary-color); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fas fa-box"></i>
+                    </div>
+                </div>
+            </div>
+            <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 900; color: var(--dark);"><%= ordersCount || 0 %></div>
+                        <div style="font-size: 0.8rem; font-weight: 600; color: var(--medium-gray);">طلب</div>
+                    </div>
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #fef3c7; color: var(--warning); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                </div>
+            </div>
+            <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 900; color: var(--dark);"><%= categoriesCount || 0 %></div>
+                        <div style="font-size: 0.8rem; font-weight: 600; color: var(--medium-gray);">تصنيف</div>
+                    </div>
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #d1fae5; color: var(--success); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                </div>
+            </div>
+            <div style="background: var(--white); border: 1px solid var(--border-color); border-radius: 14px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 900; color: var(--dark);"><%= usersCount || 0 %></div>
+                        <div style="font-size: 0.8rem; font-weight: 600; color: var(--medium-gray);">مستخدم</div>
+                    </div>
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #dbeafe; color: var(--info); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<%- include('partials/footer') %>

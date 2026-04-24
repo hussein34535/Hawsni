@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html dir="ltr">
+
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Hawsni - Premium Fashion & Lifestyle Shopping">
+  <meta name="keywords" content="fashion, shopping, clothes, style, hawsni, egypt, ecommerce">
+  <meta name="author" content="Hawsni">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hwasi.com/">
+  <meta property="og:title" content="Hawsni - Your Style, Your Way">
+  <meta property="og:description"
+    content="Discover premium fashion and lifestyle products at Hawsni. Shop the latest trends with fast delivery.">
+  <meta property="og:image" content="icons/Icon-192.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://hwasi.com/">
+  <meta property="twitter:title" content="Hawsni - Your Style, Your Way">
+  <meta property="twitter:description"
+    content="Discover premium fashion and lifestyle products at Hawsni. Shop the latest trends with fast delivery.">
+  <meta property="twitter:image" content="icons/Icon-192.png">
+
+  <title>Hawsni</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    // ============================================================
+    // 1. SERVICE WORKER KILLER - Block SW registration completely
+    // ============================================================
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function (registrations) {
+        for (let reg of registrations) { reg.unregister(); }
+      });
+      const _swMock = function (script, options) {
+        const scriptStr = (script instanceof URL) ? script.href : String(script);
+        const reg = {
+          active: { scriptURL: scriptStr, state: 'activated', addEventListener: () => { }, removeEventListener: () => { }, postMessage: () => { } },
+          installing: null, waiting: null, scope: '/',
+          update: () => Promise.resolve(reg),
+          unregister: () => Promise.resolve(true),
+          showNotification: () => Promise.resolve(),
+          getNotifications: () => Promise.resolve([]),
+          addEventListener: () => { }, removeEventListener: () => { }, dispatchEvent: () => true
+        };
+        return Promise.resolve(reg);
+      };
+      navigator.serviceWorker.register = _swMock;
+      navigator.serviceWorker.getRegistration = () => Promise.resolve(undefined);
+      Object.defineProperty(navigator.serviceWorker, 'ready', { get: () => new Promise(() => { }), configurable: true });
+    }
+    if ('caches' in window) {
+      caches.keys().then(names => names.forEach(n => caches.delete(n)));
+    }
+
+    // ============================================================
+    // 2. CANVASKIT ENFORCER
+    //    Intercepts _flutter.loader before flutter_bootstrap.js
+    //    sets it, wrapping the load() call to inject canvaskit.
+    //    This prevents skwasm from being selected even if the
+    //    browser supports WasmGC.
+    // ============================================================
+    window._flutter = window._flutter || {};
+    let _flutterLoaderRef = null;
+    Object.defineProperty(window._flutter, 'loader', {
+      get: function () { return _flutterLoaderRef; },
+      set: function (loader) {
+        const _origLoad = loader.load.bind(loader);
+        loader.load = function (options) {
+          console.log('✅ Forcing CanvasKit renderer (skwasm disabled)');
+          const patched = Object.assign({}, options || {}, {
+            config: Object.assign({}, (options || {}).config || {}, {
+              renderer: 'canvaskit',
+              useColorEmoji: false,
+            })
+          });
+          return _origLoad(patched);
+        };
+        _flutterLoaderRef = loader;
+      },
+      configurable: true
+    });
+  </script>
+
+  <style>
+    @font-face {
+      font-family: 'Cairo';
+      src: url('assets/assets/fonts/Cairo.ttf') format('truetype');
+    }
+
+    /* Global Reset */
+    html,
+    body {
+      background-color: #FFFFFF;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100dvh;
+      width: 100%;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    /* Premium Splash Screen Container */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+      background-color: #FFFFFF;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    /* Animated Logo */
+    .splash-logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 40px;
+      object-fit: contain;
+      animation: logo-spin 3s infinite ease-in-out;
+    }
+
+    @keyframes logo-spin {
+      0% {
+        transform: rotate(0deg) scale(1);
+      }
+
+      50% {
+        transform: rotate(180deg) scale(1.1);
+      }
+
+      100% {
+        transform: rotate(360deg) scale(1);
+      }
+    }
+
+    /* HWASI Text */
+    .brand-name {
+      font-size: 56px;
+      font-weight: 800;
+      color: #1B4D3E;
+      /* Hawsni Green */
+      letter-spacing: 6px;
+      margin: 0;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fade-in-up 0.8s forwards ease-out 0.2s;
+    }
+
+    /* Subtitle */
+    .tagline {
+      font-size: 18px;
+      color: #757575;
+      letter-spacing: 1.5px;
+      margin-top: 12px;
+      opacity: 0;
+      animation: fade-in-up 0.8s forwards ease-out 0.5s;
+    }
+
+    @keyframes fade-in-up {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Smooth transition for the loader removal */
+    .loading-container.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+
+  <!-- Performance Optimizations -->
+
+
+  <!-- Preload core Flutter Web Engine -->
+  <link rel="preload" href="main.dart.js" as="script">
+  <link rel="preload" href="flutter_bootstrap.js" as="script">
+
+
+
+  <!-- Preload the Logo image used in splash -->
+  <link rel="preload" href="assets/assets/images/logo.png" as="image">
+
+
+</head>
+
+<body>
+  <!-- Custom Splash Screen -->
+  <div id="loading-indicator" class="loading-container">
+    <img src="assets/assets/images/logo.png" alt="HWASI Logo" class="splash-logo">
+    <h1 class="brand-name">HWASI</h1>
+    <p class="tagline">Your Style, Your Way</p>
+  </div>
+
+  <!-- The Flutter bootstrapping script - runs its own loader.load() inside -->
+  <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    // Remove loading indicator when Flutter renders the first frame
+    window.addEventListener('flutter-first-frame', function () {
+      const loader = document.getElementById('loading-indicator');
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 400);
+      }
+    });
+  </script>
+</body>
+
+</html>

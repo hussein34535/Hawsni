@@ -1,0 +1,2497 @@
+
+Model
+ThinkingThoughts
+Expand to view model thoughts
+
+chevron_right
+عظيم! سنبدأ بالمسار الأول: تحسين واجهة المستخدم (UI Upgrade).
+سنجعل الشاشة الرئيسية (Home Screen) تبدو احترافية بإضافة "شريط عروض متحرك" (Carousel Slider) في الأعلى بدلاً من الصورة الثابتة المملة، وسنستخدم مكتبة لعرض الصور بشكل ذكي (Cashing).
+الخطوة 1: إضافة المكتبات اللازمة
+أوقف التطبيق (Stop) في التيرمينال، ونفذ هذا الأمر لإضافة مكتبات السلايدر والصور:
+code
+Powershell
+flutter pub add carousel_slider cached_network_image
+الخطوة 2: إنشاء ويدجت السلايدر (PromoSlider)
+سنقوم بإنشاء ملف جديد لتنظيم الكود.
+أنشئ ملفاً جديداً في المسار:
+lib/features/home/presentation/widgets/promo_slider.dart
+ضع فيه هذا الكود:
+code
+Dart
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
+
+class PromoSlider extends StatefulWidget {
+  const PromoSlider({super.key});
+
+  @override
+  State<PromoSlider> createState() => _PromoSliderState();
+}
+
+class _PromoSliderState extends State<PromoSlider> {
+  int _currentIndex = 0;
+
+  // بيانات وهمية للعروض (لاحقاً سنجلبها من الباك اند)
+  final List<Map<String, String>> _banners = [
+    {
+      "image": "https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+      "title": "New Collection",
+      "subtitle": "Discount 50% for the first transaction"
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+      "title": "Summer Sale",
+      "subtitle": "Up to 70% OFF on selected items"
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80",
+      "title": "Black Friday",
+      "subtitle": "Special deals for limited time"
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        CarouselSlider(
+          options: CarouselOptions(
+            height: 180.0,
+            autoPlay: true,
+            enlargeCenterPage: true,
+            aspectRatio: 16 / 9,
+            autoPlayCurve: Curves.fastOutSlowIn,
+            enableInfiniteScroll: true,
+            autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            viewportFraction: 0.9,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+          items: _banners.map((banner) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      children: [
+                        // الخلفية (الصورة)
+                        CachedNetworkImage(
+                          imageUrl: banner['image']!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          placeholder: (context, url) => const SkeletonLoader(height: 180),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.error),
+                          ),
+                        ),
+                        // طبقة سوداء خفيفة لقراءة النص
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // النصوص
+                        Positioned(
+                          bottom: 20,
+                          left: 20,
+                          right: 20,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                banner['title']!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                banner['subtitle']!,
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 12),
+        // المؤشرات (Dots)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: _banners.asMap().entries.map((entry) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: _currentIndex == entry.key ? 20.0 : 8.0,
+              height: 8.0,
+              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.blue[700])!
+                    .withOpacity(_currentIndex == entry.key ? 0.9 : 0.2),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+الخطوة 3: تحديث الصفحة الرئيسية
+الآن سنقوم بإزالة الـ "Hero Banner" القديم الثابت ونضع مكانه الـ PromoSlider الجديد.
+اذهب للملف: lib/features/home/presentation/screens/home_screen.dart
+عدل دالة build لتصبح هكذا:
+(لا تنس استيراد ملف الـ PromoSlider في الأعلى)
+code
+Dart
+import 'package:hwasi_app/features/home/presentation/widgets/promo_slider.dart'; // <--- استيراد مهم
+
+// ... داخل الكلاس HomeScreen ...
+
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Refresh logic would go here
+          setState(() {}); // Simple refresh triggering rebuild
+        },
+        child: ListView(
+          children: [
+            const SizedBox(height: 16),
+            
+            // ✅ تم استبدال البانر القديم بهذا السلايدر الجديد
+            const PromoSlider(),
+
+            // Categories section
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0), // زيادة المسافة قليلاً
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                   Text(
+                    'Categories',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const CategoryList(),
+
+            // Featured Products section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Featured Products',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                       // Navigate to all products
+                    },
+                    child: const Text('See All'),
+                  ),
+                ],
+              ),
+            ),
+            const ProductGrid(),
+            
+            const SizedBox(height: 20), // مسافة في الأسفل
+          ],
+        ),
+      ),
+ماذا تفعل الآن؟
+نفذ flutter pub get في التيرمينال.
+أعد تشغيل التطبيق (يفضل إغلاقه وتشغيله من جديد flutter run لأننا أضفنا مكتبات جديدة).
+شاهد الشاشة الرئيسية الجديدة وأخبرني رأيك! 😎
+الخطوة القادمة ستكون: حل مشكلة رفع الصور في الباك اند (Supabase Storage).
+Model
+ThinkingThoughts
+Expand to view model thoughts
+
+chevron_right
+تمام، لنكمل الرحلة! 🚀
+أنت الآن تملك واجهة جميلة (Carousel)، لكن "القلب" (الباك اند) ما زال يحفظ الصور "على جهازه الشخصي" (Local Storage). هذا يعني لو رفعت السيرفر غداً، ستختفي صور المنتجات.
+سننتقل الآن لـ المسار الثالث: تخزين الصور السحابي (Supabase Storage).
+هذه الخطوة ستجعل تطبيقك احترافياً 100%، حيث يتم رفع الصور إلى سحابة Supabase، ويتم حفظ "رابط الصورة" فقط في قاعدة البيانات.
+الخطوة 1: إعداد الـ Bucket في Supabase 🗄️
+بما أنني لا أستطيع الدخول لحسابك، يجب عليك تنفيذ هذه الخطوة يدوياً (سهلة جداً):
+افتح لوحة تحكم مشروعك في Supabase.
+من القائمة الجانبية اختر Storage (أيقونة مجلد).
+اضغط New Bucket.
+الاسم: images.
+مهم جداً: فعل خيار Public Bucket (لكي تظهر الصور في التطبيق بدون توكن معقد).
+اضغط Save.
+الخطوة 2: تعديل upload.js لاستخدام الذاكرة 🧠
+حالياً multer يحفظ الملفات على القرص (diskStorage). سنغيره ليحفظها في الذاكرة المؤقتة (memoryStorage) لكي نتمكن من إرسالها لـ Supabase.
+اذهب للملف: hwasi_backend/middleware/upload.js
+استبدل محتواه بالكامل بهذا الكود:
+code
+JavaScript
+const multer = require('multer');
+const path = require('path');
+
+// استخدام الذاكرة بدلاً من القرص (لأننا سنرفع الملفات لـ Supabase فوراً)
+const storage = multer.memoryStorage();
+
+// فلتر للتحقق من نوع الملف (صور فقط)
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif|webp|svg/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('الصور فقط مسموح بها! (Only images are allowed)'));
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max size
+  fileFilter: fileFilter
+});
+
+module.exports = upload;
+الخطوة 3: إنشاء دالة رفع الصور لـ Supabase ☁️
+سننشئ ملفاً مساعداً (Helper) يقوم بمهمة الرفع وإرجاع الرابط العام للصورة.
+أنشئ مجلداً جديداً داخل hwasi_backend اسمه utils.
+داخل utils، أنشئ ملفاً اسمه fileUpload.js وضع فيه هذا الكود:
+code
+JavaScript
+const supabase = require('../config/supabase');
+const path = require('path');
+
+/**
+ * رفع ملف إلى Supabase Storage
+ * @param {Object} file - ملف Multer
+ * @param {String} folder - اسم المجلد داخل الـ Bucket (products/categories)
+ * @returns {String} - الرابط العام للصورة
+ */
+const uploadToSupabase = async (file, folder = 'products') => {
+  try {
+    // إنشاء اسم فريد للملف
+    const timestamp = Date.now();
+    const ext = path.extname(file.originalname);
+    const filename = `${folder}/${timestamp}-${Math.round(Math.random() * 1E9)}${ext}`;
+
+    // رفع الملف (Buffer) إلى Supabase
+    const { data, error } = await supabase.storage
+      .from('images') // تأكد أن اسم الـ bucket هو images كما أنشأته
+      .upload(filename, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false
+      });
+
+    if (error) {
+      throw new Error(`Supabase Upload Error: ${error.message}`);
+    }
+
+    // الحصول على الرابط العام
+    const { data: publicUrlData } = supabase.storage
+      .from('images')
+      .getPublicUrl(filename);
+
+    return publicUrlData.publicUrl;
+
+  } catch (err) {
+    console.error('Upload function error:', err);
+    throw err;
+  }
+};
+
+module.exports = uploadToSupabase;
+الخطوة 4: تحديث إضافة المنتجات (products.js) 🛠️
+الآن سنعدل كود إضافة المنتج ليستخدم الدالة الجديدة بدلاً من المسار المحلي.
+اذهب للملف: hwasi_backend/routes/products.js
+1. استورد الدالة في الأعلى:
+code
+JavaScript
+const uploadToSupabase = require('../utils/fileUpload');
+2. عدل دالة POST / (إضافة منتج) لتصبح كالتالي:
+(ابحث عن router.post('/', ...) واستبدلها)
+code
+JavaScript
+// @route   POST /api/products
+// @desc    Create product (Admin only)
+router.post('/', upload.array('images', 5), async (req, res) => { // لاحظ استخدام middleware upload هنا
+  try {
+    let imageUrls = [];
+
+    // رفع الصور إن وجدت
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(file => uploadToSupabase(file, 'products'));
+      imageUrls = await Promise.all(uploadPromises);
+    }
+
+    // معالجة المقاسات والألوان
+    let sizes = [];
+    let colors = [];
+    
+    if (req.body.sizes) {
+      sizes = Array.isArray(req.body.sizes) ? req.body.sizes : req.body.sizes.split(',').map(s => s.trim());
+    }
+    
+    if (req.body.colors) {
+      colors = Array.isArray(req.body.colors) ? req.body.colors : req.body.colors.split(',').map(c => c.trim());
+    }
+    
+    const productData = {
+      name: req.body.name,
+      description: req.body.description,
+      price: parseFloat(req.body.price),
+      discount: parseInt(req.body.discount) || 0,
+      category_id: req.body.category_id || null,
+      stock: parseInt(req.body.stock) || 0,
+      is_featured: req.body.is_featured === 'on' || req.body.is_featured === 'true' || req.body.is_featured === true,
+      sizes: sizes,
+      colors: colors,
+      images: imageUrls // الآن هذه روابط حقيقية من Supabase
+    };
+    
+    const { data: product, error } = await supabase
+      .from('products')
+      .insert(productData)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    res.status(201).json({ success: true, product });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+ملاحظة: يجب عليك التأكد من إضافة const upload = require('../middleware/upload'); في أعلى ملف products.js إذا لم تكن موجودة، أو تأكد من تمريرها في ملف server.js إذا كنت تستخدمها هناك (لكن الأفضل استدعاؤها داخل ملف الراوت نفسه).
+الخطوة 5: التجربة (Test) 🧪
+تأكد أن السيرفر يعمل (node server.js).
+الآن عندما تضيف منتجاً جديداً (عبر Postman أو عبر لوحة تحكم الويب الخاصة بك /products/new)، سيتم رفع الصور إلى Supabase.
+رابط الصورة سيكون شيئاً مثل:
+https://PROJECT_ID.supabase.co/storage/v1/object/public/images/products/173245...jpg
+بدلاً من uploads/product-123.jpg.
+النتيجة: الآن تطبيق Flutter سيعرض الصور بنجاح سواء كنت على المحاكي أو الموبايل الحقيقي، لأن الرابط "عالمي" (Public URL).
+هل تريد أن ننتقل للمسار الثاني (تفعيل البحث والفلترة) أم تريد تعديل كود إضافة التصنيفات (categories.js) أيضاً ليدعم الرفع السحابي؟ (أنصح بعمل التصنيفات أيضاً لتنتهي من موضوع الصور تماماً).
+Model
+ThinkingThoughts
+Expand to view model thoughts
+
+chevron_right
+تمام، لنكمل عملية التحول إلى السحابة ☁️.
+لقد قمنا بتحديث المنتجات لرفع الصور إلى Supabase. الآن سنفعل نفس الشيء مع التصنيفات (Categories) ليكون التطبيق متسقاً بالكامل.
+سنقوم بتحديث ملفين:
+hwasi_backend/routes/categories.js: الخاص بـ API التطبيق.
+hwasi_backend/server.js: الخاص بلوحة تحكم الأدمن (الويب)، لأنك غالباً ستضيف التصنيفات من هناك.
+الخطوة 1: تحديث API التصنيفات (routes/categories.js)
+اذهب للملف: hwasi_backend/routes/categories.js
+استبدل الكود بداخله بهذا الكود المحدث الذي يدعم رفع الصور:
+code
+JavaScript
+const express = require('express');
+const router = express.Router();
+const supabase = require('../config/supabase');
+const upload = require('../middleware/upload'); // استيراد الميدلوير
+const uploadToSupabase = require('../utils/fileUpload'); // استيراد دالة الرفع
+
+// @route   GET /api/categories
+router.get('/', async (req, res) => {
+  try {
+    const { data: categories, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('sort_order', { ascending: true });
+    
+    if (error) throw error;
+    
+    res.json({
+      success: true,
+      count: categories.length,
+      categories
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   POST /api/categories
+// @desc    Create category (Admin only)
+router.post('/', upload.single('image'), async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Category name is required' });
+    }
+    
+    // 1. رفع الصورة إن وجدت
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = await uploadToSupabase(req.file, 'categories');
+    }
+
+    // 2. تحديد الترتيب
+    const { data: maxOrderData } = await supabase
+      .from('categories')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    const maxOrder = maxOrderData?.sort_order || 0;
+    
+    // 3. الحفظ في قاعدة البيانات
+    const { data: category, error } = await supabase
+      .from('categories')
+      .insert({ 
+        name, 
+        description: description || '',
+        image: imageUrl, // رابط Supabase
+        sort_order: maxOrder + 1
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    res.status(201).json({ success: true, category });
+  } catch (error) {
+    console.error('Error creating category:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   PUT /api/categories/:id
+router.put('/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { name, description, is_active } = req.body;
+    
+    // تجهيز البيانات للتحديث
+    const updateData = {
+      name,
+      description: description || '',
+      is_active: is_active !== undefined ? is_active : true
+    };
+
+    // تحديث الصورة فقط لو تم رفع ملف جديد
+    if (req.file) {
+      updateData.image = await uploadToSupabase(req.file, 'categories');
+    }
+    
+    const { data: category, error } = await supabase
+      .from('categories')
+      .update(updateData)
+      .eq('id', req.params.id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    res.json({ success: true, category });
+  } catch (error) {
+    console.error('Error updating category:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   DELETE /api/categories/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('categories')
+      .delete()
+      .eq('id', req.params.id);
+    
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Category deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+module.exports = router;
+الخطوة 2: تحديث server.js (لوحة تحكم الأدمن)
+بما أنك تستخدم server.js لعرض صفحات الويب (EJS) للإدارة، يجب تحديث الكود هناك أيضاً لرفع الصور لسوبابيس بدلاً من السيرفر المحلي.
+اذهب للملف: hwasi_backend/server.js
+1. أضف استيراد الدالة في أعلى الملف (مع باقي الـ requires):
+code
+JavaScript
+const uploadToSupabase = require('./utils/fileUpload');
+2. ابحث عن: app.post('/categories', ...) واستبدلها بالتالي:
+code
+JavaScript
+app.post('/categories', upload.single('image'), async (req, res) => {
+  try {
+    const { name, description } = req.body;
+    
+    if (!name) return res.status(400).send('اسم التصنيف مطلوب');
+    
+    // الحصول على الترتيب
+    const { data: maxOrderData } = await supabase
+      .from('categories')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    
+    const maxOrder = maxOrderData?.sort_order || 0;
+    
+    // رفع الصورة لـ Supabase
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = await uploadToSupabase(req.file, 'categories');
+    }
+    
+    const { error } = await supabase.from('categories').insert({ 
+      name, 
+      description: description || '',
+      image: imageUrl, // الرابط السحابي
+      sort_order: maxOrder + 1
+    });
+    
+    if (error) throw error;
+    
+    res.redirect('/categories');
+  } catch (err) {
+    console.error('Server error:', err);
+    res.status(500).send(`خطأ في السيرفر: ${err.message}`);
+  }
+});
+3. ابحث عن: app.post('/categories/:id', ...) (تحديث التصنيف) واستبدلها بالتالي:
+code
+JavaScript
+app.post('/categories/:id', upload.single('image'), async (req, res) => {
+  try {
+    const { name, description, is_active } = req.body;
+    
+    const updateData = {
+      name,
+      description: description || '',
+      is_active: is_active === 'on' || is_active === 'true'
+    };
+    
+    // رفع الصورة الجديدة لـ Supabase
+    if (req.file) {
+      updateData.image = await uploadToSupabase(req.file, 'categories');
+    }
+    
+    const { error } = await supabase.from('categories').update(updateData).eq('id', req.params.id);
+    
+    if (error) throw error;
+    
+    res.redirect('/categories');
+  } catch (err) {
+    console.error('Server error:', err);
+    res.status(500).send(`خطأ في السيرفر: ${err.message}`);
+  }
+});
+🎉 الآن النظام جاهز تماماً!
+لقد أكملنا المسار الثالث (Backend & Storage) بنجاح.
+ما تم إنجازه:
+✅ الصفحة الرئيسية في التطبيق أصبحت ديناميكية (Carousel).
+✅ رفع صور المنتجات يتم سحابياً على Supabase.
+✅ رفع صور التصنيفات يتم سحابياً على Supabase.
+الخطوة التالية المقترحة:
+الذهاب إلى المسار الثاني: الوظائف والمميزات.
+هل نبدأ بـ "تفعيل البحث الحقيقي" (Real Search) وربطه بالباك اند؟
+أو تفضل "صفحة تفاصيل المنتج" (عرض الألوان والمقاسات وإضافة للسلة)؟
+(أنا جاهز للكود التالي، اختر أيهما تفضل!)
+Model
+ThinkingThoughts
+Expand to view model thoughts
+
+chevron_right
+رائع! بما أننا انتهينا من الأساسيات والواجهة الرئيسية، الخطوة الطبيعية التالية هي صفحة تفاصيل المنتج (Product Details Screen).
+هذه الصفحة هي المكان الذي يتخذ فيه العميل قرار الشراء. سنجعلها احترافية جداً بإضافة:
+معرض صور (Gallery): بدلاً من صورة واحدة، سنعرض عدة صور للمنتج (إذا توفرت) مع إمكانية التنقل.
+محدد الألوان والمقاسات (Selectors): واجهة تفاعلية لاختيار اللون والمقاس.
+إضافة للسلة (Add to Cart): ربط الزر بـ CartBloc فعلياً.
+تحديث ملف product_detail_screen.dart
+انسخ هذا الكود بالكامل واستبدل به محتوى الملف الموجود في:
+lib/features/products/presentation/screens/product_detail_screen.dart
+code
+Dart
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_bloc.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_event.dart';
+import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
+
+class ProductDetailScreen extends StatefulWidget {
+  final String productId;
+  final String name;
+  final String price;
+  final String imageUrl;
+  final List<String>? images; // قائمة صور إضافية
+  final String description;
+  final double rating;
+  final int reviewCount;
+  final List<String>? sizes;
+  final List<String>? colors;
+
+  const ProductDetailScreen({
+    super.key,
+    required this.productId,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+    this.images,
+    required this.description,
+    this.rating = 0.0,
+    this.reviewCount = 0,
+    this.sizes,
+    this.colors,
+  });
+
+  @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  int _selectedImageIndex = 0;
+  int _quantity = 1;
+  String? _selectedSize;
+  String? _selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+    // تحديد أول مقاس ولون افتراضياً إذا وجدوا
+    if (widget.sizes != null && widget.sizes!.isNotEmpty) {
+      _selectedSize = widget.sizes![0];
+    }
+    if (widget.colors != null && widget.colors!.isNotEmpty) {
+      _selectedColor = widget.colors![0];
+    }
+  }
+
+  void _addToCart() {
+    // التحقق من اختيار المقاس واللون (إذا كان المنتج يتطلب ذلك)
+    if (widget.sizes != null && widget.sizes!.isNotEmpty && _selectedSize == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a size')));
+      return;
+    }
+    if (widget.colors != null && widget.colors!.isNotEmpty && _selectedColor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a color')));
+      return;
+    }
+
+    // إنشاء عنصر السلة
+    final cartItem = CartItem(
+      id: widget.productId,
+      name: widget.name,
+      price: widget.price,
+      imageUrl: widget.imageUrl,
+      quantity: _quantity,
+      // يمكنك تعديل كلاس CartItem لاحقاً ليحفظ المقاس واللون المختار
+    );
+
+    // إرسال الحدث للـ Bloc
+    context.read<CartBloc>().add(AddToCart(cartItem));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${widget.name} added to cart!'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // تجميع كل الصور المتاحة للعرض
+    final List<String> allImages = [widget.imageUrl];
+    if (widget.images != null) {
+      allImages.addAll(widget.images!);
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: CustomScrollView(
+        slivers: [
+          // 1. رأس الصفحة (App Bar + Images)
+          SliverAppBar(
+            expandedHeight: 400.0,
+            pinned: true,
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.arrow_back, color: Colors.black),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  PageView.builder(
+                    itemCount: allImages.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _selectedImageIndex = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return CachedNetworkImage(
+                        imageUrl: allImages[index],
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(color: Colors.grey[200]),
+                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                      );
+                    },
+                  ),
+                  // مؤشر الصور (Dots)
+                  if (allImages.length > 1)
+                    Positioned(
+                      bottom: 20,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: allImages.asMap().entries.map((entry) {
+                          return Container(
+                            width: 8.0,
+                            height: 8.0,
+                            margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _selectedImageIndex == entry.key
+                                  ? Colors.blue
+                                  : Colors.white.withOpacity(0.5),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          // 2. تفاصيل المنتج
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // العنوان والتقييم
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.name,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        children: [
+                          const Icon(Icons.star, color: Colors.amber, size: 28),
+                          Text(
+                            '${widget.rating} (${widget.reviewCount})',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 10),
+                  
+                  // السعر
+                  Text(
+                    widget.price,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[700],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // الوصف
+                  const Text(
+                    "Description",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.description,
+                    style: TextStyle(color: Colors.grey[600], height: 1.5),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  // اختيار المقاس (Size)
+                  if (widget.sizes != null && widget.sizes!.isNotEmpty) ...[
+                    const Text("Size", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 40,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: widget.sizes!.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                        itemBuilder: (context, index) {
+                          final size = widget.sizes![index];
+                          final isSelected = _selectedSize == size;
+                          return GestureDetector(
+                            onTap: () => setState(() => _selectedSize = size),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.blue[700] : Colors.grey[100],
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isSelected ? Colors.transparent : Colors.grey[300]!,
+                                ),
+                              ),
+                              child: Text(
+                                size,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  // اختيار اللون (Color)
+                  if (widget.colors != null && widget.colors!.isNotEmpty) ...[
+                    const Text("Color", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 40,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: widget.colors!.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                        itemBuilder: (context, index) {
+                          final colorName = widget.colors![index];
+                          final isSelected = _selectedColor == colorName;
+                          return GestureDetector(
+                            onTap: () => setState(() => _selectedColor = colorName),
+                            child: Container(
+                              padding: const EdgeInsets.all(3), // حافة للاختيار
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected ? Colors.blue : Colors.transparent,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: _getColorFromString(colorName),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 5,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+
+                  const SizedBox(height: 80), // مسافة للزر السفلي
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      
+      // الشريط السفلي (الكمية + زر الإضافة)
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Row(
+            children: [
+              // عداد الكمية
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove),
+                      onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                    ),
+                    Text('$_quantity', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () => setState(() => _quantity++),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              // زر الإضافة للسلة
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _addToCart,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[700],
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Add to Cart',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // دالة مساعدة بسيطة لتحويل اسم اللون إلى لون Flutter
+  Color _getColorFromString(String colorName) {
+    switch (colorName.toLowerCase()) {
+      case 'red': return Colors.red;
+      case 'blue': return Colors.blue;
+      case 'green': return Colors.green;
+      case 'yellow': return Colors.yellow;
+      case 'black': return Colors.black;
+      case 'white': return Colors.white;
+      case 'grey': return Colors.grey;
+      case 'pink': return Colors.pink;
+      case 'purple': return Colors.purple;
+      case 'orange': return Colors.orange;
+      case 'brown': return Colors.brown;
+      default: return Colors.grey; // لون افتراضي
+    }
+  }
+}
+ما الجديد في هذه الصفحة؟
+SliverAppBar: الصورة الرئيسية تتحرك وتختفي بشكل جميل عند التمرير (Parallax Effect).
+Selectors: يمكنك الآن اختيار المقاس (S, M, L) واللون بشكل مرئي.
+Quantity Counter: زر لزيادة ونقصان العدد قبل الإضافة للسلة.
+Cart Logic: الكود مربوط فعلياً بالـ CartBloc. عند الضغط، سيتم إضافة المنتج للسلة وسترى إشعاراً (SnackBar) بالنجاح.
+جرب الآن:
+افتح التطبيق.
+اضغط على أي منتج من الصفحة الرئيسية.
+شاهد صفحة التفاصيل الجديدة.
+اختر مقاساً ولوناً واضغط "Add to Cart".
+عد للخلف واذهب لصفحة السلة، ستجد المنتج هناك! 🎉
+الخطوة التالية؟ ربما البحث والفلترة؟
+Model
+ThinkingThoughts
+Expand to view model thoughts
+
+chevron_right
+رائع! الخطوة التالية المنطقية هي نظام البحث والفلترة المتقدم (Advanced Search & Filter). 🔍
+حالياً، زر البحث في تطبيقك ينقلك لشاشة فارغة أو بسيطة. سنجعلها "محرك بحث" حقيقي يتيح للمستخدم:
+البحث بالكتابة: نتائج تظهر أثناء الكتابة (Real-time).
+الفلترة (Filter): تصفية النتائج حسب السعر (Slider) أو الترتيب (الأرخص/الأحدث).
+عرض النتائج: شبكة منتجات (Grid) محدثة.
+تحديث ملف search_screen.dart
+انسخ هذا الكود واستبدل به محتوى الملف الموجود في:
+lib/features/search/presentation/screens/search_screen.dart
+code
+Dart
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/widgets/skeleton_loader.dart';
+import 'package:hwasi_app/features/home/presentation/widgets/product_card.dart';
+
+class SearchScreen extends StatefulWidget {
+  final String? initialQuery;
+  const SearchScreen({super.key, this.initialQuery});
+
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  
+  // حالة البحث والبيانات
+  List<dynamic> _searchResults = [];
+  bool _isLoading = false;
+  bool _hasSearched = false;
+
+  // الفلاتر
+  String _sortBy = 'newest'; // السعر_تصاعدي، السعر_تنازلي، الأحدث
+  RangeValues _priceRange = const RangeValues(0, 10000); // نطاق السعر
+  
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialQuery != null) {
+      _searchController.text = widget.initialQuery!;
+      _performSearch();
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  // دالة البحث مع تأخير بسيط (Debounce) لتقليل الطلبات للسيرفر
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      _performSearch();
+    });
+  }
+
+  Future<void> _performSearch() async {
+    setState(() {
+      _isLoading = true;
+      _hasSearched = true;
+    });
+
+    try {
+      // استدعاء الـ API مع الفلاتر
+      final results = await ApiService.searchProductsWithFilters(
+        query: _searchController.text,
+        minPrice: _priceRange.start,
+        maxPrice: _priceRange.end,
+        sortBy: _sortBy,
+      );
+
+      if (mounted) {
+        setState(() {
+          _searchResults = results;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Search Error: $e");
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _searchResults = [];
+        });
+      }
+    }
+  }
+
+  // إظهار نافذة الفلاتر السفلية
+  void _showFilterModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(20),
+              height: 450,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Filters", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      TextButton(
+                        onPressed: () {
+                          setModalState(() {
+                            _priceRange = const RangeValues(0, 10000);
+                            _sortBy = 'newest';
+                          });
+                        },
+                        child: const Text("Reset"),
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 10),
+                  
+                  // 1. ترتيب حسب
+                  const Text("Sort By", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Wrap(
+                    spacing: 10,
+                    children: [
+                      _buildFilterChip('Newest', 'newest', setModalState),
+                      _buildFilterChip('Price: Low to High', 'price_asc', setModalState),
+                      _buildFilterChip('Price: High to Low', 'price_desc', setModalState),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 20),
+
+                  // 2. نطاق السعر
+                  const Text("Price Range", style: TextStyle(fontWeight: FontWeight.bold)),
+                  RangeSlider(
+                    values: _priceRange,
+                    min: 0,
+                    max: 10000, // يمكن جعل هذا ديناميكياً لاحقاً
+                    divisions: 100,
+                    activeColor: Colors.blue,
+                    labels: RangeLabels(
+                      '${_priceRange.start.round()}',
+                      '${_priceRange.end.round()}',
+                    ),
+                    onChanged: (RangeValues values) {
+                      setModalState(() {
+                        _priceRange = values;
+                      });
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('${_priceRange.start.round()} EGP'),
+                      Text('${_priceRange.end.round()} EGP'),
+                    ],
+                  ),
+
+                  const Spacer(),
+                  
+                  // زر تطبيق الفلتر
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _performSearch(); // تنفيذ البحث بالقيم الجديدة
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[700],
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text("Apply Filters", style: TextStyle(fontSize: 16, color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value, StateSetter setModalState) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: _sortBy == value,
+      onSelected: (bool selected) {
+        if (selected) {
+          setModalState(() {
+            _sortBy = value;
+          });
+        }
+      },
+      selectedColor: Colors.blue.withOpacity(0.2),
+      labelStyle: TextStyle(
+        color: _sortBy == value ? Colors.blue[700] : Colors.black,
+        fontWeight: _sortBy == value ? FontWeight.bold : FontWeight.normal,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // شريط البحث العلوي
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Colors.white,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      autofocus: widget.initialQuery == null, // التركيز التلقائي لو لم يأتِ من مكان آخر
+                      decoration: InputDecoration(
+                        hintText: "Search for products...",
+                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 20),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _performSearch();
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.tune, color: Colors.blue),
+                      onPressed: _showFilterModal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // منطقة النتائج
+            Expanded(
+              child: _isLoading
+                  ? _buildLoadingShimmer()
+                  : _searchResults.isEmpty
+                      ? _buildEmptyState()
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.7,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
+                          itemCount: _searchResults.length,
+                          itemBuilder: (context, index) {
+                            final product = _searchResults[index];
+                            final images = product['images'] as List?;
+                            final imageUrl = images != null && images.isNotEmpty
+                                ? images[0].toString().startsWith('http') 
+                                    ? images[0] 
+                                    : '${ApiService.baseUrl.replaceAll('/api', '')}${images[0]}' // معالجة المسار
+                                : 'https://via.placeholder.com/300';
+
+                            return ProductCard(
+                              id: product['id'].toString(),
+                              name: product['name'] ?? '',
+                              price: '${product['price']} EGP',
+                              imageUrl: imageUrl,
+                              description: product['description'] ?? '',
+                              rating: (product['rating'] ?? 0.0).toDouble(),
+                              reviewCount: product['num_reviews'] ?? 0,
+                              sizes: product['sizes'] != null ? List<String>.from(product['sizes']) : [],
+                              colors: product['colors'] != null ? List<String>.from(product['colors']) : [],
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    if (!_hasSearched && _searchController.text.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search, size: 80, color: Colors.grey[300]),
+            const SizedBox(height: 16),
+            const Text("Type something to start searching", style: TextStyle(color: Colors.grey)),
+          ],
+        ),
+      );
+    }
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 80, color: Colors.grey[300]),
+          const SizedBox(height: 16),
+          const Text("No results found", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text("Try adjusting your filters or search term", style: TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingShimmer() {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(child: SkeletonLoader(borderRadius: BorderRadius.circular(12))),
+            const SizedBox(height: 8),
+            const SkeletonLoader(width: 100, height: 15),
+            const SizedBox(height: 4),
+            const SkeletonLoader(width: 60, height: 15),
+          ],
+        );
+      },
+    );
+  }
+}
+ما الجديد في هذه الشاشة؟ 🔥
+فلترة حقيقية (Real Filtering):
+اضغط على أيقونة "الفلتر" (بجانب مربع البحث).
+ستظهر نافذة سفلية (Bottom Sheet) تتيح لك:
+تحديد نطاق السعر (Slider).
+الترتيب (Sort By): الأحدث، السعر من الأقل للأعلى، السعر من الأعلى للأقل.
+عند الضغط على "Apply"، يتم إرسال طلب جديد للباك اند بالقيم المختارة.
+البحث الذكي (Debouncing):
+لن يقوم التطبيق "بقصف" السيرفر بطلبات مع كل حرف تكتبه.
+سينتظر نصف ثانية (500ms) بعد توقفك عن الكتابة ثم يبحث مرة واحدة. هذا يحسن الأداء جداً.
+عرض الشبكة (Grid View):
+النتائج تظهر بنفس شكل الصفحة الرئيسية (بطاقات منتجات)، ويمكنك الضغط عليها للدخول لصفحة التفاصيل الجديدة التي بنيناها سابقاً.
+🧪 كيفية التجربة:
+تأكد أن السيرفر يعمل.
+في التطبيق، اضغط أيقونة البحث 🔍 في الصفحة الرئيسية.
+اكتب اسم منتج موجود لديك (مثلاً "Shirt" أو حرف "a").
+جرب الفلتر: غير السعر أو الترتيب واضغط Apply.
+سترى النتائج تتغير بناءً على طلبك.
+الخطوة القادمة:
+هل تريد الانتقال لـ "المسار الرابع: لوحة التحكم" لإضافة منتجات حقيقية بسهولة؟
+أم تريد تفعيل "المفضلة (Wishlist)" وربطها بقاعدة البيانات؟
+Model
+ThinkingThoughts
+Expand to view model thoughts
+
+chevron_right
+رائع! بما أننا قمنا بتحسين الواجهة والبحث، حان الوقت لجعل التطبيق "يحفظ" تفضيلات المستخدم.
+سننتقل إلى المفضلة (Wishlist Sync). ❤️
+حالياً، إذا أضاف المستخدم منتجاً للمفضلة وأغلق التطبيق، ستختفي البيانات. سنجعلها الآن تُحفظ في قاعدة بيانات Supabase، بحيث يجدها المستخدم حتى لو فتح حسابه من هاتف آخر.
+سنقوم بتحديث الباك اند (Backend) ثم التطبيق (Frontend).
+أولاً: الباك اند (Backend)
+سنقوم بكتابة منطق التعامل مع جدول wishlists و wishlist_items.
+اذهب للملف: hwasi_backend/routes/wishlist.js
+استبدل محتواه بهذا الكود:
+code
+JavaScript
+const express = require('express');
+const router = express.Router();
+const supabase = require('../config/supabase');
+const { protect } = require('../middleware/auth');
+
+// دالة مساعدة للحصول على id قائمة الأمنيات الخاصة بالمستخدم
+const getOrCreateWishlistId = async (userId) => {
+  // 1. البحث هل توجد قائمة بالفعل؟
+  let { data: wishlist } = await supabase
+    .from('wishlists')
+    .select('id')
+    .eq('user_id', userId)
+    .single();
+
+  // 2. إذا لم توجد، أنشئ واحدة
+  if (!wishlist) {
+    const { data: newWishlist, error } = await supabase
+      .from('wishlists')
+      .insert({ user_id: userId })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    wishlist = newWishlist;
+  }
+  return wishlist.id;
+};
+
+// @route   GET /api/wishlist
+// @desc    Get user wishlist with products
+router.get('/', protect, async (req, res) => {
+  try {
+    // جلب العناصر مع بيانات المنتج المرتبطة بها
+    // ملاحظة: نستخدم الـ Joining في Supabase
+    const { data: wishlist, error } = await supabase
+      .from('wishlists')
+      .select(`
+        id,
+        wishlist_items (
+          product_id,
+          products (
+            id, name, price, images, description, rating, num_reviews
+          )
+        )
+      `)
+      .eq('user_id', req.user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error; // 116 تعني لا يوجد صف
+
+    // تنسيق البيانات لتكون قائمة منتجات نظيفة
+    let products = [];
+    if (wishlist && wishlist.wishlist_items) {
+      products = wishlist.wishlist_items.map(item => {
+        const p = item.products;
+        return {
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          description: p.description,
+          imageUrl: p.images && p.images.length > 0 ? p.images[0] : null,
+          rating: p.rating,
+          reviewCount: p.num_reviews
+        };
+      });
+    }
+
+    res.json({ success: true, wishlist: products });
+  } catch (error) {
+    console.error('Get Wishlist Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   POST /api/wishlist/products/:productId
+// @desc    Add product to wishlist
+router.post('/products/:productId', protect, async (req, res) => {
+  try {
+    const wishlistId = await getOrCreateWishlistId(req.user.id);
+    const productId = req.params.productId;
+
+    // إضافة المنتج (تجاهل إذا كان موجوداً بالفعل)
+    const { error } = await supabase
+      .from('wishlist_items')
+      .upsert({ wishlist_id: wishlistId, product_id: productId }, { onConflict: 'wishlist_id, product_id' })
+      .select();
+
+    if (error) throw error;
+
+    res.json({ success: true, message: 'Added to wishlist' });
+  } catch (error) {
+    console.error('Add Wishlist Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   DELETE /api/wishlist/products/:productId
+// @desc    Remove product from wishlist
+router.delete('/products/:productId', protect, async (req, res) => {
+  try {
+    const { data: wishlist } = await supabase
+      .from('wishlists')
+      .select('id')
+      .eq('user_id', req.user.id)
+      .single();
+
+    if (wishlist) {
+      const { error } = await supabase
+        .from('wishlist_items')
+        .delete()
+        .eq('wishlist_id', wishlist.id)
+        .eq('product_id', req.params.productId);
+
+      if (error) throw error;
+    }
+
+    res.json({ success: true, message: 'Removed from wishlist' });
+  } catch (error) {
+    console.error('Remove Wishlist Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+module.exports = router;
+ثانياً: التطبيق (Frontend)
+الآن سنقوم بتحديث ApiService ليتصل بالمسارات الجديدة، وتحديث WishlistService لإدارة الحالة.
+1. تحديث lib/core/services/api_service.dart
+أضف هذه الدوال الثلاثة داخل الكلاس ApiService (أو استبدل الدوال القديمة الخاصة بالـ wishlist):
+code
+Dart
+// Get User Wishlist
+  static Future<List<dynamic>> getWishlist() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/wishlist'),
+        headers: _getHeaders(includeAuth: true),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['wishlist'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching wishlist: $e');
+      return [];
+    }
+  }
+
+  // Add to Wishlist
+  static Future<bool> addToWishlist(String productId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/wishlist/products/$productId'),
+        headers: _getHeaders(includeAuth: true),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error adding to wishlist: $e');
+      return false;
+    }
+  }
+
+  // Remove from Wishlist
+  static Future<bool> removeFromWishlist(String productId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/wishlist/products/$productId'),
+        headers: _getHeaders(includeAuth: true),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error removing from wishlist: $e');
+      return false;
+    }
+  }
+2. تحديث lib/core/services/wishlist_service.dart
+هذا هو التغيير الأهم. سنحول الخدمة من مجرد قائمة في الذاكرة إلى خدمة تتصل بالسيرفر.
+استبدل محتوى الملف بالكامل:
+code
+Dart
+import 'package:flutter/foundation.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:hwasi_app/core/services/auth_service.dart';
+
+class WishlistItem {
+  final String id;
+  final String name;
+  final dynamic price; // Dynamic to handle string or number
+  final String imageUrl;
+  final String description;
+  final double rating;
+  final int reviewCount;
+
+  WishlistItem({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+    required this.description,
+    required this.rating,
+    required this.reviewCount,
+  });
+
+  factory WishlistItem.fromJson(Map<String, dynamic> json) {
+    // معالجة الصورة: إذا كانت مصفوفة أو نص
+    String img = 'https://via.placeholder.com/150';
+    if (json['imageUrl'] != null) {
+      img = json['imageUrl'];
+    } else if (json['images'] != null && (json['images'] as List).isNotEmpty) {
+      img = json['images'][0];
+    }
+
+    return WishlistItem(
+      id: json['id'].toString(),
+      name: json['name'] ?? '',
+      price: json['price'],
+      imageUrl: img,
+      description: json['description'] ?? '',
+      rating: (json['rating'] ?? 0.0).toDouble(),
+      reviewCount: json['reviewCount'] ?? 0,
+    );
+  }
+}
+
+class WishlistService extends ChangeNotifier {
+  List<WishlistItem> _items = [];
+  bool _isLoading = false;
+
+  List<WishlistItem> get items => _items;
+  bool get isLoading => _isLoading;
+
+  // عند بدء التطبيق، اجلب البيانات
+  WishlistService() {
+    if (AuthService.isAuthenticated()) {
+      fetchWishlist();
+    }
+  }
+
+  Future<void> fetchWishlist() async {
+    if (!AuthService.isAuthenticated()) return;
+    
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final List<dynamic> data = await ApiService.getWishlist();
+      _items = data.map((json) => WishlistItem.fromJson(json)).toList();
+    } catch (e) {
+      print("Wishlist fetch error: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  bool isItemInWishlist(String itemId) {
+    return _items.any((item) => item.id == itemId);
+  }
+
+  Future<void> addToWishlist(WishlistItem item) async {
+    // 1. تحديث الواجهة فوراً (Optimistic UI Update)
+    if (!isItemInWishlist(item.id)) {
+      _items.add(item);
+      notifyListeners();
+
+      // 2. إرسال الطلب للسيرفر
+      final success = await ApiService.addToWishlist(item.id);
+      
+      // 3. التراجع في حال الفشل
+      if (!success) {
+        _items.removeWhere((i) => i.id == item.id);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> removeFromWishlist(String itemId) async {
+    // 1. الاحتفاظ بالعنصر مؤقتاً للتمكن من إعادته في حال الفشل
+    final existingIndex = _items.indexWhere((item) => item.id == itemId);
+    if (existingIndex == -1) return;
+    
+    final existingItem = _items[existingIndex];
+
+    // 2. التحديث الفوري للواجهة
+    _items.removeAt(existingIndex);
+    notifyListeners();
+
+    // 3. إرسال الطلب للسيرفر
+    final success = await ApiService.removeFromWishlist(itemId);
+
+    // 4. التراجع في حال الفشل
+    if (!success) {
+      _items.insert(existingIndex, existingItem);
+      notifyListeners();
+    }
+  }
+
+  void clearWishlist() {
+    _items.clear();
+    notifyListeners();
+  }
+}
+🧪 كيفية التجربة
+أعد تشغيل السيرفر (أوقف الـ Terminal الخاص بالباك اند وشغله مرة أخرى بـ node server.js) لكي يأخذ ملف wishlist.js الجديد في الاعتبار.
+أعد تشغيل التطبيق (Hot Restart).
+تأكد أنك مسجل دخول في التطبيق.
+اضغط على ❤️ في أي منتج.
+يجب أن تظهر رسالة "Added to wishlist".
+اذهب لشاشة الـ Wishlist (من الشريط السفلي)، ستجد المنتج هناك.
+اختبار المزامنة: أغلق التطبيق تماماً وأعد فتحه. اذهب للمفضلة، ستجد المنتج ما زال موجوداً! (لأنه قادم من Supabase).
+الخطوة القادمة: لوحة التحكم (Admin Dashboard) لعرض الإحصائيات الحقيقية؟ 📊
+Model
+ThinkingThoughts
+Expand to view model thoughts
+
+chevron_right
+تمام، لننتقل الآن إلى المسار الرابع: لوحة التحكم (Admin Dashboard). 📊👨‍💻
+حتى الآن، لوحة التحكم الخاصة بك تعرض بيانات وهمية (Static Data). سنجعلها الآن "غرفة عمليات" حقيقية تتصل بقاعدة بيانات Supabase وتعرض لك:
+الإحصائيات الحقيقية: عدد المستخدمين، الطلبات، المنتجات، وإجمالي الأرباح.
+الطلبات الحديثة: جدول يعرض آخر الطلبات القادمة من التطبيق.
+رسم بياني (Chart): يوضح حالة الطلبات (كم طلب تم توصيله vs قيد الانتظار).
+سنقوم بتعديل ملفين في الباك اند.
+الخطوة 1: تحديث server.js لجلب البيانات الحقيقية 🧠
+سنقوم بتغيير الـ Route الخاص بـ /dashboard ليقوم بحساب الأرقام من قاعدة البيانات قبل عرض الصفحة.
+اذهب للملف: hwasi_backend/server.js
+ابحث عن: app.get('/dashboard', ...)
+استبدلها بالكود التالي:
+code
+JavaScript
+// Admin Dashboard Route
+app.get('/dashboard', async (req, res) => {
+  try {
+    // 1. جلب الإحصائيات (Counts)
+    const { count: productsCount } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: categoriesCount } = await supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: ordersCount } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: usersCount } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true });
+
+    // 2. حساب إجمالي الأرباح (Revenue)
+    // ملاحظة: في التطبيقات الكبيرة يفضل عمل دالة RPC في قاعدة البيانات، لكن هنا سنحسبها بالكود
+    const { data: revenueData } = await supabase
+      .from('orders')
+      .select('total');
+    
+    const totalRevenue = revenueData 
+      ? revenueData.reduce((sum, order) => sum + (parseFloat(order.total) || 0), 0) 
+      : 0;
+
+    // 3. جلب أحدث المنتجات
+    const { data: recentProducts } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    // 4. جلب أحدث الطلبات
+    const { data: recentOrders } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    // 5. تجهيز بيانات الرسم البياني (حالة الطلبات)
+    const { data: orderStats } = await supabase
+      .from('orders')
+      .select('status');
+
+    // حساب عدد الطلبات لكل حالة
+    const statusCounts = {
+      'Processing': 0,
+      'Shipped': 0, // أو In Transit
+      'Delivered': 0,
+      'Cancelled': 0
+    };
+
+    if (orderStats) {
+      orderStats.forEach(order => {
+        // توحيد المسميات للتأكد
+        const status = order.status || 'Processing';
+        if (statusCounts[status] !== undefined) {
+          statusCounts[status]++;
+        } else if (status === 'In Transit') {
+          statusCounts['Shipped']++;
+        }
+      });
+    }
+
+    res.render('dashboard', { 
+      productsCount: productsCount || 0,
+      categoriesCount: categoriesCount || 0,
+      ordersCount: ordersCount || 0,
+      usersCount: usersCount || 0,
+      revenue: totalRevenue.toFixed(2),
+      products: recentProducts || [],
+      orders: recentOrders || [],
+      chartData: statusCounts // نمرر بيانات الرسم البياني
+    });
+
+  } catch (err) {
+    console.error('Dashboard Error:', err);
+    res.status(500).send("خطأ في تحميل لوحة التحكم");
+  }
+});
+الخطوة 2: تحديث واجهة dashboard.ejs 🎨
+سنضيف مكتبة Chart.js لرسم المبيعات، وسنربط الأرقام بالمتغيرات التي أرسلناها من السيرفر.
+اذهب للملف: hwasi_backend/views/dashboard.ejs
+استبدل المحتوى بالكامل بهذا الكود المحسن:
+code
+Html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - hwasi Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- إضافة مكتبة Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fb; color: #333; }
+        
+        /* Navbar */
+        .navbar { background: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .navbar h1 { font-size: 1.5rem; color: #2c3e50; font-weight: 800; }
+        .navbar h1 span { color: #3498db; }
+        .nav-links a { text-decoration: none; color: #555; margin-right: 20px; font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: #3498db; }
+
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+
+        /* Stats Grid */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); transition: transform 0.3s; border-bottom: 4px solid transparent; }
+        .stat-card:hover { transform: translateY(-5px); }
+        
+        .stat-card.products { border-color: #3498db; }
+        .stat-card.users { border-color: #9b59b6; }
+        .stat-card.orders { border-color: #e67e22; }
+        .stat-card.revenue { border-color: #27ae60; }
+
+        .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        
+        .products .stat-icon { background: #eaf6fc; color: #3498db; }
+        .users .stat-icon { background: #f5eef9; color: #9b59b6; }
+        .orders .stat-icon { background: #fdf2e9; color: #e67e22; }
+        .revenue .stat-icon { background: #e9f7ef; color: #27ae60; }
+
+        .stat-card h3 { font-size: 2rem; margin-bottom: 0.2rem; color: #2c3e50; }
+        .stat-card p { color: #7f8c8d; font-size: 0.9rem; font-weight: 600; }
+
+        /* Content Grid */
+        .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+        
+        .card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); padding: 2rem; margin-bottom: 2rem; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .card-header h2 { font-size: 1.25rem; color: #2c3e50; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: right; border-bottom: 1px solid #f1f1f1; }
+        th { color: #7f8c8d; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { font-weight: 500; }
+        tr:last-child td { border-bottom: none; }
+        
+        .status { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .status.processing { background: #fff3cd; color: #856404; }
+        .status.delivered { background: #d4edda; color: #155724; }
+        .status.cancelled { background: #f8d7da; color: #721c24; }
+
+        .btn { padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; transition: 0.3s; background: #f8f9fa; color: #333; }
+        .btn:hover { background: #e2e6ea; }
+
+        @media (max-width: 1024px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>hwasi <span>Admin</span></h1>
+        <div class="nav-links">
+            <a href="/dashboard" class="active"><i class="fas fa-home"></i> الرئيسية</a>
+            <a href="/products"><i class="fas fa-box"></i> المنتجات</a>
+            <a href="/categories"><i class="fas fa-tags"></i> التصنيفات</a>
+            <a href="/orders"><i class="fas fa-shopping-cart"></i> الطلبات</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div style="margin: 2rem 0;">
+            <h2 style="color: #2c3e50;">👋 أهلاً بك في لوحة التحكم</h2>
+            <p style="color: #7f8c8d;">إليك نظرة عامة على أداء متجرك اليوم</p>
+        </div>
+        
+        <!-- Cards -->
+        <div class="stats">
+            <div class="stat-card revenue">
+                <div class="stat-header">
+                    <div>
+                        <h3><%= revenue %> ج.م</h3>
+                        <p>إجمالي المبيعات</p>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-sack-dollar"></i></div>
+                </div>
+            </div>
+            <div class="stat-card orders">
+                <div class="stat-header">
+                    <div>
+                        <h3><%= ordersCount %></h3>
+                        <p>الطلبات</p>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                </div>
+            </div>
+            <div class="stat-card products">
+                <div class="stat-header">
+                    <div>
+                        <h3><%= productsCount %></h3>
+                        <p>المنتجات</p>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-box"></i></div>
+                </div>
+            </div>
+            <div class="stat-card users">
+                <div class="stat-header">
+                    <div>
+                        <h3><%= usersCount %></h3>
+                        <p>المستخدمين</p>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <!-- Recent Orders -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>📦 أحدث الطلبات</h2>
+                    <a href="/orders" class="btn">عرض الكل</a>
+                </div>
+                <% if (orders.length > 0) { %>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>رقم الطلب</th>
+                                <th>المبلغ</th>
+                                <th>الحالة</th>
+                                <th>التاريخ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td>#<%= order.id.substring(0, 8) %></td>
+                                    <td><%= parseFloat(order.total).toFixed(2) %> ج.م</td>
+                                    <td>
+                                        <span class="status <%= order.status ? order.status.toLowerCase().replace(' ', '') : 'processing' %>">
+                                            <%= order.status || 'Processing' %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(order.created_at).toLocaleDateString('ar-EG') %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <div style="text-align: center; color: #999; padding: 2rem;">
+                        <i class="fas fa-shopping-bag" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p>لا توجد طلبات حتى الآن</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>📊 حالة الطلبات</h2>
+                </div>
+                <canvas id="ordersChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // استقبال البيانات من السيرفر
+        const chartData = <%- JSON.stringify(chartData) %>;
+        
+        const ctx = document.getElementById('ordersChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['قيد المعالجة', 'تم الشحن', 'تم التوصيل', 'ملغى'],
+                datasets: [{
+                    data: [
+                        chartData['Processing'],
+                        chartData['Shipped'],
+                        chartData['Delivered'],
+                        chartData['Cancelled']
+                    ],
+                    backgroundColor: [
+                        '#f1c40f', // اصفر - معالجة
+                        '#3498db', // ازرق - شحن
+                        '#27ae60', // اخضر - توصيل
+                        '#e74c3c'  // احمر - الغاء
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { family: 'Segoe UI' } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+🧪 كيف تجرب هذا السحر؟
+أعد تشغيل السيرفر (Backend):
+في التيرمينال الخاص بـ Node.js، اضغط Ctrl+C ثم اكتب:
+code
+Powershell
+node server.js
+افتح المتصفح (Chrome/Edge):
+ادخل على الرابط: http://localhost:5000/dashboard
+ماذا ستشاهد؟
+سترى عدادات حقيقية (0 مبيعات، 0 طلبات.. إلخ إذا كانت قاعدة البيانات فارغة).
+رسم بياني (Doughnut Chart) جميل لحالات الطلبات.
+إذا قمت بعمل طلب من تطبيق Flutter (Checkout)، واعمل Refresh لصفحة الويب، ستزيد الأرقام فوراً وسيظهر الطلب في القائمة! 🤯
+هذا هو التكامل الحقيقي (Real-time Integration).
+هل تريد الانتقال للخطوة الأخيرة (نظام التقييمات Reviews) أم لديك تعديلات على لوحة التحكم؟
+Model
+ThinkingThoughts
+Expand to view model thoughts
+
+chevron_right
+تمام، لنكمل بناء الثقة في متجرك! 🌟
+الخطوة التالية هي نظام التقييمات (Reviews System).
+العملاء لا يشترون منتجاً إلا إذا رأوا تقييمات الآخرين. سنقوم ببناء نظام يسمح للمستخدم:
+كتابة تعليق واختيار عدد النجوم (1-5).
+حفظ التقييم في قاعدة البيانات.
+تحديث متوسط تقييم المنتج تلقائياً (مثلاً: إذا كان 4.0 وجاء تقييم 5.0، يرتفع المتوسط).
+أولاً: الباك اند (Backend) 🛠️
+سنقوم بتحديث ملف reviews.js ليتعامل مع Supabase ويقوم بحساب المتوسط الحسابي للنجوم.
+اذهب للملف: hwasi_backend/routes/reviews.js
+استبدل محتواه بالكامل بهذا الكود الذكي:
+code
+JavaScript
+const express = require('express');
+const router = express.Router();
+const supabase = require('../config/supabase');
+const { protect } = require('../middleware/auth');
+
+// دالة مساعدة لتحديث تقييم المنتج
+const updateProductRating = async (productId) => {
+  // 1. جلب كل التقييمات لهذا المنتج
+  const { data: reviews, error } = await supabase
+    .from('reviews')
+    .select('rating')
+    .eq('product_id', productId);
+
+  if (error || !reviews || reviews.length === 0) return;
+
+  // 2. حساب المتوسط
+  const total = reviews.reduce((acc, review) => acc + review.rating, 0);
+  const average = total / reviews.length;
+
+  // 3. تحديث جدول المنتجات
+  await supabase
+    .from('products')
+    .update({ 
+      rating: average.toFixed(1), // رقم عشري واحد (4.5)
+      num_reviews: reviews.length 
+    })
+    .eq('id', productId);
+};
+
+// @route   GET /api/reviews/product/:productId
+// @desc    Get all reviews for a product
+router.get('/product/:productId', async (req, res) => {
+  try {
+    const { data: reviews, error } = await supabase
+      .from('reviews')
+      .select(`
+        *,
+        users (name)
+      `)
+      .eq('product_id', req.params.productId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // تحسين شكل البيانات للفرونت إند
+    const formattedReviews = reviews.map(review => ({
+      id: review.id,
+      rating: review.rating,
+      comment: review.comment,
+      userName: review.users ? review.users.name : 'مستخدم',
+      createdAt: review.created_at
+    }));
+
+    res.json({ success: true, reviews: formattedReviews });
+  } catch (error) {
+    console.error('Get Reviews Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   POST /api/reviews
+// @desc    Add a review (Auth required)
+router.post('/', protect, async (req, res) => {
+  try {
+    const { productId, rating, comment } = req.body;
+
+    // التأكد من أن المستخدم لم يقم بالتقييم مسبقاً
+    const { data: existingReview } = await supabase
+      .from('reviews')
+      .select('id')
+      .eq('user_id', req.user.id)
+      .eq('product_id', productId)
+      .single();
+
+    if (existingReview) {
+      return res.status(400).json({ success: false, message: 'لقد قمت بتقييم هذا المنتج مسبقاً' });
+    }
+
+    // إضافة التقييم
+    const { data: review, error } = await supabase
+      .from('reviews')
+      .insert({
+        user_id: req.user.id,
+        product_id: productId,
+        rating: rating,
+        comment: comment
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // تحديث متوسط تقييم المنتج
+    await updateProductRating(productId);
+
+    res.status(201).json({ success: true, review });
+  } catch (error) {
+    console.error('Add Review Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+module.exports = router;
+ملاحظة: تأكد من أن ملف server.js يستخدم هذا الملف: app.use('/api/reviews', require('./routes/reviews')); (موجود بالفعل في كودك السابق).
+ثانياً: تطبيق Flutter (Frontend) 📱
+سنحتاج لمكتبة لرسم النجوم (Rating Bar).
+1. إضافة المكتبة:
+في التيرمينال نفذ:
+code
+Powershell
+flutter pub add flutter_rating_bar intl
+(أضفنا intl أيضاً لتنسيق التاريخ)
+2. تحديث ApiService:
+أضف هذه الدالة في lib/core/services/api_service.dart لجلب التقييمات:
+code
+Dart
+// Get Reviews
+  static Future<List<dynamic>> getReviews(String productId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/reviews/product/$productId'),
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['reviews'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching reviews: $e');
+      return [];
+    }
+  }
+(دالة createReview موجودة بالفعل في كودك السابق، تأكد فقط أنها تستخدم productId و rating و comment بنفس الأسماء).
+3. إنشاء ويدجت التقييمات:
+أنشئ ملفاً جديداً: lib/features/products/presentation/widgets/reviews_section.dart
+وضع فيه هذا الكود الجميل:
+code
+Dart
+import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:hwasi_app/core/services/api_service.dart';
+import 'package:intl/intl.dart';
+
+class ReviewsSection extends StatefulWidget {
+  final String productId;
+  const ReviewsSection({super.key, required this.productId});
+
+  @override
+  State<ReviewsSection> createState() => _ReviewsSectionState();
+}
+
+class _ReviewsSectionState extends State<ReviewsSection> {
+  List<dynamic> _reviews = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    final reviews = await ApiService.getReviews(widget.productId);
+    if (mounted) {
+      setState(() {
+        _reviews = reviews;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showAddReviewDialog() {
+    final commentController = TextEditingController();
+    double rating = 5.0;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          left: 20, right: 20, top: 20
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Write a Review", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Center(
+              child: RatingBar.builder(
+                initialRating: 5,
+                minRating: 1,
+                direction: Axis.horizontal,
+                itemCount: 5,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+                onRatingUpdate: (value) => rating = value,
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: commentController,
+              decoration: const InputDecoration(
+                hintText: "Share your thoughts...",
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context); // Close dialog
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Submitting review..."))
+                  );
+                  
+                  final result = await ApiService.createReview(
+                    productId: widget.productId,
+                    rating: rating.toInt(),
+                    comment: commentController.text,
+                  );
+
+                  if (result != null) {
+                    _loadReviews(); // Refresh list
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Review added successfully!"), backgroundColor: Colors.green)
+                    );
+                  } else {
+                     ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Failed or already reviewed"), backgroundColor: Colors.red)
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[700],
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: const Text("Submit Review", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text("Reviews", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            TextButton.icon(
+              onPressed: _showAddReviewDialog,
+              icon: const Icon(Icons.edit, size: 16),
+              label: const Text("Write Review"),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        if (_isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (_reviews.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Text("No reviews yet. Be the first!", style: TextStyle(color: Colors.grey)),
+            ),
+          )
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _reviews.length,
+            separatorBuilder: (_, __) => const Divider(),
+            itemBuilder: (context, index) {
+              final review = _reviews[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.blue[100],
+                  child: Text(review['userName'][0].toUpperCase()),
+                ),
+                title: Row(
+                  children: [
+                    Text(review['userName'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const Spacer(),
+                    Text(
+                      DateFormat('MMM d, yyyy').format(DateTime.parse(review['createdAt'])),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 4),
+                    RatingBarIndicator(
+                      rating: (review['rating'] as num).toDouble(),
+                      itemBuilder: (context, index) => const Icon(Icons.star, color: Colors.amber),
+                      itemCount: 5,
+                      itemSize: 14.0,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(review['comment']),
+                  ],
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+}
+4. إضافة الـ Reviews لصفحة المنتج:
+عدنا لملف product_detail_screen.dart الذي عدلناه سابقاً.
+سنضيف ReviewsSection في أسفل الصفحة.
+أضف الاستيراد في الأعلى:
+import 'package:hwasi_app/features/products/presentation/widgets/reviews_section.dart';
+داخل build، انزل لأسفل الـ Column (قبل SizedBox(height: 80)) وأضف التالي:
+code
+Dart
+// ... بعد كود الألوان (Colors) ...
+                  
+                  const SizedBox(height: 20),
+                  const Divider(),
+                  const SizedBox(height: 20),
+                  
+                  // قسم التقييمات الجديد
+                  ReviewsSection(productId: widget.productId),
+
+                  const SizedBox(height: 80), // مسافة للزر السفلي
+🧪 التجربة النهائية
+أعد تشغيل السيرفر (لأخذ تحديثات reviews.js).
+أعد تشغيل التطبيق.
+ادخل على منتج.
+اضغط "Write Review".
+أعطِ 5 نجوم واكتب "Amazing Product!".
+اضغط Submit.
+ستظهر التقييمات فوراً، ولو عدت للصفحة الرئيسية ودخلت مرة أخرى، ستجد أن تقييم المنتج (النجوم في الأعلى) قد تغير بناءً على المتوسط!
+أنت الآن تملك تطبيقاً شبه متكامل (تصفح، بحث، سلة، شراء، تقييم، حساب، لوحة تحكم).

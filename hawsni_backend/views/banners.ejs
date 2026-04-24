@@ -1,0 +1,72 @@
+<%- include('partials/header', { title: 'إدارة البنرات' , pageTitle: 'البنرات' , page: 'banners' }) %>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-images"></i> جميع البنرات
+            </h2>
+            <a href="/banners/new" class="btn btn-primary">
+                <i class="fas fa-plus"></i> إضافة بنر جديد
+            </a>
+        </div>
+
+        <% if (banners && banners.length> 0) { %>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                <% banners.forEach(banner=> { %>
+                    <div class="card" style="margin: 0;">
+                        <div
+                            style="position: relative; height: 180px; border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
+                            <% const isVideo = banner.image_url && (banner.image_url.endsWith('.mp4') || banner.image_url.endsWith('.webm') || banner.image_url.endsWith('.mov')); %>
+                            <% if (isVideo) { %>
+                                <video src="<%= banner.image_url %>" style="width: 100%; height: 100%; object-fit: cover;" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>
+                                <div style="position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.5); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">
+                                    <i class="fas fa-video"></i> فيديو
+                                </div>
+                            <% } else { %>
+                                <img src="<%= banner.image_url %>" alt="<%= banner.title || 'بنر' %>"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                            <% } %>
+                            <div style="position: absolute; top: 0.5rem; left: 0.5rem;">
+                                <span class="badge <%= banner.is_active ? 'badge-success' : 'badge-danger' %>">
+                                    <%= banner.is_active ? 'نشط' : 'غير نشط' %>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style="padding: 0 0.5rem;">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--dark-gray);">
+                                <%= banner.title || 'بدون عنوان' %>
+                            </h3>
+
+                            <div
+                                style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; color: var(--medium-gray); font-size: 0.85rem;">
+                                <i class="fas fa-sort"></i>
+                                <span>الترتيب: <%= banner.sort_order || 0 %></span>
+                            </div>
+
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="/banners/<%= banner.id %>/edit" class="btn btn-secondary btn-sm"
+                                    style="flex: 1;">
+                                    <i class="fas fa-edit"></i> تعديل
+                                </a>
+                                <button onclick="handleDelete('/banners/<%= banner.id %>', 'هذا البنر')"
+                                    class="btn btn-danger btn-sm" style="flex: 1;">
+                                    <i class="fas fa-trash"></i> حذف
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+            </div>
+            <% } else { %>
+                <div class="text-center" style="padding: 3rem; color: var(--medium-gray);">
+                    <i class="fas fa-images" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <p style="font-size: 1.1rem;">لا توجد بنرات حتى الآن</p>
+                    <a href="/banners/new" class="btn btn-primary" style="margin-top: 1rem;">
+                        <i class="fas fa-plus"></i> إضافة أول بنر
+                    </a>
+                </div>
+                <% } %>
+    </div>
+
+    <%- include('partials/footer') %>

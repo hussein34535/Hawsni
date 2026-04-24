@@ -1,0 +1,1385 @@
+<%- include('partials/header', { title: product ? 'تعديل منتج' : 'إضافة منتج جديد' , pageTitle: product ? 'تعديل منتج'
+    : 'إضافة منتج جديد' , page: 'products' }) %>
+
+    <style>
+        .image-card {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #eee;
+            cursor: grab;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            /* Prevent selection during drag */
+            user-select: none;
+        }
+
+        .sortable-fallback {
+            opacity: 0.9 !important;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .image-card:hover {
+            border-color: var(--primary);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            display: block;
+        }
+
+        .sortable-ghost {
+            opacity: 0.3;
+            background: #e9ecef !important;
+            border: 2px dashed var(--primary) !important;
+        }
+
+        .sortable-chosen {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .sortable-drag {
+            opacity: 0.9;
+            cursor: grabbing;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .image-badge {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 10px;
+            padding: 2px 0;
+            text-align: center;
+        }
+
+        .delete-img-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+
+        .delete-img-btn:hover {
+            background: #dc3545;
+        }
+    </style>
+
+    <div class="card">
+        <div id="server-product-data" data-product="<%= product ? JSON.stringify(product) : 'null' %>"
+            style="display:none;"></div>
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-<%= product ? 'edit' : 'plus' %>"></i>
+                <%= product ? 'تعديل منتج' : 'إضافة منتج جديد' %>
+            </h2>
+            <a href="/products" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> رجوع
+            </a>
+        </div>
+
+
+        <form action="/products<%= product ? '/' + product.id : '' %>" method="POST"
+            onsubmit="return handleProductSubmit(event)" id="productForm">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+            <% if (product) { %>
+                <input type="hidden" name="_method" value="PUT">
+                <% } %>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <!-- Column 1 -->
+                        <div>
+                            <div class="form-group">
+                                <label class="form-label">اسم المنتج <span
+                                        style="color: var(--danger);">*</span></label>
+                                <input type="text" name="name" class="form-control"
+                                    value="<%= product ? product.name : '' %>" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">الوصف <span style="color: var(--danger);">*</span></label>
+                                <textarea name="description" class="form-control" rows="4"
+                                    required><%= product ? product.description : '' %></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">الأقسام (اختر قسماً أو أكثر)</label>
+                                <div
+                                    style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; background: #fff;">
+                                    <% categories.forEach(cat=> { %>
+                                        <div class="form-check" style="margin-bottom: 5px;">
+                                            <label
+                                                style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                                <input type="checkbox" name="category_ids[]" value="<%= cat.id %>"
+                                                    <%=(product && product.category_ids &&
+                                                    product.category_ids.includes(cat.id)) ? 'checked' : '' %>>
+                                                <span>
+                                                    <%= cat.name %>
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <% }) %>
+                                </div>
+                                <small class="text-muted">يمكنك ربط المنتج بأكثر من قسم ليظهر في نتائج البحث
+                                    المختلفة.</small>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label">المقاسات</label>
+                                    <input type="text" name="sizes" id="sizesInput" class="form-control"
+                                        value="<%= product && product.sizes ? product.sizes.join(', ') : '' %>"
+                                        placeholder="S, M, L, XL">
+                                    <small class="text-muted">افصل بينها بفواصل</small>
+                                </div>
+
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label class="form-label">دليل المقاسات</label>
+                                    <textarea name="size_guide" class="form-control" rows="3"
+                                        placeholder="مثال: S=صدر 90سم، M=صدر 95سم، L=صدر 100سم"><%= product && product.size_guide ? product.size_guide : '' %></textarea>
+                                    <small class="text-muted">أدخل تفاصيل المقاسات لعرضها في التطبيق</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">الألوان</label>
+                                    <div
+                                        style="display: flex; gap: 0.5rem; align-items: flex-start; margin-bottom: 1rem;">
+                                        <input type="color" id="colorPicker" class="form-control"
+                                            style="width: 50px; padding: 0; height: 40px; flex-shrink: 0;"
+                                            value="#000000">
+                                        <button type="button" class="btn btn-outline-info" onclick="openEyeDropper()"
+                                            style="height: 40px; padding: 0 10px;" title="سحب لون من صورة">
+                                            <i class="fas fa-eye-dropper"></i>
+                                        </button>
+                                        <div id="imageSelectorContainer" style="flex: 1; position: relative;">
+                                            <div id="selectedImagePreview"
+                                                style="display: none; border: 2px solid #dee2e6; border-radius: 8px; padding: 4px; background: white; cursor: pointer;"
+                                                onclick="toggleImageDropdown()">
+                                                <img id="selectedImageThumb"
+                                                    style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px;">
+                                                <div
+                                                    style="text-align: center; font-size: 0.75rem; color: #666; margin-top: 2px;">
+                                                    انقر للتغيير</div>
+                                            </div>
+                                            <button type="button" id="noImageButton" class="btn btn-outline-secondary"
+                                                style="width: 100%; padding: 0.5rem;" onclick="toggleImageDropdown()">
+                                                بدون صورة (اختياري) ▼
+                                            </button>
+                                            <div id="imageDropdown"
+                                                style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                                <!-- Images will be added here -->
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-secondary" onclick="addColor()"
+                                            style="padding: 0.5rem 1rem; flex-shrink: 0; height: 40px;">
+                                            <i class="fas fa-plus"></i> إضافة
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="colors" id="colorsInput"
+                                        value="<%= product && product.colors ? JSON.stringify(product.colors) : '' %>">
+                                    <div id="colorsContainer" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                        <!-- Swatches will be added here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2 -->
+                        <div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label">السعر <span style="color: var(--danger);">*</span></label>
+                                    <input type="number" name="price" class="form-control" step="0.01"
+                                        value="<%= product ? product.price : '' %>" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                        <label class="form-label" style="margin-bottom: 0;">الخصم</label>
+                                        <div class="discount-type-toggle" style="display: flex; background: #f1f5f9; border-radius: 6px; padding: 2px;">
+                                            <button type="button" id="btnPercent" class="btn-toggle active" onclick="setDiscountMode('percent')" style="border: none; background: var(--primary); color: white; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">%</button>
+                                            <button type="button" id="btnPrice" class="btn-toggle" onclick="setDiscountMode('price')" style="border: none; background: transparent; color: #64748b; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer;">ج.م</button>
+                                        </div>
+                                    </div>
+                                    <div style="position: relative;">
+                                        <input type="number" id="discountInput" class="form-control" step="0.01" min="0" 
+                                            value="<%= product ? product.discount : 0 %>" oninput="handleDiscountInput()">
+                                        <input type="hidden" name="discount" id="hiddenDiscount" value="<%= product ? product.discount : 0 %>">
+                                        <span id="discountLabel" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;">%</span>
+                                    </div>
+                                    <small id="discountHint" class="text-muted" style="font-size: 0.7rem; display: block; margin-top: 4px; height: 1.2em;">
+                                        <% if (product && product.discount > 0) { %>
+                                            السعر بعد الخصم: <%= (product.price * (1 - product.discount/100)).toFixed(2) %> ج.م
+                                        <% } %>
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">المخزون <span style="color: var(--danger);">*</span></label>
+                                <input type="number" name="stock" id="mainStockInput" class="form-control" min="0"
+                                    value="<%= product ? product.stock : 0 %>" required>
+                                <small id="stockSyncHint" class="text-muted" style="display:none; color: #8b5cf6 !important; font-weight: 600;"><i class="fas fa-link"></i> يتم حسابه تلقائياً من مجموع مخزون الـ Variants</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="is_featured" <%=product && product.is_featured
+                                        ? 'checked' : '' %>>
+                                    <span class="form-label" style="margin: 0;">منتج مميز</span>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="is_vto_enabled" <%=!product || product.is_vto_enabled
+                                        !==false ? 'checked' : '' %>>
+                                    <span class="form-label" style="margin: 0;">تفعيل ميزة الذكاء الاصطناعي VTO لهذا
+                                        المنتج</span>
+                                </label>
+                            </div>
+                            <!-- Scraped Images Input (Hidden JSON) -->
+                            <input type="hidden" name="scraped_images" id="scrapedImagesInput">
+
+                            <!-- Retained Existing Images Input (Hidden JSON) -->
+                            <input type="hidden" name="retained_images" id="retainedImagesInput">
+
+
+
+                            <!-- Hidden File Input for standard uploads (Legacy - Restored Name) -->
+                            <!-- Used for ADDING files to the JS state only -->
+                            <input type="file" id="imageAdder" multiple
+                                accept="image/*,video/mp4,video/webm,video/quicktime" style="display: none;"
+                                onchange="handleFileSelect(this)">
+
+                            <!-- Direct Upload URLs (sent to server instead of files) -->
+                            <input type="hidden" name="image_urls" id="directUploadUrls">
+
+                            <div class="form-group">
+                                <label class="form-label">الصور (سحب وإفلات لترتيب الصور)</label>
+
+                                <!-- Toolbar -->
+                                <div class="d-flex gap-2 mb-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm"
+                                        onclick="document.getElementById('imageAdder').click()">
+                                        <i class="fas fa-plus"></i> إضافة صور
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                        onclick="clearAllImages()">
+                                        <i class="fas fa-trash"></i> حذف الكل
+                                    </button>
+                                </div>
+
+                                <!-- Image Grid (Sortable) -->
+                                <div id="unifiedImageConfigs" dir="rtl"
+                                    style="display: flex; flex-wrap: wrap; gap: 10px; min-height: 120px; padding: 10px; border: 2px dashed #ddd; border-radius: 8px; background: #f9f9f9; align-content: flex-start;">
+                                    <!-- Images will be rendered here -->
+                                    <!-- Empty state will be managed by JS -->
+                                    <div class="text-muted w-100 text-center d-flex align-items-center justify-content-center"
+                                        id="emptyState">
+                                        <span>لا توجد صور حالياً. اضغط إضافة أو استخدم الإضافة للسحب.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Variants Management Section -->
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
+                        <h4 style="margin-bottom: 1rem;"><i class="fas fa-boxes"></i> المخزون والـ SKUs (حسب المقاس واللون)</h4>
+                        <p class="text-muted" style="font-size: 0.9em;">
+                            قم بإدخال المقاسات والألوان في الأعلى، ثم انقر على "توليد/تحديث الجدول" لإنشاء صف لكل مزيج وإدخال الكمية المتوفرة ورقم الـ SKU الخاص به.
+                        </p>
+                        <button type="button" class="btn btn-outline-primary mb-3" onclick="generateVariantsTable()">
+                            <i class="fas fa-sync-alt"></i> توليد / تحديث الجدول
+                        </button>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="variantsTable" style="display: none; background: white;">
+                                <thead style="background-color: var(--light-gray);">
+                                    <tr>
+                                        <th>المقاس</th>
+                                        <th>اللون</th>
+                                        <th>SKU (كود الصنف)</th>
+                                        <th>المخزون المتوفر</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows generated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" name="variants" id="variantsDataInput">
+                    </div>
+
+                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
+                        <h4 style="margin-bottom: 1rem;"><i class="fas fa-gift"></i> ملحقات المنتج (المبيعات الإضافية / Cross-selling)</h4>
+                        <p class="text-muted" style="font-size: 0.9em;">
+                            أضف ملحقات يمكن للعميل شراؤها بشكل إضافي واختياري عند إضافة هذا المنتج للسلة.
+                        </p>
+                        <button type="button" class="btn btn-outline-info mb-3" onclick="addAccessoryRow()">
+                            <i class="fas fa-plus"></i> إضافة ملحق
+                        </button>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="accessoriesTable">
+                                <thead style="background-color: var(--light-gray);">
+                                    <tr>
+                                        <th style="width: 25%">صورة الملحق (رابط url)</th>
+                                        <th style="width: 40%">اسم الملحق</th>
+                                        <th style="width: 20%">السعر الإضافي (ج.م)</th>
+                                        <th style="width: 15%">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows generated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" name="accessories" id="accessoriesDataInput" value="<%= product && product.accessories ? JSON.stringify(product.accessories) : '[]' %>">
+                    </div>
+
+                    <div
+                        style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--light-gray);">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            <%= product ? 'حفظ التعديلات' : 'إضافة المنتج' %>
+                        </button>
+                        <a href="/products" class="btn btn-secondary">إلغاء</a>
+                    </div>
+        </form>
+    </div>
+
+    <!-- Eye Dropper Modal -->
+    <div id="eyeDropperModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+        <div
+            style="background: white; border-radius: 12px; padding: 20px; width: 100%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0;">سحب لون من صورة <i class="fas fa-eye-dropper"></i></h4>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeEyeDropper()">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
+            </div>
+
+            <div id="eyeDropperStep1">
+                <p class="text-muted mb-2">اختر إحدى الصور المرفوعة لسحب اللون منها:</p>
+                <div id="eyeDropperImageList" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                    <!-- Images will be listed here -->
+                </div>
+            </div>
+
+            <div id="eyeDropperStep2"
+                style="display: none; flex: 1; min-height: 0; flex-direction: column; align-items: center; gap: 10px;">
+                <div
+                    style="display: flex; gap: 10px; align-items: center; width: 100%; justify-content: space-between;">
+                    <span class="badge bg-info" style="font-size: 1rem;"><i class="fas fa-hand-pointer"></i>
+                        اضغط على أي مكان في الصورة لاختيار لونه</span>
+                    <button type="button" class="btn btn-sm btn-secondary"
+                        onclick="document.getElementById('eyeDropperStep2').style.display='none'; document.getElementById('eyeDropperStep1').style.display='block';">
+                        <i class="fas fa-arrow-right"></i> رجوع للصور
+                    </button>
+                </div>
+                <div
+                    style="flex: 1; width: 100%; overflow: auto; border: 2px dashed #ccc; border-radius: 8px; position: relative; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                    <!-- Canvas for pixel picking -->
+                    <canvas id="eyeDropperCanvas"
+                        style="cursor: crosshair; max-width: 100%; height: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <script>
+        // === Unified Image State ===
+        // Items: { id: string, type: 'file'|'scraped'|'existing', url: string, file: File|null, isVideo: boolean }
+        let imageState = [];
+        let colors = [];
+        let selectedImageIndex = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Initialize Sortable
+            const grid = document.getElementById('unifiedImageConfigs');
+            new Sortable(grid, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                dragClass: 'sortable-drag',
+                forceFallback: true, // Crucial for RTL visual consistency
+                fallbackClass: 'sortable-fallback',
+                direction: 'rtl', // Match the container direction
+                swapThreshold: 0.5,
+                onEnd: function () {
+                    syncStateFromDOM();
+                    updateInputs();
+                    updateImageDropdown();
+                }
+            });
+
+            // 2. Load Existing Images (Server Rendered)
+            const productDataEl = document.getElementById('server-product-data');
+            const existingProduct = productDataEl && productDataEl.getAttribute('data-product') !== 'null' ? JSON.parse(productDataEl.getAttribute('data-product')) : null;
+            if (existingProduct && existingProduct.images && Array.isArray(existingProduct.images)) {
+                existingProduct.images.forEach(url => {
+                    const isVideo = url.match(/\.(mp4|webm|mov)$/i) !== null;
+                    addImageToState({ type: 'existing', url: url, file: null, isVideo }, false);
+                });
+                renderGallery(); // Render once after adding all
+                updateImageDropdown();
+            }
+
+            // 3. Initialize Colors
+            // 3. Initialize Colors (Deep Clean for Corrupted Data)
+            if (existingProduct && existingProduct.colors) {
+                let rawData = existingProduct.colors;
+                let cleanColors = [];
+
+                // Function to recursively extract valid color objects
+                const recursiveParse = (item) => {
+                    if (!item) return;
+
+                    if (typeof item === 'string') {
+                        try {
+                            const parsed = JSON.parse(item);
+                            recursiveParse(parsed);
+                        } catch (e) {
+                            // If it's a string that can't be parsed, treat it as a color name
+                            // But verify it's not a leftover JSON bracket
+                            if (!item.trim().startsWith('[')) {
+                                cleanColors.push({ color: item, imageIndex: null });
+                            }
+                        }
+                    } else if (Array.isArray(item)) {
+                        item.forEach(i => recursiveParse(i));
+                    } else if (typeof item === 'object') {
+                        // Check if 'color' property is itself a JSON string (The reported bug)
+                        if (item.color && typeof item.color === 'string' && (item.color.trim().startsWith('[') || item.color.trim().startsWith('{'))) {
+                            try {
+                                const parsedColor = JSON.parse(item.color);
+                                recursiveParse(parsedColor);
+                            } catch (e) {
+                                cleanColors.push(item);
+                            }
+                        } else if (item.color) {
+                            cleanColors.push(item);
+                        }
+                    }
+                };
+
+                recursiveParse(rawData);
+                colors = cleanColors;
+
+                // FORCE DELETE ANY EXISTING imageId loaded from DB because they are invalid in a new session (the DB shouldn't hold DOM ids)
+                colors.forEach(c => { delete c.imageId; });
+
+                // Initialize imageIds for existing colors if they only have imageIndex
+                colors.forEach(c => {
+                    if (c.imageIndex !== null && c.imageIndex !== undefined && !c.imageId) {
+                        if (imageState[c.imageIndex]) {
+                            c.imageId = imageState[c.imageIndex].id;
+                        } else {
+                            // Invalid index, clear it
+                            c.imageIndex = null;
+                        }
+                    }
+                });
+
+                renderColors();
+                updateColorsInput();
+            }
+        });
+
+        // === Image Actions ===
+
+        function handleFileSelect(input) {
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const url = URL.createObjectURL(file);
+                    const isVideo = file.type.startsWith('video/');
+                    addImageToState({ type: 'file', url: url, file: file, isVideo }, false);
+                });
+                renderGallery();
+                updateInputs();
+                updateImageDropdown();
+            }
+            input.value = ''; // Reset
+        }
+
+        // Handle Paste from Extension
+        window.addEventListener('hwasi-data-pasted', (event) => {
+            const p = event.detail;
+            if (p && p.images && Array.isArray(p.images)) {
+                p.images.forEach(url => {
+                    const isVideo = url.match(/\.(mp4|webm|mov)$/i) !== null;
+                    addImageToState({ type: 'scraped', url: url, file: null, isVideo }, false);
+                });
+                renderGallery();
+                updateInputs();
+                updateImageDropdown();
+            }
+            // Update colors if present
+            if (p.colors) {
+                // ... color logic (simplified for now to avoid overwriting complex existing colors)
+            }
+        });
+
+        function addImageToState(imgObj, render = true) {
+            imgObj.id = Date.now() + Math.random().toString(36).substr(2, 9);
+            imageState.push(imgObj);
+            if (render) {
+                renderGallery();
+                updateInputs();
+                updateImageDropdown();
+            }
+        }
+
+        function removeImage(id) {
+            imageState = imageState.filter(img => img.id !== id);
+            syncColorIndexes();
+            renderGallery();
+            updateInputs();
+            updateImageDropdown();
+        }
+
+        function clearAllImages() {
+            showConfirm('هل أنت متأكد من حذف جميع الصور؟', async () => {
+                imageState = [];
+                syncColorIndexes();
+                renderGallery();
+                updateInputs();
+                updateImageDropdown();
+            });
+        }
+
+        function syncStateFromDOM() {
+            const newOrderIds = Array.from(document.querySelectorAll('.image-card')).map(el => el.dataset.id);
+            const newState = [];
+            newOrderIds.forEach(id => {
+                const img = imageState.find(item => item.id === id);
+                if (img) newState.push(img);
+            });
+            imageState = newState;
+            syncColorIndexes();
+        }
+
+        function syncColorIndexes() {
+            colors.forEach(c => {
+                if (c.imageId) {
+                    const newIndex = imageState.findIndex(img => img.id === c.imageId);
+                    c.imageIndex = newIndex !== -1 ? newIndex : null;
+                    if (newIndex === -1) c.imageId = null; // Image deleted
+                } else {
+                    c.imageIndex = null;
+                }
+            });
+            updateColorsInput();
+            renderColors();
+        }
+
+        function renderGallery() {
+            const grid = document.getElementById('unifiedImageConfigs');
+            // Clear current content
+            grid.innerHTML = '';
+
+            if (imageState.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'text-muted w-100 text-center d-flex align-items-center justify-content-center';
+                emptyState.id = 'emptyState';
+                emptyState.innerHTML = '<span>لا توجد صور حالياً. اضغط إضافة أو استخدم الإضافة للسحب.</span>';
+                grid.appendChild(emptyState);
+                return;
+            }
+
+            imageState.forEach((img, index) => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                card.dataset.id = img.id;
+
+                let mediaEl;
+                if (img.isVideo) {
+                    mediaEl = document.createElement('video');
+                    mediaEl.src = img.url;
+                    mediaEl.setAttribute('draggable', 'false');
+                    mediaEl.autoplay = true;
+                    mediaEl.loop = true;
+                    mediaEl.muted = true;
+                    mediaEl.style.cssText = 'width: 100%; height: 100%; object-fit: cover; pointer-events: none; display: block;';
+                } else {
+                    mediaEl = document.createElement('img');
+                    mediaEl.src = img.url;
+                    mediaEl.setAttribute('draggable', 'false');
+                }
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                deleteBtn.type = 'button';
+                deleteBtn.className = 'delete-img-btn';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    removeImage(img.id);
+                };
+
+                const badge = document.createElement('span');
+                badge.className = 'image-badge';
+                badge.textContent = `${index + 1}. ${(img.type === 'file' ? 'ملف' : (img.type === 'scraped' ? 'مستورد' : 'موجود'))}`;
+
+                card.appendChild(mediaEl);
+                card.appendChild(deleteBtn);
+                card.appendChild(badge);
+                grid.appendChild(card);
+            });
+        }
+
+        function updateInputs() {
+            // A. Scraped URLs
+            const scrapedUrls = imageState
+                .filter(img => img.type === 'scraped')
+                .map(img => img.url);
+            document.getElementById('scrapedImagesInput').value = JSON.stringify(scrapedUrls);
+
+            // B. Retained Existing Images
+            const retainedUrls = imageState
+                .filter(img => img.type === 'existing')
+                .map(img => img.url);
+            document.getElementById('retainedImagesInput').value = JSON.stringify(retainedUrls);
+        }
+        // === Compress image to max 4MB ===
+        function compressImage(file, maxSizeMB = 4) {
+            return new Promise((resolve) => {
+                const maxSize = maxSizeMB * 1024 * 1024;
+                if (file.size <= maxSize) { resolve(file); return; }
+
+                const img = new window.Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    let w = img.width, h = img.height;
+                    let quality = 0.8;
+
+                    // Scale down if very large
+                    const maxDim = 2000;
+                    if (w > maxDim || h > maxDim) {
+                        const ratio = Math.min(maxDim / w, maxDim / h);
+                        w = Math.round(w * ratio);
+                        h = Math.round(h * ratio);
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+                    (function tryCompress() {
+                        canvas.toBlob((blob) => {
+                            if (blob.size <= maxSize || quality <= 0.3) {
+                                resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                            } else {
+                                quality -= 0.1;
+                                canvas.toBlob((b2) => {
+                                    resolve(new File([b2], file.name, { type: 'image/jpeg' }));
+                                }, 'image/jpeg', quality);
+                            }
+                        }, 'image/jpeg', quality);
+                    })();
+                };
+                img.src = url;
+            });
+        }
+
+        // === Direct Cloudinary Upload on Submit ===
+        async function handleProductSubmit(e) {
+            e.preventDefault();
+            if (!validateForm('productForm')) return false;
+
+            const form = document.getElementById('productForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري تجهيز الصور...';
+
+            try {
+                // 1. Get files to upload
+                const filesToUpload = imageState.filter(img => img.type === 'file' && img.file);
+                const uploadedUrls = [];
+
+                if (filesToUpload.length > 0) {
+                    // Compress image files over 4MB, skip compression for videos
+                    for (let i = 0; i < filesToUpload.length; i++) {
+                        const isVideo = filesToUpload[i].file.type.startsWith('video/');
+                        if (!isVideo && filesToUpload[i].file.size > 4 * 1024 * 1024) {
+                            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ضغط صورة ${i + 1}...`;
+                            filesToUpload[i].file = await compressImage(filesToUpload[i].file);
+                        }
+                    }
+
+                    // 2. Prepare Cloudinary parameters
+                    const isVideoUpload = filesToUpload.some(img => img.file.type.startsWith('video/'));
+                    const videoTransform = 'w_1280,h_720,c_limit,br_500k,q_auto:eco,vc_h264,ac_aac,f_mp4';
+                    
+                    // 3. Get Cloudinary signature from backend
+                    // If we have videos, we need to sign the eager transformation
+                    const signUrl = `/api/cloudinary/sign?folder=products${isVideoUpload ? `&eager=${videoTransform}&resource_type=video` : ''}`;
+                    const signRes = await fetch(signUrl);
+                    const signData = await signRes.json();
+
+                    // 4. Upload each file directly to Cloudinary
+                    for (let i = 0; i < filesToUpload.length; i++) {
+                        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> رفع ملف ${i + 1}/${filesToUpload.length}...`;
+
+                        const file = filesToUpload[i].file;
+                        const isVideo = file.type.startsWith('video/');
+
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('api_key', signData.api_key);
+                        formData.append('timestamp', signData.timestamp);
+                        formData.append('signature', signData.signature);
+                        formData.append('folder', signData.folder);
+                        
+                        // Add eager transformations for videos
+                        if (isVideo) {
+                            formData.append('eager', videoTransform);
+                        }
+
+                        // Let Cloudinary auto-detect if image or video
+                        const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/${isVideo ? 'video' : 'image'}/upload`;
+
+                        const cloudRes = await fetch(uploadEndpoint, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const cloudData = await cloudRes.json();
+                        
+                        let finalUrl = cloudData.secure_url;
+                        // Use the compressed (eager) version for videos
+                        if (isVideo && cloudData.eager && cloudData.eager.length > 0) {
+                            finalUrl = cloudData.eager[0].secure_url;
+                            console.log('✅ Using compressed video URL:', finalUrl);
+                        }
+
+                        if (finalUrl) {
+                            filesToUpload[i].url = finalUrl;
+                            filesToUpload[i].type = 'existing';
+                        } else {
+                            throw new Error(cloudData.error?.message || 'فشل رفع الملف');
+                        }
+                    }
+                }
+
+                // 4. Handle Accessories Uploads
+                const accessoryRows = document.querySelectorAll('#accessoriesTable tbody tr');
+                if (accessoryRows.length > 0) {
+                    for (let i = 0; i < accessoryRows.length; i++) {
+                        const row = accessoryRows[i];
+                        const fileInput = row.querySelector('.acc-file');
+                        if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                            submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> رفع صورة الملحق ${i + 1}...`;
+                            const file = fileInput.files[0];
+                            
+                            // Let's compress it just in case
+                            const compressedFile = await compressImage(file, 2); // max 2MB for accessories
+                            
+                            const signUrl = `/api/cloudinary/sign?folder=accessories`;
+                            const signRes = await fetch(signUrl);
+                            const signData = await signRes.json();
+                            
+                            const formData = new FormData();
+                            formData.append('file', compressedFile);
+                            formData.append('api_key', signData.api_key);
+                            formData.append('timestamp', signData.timestamp);
+                            formData.append('signature', signData.signature);
+                            formData.append('folder', signData.folder);
+                            
+                            const uploadEndpoint = `https://api.cloudinary.com/v1_1/${signData.cloud_name}/image/upload`;
+                            const cloudRes = await fetch(uploadEndpoint, { method: 'POST', body: formData });
+                            const cloudData = await cloudRes.json();
+                            
+                            if (cloudData.secure_url) {
+                                row.querySelector('.acc-image').value = cloudData.secure_url;
+                            }
+                        }
+                    }
+                    // Sync the inputs into the JSON payload
+                    updateAccessoriesInput();
+                }
+
+                // 5. Preserve perfect drag-and-drop sort order.
+                // We map all imageState objects (which now all have real URLs)
+                const finalOrderedUrls = imageState.map(img => img.url);
+
+                // 6. Send the exact ordered sequence to the backend via 'image_urls'
+                document.getElementById('directUploadUrls').value = JSON.stringify(finalOrderedUrls);
+
+                // 6. Clear other inputs so backend 'updateProductAdmin' doesn't prepend or append duplicates
+                document.getElementById('scrapedImagesInput').value = '[]';
+                document.getElementById('retainedImagesInput').value = '[]';
+
+                // 7. Submit form normally
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+                form.submit();
+            } catch (err) {
+                console.error('Upload error:', err);
+                alert('خطأ في رفع الصور: ' + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+            return false;
+        }
+
+        // === Color Picker Logic (Adapted) ===
+        function updateImageDropdown() {
+            const dropdown = document.getElementById('imageDropdown');
+            dropdown.innerHTML = '<div style="padding: 8px; border-bottom: 1px solid #dee2e6; cursor: pointer;" onclick="selectImage(null, null)"><i class="fas fa-times-circle"></i> بدون صورة</div>';
+
+            imageState.forEach((img, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid #eee;';
+                item.onmouseover = () => item.style.background = '#f8f9fa';
+                item.onmouseout = () => item.style.background = 'white';
+                item.onclick = () => selectImage(index, img.url);
+
+                const thumb = document.createElement('img');
+                thumb.src = img.url;
+                thumb.style.cssText = 'width: 40px; height: 40px; object-fit: cover; border-radius: 4px;';
+
+                const label = document.createElement('span');
+                label.textContent = `صورة ${index + 1}`;
+
+                item.appendChild(thumb);
+                item.appendChild(label);
+                dropdown.appendChild(item);
+            });
+        }
+
+        function toggleImageDropdown() {
+            const dropdown = document.getElementById('imageDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function selectImage(index, imageSrc) {
+            selectedImageIndex = index;
+            const preview = document.getElementById('selectedImagePreview');
+            const thumb = document.getElementById('selectedImageThumb');
+            const noImageBtn = document.getElementById('noImageButton');
+
+            if (index === null) {
+                preview.style.display = 'none';
+                noImageBtn.style.display = 'block';
+            } else {
+                thumb.src = imageSrc;
+                preview.style.display = 'block';
+                noImageBtn.style.display = 'none';
+            }
+            toggleImageDropdown();
+        }
+
+        // === Eye Dropper Logic ===
+        let eyeDropperActiveImageIndex = null;
+
+        function openEyeDropper() {
+            if (imageState.length === 0) {
+                alert('الرجاء رفع صور للمنتج أولاً لتتمكن من سحب الألوان منها.');
+                return;
+            }
+            const modal = document.getElementById('eyeDropperModal');
+            document.getElementById('eyeDropperStep1').style.display = 'block';
+            document.getElementById('eyeDropperStep2').style.display = 'none';
+            modal.style.display = 'flex';
+            renderEyeDropperList();
+        }
+
+        function closeEyeDropper() {
+            document.getElementById('eyeDropperModal').style.display = 'none';
+        }
+
+        function renderEyeDropperList() {
+            const list = document.getElementById('eyeDropperImageList');
+            list.innerHTML = '';
+
+            imageState.forEach((img, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'flex-shrink: 0; width: 100px; cursor: pointer; border: 2px solid transparent; border-radius: 8px; overflow: hidden; transition: 0.2s;';
+                wrapper.onmouseover = () => wrapper.style.borderColor = 'var(--primary)';
+                wrapper.onmouseout = () => wrapper.style.borderColor = 'transparent';
+                wrapper.onclick = () => activateEyeDropperCanvas(index, img.url);
+
+                const el = document.createElement('img');
+                el.src = img.url;
+                el.style.cssText = 'width: 100px; height: 100px; object-fit: cover; display: block;';
+
+                const label = document.createElement('div');
+                label.style.cssText = 'text-align: center; background: #eee; padding: 2px; font-size: 12px;';
+                label.innerHTML = `صورة ${index + 1}`;
+
+                wrapper.appendChild(el);
+                wrapper.appendChild(label);
+                list.appendChild(wrapper);
+            });
+        }
+
+        function activateEyeDropperCanvas(index, src) {
+            eyeDropperActiveImageIndex = index;
+            document.getElementById('eyeDropperStep1').style.display = 'none';
+            document.getElementById('eyeDropperStep2').style.display = 'flex';
+
+            const canvas = document.getElementById('eyeDropperCanvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            const img = new Image();
+            img.crossOrigin = "Anonymous"; // Crucial for CORS and canvas reading
+            img.onload = () => {
+                // Ensure canvas matches image dimensions
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // Add click event for pixel extraction
+                canvas.onclick = function (event) {
+                    const rect = canvas.getBoundingClientRect();
+                    // Calculate scale to map screen pixels to canvas pixels
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+
+                    const x = (event.clientX - rect.left) * scaleX;
+                    const y = (event.clientY - rect.top) * scaleY;
+
+                    try {
+                        const pixel = ctx.getImageData(x, y, 1, 1).data;
+                        const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+
+                        // Set the selected color and close modal
+                        document.getElementById('colorPicker').value = hex;
+
+                        // Temporarily set the selectedImageIndex without closing dropdown directly 
+                        // (we just simulate the user picking it)
+                        selectedImageIndex = eyeDropperActiveImageIndex;
+                        const preview = document.getElementById('selectedImagePreview');
+                        const thumb = document.getElementById('selectedImageThumb');
+                        const noImageBtn = document.getElementById('noImageButton');
+
+                        thumb.src = src;
+                        preview.style.display = 'block';
+                        noImageBtn.style.display = 'none';
+
+                        closeEyeDropper();
+                    } catch (e) {
+                        alert("لا يمكن سحب اللون من هذه الصورة بأمان بسبب قيود المتصفح (CORS).");
+                        console.error(e);
+                    }
+                };
+            };
+            img.src = src;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toLowerCase();
+        }
+
+        // Colors Rendering
+        if (typeof renderColors === 'undefined') {
+            // Re-define renderColors if it was lost or keep existing logic structure
+            // Just putting a placeholder here assuming standard logic
+        }
+
+
+        // --- Colors Utility Functions (Copied from original to ensure they exist) ---
+        function updateColorsInput() {
+            const colorsInput = document.getElementById('colorsInput');
+            if (colorsInput) {
+                // Strip the temporary DOM 'imageId' before sending to the database
+                const cleanColors = colors.map(c => ({ color: c.color, imageIndex: c.imageIndex }));
+                colorsInput.value = JSON.stringify(cleanColors);
+            }
+        }
+
+        function renderColors() {
+            const container = document.getElementById('colorsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            colors.forEach((c, idx) => {
+                const div = document.createElement('div');
+                div.className = 'color-swatch-item';
+                div.style.cssText = 'display:inline-flex; align-items:center; gap:8px; background:#f8f9fa; padding:6px 14px; border-radius:50px; margin:5px; border:1px solid #ddd; cursor:pointer; transition: all 0.2s;';
+                div.onmouseover = () => { div.style.borderColor = 'var(--primary)'; div.style.transform = 'translateY(-2px)'; div.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)'; };
+                div.onmouseout = () => { div.style.borderColor = '#ddd'; div.style.transform = 'none'; div.style.boxShadow = 'none'; };
+                div.onclick = () => editColor(idx);
+                
+                div.innerHTML = `
+                    <div style="width:18px;height:18px;border-radius:50%;background:${c.color};border:1px solid rgba(0,0,0,0.1);"></div>
+                    <span style="font-size: 13px; font-weight: 500;">${c.color}</span>
+                    ${c.imageIndex !== null ? `<i class="fas fa-link" style="color:var(--primary); font-size: 11px;" title="مرتبط بصورة ${c.imageIndex + 1}"></i>` : '<i class="fas fa-link-slash" style="color:#999; font-size: 11px;" title="غير مرتبط بصورة"></i>'}
+                    <span style="color:#dc3545; cursor:pointer; margin-right:5px; padding: 2px 5px;" onclick="event.stopPropagation(); removeColor(${idx})">
+                        <i class="fas fa-trash" style="font-size: 11px;"></i>
+                    </span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function editColor(index) {
+            const c = colors[index];
+            if (!c) return;
+
+            // Load into picker
+            document.getElementById('colorPicker').value = c.color.toLowerCase();
+            
+            // Load image mapping
+            selectImage(c.imageIndex, (c.imageIndex !== null && imageState[c.imageIndex]) ? imageState[c.imageIndex].url : null);
+            
+            // Visual feedback - highlight the active swatch
+            const container = document.getElementById('colorsContainer');
+            Array.from(container.children).forEach((child, i) => {
+                if (i === index) {
+                    child.style.background = '#eef2ff';
+                    child.style.borderColor = 'var(--primary)';
+                    child.style.boxShadow = '0 0 0 2px rgba(79, 70, 229, 0.2)';
+                } else {
+                    child.style.background = '#f8f9fa';
+                    child.style.borderColor = '#ddd';
+                    child.style.boxShadow = 'none';
+                }
+            });
+            
+            // Scroll to picker for better visibility
+            document.getElementById('colorPicker').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function removeColor(index) {
+            colors.splice(index, 1);
+            updateColorsInput();
+            renderColors();
+            if (typeof generateVariantsTable === 'function') generateVariantsTable();
+        }
+
+        function addColor() {
+            const picker = document.getElementById('colorPicker');
+            const color = picker.value.toLowerCase(); // Standardize to lowercase
+            
+            let imageId = null;
+            if (selectedImageIndex !== null && imageState[selectedImageIndex]) {
+                imageId = imageState[selectedImageIndex].id;
+            }
+
+            // Check if color already exists (case-insensitive)
+            const exists = colors.find(c => c.color.toLowerCase() === color);
+            if (exists) {
+                exists.imageIndex = selectedImageIndex;
+                exists.imageId = imageId;
+                exists.color = color; // Sync with picker value
+            } else {
+                colors.push({ color, imageIndex: selectedImageIndex, imageId });
+            }
+
+            // Reset selection state
+            selectedImageIndex = null;
+            document.getElementById('selectedImagePreview').style.display = 'none';
+            document.getElementById('noImageButton').style.display = 'block';
+            
+            // Reset visual feedback on swatches
+            const container = document.getElementById('colorsContainer');
+            if (container) {
+                Array.from(container.children).forEach(child => {
+                    child.style.background = '#f8f9fa';
+                    child.style.borderColor = '#ddd';
+                    child.style.boxShadow = 'none';
+                });
+            }
+
+            updateColorsInput();
+            renderColors();
+            if (typeof generateVariantsTable === 'function') generateVariantsTable();
+        }
+
+        // === Variants Logic ===
+        let activeVariants = [];
+        
+        function parseSizes() {
+            const input = document.getElementById('sizesInput').value || '';
+            return input.split(/[,،]/).map(s => s.trim()).filter(s => s);
+        }
+
+        function buildCombinations() {
+            const currSizes = parseSizes();
+            const currColors = colors.map(c => c.color);
+            
+            const combinations = [];
+            
+            if (currSizes.length === 0 && currColors.length === 0) {
+            	// No variants selected
+                return [];
+            }
+            
+            if (currSizes.length > 0 && currColors.length === 0) {
+                currSizes.forEach(s => combinations.push({size: s, color: null}));
+            } else if (currSizes.length === 0 && currColors.length > 0) {
+                currColors.forEach(c => combinations.push({size: null, color: c}));
+            } else {
+                currSizes.forEach(s => {
+                    currColors.forEach(c => {
+                        combinations.push({size: s, color: c});
+                    });
+                });
+            }
+            return combinations;
+        }
+
+        function generateVariantsTable() {
+            const tbody = document.querySelector('#variantsTable tbody');
+            const combinations = buildCombinations();
+            
+            // Backup currently inputted data in table
+            const currentInputs = Array.from(tbody.querySelectorAll('tr')).map(tr => ({
+                size: tr.dataset.size,
+                color: tr.dataset.color,
+                sku: tr.querySelector('.variant-sku').value,
+                stock: tr.querySelector('.variant-stock').value
+            }));
+
+            // Identify initial load existing variants
+            const productDataEl = document.getElementById('server-product-data');
+            const existingProduct = productDataEl && productDataEl.getAttribute('data-product') !== 'null' ? JSON.parse(productDataEl.getAttribute('data-product')) : null;
+            const dbVariants = (existingProduct && existingProduct.product_variants) ? existingProduct.product_variants : [];
+
+            document.getElementById('variantsTable').style.display = combinations.length > 0 ? 'table' : 'none';
+            tbody.innerHTML = '';
+            activeVariants = [];
+
+            if (combinations.length === 0) {
+                updateVariantsInput();
+                return;
+            }
+
+            combinations.forEach((combo, idx) => {
+                const tr = document.createElement('tr');
+                tr.dataset.size = combo.size || '';
+                tr.dataset.color = combo.color || '';
+
+                // Try to find previously typed input
+                let matchedInput = currentInputs.find(c => c.size === (combo.size || '') && c.color === (combo.color || ''));
+                
+                // Try to find from DB on first load (if matchedInput is empty)
+                if (!matchedInput) {
+                    const matchedDb = dbVariants.find(v => (v.size || '') === (combo.size || '') && (v.color || '') === (combo.color || ''));
+                    if (matchedDb) {
+                        matchedInput = { sku: matchedDb.sku || '', stock: matchedDb.stock || 0 };
+                    }
+                }
+
+                const skuVal = matchedInput ? matchedInput.sku : '';
+                const stockVal = matchedInput ? matchedInput.stock : 0;
+
+                tr.innerHTML = `
+                    <td class="align-middle">${combo.size || '-'}</td>
+                    <td class="align-middle">
+                        ${combo.color ? `<div style="display:inline-block; width:15px; height:15px; border-radius:50%; background:${combo.color}; vertical-align:-2px; border:1px solid #ccc;"></div> <span dir="ltr">${combo.color}</span>` : '-'}
+                    </td>
+                    <td><input type="text" class="form-control variant-sku" placeholder="كود اختياري" value="${skuVal}" onchange="updateVariantsInput()"></td>
+                    <td><input type="number" class="form-control variant-stock" min="0" value="${stockVal}" onchange="updateVariantsInput()" oninput="updateVariantsInput()"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateVariantsInput();
+        }
+
+        function updateVariantsInput() {
+            const rows = document.querySelectorAll('#variantsTable tbody tr');
+            const result = [];
+            let totalStock = 0;
+            rows.forEach(tr => {
+                const stockVal = parseInt(tr.querySelector('.variant-stock').value) || 0;
+                totalStock += stockVal;
+                result.push({
+                    size: tr.dataset.size || null,
+                    color: tr.dataset.color || null,
+                    sku: tr.querySelector('.variant-sku').value,
+                    stock: stockVal
+                });
+            });
+            document.getElementById('variantsDataInput').value = JSON.stringify(result);
+
+            // Auto-sync main stock with variant totals
+            const mainStockInput = document.getElementById('mainStockInput');
+            const stockSyncHint = document.getElementById('stockSyncHint');
+            if (rows.length > 0) {
+                mainStockInput.value = totalStock;
+                mainStockInput.readOnly = true;
+                mainStockInput.style.background = '#f1f5f9';
+                mainStockInput.style.cursor = 'not-allowed';
+                if (stockSyncHint) stockSyncHint.style.display = 'block';
+            } else {
+                mainStockInput.readOnly = false;
+                mainStockInput.style.background = '';
+                mainStockInput.style.cursor = '';
+                if (stockSyncHint) stockSyncHint.style.display = 'none';
+            }
+        }
+
+        // ==========================
+        // === Accessories Logic ===
+        // ==========================
+        function loadExistingAccessories() {
+            const rawData = document.getElementById('accessoriesDataInput').value;
+            let accList = [];
+            try {
+                accList = JSON.parse(rawData);
+            } catch (e) {}
+            
+            if (Array.isArray(accList)) {
+                accList.forEach(acc => addAccessoryRow(acc));
+            }
+        }
+
+        function generateUniqueId() {
+            return 'acc_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function addAccessoryRow(data = null) {
+            const tbody = document.querySelector('#accessoriesTable tbody');
+            const tr = document.createElement('tr');
+            
+            const id = data?.id || generateUniqueId();
+            const imageUrl = data?.image_url || '';
+            const name = data?.name || '';
+            const price = data?.price || 0;
+
+            tr.innerHTML = `
+                <td>
+                    <div style="display: flex; gap: 10px; align-items: flex-start;">
+                        <img src="${imageUrl || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #ccc; flex-shrink:0;" onerror="this.src='https://via.placeholder.com/40'">
+                        <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1;">
+                            <input type="text" class="form-control form-control-sm acc-image" value="${imageUrl}" placeholder="رابط URL..." onchange="updateAccessoriesInput(); this.parentElement.previousElementSibling.src = this.value || 'https://via.placeholder.com/40'">
+                            <input type="file" class="form-control form-control-sm acc-file" accept="image/*" onchange="const img=this.parentElement.previousElementSibling; if(this.files[0]){img.src=URL.createObjectURL(this.files[0]);} this.previousElementSibling.value=''; updateAccessoriesInput();">
+                        </div>
+                    </div>
+                </td>
+                <td><input type="text" class="form-control form-control-sm acc-name" placeholder="مثال: تغليف هدية فاخر" value="${name}" onchange="updateAccessoriesInput()"></td>
+                <td><input type="number" class="form-control form-control-sm acc-price" placeholder="0" min="0" value="${price}" onchange="updateAccessoriesInput()"></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); updateAccessoriesInput()"><i class="fas fa-trash"></i> إزالة</button></td>
+            `;
+            tr.dataset.id = id;
+            tbody.appendChild(tr);
+            updateAccessoriesInput();
+        }
+
+        function updateAccessoriesInput() {
+            const rows = document.querySelectorAll('#accessoriesTable tbody tr');
+            const result = [];
+            rows.forEach(tr => {
+                const name = tr.querySelector('.acc-name').value.trim();
+                const price = parseFloat(tr.querySelector('.acc-price').value) || 0;
+                const image_url = tr.querySelector('.acc-image').value.trim();
+                
+                if (name) {
+                    result.push({
+                        id: tr.dataset.id,
+                        name,
+                        price,
+                        image_url
+                    });
+                }
+            });
+            document.getElementById('accessoriesDataInput').value = JSON.stringify(result);
+        }
+
+        // Add initialization to DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+            loadExistingAccessories();
+        });
+
+        // ==========================
+
+        // On Load initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                generateVariantsTable();
+            }, 500); // Wait for sizes and colors to finish parsing
+
+            const sInput = document.getElementById('sizesInput');
+            if (sInput) {
+                sInput.addEventListener('input', () => {
+                    generateVariantsTable();
+                });
+            }
+        });
+
+        // Discount Management Logic
+        let discountMode = 'percent'; 
+
+        function setDiscountMode(mode) {
+            discountMode = mode;
+            const price = parseFloat(document.querySelector('input[name="price"]').value) || 0;
+            const currentDiscount = parseFloat(document.getElementById('hiddenDiscount').value) || 0;
+            const btnPercent = document.getElementById('btnPercent');
+            const btnPrice = document.getElementById('btnPrice');
+            const label = document.getElementById('discountLabel');
+            const input = document.getElementById('discountInput');
+
+            if (mode === 'percent') {
+                btnPercent.style.background = 'var(--primary)';
+                btnPercent.style.color = 'white';
+                btnPrice.style.background = 'transparent';
+                btnPrice.style.color = '#64748b';
+                label.textContent = '%';
+                input.value = currentDiscount;
+            } else {
+                btnPrice.style.background = 'var(--primary)';
+                btnPrice.style.color = 'white';
+                btnPercent.style.background = 'transparent';
+                btnPercent.style.color = '#64748b';
+                label.textContent = 'ج.م';
+                input.value = (price * (1 - currentDiscount / 100)).toFixed(2);
+            }
+            handleDiscountInput();
+        }
+
+        function handleDiscountInput() {
+            const price = parseFloat(document.querySelector('input[name="price"]').value) || 0;
+            const inputVal = parseFloat(document.getElementById('discountInput').value) || 0;
+            const hiddenInput = document.getElementById('hiddenDiscount');
+            const hint = document.getElementById('discountHint');
+
+            if (discountMode === 'percent') {
+                hiddenInput.value = inputVal;
+                const finalPrice = price * (1 - inputVal / 100);
+                hint.textContent = inputVal > 0 ? `السعر بعد الخصم: ${finalPrice.toFixed(2)} ج.م` : '';
+            } else {
+                if (price > 0) {
+                    const percentage = Math.max(0, Math.min(100, (1 - (inputVal / price)) * 100));
+                    hiddenInput.value = percentage;
+                    hint.textContent = inputVal > 0 ? `نسبة الخصم المحسوبة: ${percentage.toFixed(2)}%` : '';
+                } else {
+                    hiddenInput.value = 0;
+                    hint.textContent = 'أدخل سعر المنتج أولاً';
+                }
+            }
+        }
+    </script>
+
+    <%- include('partials/footer') %>

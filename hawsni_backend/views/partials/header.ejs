@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= locals.title || 'hwasi Admin' %>
+    </title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="/admin/dashboard" class="sidebar-brand">
+                    <i class="fas fa-gem" style="font-size: 2rem;"></i>
+                    <h1>hwasi <span>Admin</span></h1>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">القائمة الرئيسية</div>
+                    <a href="/admin/dashboard" class="nav-link <%= page === 'dashboard' ? 'active' : '' %>">
+                        <i class="fas fa-home"></i>
+                        <span>لوحة التحكم</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">إدارة المتجر</div>
+                    <a href="/admin/products" class="nav-link <%= page === 'products' ? 'active' : '' %>">
+                        <i class="fas fa-box"></i>
+                        <span>المنتجات</span>
+                    </a>
+                    <a href="/admin/categories" class="nav-link <%= page === 'categories' ? 'active' : '' %>">
+                        <i class="fas fa-tags"></i>
+                        <span>التصنيفات</span>
+                    </a>
+                    <a href="/admin/banners" class="nav-link <%= page === 'banners' ? 'active' : '' %>">
+                        <i class="fas fa-images"></i>
+                        <span>البنرات</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">الطلبات والعملاء</div>
+                    <a href="/admin/orders" class="nav-link <%= page === 'orders' ? 'active' : '' %>">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>الطلبات</span>
+                    </a>
+                    <a href="/admin/users" class="nav-link <%= page === 'users' ? 'active' : '' %>">
+                        <i class="fas fa-users"></i>
+                        <span>المستخدمين</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">التواصل والدعم</div>
+                    <a href="/admin/chat" class="nav-link <%= locals.page === 'chat' ? 'active' : '' %>">
+                        <i class="fas fa-comment-dots" style="color:#0ea5e9;"></i>
+                        <span>شات الدعم المباشر</span>
+                    </a>
+                    <a href="/admin/reviews" class="nav-link <%= page === 'reviews' ? 'active' : '' %>">
+                        <i class="fas fa-star" style="color:#F59E0B;"></i>
+                        <span>التقييمات</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">الإعدادات</div>
+                    <a href="/admin/settings" class="nav-link <%= page === 'settings' ? 'active' : '' %>">
+                        <i class="fas fa-cog"></i>
+                        <span>إعدادات المتجر</span>
+                    </a>
+                    <a href="/admin/shipping" class="nav-link <%= page === 'shipping' ? 'active' : '' %>">
+                        <i class="fas fa-truck"></i>
+                        <span>إعدادات الشحن</span>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Logout at bottom of sidebar -->
+            <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
+                <a href="/admin/logout" 
+                   onclick="return confirm('هل أنت متأكد من تسجيل الخروج؟')"
+                   style="display:flex; align-items:center; gap:10px; color:#f87171; text-decoration:none; padding:10px 12px; border-radius:10px; font-weight:700; font-size:0.9rem; transition:background 0.2s;"
+                   onmouseover="this.style.background='rgba(239,68,68,0.15)'" 
+                   onmouseout="this.style.background='transparent'">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="topbar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button id="menuToggle" class="btn btn-secondary">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">
+                        <%= locals.pageTitle || locals.title || 'لوحة التحكم' %>
+                    </h1>
+                </div>
+
+                <div class="topbar-actions">
+                    <a href="https://hwasi.com" target="_blank" class="btn btn-secondary">
+                        <i class="fas fa-external-link-alt"></i>
+                        عرض المتجر
+                    </a>
+                    <a href="/admin/logout" class="btn btn-danger" style="display:flex;align-items:center;gap:6px;" onclick="return confirm('هل أنت متأكد من تسجيل الخروج؟')">
+                        <i class="fas fa-sign-out-alt"></i>
+                        خروج
+                    </a>
+                </div>
+            </div>
+
+            <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+            <div class="content-wrapper">

@@ -1,0 +1,5 @@
+# Ignore uploaded files (they live in Cloudinary)
+public/uploads/
+
+# Ignore frontend folder accidentally nested inside backend
+hawsni-web/

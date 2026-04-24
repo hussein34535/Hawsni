@@ -1,0 +1,116 @@
+<%- include('partials/header', { title: 'إدارة التصنيفات' , pageTitle: 'التصنيفات' , page: 'categories' }) %>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-tags"></i> جميع التصنيفات
+            </h2>
+            <button onclick="showAddForm()" class="btn btn-primary">
+                <i class="fas fa-plus"></i> إضافة تصنيف جديد
+            </button>
+        </div>
+
+        <!-- Add Form (hidden by default) -->
+        <div id="addForm"
+            style="display: none; margin-bottom: 2rem; padding: 1.5rem; background: var(--light-gray); border-radius: var(--radius-md);">
+            <h3 style="margin-bottom: 1rem; color: var(--dark-gray);">
+                <i class="fas fa-plus"></i> إضافة تصنيف جديد
+            </h3>
+            <form method="POST" action="/categories" enctype="multipart/form-data">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="two-col-grid">
+                    <div class="form-group">
+                        <label class="form-label">اسم التصنيف <span style="color: var(--danger);">*</span></label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">الصورة</label>
+                        <input type="file" name="image" class="form-control" accept="image/*">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الوصف</label>
+                    <textarea name="description" class="form-control" rows="2"></textarea>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fas fa-save"></i> إضافة
+                    </button>
+                    <button type="button" onclick="hideAddForm()" class="btn btn-secondary btn-sm">إلغاء</button>
+                </div>
+            </form>
+        </div>
+
+        <% if (categories && categories.length> 0) { %>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+                <% categories.forEach(category=> { %>
+                    <div class="card" style="margin: 0; transition: transform var(--transition-fast); cursor: pointer;">
+                        <% if (category.image) { %>
+                            <div
+                                style="height: 150px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1rem;">
+                                <img src="<%= category.image %>" alt="<%= category.name %>"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <% } else { %>
+                                <div
+                                    style="height: 150px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+                                    <i class="fas fa-folder"
+                                        style="font-size: 3rem; color: var(--dark); opacity: 0.3;"></i>
+                                </div>
+                                <% } %>
+
+                                    <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--dark-gray);">
+                                        <%= category.name %>
+                                    </h3>
+
+                                    <p style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 1rem;">
+                                        <%= category.description || 'لا يوجد وصف' %>
+                                    </p>
+
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <a href="/categories/<%= category.id %>/edit" class="btn btn-secondary btn-sm"
+                                            style="flex: 1;">
+                                            <i class="fas fa-edit"></i> تعديل
+                                        </a>
+                                        <button
+                                            onclick="handleDelete('/categories/<%= category.id %>/delete', 'هذا التصنيف')"
+                                            class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                    </div>
+                    <% }) %>
+            </div>
+            <% } else { %>
+                <div class="text-center" style="padding: 3rem; color: var(--medium-gray);">
+                    <i class="fas fa-tags" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <p style="font-size: 1.1rem;">لا توجد تصنيفات حتى الآن</p>
+                    <button onclick="showAddForm()" class="btn btn-primary" style="margin-top: 1rem;">
+                        <i class="fas fa-plus"></i> إضافة أول تصنيف
+                    </button>
+                </div>
+                <% } %>
+    </div>
+
+    <script>
+        function showAddForm() {
+            document.getElementById('addForm').style.display = 'block';
+        }
+
+        function hideAddForm() {
+            document.getElementById('addForm').style.display = 'none';
+        }
+
+        // Override handleDelete for categories (uses POST to /categories/:id/delete)
+        function handleDelete(url, itemName) {
+            showConfirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = url;
+                document.body.appendChild(form);
+                form.submit();
+            });
+        }
+    </script>
+
+    <%- include('partials/footer') %>

@@ -1,0 +1,100 @@
+const UserService = require('../../services/userService');
+const AddressService = require('../../services/addressService');
+
+class UserController {
+    async getProfile(req, res) {
+        try {
+            const user = await UserService.getProfile(req.user.id);
+            res.json({ success: true, user });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async updateProfile(req, res) {
+        try {
+            const { name, phone } = req.body;
+            const user = await UserService.updateProfile(req.user.id, { name, phone });
+            res.json({ success: true, user });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async uploadAvatar(req, res) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ success: false, message: 'No file uploaded' });
+            }
+            const user = await UserService.uploadAvatar(req.user.id, req.file);
+            res.json({ success: true, user });
+        } catch (error) {
+            console.error('Upload Avatar Error:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async getAddresses(req, res) {
+        try {
+            const addresses = await AddressService.getAddresses(req.user.id);
+            res.json({ success: true, addresses });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async addAddress(req, res) {
+        try {
+            const address = await AddressService.addAddress(req.user.id, req.body);
+            res.json({ success: true, address });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async updateAddress(req, res) {
+        try {
+            const address = await AddressService.updateAddress(req.user.id, req.params.addressId, req.body);
+            res.json({ success: true, address });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async deleteAddress(req, res) {
+        try {
+            await AddressService.deleteAddress(req.user.id, req.params.addressId);
+            res.json({ success: true, message: 'Address deleted' });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async updateFcmToken(req, res) {
+        try {
+            const { fcmToken } = req.body;
+            if (!fcmToken) {
+                return res.status(400).json({ success: false, message: 'FCM Token is required' });
+            }
+            // Use updateProfile since it is generic
+            await UserService.updateProfile(req.user.id, { fcm_token: fcmToken });
+            res.json({ success: true, message: 'FCM Token updated' });
+        } catch (error) {
+            console.error('Update FCM Token Error:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    // Admin Method
+    async getAllUsers(req, res) {
+        try {
+            // Check admin role or assume middleware does it
+            const users = await UserService.getAllUsers();
+            res.json({ success: true, users });
+        } catch (error) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+}
+
+module.exports = new UserController();

@@ -1,0 +1,284 @@
+<%- include('partials/header', { title: 'إدارة التقييمات' , pageTitle: 'إدارة التقييمات' , page: 'reviews' }) %>
+
+    <% if (locals.success) { %>
+        <div
+            style="background:#d1fae5; border:1px solid #6ee7b7; color:#065f46; padding:12px 20px; border-radius:12px; margin-bottom:20px; font-weight:bold;">
+            ✅ تم إضافة التقييم بنجاح!
+        </div>
+        <% } %>
+            <% if (locals.error) { %>
+                <div
+                    style="background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:12px 20px; border-radius:12px; margin-bottom:20px; font-weight:bold;">
+                    ❌ خطأ: <%= error %>
+                </div>
+                <% } %>
+
+                    <div style="display:grid; grid-template-columns:1fr 1.5fr; gap:24px; align-items:start;">
+
+                        <!-- ── Add Review Form ── -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title"><i class="fas fa-star" style="color:#F59E0B;"></i> إضافة تقييم
+                                    جديد</h2>
+                            </div>
+                            <div style="padding:1.5rem;">
+                                <form method="POST" action="/reviews">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                                    <div class="form-group">
+                                        <label class="form-label">المنتج</label>
+                                        <select name="product_id" class="form-control" required>
+                                            <option value="">— اختر منتج —</option>
+                                            <% products.forEach(p=> { %>
+                                                <option value="<%= p.id %>">
+                                                    <%= p.name %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">اسم المراجع (مخصص)</label>
+                                        <input type="text" name="custom_name" class="form-control" required
+                                            placeholder="مثال: أحمد محمد">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">التقييم</label>
+                                        <div id="starPicker"
+                                            style="display:flex; gap:8px; font-size:2rem; cursor:pointer; margin-bottom:4px;">
+                                            <% [1,2,3,4,5].forEach(s=> { %>
+                                                <span class="star-btn" data-val="<%= s %>"
+                                                    style="color:#D1D5DB; transition:color .15s;">★</span>
+                                                <% }) %>
+                                        </div>
+                                        <input type="hidden" name="rating" id="ratingInput" required value="0">
+                                        <small style="color:#9CA3AF;">اضغط على نجمة لاختيار التقييم</small>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">التعليق</label>
+                                        <textarea name="comment" class="form-control" rows="4" required
+                                            placeholder="اكتب التعليق هنا..."></textarea>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-images" style="color:#6366F1;"></i>
+                                            الصور (اختياري - حتى 4 صور)
+                                        </label>
+
+                                        <!-- Image preview grid -->
+                                        <div id="imgPreviews"
+                                            style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; min-height:0;">
+                                        </div>
+
+                                        <!-- Pick button -->
+                                        <button type="button" id="pickImgBtn"
+                                            style="display:flex; align-items:center; gap:8px; padding:8px 16px; border:2px dashed #C7D2FE; border-radius:12px; background:#F5F3FF; color:#6366F1; font-weight:bold; cursor:pointer; font-size:0.85rem;"
+                                            onclick="document.getElementById('imgFileInput').click()">
+                                            <i class="fas fa-cloud-upload-alt"></i> اختر صور
+                                        </button>
+                                        <input type="file" id="imgFileInput" accept="image/*" multiple hidden>
+
+                                        <!-- Upload progress -->
+                                        <div id="uploadStatus"
+                                            style="display:none; margin-top:8px; color:#6366F1; font-size:0.82rem; font-weight:bold;">
+                                            <i class="fas fa-spinner fa-spin"></i> جاري رفع الصور...
+                                        </div>
+
+                                        <!-- Hidden inputs will be injected here by JS -->
+                                        <div id="hiddenImgInputs"></div>
+                                    </div>
+
+                                    <button type="submit" id="submitBtn" class="btn btn-primary" style="width:100%;">
+                                        <i class="fas fa-paper-plane"></i> إرسال التقييم
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- ── Reviews Table ── -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title"><i class="fas fa-list"></i> آخر التقييمات (<%= reviews.length %>)
+                                </h2>
+                            </div>
+                            <div style="overflow-x:auto; max-height:70vh; overflow-y:auto;">
+                                <table class="table" style="font-size:0.9rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>المنتج</th>
+                                            <th>الاسم</th>
+                                            <th>التقييم</th>
+                                            <th>التعليق</th>
+                                            <th>التاريخ</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (reviews.length===0) { %>
+                                            <tr>
+                                                <td colspan="6" style="text-align:center; color:#9CA3AF; padding:2rem;">
+                                                    لا توجد تقييمات بعد</td>
+                                            </tr>
+                                            <% } else { %>
+                                                <% reviews.forEach(r=> { %>
+                                                    <tr>
+                                                        <td
+                                                            style="font-weight:bold; max-width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                                            <%= r.productName %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (r.custom_name) { %>
+                                                                <span
+                                                                    style="background:#EDE9FE; color:#7C3AED; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">
+                                                                    ✍️ <%= r.custom_name %>
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <span style="color:#6B7280;">عميل</span>
+                                                                    <% } %>
+                                                        </td>
+                                                        <td
+                                                            style="color:#F59E0B; font-size:1.1rem; white-space:nowrap;">
+                                                            <% for(let i=0;i<r.rating;i++){%>★<% } %>
+                                                                    <% for(let i=r.rating;i<5;i++){%><span
+                                                                            style="color:#D1D5DB;">★</span>
+                                                                        <% } %>
+                                                        </td>
+                                                        <td style="max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                                                            title="<%= r.comment %>">
+                                                            <%= r.comment %>
+                                                        </td>
+                                                        <td
+                                                            style="color:#9CA3AF; font-size:0.8rem; white-space:nowrap;">
+                                                            <%= new Date(r.created_at).toLocaleDateString('ar-EG') %>
+                                                        </td>
+                                                        <td>
+                                                            <button onclick="deleteReview('<%= r.id %>')"
+                                                                style="background:none; border:none; color:#EF4444; cursor:pointer; padding:4px;"
+                                                                title="حذف">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                                        <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <script>
+                        // ── Cloudinary Config ─────────────────────────────────────────────────────────
+                        const CLOUD_NAME = 'djxkwged9';
+                        const UPLOAD_PRESET = 'hawsni_reviews';
+
+                        let selectedFiles = [];
+
+                        const fileInput = document.getElementById('imgFileInput');
+                        const previews = document.getElementById('imgPreviews');
+                        const hiddenDiv = document.getElementById('hiddenImgInputs');
+                        const statusDiv = document.getElementById('uploadStatus');
+                        const submitBtn = document.getElementById('submitBtn');
+                        const reviewForm = submitBtn.closest('form');
+
+                        fileInput.addEventListener('change', () => {
+                            const newFiles = Array.from(fileInput.files);
+                            const remaining = 4 - selectedFiles.length;
+                            selectedFiles = [...selectedFiles, ...newFiles.slice(0, remaining)].slice(0, 4);
+                            fileInput.value = '';
+                            renderPreviews();
+                        });
+
+                        function renderPreviews() {
+                            previews.innerHTML = '';
+                            selectedFiles.forEach((file, i) => {
+                                const reader = new FileReader();
+                                reader.onload = e => {
+                                    const wrap = document.createElement('div');
+                                    wrap.style.cssText = 'position:relative; width:72px; height:72px;';
+                                    wrap.innerHTML = `
+                                        <img src="${e.target.result}" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid #E5E7EB;">
+                                        <button type="button" onclick="removeFile(${i})"
+                                            style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#EF4444;border:none;border-radius:50%;color:white;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+                                    `;
+                                    previews.appendChild(wrap);
+                                };
+                                reader.readAsDataURL(file);
+                            });
+                        }
+
+                        function removeFile(idx) {
+                            selectedFiles.splice(idx, 1);
+                            renderPreviews();
+                        }
+
+                        async function uploadSingle(file) {
+                            const fd = new FormData();
+                            fd.append('file', file);
+                            fd.append('upload_preset', UPLOAD_PRESET);
+                            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                                method: 'POST', body: fd
+                            });
+                            const data = await res.json();
+                            if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed');
+                            return data.secure_url;
+                        }
+
+                        reviewForm.addEventListener('submit', async function (e) {
+                            if (selectedFiles.length === 0) return; // no images → submit normally
+                            e.preventDefault();
+
+                            submitBtn.disabled = true;
+                            statusDiv.style.display = 'block';
+
+                            try {
+                                const urls = await Promise.all(selectedFiles.map(uploadSingle));
+                                hiddenDiv.innerHTML = '';
+                                urls.forEach(url => {
+                                    const inp = document.createElement('input');
+                                    inp.type = 'hidden';
+                                    inp.name = 'images[]';
+                                    inp.value = url;
+                                    hiddenDiv.appendChild(inp);
+                                });
+                                reviewForm.submit();
+                            } catch (err) {
+                                statusDiv.innerHTML = `<span style="color:#EF4444;">❌ فشل الرفع: ${err.message}</span>`;
+                                submitBtn.disabled = false;
+                            }
+                        });
+
+                        // ── Star Picker ───────────────────────────────────────────────────────────────
+                        const stars = document.querySelectorAll('.star-btn');
+                        const ratingInput = document.getElementById('ratingInput');
+
+                        stars.forEach(star => {
+                            star.addEventListener('mouseover', () => highlight(star.dataset.val));
+                            star.addEventListener('mouseout', () => highlight(ratingInput.value || 0));
+                            star.addEventListener('click', () => {
+                                ratingInput.value = star.dataset.val;
+                                highlight(star.dataset.val);
+                            });
+                        });
+
+                        function highlight(val) {
+                            stars.forEach(s => {
+                                s.style.color = parseInt(s.dataset.val) <= parseInt(val) ? '#F59E0B' : '#D1D5DB';
+                            });
+                        }
+
+                        // ── Delete Review ─────────────────────────────────────────────────────────────
+                        async function deleteReview(id) {
+                            if (!confirm('هل أنت متأكد من حذف هذا التقييم؟')) return;
+                            const res = await fetch(`/reviews/${id}`, { method: 'DELETE' });
+                            const data = await res.json();
+                            if (data.success) location.reload();
+                            else alert('فشل الحذف: ' + data.message);
+                        }
+                    </script>
+
+                    <%- include('partials/footer') %>

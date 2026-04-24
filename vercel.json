@@ -1,0 +1,77 @@
+{
+    "version": 2,
+    "cleanUrls": true,
+    "rewrites": [
+        {
+            "source": "/sitemap.xml",
+            "destination": "https://hwasibackend.vercel.app/sitemap.xml"
+        },
+        {
+            "source": "/robots.txt",
+            "destination": "https://hwasibackend.vercel.app/robots.txt"
+        },
+        {
+            "source": "/product/:id",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "User-Agent",
+                    "value": ".*(googlebot|bingbot|facebot|facebookexternalhit|twitterbot|whatsapp).*"
+                }
+            ],
+            "destination": "https://hwasibackend.vercel.app/product/:id"
+        },
+        {
+            "source": "/category/:id",
+            "has": [
+                {
+                    "type": "header",
+                    "key": "User-Agent",
+                    "value": ".*(googlebot|bingbot|facebot|facebookexternalhit|twitterbot|whatsapp).*"
+                }
+            ],
+            "destination": "https://hwasibackend.vercel.app/category/:id"
+        },
+        {
+            "source": "/((?!api/|sitemap.xml|robots.txt).*)",
+            "destination": "/index.html"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/(.*).wasm",
+            "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/wasm"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        },
+        {
+            "source": "/(.*).(js|json|css|png|jpg|jpeg|gif|svg|ico)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        },
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Cross-Origin-Embedder-Policy",
+                    "value": "require-corp"
+                },
+                {
+                    "key": "Cross-Origin-Opener-Policy",
+                    "value": "same-origin"
+                }
+            ]
+        }
+    ]
+}

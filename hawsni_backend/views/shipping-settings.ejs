@@ -1,0 +1,318 @@
+<%- include('partials/header', { title: 'إعدادات الشحن' , pageTitle: 'إعدادات الشحن' , page: 'shipping' }) %>
+
+    <style>
+        .shipping-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .shipping-card-header {
+            padding: 1.5rem 2rem;
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .shipping-card-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+        .shipping-card-body {
+            padding: 2rem;
+        }
+        .gov-table-header {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 1fr 60px;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+        .gov-row {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 1fr 60px;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 1px solid transparent;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.2s;
+        }
+        .gov-row:hover {
+            background: #fbfcfe;
+            border-color: #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transform: translateY(-2px);
+            z-index: 2;
+        }
+        .gov-row input {
+            border-radius: 0.75rem !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 0.6rem 1rem !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            transition: all 0.2s !important;
+        }
+        .gov-row input:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1) !important;
+            background: white !important;
+            outline: none !important;
+        }
+        .remove-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ef4444;
+            background: #fef2f2;
+            border: none;
+            transition: all 0.2s;
+        }
+        .remove-btn:hover {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.1);
+        }
+        .add-gov-btn {
+            background: white;
+            border: 2px dashed #cbd5e1;
+            color: #64748b;
+            width: 100%;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+        .add-gov-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: rgba(var(--primary-rgb), 0.02);
+        }
+        .info-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: #f0f9ff;
+            color: #0369a1;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            border: 1px solid #e0f2fe;
+        }
+        .save-bar {
+            position: sticky;
+            bottom: 2rem;
+            background: white;
+            padding: 1.25rem 2rem;
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 3rem;
+            border: 1px solid rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        @media (max-width: 768px) {
+            .gov-table-header { display: none; }
+            .gov-row {
+                grid-template-columns: 1fr 1fr;
+                padding: 1.5rem;
+                border: 1px solid #f1f5f9;
+                border-radius: 1.25rem;
+                margin-bottom: 1rem;
+            }
+            .gov-row input:first-child { grid-column: span 2; }
+            .remove-btn { grid-column: span 2; width: 100%; }
+        }
+    </style>
+
+    <div class="container-fluid py-4">
+        <form method="POST" action="/shipping">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            
+            <!-- Global Settings -->
+            <div class="shipping-card">
+                <div class="shipping-card-header">
+                    <h2 class="shipping-card-title">
+                        <i class="fas fa-globe-africa" style="color: var(--primary-color);"></i>
+                        الإعدادات الافتراضية العامة
+                    </h2>
+                </div>
+                <div class="shipping-card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="form-group mb-0">
+                                <label class="form-label d-flex align-items-center gap-2">
+                                    <i class="fas fa-truck-loading text-primary"></i>
+                                    تكلفة الشحن الأساسية (ج.م)
+                                </label>
+                                <input type="number" name="delivery_cost" class="form-control form-control-lg"
+                                    value="<%= settings.delivery_cost || 0 %>" min="0" step="0.5" placeholder="0 = شحن مجاني">
+                                <p class="small text-muted mt-2">تُطبق هذه التكلفة على أي محافظة غير مذكورة في القائمة بالأسفل.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-0">
+                                <label class="form-label d-flex align-items-center gap-2">
+                                    <i class="fas fa-gift text-success"></i>
+                                    حد الشحن المجاني (ج.م)
+                                </label>
+                                <input type="number" name="free_shipping_threshold" class="form-control form-control-lg"
+                                    value="<%= settings.free_shipping_threshold || 0 %>" min="0" step="1"
+                                    placeholder="0 = لا يوجد حد">
+                                <p class="small text-muted mt-2">يُلغى سعر الشحن تماماً إذا تجاوز إجمالي الطلب هذا المبلغ.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-0">
+                                <label class="form-label d-flex align-items-center gap-2">
+                                    <i class="far fa-clock text-warning"></i>
+                                    أقل أيام توصيل
+                                </label>
+                                <input type="number" name="default_days_min" class="form-control"
+                                    value="<%= settings.default_days_min || 3 %>" min="1" max="30">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-0">
+                                <label class="form-label d-flex align-items-center gap-2">
+                                    <i class="fas fa-history text-warning"></i>
+                                    أكثر أيام توصيل
+                                </label>
+                                <input type="number" name="default_days_max" class="form-control"
+                                    value="<%= settings.default_days_max || 7 %>" min="1" max="30">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Per-Governorate Settings -->
+            <div class="shipping-card">
+                <div class="shipping-card-header">
+                    <h2 class="shipping-card-title">
+                        <i class="fas fa-map-marked-alt text-danger"></i>
+                        تكاليف المحافظات المخصصة
+                    </h2>
+                    <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill font-weight-bold" style="background-color: rgba(var(--primary-rgb), 0.1);">
+                        <%= Object.keys(settings.governorate_settings || {}).length %> محافظات مخصصة
+                    </span>
+                </div>
+                <div class="shipping-card-body">
+                    <div class="gov-table-header">
+                        <span>اسم المحافظة</span>
+                        <span>السعر (ج.م)</span>
+                        <span>أقل أيام</span>
+                        <span>أكثر أيام</span>
+                        <span></span>
+                    </div>
+                    
+                    <div id="govContainer">
+                        <% const govSettings = settings.governorate_settings || {}; %>
+                        <% if (Object.keys(govSettings).length === 0) { %>
+                            <div class="gov-row">
+                                <input type="text" name="gov_name[]" class="form-control" placeholder="مثال: القاهرة">
+                                <input type="number" name="gov_cost[]" class="form-control" placeholder="50" min="0" step="0.5">
+                                <input type="number" name="gov_days_min[]" class="form-control" placeholder="1" min="1">
+                                <input type="number" name="gov_days_max[]" class="form-control" placeholder="3" min="1">
+                                <button type="button" onclick="removeRow(this)" class="remove-btn" title="حذف">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        <% } else { %>
+                            <% Object.entries(govSettings).forEach(([name, cfg]) => { %>
+                                <div class="gov-row">
+                                    <input type="text" name="gov_name[]" class="form-control" value="<%= name %>">
+                                    <input type="number" name="gov_cost[]" class="form-control" value="<%= cfg.cost || 0 %>" min="0" step="0.5">
+                                    <input type="number" name="gov_days_min[]" class="form-control" value="<%= cfg.days_min || 1 %>" min="1">
+                                    <input type="number" name="gov_days_max[]" class="form-control" value="<%= cfg.days_max || 3 %>" min="1">
+                                    <button type="button" onclick="removeRow(this)" class="remove-btn">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            <% }) %>
+                        <% } %>
+                    </div>
+
+                    <button type="button" onclick="addGovRow()" class="add-gov-btn">
+                        <i class="fas fa-plus-circle"></i>
+                        إضافة إعدادات لمحافظة جديدة
+                    </button>
+
+                    <div class="info-pill">
+                        <i class="fas fa-info-circle"></i>
+                        أي محافظة لا تظهر في القائمة أعلاه، سيتم التعامل معها بناءً على الإعدادات العامة في الكارت العلوي.
+                    </div>
+                </div>
+            </div>
+
+            <div class="save-bar">
+                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-lg" style="background-color: var(--primary-color); border: none;">
+                    <i class="fas fa-save me-2"></i>
+                    حفظ كافة التغييرات
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function addGovRow() {
+            const container = document.getElementById('govContainer');
+            const row = document.createElement('div');
+            row.className = 'gov-row';
+            row.innerHTML = `
+                <input type="text" name="gov_name[]" class="form-control" placeholder="اسم المحافظة">
+                <input type="number" name="gov_cost[]" class="form-control" placeholder="0" min="0" step="0.5">
+                <input type="number" name="gov_days_min[]" class="form-control" placeholder="1" min="1">
+                <input type="number" name="gov_days_max[]" class="form-control" placeholder="3" min="1">
+                <button type="button" onclick="removeRow(this)" class="remove-btn">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            `;
+            container.appendChild(row);
+            
+            // Animation
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                row.style.transition = 'all 0.3s';
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        function removeRow(btn) {
+            const row = btn.closest('.gov-row');
+            row.style.opacity = '0';
+            row.style.transform = 'scale(0.95)';
+            setTimeout(() => row.remove(), 200);
+        }
+    </script>
+
+    <%- include('partials/footer') %>

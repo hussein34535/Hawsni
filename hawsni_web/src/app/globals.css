@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-cairo), sans-serif;
+
+  /* Colors */
+  --color-brand-primary: #1B4D3E;
+  /* Emerald Green */
+  --color-brand-accent: #D4AF37;
+  /* Gold */
+
+  --color-bg-primary: #FFFFFF;
+  /* surfaceColor */
+  --color-bg-secondary: #FAFAFA;
+  /* scaffoldBackgroundColor */
+  --color-bg-tertiary: #F5F5F5;
+  /* secondaryColor */
+
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #757575;
+  --color-text-tertiary: #BDBDBD;
+
+  --color-border-light: #EEEEEE;
+  /* borderColor / dividerColor */
+
+
+  --color-error: #CF6679;
+  --color-success: #03DAC6;
+
+  /* Shadows */
+  --shadow-soft: 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 6px 16px rgba(0, 0, 0, 0.12);
+  --shadow-floating: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+  /* Animations */
+  @keyframes mesh-slow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  --animate-mesh-slow: mesh-slow 25s ease infinite;
+
+  /* Glassmorphism Tokens */
+  --glass-bg: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(12px);
+}
+
+@layer utilities {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(14, 68, 53, 0.05);
+  }
+
+  .mesh-gradient-bg {
+    background: linear-gradient(-45deg, #0E4435, #1B4D3E, #D4AF37, #FFFFFF);
+    background-size: 400% 400%;
+    animation: mesh-slow 25s ease infinite;
+  }
+}
+
+@layer base {
+
+  html,
+  body {
+    @apply bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] antialiased;
+    direction: ltr;
+    touch-action: pan-x pan-y;
+  }
+}

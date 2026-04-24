@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "165507639857",
+    "project_id": "hwasi-ceafc",
+    "storage_bucket": "hwasi-ceafc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:165507639857:android:8920024620e043586bc310",
+        "android_client_info": {
+          "package_name": "com.example.hwasi_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEvldDPwenjWXnX5GK8YMIeqthlSzPXBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:165507639857:android:b11f32e783bfe6fd6bc310",
+        "android_client_info": {
+          "package_name": "com.example.hwasi_clean"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEvldDPwenjWXnX5GK8YMIeqthlSzPXBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
