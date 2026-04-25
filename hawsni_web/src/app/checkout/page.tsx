@@ -100,7 +100,7 @@ export default function CheckoutPage() {
 // مكوّن الفورم المستقل
 // ----------------------------------------------------------------------
 
-// تصميم خانة الإدخال بخط أسود حاد وزوايا حادة ليعطي شكل قوي ومميز
+// ستايل موحد للخانات
 const INPUT_CLASS = "w-full bg-white border-2 border-black px-5 py-4 text-black text-[16px] font-black focus:outline-none focus:ring-0 placeholder:text-gray-400 placeholder:font-bold rounded-none appearance-none";
 const LABEL_CLASS = "block text-base font-black text-black mb-2";
 
@@ -108,18 +108,6 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [promoCode, setPromoCode] = useState('');
     const [isApplyingPromo, setIsApplyingPromo] = useState(false);
-    
-    const [formData, setFormData] = useState({
-        name: '',
-        phone: '',
-        governorate: 'القاهرة',
-        city: '',
-        street: '',
-    });
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
 
     const handleApplyPromo = async () => {
         if (!promoCode.trim()) return;
@@ -139,9 +127,17 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
+        
+        // جلب البيانات مباشرة من الفورم بدون State لمنع التهنيج
+        const formData = new FormData(e.currentTarget);
+        const name = formData.get('name') as string;
+        const phone = formData.get('phone') as string;
+        const governorate = formData.get('governorate') as string;
+        const city = formData.get('city') as string;
+        const street = formData.get('street') as string;
 
         try {
             const orderData = {
@@ -155,9 +151,9 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                     accessories: i.accessories
                 })),
                 shippingAddress: {
-                    street: formData.street,
-                    city: formData.city,
-                    state: formData.governorate,
+                    street: street,
+                    city: city,
+                    state: governorate,
                     country: 'Egypt'
                 },
                 paymentMethod: 'cash_on_delivery',
@@ -166,8 +162,8 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                 discount,
                 totalAmount: total,
                 couponCode: appliedCoupon || undefined,
-                guestName: formData.name,
-                guestPhone: formData.phone,
+                guestName: name,
+                guestPhone: phone,
             };
 
             const res = await checkoutService.placeOrder(orderData);
@@ -236,8 +232,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             type="text"
                             name="name"
                             required
-                            value={formData.name}
-                            onChange={handleInputChange}
+                            defaultValue=""
                             className={INPUT_CLASS}
                             placeholder={isRTL ? "الاسم ثنائي على الأقل..." : "Full name..."}
                         />
@@ -249,8 +244,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             type="tel"
                             name="phone"
                             required
-                            value={formData.phone}
-                            onChange={handleInputChange}
+                            defaultValue=""
                             className={INPUT_CLASS}
                             placeholder="010xxxxxxxx"
                             dir="ltr"
@@ -265,8 +259,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             <select
                                 name="governorate"
                                 required
-                                value={formData.governorate}
-                                onChange={handleInputChange}
+                                defaultValue="القاهرة"
                                 className={`${INPUT_CLASS} pr-10`}
                             >
                                 {EGYPT_GOVS.map(gov => (
@@ -285,8 +278,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             type="text"
                             name="city"
                             required
-                            value={formData.city}
-                            onChange={handleInputChange}
+                            defaultValue=""
                             className={INPUT_CLASS}
                             placeholder={isRTL ? 'المدينة أو الحي...' : 'City or area...'}
                         />
@@ -299,8 +291,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         type="text"
                         name="street"
                         required
-                        value={formData.street}
-                        onChange={handleInputChange}
+                        defaultValue=""
                         className={INPUT_CLASS}
                         placeholder={isRTL ? 'اسم الشارع، رقم العمارة، رقم الشقة...' : 'Street name, building no...'}
                     />
