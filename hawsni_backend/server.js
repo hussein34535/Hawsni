@@ -121,6 +121,10 @@ app.use(express.urlencoded({ extended: true, limit: '4mb' }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Ignore favicon requests to prevent 404 errors in logs
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.get('/favicon.png', (req, res) => res.status(204).end());
+
 // CSRF Protection specific for SSR (EJS) Admin UI
 const csurf = require('csurf');
 const csrfProtection = csurf({ 
@@ -131,7 +135,6 @@ const csrfProtection = csurf({
     } 
 });
 
-// CSRF Protection specific for SSR (EJS) Admin UI
 
 // General API Routes
 app.use('/api/auth', authRoutes);
