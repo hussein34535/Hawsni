@@ -181,6 +181,32 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         const street = formData.get('street') as string;
         const notes = formData.get('notes') as string;
 
+        // التحقق من صحة البيانات (Validation)
+        if (name.trim().split(/\s+/).length < 2) {
+            showToast(isRTL ? 'يرجى إدخال الاسم ثنائياً على الأقل' : 'Please enter at least two names', 'error');
+            setIsSubmitting(false);
+            return;
+        }
+
+        const phoneRegex = /^01[0125][0-9]{8}$/;
+        if (!phoneRegex.test(phone)) {
+            showToast(isRTL ? 'يرجى إدخال رقم هاتف مصري صحيح' : 'Please enter a valid Egyptian phone number', 'error');
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (phone2 && !phoneRegex.test(phone2)) {
+            showToast(isRTL ? 'يرجى إدخال رقم هاتف بديل صحيح' : 'Please enter a valid alternative phone number', 'error');
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (!governorateName || !cityName) {
+            showToast(isRTL ? 'يرجى اختيار المحافظة والمدينة' : 'Please select governorate and city', 'error');
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
             const orderData = {
                 items: items.map((i: any) => ({
