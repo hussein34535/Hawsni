@@ -61,7 +61,7 @@ export default function CheckoutPage() {
             <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative">
                 <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
                     
-                    <div className="w-full lg:w-3/5 order-2 lg:order-1">
+                    <div className="w-full lg:w-3/5 order-1">
                         <CheckoutForm 
                             isRTL={isRTL} 
                             items={items}
@@ -78,7 +78,7 @@ export default function CheckoutPage() {
                         />
                     </div>
 
-                    <div className="w-full lg:w-2/5 order-1 lg:order-2">
+                    <div className="w-full lg:w-2/5 order-2">
                         <OrderReceipt 
                             subtotal={subtotal}
                             shippingFee={shippingFee}
@@ -184,7 +184,8 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     return (
         <form onSubmit={handleSubmit} className="space-y-8 pb-32">
             
-            {/* قسم البرومو كود */}
+            {/* قسم البرومو كود - موقوف حالياً بناء على طلبك */}
+            {/* 
             <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
                 <label className="flex items-center gap-2 mb-3 text-sm font-black text-gray-900">
                     <Tag className="w-5 h-5 text-[#0E4435]" />
@@ -214,6 +215,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                     </p>
                 )}
             </div>
+            */}
 
             {/* بيانات التوصيل */}
             <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
