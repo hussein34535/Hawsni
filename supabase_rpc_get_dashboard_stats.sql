@@ -31,7 +31,7 @@ BEGIN
   SELECT count(*) INTO v_banners_count FROM public.banners;
   
   -- Total Revenue (excluding Cancelled/Refunded)
-  SELECT COALESCE(sum(total_amount), 0) INTO v_revenue 
+  SELECT COALESCE(sum(total), 0) INTO v_revenue 
   FROM public.orders 
   WHERE status NOT IN ('Cancelled', 'Refunded', 'ملغي', 'مسترجع');
   
@@ -47,7 +47,7 @@ BEGIN
   -- Recent orders (top 5)
   SELECT COALESCE(jsonb_agg(o), '[]'::jsonb) INTO v_recent_orders
   FROM (
-    SELECT id, total_amount, status, created_at, shipping_address 
+    SELECT id, total, status, created_at, shipping_address 
     FROM public.orders 
     ORDER BY created_at DESC 
     LIMIT 5
