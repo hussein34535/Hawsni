@@ -107,10 +107,50 @@ const PREMIUM_LABEL_CLASS = "block text-[13px] font-black text-gray-600 mb-1.5 p
 function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon }: any) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-        } finally {
-            setIsApplyingPromo(false);
-        }
-    };
+    // Bosta API States
+    const [cities, setCities] = useState<any[]>([]);
+    const [districts, setDistricts] = useState<any[]>([]);
+    const [selectedCityId, setSelectedCityId] = useState('');
+    const [isLoadingCities, setIsLoadingCities] = useState(true);
+    const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const res = await checkoutService.getCities();
+                if (res.success) {
+                    setCities(res.cities);
+                }
+            } catch (err) {
+                console.error("Failed to load cities");
+            } finally {
+                setIsLoadingCities(false);
+            }
+        };
+        fetchCities();
+    }, []);
+
+    useEffect(() => {
+        const fetchDistricts = async () => {
+            if (!selectedCityId) {
+                setDistricts([]);
+                return;
+            }
+            setIsLoadingDistricts(true);
+            try {
+                const res = await checkoutService.getDistricts(selectedCityId);
+                if (res.success) {
+                    setDistricts(res.districts);
+                }
+            } catch (err) {
+                console.error("Failed to load districts");
+            } finally {
+                setIsLoadingDistricts(false);
+            }
+        };
+        fetchDistricts();
+    }, [selectedCityId]);
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
