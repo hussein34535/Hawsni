@@ -113,6 +113,10 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     const [selectedCityId, setSelectedCityId] = useState('');
     const [isLoadingCities, setIsLoadingCities] = useState(true);
     const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
+    
+    // Searchable District States
+    const [districtSearch, setDistrictSearch] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     useEffect(() => {
         const fetchCities = async () => {
@@ -134,6 +138,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         const fetchDistricts = async () => {
             if (!selectedCityId) {
                 setDistricts([]);
+                setDistrictSearch('');
                 return;
             }
             setIsLoadingDistricts(true);
@@ -141,6 +146,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                 const res = await checkoutService.getDistricts(selectedCityId);
                 if (res.success) {
                     setDistricts(res.districts);
+                    setDistrictSearch(''); // Reset search when city changes
                 }
             } catch (err) {
                 console.error("Failed to load districts");
@@ -150,6 +156,10 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         };
         fetchDistricts();
     }, [selectedCityId]);
+
+    const filteredDistricts = districts.filter(d => 
+        (isRTL ? d.arabicName : d.name).toLowerCase().includes(districtSearch.toLowerCase())
+    );
 
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -166,8 +176,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         const citySelect = e.currentTarget.elements.namedItem('governorate') as HTMLSelectElement;
         const governorateName = citySelect?.options[citySelect.selectedIndex]?.text || '';
         
-        const districtSelect = e.currentTarget.elements.namedItem('city') as HTMLSelectElement;
-        const cityName = districtSelect?.options[districtSelect.selectedIndex]?.text || '';
+        const cityName = districtSearch;
 
         const street = formData.get('street') as string;
         const notes = formData.get('notes') as string;
@@ -343,20 +352,48 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
 
                     <div className="relative">
                         <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'المدينة / المنطقة' : 'City / Area'}</label>
-                        <select
-                            name="city"
-                            required
+                        <input
+                            type="text"
+                            value={districtSearch}
+                            onChange={(e) => {
+                                setDistrictSearch(e.target.value);
+                                setIsDropdownOpen(true);
+                            }}
+                            onFocus={() => setIsDropdownOpen(true)}
+                            onBlur={() => {
+                                // Delay closing to allow clicking an option
+                                setTimeout(() => setIsDropdownOpen(false), 200);
+                            }}
                             disabled={!selectedCityId || isLoadingDistricts}
-                            className={`${PREMIUM_INPUT_CLASS} cursor-pointer pr-10`}
-                        >
-                            <option value="" disabled>{isLoadingDistricts ? (isRTL ? 'جاري التحميل...' : 'Loading...') : (isRTL ? 'اختر المدينة' : 'Select City')}</option>
-                            {districts.map(dist => (
-                                <option key={dist.id} value={dist.id}>{isRTL ? dist.arabicName : dist.name}</option>
-                            ))}
-                        </select>
-                        <div className={`pointer-events-none absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} top-7 flex items-center text-gray-400`}>
-                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                        </div>
+                            className={`${PREMIUM_INPUT_CLASS} ${isRTL ? 'text-right' : 'text-left'}`}
+                            placeholder={isLoadingDistricts ? (isRTL ? 'جاري التحميل...' : 'Loading...') : (isRTL ? 'ابحث عن منطقتك...' : 'Search area...')}
+                            autoComplete="off"
+                        />
+                        
+                        {isDropdownOpen && selectedCityId && filteredDistricts.length > 0 && (
+                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto py-2">
+                                {filteredDistricts.map(dist => (
+                                    <button
+                                        key={dist.id}
+                                        type="button"
+                                        onClick={() => {
+                                            setDistrictSearch(isRTL ? dist.arabicName : dist.name);
+                                            setIsDropdownOpen(false);
+                                        }}
+                                        className="w-full px-4 py-2 text-right hover:bg-gray-50 transition-colors flex flex-col"
+                                    >
+                                        <span className="text-[14px] font-bold text-gray-900">{isRTL ? dist.arabicName : dist.name}</span>
+                                        <span className="text-[10px] text-gray-400 font-medium">{isRTL ? dist.name : dist.arabicName}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        
+                        {isDropdownOpen && selectedCityId && districtSearch && filteredDistricts.length === 0 && (
+                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl p-4 text-center">
+                                <p className="text-sm text-gray-500 font-bold">{isRTL ? 'لا يوجد نتائج، يمكنك كتابة المنطقة يدوياً' : 'No results, you can type manually'}</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
