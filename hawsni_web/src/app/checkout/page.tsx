@@ -58,8 +58,8 @@ export default function CheckoutPage() {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative">
-                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
+            <main className="max-w-7xl mx-auto px-4 py-6 md:py-10 relative">
+                <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
                     
                     <div className="w-full lg:w-3/5 order-1">
                         <CheckoutForm 
@@ -100,9 +100,9 @@ export default function CheckoutPage() {
 // مكوّن الفورم المستقل: تم تحويله لـ Uncontrolled لمنع تهنيج الكتابة
 // ----------------------------------------------------------------------
 
-// تصميم الخانات الاحترافي (Floating Labels)
-const FLOATING_INPUT_CLASS = "block px-5 pb-3 pt-7 w-full text-base font-black text-gray-900 bg-gray-50 rounded-2xl border border-gray-200 appearance-none focus:outline-none focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] peer shadow-sm transition-all";
-const FLOATING_LABEL_CLASS = "absolute text-sm font-black text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-1 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-[#0E4435]";
+// تصميم بريميوم وأنيق للخانات (على طريقة المواقع الكبرى مثل آبل و Stripe)
+const PREMIUM_INPUT_CLASS = "w-full h-[52px] px-4 bg-[#F9FAFB] border border-gray-200 text-gray-900 text-[15px] font-bold rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0E4435]/15 focus:border-[#0E4435] transition-all placeholder:text-gray-400 placeholder:font-medium appearance-none shadow-sm";
+const PREMIUM_LABEL_CLASS = "block text-[13px] font-black text-gray-600 mb-1.5 px-1 tracking-wide";
 
 function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon }: any) {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -183,7 +183,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 pb-32">
+        <form onSubmit={handleSubmit} className="space-y-5 pb-32">
             
             {/* قسم البرومو كود - موقوف حالياً بناء على طلبك */}
             {/* 
@@ -219,94 +219,82 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
             */}
 
             {/* بيانات التوصيل */}
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                        <User className="w-5 h-5" />
+            <div className="bg-white p-5 md:p-6 rounded-[1.5rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50 space-y-5 relative overflow-hidden">
+                <div className="flex items-center gap-3 mb-1">
+                    <div className="w-9 h-9 bg-gray-50 text-gray-700 rounded-lg flex items-center justify-center border border-gray-100">
+                        <User className="w-4 h-4" />
                     </div>
-                    <h2 className="text-xl font-black text-gray-900">{isRTL ? 'بيانات التوصيل' : 'Delivery Details'}</h2>
+                    <h2 className="text-lg font-black text-gray-900 tracking-tight">{isRTL ? 'بيانات التوصيل' : 'Delivery Details'}</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
                         <input
                             type="text"
-                            id="name"
                             name="name"
                             required
                             defaultValue=""
-                            className={FLOATING_INPUT_CLASS}
-                            placeholder=" "
+                            className={PREMIUM_INPUT_CLASS}
+                            placeholder={isRTL ? "الاسم ثنائي على الأقل..." : "Ahmed Mohamed..."}
                         />
-                        <label htmlFor="name" className={`${FLOATING_LABEL_CLASS} ${isRTL ? 'right-5 peer-focus:right-5' : 'left-5 peer-focus:left-5'}`}>
-                            {isRTL ? 'الاسم بالكامل' : 'Full Name'}
-                        </label>
                     </div>
 
-                    <div className="relative">
+                    <div>
+                        <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'رقم الهاتف' : 'Phone Number'}</label>
                         <input
                             type="tel"
-                            id="phone"
                             name="phone"
                             required
                             defaultValue=""
-                            className={`${FLOATING_INPUT_CLASS} ${isRTL ? 'text-right' : 'text-left'}`}
-                            placeholder=" "
+                            className={PREMIUM_INPUT_CLASS}
+                            placeholder="010xxxxxxxx"
                             dir="ltr"
                         />
-                        <label htmlFor="phone" className={`${FLOATING_LABEL_CLASS} ${isRTL ? 'right-5 peer-focus:right-5' : 'left-5 peer-focus:left-5'}`}>
-                            {isRTL ? 'رقم الهاتف' : 'Phone Number'}
-                        </label>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="relative">
+                        <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'المحافظة' : 'Governorate'}</label>
                         <select
-                            id="governorate"
                             name="governorate"
                             required
                             defaultValue="القاهرة"
-                            className={`${FLOATING_INPUT_CLASS} cursor-pointer`}
+                            className={`${PREMIUM_INPUT_CLASS} cursor-pointer pr-10`}
                         >
                             {EGYPT_GOVS.map(gov => (
                                 <option key={gov} value={gov}>{gov}</option>
                             ))}
                         </select>
-                        <label htmlFor="governorate" className={`${FLOATING_LABEL_CLASS} ${isRTL ? 'right-5 peer-focus:right-5' : 'left-5 peer-focus:left-5'} -translate-y-3 scale-75 text-[#0E4435]`}>
-                            {isRTL ? 'المحافظة' : 'Governorate'}
-                        </label>
+                        <div className={`pointer-events-none absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} top-7 flex items-center text-gray-400`}>
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
                     </div>
 
-                    <div className="relative">
+                    <div>
+                        <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'المدينة / المنطقة' : 'City / Area'}</label>
                         <input
                             type="text"
-                            id="city"
                             name="city"
                             required
                             defaultValue=""
-                            className={FLOATING_INPUT_CLASS}
-                            placeholder=" "
+                            className={PREMIUM_INPUT_CLASS}
+                            placeholder={isRTL ? 'مثال: مدينة نصر، التجمع...' : 'Nasr City, Maadi...'}
                         />
-                        <label htmlFor="city" className={`${FLOATING_LABEL_CLASS} ${isRTL ? 'right-5 peer-focus:right-5' : 'left-5 peer-focus:left-5'}`}>
-                            {isRTL ? 'المدينة / المنطقة' : 'City / Area'}
-                        </label>
                     </div>
                 </div>
 
-                <div className="relative">
+                <div>
+                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'العنوان بالتفصيل' : 'Detailed Address'}</label>
                     <input
                         type="text"
-                        id="street"
                         name="street"
                         required
                         defaultValue=""
-                        className={FLOATING_INPUT_CLASS}
-                        placeholder=" "
+                        className={PREMIUM_INPUT_CLASS}
+                        placeholder={isRTL ? 'اسم الشارع، رقم العمارة، رقم الشقة...' : 'Street name, building no...'}
                     />
-                    <label htmlFor="street" className={`${FLOATING_LABEL_CLASS} ${isRTL ? 'right-5 peer-focus:right-5' : 'left-5 peer-focus:left-5'}`}>
-                        {isRTL ? 'العنوان بالتفصيل (الشارع، العمارة، الشقة)' : 'Detailed Address'}
-                    </label>
                 </div>
             </div>
 
