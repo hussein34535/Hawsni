@@ -106,22 +106,7 @@ const PREMIUM_LABEL_CLASS = "block text-[13px] font-black text-gray-600 mb-1.5 p
 
 function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon }: any) {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [promoCode, setPromoCode] = useState('');
-    const [isApplyingPromo, setIsApplyingPromo] = useState(false);
     
-    const handleApplyPromo = async () => {
-        if (!promoCode.trim()) return;
-        setIsApplyingPromo(true);
-        try {
-            if (promoCode.toUpperCase() === 'WELCOME10') {
-                setDiscount(subtotal * 0.1); 
-                setAppliedCoupon(promoCode.toUpperCase());
-                showToast(isRTL ? 'تم تفعيل كود الخصم بنجاح!' : 'Promo code applied!', 'success');
-            } else {
-                showToast(isRTL ? 'كود الخصم غير صحيح أو منتهي' : 'Invalid promo code', 'error');
-            }
-        } catch (err) {
-            showToast(isRTL ? 'حدث خطأ أثناء تطبيق الكود' : 'Error applying code', 'error');
         } finally {
             setIsApplyingPromo(false);
         }
@@ -131,13 +116,21 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         e.preventDefault();
         setIsSubmitting(true);
         
-        // جلب البيانات مباشرة من الفورم بدون State
+        // جلب البيانات مباشرة من الفورم
         const formData = new FormData(e.currentTarget);
         const name = formData.get('name') as string;
         const phone = formData.get('phone') as string;
-        const governorate = formData.get('governorate') as string;
-        const city = formData.get('city') as string;
+        const phone2 = formData.get('phone2') as string;
+        const email = formData.get('email') as string;
+        
+        const citySelect = e.currentTarget.elements.namedItem('governorate') as HTMLSelectElement;
+        const governorateName = citySelect?.options[citySelect.selectedIndex]?.text || '';
+        
+        const districtSelect = e.currentTarget.elements.namedItem('city') as HTMLSelectElement;
+        const cityName = districtSelect?.options[districtSelect.selectedIndex]?.text || '';
+
         const street = formData.get('street') as string;
+        const notes = formData.get('notes') as string;
 
         try {
             const orderData = {
@@ -152,8 +145,8 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                 })),
                 shippingAddress: {
                     street: street,
-                    city: city,
-                    state: governorate,
+                    city: cityName,
+                    state: governorateName,
                     country: 'Egypt'
                 },
                 paymentMethod: 'cash_on_delivery',
@@ -164,9 +157,9 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                 couponCode: appliedCoupon || undefined,
                 guestName: name,
                 guestPhone: phone,
-                guestAlternativePhone: (formData.get('phone2') as string) || undefined,
-                guestEmail: (formData.get('email') as string) || undefined,
-                notes: (formData.get('notes') as string) || undefined,
+                guestAlternativePhone: phone2 || undefined,
+                guestEmail: email || undefined,
+                notes: notes || undefined,
             };
 
             const res = await checkoutService.placeOrder(orderData);
@@ -221,28 +214,30 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
             </div>
             */}
 
-            {/* بيانات التوصيل */}
-            <div className="bg-white p-5 md:p-6 rounded-[1.5rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50 space-y-5 relative overflow-hidden">
-                <div className="flex items-center gap-3 mb-1">
+            {/* بيانات التوصيل المجمعة بالترتيب المطلوب */}
+            <div className="bg-white p-5 md:p-6 rounded-[1.5rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50 space-y-4 relative overflow-hidden">
+                <div className="flex items-center gap-3 mb-2">
                     <div className="w-9 h-9 bg-gray-50 text-gray-700 rounded-lg flex items-center justify-center border border-gray-100">
                         <User className="w-4 h-4" />
                     </div>
                     <h2 className="text-lg font-black text-gray-900 tracking-tight">{isRTL ? 'بيانات التوصيل' : 'Delivery Details'}</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
-                        <input
-                            type="text"
-                            name="name"
-                            required
-                            defaultValue=""
-                            className={PREMIUM_INPUT_CLASS}
-                            placeholder={isRTL ? "الاسم ثنائي على الأقل..." : "Ahmed Mohamed..."}
-                        />
-                    </div>
+                {/* 1. Name */}
+                <div>
+                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
+                    <input
+                        type="text"
+                        name="name"
+                        required
+                        defaultValue=""
+                        className={PREMIUM_INPUT_CLASS}
+                        placeholder={isRTL ? "أحمد محمد..." : "Ahmed Mohamed..."}
+                    />
+                </div>
 
+                {/* 2 & 3. Phone and Alt Phone */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'رقم الهاتف' : 'Phone Number'}</label>
                         <input
@@ -255,19 +250,50 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             dir="ltr"
                         />
                     </div>
+                    <div>
+                        <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'رقم بديل (اختياري)' : 'Alt Phone (Optional)'}</label>
+                        <input
+                            type="tel"
+                            name="phone2"
+                            defaultValue=""
+                            className={PREMIUM_INPUT_CLASS}
+                            placeholder="010xxxxxxxx"
+                            dir="ltr"
+                        />
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 4. Email */}
+                <div>
+                    <label className={PREMIUM_LABEL_CLASS}>
+                        {isRTL ? 'البريد الإلكتروني ' : 'Email '}
+                        <span className="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded ml-1">{isRTL ? 'ننصح به' : 'Recommended'}</span>
+                    </label>
+                    <input
+                        type="email"
+                        name="email"
+                        defaultValue=""
+                        className={PREMIUM_INPUT_CLASS}
+                        placeholder="example@email.com"
+                        dir="ltr"
+                    />
+                </div>
+
+                {/* 5 & 6. Governorate and City (Bosta) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-100/60 mt-2">
                     <div className="relative">
                         <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'المحافظة' : 'Governorate'}</label>
                         <select
                             name="governorate"
                             required
-                            defaultValue="القاهرة"
+                            value={selectedCityId}
+                            onChange={(e) => setSelectedCityId(e.target.value)}
                             className={`${PREMIUM_INPUT_CLASS} cursor-pointer pr-10`}
+                            disabled={isLoadingCities}
                         >
-                            {EGYPT_GOVS.map(gov => (
-                                <option key={gov} value={gov}>{gov}</option>
+                            <option value="" disabled>{isLoadingCities ? (isRTL ? 'جاري التحميل...' : 'Loading...') : (isRTL ? 'اختر المحافظة' : 'Select Governorate')}</option>
+                            {cities.map(gov => (
+                                <option key={gov._id} value={gov._id}>{isRTL ? gov.nameAr : gov.nameEn}</option>
                             ))}
                         </select>
                         <div className={`pointer-events-none absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} top-7 flex items-center text-gray-400`}>
@@ -275,21 +301,28 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         </div>
                     </div>
 
-                    <div>
+                    <div className="relative">
                         <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'المدينة / المنطقة' : 'City / Area'}</label>
-                        <input
-                            type="text"
+                        <select
                             name="city"
                             required
-                            defaultValue=""
-                            className={PREMIUM_INPUT_CLASS}
-                            placeholder={isRTL ? 'مثال: مدينة نصر، التجمع...' : 'Nasr City, Maadi...'}
-                        />
+                            disabled={!selectedCityId || isLoadingDistricts}
+                            className={`${PREMIUM_INPUT_CLASS} cursor-pointer pr-10`}
+                        >
+                            <option value="" disabled>{isLoadingDistricts ? (isRTL ? 'جاري التحميل...' : 'Loading...') : (isRTL ? 'اختر المدينة' : 'Select City')}</option>
+                            {districts.map(dist => (
+                                <option key={dist._id} value={dist._id}>{isRTL ? dist.nameAr : dist.nameEn}</option>
+                            ))}
+                        </select>
+                        <div className={`pointer-events-none absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} top-7 flex items-center text-gray-400`}>
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
                     </div>
                 </div>
 
+                {/* 7. Detailed Address */}
                 <div>
-                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'العنوان بالتفصيل' : 'Detailed Address'}</label>
+                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'العنوان بالتفصيل (الشارع، العمارة، الشقة)' : 'Detailed Address'}</label>
                     <input
                         type="text"
                         name="street"
@@ -300,35 +333,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                     />
                 </div>
 
-                {/* الحقول الاختيارية */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-100/60 mt-2">
-                    <div>
-                        <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'رقم هاتف إضافي (اختياري)' : 'Alternative Phone (Optional)'}</label>
-                        <input
-                            type="tel"
-                            name="phone2"
-                            defaultValue=""
-                            className={PREMIUM_INPUT_CLASS}
-                            placeholder="010xxxxxxxx"
-                            dir="ltr"
-                        />
-                    </div>
-                    <div>
-                        <label className={PREMIUM_LABEL_CLASS}>
-                            {isRTL ? 'البريد الإلكتروني ' : 'Email '}
-                            <span className="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded ml-1">{isRTL ? 'ننصح به' : 'Recommended'}</span>
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            defaultValue=""
-                            className={PREMIUM_INPUT_CLASS}
-                            placeholder="example@email.com"
-                            dir="ltr"
-                        />
-                    </div>
-                </div>
-
+                {/* 8. Notes */}
                 <div>
                     <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'ملاحظات إضافية (اختياري)' : 'Order Notes (Optional)'}</label>
                     <textarea
