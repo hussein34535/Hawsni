@@ -4,7 +4,7 @@ import { memo } from 'react';
 
 const MeshBackground = memo(function MeshBackground() {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#fafafa]">
+    <div className="hidden md:block fixed inset-0 -z-10 overflow-hidden bg-[#fafafa]">
       {/* Mesh Blobs */}
       <div
         className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] bg-[#0E4435]/10 rounded-full blur-[120px]"
@@ -25,4 +25,3 @@ const MeshBackground = memo(function MeshBackground() {
 });
 
 export default MeshBackground;
-
