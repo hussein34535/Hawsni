@@ -22,7 +22,7 @@ export default function OrderReceipt({
   const { isRTL } = useLanguage();
 
   return (
-    <div className="bg-white/40 backdrop-blur-md rounded-[32px] border border-white/60 shadow-xl shadow-[#0E4435]/5 overflow-hidden sticky top-24">
+    <div className="bg-white rounded-[32px] border border-gray-100 shadow-lg overflow-hidden sticky top-24">
       {/* Premium Header */}
       <div className="px-6 py-6 border-b border-white/40 flex items-center justify-between">
         <div className="flex items-center gap-3">

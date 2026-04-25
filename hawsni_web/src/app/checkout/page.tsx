@@ -8,7 +8,6 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useToastStore } from '@/store/toastStore';
 import { checkoutService } from '@/services/checkoutService';
 import OrderReceipt from '@/components/checkout/OrderReceipt';
-import MeshBackground from '@/components/checkout/MeshBackground';
 
 // قائمة المحافظات لتسهيل وتسريع الطلب
 const EGYPT_GOVS =[
@@ -21,15 +20,13 @@ export default function CheckoutPage() {
     const { isRTL } = useLanguage();
     const { showToast } = useToastStore();
 
-    // حالات الفاتورة والأموال (مفصولة عن الفورم لمنع التهنيج)
-    const [shippingFee] = useState(50); // يمكنك ربطها لاحقاً بالـ API
+    const [shippingFee] = useState(50);
     const [discount, setDiscount] = useState(0);
     const [appliedCoupon, setAppliedCoupon] = useState('');
 
     const subtotal = getTotal();
     const total = subtotal + shippingFee - discount;
 
-    // توجيه المستخدم للسلة لو كانت فارغة
     useEffect(() => {
         if (items.length === 0) {
             router.push('/cart');
@@ -39,31 +36,29 @@ export default function CheckoutPage() {
     if (items.length === 0) return null;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] font-cairo pb-24" dir={isRTL ? 'rtl' : 'ltr'}>
-            <MeshBackground />
+        <div className="min-h-screen bg-[#FAFAFA] font-cairo pb-28" dir={isRTL ? 'rtl' : 'ltr'}>
 
-            {/* الهيدر العلوي */}
+            {/* الهيدر العلوي - بدون أي blur */}
             <header className="sticky top-0 z-40 bg-white border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <button
                         onClick={() => router.back()}
-                        className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-95"
+                        className="w-10 h-10 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center"
                     >
                         {isRTL ? <ArrowRight className="w-5 h-5 text-gray-900" /> : <ArrowLeft className="w-5 h-5 text-gray-900" />}
                     </button>
-                    <h1 className="text-xl font-black text-gray-900">
+                    <h1 className="text-lg font-black text-gray-900">
                         {isRTL ? 'إتمام الطلب' : 'Checkout'}
                     </h1>
-                    <div className="w-12 text-center">
-                        <ShieldCheck className="w-6 h-6 text-[#0E4435] mx-auto opacity-50" />
+                    <div className="w-10 text-center">
+                        <ShieldCheck className="w-5 h-5 text-[#0E4435] mx-auto opacity-50" />
                     </div>
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative">
+            <main className="max-w-7xl mx-auto px-4 py-6 md:py-12">
                 <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
                     
-                    {/* عمود اليمين: الفورم وكود الخصم */}
                     <div className="w-full lg:w-3/5 order-2 lg:order-1">
                         <CheckoutForm 
                             isRTL={isRTL} 
@@ -81,7 +76,6 @@ export default function CheckoutPage() {
                         />
                     </div>
 
-                    {/* عمود اليسار: الفاتورة الثابتة */}
                     <div className="w-full lg:w-2/5 order-1 lg:order-2">
                         <OrderReceipt 
                             subtotal={subtotal}
@@ -101,8 +95,12 @@ export default function CheckoutPage() {
 }
 
 // ----------------------------------------------------------------------
-// مكوّن الفورم المستقل: يمنع إعادة تصيير (Re-render) الصفحة بالكامل عند الكتابة
+// مكوّن الفورم المستقل: يمنع إعادة تصيير الصفحة بالكامل عند الكتابة
 // ----------------------------------------------------------------------
+
+// ستايل موحد للخانات - بدون أي transition أو shadow أو blur
+const INPUT_CLASS = "w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3.5 text-gray-900 text-[16px] font-bold focus:border-black outline-none placeholder:text-gray-300 placeholder:font-normal";
+
 function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon }: any) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [promoCode, setPromoCode] = useState('');
@@ -120,7 +118,6 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // معالجة كود الخصم
     const handleApplyPromo = async () => {
         if (!promoCode.trim()) return;
         setIsApplyingPromo(true);
@@ -139,7 +136,6 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         }
     };
 
-    // إرسال الطلب
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -188,86 +184,86 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
             
             {/* قسم البرومو كود */}
-            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
+            <div className="bg-white p-5 rounded-2xl border border-gray-100">
                 <label className="flex items-center gap-2 mb-3 text-sm font-black text-gray-900">
-                    <Tag className="w-5 h-5 text-[#0E4435]" />
+                    <Tag className="w-4 h-4 text-[#0E4435]" />
                     {isRTL ? 'هل لديك كود خصم؟' : 'Have a promo code?'}
                 </label>
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex gap-3">
                     <input
                         type="text"
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value)}
                         placeholder={isRTL ? 'أدخل الكود هنا' : 'Enter code here'}
-                        className={`flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black uppercase focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`flex-1 ${INPUT_CLASS} uppercase ${isRTL ? 'text-right' : 'text-left'}`}
                     />
                     <button
                         type="button"
                         onClick={handleApplyPromo}
                         disabled={isApplyingPromo || !promoCode}
-                        className="shrink-0 h-[58px] px-8 bg-gray-900 hover:bg-black text-white rounded-2xl font-black transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-gray-900/20"
+                        className="shrink-0 h-[50px] px-6 bg-gray-900 text-white rounded-xl font-black text-sm disabled:opacity-40"
                     >
-                        {isApplyingPromo ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : (isRTL ? 'تطبيق الخصم' : 'Apply Code')}
+                        {isApplyingPromo ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : (isRTL ? 'تطبيق' : 'Apply')}
                     </button>
                 </div>
                 {appliedCoupon && (
                     <p className="mt-3 text-emerald-600 text-xs font-bold flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4" />
-                        {isRTL ? `تم تفعيل الكود بنجاح: ${appliedCoupon}` : `Code applied: ${appliedCoupon}`}
+                        {isRTL ? `تم تفعيل الكود: ${appliedCoupon}` : `Code applied: ${appliedCoupon}`}
                     </p>
                 )}
             </div>
 
             {/* بيانات التوصيل */}
-            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                        <User className="w-5 h-5" />
+            <div className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 space-y-5">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                        <User className="w-4 h-4" />
                     </div>
-                    <h2 className="text-xl font-black text-gray-900">{isRTL ? 'بيانات التوصيل' : 'Delivery Details'}</h2>
+                    <h2 className="text-lg font-black text-gray-900">{isRTL ? 'بيانات التوصيل' : 'Delivery Details'}</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
+                        <label className="block text-sm font-bold text-gray-600 mb-1.5 px-1">{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
                         <input
                             type="text"
                             name="name"
                             required
                             value={formData.name}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400"
+                            className={INPUT_CLASS}
                             placeholder={isRTL ? "أحمد محمد..." : "Ahmed Mohamed..."}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'رقم الهاتف' : 'Phone Number'}</label>
+                        <label className="block text-sm font-bold text-gray-600 mb-1.5 px-1">{isRTL ? 'رقم الهاتف' : 'Phone Number'}</label>
                         <input
                             type="tel"
                             name="phone"
                             required
                             value={formData.phone}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400"
+                            className={INPUT_CLASS}
                             placeholder="010xxxxxxxx"
                             dir="ltr"
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'المحافظة' : 'Governorate'}</label>
+                        <label className="block text-sm font-bold text-gray-600 mb-1.5 px-1">{isRTL ? 'المحافظة' : 'Governorate'}</label>
                         <select
                             name="governorate"
                             required
                             value={formData.governorate}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm appearance-none cursor-pointer"
+                            className={`${INPUT_CLASS} appearance-none cursor-pointer`}
                         >
                             {EGYPT_GOVS.map(gov => (
                                 <option key={gov} value={gov}>{gov}</option>
@@ -276,59 +272,57 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                     </div>
 
                     <div>
-                        <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'المدينة / المنطقة' : 'City / Area'}</label>
+                        <label className="block text-sm font-bold text-gray-600 mb-1.5 px-1">{isRTL ? 'المدينة / المنطقة' : 'City / Area'}</label>
                         <input
                             type="text"
                             name="city"
                             required
                             value={formData.city}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400"
+                            className={INPUT_CLASS}
                             placeholder={isRTL ? 'مدينة نصر، التجمع...' : 'Nasr City, Maadi...'}
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'العنوان بالتفصيل (الشارع، العمارة، الشقة)' : 'Detailed Address (Street, Bldg, Flat)'}</label>
+                    <label className="block text-sm font-bold text-gray-600 mb-1.5 px-1">{isRTL ? 'العنوان بالتفصيل (الشارع، العمارة، الشقة)' : 'Detailed Address (Street, Bldg, Flat)'}</label>
                     <input
                         type="text"
                         name="street"
                         required
                         value={formData.street}
                         onChange={handleInputChange}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400"
+                        className={INPUT_CLASS}
                         placeholder={isRTL ? 'شارع كذا، عمارة رقم كذا...' : 'Street name, building no...'}
                     />
                 </div>
             </div>
 
-            {/* شريط تأكيد الطلب السفلي الثابت */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 md:p-6 border-t border-gray-200 rounded-t-[2rem] z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.06)]">
-                <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto px-4">
+            {/* شريط تأكيد الطلب السفلي الثابت - بدون أي blur أو shadow ثقيلة */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200 z-50">
+                <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto">
                     
-                    {/* السعر الإجمالي */}
-                    <div className="flex-1 text-right">
-                        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">{isRTL ? 'الإجمالي المطلوب' : 'Total Amount'}</p>
-                        <p className="text-2xl font-black text-gray-900 leading-none mt-1">
-                            {Math.round(total).toLocaleString()} <span className="text-xs font-bold text-gray-400 ml-1">{isRTL ? 'ج.م' : 'EGP'}</span>
+                    <div className="flex-1">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase">{isRTL ? 'الإجمالي' : 'Total'}</p>
+                        <p className="text-xl font-black text-gray-900 leading-none mt-0.5">
+                            {Math.round(total).toLocaleString()} <span className="text-[10px] font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                         </p>
                     </div>
                     
-                    {/* زر التأكيد - الآن سيقوم بفحص الفورم عند الضغط */}
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="h-14 px-8 bg-[#0E4435] text-white rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-emerald-950/20 disabled:opacity-60 active:scale-95 transition-all hover:bg-[#0a3126]"
+                        className="h-12 px-6 bg-[#0E4435] text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 disabled:opacity-60"
                     >
                         {isSubmitting ? (
                             <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>{isRTL ? 'جاري...' : 'Processing'}</span>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>{isRTL ? 'جاري...' : 'Wait...'}</span>
                             </>
                         ) : (
                             <>
-                                <ShieldCheck size={18} />
+                                <ShieldCheck size={16} />
                                 <span>{isRTL ? 'تأكيد الطلب' : 'Confirm Order'}</span>
                             </>
                         )}
