@@ -8,9 +8,10 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useToastStore } from '@/store/toastStore';
 import { checkoutService } from '@/services/checkoutService';
 import OrderReceipt from '@/components/checkout/OrderReceipt';
+import MeshBackground from '@/components/checkout/MeshBackground';
 
 // قائمة المحافظات لتسهيل وتسريع الطلب
-const EGYPT_GOVS = [
+const EGYPT_GOVS =[
     'القاهرة', 'الجيزة', 'الإسكندرية', 'الشرقية', 'الدقهلية', 'القليوبية', 'المنيا', 'الغربية', 'الإسماعيلية', 'أسيوط', 'الفيوم', 'سوهاج', 'قنا', 'بني سويف', 'أسوان', 'البحيرة', 'كفر الشيخ', 'المنوفية', 'دمياط', 'الأقصر', 'البحر الأحمر', 'السويس', 'بورسعيد', 'مطروح', 'شمال سيناء', 'جنوب سيناء'
 ];
 
@@ -36,30 +37,30 @@ export default function CheckoutPage() {
     if (items.length === 0) return null;
 
     return (
-        <div className="bg-[#FAFAFA] font-cairo pb-20" dir={isRTL ? 'rtl' : 'ltr'}>
-            
-            {/* رأس الصفحة بسيط جداً وبدون sticky لتجنب التعليق على الموبايل */}
-            <header className="bg-white border-b-2 border-black relative z-10">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="min-h-screen bg-[#FAFAFA] font-cairo pb-24" dir={isRTL ? 'rtl' : 'ltr'}>
+            <MeshBackground />
+
+            {/* الهيدر العلوي - بخلفية صلبة لمنع التعليق */}
+            <header className="sticky top-0 z-40 bg-white border-b border-gray-100">
+                <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
                     <button
                         onClick={() => router.back()}
-                        className="w-12 h-12 bg-white border-2 border-black flex items-center justify-center text-black"
+                        className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-95"
                     >
-                        {isRTL ? <ArrowRight className="w-6 h-6" /> : <ArrowLeft className="w-6 h-6" />}
+                        {isRTL ? <ArrowRight className="w-5 h-5 text-gray-900" /> : <ArrowLeft className="w-5 h-5 text-gray-900" />}
                     </button>
-                    <h1 className="text-2xl font-black text-black">
+                    <h1 className="text-xl font-black text-gray-900">
                         {isRTL ? 'إتمام الطلب' : 'Checkout'}
                     </h1>
                     <div className="w-12 text-center">
-                        <ShieldCheck className="w-7 h-7 text-black mx-auto" />
+                        <ShieldCheck className="w-6 h-6 text-[#0E4435] mx-auto opacity-50" />
                     </div>
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 py-8 relative z-0">
-                <div className="flex flex-col lg:flex-row gap-8 items-start">
+            <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative">
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
                     
-                    {/* فورم البيانات - يمين */}
                     <div className="w-full lg:w-3/5 order-2 lg:order-1">
                         <CheckoutForm 
                             isRTL={isRTL} 
@@ -77,7 +78,6 @@ export default function CheckoutPage() {
                         />
                     </div>
 
-                    {/* الفاتورة - يسار */}
                     <div className="w-full lg:w-2/5 order-1 lg:order-2">
                         <OrderReceipt 
                             subtotal={subtotal}
@@ -97,18 +97,17 @@ export default function CheckoutPage() {
 }
 
 // ----------------------------------------------------------------------
-// مكوّن الفورم المستقل
+// مكوّن الفورم المستقل: تم تحويله لـ Uncontrolled لمنع تهنيج الكتابة
 // ----------------------------------------------------------------------
 
-// ستايل موحد للخانات
-const INPUT_CLASS = "w-full bg-white border-2 border-black px-5 py-4 text-black text-[16px] font-black focus:outline-none focus:ring-0 placeholder:text-gray-400 placeholder:font-bold rounded-none appearance-none";
-const LABEL_CLASS = "block text-base font-black text-black mb-2";
+const INPUT_CLASS = "w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400";
+const LABEL_CLASS = "block text-sm font-bold text-gray-600 mb-2 px-1";
 
 function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon }: any) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [promoCode, setPromoCode] = useState('');
     const [isApplyingPromo, setIsApplyingPromo] = useState(false);
-
+    
     const handleApplyPromo = async () => {
         if (!promoCode.trim()) return;
         setIsApplyingPromo(true);
@@ -131,7 +130,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         e.preventDefault();
         setIsSubmitting(true);
         
-        // جلب البيانات مباشرة من الفورم بدون State لمنع التهنيج
+        // جلب البيانات مباشرة من الفورم بدون State
         const formData = new FormData(e.currentTarget);
         const name = formData.get('name') as string;
         const phone = formData.get('phone') as string;
@@ -183,12 +182,12 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-8 pb-32">
             
             {/* قسم البرومو كود */}
-            <div className="bg-white p-6 md:p-8 border-2 border-black">
-                <label className="flex items-center gap-2 mb-4 text-lg font-black text-black">
-                    <Tag className="w-6 h-6 text-black" />
+            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
+                <label className="flex items-center gap-2 mb-3 text-sm font-black text-gray-900">
+                    <Tag className="w-5 h-5 text-[#0E4435]" />
                     {isRTL ? 'هل لديك كود خصم؟' : 'Have a promo code?'}
                 </label>
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -203,26 +202,26 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         type="button"
                         onClick={handleApplyPromo}
                         disabled={isApplyingPromo || !promoCode}
-                        className="shrink-0 h-[60px] px-8 bg-black text-white font-black text-lg disabled:opacity-50 border-2 border-black"
+                        className="shrink-0 h-[58px] px-8 bg-gray-900 hover:bg-black text-white rounded-2xl font-black transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-gray-900/20"
                     >
-                        {isApplyingPromo ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (isRTL ? 'تطبيق الخصم' : 'Apply')}
+                        {isApplyingPromo ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : (isRTL ? 'تطبيق الخصم' : 'Apply Code')}
                     </button>
                 </div>
                 {appliedCoupon && (
-                    <p className="mt-4 text-[#0E4435] text-sm font-bold flex items-center gap-2">
-                        <CheckCircle2 className="w-5 h-5" />
-                        {isRTL ? `تم تفعيل الكود: ${appliedCoupon}` : `Code applied: ${appliedCoupon}`}
+                    <p className="mt-3 text-emerald-600 text-xs font-bold flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        {isRTL ? `تم تفعيل الكود بنجاح: ${appliedCoupon}` : `Code applied: ${appliedCoupon}`}
                     </p>
                 )}
             </div>
 
             {/* بيانات التوصيل */}
-            <div className="bg-white p-6 md:p-8 border-2 border-black space-y-6">
-                <div className="flex items-center gap-3 mb-8 pb-4 border-b-2 border-black">
-                    <div className="w-12 h-12 bg-black text-white flex items-center justify-center rounded-none">
-                        <User className="w-6 h-6" />
+            <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                        <User className="w-5 h-5" />
                     </div>
-                    <h2 className="text-2xl font-black text-black">{isRTL ? 'بيانات التوصيل' : 'Delivery Details'}</h2>
+                    <h2 className="text-xl font-black text-gray-900">{isRTL ? 'بيانات التوصيل' : 'Delivery Details'}</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -234,7 +233,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             required
                             defaultValue=""
                             className={INPUT_CLASS}
-                            placeholder={isRTL ? "الاسم ثنائي على الأقل..." : "Full name..."}
+                            placeholder={isRTL ? "أحمد محمد..." : "Ahmed Mohamed..."}
                         />
                     </div>
 
@@ -255,21 +254,16 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className={LABEL_CLASS}>{isRTL ? 'المحافظة' : 'Governorate'}</label>
-                        <div className="relative">
-                            <select
-                                name="governorate"
-                                required
-                                defaultValue="القاهرة"
-                                className={`${INPUT_CLASS} pr-10`}
-                            >
-                                {EGYPT_GOVS.map(gov => (
-                                    <option key={gov} value={gov}>{gov}</option>
-                                ))}
-                            </select>
-                            <div className={`pointer-events-none absolute inset-y-0 ${isRTL ? 'left-0 pl-4' : 'right-0 pr-4'} flex items-center text-black`}>
-                                <svg className="fill-current h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                            </div>
-                        </div>
+                        <select
+                            name="governorate"
+                            required
+                            defaultValue="القاهرة"
+                            className={`${INPUT_CLASS} appearance-none cursor-pointer`}
+                        >
+                            {EGYPT_GOVS.map(gov => (
+                                <option key={gov} value={gov}>{gov}</option>
+                            ))}
+                        </select>
                     </div>
 
                     <div>
@@ -280,50 +274,54 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             required
                             defaultValue=""
                             className={INPUT_CLASS}
-                            placeholder={isRTL ? 'المدينة أو الحي...' : 'City or area...'}
+                            placeholder={isRTL ? 'مدينة نصر، التجمع...' : 'Nasr City, Maadi...'}
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label className={LABEL_CLASS}>{isRTL ? 'العنوان بالتفصيل' : 'Detailed Address'}</label>
+                    <label className={LABEL_CLASS}>{isRTL ? 'العنوان بالتفصيل (الشارع، العمارة، الشقة)' : 'Detailed Address'}</label>
                     <input
                         type="text"
                         name="street"
                         required
                         defaultValue=""
                         className={INPUT_CLASS}
-                        placeholder={isRTL ? 'اسم الشارع، رقم العمارة، رقم الشقة...' : 'Street name, building no...'}
+                        placeholder={isRTL ? 'شارع كذا، عمارة رقم كذا...' : 'Street name, building no...'}
                     />
                 </div>
             </div>
 
-            {/* زر تأكيد الطلب العادي - غير ثابت لتجنب التعليق على الموبايل */}
-            <div className="bg-black p-6 md:p-8 mt-8 border-2 border-black flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="w-full md:w-auto text-center md:text-right">
-                    <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">{isRTL ? 'الإجمالي المطلوب' : 'Total Amount'}</p>
-                    <p className="text-4xl font-black text-white leading-none mt-2">
-                        {Math.round(total).toLocaleString()} <span className="text-lg font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
-                    </p>
+            {/* شريط تأكيد الطلب السفلي الثابت - بلون صلب بدون ضبابية لمنع التعليق */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 md:p-6 border-t border-gray-200 rounded-t-[2rem] z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.06)]">
+                <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto px-4">
+                    
+                    {/* السعر الإجمالي */}
+                    <div className="flex-1 text-right">
+                        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">{isRTL ? 'الإجمالي المطلوب' : 'Total Amount'}</p>
+                        <p className="text-2xl font-black text-gray-900 leading-none mt-1">
+                            {Math.round(total).toLocaleString()} <span className="text-xs font-bold text-gray-400 ml-1">{isRTL ? 'ج.م' : 'EGP'}</span>
+                        </p>
+                    </div>
+                    
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="h-14 px-8 bg-[#0E4435] text-white rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-emerald-950/20 disabled:opacity-60 active:scale-95 transition-all hover:bg-[#0a3126]"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <span>{isRTL ? 'جاري...' : 'Processing'}</span>
+                            </>
+                        ) : (
+                            <>
+                                <ShieldCheck size={18} />
+                                <span>{isRTL ? 'تأكيد الطلب' : 'Confirm Order'}</span>
+                            </>
+                        )}
+                    </button>
                 </div>
-                
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full md:w-auto h-16 px-10 bg-white text-black font-black text-xl flex items-center justify-center gap-3 disabled:opacity-60 border-2 border-white hover:bg-gray-200 transition-colors rounded-none"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <Loader2 className="w-6 h-6 animate-spin" />
-                            <span>{isRTL ? 'جاري المعالجة...' : 'Processing...'}</span>
-                        </>
-                    ) : (
-                        <>
-                            <ShieldCheck size={28} />
-                            <span>{isRTL ? 'تأكيد الطلب الآن' : 'Confirm Order Now'}</span>
-                        </>
-                    )}
-                </button>
             </div>
         </form>
     );
