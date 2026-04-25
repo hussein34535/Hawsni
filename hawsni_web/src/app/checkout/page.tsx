@@ -205,7 +205,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value)}
                         placeholder={isRTL ? 'أدخل الكود هنا' : 'Enter code here'}
-                        className={`flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 font-bold uppercase focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-all shadow-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`flex-1 bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black uppercase focus:ring-0 focus:border-black outline-none transition-colors shadow-sm ${isRTL ? 'text-right' : 'text-left'}`}
                     />
                     <button
                         type="button"
@@ -235,27 +235,27 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-2 px-1">{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
+                        <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
                         <input
                             type="text"
                             name="name"
                             required
                             value={formData.name}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-base font-semibold focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-all shadow-sm"
+                            className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-300"
                             placeholder={isRTL ? "أحمد محمد..." : "Ahmed Mohamed..."}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-2 px-1">{isRTL ? 'رقم الهاتف' : 'Phone Number'}</label>
+                        <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'رقم الهاتف' : 'Phone Number'}</label>
                         <input
                             type="tel"
                             name="phone"
                             required
                             value={formData.phone}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-base font-semibold focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-all shadow-sm"
+                            className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-300"
                             placeholder="010xxxxxxxx"
                             dir="ltr"
                         />
@@ -264,13 +264,13 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-2 px-1">{isRTL ? 'المحافظة' : 'Governorate'}</label>
+                        <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'المحافظة' : 'Governorate'}</label>
                         <select
                             name="governorate"
                             required
                             value={formData.governorate}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-base font-semibold focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-all shadow-sm appearance-none cursor-pointer"
+                            className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm appearance-none cursor-pointer"
                         >
                             {EGYPT_GOVS.map(gov => (
                                 <option key={gov} value={gov}>{gov}</option>
@@ -279,28 +279,28 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-gray-500 mb-2 px-1">{isRTL ? 'المدينة / المنطقة' : 'City / Area'}</label>
+                        <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'المدينة / المنطقة' : 'City / Area'}</label>
                         <input
                             type="text"
                             name="city"
                             required
                             value={formData.city}
                             onChange={handleInputChange}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-base font-semibold focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-all shadow-sm"
+                            className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-300"
                             placeholder={isRTL ? 'مدينة نصر، التجمع...' : 'Nasr City, Maadi...'}
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-2 px-1">{isRTL ? 'العنوان بالتفصيل (الشارع، العمارة، الشقة)' : 'Detailed Address (Street, Bldg, Flat)'}</label>
+                    <label className="block text-sm font-bold text-gray-600 mb-2 px-1">{isRTL ? 'العنوان بالتفصيل (الشارع، العمارة، الشقة)' : 'Detailed Address (Street, Bldg, Flat)'}</label>
                     <input
                         type="text"
                         name="street"
                         required
                         value={formData.street}
                         onChange={handleInputChange}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-base font-semibold focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-all shadow-sm"
+                        className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-300"
                         placeholder={isRTL ? 'شارع كذا، عمارة رقم كذا...' : 'Street name, building no...'}
                     />
                 </div>
