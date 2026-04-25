@@ -272,7 +272,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         required
                         defaultValue=""
                         className={PREMIUM_INPUT_CLASS}
-                        placeholder={isRTL ? "أحمد محمد..." : "Ahmed Mohamed..."}
+                        placeholder={isRTL ? "الاسم ثنائي..." : "First and Last Name..."}
                     />
                 </div>
 
