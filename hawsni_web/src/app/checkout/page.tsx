@@ -58,7 +58,7 @@ export default function CheckoutPage() {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 py-6 md:py-10 relative">
+            <main className="max-w-7xl mx-auto px-4 pt-6 pb-32 md:pt-10 relative">
                 <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
                     
                     <div className="w-full lg:w-3/5 order-1">
@@ -219,7 +219,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-5 pb-32">
+        <form onSubmit={handleSubmit} className="space-y-5">
             
             {/* قسم البرومو كود - موقوف حالياً بناء على طلبك */}
             {/* 
