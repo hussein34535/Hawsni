@@ -10,7 +10,7 @@ import { checkoutService } from '@/services/checkoutService';
 import OrderReceipt from '@/components/checkout/OrderReceipt';
 import MeshBackground from '@/components/checkout/MeshBackground';
 
-// قائمة المحافظات لتسهيل وتريع الطلب
+// قائمة المحافظات لتسهيل وتسريع الطلب
 const EGYPT_GOVS =[
     'القاهرة', 'الجيزة', 'الإسكندرية', 'الشرقية', 'الدقهلية', 'القليوبية', 'المنيا', 'الغربية', 'الإسماعيلية', 'أسيوط', 'الفيوم', 'سوهاج', 'قنا', 'بني سويف', 'أسوان', 'البحيرة', 'كفر الشيخ', 'المنوفية', 'دمياط', 'الأقصر', 'البحر الأحمر', 'السويس', 'بورسعيد', 'مطروح', 'شمال سيناء', 'جنوب سيناء'
 ];
@@ -24,7 +24,7 @@ export default function CheckoutPage() {
     // حالات الفاتورة والأموال (مفصولة عن الفورم لمنع التهنيج)
     const [shippingFee] = useState(50); // يمكنك ربطها لاحقاً بالـ API
     const [discount, setDiscount] = useState(0);
-    const[appliedCoupon, setAppliedCoupon] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState('');
 
     const subtotal = getTotal();
     const total = subtotal + shippingFee - discount;
@@ -39,7 +39,7 @@ export default function CheckoutPage() {
     if (items.length === 0) return null;
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] font-cairo" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="min-h-screen bg-[#FAFAFA] font-cairo pb-24" dir={isRTL ? 'rtl' : 'ltr'}>
             <MeshBackground />
 
             {/* الهيدر العلوي */}
@@ -60,10 +60,10 @@ export default function CheckoutPage() {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+            <main className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative">
                 <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
                     
-                    {/* عمود اليمين: الفورم وكود الخصم (مفصول في مكون خاص لسرعة الأداء) */}
+                    {/* عمود اليمين: الفورم وكود الخصم */}
                     <div className="w-full lg:w-3/5 order-2 lg:order-1">
                         <CheckoutForm 
                             isRTL={isRTL} 
@@ -106,10 +106,9 @@ export default function CheckoutPage() {
 function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon }: any) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [promoCode, setPromoCode] = useState('');
-    const[isApplyingPromo, setIsApplyingPromo] = useState(false);
+    const [isApplyingPromo, setIsApplyingPromo] = useState(false);
     
-    // الخانات الأساسية فقط (تم حذف الخانات المزعجة)
-    const[formData, setFormData] = useState({
+    const [formData, setFormData] = useState({
         name: '',
         phone: '',
         governorate: 'القاهرة',
@@ -118,7 +117,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     });
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({ ...formData,[e.target.name]: e.target.value });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     // معالجة كود الخصم
@@ -126,8 +125,6 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
         if (!promoCode.trim()) return;
         setIsApplyingPromo(true);
         try {
-            // هنا يمكنك استدعاء couponService.validateCoupon من الباك إند
-            // سأضع مثالاً وهمياً (خصم 10%) حتى تقوم بربطها
             if (promoCode.toUpperCase() === 'WELCOME10') {
                 setDiscount(subtotal * 0.1); 
                 setAppliedCoupon(promoCode.toUpperCase());
@@ -193,7 +190,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
     return (
         <form onSubmit={handleSubmit} className="space-y-8">
             
-            {/* قسم البرومو كود - تصميم مرن وأنيق */}
+            {/* قسم البرومو كود */}
             <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
                 <label className="flex items-center gap-2 mb-3 text-sm font-black text-gray-900">
                     <Tag className="w-5 h-5 text-[#0E4435]" />
@@ -205,7 +202,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         value={promoCode}
                         onChange={(e) => setPromoCode(e.target.value)}
                         placeholder={isRTL ? 'أدخل الكود هنا' : 'Enter code here'}
-                        className={`flex-1 bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black uppercase focus:ring-0 focus:border-black outline-none transition-colors shadow-sm ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black uppercase focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm ${isRTL ? 'text-right' : 'text-left'}`}
                     />
                     <button
                         type="button"
@@ -224,7 +221,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                 )}
             </div>
 
-            {/* بيانات التوصيل - تصميم الخانات النظيف */}
+            {/* بيانات التوصيل */}
             <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 space-y-6">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
@@ -242,7 +239,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             required
                             value={formData.name}
                             onChange={handleInputChange}
-                            className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-300"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400"
                             placeholder={isRTL ? "أحمد محمد..." : "Ahmed Mohamed..."}
                         />
                     </div>
@@ -255,7 +252,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             required
                             value={formData.phone}
                             onChange={handleInputChange}
-                            className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-300"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400"
                             placeholder="010xxxxxxxx"
                             dir="ltr"
                         />
@@ -270,7 +267,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             required
                             value={formData.governorate}
                             onChange={handleInputChange}
-                            className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm appearance-none cursor-pointer"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm appearance-none cursor-pointer"
                         >
                             {EGYPT_GOVS.map(gov => (
                                 <option key={gov} value={gov}>{gov}</option>
@@ -286,7 +283,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             required
                             value={formData.city}
                             onChange={handleInputChange}
-                            className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-300"
+                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400"
                             placeholder={isRTL ? 'مدينة نصر، التجمع...' : 'Nasr City, Maadi...'}
                         />
                     </div>
@@ -300,30 +297,44 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         required
                         value={formData.street}
                         onChange={handleInputChange}
-                        className="w-full bg-white border-2 border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-0 focus:border-black outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-300"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-gray-900 text-lg font-black focus:ring-4 focus:ring-[#0E4435]/15 focus:border-[#0E4435] focus:bg-white outline-none transition-colors shadow-sm placeholder:font-semibold placeholder:text-gray-400"
                         placeholder={isRTL ? 'شارع كذا، عمارة رقم كذا...' : 'Street name, building no...'}
                     />
                 </div>
             </div>
 
-            {/* زر تأكيد الطلب */}
-            <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-5 bg-[#0E4435] text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-emerald-950/20 hover:scale-[1.02] hover:bg-[#0a3126] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-                {isSubmitting ? (
-                    <>
-                        <Loader2 className="w-6 h-6 animate-spin" />
-                        <span>{isRTL ? 'جاري تأكيد الطلب...' : 'Processing...'}</span>
-                    </>
-                ) : (
-                    <>
-                        <ShieldCheck className="w-6 h-6" />
-                        <span>{isRTL ? 'تأكيد الطلب (الدفع عند الاستلام)' : 'Confirm Order (COD)'}</span>
-                    </>
-                )}
-            </button>
+            {/* شريط تأكيد الطلب السفلي الثابت */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl p-4 md:p-6 border-t border-gray-200 rounded-t-[2rem] z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.06)]">
+                <div className="flex items-center justify-between gap-4 max-w-7xl mx-auto px-4">
+                    
+                    {/* السعر الإجمالي */}
+                    <div className="flex-1 text-right">
+                        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">{isRTL ? 'الإجمالي المطلوب' : 'Total Amount'}</p>
+                        <p className="text-2xl font-black text-gray-900 leading-none mt-1">
+                            {Math.round(total).toLocaleString()} <span className="text-xs font-bold text-gray-400 ml-1">{isRTL ? 'ج.م' : 'EGP'}</span>
+                        </p>
+                    </div>
+                    
+                    {/* زر التأكيد - الآن سيقوم بفحص الفورم عند الضغط */}
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="h-14 px-8 bg-[#0E4435] text-white rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-emerald-950/20 disabled:opacity-60 active:scale-95 transition-all hover:bg-[#0a3126]"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <span>{isRTL ? 'جاري...' : 'Processing'}</span>
+                            </>
+                        ) : (
+                            <>
+                                <ShieldCheck size={18} />
+                                <span>{isRTL ? 'تأكيد الطلب' : 'Confirm Order'}</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
         </form>
     );
 }
