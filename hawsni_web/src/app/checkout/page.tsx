@@ -333,7 +333,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         >
                             <option value="" disabled>{isLoadingCities ? (isRTL ? 'جاري التحميل...' : 'Loading...') : (isRTL ? 'اختر المحافظة' : 'Select Governorate')}</option>
                             {cities.map(gov => (
-                                <option key={gov._id} value={gov._id}>{isRTL ? gov.nameAr : gov.nameEn}</option>
+                                <option key={gov.id} value={gov.id}>{isRTL ? gov.arabicName : gov.name}</option>
                             ))}
                         </select>
                         <div className={`pointer-events-none absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} top-7 flex items-center text-gray-400`}>
@@ -351,7 +351,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         >
                             <option value="" disabled>{isLoadingDistricts ? (isRTL ? 'جاري التحميل...' : 'Loading...') : (isRTL ? 'اختر المدينة' : 'Select City')}</option>
                             {districts.map(dist => (
-                                <option key={dist._id} value={dist._id}>{isRTL ? dist.nameAr : dist.nameEn}</option>
+                                <option key={dist.id} value={dist.id}>{isRTL ? dist.arabicName : dist.name}</option>
                             ))}
                         </select>
                         <div className={`pointer-events-none absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} top-7 flex items-center text-gray-400`}>
