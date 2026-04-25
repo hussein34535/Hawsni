@@ -164,6 +164,9 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                 couponCode: appliedCoupon || undefined,
                 guestName: name,
                 guestPhone: phone,
+                guestAlternativePhone: (formData.get('phone2') as string) || undefined,
+                guestEmail: (formData.get('email') as string) || undefined,
+                notes: (formData.get('notes') as string) || undefined,
             };
 
             const res = await checkoutService.placeOrder(orderData);
@@ -294,6 +297,46 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         defaultValue=""
                         className={PREMIUM_INPUT_CLASS}
                         placeholder={isRTL ? 'اسم الشارع، رقم العمارة، رقم الشقة...' : 'Street name, building no...'}
+                    />
+                </div>
+
+                {/* الحقول الاختيارية */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-100/60 mt-2">
+                    <div>
+                        <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'رقم هاتف إضافي (اختياري)' : 'Alternative Phone (Optional)'}</label>
+                        <input
+                            type="tel"
+                            name="phone2"
+                            defaultValue=""
+                            className={PREMIUM_INPUT_CLASS}
+                            placeholder="010xxxxxxxx"
+                            dir="ltr"
+                        />
+                    </div>
+                    <div>
+                        <label className={PREMIUM_LABEL_CLASS}>
+                            {isRTL ? 'البريد الإلكتروني ' : 'Email '}
+                            <span className="text-emerald-600 font-bold text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded ml-1">{isRTL ? 'ننصح به' : 'Recommended'}</span>
+                        </label>
+                        <input
+                            type="email"
+                            name="email"
+                            defaultValue=""
+                            className={PREMIUM_INPUT_CLASS}
+                            placeholder="example@email.com"
+                            dir="ltr"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'ملاحظات إضافية (اختياري)' : 'Order Notes (Optional)'}</label>
+                    <textarea
+                        name="notes"
+                        defaultValue=""
+                        className={`${PREMIUM_INPUT_CLASS} h-auto py-3 resize-none`}
+                        rows={2}
+                        placeholder={isRTL ? 'أي ملاحظات خاصة بالتوصيل أو الطلب...' : 'Any special instructions...'}
                     />
                 </div>
             </div>
