@@ -136,12 +136,6 @@ export default function OrderReceipt({
               <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
                 {isRTL ? 'إجمالي المطلوب' : 'Total Amount'}
               </p>
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500/10 rounded-lg border border-emerald-500/10">
-                <ShieldCheck size={12} strokeWidth={3} className="text-emerald-600" />
-                <span className="text-[9px] font-black text-emerald-700 uppercase tracking-tighter">
-                  {isRTL ? 'ضمان هوسي الأصلي' : 'Hawsni Certified'}
-                </span>
-              </div>
             </div>
             <div className="text-right">
               <span className="text-4xl font-black text-[#0E4435] leading-none tracking-tighter">
@@ -151,15 +145,6 @@ export default function OrderReceipt({
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Trust Message */}
-      <div className="px-6 py-4 bg-[#0E4435]/[0.03] border-t border-white/20">
-        <p className="text-[9px] font-bold text-gray-400 text-center leading-relaxed">
-          {isRTL 
-            ? 'بإتمامك للطلب، أنت توافق على شروط الخدمة. الشحن يتم بواسطة أسرع مناديب في مصر 🇪🇬'
-            : 'By placing the order, you agree to the Terms of Service. Fast shipping across all Egypt 🇪🇬'}
-        </p>
       </div>
     </div>
   );

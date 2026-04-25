@@ -87,35 +87,9 @@ class OrderController {
             });
 
             // --- Server-side Shipping Fee Verification ---
-            let verifiedShippingFee = 0;
-            try {
-                const { data: settingsArray } = await supabase
-                    .from('shipping_settings')
-                    .select('*')
-                    .order('updated_at', { ascending: false })
-                    .limit(1);
-
-                const shippingConfig = settingsArray && settingsArray.length > 0 ? settingsArray[0] : null;
-
-                if (shippingConfig) {
-                    const gov = finalShippingAddress.state || finalShippingAddress.city || '';
-                    const govSettings = shippingConfig.governorate_settings?.[gov];
-                    const threshold = shippingConfig.free_shipping_threshold || 0;
-
-                    if (threshold > 0 && safeSubtotal >= threshold) {
-                        verifiedShippingFee = 0;
-                    } else if (govSettings) {
-                        verifiedShippingFee = parseFloat(govSettings.cost) || 0;
-                    } else {
-                        verifiedShippingFee = parseFloat(shippingConfig.delivery_cost) || 0;
-                    }
-                }
-            } catch (err) {
-                console.error('Shipping verification error:', err);
-                verifiedShippingFee = parseFloat(req.body.shippingFee) || 0;
-            }
-
-            const finalShippingFee = Math.round(verifiedShippingFee * 100) / 100;
+            // Force fixed 90 EGP shipping for all orders as requested
+            let verifiedShippingFee = 90;
+            const finalShippingFee = 90;
 
             // --- Server-side Coupon Validation ---
             let orderDiscount = 0;

@@ -21,7 +21,7 @@ export default function CheckoutPage() {
     const { isRTL } = useLanguage();
     const { showToast } = useToastStore();
 
-    const [shippingFee] = useState(50);
+    const [shippingFee] = useState(90);
     const [discount, setDiscount] = useState(0);
     const [appliedCoupon, setAppliedCoupon] = useState('');
 
@@ -248,7 +248,8 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
             }
         } catch (error: any) {
             console.error(error);
-            showToast(error.message || (isRTL ? 'حدث خطأ في النظام' : 'System error'), 'error');
+            const errorMsg = typeof error === 'string' ? error : (error.message || (isRTL ? 'حدث خطأ في النظام' : 'System error'));
+            showToast(errorMsg, 'error');
             setIsSubmitting(false);
         }
     };
@@ -456,6 +457,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                     {/* السعر الإجمالي */}
                     <div className="flex-1 text-right">
                         <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">{isRTL ? 'الإجمالي المطلوب' : 'Total Amount'}</p>
+                        {/* تم إزالة رسالة الضمان والشروط بناء على طلبك */}
                         <p className="text-2xl font-black text-gray-900 leading-none mt-1">
                             {Math.round(total).toLocaleString()} <span className="text-xs font-bold text-gray-400 ml-1">{isRTL ? 'ج.م' : 'EGP'}</span>
                         </p>
