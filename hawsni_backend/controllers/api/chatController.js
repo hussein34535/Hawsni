@@ -19,7 +19,7 @@ class ChatController {
             const { data: session, error: upsertErr } = await supabase
                 .from('chat_sessions')
                 .upsert(
-                    { session_id: sessionId, status: 'bot_active', last_active_at: now },
+                    { session_id: sessionId, status: 'bot_active', updated_at: now },
                     { onConflict: 'session_id', ignoreDuplicates: true } // ignoreDuplicates: true means it won't overwrite existing
                 )
                 .select()
@@ -28,7 +28,7 @@ class ChatController {
             if (upsertErr) throw upsertErr;
 
             // 2. Check if this is a BRAND NEW session (created just now)
-            // If created_at is very close to last_active_at (which we just set to 'now'), it's new.
+            // If created_at is very close to updated_at (which we just set to 'now'), it's new.
             // Or better: Check if chat_messages for this session exist.
             const { count: msgCount } = await supabase
                 .from('chat_messages')
@@ -48,7 +48,7 @@ class ChatController {
             } else {
                 // SESSION EXISTS: Check Expiry (24 hours)
                 // SESSION EXISTS: Check Expiry (24 hours)
-                const lastActive = new Date(session.last_active_at || session.created_at);
+                const lastActive = new Date(session.updated_at || session.created_at);
                 const diffHours = (now.getTime() - lastActive.getTime()) / (1000 * 3600);
 
                 if (diffHours >= 24) {
@@ -72,7 +72,7 @@ class ChatController {
                         await supabase.from('chat_sessions')
                             .update({ 
                                 summary: newSummary, 
-                                last_active_at: now.toISOString(),
+                                updated_at: now.toISOString(),
                                 status: 'bot_active' 
                             })
                             .eq('session_id', sessionId);
@@ -88,7 +88,7 @@ class ChatController {
                     } else {
                         // Just update time if not enough history to summarize
                         await supabase.from('chat_sessions')
-                            .update({ last_active_at: now.toISOString() })
+                            .update({ updated_at: now.toISOString() })
                             .eq('session_id', sessionId);
                     }
                 }
@@ -181,9 +181,9 @@ class ChatController {
             // Pass the summary from session for persistent context
             const aiResponse = await aiChatbotService.handleChat(message, formattedHistory || [], sessionId, session.summary);
 
-            // 4. Update last_active_at and Insert AI response
+            // 4. Update updated_at and Insert AI response
             await supabase.from('chat_sessions')
-                .update({ last_active_at: new Date().toISOString() })
+                .update({ updated_at: new Date().toISOString() })
                 .eq('session_id', sessionId);
 
             if (aiResponse && aiResponse.reply) {
@@ -236,7 +236,7 @@ class ChatController {
             await supabase.from('chat_sessions')
                 .update({ 
                     summary: newSummary, 
-                    last_active_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
                     status: 'bot_active' 
                 })
                 .eq('session_id', sessionId);
