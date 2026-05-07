@@ -77,19 +77,19 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
               'phone': newAddress.phone,
               'is_default': newAddress.isDefault
             };
-
+            final messenger = ScaffoldMessenger.of(context);
             final result = await ApiService.addAddress(addressMap);
             if (!mounted) return;
             if (result != null) {
               _loadAddresses();
-              ScaffoldMessenger.of(context).showSnackBar(
+              messenger.showSnackBar(
                 const SnackBar(
                     content: Text('تم إضافة العنوان بنجاح',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.successColor),
               );
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
+              messenger.showSnackBar(
                 const SnackBar(
                     content: Text('فشل إضافة العنوان',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
@@ -136,19 +136,20 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
             // Re-reading my plan: I checked ApiService outline in the same turn.
             // I will use ApiService.updateAddress(updatedAddress.id, addressMap).
 
+            final messenger = ScaffoldMessenger.of(context);
             final result =
                 await ApiService.updateAddress(updatedAddress.id, addressMap);
             if (!mounted) return;
             if (result != null) {
               _loadAddresses();
-              ScaffoldMessenger.of(context).showSnackBar(
+              messenger.showSnackBar(
                 const SnackBar(
                     content: Text('تم تعديل العنوان بنجاح',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),
                     backgroundColor: AppTheme.successColor),
               );
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
+              messenger.showSnackBar(
                 const SnackBar(
                     content: Text('فشل تعديل العنوان',
                         style: TextStyle(fontFamily: 'Cairo',color: Colors.white)),

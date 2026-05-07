@@ -35,17 +35,16 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     });
   }
 
-  void _continueToOnboarding(BuildContext context) async {
+  void _continueToOnboarding() async {
     final settingsProvider =
         Provider.of<SettingsProvider>(context, listen: false);
     await settingsProvider.setLanguage(_selectedLanguage);
     await AppSettingsService().setFirstLaunchCompleted();
 
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
-    }
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+    );
   }
 
   @override
@@ -101,7 +100,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () => _continueToOnboarding(context),
+                    onPressed: _continueToOnboarding,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       foregroundColor: Colors.white,

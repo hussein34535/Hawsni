@@ -500,10 +500,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             size: 18, color: Colors.black54),
                       ),
                     ),
-                    Expanded(
+                    const Expanded(
                       child: Text(
                         'تفاصيل الطلب',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -597,7 +597,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             const SizedBox(width: 10),
                             Text(
                               deliveryText,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,

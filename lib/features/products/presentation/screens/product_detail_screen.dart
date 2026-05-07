@@ -1217,11 +1217,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           const SizedBox(height: 40),
 
           // Description
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF0E4435)),
-              const SizedBox(width: 8),
-              const Text('التفاصيل',
+              Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFF0E4435)),
+              SizedBox(width: 8),
+              Text('التفاصيل',
                   style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 14,
@@ -1305,7 +1305,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
           ],
         ),
         const SizedBox(height: 20),
-        ...faqs.map((faq) => _buildFAQItem(faq['question']!, faq['answer']!)).toList(),
+        ...faqs.map((faq) => _buildFAQItem(faq['question']!, faq['answer']!)),
       ],
     );
   }
@@ -1313,7 +1313,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen>
   Widget _buildFAQItem(String question, String answer) {
     return StatefulBuilder(
       builder: (context, setState) {
-        bool isOpen = false;
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(

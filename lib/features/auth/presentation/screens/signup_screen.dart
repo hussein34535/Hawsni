@@ -6,6 +6,7 @@ import 'package:hwasi_app/features/auth/presentation/screens/otp_verification_sc
 import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/features/main/presentation/screens/main_screen.dart';
+import 'package:hwasi_app/core/widgets/mesh_background.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -112,7 +113,7 @@ class _SignupScreenState extends State<SignupScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -121,8 +122,9 @@ class _SignupScreenState extends State<SignupScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
+      body: MeshBackground(
+        child: Center(
+          child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
@@ -302,6 +304,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

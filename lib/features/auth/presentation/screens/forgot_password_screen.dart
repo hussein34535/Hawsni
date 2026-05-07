@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/core/widgets/spinning_loader.dart';
+import 'package:hwasi_app/core/widgets/mesh_background.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -168,16 +169,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('استعادة كلمة المرور',
             style: TextStyle(
-                fontFamily: 'Playfair Display', fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.black,
+                fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        iconTheme: const IconThemeData(color: AppTheme.primaryColor),
       ),
-      body: Center(
+      body: MeshBackground(
+        child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -194,8 +197,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Playfair Display',
+                  color: Colors.black,
+                  fontFamily: 'Cairo',
                 ),
               ),
               const SizedBox(height: 16),
@@ -399,6 +402,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ),
             ],
           ),
+        ),
         ),
       ),
     );

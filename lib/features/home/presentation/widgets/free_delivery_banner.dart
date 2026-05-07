@@ -104,10 +104,10 @@ class _FreeDeliveryBannerState extends State<FreeDeliveryBanner>
                   color: Colors.white, size: 26),
             ),
             const SizedBox(width: 12),
-            Expanded(
+            const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text(
                     '🎉 توصيل مجاني لمدة 24 ساعة!',
                     style: TextStyle(

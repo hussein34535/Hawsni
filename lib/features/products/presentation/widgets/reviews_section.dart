@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/features/reviews/presentation/widgets/add_review_sheet.dart';
 import 'package:hwasi_app/core/services/auth_service.dart';
-import 'package:hwasi_app/features/reviews/bloc/review_event.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ReviewsSection extends StatelessWidget {
   final String productId;

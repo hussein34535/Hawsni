@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
+import 'package:hwasi_app/core/widgets/mesh_background.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
   final Map<String, dynamic> orderDetails;
@@ -12,9 +13,10 @@ class OrderSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
+      backgroundColor: Colors.transparent,
+      body: MeshBackground(
+        child: SafeArea(
+          child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -141,6 +143,7 @@ class OrderSuccessScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

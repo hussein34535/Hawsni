@@ -433,6 +433,7 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
 
   Future<void> _shareImage() async {
     if (_resultImageUrl == null) return;
+    final messenger = ScaffoldMessenger.of(context);
     try {
       final response = await http.get(Uri.parse(_resultImageUrl!));
       final documentDirectory = await getTemporaryDirectory();
@@ -443,7 +444,7 @@ class _VirtualTryOnScreenState extends State<VirtualTryOnScreen> {
           files: [XFile(file.path)],
           text: 'Check out my new look with hwasi AI! 👗✨'));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(content: Text('Error sharing image: $e')),
       );
     }

@@ -92,6 +92,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         // Note: Actual image upload would go here if backend supported it.
         // For now we just update text fields.
 
+        final messenger = ScaffoldMessenger.of(context);
         final success = await ApiService.updateUserProfile(
           _nameController.text,
           _phoneController.text,
@@ -99,7 +100,8 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
 
         if (success && mounted) {
           await _loadUserProfile();
-          ScaffoldMessenger.of(context).showSnackBar(
+          if (!mounted) return;
+          messenger.showSnackBar(
             const SnackBar(
                 content: Text('Profile updated successfully!',
                     style: TextStyle(color: Colors.white)),
@@ -111,7 +113,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           });
         } else if (mounted) {
           setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             const SnackBar(
                 content: Text('Failed to update profile',
                     style: TextStyle(color: Colors.white)),

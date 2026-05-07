@@ -17,6 +17,7 @@ import 'package:hwasi_app/features/profile/presentation/screens/change_password_
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/features/orders/presentation/screens/guest_track_order_screen.dart';
 import 'package:hwasi_app/core/utils/responsive_layout.dart';
+import 'package:hwasi_app/core/widgets/mesh_background.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -68,130 +69,132 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Check for Guest Mode
     if (AuthService.isGuest) {
       return Scaffold(
-        backgroundColor: AppTheme.scaffoldBackgroundColor,
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: AppTheme.shadowSoft,
+        backgroundColor: Colors.transparent,
+        body: MeshBackground(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: AppTheme.shadowSoft,
+                    ),
+                    child: const Icon(
+                      Icons.person_outline,
+                      size: 64,
+                      color: AppTheme.primaryColor,
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.person_outline,
-                    size: 64,
-                    color: AppTheme.primaryColor,
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.welcomeGuest,
+                    style: AppTheme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  l10n.welcomeGuest,
-                  style: AppTheme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textPrimary,
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.accessProfileMessage,
+                    textAlign: TextAlign.center,
+                    style: AppTheme.textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.accessProfileMessage,
-                  textAlign: TextAlign.center,
-                  style: AppTheme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
+                        elevation: 0,
                       ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      l10n.loginSignup,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const GuestTrackOrderScreen(),
+                      child: Text(
+                        l10n.loginSignup,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 1,
                         ),
-                      );
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppTheme.primaryColor),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Track Order',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryColor,
-                        letterSpacing: 1,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const GuestTrackOrderScreen(),
+                          ),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppTheme.primaryColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Track Order',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryColor,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
-                // Settings Section for Guests (Language/Currency)
-                _buildSectionTitle(l10n.appSettings),
-                Consumer<SettingsProvider>(
-                  builder: (context, settingsProvider, child) {
-                    return _buildMenuIsland([
-                      _buildMenuItem(
-                        icon: Icons.language,
-                        title: l10n.language,
-                        subtitle: settingsProvider.language == 'en'
-                            ? 'English'
-                            : 'العربية',
-                        onTap: () =>
-                            _showLanguageDialog(context, settingsProvider),
-                      ),
-                      _buildDivider(),
-                      _buildMenuItem(
-                        icon: Icons.attach_money,
-                        title: l10n.currency,
-                        subtitle: _getCurrencyName(settingsProvider.currency),
-                        onTap: () =>
-                            _showCurrencyDialog(context, settingsProvider),
-                      ),
-                    ]);
-                  },
-                ),
-              ],
+                  // Settings Section for Guests (Language/Currency)
+                  _buildSectionTitle(l10n.appSettings),
+                  Consumer<SettingsProvider>(
+                    builder: (context, settingsProvider, child) {
+                      return _buildMenuIsland([
+                        _buildMenuItem(
+                          icon: Icons.language,
+                          title: l10n.language,
+                          subtitle: settingsProvider.language == 'en'
+                              ? 'English'
+                              : 'العربية',
+                          onTap: () =>
+                              _showLanguageDialog(context, settingsProvider),
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.attach_money,
+                          title: l10n.currency,
+                          subtitle: _getCurrencyName(settingsProvider.currency),
+                          onTap: () =>
+                              _showCurrencyDialog(context, settingsProvider),
+                        ),
+                      ]);
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -199,8 +202,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackgroundColor,
-      body: _isLoading
+      backgroundColor: Colors.transparent,
+      body: MeshBackground(
+        child: _isLoading
           ? const Center(child: SpinningLoader())
           : CustomScrollView(
               slivers: [
@@ -464,6 +468,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
+      ),
     );
   }
 
@@ -652,7 +657,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontWeight: FontWeight.w500,
               color: AppTheme.textPrimary)),
       value: value,
+      // ignore: deprecated_member_use
       groupValue: groupValue,
+      // ignore: deprecated_member_use
       onChanged: onChanged,
       activeColor: AppTheme.primaryColor,
       contentPadding: EdgeInsets.zero,
@@ -789,216 +796,218 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackgroundColor,
-      body: _isLoading
-          ? const Center(child: SpinningLoader())
-          : Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left Column: Profile Card
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(32),
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(24),
-                                  boxShadow: AppTheme.shadowFloating),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: AppTheme.primaryColor),
-                                    child: CircleAvatar(
-                                      radius: 64,
-                                      backgroundColor: Colors.white,
-                                      backgroundImage:
-                                          _userProfile?['avatar_url'] != null
-                                              ? NetworkImage(
-                                                  _userProfile!['avatar_url'])
-                                              : null,
-                                      child: _userProfile?['avatar_url'] == null
-                                          ? const Icon(Icons.person,
-                                              size: 64,
-                                              color: AppTheme.textTertiary)
-                                          : null,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  Text(_userProfile?['name'] ?? 'John Doe',
-                                      style: AppTheme.textTheme.headlineSmall
-                                          ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppTheme.textPrimary)),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                      _userProfile?['email'] ??
-                                          'john.doe@email.com',
-                                      style: AppTheme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                              color: AppTheme.textSecondary)),
-                                  const SizedBox(height: 16),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
-                                    decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor
-                                            .withValues(alpha: 0.1),
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                    child: Text(l10n.premiumMember,
-                                        style: AppTheme.textTheme.labelMedium
-                                            ?.copyWith(
-                                                color: AppTheme.primaryColor,
-                                                fontWeight: FontWeight.bold)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 32),
-                      // Right Column: Settings
-                      Expanded(
-                        flex: 2,
-                        child: SingleChildScrollView(
+      backgroundColor: Colors.transparent,
+      body: MeshBackground(
+        child: _isLoading
+            ? const Center(child: SpinningLoader())
+            : Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Left Column: Profile Card
+                        Expanded(
+                          flex: 1,
                           child: Column(
                             children: [
-                              _buildSectionTitle(l10n.account),
-                              _buildMenuIsland([
-                                _buildMenuItem(
-                                  icon: Icons.person_outline,
-                                  title: l10n.profileDetails,
-                                  onTap: () async {
-                                    await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) =>
-                                                const ProfileDetailsScreen()));
-                                    _loadUserProfile();
-                                  },
-                                ),
-                                _buildDivider(),
-                                _buildMenuItem(
-                                  icon: Icons.lock_outline,
-                                  title: l10n.changePassword,
-                                  onTap: () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const ChangePasswordScreen())),
-                                ),
-                                _buildDivider(),
-                                _buildMenuItem(
-                                  icon: Icons.notifications_outlined,
-                                  title: l10n.notifications,
-                                  onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const NotificationsSettingsScreen())),
-                                ),
-                              ]),
-                              const SizedBox(height: 24),
-                              _buildSectionTitle(l10n.appSettings),
-                              Consumer<SettingsProvider>(
-                                builder: (context, settingsProvider, child) {
-                                  return _buildMenuIsland([
-                                    _buildMenuItem(
-                                      icon: Icons.language,
-                                      title: l10n.language,
-                                      subtitle:
-                                          settingsProvider.language == 'en'
-                                              ? 'English'
-                                              : 'العربية',
-                                      onTap: () => _showLanguageDialog(
-                                          context, settingsProvider),
+                              Container(
+                                padding: const EdgeInsets.all(32),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: AppTheme.shadowFloating),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: AppTheme.primaryColor),
+                                      child: CircleAvatar(
+                                        radius: 64,
+                                        backgroundColor: Colors.white,
+                                        backgroundImage:
+                                            _userProfile?['avatar_url'] != null
+                                                ? NetworkImage(
+                                                    _userProfile!['avatar_url'])
+                                                : null,
+                                        child: _userProfile?['avatar_url'] == null
+                                            ? const Icon(Icons.person,
+                                                size: 64,
+                                                color: AppTheme.textTertiary)
+                                            : null,
+                                      ),
                                     ),
-                                    _buildDivider(),
-                                    _buildMenuItem(
-                                      icon: Icons.attach_money,
-                                      title: l10n.currency,
-                                      subtitle: _getCurrencyName(
-                                          settingsProvider.currency),
-                                      onTap: () => _showCurrencyDialog(
-                                          context, settingsProvider),
+                                    const SizedBox(height: 24),
+                                    Text(_userProfile?['name'] ?? 'John Doe',
+                                        style: AppTheme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppTheme.textPrimary)),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                        _userProfile?['email'] ??
+                                            'john.doe@email.com',
+                                        style: AppTheme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                                color: AppTheme.textSecondary)),
+                                    const SizedBox(height: 16),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
+                                      decoration: BoxDecoration(
+                                          color: AppTheme.primaryColor
+                                              .withValues(alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      child: Text(l10n.premiumMember,
+                                          style: AppTheme.textTheme.labelMedium
+                                              ?.copyWith(
+                                                  color: AppTheme.primaryColor,
+                                                  fontWeight: FontWeight.bold)),
                                     ),
-                                  ]);
-                                },
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 24),
-                              _buildSectionTitle(l10n.myActivity),
-                              _buildMenuIsland([
-                                _buildMenuItem(
-                                  icon: Icons.shopping_bag_outlined,
-                                  title: l10n.myOrders,
-                                  onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const OrdersScreen())),
-                                ),
-                                _buildDivider(),
-                                _buildMenuItem(
-                                  icon: Icons.favorite_border,
-                                  title: l10n.wishlist,
-                                  onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const WishlistScreen())),
-                                ),
-                                _buildDivider(),
-                                _buildMenuItem(
-                                  icon: Icons.location_on_outlined,
-                                  title: l10n.addresses,
-                                  onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const AddressManagementScreen())),
-                                ),
-                                _buildDivider(),
-                                _buildMenuItem(
-                                  icon: Icons.local_offer_outlined,
-                                  title: l10n.myCoupons,
-                                  onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const CouponsScreen())),
-                                ),
-                              ]),
-                              const SizedBox(height: 24),
-                              _buildMenuIsland([
-                                _buildMenuItem(
-                                  icon: Icons.logout,
-                                  title: l10n.logout,
-                                  textColor: AppTheme.errorColor,
-                                  iconColor: AppTheme.errorColor,
-                                  onTap: () => _handleLogout(context),
-                                  showArrow: false,
-                                ),
-                              ]),
-                              const SizedBox(height: 32),
                             ],
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 32),
+                        // Right Column: Settings
+                        Expanded(
+                          flex: 2,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                _buildSectionTitle(l10n.account),
+                                _buildMenuIsland([
+                                  _buildMenuItem(
+                                    icon: Icons.person_outline,
+                                    title: l10n.profileDetails,
+                                    onTap: () async {
+                                      await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const ProfileDetailsScreen()));
+                                      _loadUserProfile();
+                                    },
+                                  ),
+                                  _buildDivider(),
+                                  _buildMenuItem(
+                                    icon: Icons.lock_outline,
+                                    title: l10n.changePassword,
+                                    onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const ChangePasswordScreen())),
+                                  ),
+                                  _buildDivider(),
+                                  _buildMenuItem(
+                                    icon: Icons.notifications_outlined,
+                                    title: l10n.notifications,
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const NotificationsSettingsScreen())),
+                                  ),
+                                ]),
+                                const SizedBox(height: 24),
+                                _buildSectionTitle(l10n.appSettings),
+                                Consumer<SettingsProvider>(
+                                  builder: (context, settingsProvider, child) {
+                                    return _buildMenuIsland([
+                                      _buildMenuItem(
+                                        icon: Icons.language,
+                                        title: l10n.language,
+                                        subtitle:
+                                            settingsProvider.language == 'en'
+                                                ? 'English'
+                                                : 'العربية',
+                                        onTap: () => _showLanguageDialog(
+                                            context, settingsProvider),
+                                      ),
+                                      _buildDivider(),
+                                      _buildMenuItem(
+                                        icon: Icons.attach_money,
+                                        title: l10n.currency,
+                                        subtitle: _getCurrencyName(
+                                            settingsProvider.currency),
+                                        onTap: () => _showCurrencyDialog(
+                                            context, settingsProvider),
+                                      ),
+                                    ]);
+                                  },
+                                ),
+                                const SizedBox(height: 24),
+                                _buildSectionTitle(l10n.myActivity),
+                                _buildMenuIsland([
+                                  _buildMenuItem(
+                                    icon: Icons.shopping_bag_outlined,
+                                    title: l10n.myOrders,
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const OrdersScreen())),
+                                  ),
+                                  _buildDivider(),
+                                  _buildMenuItem(
+                                    icon: Icons.favorite_border,
+                                    title: l10n.wishlist,
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const WishlistScreen())),
+                                  ),
+                                  _buildDivider(),
+                                  _buildMenuItem(
+                                    icon: Icons.location_on_outlined,
+                                    title: l10n.addresses,
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) =>
+                                                const AddressManagementScreen())),
+                                  ),
+                                  _buildDivider(),
+                                  _buildMenuItem(
+                                    icon: Icons.local_offer_outlined,
+                                    title: l10n.myCoupons,
+                                    onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => const CouponsScreen())),
+                                  ),
+                                ]),
+                                const SizedBox(height: 24),
+                                _buildMenuIsland([
+                                  _buildMenuItem(
+                                    icon: Icons.logout,
+                                    title: l10n.logout,
+                                    textColor: AppTheme.errorColor,
+                                    iconColor: AppTheme.errorColor,
+                                    onTap: () => _handleLogout(context),
+                                    showArrow: false,
+                                  ),
+                                ]),
+                                const SizedBox(height: 32),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
+      ),
     );
   }
+
 }

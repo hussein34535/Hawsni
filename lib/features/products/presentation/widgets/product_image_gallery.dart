@@ -283,8 +283,8 @@ class _FullScreenImageGalleryState extends State<FullScreenImageGallery> {
       );
       // Matrix4 scale and translate
       final matrix = Matrix4.identity();
-      matrix.translate(-position.dx * (_scale - 1), -position.dy * (_scale - 1));
-      matrix.scale(_scale);
+      matrix.translateByDouble(-position.dx * (_scale - 1), -position.dy * (_scale - 1), 0.0, 1.0);
+      matrix.scaleByDouble(_scale, _scale, _scale, 1.0);
       _transformationController.value = matrix;
     }
   }

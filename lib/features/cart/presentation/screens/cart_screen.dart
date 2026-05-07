@@ -5,7 +5,6 @@ import 'package:hwasi_app/features/cart/bloc/cart_state.dart';
 
 import 'package:hwasi_app/features/cart/presentation/widgets/cart_item_card.dart';
 import 'package:hwasi_app/features/checkout/presentation/screens/checkout_screen.dart';
-import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/core/utils/responsive_layout.dart';
 
@@ -81,7 +80,7 @@ class CartScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(32),
                         ),
                         elevation: 10,
-                        shadowColor: const Color(0xFF0E4435).withOpacity(0.3),
+                        shadowColor: const Color(0xFF0E4435).withValues(alpha: 0.3),
                       ),
                       child: Text(
                         isRTL ? 'استكشف الآن' : 'Start Exploring',
@@ -142,7 +141,8 @@ class CartScreen extends StatelessWidget {
           return const SizedBox();
         },
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildDesktopLayout(

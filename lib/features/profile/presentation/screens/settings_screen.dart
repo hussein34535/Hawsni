@@ -331,7 +331,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               fontWeight: FontWeight.w500,
               color: AppTheme.textPrimary)),
       value: value,
+      // ignore: deprecated_member_use
       groupValue: groupValue,
+      // ignore: deprecated_member_use
       onChanged: onChanged,
       activeColor: AppTheme.primaryColor,
       contentPadding: EdgeInsets.zero,

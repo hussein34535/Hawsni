@@ -9,6 +9,7 @@ import 'package:hwasi_app/features/cart/data/services/cart_service.dart';
 import 'package:hwasi_app/l10n/generated/app_localizations.dart';
 import 'package:hwasi_app/features/orders/presentation/screens/guest_track_order_screen.dart';
 import 'package:hwasi_app/core/utils/responsive_layout.dart';
+import 'package:hwasi_app/core/widgets/mesh_background.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -93,14 +94,15 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackgroundColor,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppTheme.primaryColor),
       ),
-      body: Center(
-        child: SingleChildScrollView(
+      body: MeshBackground(
+        child: Center(
+          child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
             key: _formKey,
@@ -283,6 +285,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

@@ -15,6 +15,7 @@ import 'package:hwasi_app/core/services/auth_service.dart';
 import 'package:hwasi_app/core/services/coupon_service.dart';
 import 'package:hwasi_app/core/services/api_service.dart';
 import 'package:hwasi_app/features/checkout/presentation/screens/order_success_screen.dart';
+import 'package:hwasi_app/core/widgets/mesh_background.dart';
 
 final List<String> egyptGovernorates = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر',
@@ -59,7 +60,6 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   final String _selectedPaymentMethod = 'Cash on Delivery';
 
   // Shipping
-  Map<String, dynamic>? _shippingSettings;
 
   List<dynamic> _governorates = [];
   List<dynamic> _districts = [];
@@ -71,7 +71,6 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   @override
   void initState() {
     super.initState();
-    _fetchShippingSettings();
     _fetchGovernorates();
     if (!_isGuest) {
       context.read<AddressBloc>().add(LoadAddresses());
@@ -95,10 +94,6 @@ class _CheckoutScreenState extends State<CheckoutScreen>
     if (mounted) setState(() => _districts = dists);
   }
 
-  Future<void> _fetchShippingSettings() async {
-    final settings = await ApiService.getShippingSettings();
-    if (mounted) setState(() => _shippingSettings = settings);
-  }
 
   @override
   void dispose() {
@@ -343,8 +338,10 @@ class _CheckoutScreenState extends State<CheckoutScreen>
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F7F7),
-        body: _isLoading
+        backgroundColor: Colors.transparent,
+        body: MeshBackground(
+          child: _isLoading
+
             ? const Center(child: SpinningLoader())
             : BlocBuilder<CartBloc, CartState>(
                 builder: (context, state) {
@@ -356,6 +353,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
                   return const Center(child: Text('السلة فارغة'));
                 },
               ),
+        ),
       ),
     );
   }
@@ -425,7 +423,8 @@ class _CheckoutScreenState extends State<CheckoutScreen>
 
   Widget _buildAppBar() {
     return Container(
-      color: const Color(0xFFF7F7F7),
+      color: Colors.transparent,
+
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 8,
         bottom: 12,
@@ -663,7 +662,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
       children: [
         // Governorate Dropdown
         DropdownButtonFormField<String>(
-          value: _selectedGovId,
+          initialValue: _selectedGovId,
           isExpanded: true,
           decoration: _inputDecoration('المحافظة', Icons.map_outlined),
           items: _governorates.isNotEmpty 
@@ -688,7 +687,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
         // District Dropdown
         if (_districts.isNotEmpty)
           DropdownButtonFormField<String>(
-            value: _selectedDistrictId,
+            initialValue: _selectedDistrictId,
             isExpanded: true,
             decoration: _inputDecoration('المنطقة / المدينة', Icons.location_city_outlined),
             items: _districts.map((d) => DropdownMenuItem<String>(value: d['id']?.toString(), child: Text(d['arabicName'] ?? d['name'], style: const TextStyle(fontFamily: 'Cairo', fontSize: 14)))).toList(),
