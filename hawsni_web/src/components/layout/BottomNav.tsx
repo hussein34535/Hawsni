@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Heart, ShoppingBag, User, Bell } from 'lucide-react';
@@ -10,6 +11,11 @@ export default function BottomNav() {
     const pathname = usePathname();
     const { t } = useLanguage();
     const itemCount = useCartStore((state) => state.getItemCount());
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const navItems = [
         { href: '/', icon: Home, label: t.common.home },
@@ -46,7 +52,7 @@ export default function BottomNav() {
                             )}
 
                             {/* Cart Badge */}
-                            {item.href === '/cart' && itemCount > 0 && (
+                            {item.href === '/cart' && isMounted && itemCount > 0 && (
                                 <span className="absolute top-2 right-[25%] w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border border-white">
                                     {itemCount}
                                 </span>

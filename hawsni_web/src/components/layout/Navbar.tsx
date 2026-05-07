@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ShoppingBag, Bell, Search, User, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,6 +13,11 @@ export default function Navbar() {
     const { t, language, isRTL } = useLanguage();
     const itemCount = useCartStore((state) => state.getItemCount());
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Hide Navbar on product detail, checkout, and cart pages to match Flutter app behavior
     if (pathname.includes('/product/') || pathname.includes('/checkout') || pathname.includes('/cart')) return null;
@@ -72,7 +77,7 @@ export default function Navbar() {
                                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors relative"
                             >
                                 <span className="font-normal text-[16px]">{t.common.cart}</span>
-                                {itemCount > 0 && (
+                                {isMounted && itemCount > 0 && (
                                     <span className="mx-2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
                                         {itemCount}
                                     </span>

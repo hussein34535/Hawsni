@@ -14,6 +14,13 @@ export default function CartPage() {
     const { items, getTotal } = useCartStore();
     const { isRTL, t } = useLanguage();
     const total = getTotal();
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) return null;
 
     return (
         <div className="w-full min-h-screen bg-[#FAFAFA]">

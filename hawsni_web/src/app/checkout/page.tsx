@@ -31,14 +31,21 @@ export default function CheckoutPage() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isRedirecting, setIsRedirecting] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     useEffect(() => {
         // Only redirect to cart if items are 0 AND we are NOT in the middle of a success redirect
-        if (items.length === 0 && !isRedirecting) {
+        // Wait for component to mount first to read persisted cart properly
+        if (isMounted && items.length === 0 && !isRedirecting) {
             router.push('/cart');
         }
-    }, [items.length, router, isRedirecting]);
+    }, [items.length, router, isRedirecting, isMounted]);
 
+    if (!isMounted) return null;
     if (items.length === 0 && !isRedirecting) return null;
 
     return (
