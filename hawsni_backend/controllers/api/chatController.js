@@ -12,7 +12,8 @@ class ChatController {
             const { sessionId } = req.params;
             if (!sessionId) return res.status(400).json({ success: false, error: 'Session ID required' });
 
-            const now = new Date().toISOString();
+            const nowDate = new Date();
+            const now = nowDate.toISOString();
 
             // 1. Get or Create session
             let { data: session, error: getErr } = await supabase
@@ -70,7 +71,7 @@ class ChatController {
                 // SESSION EXISTS: Check Expiry (24 hours)
                 // SESSION EXISTS: Check Expiry (24 hours)
                 const lastActive = new Date(session.updated_at || session.created_at);
-                const diffHours = (now.getTime() - lastActive.getTime()) / (1000 * 3600);
+                const diffHours = (nowDate.getTime() - lastActive.getTime()) / (1000 * 3600);
 
                 if (diffHours >= 24) {
                     console.log(`[Chat] ⏳ Session ${sessionId} expired (${diffHours.toFixed(1)}h). Summarizing...`);
@@ -93,7 +94,7 @@ class ChatController {
                         await supabase.from('chat_sessions')
                             .update({ 
                                 summary: newSummary, 
-                                updated_at: now.toISOString(),
+                                updated_at: now,
                                 status: 'bot_active' 
                             })
                             .eq('session_id', sessionId);
@@ -109,7 +110,7 @@ class ChatController {
                     } else {
                         // Just update time if not enough history to summarize
                         await supabase.from('chat_sessions')
-                            .update({ updated_at: now.toISOString() })
+                            .update({ updated_at: now })
                             .eq('session_id', sessionId);
                     }
                 }
