@@ -4,7 +4,7 @@ const supabase = require('../config/supabase');
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
-const REASONER_MODEL  = "gemma-4-31b-it"; 
+const REASONER_MODEL  = "gemini-2.5-flash"; 
 const FORMATTER_MODEL = "gemini-2.5-flash"; 
 const MAX_RESULTS     = 5;
 const MAX_ORDERS      = 3;
