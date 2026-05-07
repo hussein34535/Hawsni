@@ -1,11 +1,11 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 const supabase = require('../config/supabase');
 
 // ─────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────
-const REASONER_MODEL  = "gemini-2.5-flash"; 
-const FORMATTER_MODEL = "gemini-2.5-flash"; 
+const REASONER_MODEL  = "gemma-4-31b-it"; 
+const FORMATTER_MODEL = "gemma-4-31b-it"; 
 const MAX_RESULTS     = 5;
 const MAX_ORDERS      = 3;
 
@@ -179,7 +179,7 @@ class AIChatbotService {
         }
 
         console.log(`[AI Bot] ✅ ${this.apiKeys.length} API key(s) loaded for rotation.`);
-        this.genAIInstances  = this.apiKeys.map(k => new GoogleGenerativeAI(k));
+        this.genAIInstances  = this.apiKeys.map(k => new GoogleGenAI({ apiKey: k }));
         this.currentKeyIndex = 0;
     }
 
@@ -192,19 +192,17 @@ class AIChatbotService {
     }
 
     // ── Retry with all keys on 429 ─────────────
-    async _generateWithRetry(modelName, config, promptOrMessages, isChat = false, chatHistory = []) {
+    async _generateWithRetry(modelName, config, contents) {
         const totalKeys = this.genAIInstances.length;
         let lastError;
         for (let attempt = 0; attempt < totalKeys; attempt++) {
             const instance = this._getInstance();
             try {
-                const model = instance.getGenerativeModel({ ...config, model: modelName });
-                if (isChat) {
-                    const chat = model.startChat({ history: chatHistory });
-                    return await chat.sendMessage(promptOrMessages);
-                } else {
-                    return await model.generateContent(promptOrMessages);
-                }
+                return await instance.models.generateContent({
+                    model: modelName,
+                    contents: contents,
+                    config: config
+                });
             } catch (err) {
                 lastError = err;
                 if (err.status === 429) {
@@ -216,24 +214,6 @@ class AIChatbotService {
             }
         }
         throw lastError;
-    }
-
-    // ── Model A: Gemma + Tools ─────────────────
-    _getToolsModel(instance) {
-        return instance.getGenerativeModel({
-            model:             REASONER_MODEL,
-            systemInstruction: TOOLS_SYSTEM,
-            tools:             TOOLS,
-        });
-    }
-
-    // ── Model B: Gemma + JSON Formatter ────────
-    _getFormatterModel(instance) {
-        return instance.getGenerativeModel({
-            model:             FORMATTER_MODEL,
-            systemInstruction: FORMAT_SYSTEM,
-            generationConfig:  { responseMimeType: "application/json" },
-        });
     }
 
     // ── Tool execution ─────────────────────────
@@ -353,14 +333,11 @@ class AIChatbotService {
     async summarizeChat(history = []) {
         if (!history.length) return "";
         try {
-            const instance = this._getInstance();
-            const model = instance.getGenerativeModel({ 
-                model: FORMATTER_MODEL, 
-                systemInstruction: SUMMARIZER_SYSTEM 
-            });
             const textHistory = history.map(h => `${h.role}: ${h.parts[0].text}`).join('\n');
-            const result = await model.generateContent(`لخص البيانات التالية للعميل:\n${textHistory}`);
-            return result.response.text().trim();
+            const contents = [{ role: 'user', parts: [{ text: `لخص البيانات التالية للعميل:\n${textHistory}` }] }];
+            const config = { systemInstruction: SUMMARIZER_SYSTEM + '\n\nملاحظة: لا تستخدم تاجات التفكير <think>.' };
+            const result = await this._generateWithRetry(FORMATTER_MODEL, config, contents);
+            return result.text.trim();
         } catch (err) {
             console.error('[AI Bot] Summarization Error:', err);
             return "";
@@ -389,45 +366,48 @@ class AIChatbotService {
         // ════════════════════════════════════════
         //  STEP 1 — Reasoner & Tools (with key retry)
         // ════════════════════════════════════════
-        const toolsConfig = { tools: TOOLS }; 
+        const toolsConfig = { tools: TOOLS, systemInstruction: TOOLS_SYSTEM + '\n\nCRITICAL RULE: DO NOT use <think> tags. Do not show your internal reasoning.' }; 
         
         let promptWithInstructions = userMessage;
         if (cleanedHistory.length === 0) {
             promptWithInstructions = `تعليمات النظام:\n${TOOLS_SYSTEM}\n\nرسالة العميل:\n${userMessage}`;
         }
         
-        let result = await this._generateWithRetry(REASONER_MODEL, toolsConfig, promptWithInstructions, true, cleanedHistory);
-        let response = result.response;
+        let currentContents = [...cleanedHistory, { role: 'user', parts: [{ text: promptWithInstructions }] }];
+        let result = await this._generateWithRetry(REASONER_MODEL, toolsConfig, currentContents);
         let toolData = null;
 
-        // Tool-call loop — continue chatting on same chat session from retry result
+        // Tool-call loop
         let iterations = 0;
-        while (response.functionCalls?.()?.length && iterations++ < 3) {
-            const calls = response.functionCalls();
+        while (result.functionCalls?.length && iterations++ < 3) {
+            const calls = result.functionCalls;
             const toolResponses = await Promise.all(
                 calls.map(async call => {
                     const res = await this._executeTool(call, sessionId);
                     toolData = res; 
                     return {
-                        functionResponse: {
-                            name:     call.name,
-                            response: { result: res },
-                        },
+                        name: call.name,
+                        result: res
                     };
                 })
             );
 
-            // For tool follow-up, create new chat session with history (retry-wrapped)
-            const fullHistory = [
-                ...cleanedHistory,
-                { role: 'user',  parts: [{ text: userMessage }] },
-                { role: 'model', parts: result.response.candidates[0].content.parts },
-            ];
-            result   = await this._generateWithRetry(REASONER_MODEL, toolsConfig, toolResponses, true, fullHistory);
-            response = result.response;
+            // Append model's functionCall to history
+            currentContents.push({ 
+                role: 'model', 
+                parts: calls.map(c => ({ functionCall: { name: c.name, args: c.args } })) 
+            });
+
+            // WORKAROUND FOR GEMMA 500 ERROR: Send tool results as standard user text message
+            const toolResultsText = toolResponses.map(tr => `[System Tool Output for ${tr.name}]:\n${JSON.stringify(tr.result)}`).join('\n\n');
+            currentContents.push({ role: 'user', parts: [{ text: toolResultsText }] });
+
+            result = await this._generateWithRetry(REASONER_MODEL, toolsConfig, currentContents);
         }
 
-        const formatterConfig = {}; 
+        const formatterConfig = { 
+            systemInstruction: FORMAT_SYSTEM + '\n\nCRITICAL RULE: DO NOT use <think> tags. Do not show your internal reasoning. Just output JSON.'
+        }; 
 
         const recentContext = cleanedHistory.slice(-2).map(h => {
             const text = h.parts.find(p => p.text)?.text || '';
@@ -441,8 +421,8 @@ class AIChatbotService {
         let finalReply = '';
         let rawText = '';
         try {
-            const fResult = await this._generateWithRetry(FORMATTER_MODEL, formatterConfig, formatterPrompt);
-            rawText = fResult.response.text();
+            const fResult = await this._generateWithRetry(FORMATTER_MODEL, formatterConfig, [{ role: 'user', parts: [{ text: formatterPrompt }] }]);
+            rawText = fResult.text;
             
             // تنظيف الـ JSON
             const cleanedText = rawText.replace(/```json/gi, '').replace(/```/gi, '').trim();
@@ -453,8 +433,8 @@ class AIChatbotService {
             console.warn('[AI Bot] ⚠️ JSON parse failed. rawText:', rawText);
             console.warn('[AI Bot] ⚠️ Parse error:', e);
             try {
-                const fResult = await this._generateWithRetry(FORMATTER_MODEL, formatterConfig, formatterPrompt);
-                const raw     = fResult.response.text();
+                const fResult = await this._generateWithRetry(FORMATTER_MODEL, formatterConfig, [{ role: 'user', parts: [{ text: formatterPrompt }] }]);
+                const raw     = fResult.text;
                 const match   = raw.match(/"reply"\s*:\s*"([\s\S]*?)(?<!\\)"/);
                 finalReply    = match?.[1] ?? '';
             } catch (_) { }
