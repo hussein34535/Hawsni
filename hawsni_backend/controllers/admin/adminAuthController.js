@@ -5,7 +5,7 @@ class AdminAuthController {
     // Show login page
     renderLogin(req, res) {
         if (req.cookies.admin_token || req.cookies.admin_refresh_token) {
-            return res.redirect('/dashboard');
+            return res.redirect('/admin/dashboard');
         }
         res.render('admin-login');
     }
@@ -58,7 +58,7 @@ class AdminAuthController {
             res.cookie('admin_token', session.access_token, cookieOptions);
             res.cookie('admin_refresh_token', session.refresh_token, cookieOptions);
 
-            res.redirect('/dashboard');
+            res.redirect('/admin/dashboard');
         } catch (err) {
             console.error('Admin Login Error:', err);
             res.render('admin-login', { error: 'حدث خطأ غير متوقع.' });

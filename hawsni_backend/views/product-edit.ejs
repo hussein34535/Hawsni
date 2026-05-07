@@ -298,7 +298,7 @@
             <a href="/categories">
                 <i class="fas fa-tags"></i> التصنيفات
             </a>
-            <a href="/orders">
+            <a href="/admin/orders">
                 <i class="fas fa-shopping-cart"></i> الطلبات
             </a>
         </nav>
@@ -365,8 +365,7 @@
                         <label for="is_featured">مميز</label>
                     </div>
                     <div class="form-group checkbox">
-                        <input type="checkbox" id="is_vto_enabled" name="is_vto_enabled" <%=product.is_vto_enabled
-                            !==false ? 'checked' : '' %>>
+                        <input type="checkbox" id="is_vto_enabled" name="is_vto_enabled" <%= (product && product.is_vto_enabled === true) ? 'checked' : '' %>>
                         <label for="is_vto_enabled">تفعيل تجربة VTO المدعومة بالذكاء الاصطناعي</label>
                     </div>
                     <div class="form-group checkbox">

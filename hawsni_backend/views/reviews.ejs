@@ -22,7 +22,7 @@
                                     جديد</h2>
                             </div>
                             <div style="padding:1.5rem;">
-                                <form method="POST" action="/reviews">
+                                <form method="POST" action="/admin/reviews">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
                                     <div class="form-group">
@@ -40,7 +40,7 @@
                                     <div class="form-group">
                                         <label class="form-label">اسم المراجع (مخصص)</label>
                                         <input type="text" name="custom_name" class="form-control" required
-                                            placeholder="مثال: أحمد محمد">
+                                            placeholder="مثال: الاسم بالكامل">
                                     </div>
 
                                     <div class="form-group">
@@ -57,9 +57,9 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="form-label">التعليق</label>
-                                        <textarea name="comment" class="form-control" rows="4" required
-                                            placeholder="اكتب التعليق هنا..."></textarea>
+                                        <label class="form-label">التعليق (اختياري)</label>
+                                        <textarea name="comment" class="form-control" rows="4"
+                                            placeholder="اكتب التعليق هنا (اختياري)..."></textarea>
                                     </div>
 
                                     <div class="form-group">
@@ -274,11 +274,20 @@
                         // ── Delete Review ─────────────────────────────────────────────────────────────
                         async function deleteReview(id) {
                             if (!confirm('هل أنت متأكد من حذف هذا التقييم؟')) return;
-                            const res = await fetch(`/reviews/${id}`, { method: 'DELETE' });
-                            const data = await res.json();
-                            if (data.success) location.reload();
-                            else alert('فشل الحذف: ' + data.message);
+                            try {
+                                const res = await fetch(`/admin/reviews/${id}`, { 
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-Token': '<%= csrfToken %>'
+                                    }
+                                });
+                                const data = await res.json();
+                                if (data.success) location.reload();
+                                else alert('فشل الحذف: ' + data.message);
+                            } catch (err) {
+                                alert('حدث خطأ أثناء الحذف');
+                            }
                         }
                     </script>
 
-                    <%- include('partials/footer') %>
+    <%- include('partials/footer') %>

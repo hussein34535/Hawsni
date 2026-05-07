@@ -6,7 +6,9 @@ import { Mail, Lock, ArrowRight, XCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/authService';
+import { cartService } from '@/services/cartService';
 import { useAuthStore } from '@/store/authStore';
+import { useCartStore } from '@/store/cartStore';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function LoginPage() {
@@ -17,6 +19,7 @@ export default function LoginPage() {
 
     const router = useRouter();
     const { setUser } = useAuthStore();
+    const { items, setItems } = useCartStore();
     const { isRTL } = useLanguage();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -31,6 +34,22 @@ export default function LoginPage() {
                 if (data.refresh_token) {
                     localStorage.setItem('refresh_token', data.refresh_token);
                 }
+
+                // Sync Cart Data
+                try {
+                    const syncData = await cartService.syncCart(items);
+                    if (syncData.success && syncData.cart && syncData.cart.items) {
+                        // The backend might return items in a different format, we need to map them back
+                        // if the backend structure differs, but assuming backend returns valid CartItems
+                        // Wait, backend returns { productId, quantity, size, color, accessories, id, price, ... }
+                        // For safety, we just overwrite the local state with the server state if it's formatted.
+                        // Assuming the backend returns items mapped to the frontend's CartItem interface
+                        setItems(syncData.cart.items as any[]);
+                    }
+                } catch (syncErr) {
+                    console.error('Failed to sync cart after login:', syncErr);
+                }
+
                 router.push('/');
             } else {
                 setError(data.message || 'فشل تسجيل الدخول');

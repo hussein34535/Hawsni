@@ -17,7 +17,7 @@ class ReviewController {
                 req.user.id,
                 productId,
                 rating,
-                comment,
+                comment || '',
                 images || [],
                 req.user.name || ''   // stored as reviewer_name safety net
             );

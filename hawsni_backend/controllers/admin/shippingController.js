@@ -135,7 +135,7 @@ class ShippingController {
                     .insert(settingsData);
             }
 
-            res.redirect('/shipping');
+            res.redirect('/admin/shipping');
         } catch (err) {
             console.error('Error saving shipping settings:', err);
             res.status(500).send('خطأ في حفظ إعدادات الشحن: ' + err.message);

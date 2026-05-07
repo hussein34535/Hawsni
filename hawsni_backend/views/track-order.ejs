@@ -385,6 +385,8 @@
                 <%
                     const statusSteps = {
                         'Processing': 1,
+                        'Confirmed': 1,
+                        'Shipped': 2,
                         'In Transit': 2,
                         'Delivered': 3,
                         'Cancelled': -1
@@ -401,12 +403,16 @@
                     ];
                     const statusBadgeClass = {
                         'Processing': 'processing',
+                        'Confirmed': 'processing',
+                        'Shipped': 'transit',
                         'In Transit': 'transit',
                         'Delivered': 'delivered',
                         'Cancelled': 'cancelled'
                     }[order.status] || 'processing';
                     const statusText = {
                         'Processing': '⏳ جاري التجهيز',
+                        'Confirmed': '✅ تم التأكيد',
+                        'Shipped': '🚚 تم الشحن',
                         'In Transit': '🚚 في الطريق',
                         'Delivered': '✅ تم التسليم',
                         'Cancelled': '❌ ملغي'
@@ -487,14 +493,60 @@
                     </div>
                 <% } %>
 
-                <!-- Bosta Tracking -->
+                <!-- Bosta Live Tracking -->
                 <% if (order.tracking_number) { %>
-                    <div class="bosta-box">
-                        <div class="bosta-label">رقم بوليصة الشحن</div>
-                        <div class="bosta-number"><%= order.tracking_number %></div>
-                        <a href="https://t.bosta.co/<%= order.tracking_number %>" target="_blank" class="btn-track">
-                            📍 تتبع مباشرة مع بوسطة
-                        </a>
+                    <div style="margin: 0 32px 32px; border-radius: 20px; overflow: hidden; border: 1.5px solid #e0f0ea;">
+                        <!-- Tracking Header -->
+                        <div style="background: linear-gradient(135deg, #0E4435, #1a6b54); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <div style="color: rgba(255,255,255,0.7); font-size: 0.75rem; font-weight: 700; margin-bottom: 4px;">📦 تتبع شحنتك</div>
+                                <div style="color: white; font-size: 1.1rem; font-weight: 900; letter-spacing: 2px;"><%= order.tracking_number %></div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 30px; font-size: 0.75rem; color: white; font-weight: 700;">بوسطة 🚚</div>
+                        </div>
+
+                        <% if (tracking) { %>
+                            <!-- Live Status -->
+                            <div style="padding: 20px 24px; background: #f8fffe; border-bottom: 1px solid #e0f0ea;">
+                                <div style="font-size: 1rem; font-weight: 900; color: #0E4435; margin-bottom: 4px;">
+                                    <%= tracking.status %>
+                                </div>
+                                <% if (tracking.city) { %>
+                                    <div style="font-size: 0.8rem; color: #64748b;">📍 <%= tracking.city %></div>
+                                <% } %>
+                            </div>
+
+                            <!-- Timeline -->
+                            <% if (tracking.timeline && tracking.timeline.length > 0) { %>
+                                <div style="padding: 20px 24px; background: white;">
+                                    <div style="font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;">سجل التتبع</div>
+                                    <% tracking.timeline.slice(0, 5).forEach((event, idx) => { %>
+                                        <div style="display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start;">
+                                            <div style="width: 10px; height: 10px; border-radius: 50%; background: <%= idx === 0 ? '#0E4435' : '#e2e8f0' %>; flex-shrink: 0; margin-top: 5px;"></div>
+                                            <div style="flex: 1;">
+                                                <div style="font-size: 0.85rem; font-weight: 800; color: <%= idx === 0 ? '#0E4435' : '#475569' %>;"><%= event.status %></div>
+                                                <% if (event.timestamp) { %>
+                                                    <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">
+                                                        <%= new Date(event.timestamp).toLocaleString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            <% } else { %>
+                                <div style="padding: 20px 24px; text-align: center; color: #94a3b8; font-size: 0.85rem; background: white;">
+                                    الشحنة في مرحلة الجمع، تفاصيل أكثر قريباً...
+                                </div>
+                            <% } %>
+                        <% } else { %>
+                            <!-- Tracking not available yet -->
+                            <div style="padding: 24px; text-align: center; background: white;">
+                                <div style="font-size: 2rem; margin-bottom: 8px;">⏳</div>
+                                <div style="font-weight: 800; color: #475569;">بانتظار استلام الشحنة</div>
+                                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">سيتم تحديث حالة التتبع تلقائياً عند استلام المندوب للطلب</div>
+                            </div>
+                        <% } %>
                     </div>
                 <% } %>
 

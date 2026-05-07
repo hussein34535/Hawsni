@@ -95,13 +95,13 @@
                 <i class="fas fa-<%= product ? 'edit' : 'plus' %>"></i>
                 <%= product ? 'تعديل منتج' : 'إضافة منتج جديد' %>
             </h2>
-            <a href="/products" class="btn btn-secondary">
+            <a href="/admin/products" class="btn btn-secondary">
                 <i class="fas fa-arrow-right"></i> رجوع
             </a>
         </div>
 
 
-        <form action="/products<%= product ? '/' + product.id : '' %>" method="POST"
+        <form action="/admin/products<%= product ? '/' + product.id : '' %>" method="POST"
             onsubmit="return handleProductSubmit(event)" id="productForm">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
@@ -170,6 +170,8 @@
                                         <input type="color" id="colorPicker" class="form-control"
                                             style="width: 50px; padding: 0; height: 40px; flex-shrink: 0;"
                                             value="#000000">
+                                        <input type="text" id="colorNameInput" class="form-control" 
+                                            style="flex: 1; height: 40px;" placeholder="اسم اللون (مثلاً: أبيض)">
                                         <button type="button" class="btn btn-outline-info" onclick="openEyeDropper()"
                                             style="height: 40px; padding: 0 10px;" title="سحب لون من صورة">
                                             <i class="fas fa-eye-dropper"></i>
@@ -255,8 +257,7 @@
 
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="checkbox" name="is_vto_enabled" <%=!product || product.is_vto_enabled
-                                        !==false ? 'checked' : '' %>>
+                                    <input type="checkbox" name="is_vto_enabled" <%= (product && product.is_vto_enabled === true) ? 'checked' : '' %>>
                                     <span class="form-label" style="margin: 0;">تفعيل ميزة الذكاء الاصطناعي VTO لهذا
                                         المنتج</span>
                                 </label>
@@ -368,7 +369,7 @@
                             <i class="fas fa-save"></i>
                             <%= product ? 'حفظ التعديلات' : 'إضافة المنتج' %>
                         </button>
-                        <a href="/products" class="btn btn-secondary">إلغاء</a>
+                        <a href="/admin/products" class="btn btn-secondary">إلغاء</a>
                     </div>
         </form>
     </div>
@@ -451,6 +452,7 @@
                     addImageToState({ type: 'existing', url: url, file: null, isVideo }, false);
                 });
                 renderGallery(); // Render once after adding all
+                updateInputs(); // Sync to hidden inputs immediately
                 updateImageDropdown();
             }
 
@@ -994,6 +996,64 @@
                 };
             };
             img.src = src;
+        }
+
+        function addColor() {
+            const hex = document.getElementById('colorPicker').value;
+            const name = document.getElementById('colorNameInput').value.trim();
+            const imageIndex = selectedImageIndex;
+            const imageId = selectedImageIndex !== null ? imageState[selectedImageIndex].id : null;
+
+            if (colors.some(c => c.color === hex && c.name === name)) {
+                showToast('هذا اللون مضاف بالفعل', 'warning');
+                return;
+            }
+
+            colors.push({ color: hex, name: name, imageIndex, imageId });
+            renderColors();
+            updateColorsInput();
+            
+            // Clear name input
+            document.getElementById('colorNameInput').value = '';
+        }
+
+        function renderColors() {
+            const container = document.getElementById('colorsContainer');
+            container.innerHTML = '';
+            colors.forEach((c, index) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch-item';
+                swatch.style.cssText = 'display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 12px; border-radius: 50px; border: 1px solid #e2e8f0;';
+                
+                const circle = document.createElement('div');
+                circle.style.cssText = `width: 16px; height: 16px; border-radius: 50%; background-color: ${c.color}; border: 1px solid rgba(0,0,0,0.1);`;
+                
+                const text = document.createElement('span');
+                text.style.cssText = 'font-size: 0.85rem; font-weight: 700;';
+                text.textContent = c.name || c.color;
+                
+                if (c.imageIndex !== null && imageState[c.imageIndex]) {
+                    const imgThumb = document.createElement('img');
+                    imgThumb.src = imageState[c.imageIndex].url;
+                    imgThumb.style.cssText = 'width: 20px; height: 20px; border-radius: 4px; object-fit: cover;';
+                    swatch.appendChild(imgThumb);
+                }
+
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.type = 'button';
+                removeBtn.style.cssText = 'border: none; background: none; color: #94a3b8; cursor: pointer; padding: 0 0 0 4px; font-size: 0.8rem;';
+                removeBtn.onclick = () => {
+                    colors.splice(index, 1);
+                    renderColors();
+                    updateColorsInput();
+                };
+
+                swatch.appendChild(circle);
+                swatch.appendChild(text);
+                swatch.appendChild(removeBtn);
+                container.appendChild(swatch);
+            });
         }
 
         function rgbToHex(r, g, b) {

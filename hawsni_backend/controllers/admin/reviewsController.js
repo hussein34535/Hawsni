@@ -49,8 +49,14 @@ class AdminReviewController {
                 ? (Array.isArray(rawImages) ? rawImages : [rawImages])
                 : [];
 
-            if (!product_id || !custom_name || !rating || !comment) {
-                return res.redirect('/reviews?error=يرجى+ملء+جميع+الحقول');
+            if (!product_id) {
+                return res.redirect('/admin/reviews?error=يرجى+اختيار+المنتج');
+            }
+            if (!custom_name || !custom_name.trim()) {
+                return res.redirect('/admin/reviews?error=يرجى+إدخال+اسم+المراجع');
+            }
+            if (!rating || parseFloat(rating) === 0) {
+                return res.redirect('/admin/reviews?error=يرجى+اختيار+التقييم+(النجوم)');
             }
 
             const { error } = await supabase
@@ -59,7 +65,7 @@ class AdminReviewController {
                     product_id,
                     custom_name: custom_name.trim(),
                     rating: parseFloat(rating),
-                    comment: comment.trim(),
+                    comment: (comment || '').trim(),
                     images,
                 }]);
 
@@ -79,10 +85,10 @@ class AdminReviewController {
                     .eq('id', product_id);
             }
 
-            res.redirect('/reviews?success=1');
+            res.redirect('/admin/reviews?success=1');
         } catch (err) {
             console.error('Create review error:', err);
-            res.redirect(`/reviews?error=${encodeURIComponent(err.message)}`);
+            res.redirect(`/admin/reviews?error=${encodeURIComponent(err.message)}`);
         }
     }
 

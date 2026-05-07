@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_URL = 'https://api.resend.com/emails';
 const SENDER = process.env.SENDER_EMAIL || 'Hawsni <noreply@hwasi.com>';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'hussona4635@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 /**
  * Smart Email Fixer: Predicts and repairs common email entry mistakes.
@@ -184,6 +184,10 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
             itemImage = item.products.images[0];
         }
 
+        const colorSwatch = (item.color && item.color.startsWith('#')) 
+            ? `<span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${item.color}; border: 1px solid #eee; vertical-align: middle; margin-left: 4px;"></span>`
+            : (item.color ? `<span style="color: #666;">${item.color}</span>` : '');
+
         return `
         <tr>
             <td style="padding: 15px 0; border-bottom: 1px solid #f8f8f8; width: 65px;">
@@ -191,7 +195,7 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
             </td>
             <td style="padding: 15px 12px; border-bottom: 1px solid #f8f8f8;">
                 <p style="margin: 0; font-weight: 800; color: #1a1a1a; font-size: 14px; line-height: 1.4;">${itemName}</p>
-                <p style="margin: 4px 0 0 0; color: #aaa; font-size: 11px; font-weight: 700;">${item.size || 'عادي'} | x${item.quantity}${item.color ? ' | ' + item.color : ''}</p>
+                <p style="margin: 4px 0 0 0; color: #aaa; font-size: 11px; font-weight: 700;">${item.size || 'عادي'} | x${item.quantity}${colorSwatch ? ' | ' + colorSwatch : ''}</p>
                 ${item.accessories && item.accessories.length > 0 ? `
                     <div style="margin-top: 4px;">
                         ${item.accessories.map(acc => `
@@ -517,8 +521,11 @@ async function sendNewOrderAdminEmail({ order, customerName, customerEmail, item
     const itemsHtml = (items || []).map(item => {
         const itemName = item.name || (item.products && item.products.name) || '—';
         const itemSize = item.size ? `المقاس: ${item.size}` : '';
-        const itemColor = item.color ? `اللون: ${item.color}` : '';
-        const extras = [itemSize, itemColor].filter(Boolean).join(' | ');
+        const colorSwatch = (item.color && item.color.startsWith('#')) 
+            ? `<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${item.color}; border: 1px solid #eee; vertical-align: middle; margin-left: 2px;"></span>`
+            : (item.color || '');
+        
+        const extras = [itemSize, colorSwatch].filter(Boolean).join(' | ');
 
         return `
         <tr>

@@ -54,19 +54,39 @@ class ProductController {
         const body = req.body;
         
         // 1. Image URLs
-        let rawUrls = [...existingImages];
+        let rawUrls = [];
+        let hasImageUpdates = false;
+
+        if (body.retained_images) {
+            try { 
+                rawUrls = JSON.parse(body.retained_images); 
+                hasImageUpdates = true;
+            } catch(e) {}
+        } else {
+            // Fallback to existing images if no explicit retain/update field is sent
+            rawUrls = [...existingImages];
+        }
+
         if (body.image_urls) {
             const urls = typeof body.image_urls === 'string' ? JSON.parse(body.image_urls) : body.image_urls;
-            rawUrls = Array.isArray(urls) ? [...rawUrls, ...urls] : [...rawUrls, urls];
+            const newUrls = Array.isArray(urls) ? urls : [urls];
+            rawUrls = [...rawUrls, ...newUrls];
+            hasImageUpdates = true;
         }
-        if (body.retained_images) {
-             try { rawUrls = JSON.parse(body.retained_images); } catch(e) {}
-        }
+
         if (body.scraped_images) {
             try {
                 const scraped = JSON.parse(body.scraped_images);
-                if (Array.isArray(scraped)) rawUrls = [...rawUrls, ...scraped];
+                if (Array.isArray(scraped)) {
+                    rawUrls = [...rawUrls, ...scraped];
+                    hasImageUpdates = true;
+                }
             } catch (e) {}
+        }
+        
+        // If absolutely no image related fields were sent, keep existing
+        if (!hasImageUpdates && (!rawUrls || rawUrls.length === 0)) {
+            rawUrls = [...existingImages];
         }
         
         // Use central utility for URLs
@@ -109,7 +129,7 @@ class ProductController {
             category_id: categoryIds[0] || null,
             category_ids: categoryIds,
             is_featured: isTrue(body.is_featured),
-            is_vto_enabled: isTrue(body.is_vto_enabled) || (body.is_vto_enabled === undefined),
+            is_vto_enabled: isTrue(body.is_vto_enabled),
             sizes: sizesArray.length > 0 ? sizesArray : null,
             colors: colorsArray.length > 0 ? colorsArray : null,
             accessories: body.accessories ? (typeof body.accessories === 'string' ? JSON.parse(body.accessories) : body.accessories) : null,
@@ -460,7 +480,7 @@ class ProductController {
             }
 
             // Fallback for standard form posts
-            res.redirect('/products');
+            res.redirect('/admin/products');
         } catch (error) {
             console.error('Error deleting product (Admin):', error);
             if (req.xhr || req.headers.accept.indexOf('json') > -1) {
@@ -501,7 +521,7 @@ class ProductController {
 
             await supabase.from('products').update({ images: imageUrls }).eq('id', req.params.id);
 
-            res.redirect(`/products/${req.params.id}/images`);
+            res.redirect(`/admin/products/${req.params.id}/images`);
         } catch (error) {
             console.error('Error uploading images:', error);
             res.status(500).send(`خطأ في رفع الصور: ${error.message}`);
@@ -514,7 +534,7 @@ class ProductController {
 
             await supabase.from('products').update({ images: newOrder }).eq('id', req.params.id);
 
-            res.redirect(`/products/${req.params.id}/images`);
+            res.redirect(`/admin/products/${req.params.id}/images`);
         } catch (error) {
             console.error('Error reordering images:', error);
             res.status(500).send(`خطأ في إعادة ترتيب الصور: ${error.message}`);

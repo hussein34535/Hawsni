@@ -151,7 +151,7 @@ class BostaService {
         try {
             console.log('[Bosta] Fetching latest districts from v2 API...');
             const response = await fetch(`${BOSTA_V2_URL}/cities/getAllDistricts`, {
-                headers: { 'Authorization': BOSTA_API_KEY }
+                headers: { 'Authorization': `Bearer ${BOSTA_API_KEY}` }
             });
             const result = await response.json();
             if (result.success && result.data) {
@@ -201,7 +201,7 @@ class BostaService {
         try {
             console.log(`[Bosta] Fetching details for Tracking # ${trackingNumber}...`);
             const response = await fetch(`${BOSTA_V2_URL}/deliveries/business/${trackingNumber}`, {
-                headers: { 'Authorization': BOSTA_API_KEY }
+                headers: { 'Authorization': `Bearer ${BOSTA_API_KEY}` }
             });
             const result = await response.json();
             
@@ -351,6 +351,7 @@ class BostaService {
             // --- AI Parsing & Dynamic Matching Logic ---
             let bostaCity = { _id: 'FceDyHXwpSYYF9zGW', name: 'Cairo' }; // Default
             let bostaZone = null;
+            let zoneFromStaticMap = false;
 
             try {
                 // ⭐ PRIORITY 1: Check for explicit Bosta IDs from Cascaded Dropdowns
@@ -467,10 +468,11 @@ class BostaService {
 
             const sizeOptions = options.size || 'MEDIUM';
             const packageTypeMap = {
-                'SMALL': 'Small',
-                'MEDIUM': 'Medium',
-                'LARGE': 'Large'
+                'SMALL': 'SMALL',
+                'MEDIUM': 'MEDIUM',
+                'LARGE': 'LARGE'
             };
+            const mappedSize = packageTypeMap[sizeOptions.toUpperCase()] || 'MEDIUM';
 
             // Calculate Product Value for Compensation (Price without shipping - 100)
             const subtotal = parseFloat(orderData.total || 0) - parseFloat(orderData.shipping_fee || 0);
@@ -480,10 +482,13 @@ class BostaService {
             const payload = {
                 type: 10, // Package Delivery
                 specs: {
-                    size: sizeOptions,
+                    packageType: 'Parcel',
+                    size: mappedSize,
+                    packageSize: mappedSize === 'LARGE' ? 'Large' : (mappedSize === 'SMALL' ? 'Small' : 'Medium'),
                     packageDetails: {
                         itemsCount: orderData.order_items?.length || 1,
-                        description: description
+                        description: description,
+                        weight: mappedSize === 'MEDIUM' ? 3 : (mappedSize === 'LARGE' ? 5 : 1)
                     }
                 },
                 cod: parseFloat(orderData.total || 0), // Cash on Delivery amount
@@ -493,10 +498,10 @@ class BostaService {
                 receiver: {
                     firstName: customerName.split(' ')[0] || 'Customer',
                     lastName: customerName.split(' ').slice(1).join(' ') || 'Hawsni',
-                    phone: customerPhone.replace(/\s+/g, '').replace(/^\+20/, '0'),
+                    phone: customerPhone.replace(/\s+/g, '').replace(/^(?:\+20|0020|20)(1[0125])/, '0$1'),
                     // Add secondary phone if available
                     ...(shippingAddress.alternative_phone || shippingAddress.guestAlternativePhone ? {
-                        secondPhone: (shippingAddress.alternative_phone || shippingAddress.guestAlternativePhone).replace(/\s+/g, '').replace(/^\+20/, '0')
+                        secondPhone: (shippingAddress.alternative_phone || shippingAddress.guestAlternativePhone).replace(/\s+/g, '').replace(/^(?:\+20|0020|20)(1[0125])/, '0$1')
                     } : {})
                 },
                 // V2 API (Modern): Requires districtId instead of string matching
@@ -507,7 +512,7 @@ class BostaService {
                     ...(shippingAddress.districtId || (bostaZone && (bostaZone.districtId || bostaZone._id)) ? {
                         districtId: shippingAddress.districtId || bostaZone.districtId || bostaZone._id
                     } : {}),
-                    firstLine: `${address} ${bostaZone ? '- ' + (bostaZone.name || bostaZone.districtName || bostaZone.zoneName || '') : ''} - ${bostaCity.name}`.replace(/\s+/g, ' '),
+                    firstLine: `${address}`.trim(),
                     // Detailed address fields for Bosta internal mapping
                     ...(shippingAddress.buildingNumber ? { buildingNumber: String(shippingAddress.buildingNumber) } : {}),
                     ...(shippingAddress.floor ? { floor: String(shippingAddress.floor) } : {}),
@@ -546,7 +551,8 @@ class BostaService {
                 .from('orders')
                 .update({
                     tracking_number: trackingNumber,
-                    bosta_id: bostaId
+                    bosta_id: bostaId,
+                    package_size: mappedSize // Save the size we sent to Bosta
                 })
                 .eq('id', orderData.id);
 
@@ -574,7 +580,7 @@ class BostaService {
             const response = await fetch(`${BOSTA_BASE_URL}/deliveries/awb/${deliveryId}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `${BOSTA_API_KEY}`
+                    'Authorization': `Bearer ${BOSTA_API_KEY}`
                 }
             });
 
@@ -588,6 +594,62 @@ class BostaService {
         } catch (error) {
             console.error('[Bosta] Error getting AWB:', error);
             throw error;
+        }
+    }
+
+    /**
+     * Get live shipment tracking status from Bosta API
+     * Returns structured tracking data in Arabic for internal display
+     */
+    async getShipmentStatus(trackingNumber) {
+        try {
+            // Using the public tracking API which is more reliable for live updates
+            const response = await fetch(`https://tracking.bosta.co/shipments/track/${trackingNumber}?lang=ar`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error('[Bosta] Track error:', data);
+                return null;
+            }
+
+            // Public API uses CurrentStatus and TransitEvents
+            const currentStatus = data.CurrentStatus || {};
+            const stateCode = currentStatus.code;
+            const stateValue = currentStatus.state || '';
+            const arabicStatus = BOSTA_STATUS_MAP[stateCode] || stateValue;
+
+            // Build timeline from transit events
+            const timeline = (data.TransitEvents || []).map(event => ({
+                code: event.code,
+                status: BOSTA_STATUS_MAP[event.code] || event.state || '',
+                timestamp: event.timestamp,
+                hub: event.hub || ''
+            })).reverse(); // Latest first
+
+            return {
+                trackingNumber,
+                stateCode,
+                status: arabicStatus,
+                isDelivered: stateCode === 45,
+                isCancelled: stateCode === 49,
+                timeline,
+                estimatedDelivery: data.PromisedDate || null,
+                provider: data.provider || 'بوسطة',
+                // Note: Public API doesn't return full receiver details for privacy
+                receiverName: null,
+                address: null,
+                city: null,
+            };
+        } catch (error) {
+            console.error('[Bosta] Error tracking shipment:', error);
+            return null;
         }
     }
 }

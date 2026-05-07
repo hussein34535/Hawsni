@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
 const emailService = require('../services/emailService');
+const whatsappService = require('../services/whatsappService');
 
 // POST /api/webhooks/bosta
 router.post('/bosta', async (req, res) => {
@@ -18,12 +19,16 @@ router.post('/bosta', async (req, res) => {
             console.warn('[Bosta Webhook] ⚠️ WARNING: BOSTA_WEBHOOK_SECRET is not set! Webhook is vulnerable.');
         }
 
-        console.log('[Bosta Webhook] Received event:', req.body);
+        console.log('[Bosta Webhook] Raw headers:', JSON.stringify(req.headers));
+        console.log('[Bosta Webhook] Raw body:', JSON.stringify(req.body));
         
-        const { deliveryId, trackingNumber, state } = req.body;
-        const actualDeliveryId = deliveryId || req.body._id;
+        // Bosta webhooks often wrap the payload in a 'data' object or send it flat
+        const payload = req.body.data || req.body;
+        const { deliveryId, trackingNumber, state } = payload;
+        const actualDeliveryId = deliveryId || payload._id || payload.id;
         
         if (!actualDeliveryId && !trackingNumber) {
+            console.warn('[Bosta Webhook] ⚠️ Could not find delivery identifiers in payload');
             return res.status(400).json({ success: false, message: 'Missing identifiers' });
         }
 
@@ -33,12 +38,12 @@ router.post('/bosta', async (req, res) => {
             let hawsniStatus = null;
             
             // Map Bosta State to Hawsni Status
-            // Bosta typical states: CREATED, PICKED_UP, DELIVERED, RETURNED, CANCELLED
-            if (bostaState === 'DELIVERED') {
+            // Bosta typical states: "Ticket created", "Pickup requested", "Picked up", "Delivered", "Returned to business", "Cancelled"
+            if (bostaState.includes('DELIVERED')) {
                 hawsniStatus = 'Delivered';
-            } else if (bostaState === 'PICKED_UP' || bostaState === 'IN_TRANSIT') {
-                hawsniStatus = 'In Transit';
-            } else if (bostaState === 'CANCELLED' || bostaState === 'RETURNED') {
+            } else if (bostaState.includes('PICKED UP') || bostaState.includes('IN TRANSIT') || bostaState.includes('PICKED_UP')) {
+                hawsniStatus = 'Shipped'; // Use 'Shipped' instead of 'In Transit' to match typical Hawsni status
+            } else if (bostaState.includes('CANCELLED') || bostaState.includes('RETURNED') || bostaState.includes('EXCEPTION')) {
                 hawsniStatus = 'Cancelled';
             }
 
@@ -63,23 +68,24 @@ router.post('/bosta', async (req, res) => {
                             .eq('id', order.id);
 
                         if (!updateError) {
-                            console.log(`[Bosta Webhook] Updated order ${order.order_number || order.id} to ${hawsniStatus}. Sending email...`);
+                            console.log(`[Bosta Webhook] Updated order ${order.order_number || order.id} to ${hawsniStatus}.`);
                             
-                            // Try to extract email
+                            // Try to extract phone and email
                             let customerEmail = order.users?.email;
                             let customerName = order.users?.name;
+                            let customerPhone = null;
 
-                            if (!customerEmail) {
-                                let ship = order.shipping_address;
-                                if (typeof ship === 'string' && ship.trim().startsWith('{')) {
-                                    try { ship = JSON.parse(ship); } catch (e) { }
-                                }
-                                if (typeof ship === 'object' && ship !== null) {
-                                    customerEmail = ship.email || ship.guestEmail;
-                                    customerName = customerName || ship.name || ship.guestName;
-                                }
+                            let ship = order.shipping_address;
+                            if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                                try { ship = JSON.parse(ship); } catch (e) { }
+                            }
+                            if (typeof ship === 'object' && ship !== null) {
+                                customerEmail = customerEmail || ship.email || ship.guestEmail;
+                                customerName = customerName || ship.name || ship.guestName;
+                                customerPhone = ship.phone || ship.guestPhone;
                             }
 
+                            // Send Email Notification
                             if (customerEmail) {
                                 emailService.sendOrderStatusEmail(
                                     customerEmail,
@@ -87,6 +93,25 @@ router.post('/bosta', async (req, res) => {
                                     order,
                                     hawsniStatus
                                 ).catch(err => console.error('[Bosta Webhook] Failed to send status email:', err));
+                            }
+
+                            // Send WhatsApp Notification
+                            if (customerPhone && whatsappService) {
+                                let whatsappMsg = '';
+                                if (hawsniStatus === 'Shipped') {
+                                    const trackingUrl = `https://hwasi.com/track-order?id=${order.id}`;
+                                    whatsappMsg = `أهلاً ${customerName || 'عميلنا العزيز'} 👋\n\nنبشرك أن طلبك رقم #${order.order_number || order.id.substring(0,8)} تم تسليمه لشركة الشحن وهو الآن في طريقه إليك! 🚚\n\nيمكنك تتبع حالة طلبك مباشرة من هنا:\n${trackingUrl}\n\nشكراً لتسوقك من Hawsni 🤍`;
+                                } else if (hawsniStatus === 'Delivered') {
+                                    whatsappMsg = `أهلاً ${customerName || 'عميلنا العزيز'} 👋\n\nتم توصيل طلبك رقم #${order.order_number || order.id} بنجاح! 🎉\nنتمنى أن ينال إعجابك، ونسعد دائماً بخدمتك في Hawsni 🤍`;
+                                } else if (hawsniStatus === 'Cancelled') {
+                                    whatsappMsg = `أهلاً ${customerName || 'عميلنا العزيز'} 👋\n\nتم تحديث حالة طلبك رقم #${order.order_number || order.id} إلى (مرتجع / ملغي).\nإذا كان لديك أي استفسار، يرجى التواصل معنا 🤍`;
+                                }
+
+                                if (whatsappMsg) {
+                                    whatsappService.sendTextMessage(customerPhone, whatsappMsg)
+                                        .then(() => console.log(`[Bosta Webhook] Sent WhatsApp notification to ${customerPhone}`))
+                                        .catch(err => console.error('[Bosta Webhook] Failed to send WhatsApp message:', err));
+                                }
                             }
                         }
                     }
@@ -101,6 +126,50 @@ router.post('/bosta', async (req, res) => {
     } catch (err) {
         console.error('[Bosta Webhook] Error processing:', err);
         // Important: Return 200 even on expected errors, or 500 if you want Bosta to retry
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// ==========================================
+// Meta WhatsApp Webhook Integration
+// ==========================================
+
+// GET /api/webhooks/whatsapp (Meta Verification)
+router.get('/whatsapp', (req, res) => {
+    // Meta sends hub.mode, hub.challenge, and hub.verify_token
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+    
+    const verifyToken = process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN;
+
+    if (mode && token) {
+        if (mode === 'subscribe' && token === verifyToken) {
+            console.log('[WhatsApp Webhook] 🟢 Verified successfully!');
+            // Meta expects a plain text response with the challenge code
+            res.status(200).send(challenge);
+        } else {
+            console.warn('[WhatsApp Webhook] 🔴 Verification failed (Token mismatch)');
+            res.status(403).send('Forbidden');
+        }
+    } else {
+        res.status(400).send('Bad Request');
+    }
+});
+
+// POST /api/webhooks/whatsapp (Message/Event Reception)
+router.post('/whatsapp', async (req, res) => {
+    try {
+        console.log('[WhatsApp Webhook] 📩 Received event payload:');
+        console.log(JSON.stringify(req.body, null, 2));
+        
+        // Pass the payload to the service to process
+        await whatsappService.handleWebhook(req.body);
+        
+        // Always respond with 200 OK to Meta so they don't retry unnecessarily
+        res.status(200).send('EVENT_RECEIVED');
+    } catch (error) {
+        console.error('[WhatsApp Webhook] ❌ Error processing event:', error);
         res.status(500).send('Internal Server Error');
     }
 });

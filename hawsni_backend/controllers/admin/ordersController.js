@@ -112,7 +112,7 @@ class OrdersController {
             if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
                 res.json({ success: true, message: 'تم تحديث الحالة بنجاح' });
             } else {
-                res.redirect('/orders');
+                res.redirect('/admin/orders');
             }
 
             // Send notification in background

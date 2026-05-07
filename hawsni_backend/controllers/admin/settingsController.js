@@ -100,7 +100,7 @@ class SettingsController {
                     .insert(settingsData);
             }
 
-            res.redirect('/settings');
+            res.redirect('/admin/settings');
         } catch (err) {
             console.error('Error updating store settings:', err);
             res.status(500).send('خطأ في حفظ الإعدادات');

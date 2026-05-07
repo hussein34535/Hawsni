@@ -78,7 +78,7 @@ class BannersController {
                 throw error;
             }
 
-            res.redirect('/banners');
+            res.redirect('/admin/banners');
         } catch (err) {
             console.error('Error creating banner:', err);
             res.status(500).send('خطأ في إضافة البنر: ' + err.message);
@@ -165,7 +165,7 @@ class BannersController {
                 throw error;
             }
 
-            res.redirect('/banners');
+            res.redirect('/admin/banners');
         } catch (err) {
             console.error('Error updating banner:', err);
             res.status(500).send('خطأ في تحديث البنر: ' + err.message);

@@ -20,12 +20,14 @@ import {
 import { useRouter, useParams } from 'next/navigation';
 import { checkoutService } from '@/services/checkoutService';
 import { useLanguage } from '@/context/LanguageContext';
+import { useCartStore } from '@/store/cartStore';
 import confetti from 'canvas-confetti';
 
 export default function OrderSuccessPage() {
     const { id } = useParams();
     const router = useRouter();
     const { isRTL } = useLanguage();
+    const { clearCart } = useCartStore();
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
@@ -145,8 +147,8 @@ export default function OrderSuccessPage() {
                                     <div>
                                         <p className="text-xs font-black text-gray-300 uppercase tracking-widest mb-1">{isRTL ? 'العنوان' : 'Address'}</p>
                                         <p className="font-bold text-gray-900 leading-relaxed">
-                                            {order?.shippingAddress?.street}, {order?.shippingAddress?.city}<br />
-                                            {order?.shippingAddress?.state}
+                                            {order?.shipping_address?.street}, {order?.shipping_address?.city}<br />
+                                            {order?.shipping_address?.state}
                                         </p>
                                     </div>
                                 </div>
@@ -171,7 +173,7 @@ export default function OrderSuccessPage() {
                             </div>
                             <div className="flex justify-between items-center text-sm font-bold text-gray-500">
                                 <span>{isRTL ? 'الشحن' : 'Shipping'}</span>
-                                <span className="text-emerald-600">{order?.shippingFee === 0 ? (isRTL ? 'مجاناً' : 'FREE') : `${order?.shippingFee?.toLocaleString()} EGP`}</span>
+                                <span className="text-emerald-600">{order?.shipping_fee === 0 ? (isRTL ? 'مجاناً' : 'FREE') : `${order?.shipping_fee?.toLocaleString()} EGP`}</span>
                             </div>
                             {order?.discount > 0 && (
                                 <div className="flex justify-between items-center text-sm font-black text-red-500 uppercase tracking-tight">
@@ -187,11 +189,64 @@ export default function OrderSuccessPage() {
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <span className="text-4xl font-black text-gray-900 tracking-tighter">{order?.totalAmount?.toLocaleString()}</span>
+                                    <span className="text-4xl font-black text-gray-900 tracking-tighter">{order?.total?.toLocaleString()}</span>
                                     <span className="text-xs font-black text-gray-400 ml-1 uppercase">EGP</span>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </motion.div>
+                
+                {/* Product Summary List (NEW) */}
+                <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="mt-8 bg-white rounded-[3rem] shadow-xl shadow-gray-200/40 overflow-hidden border border-white p-8 md:p-12"
+                >
+                    <h3 className="text-xl font-black text-gray-900 mb-8 flex items-center gap-3">
+                        <ShoppingBag size={22} className="text-[#0E4435]" />
+                        {isRTL ? 'المنتجات المطلوبة' : 'Order Items'}
+                    </h3>
+                    
+                    <div className="space-y-6">
+                        {(order?.order_items || order?.items || []).map((item: any, idx: number) => (
+                            <div key={idx} className="flex items-center gap-4 md:gap-6 pb-6 border-b border-gray-50 last:border-0 last:pb-0">
+                                <div className="w-20 h-20 md:w-24 md:h-24 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-100">
+                                    <img 
+                                        src={item.image_url || item.products?.images?.[0] || '/placeholder.png'} 
+                                        alt={item.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-black text-gray-900 text-lg mb-1 leading-tight">{item.name || item.products?.name}</h4>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {item.size && (
+                                            <span className="px-2 py-1 bg-gray-50 text-gray-500 rounded-lg text-xs font-bold border border-gray-100">
+                                                {isRTL ? 'المقاس:' : 'Size:'} {item.size}
+                                            </span>
+                                        )}
+                                        {item.color && (
+                                            <span className="px-2 py-1 bg-gray-50 text-gray-500 rounded-lg text-xs font-bold border border-gray-100 flex items-center gap-1.5">
+                                                {isRTL ? 'اللون:' : 'Color:'}
+                                                {item.color.startsWith('#') && (
+                                                    <span className="w-2.5 h-2.5 rounded-full border border-gray-200" style={{ backgroundColor: item.color }} />
+                                                )}
+                                                {item.color}
+                                            </span>
+                                        )}
+                                        <span className="px-2 py-1 bg-[#0E4435]/5 text-[#0E4435] rounded-lg text-xs font-black">
+                                            x{item.quantity}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-black text-gray-900 text-lg">{(item.price * item.quantity).toLocaleString()}</p>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">EGP</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </motion.div>
 
@@ -206,7 +261,7 @@ export default function OrderSuccessPage() {
                     </button>
                     
                     <button 
-                        onClick={() => router.push('/profile/orders')}
+                        onClick={() => router.push(`/track-order?id=${id}`)}
                         className="w-full md:w-auto px-12 py-5 bg-white text-gray-900 rounded-[2rem] font-black text-lg border border-gray-100 hover:bg-gray-50 active:scale-95 transition-all"
                     >
                         {isRTL ? 'تتبع طلبي' : 'Track My Order'}

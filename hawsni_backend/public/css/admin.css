@@ -800,3 +800,364 @@ tr:hover td {
 .method-card i {
     font-size: 1.5rem;
 }
+
+/* ═══════════════════════════════════════════════════════
+   COMPREHENSIVE MOBILE RESPONSIVE OVERHAUL
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Topbar Mobile ─────────────────────────────────────── */
+@media (max-width: 768px) {
+    .topbar {
+        padding: 0 0.8rem;
+        height: 60px;
+        gap: 0.5rem;
+    }
+
+    .topbar-actions {
+        gap: 0.4rem;
+    }
+
+    /* Hide text in topbar buttons, show only icons */
+    .topbar-actions .btn span,
+    .topbar-actions .btn:not(.btn-icon) > *:not(i) {
+        display: none;
+    }
+
+    .topbar-actions .btn {
+        padding: 0.5rem 0.6rem;
+        min-width: 38px;
+        min-height: 38px;
+    }
+
+    .page-title {
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 160px;
+    }
+
+    /* ── Content Wrapper ── */
+    .content-wrapper {
+        padding: 0.8rem;
+    }
+
+    /* ── Cards ── */
+    .card {
+        padding: 1rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 1rem;
+    }
+
+    .card-header {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+    }
+
+    .card-header h2, .card-header .card-title {
+        font-size: 1rem;
+    }
+
+    .card-header .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* ── Stats Grid ── */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 1rem 0.75rem;
+    }
+
+    .stat-value {
+        font-size: 1.4rem;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    /* ── Tables ── */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: var(--radius-md);
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    th, td {
+        padding: 0.75rem 0.6rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    /* ── Forms ── */
+    .form-control {
+        height: 48px;
+        font-size: 0.9rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+
+    .two-col-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* ── Extra Small Phones ─────────────────────────────────── */
+@media (max-width: 420px) {
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .stat-card {
+        padding: 0.8rem 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
+    }
+
+    .content-wrapper {
+        padding: 0.6rem;
+    }
+
+    .card {
+        padding: 0.75rem;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CHAT INBOX MOBILE LAYOUT
+   ═══════════════════════════════════════════════════════ */
+
+/* Chat page mobile: stack sessions list on top of chat area */
+@media (max-width: 768px) {
+    /* The main chat container */
+    .chat-mobile-container {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+
+    .chat-sessions-panel {
+        width: 100% !important;
+        max-height: 220px;
+        border-left: none !important;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .chat-messages-panel {
+        width: 100% !important;
+        height: 60vh;
+        min-height: 300px;
+    }
+
+    #sessions-list {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        padding: 8px 12px !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #sessions-list > div {
+        flex-shrink: 0;
+        width: 160px !important;
+        margin-bottom: 0 !important;
+    }
+
+    #messages-container {
+        height: calc(60vh - 140px);
+    }
+
+    /* Fix chat input on mobile */
+    #chat-form {
+        gap: 8px;
+    }
+
+    #chat-form input {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+    }
+
+    #chat-input-area {
+        padding: 10px 12px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ORDERS PAGE MOBILE
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    /* Filters bar stacks vertically */
+    .filters-bar {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+    }
+
+    /* Bulk actions bar */
+    .bulk-actions-bar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .bulk-actions-bar .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 10px !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PRODUCTS PAGE MOBILE
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    /* Products list items */
+    .product-row {
+        flex-wrap: wrap;
+    }
+
+    .product-info-main {
+        width: 100%;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODAL MOBILE FIX
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    /* Modal should be full-screen on small phones */
+    .modal-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        height: 100vh;
+        overflow-y: auto;
+    }
+
+    .modal-overlay {
+        padding: 0 !important;
+        align-items: flex-start !important;
+    }
+
+    /* Modal close button more visible */
+    .modal-close {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 999;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR MOBILE IMPROVEMENTS
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 280px;
+        z-index: 1100; /* Above overlay */
+    }
+
+    /* Swipe-feel improvement */
+    .sidebar-nav {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 100px; /* Space for bottom logout */
+    }
+
+    .nav-link {
+        padding: 1rem 1.2rem;
+        font-size: 1rem;
+        gap: 16px;
+    }
+
+    .nav-link i {
+        font-size: 1.2rem;
+        width: 24px;
+    }
+}
+
+/* ── Safe Area for notch phones (iOS/Android) ───────────── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    @media (max-width: 768px) {
+        .topbar {
+            padding-top: env(safe-area-inset-top);
+        }
+
+        #chat-input-area {
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        }
+    }
+}
+
+/* ── Touch-friendly tap targets ─────────────────────────── */
+@media (max-width: 768px) {
+    .nav-link,
+    .btn,
+    select,
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-height: 44px; /* Apple HIG minimum tap target */
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-width: 44px;
+        width: 20px;
+        height: 20px;
+    }
+}

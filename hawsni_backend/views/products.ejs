@@ -60,7 +60,7 @@
                 <span>المنتجات</span>
                 <span class="badge badge-info" style="font-size: 0.7rem; margin-right: 8px;"><%= products ? products.length : 0 %></span>
             </h2>
-            <a href="/products/new" class="btn btn-primary btn-sm">
+            <a href="/admin/products/new" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus"></i> إضافة منتج
             </a>
         </div>
@@ -119,7 +119,7 @@
                         <% } %>
 
                         <div class="product-info-main">
-                            <a href="/products/<%= product.id %>/edit" class="product-name-link"><%= product.name %></a>
+                            <a href="/admin/products/<%= product.id %>/edit" class="product-name-link"><%= product.name %></a>
                             <div class="product-meta-row">
                                 <span style="font-weight: 900; color: var(--brand-primary); font-size: 0.9rem;">
                                     <%= product.price ? product.price.toFixed(0) : '0' %> ج.م
@@ -136,10 +136,10 @@
                         </div>
 
                         <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                            <a href="/products/<%= product.id %>/edit" class="btn btn-secondary btn-sm" style="padding: 8px; width: 36px; height: 36px;" title="تعديل">
+                            <a href="/admin/products/<%= product.id %>/edit" class="btn btn-secondary btn-sm" style="padding: 8px; width: 36px; height: 36px;" title="تعديل">
                                 <i class="fas fa-pen" style="font-size: 0.8rem;"></i>
                             </a>
-                            <button onclick="handleDelete('/products/<%= product.id %>', '<%= product.name %>')" class="btn btn-danger btn-sm" style="padding: 8px; width: 36px; height: 36px;" title="حذف">
+                            <button onclick="handleDelete('/admin/products/<%= product.id %>', '<%= product.name %>')" class="btn btn-danger btn-sm" style="padding: 8px; width: 36px; height: 36px;" title="حذف">
                                 <i class="fas fa-trash" style="font-size: 0.8rem;"></i>
                             </button>
                         </div>
@@ -150,7 +150,7 @@
             <div style="text-align: center; padding: 3rem; color: var(--medium-gray);">
                 <i class="fas fa-box" style="font-size: 3rem; opacity: 0.2; margin-bottom: 0.75rem; display: block;"></i>
                 <p style="font-size: 0.95rem; font-weight: 600;">لا توجد منتجات حتى الآن</p>
-                <a href="/products/new" class="btn btn-primary btn-sm" style="margin-top: 1rem;">
+                <a href="/admin/products/new" class="btn btn-primary btn-sm" style="margin-top: 1rem;">
                     <i class="fas fa-plus"></i> إضافة أول منتج
                 </a>
             </div>
@@ -195,9 +195,12 @@
             if (!ids.length) return;
             showConfirm(`هل أنت متأكد من حذف ${ids.length} منتج؟`, async () => {
                 try {
-                    const res = await fetch('/products/bulk-delete', {
+                    const res = await fetch('/admin/products/bulk-delete', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<%= csrfToken %>'
+                        },
                         body: JSON.stringify({ ids })
                     });
                     const data = await res.json();
@@ -224,9 +227,12 @@
             if (!categoryId) return showToast('اختر تصنيفاً', 'error');
 
             try {
-                const res = await fetch('/products/bulk-update', {
+                const res = await fetch('/admin/products/bulk-update', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<%= csrfToken %>'
+                    },
                     body: JSON.stringify({ ids, updates: { category_id: categoryId } })
                 });
                 const data = await res.json();
@@ -246,9 +252,12 @@
             if (!ids.length) return showToast('اختر منتجات أولاً', 'error');
 
             try {
-                const res = await fetch('/products/bulk-update', {
+                const res = await fetch('/admin/products/bulk-update', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': '<%= csrfToken %>'
+                    },
                     body: JSON.stringify({ ids, updates: { is_featured: isFeatured } })
                 });
                 const data = await res.json();
@@ -270,7 +279,10 @@
                 try {
                     const res = await fetch(url, {
                         method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': '<%= csrfToken %>'
+                        }
                     });
                     const data = await res.json();
                     if (res.ok) {

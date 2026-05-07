@@ -5,7 +5,7 @@
             <h2 class="card-title">
                 <i class="fas fa-images"></i> جميع البنرات
             </h2>
-            <a href="/banners/new" class="btn btn-primary">
+            <a href="/admin/banners/new" class="btn btn-primary">
                 <i class="fas fa-plus"></i> إضافة بنر جديد
             </a>
         </div>
@@ -45,11 +45,11 @@
                             </div>
 
                             <div style="display: flex; gap: 0.5rem;">
-                                <a href="/banners/<%= banner.id %>/edit" class="btn btn-secondary btn-sm"
+                                <a href="/admin/banners/<%= banner.id %>/edit" class="btn btn-secondary btn-sm"
                                     style="flex: 1;">
                                     <i class="fas fa-edit"></i> تعديل
                                 </a>
-                                <button onclick="handleDelete('/banners/<%= banner.id %>', 'هذا البنر')"
+                                <button onclick="handleDelete('/admin/banners/<%= banner.id %>', 'هذا البنر')"
                                     class="btn btn-danger btn-sm" style="flex: 1;">
                                     <i class="fas fa-trash"></i> حذف
                                 </button>
@@ -62,11 +62,34 @@
                 <div class="text-center" style="padding: 3rem; color: var(--medium-gray);">
                     <i class="fas fa-images" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
                     <p style="font-size: 1.1rem;">لا توجد بنرات حتى الآن</p>
-                    <a href="/banners/new" class="btn btn-primary" style="margin-top: 1rem;">
+                    <a href="/admin/banners/new" class="btn btn-primary" style="margin-top: 1rem;">
                         <i class="fas fa-plus"></i> إضافة أول بنر
                     </a>
                 </div>
                 <% } %>
     </div>
 
+    <script>
+        async function handleDelete(url, itemName) {
+            showConfirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
+                try {
+                    const res = await fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-Token': '<%= csrfToken %>'
+                        }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('تم الحذف بنجاح', 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast(data.message || 'فشل الحذف', 'error');
+                    }
+                } catch (err) {
+                    showToast('حدث خطأ أثناء الحذف', 'error');
+                }
+            });
+        }
+    </script>
     <%- include('partials/footer') %>

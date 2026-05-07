@@ -185,9 +185,18 @@ const getThumbnailUrl = (url: string | null) => {
     return url;
 };
 
-const parseColors = (colors: any[] | undefined) => {
+const parseColors = (colors: any) => {
     if (!colors) return [];
-    return colors.map(c => {
+    let arr = colors;
+    if (typeof colors === 'string') {
+        try {
+            arr = JSON.parse(colors);
+        } catch (e) {
+            return [];
+        }
+    }
+    if (!Array.isArray(arr)) return [];
+    return arr.map(c => {
         if (typeof c === 'string') {
             try {
                 const cleaned = c.trim();
@@ -335,6 +344,15 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
         }
         if (variantsForSize.length === 0) return stockCount <= 0;
         return variantsForSize.every((v: any) => v.stock <= 0);
+    };
+
+    const isColorOutOfStock = (c: string) => {
+        if (!product || !product.product_variants || product.product_variants.length === 0) {
+            return stockCount <= 0;
+        }
+        const variantsForColor = product.product_variants.filter((v: any) => v.color === c);
+        if (variantsForColor.length === 0) return stockCount <= 0;
+        return variantsForColor.every((v: any) => v.stock <= 0);
     };
 
     const currentStockOut = selectedSize ? isSizeOutOfStock(selectedSize) : (stockCount <= 0);
@@ -493,6 +511,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
         setSelectedAccessories(selectedAccs);
 
         let selectedColorImage = safeImages[0] || '';
+        let selectedColorValue = '';
         if (selectedColor && product.colors) {
             const parsedColors = parseColors(product.colors);
             const colorData = parsedColors.find(c => c.color === selectedColor);
@@ -501,6 +520,10 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                     selectedColorImage = colorData.image;
                 } else if (colorData.imageIndex !== undefined && safeImages[colorData.imageIndex]) {
                     selectedColorImage = safeImages[colorData.imageIndex];
+                }
+                // Use color name if available, otherwise fallback to hex
+                if (colorData.name) {
+                    selectedColorValue = colorData.name;
                 }
             }
         }
@@ -516,7 +539,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             imageUrl: formatImageUrl(selectedColorImage),
             quantity: quantity,
             size: selectedSize,
-            color: selectedColor || undefined,
+            color: selectedColorValue || selectedColor || undefined,
             accessories: selectedAccs
         });
 
@@ -819,10 +842,12 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
                                             const thumbImage = getThumbnailUrl(rawImage);
 
+                                            const outOfStock = isColorOutOfStock(c.color);
                                             return (
                                                 <button
                                                     key={`${c.color}-${i}`}
                                                     onClick={() => {
+                                                        if (outOfStock) return;
                                                         setSelectedColor(c.color);
                                                         if (c.imageIndex !== undefined && c.imageIndex !== null && c.imageIndex >= 0) {
                                                             scrollToImage(c.imageIndex);
@@ -836,9 +861,10 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                     }}
                                                     className={`
                                                         w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 p-[3px] border-2 group relative
+                                                        ${outOfStock ? 'opacity-40 grayscale-[0.5] cursor-not-allowed' : ''}
                                                         ${selectedColor === c.color
                                                             ? 'border-[var(--color-brand-primary)] shadow-md shadow-[var(--color-brand-primary)]/20 scale-110'
-                                                            : 'border-transparent bg-gray-50 hover:border-gray-300 hover:scale-105'}
+                                                            : outOfStock ? 'border-gray-100' : 'border-transparent bg-gray-50 hover:border-gray-300 hover:scale-105'}
                                                     `}
                                                     title={c.color}
                                                 >
@@ -852,11 +878,18 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                                 sizes="56px"
                                                             />
                                                         ) : (
-                                                            <span className="text-[10px] text-gray-400 font-bold px-1 text-center font-cairo leading-tight">{c.color}</span>
+                                                            <span className="text-[10px] text-gray-400 font-bold px-1 text-center font-cairo leading-tight">
+                                                                {c.name || c.color}
+                                                            </span>
                                                         )}
-                                                        {selectedColor === c.color && (
+                                                        {selectedColor === c.color && !outOfStock && (
                                                             <div className="absolute inset-0 bg-black/10 flex items-center justify-center backdrop-blur-[1px]">
                                                                 <Check size={18} className="text-white drop-shadow-md" />
+                                                            </div>
+                                                        )}
+                                                        {outOfStock && (
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <div className="w-full h-[2px] bg-red-500/80 -rotate-45 shadow-sm"></div>
                                                             </div>
                                                         )}
                                                     </div>

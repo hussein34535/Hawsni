@@ -188,6 +188,54 @@ function TrackOrderContent() {
                                     );
                                 })}
                             </div>
+
+                            {/* Package Contents (NEW) */}
+                            <div className="mt-12 pt-8 border-t border-gray-100">
+                                <h3 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
+                                    <Package size={20} className="text-[#0E4435]" />
+                                    {isRTL ? 'محتويات الشحنة' : 'Package Contents'}
+                                </h3>
+                                <div className="space-y-4">
+                                    {(order.order_items || order.items || []).map((item: any, idx: number) => (
+                                        <div key={idx} className="flex items-center gap-4 p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50">
+                                            <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 bg-white">
+                                                <img 
+                                                    src={item.image_url || item.products?.images?.[0] || '/placeholder.png'} 
+                                                    alt={item.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-black text-gray-900 text-sm leading-tight mb-1">{item.name || item.products?.name}</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {item.size && (
+                                                        <span className="text-[10px] font-bold text-gray-400">
+                                                            {isRTL ? 'مقاس:' : 'Size:'} {item.size}
+                                                        </span>
+                                                    )}
+                                                    {item.color && (
+                                                        <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
+                                                            {isRTL ? 'لون:' : 'Color:'}
+                                                            {item.color.startsWith('#') && (
+                                                                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                                                            )}
+                                                            {item.color}
+                                                        </span>
+                                                    )}
+                                                    <span className="text-[10px] font-black text-[#0E4435]">x{item.quantity}</span>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="font-black text-gray-900 text-sm">{(item.price * item.quantity).toLocaleString()} ج.م</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center">
+                                    <span className="font-bold text-gray-500 text-sm">{isRTL ? 'إجمالي الطلب' : 'Order Total'}</span>
+                                    <span className="font-black text-gray-900 text-lg">{order.total?.toLocaleString()} ج.م</span>
+                                </div>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

@@ -32,7 +32,7 @@ const productSchema = [
 
 const orderSchema = [
     body('shippingAddress').isObject().withMessage('Shipping address is required'),
-    body('paymentMethod').isIn(['Cash on Delivery', 'Credit Card', 'PayPal']).withMessage('Invalid payment method'),
+    body('paymentMethod').isIn(['Cash on Delivery', 'cash_on_delivery', 'Credit Card', 'PayPal']).withMessage('Invalid payment method'),
     body('subtotal').isFloat({ min: 0 }),
     body('totalAmount').isFloat({ min: 0 }),
     validate

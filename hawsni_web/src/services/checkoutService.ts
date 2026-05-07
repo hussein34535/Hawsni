@@ -61,7 +61,12 @@ export const checkoutService = {
             const response = await apiClient.post('/orders', orderData);
             return response.data;
         } catch (error: any) {
-            throw error.response?.data?.message || 'Failed to place order';
+            const serverError = error.response?.data;
+            if (serverError?.errors && Array.isArray(serverError.errors)) {
+                // Join express-validator errors into a single string
+                throw serverError.errors.map((e: any) => e.msg).join(' - ');
+            }
+            throw serverError?.message || 'Failed to place order';
         }
     },
 

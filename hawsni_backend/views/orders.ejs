@@ -41,7 +41,7 @@
                 <i class="fas fa-list-ul"></i> قائمة الطلبات الحالية
             </h2>
 
-            <div id="bulkBar" style="display:none; align-items: center; gap: 1rem;">
+            <div id="bulkBar" class="bulk-actions-bar" style="display:none; align-items: center; gap: 1rem;">
                 <span id="selectedCount" class="badge badge-info" style="font-size: 0.9rem;">0 محدد</span>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
                     <select id="bulkStatusSelect" class="form-control" style="width: auto; height: 38px;">
@@ -166,7 +166,7 @@
                                     </td>
                                     <td onclick="event.stopPropagation()">
                                         <div class="action-cell">
-                                            <form method="POST" action="/orders/<%= order.id %>/status">
+                                            <form method="POST" action="/admin/orders/<%= order.id %>/status">
                                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                                 <select name="status" class="status-select select-<%= sClass %>"
                                                     onchange="this.form.submit()">
@@ -208,7 +208,7 @@
         <% if (pagination && pagination.totalPages > 1) { %>
             <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding: 20px;">
                 <% if (pagination.page > 1) { %>
-                    <a href="/orders?page=<%= pagination.page - 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                    <a href="/admin/orders?page=<%= pagination.page - 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                         <i class="fas fa-chevron-right" style="margin-left: 5px;"></i> السابق
                     </a>
                 <% } %>
@@ -218,7 +218,7 @@
                 </div>
 
                 <% if (pagination.page < pagination.totalPages) { %>
-                    <a href="/orders?page=<%= pagination.page + 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                    <a href="/admin/orders?page=<%= pagination.page + 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                         التالي <i class="fas fa-chevron-left" style="margin-right: 5px;"></i>
                     </a>
                 <% } %>
@@ -395,9 +395,9 @@
                                         <span id="bostaTrackingNumber" style="font-size: 1.1rem; letter-spacing: 1px; display: inline-block; margin-top: 4px;"></span>
                                     </div>
                                     <div style="display: flex; gap: 8px;">
-                                        <a id="bostaTrackingLink" href="#" target="_blank" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 6px; background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; text-decoration: none;">
-                                            <i class="fas fa-external-link-alt"></i> تتبع
-                                        </a>
+                                        <button onclick="openTrackingModal()" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 6px; background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; text-decoration: none; border: none; cursor: pointer; font-family: 'Cairo', sans-serif;">
+                                            <i class="fas fa-search-location"></i> تتبع الشحنة
+                                        </button>
                                         <button onclick="showResendBosta()" style="flex: 1; border: 1px solid #cbd5e1; background: white; color: #64748b; padding: 8px; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.8rem;">
                                             تعديل
                                         </button>
@@ -455,7 +455,7 @@
                 document.getElementById('bostaNotSentBox').style.display = 'none';
                 document.getElementById('bostaSentBox').style.display = 'block';
                 document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + order.tracking_number;
-                document.getElementById('bostaTrackingLink').href = 'https://t.bosta.co/' + order.tracking_number;
+                document.getElementById('bostaTrackingNumber').dataset.trackingNum = order.tracking_number;
                 document.getElementById('sendBostaBtn').disabled = false;
                 document.getElementById('sendBostaBtn').innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
             } else {
@@ -597,7 +597,13 @@
                         </div>
                         <div class="item-specs">
                             ${item.size ? `<span class="spec-tag">المقاس: ${item.size}</span>` : ''}
-                            ${item.color ? `<span class="spec-tag">اللون: ${item.color}</span>` : ''}
+                            ${item.color ? `
+                                <span class="spec-tag">
+                                    اللون: 
+                                    ${item.color.startsWith('#') ? `<span class="color-circle" style="background-color: ${item.color}"></span>` : ''}
+                                    ${item.color}
+                                </span>
+                            ` : ''}
                         </div>
                     </div>
                     <div class="item-price-col">
@@ -642,7 +648,7 @@
             
             try {
                 const skipEmail = document.getElementById('modalSkipEmail').checked;
-                const res = await fetch(`/orders/${currentOrderId}/status`, {
+                const res = await fetch(`/admin/orders/${currentOrderId}/status`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -730,7 +736,7 @@
             if (!ids.length || !status) return;
 
             try {
-                const res = await fetch('/orders/bulk-status', {
+                const res = await fetch('/admin/orders/bulk-status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify({ ids, status, skipEmail })
@@ -754,7 +760,7 @@
                 if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...'; deleteBtn.disabled = true; }
 
                 try {
-                    const res = await fetch('/orders/bulk-delete', {
+                    const res = await fetch('/admin/orders/bulk-delete', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                         body: JSON.stringify({ ids })
@@ -789,7 +795,7 @@
                 }
 
                 try {
-                    const res = await fetch(`/orders/${orderId}/delete`, {
+                    const res = await fetch(`/admin/orders/${orderId}/delete`, {
                         method: 'POST',
                         headers: { 'Accept': 'application/json', 'X-CSRF-Token': CSRF_TOKEN }
                     });
@@ -846,7 +852,7 @@
             btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
             btn.disabled = true;
             try {
-                const res = await fetch(`/orders/${currentOrderId}/no-answer`, { 
+                const res = await fetch(`/admin/orders/${currentOrderId}/no-answer`, { 
                     method: 'POST',
                     headers: { 'X-CSRF-Token': CSRF_TOKEN }
                 });
@@ -884,7 +890,7 @@
             btn.disabled = true;
 
             try {
-                const res = await fetch(`/orders/${currentOrderId}/generate-ai-email`, {
+                const res = await fetch(`/admin/orders/${currentOrderId}/generate-ai-email`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify({ prompt })
@@ -938,7 +944,7 @@
             btn.disabled = true;
 
             try {
-                const res = await fetch(`/orders/${currentOrderId}/send-ai-email`, {
+                const res = await fetch(`/admin/orders/${currentOrderId}/send-ai-email`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify({ htmlContent: currentGeneratedHtml })
@@ -989,7 +995,7 @@
             btn.disabled = true;
 
             try {
-                const res = await fetch(`/orders/${currentOrderId}/bosta-ship`, {
+                const res = await fetch(`/admin/orders/${currentOrderId}/bosta-ship`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify(payload)
@@ -1007,7 +1013,7 @@
                     document.getElementById('bostaNotSentBox').style.display = 'none';
                     document.getElementById('bostaSentBox').style.display = 'block';
                     document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + data.trackingNumber;
-                    document.getElementById('bostaTrackingLink').href = 'https://t.bosta.co/' + data.trackingNumber;
+                    document.getElementById('bostaTrackingNumber').dataset.trackingNum = data.trackingNumber;
                     
                     alert('تم إنشاء الشحنة في بوسطة بنجاح!');
                 } else {
@@ -1400,6 +1406,27 @@
             font-family: 'Cairo', sans-serif;
         }
 
+        .color-circle {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1);
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .spec-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
         .section-title i {
             font-size: 1.2rem;
             color: var(--brand-primary);
@@ -1738,5 +1765,102 @@
             }
         }
     </style>
+
+    <!-- ===== Bosta Live Tracking Modal ===== -->
+    <div id="bostaTrackingModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:24px; width:100%; max-width:480px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.3); direction:rtl;">
+            <!-- Modal Header -->
+            <div style="background:linear-gradient(135deg,#0E4435,#1a6b54); padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <div style="color:rgba(255,255,255,0.7); font-size:0.75rem; font-weight:700; margin-bottom:4px;">📦 تتبع الشحنة</div>
+                    <div id="trackingModalNumber" style="color:white; font-size:1.1rem; font-weight:900; letter-spacing:2px;"></div>
+                </div>
+                <button onclick="closeTrackingModal()" style="background:rgba(255,255,255,0.2); border:none; color:white; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
+            <!-- Modal Body -->
+            <div id="trackingModalBody" style="padding:24px; min-height:150px; display:flex; align-items:center; justify-content:center;">
+                <div style="text-align:center; color:#94a3b8;">
+                    <div style="font-size:2rem; margin-bottom:8px;">⏳</div>
+                    <div style="font-weight:700;">جاري جلب بيانات التتبع...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentTrackingNumber = null;
+
+    function openTrackingModal() {
+        const trackingNumEl = document.getElementById('bostaTrackingNumber');
+        if (!trackingNumEl) return;
+        // Read from data attribute first, fallback to stripping non-digits from text
+        const num = trackingNumEl.dataset.trackingNum || trackingNumEl.textContent.replace(/[^0-9]/g, '');
+        if (!num) {
+            alert('لا يوجد رقم تتبع لهذا الطلب بعد.');
+            return;
+        }
+        currentTrackingNumber = num;
+        document.getElementById('trackingModalNumber').textContent = num;
+        document.getElementById('bostaTrackingModal').style.display = 'flex';
+        loadTrackingData(num);
+    }
+
+    function closeTrackingModal() {
+        document.getElementById('bostaTrackingModal').style.display = 'none';
+    }
+
+    async function loadTrackingData(trackingNumber) {
+        const body = document.getElementById('trackingModalBody');
+        body.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;"><div style="font-size:2rem; margin-bottom:8px;">⏳</div><div style="font-weight:700;">جاري جلب بيانات التتبع...</div></div>';
+
+        try {
+            const res = await fetch('/api/track/' + trackingNumber);
+            const json = await res.json();
+
+            if (!res.ok || !json.success) {
+                body.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;"><div style="font-size:2rem; margin-bottom:8px;">⚠️</div><div style="font-weight:700;">' + (json.message || 'لم يتم العثور على الشحنة') + '</div></div>';
+                return;
+            }
+
+            const t = json.data;
+            const statusColor = t.isDelivered ? '#15803d' : t.isCancelled ? '#dc2626' : '#0E4435';
+
+            let timelineHtml = '';
+            if (t.timeline && t.timeline.length > 0) {
+                timelineHtml = '<div style="margin-top:20px; border-top:1px solid #f1f5f9; padding-top:16px;"><div style="font-size:0.7rem; font-weight:800; color:#94a3b8; letter-spacing:1px; margin-bottom:12px;">سجل التتبع</div>';
+                t.timeline.slice(0, 6).forEach((ev, i) => {
+                    const dot = i === 0 ? '#0E4435' : '#e2e8f0';
+                    const dateStr = ev.timestamp ? new Date(ev.timestamp).toLocaleString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+                    timelineHtml += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:flex-start;">
+                        <div style="width:9px; height:9px; border-radius:50%; background:${dot}; flex-shrink:0; margin-top:5px;"></div>
+                        <div>
+                            <div style="font-size:0.85rem; font-weight:800; color:${i===0?'#0E4435':'#475569'};">${ev.status}</div>
+                            ${dateStr ? `<div style="font-size:0.72rem; color:#94a3b8; margin-top:2px;">${dateStr}</div>` : ''}
+                        </div>
+                    </div>`;
+                });
+                timelineHtml += '</div>';
+            } else {
+                timelineHtml = '<div style="margin-top:16px; text-align:center; color:#94a3b8; font-size:0.85rem;">الشحنة في مرحلة الاستلام، التفاصيل ستظهر قريباً...</div>';
+            }
+
+            body.innerHTML = `
+                <div>
+                    <div style="background:#f8fffe; border:1.5px solid #e0f0ea; border-radius:14px; padding:16px; margin-bottom:4px;">
+                        <div style="font-size:1rem; font-weight:900; color:${statusColor}; margin-bottom:6px;">${t.status}</div>
+                        ${t.city ? `<div style="font-size:0.8rem; color:#64748b;">📍 ${t.city}</div>` : ''}
+                    </div>
+                    ${timelineHtml}
+                </div>`;
+        } catch(e) {
+            body.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;"><div style="font-size:2rem; margin-bottom:8px;">❌</div><div style="font-weight:700;">خطأ في الاتصال بالسيرفر</div></div>';
+        }
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('bostaTrackingModal').addEventListener('click', function(e) {
+        if (e.target === this) closeTrackingModal();
+    });
+    </script>
 
     <%- include('partials/footer') %>

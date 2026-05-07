@@ -163,7 +163,7 @@ class CategoryController {
             }
 
             console.log('✅ Category added successfully:', data);
-            res.redirect('/categories');
+            res.redirect('/admin/categories');
         } catch (err) {
             console.error('❌ Server error:', err);
             res.status(500).send(`خطأ في السيرفر: ${err.message}`);
@@ -201,7 +201,7 @@ class CategoryController {
             }
 
             console.log('✅ Category updated successfully:', data);
-            res.redirect('/categories');
+            res.redirect('/admin/categories');
         } catch (err) {
             console.error('❌ Server error:', err);
             res.status(500).send(`خطأ في السيرفر: ${err.message}`);
@@ -217,7 +217,7 @@ class CategoryController {
                 return res.status(500).send(`خطأ في حذف التصنيف: ${error.message}`);
             }
 
-            res.redirect('/categories');
+            res.redirect('/admin/categories');
         } catch (error) {
             console.error('Error deleting category:', error);
             res.status(500).send(`خطأ في حذف التصنيف: ${error.message}`);

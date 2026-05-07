@@ -15,22 +15,31 @@ cloudinary.config({
  */
 router.get('/sign', (req, res) => {
     try {
-        const folder = req.query.folder || 'products';
-        const eager = req.query.eager || '';
-        const resource_type = req.query.resource_type || 'image';
+        const folder = (req.query.folder || 'products').trim();
+        const eager = (req.query.eager || '').trim();
         const timestamp = Math.round(new Date().getTime() / 1000);
 
+        // Cloudinary requires ALL parameters (except file, api_key, and signature) 
+        // to be included in the signature, in alphabetical order.
         const paramsToSign = {
-            timestamp,
-            folder
+            folder,
+            timestamp
         };
 
         if (eager) paramsToSign.eager = eager;
 
-        const signature = cloudinary.utils.api_sign_request(
-            paramsToSign,
-            process.env.CLOUDINARY_SECRET || process.env.CLOUDINARY_API_SECRET
-        );
+        const apiSecret = (process.env.CLOUDINARY_SECRET || process.env.CLOUDINARY_API_SECRET || '').trim();
+        
+        if (!apiSecret) {
+            throw new Error('Cloudinary API Secret is missing in environment variables');
+        }
+
+        const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+
+        // Log the string to sign in dev to compare with Cloudinary error
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('[Cloudinary] Params to sign:', paramsToSign);
+        }
 
         res.json({
             success: true,
@@ -38,9 +47,8 @@ router.get('/sign', (req, res) => {
             signature,
             folder,
             eager,
-            resource_type,
-            cloud_name: process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME,
-            api_key: process.env.CLOUDINARY_KEY || process.env.CLOUDINARY_API_KEY,
+            cloud_name: (process.env.CLOUDINARY_NAME || process.env.CLOUDINARY_CLOUD_NAME || '').trim(),
+            api_key: (process.env.CLOUDINARY_KEY || process.env.CLOUDINARY_API_KEY || '').trim(),
         });
     } catch (error) {
         console.error('Cloudinary sign error:', error);

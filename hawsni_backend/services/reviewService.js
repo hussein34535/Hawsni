@@ -80,7 +80,7 @@ class ReviewService {
                 user_id: userId,
                 product_id: productId,
                 rating,
-                comment,
+                comment: comment || '',
                 images: images || [],
                 reviewer_name: reviewerName || null,
             }])
@@ -96,7 +96,7 @@ class ReviewService {
                     user_id: userId,
                     product_id: productId,
                     rating,
-                    comment,
+                    comment: comment || '',
                 }])
                 .select()
                 .single());
@@ -121,7 +121,7 @@ class ReviewService {
 
         const updates = {};
         if (rating) updates.rating = rating;
-        if (comment) updates.comment = comment;
+        if (comment !== undefined) updates.comment = comment || '';
 
         const { data, error } = await supabase
             .from('reviews')

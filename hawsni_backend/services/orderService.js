@@ -1,6 +1,7 @@
 const { supabaseAdmin: supabase } = require('../config/supabase');
 const emailService = require('./emailService');
 const metaService = require('./metaService');
+const whatsappService = require('./whatsappService');
 
 class OrderService {
     async getAllOrders() {
@@ -264,6 +265,15 @@ class OrderService {
                 eventId: guestInfo.conversionEventId, // For Browser Pixel deduplication
             }).catch(err => console.error('Meta CAPI Purchase tracking failed:', err));
 
+            // 🟢 Send WhatsApp Confirmation 📱
+            if (shipping?.phone || guestInfo.guestPhone) {
+                whatsappService.sendOrderConfirmation(
+                    shipping?.phone || guestInfo.guestPhone,
+                    customerName,
+                    order
+                ).catch(err => console.error('WhatsApp notification failed:', err));
+            }
+
         } catch (emailErr) {
             console.error('Failed to handle order emails:', emailErr);
         }
@@ -427,6 +437,44 @@ class OrderService {
             console.error('❌ Failed to link guest orders:', error);
             // Non-critical failure, don't block the main auth flow
             return 0;
+        }
+    }
+
+    async getLatestActiveOrderByPhone(phone) {
+        try {
+            // Normalize phone for comparison (remove +20, spaces, etc.)
+            const cleanPhone = phone.replace(/\s+/g, '').replace(/^\+20/, '0');
+            const cleanPhone2 = phone.replace(/\s+/g, '').replace(/^20/, '0');
+
+            // Fetch active orders (Pending, Processing, Confirmed)
+            const { data: activeOrders, error } = await supabase
+                .from('orders')
+                .select('id, order_number, shipping_address, status, created_at, tracking_number, bosta_id')
+                .in('status', ['Pending', 'Processing', 'Confirmed', 'Shipped'])
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            if (!activeOrders || activeOrders.length === 0) return null;
+
+            // Find the first order matching the phone number in shipping_address
+            const matchedOrder = activeOrders.find(order => {
+                let addr = order.shipping_address;
+                if (typeof addr === 'string') {
+                    try { addr = JSON.parse(addr); } catch (e) { return false; }
+                }
+                
+                if (addr && addr.phone) {
+                    const addrPhone = addr.phone.toString().replace(/\s+/g, '').replace(/^\+20/, '0').replace(/^20/, '0');
+                    return addrPhone === cleanPhone || addrPhone === cleanPhone2;
+                }
+                
+                return false;
+            });
+
+            return matchedOrder || null;
+        } catch (error) {
+            console.error('❌ Error finding order by phone:', error);
+            return null;
         }
     }
 }

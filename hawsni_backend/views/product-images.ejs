@@ -6,14 +6,14 @@
                 <i class="fas fa-images"></i>
                 إدارة صور المنتج: <%= product.name %>
             </h2>
-            <a href="/products" class="btn btn-secondary">
+            <a href="/admin/products" class="btn btn-secondary">
                 <i class="fas fa-arrow-right"></i> رجوع
             </a>
         </div>
 
         <div class="card-body">
             <!-- Upload New Images -->
-            <form action="/products/<%= product.id %>/images" method="POST" enctype="multipart/form-data"
+            <form action="/admin/products/<%= product.id %>/images" method="POST" enctype="multipart/form-data"
                 style="margin-bottom: 2rem;">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="form-group">
@@ -34,7 +34,7 @@
             <h3 style="margin-bottom: 1.5rem;">الصور الحالية (<%= product.images ? product.images.length : 0 %>)</h3>
 
             <% if (product && product.images && product.images.length> 0) { %>
-                <form action="/products/<%= product.id %>/images/reorder" method="POST" id="reorderForm">
+                <form action="/admin/products/<%= product.id %>/images/reorder" method="POST" id="reorderForm">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     <input type="hidden" name="imageOrder" id="imageOrderInput">
 
@@ -140,8 +140,11 @@
 
         function deleteImage(productId, imageIndex) {
             showConfirm('هل أنت متأكد من حذف هذه الصورة؟', async () => {
-                const response = await fetch(`/products/${productId}/images/${imageIndex}`, {
-                    method: 'DELETE'
+                const response = await fetch(`/admin/products/${productId}/images/${imageIndex}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-Token': '<%= csrfToken %>'
+                    }
                 });
                 if (response.ok) {
                     window.location.reload();

@@ -53,11 +53,6 @@ const authLimiter = rateLimit({
   max: 10, // Strict limit for auth/sensitive actions (5-10 per 15 min)
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (forwarded) return forwarded.split(',')[0].trim();
-    return req.ip || 'unknown';
-  },
   message: { success: false, message: 'Too many attempts, please try again after 15 minutes.' }
 });
 
@@ -66,11 +61,6 @@ const generalLimiter = rateLimit({
   max: 30, // Conservative safeguard for Serverless (approx 30 req/min per IP)
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (forwarded) return forwarded.split(',')[0].trim();
-    return req.ip || 'unknown';
-  },
   skip: (req) => req.path === '/health',
   message: { success: false, message: 'Too many requests, please slow down.' }
 });
@@ -131,6 +121,10 @@ app.use(express.urlencoded({ extended: true, limit: '4mb' }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Ignore favicon requests to prevent 404 errors in logs
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.get('/favicon.png', (req, res) => res.status(204).end());
+
 // CSRF Protection specific for SSR (EJS) Admin UI
 const csurf = require('csurf');
 const csrfProtection = csurf({ 
@@ -141,8 +135,6 @@ const csrfProtection = csurf({
     } 
 });
 
-// Import admin storage protection
-const { adminProtect } = require('./middleware/adminAuth');
 
 // General API Routes
 app.use('/api/auth', authRoutes);
@@ -168,7 +160,7 @@ app.use('/api/chat', chatRoutes);
 app.get('/track-order', async (req, res) => {
   try {
     const { id } = req.query;
-    if (!id) return res.render('track-order', { order: null });
+    if (!id) return res.render('track-order', { order: null, tracking: null });
 
     const supabase = require('./config/supabase');
     const { data: order, error } = await supabase
@@ -178,13 +170,37 @@ app.get('/track-order', async (req, res) => {
       .single();
 
     if (error || !order) {
-      return res.render('track-order', { order: null });
+      return res.render('track-order', { order: null, tracking: null });
     }
 
-    return res.render('track-order', { order });
+    // Fetch live tracking from Bosta if we have a tracking number
+    let tracking = null;
+    if (order.tracking_number) {
+      try {
+        const bostaService = require('./services/bostaService');
+        tracking = await bostaService.getShipmentStatus(order.tracking_number);
+      } catch (e) {
+        console.warn('[Track Order] Could not fetch live tracking:', e.message);
+      }
+    }
+
+    return res.render('track-order', { order, tracking });
   } catch (err) {
     console.error('[Track Order] Error:', err);
-    return res.render('track-order', { order: null });
+    return res.render('track-order', { order: null, tracking: null });
+  }
+});
+
+// API: Live Bosta tracking (for AJAX refresh)
+app.get('/api/track/:trackingNumber', async (req, res) => {
+  try {
+    const bostaService = require('./services/bostaService');
+    const tracking = await bostaService.getShipmentStatus(req.params.trackingNumber);
+    if (!tracking) return res.status(404).json({ success: false, message: 'لم يتم العثور على الشحنة' });
+    res.json({ success: true, data: tracking });
+  } catch (err) {
+    console.error('[Track API] Error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات التتبع' });
   }
 });
 
@@ -201,9 +217,10 @@ const injectCsrfToken = (req, res, next) => {
     next();
 };
 
-// Admin / Dashboard Routes - Apply Protection and Injection
+// Admin / Dashboard Routes - Apply CSRF and Injection
 // Mounted at /admin to separate from root and public APIs
-app.use('/admin', adminProtect, csrfProtection, injectCsrfToken, adminRoutes);
+// Note: adminProtect is applied internally within adminRoutes for all paths except /login
+app.use('/admin', csrfProtection, injectCsrfToken, adminRoutes);
 
 // Root redirect for backward compatibility or simple entry
 app.get('/dashboard', (req, res) => res.redirect('/admin/dashboard'));

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const apiClient = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api/',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -44,7 +44,7 @@ apiClient.interceptors.response.use(
                 isRefreshing = true;
                 try {
                     const res = await axios.post(
-                        `${process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api'}/auth/refresh`,
+                        `${process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api/'}auth/refresh`,
                         { refresh_token: refreshToken }
                     );
                     if (res.data?.token) {

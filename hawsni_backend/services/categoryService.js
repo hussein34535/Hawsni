@@ -1,18 +1,7 @@
 const { supabaseAdmin: supabase } = require('../config/supabase');
 
-let categoryCache = {
-    data: null,
-    timestamp: 0
-};
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-
 class CategoryService {
     async getAllCategories() {
-        const now = Date.now();
-        if (categoryCache.data && (now - categoryCache.timestamp < CACHE_TTL)) {
-            return categoryCache.data;
-        }
-
         const { data, error } = await supabase
             .from('categories')
             .select('*')
@@ -20,8 +9,6 @@ class CategoryService {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        
-        categoryCache = { data, timestamp: now };
         return data;
     }
 
@@ -57,8 +44,6 @@ class CategoryService {
             .single();
 
         if (error) throw error;
-        
-        this.clearCache();
         return data;
     }
 
@@ -71,8 +56,6 @@ class CategoryService {
             .single();
 
         if (error) throw error;
-        
-        this.clearCache();
         return data;
     }
 
@@ -83,8 +66,6 @@ class CategoryService {
             .eq('id', id);
 
         if (error) throw error;
-        
-        this.clearCache();
         return true;
     }
 
@@ -100,12 +81,7 @@ class CategoryService {
             throw new Error('Failed to update sort orders: ' + errors.map(e => e.error.message).join(', '));
         }
 
-        this.clearCache();
         return true;
-    }
-
-    clearCache() {
-        categoryCache = { data: null, timestamp: 0 };
     }
 }
 

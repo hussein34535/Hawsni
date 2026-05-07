@@ -72,24 +72,24 @@ router.post('/orders/:id/bosta-ship', ordersController.createBostaShipment);
 const CategoryController = require('../controllers/api/categoryController');
 
 // Products Routes
-router.get('/products', ProductController.renderProductsPage);
-router.get('/products/new', ProductController.renderNewProductPage);
-router.post('/products', ProductController.createProductAdmin);
-router.get('/products/:id/edit', ProductController.renderEditProductPage);
-router.post('/products/:id', ProductController.updateProductAdmin);
-router.delete('/products/:id', ProductController.deleteProductAdmin);
+router.get('/products', ProductController.renderProductsPage.bind(ProductController));
+router.get('/products/new', ProductController.renderNewProductPage.bind(ProductController));
+router.post('/products', ProductController.createProductAdmin.bind(ProductController));
+router.get('/products/:id/edit', ProductController.renderEditProductPage.bind(ProductController));
+router.post('/products/:id', ProductController.updateProductAdmin.bind(ProductController));
+router.delete('/products/:id', ProductController.deleteProductAdmin.bind(ProductController));
 
 // Products Bulk Routes
-router.post('/products/bulk-delete', ProductController.bulkDelete);
-router.post('/products/bulk-update', ProductController.bulkUpdate);
+router.post('/products/bulk-delete', ProductController.bulkDelete.bind(ProductController));
+router.post('/products/bulk-update', ProductController.bulkUpdate.bind(ProductController));
 
 // Categories Routes
-router.get('/categories', CategoryController.renderCategoriesPage);
-router.post('/categories', upload.single('image'), CategoryController.createCategoryAdmin);
-router.get('/categories/:id/edit', CategoryController.renderEditPage);
-router.post('/categories/:id', upload.single('image'), CategoryController.updateCategoryAdmin);
-router.delete('/categories/:id', CategoryController.deleteCategoryAdmin);
-router.post('/categories/reorder', CategoryController.reorderCategories);
+router.get('/categories', CategoryController.renderCategoriesPage.bind(CategoryController));
+router.post('/categories', upload.single('image'), CategoryController.createCategoryAdmin.bind(CategoryController));
+router.get('/categories/:id/edit', CategoryController.renderEditPage.bind(CategoryController));
+router.post('/categories/:id', upload.single('image'), CategoryController.updateCategoryAdmin.bind(CategoryController));
+router.delete('/categories/:id', CategoryController.deleteCategoryAdmin.bind(CategoryController));
+router.post('/categories/reorder', CategoryController.reorderCategories.bind(CategoryController));
 
 // Shipping Settings Routes
 router.get('/shipping', shippingController.index);

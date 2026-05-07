@@ -7,7 +7,7 @@
             </h2>
         </div>
 
-        <form method="POST" action="/settings">
+        <form method="POST" action="/admin/settings">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <!-- General Info -->
             <div class="card" style="margin-bottom: 1.5rem;">
@@ -127,14 +127,14 @@
                         <small style="color:#666;">لما يتفعل، يظهر بانر العد التنازلي في صفحة المنتج وتكون قيمة التوصيل
                             صفر تلقائياً عند الدفع.</small>
                     </div>
-                    <% var labelColor = settings.free_delivery_enabled ? '#1DBF73' : '#999'; %>
                     <label style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
                         <input type="checkbox" name="free_delivery_enabled" id="free_delivery_enabled"
                             <%=settings.free_delivery_enabled ? 'checked' : '' %>
                         style="width:20px;height:20px;accent-color:#1DBF73;"
-                        onchange="var l=document.getElementById('freeDeliveryLabel');l.textContent=this.checked?'\u2705 \u0645\u0641\u0639\u0651\u0644':'\u274C \u0645\u0639\u0637\u0651\u0644';l.style.color=this.checked?'#1DBF73':'#999';">
-                        <span id="freeDeliveryLabel" style="font-weight:bold;font-size:1rem;color:<%= labelColor %>;">
-                            <%=settings.free_delivery_enabled ? '\u2705 \u0645\u0641\u0639\u0651\u0644' : '\u274C \u0645\u0639\u0637\u0651\u0644' %>
+                        onchange="var l=document.getElementById('freeDeliveryLabel');l.textContent=this.checked?'✅ مفعّل':'❌ معطّل';l.style.color=this.checked?'#1DBF73':'#999';">
+                        <span id="freeDeliveryLabel"
+                            style="font-weight:bold;font-size:1rem;color:<%- settings.free_delivery_enabled ? '#1DBF73' : '#999' %>;">
+                            <%=settings.free_delivery_enabled ? '✅ مفعّل' : '❌ معطّل' %>
                         </span>
                     </label>
                 </div>

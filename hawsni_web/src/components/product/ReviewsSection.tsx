@@ -216,7 +216,7 @@ export default function ReviewsSection({ productId }: { productId: string }) {
 
                             <textarea
                                 value={comment} onChange={(e) => setComment(e.target.value)}
-                                placeholder={isRTL ? 'اكتب رأيك هنا بكل صراحة...' : 'Describe your experience...'}
+                                placeholder={isRTL ? 'اكتب رأيك هنا (اختياري)...' : 'Describe your experience (optional)...'}
                                 className="w-full bg-white rounded-2xl p-4 text-sm font-cairo border border-gray-100 focus:ring-2 focus:ring-[var(--color-brand-primary)] outline-none min-h-[100px] transition-shadow resize-none"
                             />
 

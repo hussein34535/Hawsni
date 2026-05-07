@@ -16,7 +16,7 @@
             <h3 style="margin-bottom: 1rem; color: var(--dark-gray);">
                 <i class="fas fa-plus"></i> إضافة تصنيف جديد
             </h3>
-            <form method="POST" action="/categories" enctype="multipart/form-data">
+            <form method="POST" action="/admin/categories" enctype="multipart/form-data">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="two-col-grid">
                     <div class="form-group">
@@ -68,12 +68,12 @@
                                     </p>
 
                                     <div style="display: flex; gap: 0.5rem;">
-                                        <a href="/categories/<%= category.id %>/edit" class="btn btn-secondary btn-sm"
+                                        <a href="/admin/categories/<%= category.id %>/edit" class="btn btn-secondary btn-sm"
                                             style="flex: 1;">
                                             <i class="fas fa-edit"></i> تعديل
                                         </a>
                                         <button
-                                            onclick="handleDelete('/categories/<%= category.id %>/delete', 'هذا التصنيف')"
+                                            onclick="handleDelete('/admin/categories/<%= category.id %>', 'هذا التصنيف')"
                                             class="btn btn-danger btn-sm">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -102,13 +102,25 @@
         }
 
         // Override handleDelete for categories (uses POST to /categories/:id/delete)
-        function handleDelete(url, itemName) {
+        async function handleDelete(url, itemName) {
             showConfirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = url;
-                document.body.appendChild(form);
-                form.submit();
+                try {
+                    const res = await fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-Token': '<%= csrfToken %>'
+                        }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('تم الحذف بنجاح', 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast(data.message || 'فشل الحذف', 'error');
+                    }
+                } catch (err) {
+                    showToast('حدث خطأ أثناء الحذف', 'error');
+                }
             });
         }
     </script>

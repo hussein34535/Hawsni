@@ -86,7 +86,7 @@ class AuthService {
             // 4. Generate Token for Auto-Login 🚀 (but still require OTP)
             const token = this.generateToken(user.id, email, 'user');
 
-            console.log(`[OTP SENT] OTP for ${email}: ${otpCode}`);
+            // Log removed to prevent OTP leak
 
             return {
                 token,
