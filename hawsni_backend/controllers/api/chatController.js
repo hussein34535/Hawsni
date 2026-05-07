@@ -171,6 +171,17 @@ class ChatController {
                 .select().single();
             if (insertErr) throw insertErr;
 
+            // 1.5. Reactivate bot automatically if 24 hours passed
+            const lastActive = new Date(session.updated_at || session.created_at);
+            const diffHours = (new Date().getTime() - lastActive.getTime()) / (1000 * 3600);
+            if (diffHours >= 24 && session.status !== 'bot_active') {
+                console.log(`[Chat] ⏳ Session ${sessionId} was ${session.status} but expired. Reactivating bot.`);
+                session.status = 'bot_active';
+                await supabase.from('chat_sessions')
+                    .update({ status: 'bot_active' })
+                    .eq('session_id', sessionId);
+            }
+
             // 2. If status is human_active or closed, bot is silenced.
             if (session.status === 'human_active' || session.status === 'closed') {
                 console.log(`[Chat] 🤖 Bot is silenced for session ${sessionId} (Status: ${session.status})`);

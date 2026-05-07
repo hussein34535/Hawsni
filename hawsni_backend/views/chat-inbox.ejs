@@ -411,7 +411,18 @@
             .from('chat_messages')
             .insert([{ session_id: activeSessionId, sender_type: 'admin', content: text }]);
 
-        if (error) alert('فشل الإرسال: ' + error.message);
+        if (error) {
+            alert('فشل الإرسال: ' + error.message);
+        } else {
+            // Automatically take over chat if admin sends a message
+            const session = sessions.find(s => s.session_id === activeSessionId);
+            if (session && session.status !== 'human_active') {
+                await chatSupabase
+                    .from('chat_sessions')
+                    .update({ status: 'human_active' })
+                    .eq('session_id', activeSessionId);
+            }
+        }
         chatInput.disabled = false;
         chatInput.focus();
     };
