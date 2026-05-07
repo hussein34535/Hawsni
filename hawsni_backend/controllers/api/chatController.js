@@ -14,18 +14,39 @@ class ChatController {
 
             const now = new Date().toISOString();
 
-            // 1. Get or Create session using upsert with onConflict
-            // We use upsert primarily to handle the race condition of multiple simultaneous 'get' requests.
-            const { data: session, error: upsertErr } = await supabase
+            // 1. Get or Create session
+            let { data: session, error: getErr } = await supabase
                 .from('chat_sessions')
-                .upsert(
-                    { session_id: sessionId, status: 'bot_active', updated_at: now },
-                    { onConflict: 'session_id', ignoreDuplicates: true } // ignoreDuplicates: true means it won't overwrite existing
-                )
-                .select()
-                .single();
+                .select('*')
+                .eq('session_id', sessionId)
+                .maybeSingle();
 
-            if (upsertErr) throw upsertErr;
+            if (getErr) throw getErr;
+
+            if (!session) {
+                // Session does not exist, insert it
+                const { data: newSession, error: insertErr } = await supabase
+                    .from('chat_sessions')
+                    .insert([{ session_id: sessionId, status: 'bot_active', updated_at: now }])
+                    .select()
+                    .single();
+
+                if (insertErr) {
+                    // Handle race condition: another request inserted it just now
+                    if (insertErr.code === '23505') { // unique violation
+                        const { data: retrySession } = await supabase
+                            .from('chat_sessions')
+                            .select('*')
+                            .eq('session_id', sessionId)
+                            .single();
+                        session = retrySession;
+                    } else {
+                        throw insertErr;
+                    }
+                } else {
+                    session = newSession;
+                }
+            }
 
             // 2. Check if this is a BRAND NEW session (created just now)
             // If created_at is very close to updated_at (which we just set to 'now'), it's new.
