@@ -403,26 +403,32 @@
         if (!text || !activeSessionId) return;
 
         chatInput.value = '';
-        
-        // Optimistic UI (handled mostly by realtime, but we can disable input)
         chatInput.disabled = true;
 
-        const { error } = await chatSupabase
-            .from('chat_messages')
-            .insert([{ session_id: activeSessionId, sender_type: 'admin', content: text }]);
+        try {
+            const response = await fetch('/admin/chat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': document.querySelector('input[name="_csrf"]').value
+                },
+                body: JSON.stringify({
+                    sessionId: activeSessionId,
+                    content: text
+                })
+            });
 
-        if (error) {
-            alert('فشل الإرسال: ' + error.message);
-        } else {
-            // Automatically take over chat if admin sends a message
-            const session = sessions.find(s => s.session_id === activeSessionId);
-            if (session && session.status !== 'human_active') {
-                await chatSupabase
-                    .from('chat_sessions')
-                    .update({ status: 'human_active' })
-                    .eq('session_id', activeSessionId);
+            const data = await response.json();
+            
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'فشل الإرسال');
             }
+            
+            // Supabase realtime will handle updating the UI for the new message
+        } catch (error) {
+            alert('خطأ: ' + error.message);
         }
+
         chatInput.disabled = false;
         chatInput.focus();
     };

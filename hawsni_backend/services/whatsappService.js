@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 
 class WhatsAppService {
     constructor() {
@@ -33,7 +34,17 @@ class WhatsAppService {
                     name: "hwasi_order", 
                     language: {
                         code: "ar"
-                    }
+                    },
+                    components: [
+                        {
+                            type: "body",
+                            parameters: [
+                                { type: "text", text: customerName || "عميلنا العزيز" },
+                                { type: "text", text: order.order_number || (order.id ? order.id.substring(0, 8) : "123456") },
+                                { type: "text", text: order.total ? order.total.toString() : "0" }
+                            ]
+                        }
+                    ]
                 }
             };
 
@@ -130,11 +141,41 @@ class WhatsAppService {
                                 }
                             }
                         } else if (msg.type === 'text' && msg.text) {
-                            const textBody = msg.text.body ? msg.text.body.trim().toLowerCase() : '';
+                            const textBody = msg.text.body ? msg.text.body.trim() : '';
                             const phone = msg.from;
                             
+                            // 🟢 SAVE TO CHAT DATABASE
+                            try {
+                                // 1. Ensure Session Exists
+                                const { data: session } = await supabase
+                                    .from('chat_sessions')
+                                    .select('session_id')
+                                    .eq('session_id', phone)
+                                    .single();
+                                    
+                                if (!session) {
+                                    await supabase.from('chat_sessions').insert([{
+                                        session_id: phone,
+                                        status: 'human_requested'
+                                    }]);
+                                } else {
+                                    // Update timestamp
+                                    await supabase.from('chat_sessions').update({ updated_at: new Date().toISOString() }).eq('session_id', phone);
+                                }
+                                
+                                // 2. Insert Message
+                                await supabase.from('chat_messages').insert([{
+                                    session_id: phone,
+                                    sender_type: 'user',
+                                    content: textBody
+                                }]);
+                            } catch (dbError) {
+                                console.error('[WhatsApp Webhook] ❌ Failed to save message to DB:', dbError);
+                            }
+
                             // Check if text contains "تتبع" or "track" (including common typos)
-                            if (textBody.includes('تتبع') || textBody.includes('تتعب') || textBody.includes('track')) {
+                            const lowerBody = textBody.toLowerCase();
+                            if (lowerBody.includes('تتبع') || lowerBody.includes('تتعب') || lowerBody.includes('track')) {
                                 console.log(`[WhatsApp Webhook] 🔍 User ${phone} requested order tracking`);
                                 
                                 const orderService = require('./orderService');
