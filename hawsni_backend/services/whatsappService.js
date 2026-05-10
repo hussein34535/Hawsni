@@ -49,17 +49,6 @@ class WhatsAppService {
             }
         ];
 
-        if (imageUrl) {
-            components.unshift({
-                type: "header",
-                parameters: [
-                    {
-                        type: "image",
-                        image: { link: imageUrl }
-                    }
-                ]
-            });
-        }
 
         try {
             const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
