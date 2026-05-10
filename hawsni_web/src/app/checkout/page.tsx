@@ -11,6 +11,8 @@ import { trackEvent } from '@/components/analytics/FacebookPixel';
 import OrderReceipt from '@/components/checkout/OrderReceipt';
 import MeshBackground from '@/components/checkout/MeshBackground';
 
+import { useAuthStore } from '@/store/authStore';
+
 // قائمة المحافظات لتسهيل وتسريع الطلب
 const EGYPT_GOVS =[
     'القاهرة', 'الجيزة', 'الإسكندرية', 'الشرقية', 'الدقهلية', 'القليوبية', 'المنيا', 'الغربية', 'الإسماعيلية', 'أسيوط', 'الفيوم', 'سوهاج', 'قنا', 'بني سويف', 'أسوان', 'البحيرة', 'كفر الشيخ', 'المنوفية', 'دمياط', 'الأقصر', 'البحر الأحمر', 'السويس', 'بورسعيد', 'مطروح', 'شمال سيناء', 'جنوب سيناء'
@@ -19,6 +21,7 @@ const EGYPT_GOVS =[
 export default function CheckoutPage() {
     const router = useRouter();
     const { items, getTotal, clearCart } = useCartStore();
+    const { user } = useAuthStore();
     const { isRTL } = useLanguage();
     const { showToast } = useToastStore();
 
@@ -95,6 +98,7 @@ export default function CheckoutPage() {
                         <CheckoutForm 
                             isRTL={isRTL} 
                             items={items}
+                            user={user}
                             subtotal={subtotal}
                             shippingFee={shippingFee}
                             discount={discount}
@@ -137,7 +141,7 @@ export default function CheckoutPage() {
 const PREMIUM_INPUT_CLASS = "w-full h-[52px] px-4 bg-[#F9FAFB] border border-gray-200 text-gray-900 text-[15px] font-bold rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0E4435]/15 focus:border-[#0E4435] transition-all placeholder:text-gray-400 placeholder:font-medium appearance-none shadow-sm";
 const PREMIUM_LABEL_CLASS = "block text-[13px] font-black text-gray-600 mb-1.5 px-1 tracking-wide";
 
-function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon, isSubmitting, setIsSubmitting, setIsRedirecting }: any) {
+function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon, isSubmitting, setIsSubmitting, setIsRedirecting }: any) {
     
     // Bosta API States
     const [cities, setCities] = useState<any[]>([]);
@@ -355,7 +359,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                         type="text"
                         name="name"
                         required
-                        defaultValue=""
+                        defaultValue={user?.name || ""}
                         className={PREMIUM_INPUT_CLASS}
                         placeholder={isRTL ? "الاسم ثنائي..." : "First and Last Name..."}
                     />
@@ -369,7 +373,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                             type="tel"
                             name="phone"
                             required
-                            defaultValue=""
+                            defaultValue={user?.phone || ""}
                             className={PREMIUM_INPUT_CLASS}
                             placeholder="010xxxxxxxx"
                             dir="ltr"
@@ -397,7 +401,7 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                     <input
                         type="email"
                         name="email"
-                        defaultValue=""
+                        defaultValue={user?.email || ""}
                         className={PREMIUM_INPUT_CLASS}
                         placeholder="example@email.com"
                         dir="ltr"

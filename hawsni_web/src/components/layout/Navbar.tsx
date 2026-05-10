@@ -45,21 +45,8 @@ export default function Navbar() {
                             Hwasi
                         </Link>
 
-                        {/* Profile + Notification Icons */}
+                        {/* Notification Icon */}
                         <div className="flex items-center gap-1">
-                            <Link href="/profile" className="p-2 text-gray-800 rounded-full block">
-                                {user && token ? (
-                                    user.avatar_url ? (
-                                        <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover border border-gray-200" />
-                                    ) : (
-                                        <div className="w-6 h-6 bg-[var(--color-brand-primary)]/10 rounded-full flex items-center justify-center">
-                                            <User size={14} className="text-[var(--color-brand-primary)]" />
-                                        </div>
-                                    )
-                                ) : (
-                                    <User size={24} />
-                                )}
-                            </Link>
                             <Link href="/notifications" className="p-2 text-gray-800 rounded-full block">
                                 <Bell size={24} />
                                 <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
@@ -100,23 +87,8 @@ export default function Navbar() {
                             </button>
                         </div>
 
-                        {/* Profile Icon */}
-                        <Link href="/profile" className="flex items-center gap-2 p-1.5 rounded-full text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors">
-                            {user && token ? (
-                                <>
-                                    {user.avatar_url ? (
-                                        <img src={user.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-gray-200" />
-                                    ) : (
-                                        <div className="w-7 h-7 bg-[var(--color-brand-primary)]/10 rounded-full flex items-center justify-center">
-                                            <User size={16} className="text-[var(--color-brand-primary)]" />
-                                        </div>
-                                    )}
-                                    <span className="text-sm font-bold text-gray-800 max-w-[100px] truncate">{user.name}</span>
-                                </>
-                            ) : (
-                                <User size={28} />
-                            )}
-                        </Link>
+                        {/* Empty Space for desktop balance if needed */}
+                        <div className="w-10"></div>
                     </div>
 
                 </div>

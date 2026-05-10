@@ -25,17 +25,17 @@ export default function CartPage() {
     return (
         <div className="w-full min-h-screen bg-[#FAFAFA]">
             {/* Header */}
-            <div dir={isRTL ? 'rtl' : 'ltr'} className="sticky top-0 z-30 bg-[#FAFAFA]/80 backdrop-blur-md px-6 py-6 flex items-center justify-between">
+            <div dir={isRTL ? 'rtl' : 'ltr'} className="sticky top-0 z-30 bg-white border-b border-gray-50 px-4 py-3 flex items-center justify-between">
                 <button
                     onClick={() => router.back()}
-                    className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm text-gray-900 active:scale-95 transition-all"
+                    className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-900 active:scale-95 transition-all"
                 >
-                    {isRTL ? <ArrowRight size={24} /> : <ArrowLeft size={24} />}
+                    {isRTL ? <ArrowRight size={20} /> : <ArrowLeft size={20} />}
                 </button>
-                <h1 className="text-xl font-black text-gray-900 font-cairo">
+                <h1 className="text-lg font-black text-gray-900 font-cairo">
                     {isRTL ? 'حقيبة التسوق' : 'Shopping Bag'}
                 </h1>
-                <div className="w-12" /> {/* Placeholder for balance */}
+                <div className="w-10" />
             </div>
 
             <div className="px-4 pb-[160px] text-right" dir="ltr">
