@@ -363,7 +363,7 @@ class AuthService {
             userRecord = newUser;
         } else {
             // 4. Update existing user profile with Google data if missing
-            const updates: any = {};
+            const updates = {};
             if (!userRecord.email && email) updates.email = email;
             if (!userRecord.name && name) updates.name = name;
             if (!userRecord.avatar_url && avatarUrl) updates.avatar_url = avatarUrl;
