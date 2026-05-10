@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Camera, Image as ImageIcon, Sparkles, RefreshCw, Share2, AlertCircle, Check, UserPlus, Maximize2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuthStore } from '@/store/authStore';
 import { vtoService } from '@/services/vtoService';
 
 const GUEST_DAILY_LIMIT = 1;
@@ -29,7 +30,7 @@ const incrementUsage = () => {
 };
 
 const isLoggedIn = (): boolean => {
-    try { return !!localStorage.getItem('token'); }
+    try { return !!useAuthStore.getState().token; }
     catch { return false; }
 };
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ShoppingBag, ChevronRight, Package, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuthStore } from '@/store/authStore';
 import axios from '@/lib/axios';
 import { motion } from 'framer-motion';
 
@@ -25,7 +26,7 @@ export default function OrdersPage() {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            const token = localStorage.getItem('token');
+            const token = useAuthStore.getState().token;
             if (!token) {
                 setIsGuest(true);
                 setIsLoading(false);

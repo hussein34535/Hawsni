@@ -1,10 +1,11 @@
 import apiClient from '@/lib/axios';
+import { useAuthStore } from '@/store/authStore';
 
 const GUEST_WISHLIST_KEY = 'guest_wishlist';
 
 export const wishlistService = {
     getWishlist: async (): Promise<{ success: boolean; wishlist: any[] }> => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const token = typeof window !== 'undefined' ? useAuthStore.getState().token : null;
         
         if (!token) {
             const guestList = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem(GUEST_WISHLIST_KEY) || '[]') : [];
@@ -30,7 +31,7 @@ export const wishlistService = {
     },
 
     addToWishlist: async (product: any): Promise<{ success: boolean; message: string }> => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const token = typeof window !== 'undefined' ? useAuthStore.getState().token : null;
         const productId = product._id || product.id;
 
         if (!token) {
@@ -51,7 +52,7 @@ export const wishlistService = {
     },
 
     removeFromWishlist: async (productId: string): Promise<{ success: boolean; message: string }> => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const token = typeof window !== 'undefined' ? useAuthStore.getState().token : null;
 
         if (!token) {
             const guestList = JSON.parse(localStorage.getItem(GUEST_WISHLIST_KEY) || '[]');

@@ -5,6 +5,7 @@ import { ShoppingBag, Bell, Search, User, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
+import { useAuthStore } from '@/store/authStore';
 import CartDrawer from '@/components/cart/CartDrawer';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -12,6 +13,7 @@ export default function Navbar() {
     const pathname = usePathname();
     const { t, language, isRTL } = useLanguage();
     const itemCount = useCartStore((state) => state.getItemCount());
+    const { user, token } = useAuthStore();
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -86,8 +88,21 @@ export default function Navbar() {
                         </div>
 
                         {/* Profile Icon */}
-                        <Link href="/profile" className="p-2 rounded-full text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors">
-                            <User size={28} />
+                        <Link href="/profile" className="flex items-center gap-2 p-1.5 rounded-full text-gray-600 hover:text-[var(--color-brand-primary)] transition-colors">
+                            {user && token ? (
+                                <>
+                                    {user.avatar_url ? (
+                                        <img src={user.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover border border-gray-200" />
+                                    ) : (
+                                        <div className="w-7 h-7 bg-[var(--color-brand-primary)]/10 rounded-full flex items-center justify-center">
+                                            <User size={16} className="text-[var(--color-brand-primary)]" />
+                                        </div>
+                                    )}
+                                    <span className="text-sm font-bold text-gray-800 max-w-[100px] truncate">{user.name}</span>
+                                </>
+                            ) : (
+                                <User size={28} />
+                            )}
                         </Link>
                     </div>
 

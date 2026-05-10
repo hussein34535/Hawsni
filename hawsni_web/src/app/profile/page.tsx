@@ -23,18 +23,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToastStore } from '@/store/toastStore';
 import { authService } from '@/services/authService';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuthStore } from '@/store/authStore';
 
 // Standardized Auth Hook
 const useAuth = () => {
     const [user, setUser] = useState<any>(null);
     const [isGuest, setIsGuest] = useState(true);
     const [loading, setLoading] = useState(true);
+    const storeUser = useAuthStore((s) => s.user);
+    const storeToken = useAuthStore((s) => s.token);
 
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-                if (token) {
+                if (storeToken) {
                     const data = await authService.getProfile();
                     if (data.success) {
                         setUser(data.user);
@@ -49,7 +51,7 @@ const useAuth = () => {
             }
         };
         checkAuth();
-    }, []);
+    }, [storeToken]);
 
     return { user, isGuest, loading };
 };

@@ -5,6 +5,7 @@ import { Star, ThumbsUp, MessageSquare, ImagePlus, X, User, CheckCircle, Chevron
 import { motion, AnimatePresence } from 'framer-motion';
 import { reviewService, Review } from '@/services/reviewService';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuthStore } from '@/store/authStore';
 import apiClient from '@/lib/axios';
 import dynamic from 'next/dynamic';
 
@@ -57,9 +58,8 @@ export default function ReviewsSection({ productId }: { productId: string }) {
     const [lightbox, setLightbox] = useState<{ images: string[], index: number } | null>(null);
     const [hasSeenSwipeHint, setHasSeenSwipeHint] = useState(false);
 
-    const loggedIn = typeof window !== 'undefined' && !!localStorage.getItem('token');
-    const currentUserStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-    const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
+    const { user: currentUser, token } = useAuthStore();
+    const loggedIn = !!token;
 
     const fetchReviews = async () => {
         try {
