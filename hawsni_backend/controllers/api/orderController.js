@@ -31,8 +31,16 @@ class OrderController {
                 return res.status(404).json({ success: false, message: 'Order not found' });
             }
 
-            if (order.user_id !== req.user.id && req.user.role !== 'admin') {
-                return res.status(403).json({ success: false, message: 'Not authorized to view this order' });
+            if (req.user) {
+                // If user is logged in, they must be the owner or an admin
+                if (order.user_id !== req.user.id && req.user.role !== 'admin') {
+                    return res.status(403).json({ success: false, message: 'Not authorized to view this order' });
+                }
+            } else {
+                // If guest, they can only view orders that don't belong to a registered user
+                if (order.user_id !== null) {
+                    return res.status(403).json({ success: false, message: 'Not authorized to view this order. Please login.' });
+                }
             }
 
             res.json({ success: true, order });

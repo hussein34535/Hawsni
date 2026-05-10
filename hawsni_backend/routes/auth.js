@@ -34,6 +34,10 @@ router.post('/change-password', protect, [
   body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters')
 ], AuthController.changePassword);
 
+// @route   POST /api/auth/google
+// @desc    Google OAuth login via Supabase
+router.post('/google', AuthController.googleLogin);
+
 // @route   POST /api/auth/refresh
 // @desc    Refresh access token
 router.post('/refresh', AuthController.refresh);

@@ -8,7 +8,7 @@ class WhatsAppService {
         this.apiVersion = 'v20.0';
     }
 
-    async sendOrderConfirmation(phone, customerName, order) {
+    async sendOrderConfirmation(phone, customerName, order, items = []) {
         if (!this.phoneNumberId) {
             console.warn('⚠️ WHATSAPP_PHONE_NUMBER_ID is not configured. WhatsApp message skipped.');
             return;
@@ -23,6 +23,44 @@ class WhatsAppService {
             finalPhone = '2' + finalPhone;
         }
 
+        // Extract products names and image
+        let productsNames = 'مجموعة منتجات';
+        let imageUrl = null;
+
+        if (items && items.length > 0) {
+            productsNames = items.map(item => item.name || item.product_name || 'منتج').join(' و ');
+            if (productsNames.length > 100) productsNames = productsNames.substring(0, 97) + '...';
+
+            const firstImg = items[0].image_url || items[0].imageUrl || items[0].image || (items[0].products && items[0].products.images ? items[0].products.images[0] : null);
+            if (firstImg && typeof firstImg === 'string' && firstImg.startsWith('http')) {
+                imageUrl = firstImg;
+            }
+        }
+
+        const components = [
+            {
+                type: "body",
+                parameters: [
+                    { type: "text", text: customerName || "عميلنا العزيز" },
+                    { type: "text", text: order.order_number || (order.id ? order.id.substring(0, 8) : "123456") },
+                    { type: "text", text: order.total ? order.total.toString() : "0" },
+                    { type: "text", text: productsNames }
+                ]
+            }
+        ];
+
+        if (imageUrl) {
+            components.unshift({
+                type: "header",
+                parameters: [
+                    {
+                        type: "image",
+                        image: { link: imageUrl }
+                    }
+                ]
+            });
+        }
+
         try {
             const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
             
@@ -31,20 +69,11 @@ class WhatsAppService {
                 to: finalPhone,
                 type: "template",
                 template: {
-                    name: "hwasi_order", 
+                    name: "order_confirm", 
                     language: {
                         code: "ar"
                     },
-                    components: [
-                        {
-                            type: "body",
-                            parameters: [
-                                { type: "text", text: customerName || "عميلنا العزيز" },
-                                { type: "text", text: order.order_number || (order.id ? order.id.substring(0, 8) : "123456") },
-                                { type: "text", text: order.total ? order.total.toString() : "0" }
-                            ]
-                        }
-                    ]
+                    components: components
                 }
             };
 
@@ -139,7 +168,93 @@ class WhatsAppService {
                                     console.log(`[WhatsApp Webhook] ⚠️ No active order found for ${phone}`);
                                     await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلب نشط أو قيد التنفيذ مرتبط برقمك. ربما تم الإلغاء مسبقاً.");
                                 }
+                            } else if (buttonText === 'موافق') {
+                                // Send Vodafone Cash details
+                                await this.sendTextMessage(
+                                    phone,
+                                    "رائع! يرجى تحويل ديبوزت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n(تنبيه: برجاء إرسال صورة التحويل 'سكرين شوت' هنا في هذه المحادثة ليتم تأكيد طلبك فوراً)."
+                                );
+                            } else if (buttonText === 'الغاء' || buttonText === 'إلغاء') {
+                                // Ask for cancellation reason
+                                await this.sendTextMessage(
+                                    phone,
+                                    "نعتذر لسماع ذلك 😔. هل يمكنك إخبارنا بسبب عدم رغبتك في إكمال الطلب لمساعدتنا في تحسين خدماتنا؟"
+                                );
+                            } else if (buttonId === 'track_order' || buttonText === 'تتبع الطلب') {
+                                // Existing tracking logic can be triggered here or send a message
+                                await this.sendTextMessage(phone, "جاري الاستعلام عن حالة طلبك...");
+                                // Actually, we can just trigger the tracking logic below if we refactored it,
+                                // but for now a simple message is fine, or we can duplicate the tracking code.
+                                const orderService = require('./orderService');
+                                const activeOrder = await orderService.findActiveOrderByPhone(phone);
+                                if (activeOrder) {
+                                    const bostaService = require('./bostaService');
+                                    if (activeOrder.tracking_number) {
+                                        const trackingData = await bostaService.trackDelivery(activeOrder.tracking_number);
+                                        const stateText = bostaService.translateDeliveryState(trackingData.state);
+                                        await this.sendTextMessage(phone, `حالة طلبك رقم #${activeOrder.order_number}: ${stateText}`);
+                                    } else {
+                                        await this.sendTextMessage(phone, `طلبك رقم #${activeOrder.order_number} جاري تجهيزه ولم يتم تسليمه لشركة الشحن بعد.`);
+                                    }
+                                } else {
+                                    await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلب نشط مرتبط برقمك.");
+                                }
+                            } else if (buttonId === 'edit_order' || buttonText === 'تعديل الطلب') {
+                                // Notify user that an admin will help
+                                await this.sendTextMessage(phone, "لتعديل طلبك، سيقوم أحد ممثلي خدمة العملاء بالرد عليك حالاً. ⏳");
+                                // Update session to human requested
+                                await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
                             }
+                        } else if (msg.type === 'image' && msg.image) {
+                            const phone = msg.from;
+                            const mediaId = msg.image.id;
+                            
+                            // 1. Save image to chat database
+                            try {
+                                const { data: session } = await supabase.from('chat_sessions').select('session_id').eq('session_id', phone).single();
+                                if (!session) {
+                                    await supabase.from('chat_sessions').insert([{ session_id: phone, status: 'human_requested' }]);
+                                } else {
+                                    await supabase.from('chat_sessions').update({ updated_at: new Date().toISOString(), status: 'human_requested' }).eq('session_id', phone);
+                                }
+                                
+                                await supabase.from('chat_messages').insert([{
+                                    session_id: phone,
+                                    sender_type: 'user',
+                                    content: `[IMAGE:${mediaId}]`
+                                }]);
+                            } catch (dbError) {
+                                console.error('[WhatsApp Webhook] ❌ Failed to save image to DB:', dbError);
+                            }
+
+                            // 2. Send interactive confirmation
+                            const interactivePayload = {
+                                messaging_product: "whatsapp",
+                                to: phone,
+                                type: "interactive",
+                                interactive: {
+                                    type: "button",
+                                    body: {
+                                        text: "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍"
+                                    },
+                                    action: {
+                                        buttons: [
+                                            { type: "reply", reply: { id: "track_order", title: "تتبع الطلب" } },
+                                            { type: "reply", reply: { id: "edit_order", title: "تعديل الطلب" } }
+                                        ]
+                                    }
+                                }
+                            };
+                            
+                            const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+                            await fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${this.token}`,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(interactivePayload)
+                            });
                         } else if (msg.type === 'text' && msg.text) {
                             const textBody = msg.text.body ? msg.text.body.trim() : '';
                             const phone = msg.from;

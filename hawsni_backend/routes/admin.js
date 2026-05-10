@@ -107,5 +107,6 @@ router.delete('/reviews/:id', adminReviewsController.delete);
 // Live Chat Inbox
 router.get('/chat', adminChatController.renderChatInbox);
 router.post('/chat/send', adminChatController.sendMessage);
+router.get('/chat/media/:mediaId', adminChatController.getWhatsAppMedia);
 
 module.exports = router;

@@ -377,7 +377,18 @@
                 flex-direction: column;
                 align-items: ${align};
                 max-width: 100%;
+                margin-bottom: 12px;
             `;
+
+            let displayContent = msg.content;
+            const imgMatch = msg.content.match(/^\[IMAGE:(.+)\]$/);
+            if (imgMatch) {
+                const mediaId = imgMatch[1];
+                displayContent = `<img src="/admin/chat/media/${mediaId}" style="max-width: 250px; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src, '_blank')" alt="صورة مرفقة" onerror="this.onerror=null; this.src=''; this.alt='صورة غير متاحة'">`;
+            } else {
+                // escape HTML for safety
+                displayContent = displayContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/\n/g, '<br>');
+            }
 
             div.innerHTML = `
                 <div style="font-size: 11px; color: #94a3b8; margin-bottom: 4px; padding: 0 4px;">${name}</div>
@@ -385,12 +396,11 @@
                     max-width: 75%;
                     background: ${bg};
                     color: ${color};
-                    padding: 12px 16px;
+                    padding: ${imgMatch ? '4px' : '12px 16px'};
                     border-radius: ${isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
                     font-size: 14px;
                     line-height: 1.5;
-                    white-space: pre-wrap;
-                ">${msg.content}</div>
+                ">${displayContent}</div>
                 <div style="font-size: 10px; color: #cbd5e1; margin-top: 4px; padding: 0 4px;">${new Date(msg.created_at).toLocaleTimeString('ar-EG')}</div>
             `;
             messagesContainerEl.appendChild(div);

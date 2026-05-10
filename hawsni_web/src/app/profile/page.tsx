@@ -39,7 +39,7 @@ const useAuth = () => {
                 if (storeToken) {
                     const data = await authService.getProfile();
                     if (data.success) {
-                        setUser(data.user);
+                        setUser({ ...storeUser, ...data.user });
                         setIsGuest(false);
                     }
                 }

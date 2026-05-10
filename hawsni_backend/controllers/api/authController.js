@@ -93,6 +93,22 @@ class AuthController {
         }
     }
 
+    async googleLogin(req, res) {
+        try {
+            const { access_token, email, name, avatar_url } = req.body;
+
+            if (!access_token || !email) {
+                return res.status(400).json({ success: false, message: 'Access token and email are required' });
+            }
+
+            const result = await AuthService.googleLogin(access_token, email, name, avatar_url);
+            res.json({ success: true, ...result });
+        } catch (error) {
+            console.error('Google Login Error:', error);
+            res.status(401).json({ success: false, message: error.message });
+        }
+    }
+
     async refresh(req, res) {
         try {
             const { refresh_token } = req.body;

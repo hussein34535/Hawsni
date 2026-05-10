@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const supabase = require('../../config/supabase');
 const whatsappService = require('../../services/whatsappService');
 
@@ -50,6 +51,41 @@ class AdminChatController {
         } catch (error) {
             console.error('Error sending message:', error);
             res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    async getWhatsAppMedia(req, res) {
+        try {
+            const mediaId = req.params.mediaId;
+            const token = process.env.WHATSAPP_TOKEN;
+            const apiVersion = process.env.WHATSAPP_API_VERSION || 'v20.0';
+
+            // 1. Get Media URL
+            const urlResponse = await fetch(`https://graph.facebook.com/${apiVersion}/${mediaId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const urlData = await urlResponse.json();
+            
+            if (!urlData.url) {
+                return res.status(404).send('Media not found');
+            }
+
+            // 2. Download Binary Data
+            const mediaResponse = await fetch(urlData.url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!mediaResponse.ok) {
+                return res.status(mediaResponse.status).send('Failed to fetch media');
+            }
+
+            // 3. Proxy to client
+            res.setHeader('Content-Type', urlData.mime_type || 'image/jpeg');
+            mediaResponse.body.pipe(res);
+            
+        } catch (error) {
+            console.error('Error fetching WhatsApp media:', error);
+            res.status(500).send('Internal Server Error');
         }
     }
 }

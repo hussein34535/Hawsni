@@ -321,6 +321,72 @@ class AuthService {
         return { success: true, message: 'Password changed successfully' };
     }
 
+    async googleLogin(accessToken, email, name, avatarUrl) {
+        // 1. Verify the Supabase access token
+        const { data: { user: supabaseUser }, error: authError } = await supabaseAdmin.auth.getUser(accessToken);
+
+        if (authError || !supabaseUser) {
+            throw new Error('Invalid Google authentication token');
+        }
+
+        const supabaseId = supabaseUser.id;
+
+        // 2. Check if user exists in our users table by supabase_id or email
+        const { data: existingUser } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', supabaseId)
+            .single();
+
+        let userRecord = existingUser;
+
+        if (!userRecord) {
+            // 3. Create new user record
+            const { data: newUser, error: createError } = await supabase
+                .from('users')
+                .insert([{
+                    id: supabaseId,
+                    name: name || email.split('@')[0],
+                    email: email,
+                    role: 'user',
+                    avatar_url: avatarUrl || null,
+                    is_email_verified: true
+                }])
+                .select()
+                .single();
+
+            if (createError) {
+                console.error('[AuthService] googleLogin createError:', createError);
+                throw new Error('Failed to create user profile');
+            }
+
+            userRecord = newUser;
+        } else if (!userRecord.avatar_url && avatarUrl) {
+            // Update avatar if not set
+            await supabase.from('users').update({ avatar_url: avatarUrl }).eq('id', supabaseId);
+        }
+
+        // Link guest orders asynchronously
+        OrderService.linkGuestOrders(supabaseId, email, userRecord.phone)
+            .catch(err => console.error('Error linking orders after googleLogin:', err));
+
+        // Generate app JWT
+        const token = this.generateToken(supabaseId, email, userRecord.role || 'user');
+
+        return {
+            token,
+            refresh_token: null,
+            user: {
+                id: supabaseId,
+                name: userRecord.name,
+                email: userRecord.email,
+                role: userRecord.role || 'user',
+                phone: userRecord.phone || null,
+                avatar_url: userRecord.avatar_url || null
+            }
+        };
+    }
+
     async refreshToken(refreshToken) {
         const { data, error } = await supabaseAuth.auth.refreshSession({
             refresh_token: refreshToken
