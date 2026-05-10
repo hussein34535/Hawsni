@@ -42,40 +42,40 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-white" dir="rtl">
+        <div className="h-[100dvh] flex flex-col bg-white overflow-hidden" dir="rtl">
             {/* Simple Top Navigation */}
-            <div className="p-4 md:p-6">
+            <div className="p-3 md:p-4 shrink-0">
                 <button 
                     onClick={() => router.push('/login')}
-                    className="flex items-center gap-2 text-gray-400 hover:text-gray-900 transition-colors group"
+                    className="flex items-center gap-1.5 text-gray-400 hover:text-gray-900 transition-colors group w-fit"
                 >
-                    <ArrowLeft size={20} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-bold font-cairo text-gray-400">العودة لتسجيل الدخول</span>
+                    <ArrowLeft size={18} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-xs font-bold font-cairo text-gray-400">العودة</span>
                 </button>
             </div>
 
-            <div className="flex-1 flex items-center justify-center p-4">
-                <div className="w-full max-w-[400px]">
-                    <div className="text-center mb-6">
-                        <div className="w-12 h-12 bg-[#0E4435] rounded-xl mx-auto flex items-center justify-center mb-4 shadow-xl">
-                            <span className="text-white text-xl font-black">H</span>
+            <div className="flex-1 flex items-center justify-center p-4 overflow-y-auto">
+                <div className="w-full max-w-[360px] pb-4">
+                    <div className="text-center mb-5">
+                        <div className="w-12 h-12 bg-[#0E4435] rounded-xl mx-auto flex items-center justify-center mb-3 shadow-lg">
+                            <img src="/logo.png" alt="Hawsni Logo" className="w-8 h-8 object-contain invert brightness-0" />
                         </div>
-                        <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-1 font-cairo">إنشاء حساب</h1>
-                        <p className="text-gray-500 text-sm font-bold font-cairo">انضم إلى مجتمع هوسي الراقي</p>
+                        <h1 className="text-xl md:text-2xl font-black text-gray-900 mb-0.5 font-cairo">إنشاء حساب</h1>
+                        <p className="text-gray-500 text-[11px] font-bold font-cairo">انضم إلى مجتمع هوسي الراقي</p>
                     </div>
 
                     {error && (
-                        <div className="mb-4 p-3 bg-red-50 rounded-xl flex items-center text-red-600 border border-red-100">
-                            <XCircle className="w-5 h-5 ml-2 flex-shrink-0" />
-                            <span className="text-xs font-bold font-cairo">{error}</span>
+                        <div className="mb-4 p-2 bg-red-50 rounded-xl flex items-center text-red-600 border border-red-100">
+                            <XCircle className="w-4 h-4 ml-2 flex-shrink-0" />
+                            <span className="text-[11px] font-bold font-cairo leading-tight">{error}</span>
                         </div>
                     )}
 
-                    <form onSubmit={handleRegister} className="space-y-3">
+                    <form onSubmit={handleRegister} className="space-y-2.5">
                         <div className="space-y-1">
-                            <label className="text-xs font-black text-gray-400 mr-1 font-cairo">الاسم بالكامل</label>
+                            <label className="text-[11px] font-black text-gray-400 mr-1 font-cairo">الاسم بالكامل</label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <UserIcon className="h-4 w-4 text-gray-300 group-focus-within:text-[#0E4435] transition-colors" />
                                 </div>
                                 <input
@@ -83,16 +83,16 @@ export default function RegisterPage() {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
-                                    className="w-full pr-11 pl-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-[#0E4435]/20 focus:ring-4 focus:ring-[#0E4435]/5 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
+                                    className="w-full pr-10 pl-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-[#0E4435]/20 focus:ring-2 focus:ring-[#0E4435]/10 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
                                     placeholder="الاسم الأول والأخير"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-black text-gray-400 mr-1 font-cairo">البريد الإلكتروني</label>
+                            <label className="text-[11px] font-black text-gray-400 mr-1 font-cairo">البريد الإلكتروني</label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <Mail className="h-4 w-4 text-gray-300 group-focus-within:text-[#0E4435] transition-colors" />
                                 </div>
                                 <input
@@ -100,16 +100,16 @@ export default function RegisterPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="w-full pr-11 pl-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-[#0E4435]/20 focus:ring-4 focus:ring-[#0E4435]/5 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
+                                    className="w-full pr-10 pl-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-[#0E4435]/20 focus:ring-2 focus:ring-[#0E4435]/10 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
                                     placeholder="example@hwasi.com"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-black text-gray-400 mr-1 font-cairo">رقم الهاتف</label>
+                            <label className="text-[11px] font-black text-gray-400 mr-1 font-cairo">رقم الهاتف</label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <Phone className="h-4 w-4 text-gray-300 group-focus-within:text-[#0E4435] transition-colors" />
                                 </div>
                                 <input
@@ -117,16 +117,16 @@ export default function RegisterPage() {
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     required
-                                    className="w-full pr-11 pl-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-[#0E4435]/20 focus:ring-4 focus:ring-[#0E4435]/5 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
+                                    className="w-full pr-10 pl-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-[#0E4435]/20 focus:ring-2 focus:ring-[#0E4435]/10 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
                                     placeholder="010 123 456 78"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-black text-gray-400 mr-1 font-cairo">كلمة المرور</label>
+                            <label className="text-[11px] font-black text-gray-400 mr-1 font-cairo">كلمة المرور</label>
                             <div className="relative group">
-                                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                     <Lock className="h-4 w-4 text-gray-300 group-focus-within:text-[#0E4435] transition-colors" />
                                 </div>
                                 <input
@@ -135,7 +135,7 @@ export default function RegisterPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     minLength={6}
-                                    className="w-full pr-11 pl-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-[#0E4435]/20 focus:ring-4 focus:ring-[#0E4435]/5 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
+                                    className="w-full pr-10 pl-3 py-2 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-[#0E4435]/20 focus:ring-2 focus:ring-[#0E4435]/10 outline-none transition-all text-right text-sm font-bold placeholder:text-gray-300"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -144,21 +144,21 @@ export default function RegisterPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3 px-6 mt-4 bg-[#0E4435] hover:bg-[#0a3126] text-white rounded-xl font-black text-sm shadow-xl shadow-[#0E4435]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] font-cairo"
+                            className="w-full py-2.5 px-4 mt-3 bg-[#0E4435] hover:bg-[#0a3126] text-white rounded-xl font-black text-sm shadow-md shadow-[#0E4435]/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] font-cairo"
                         >
                             {isLoading ? (
-                                <div className="h-5 w-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                             ) : (
                                 <>
                                     <span>إنشاء الحساب</span>
-                                    <ArrowRight className="w-4 h-4 mr-1 rotate-180" />
+                                    <ArrowRight className="w-3.5 h-3.5 mr-1 rotate-180" />
                                 </>
                             )}
                         </button>
                     </form>
 
-                    <div className="mt-6 text-center">
-                        <p className="text-gray-500 text-xs font-bold font-cairo">
+                    <div className="mt-4 text-center">
+                        <p className="text-gray-500 text-[11px] font-bold font-cairo">
                             لديك حساب بالفعل؟{' '}
                             <Link href="/login" title="login">
                                 <span className="text-[#0E4435] hover:underline">
@@ -168,9 +168,9 @@ export default function RegisterPage() {
                         </p>
                     </div>
 
-                    <div className="mt-4 flex items-center justify-center gap-4">
+                    <div className="mt-4 flex items-center justify-center gap-3">
                         <div className="h-[1px] flex-1 bg-gray-100" />
-                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest font-cairo">أو</span>
+                        <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest font-cairo">أو</span>
                         <div className="h-[1px] flex-1 bg-gray-100" />
                     </div>
 
@@ -179,7 +179,7 @@ export default function RegisterPage() {
                             const { supabase } = await import('@/lib/supabase');
                             supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback-handler` } })
                         }}
-                        className="w-full py-3 px-6 bg-white border-2 border-gray-100 hover:border-gray-200 text-gray-900 rounded-xl font-black text-sm shadow-sm transition-all flex items-center justify-center gap-3 active:scale-[0.98] font-cairo mt-4"
+                        className="w-full py-2.5 px-4 bg-white border-2 border-gray-100 hover:border-gray-200 text-gray-900 rounded-xl font-black text-[13px] shadow-sm transition-all flex items-center justify-center gap-2.5 active:scale-[0.98] font-cairo mt-3"
                     >
                         <svg className="w-4 h-4" viewBox="0 0 48 48">
                             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
