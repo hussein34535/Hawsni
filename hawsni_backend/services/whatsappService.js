@@ -157,11 +157,11 @@ class WhatsAppService {
                                     console.log(`[WhatsApp Webhook] ⚠️ No active order found for ${phone}`);
                                     await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلب نشط أو قيد التنفيذ مرتبط برقمك. ربما تم الإلغاء مسبقاً.");
                                 }
-                            } else if (buttonText === 'موافق') {
+                            } else if (buttonId === 'confirm_order' || (buttonText && (buttonText.trim() === 'موافق' || buttonText.trim() === 'Confirm'))) {
                                 // Send Vodafone Cash details
                                 await this.sendTextMessage(
                                     phone,
-                                    "رائع! يرجى تحويل ديبوزت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n(تنبيه: برجاء إرسال صورة التحويل 'سكرين شوت' هنا في هذه المحادثة ليتم تأكيد طلبك فوراً)."
+                                    "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n(تنبيه: برجاء إرسال صورة التحويل 'سكرين شوت' هنا في هذه المحادثة ليتم تأكيد طلبك فوراً)."
                                 );
                             } else if (buttonText === 'الغاء' || buttonText === 'إلغاء') {
                                 // Ask for cancellation reason
@@ -198,20 +198,22 @@ class WhatsAppService {
                             const phone = msg.from;
                             const mediaId = msg.image.id;
                             
-                            // 1. Save image to chat database
+                            // 🟢 SAVE TO CHAT DATABASE
                             try {
                                 const { data: session } = await supabase.from('chat_sessions').select('session_id').eq('session_id', phone).single();
                                 if (!session) {
-                                    await supabase.from('chat_sessions').insert([{ session_id: phone, status: 'human_requested' }]);
+                                    await supabase.from('chat_sessions').insert([{ 
+                                        session_id: phone, 
+                                        status: 'human_requested',
+                                        platform: 'whatsapp'
+                                    }]);
                                 } else {
-                                    await supabase.from('chat_sessions').update({ updated_at: new Date().toISOString(), status: 'human_requested' }).eq('session_id', phone);
+                                    await supabase.from('chat_sessions').update({ 
+                                        updated_at: new Date().toISOString(),
+                                        platform: 'whatsapp'
+                                    }).eq('session_id', phone);
                                 }
-                                
-                                await supabase.from('chat_messages').insert([{
-                                    session_id: phone,
-                                    sender_type: 'user',
-                                    content: `[IMAGE:${mediaId}]`
-                                }]);
+                                await supabase.from('chat_messages').insert([{ session_id: phone, sender_type: 'user', content: `[IMAGE:${mediaId}]` }]);
                             } catch (dbError) {
                                 console.error('[WhatsApp Webhook] ❌ Failed to save image to DB:', dbError);
                             }
@@ -250,43 +252,33 @@ class WhatsAppService {
                             
                             // 🟢 SAVE TO CHAT DATABASE
                             try {
-                                // 1. Ensure Session Exists
-                                const { data: session } = await supabase
-                                    .from('chat_sessions')
-                                    .select('session_id')
-                                    .eq('session_id', phone)
-                                    .single();
-                                    
+                                const { data: session } = await supabase.from('chat_sessions').select('session_id').eq('session_id', phone).single();
                                 if (!session) {
-                                    await supabase.from('chat_sessions').insert([{
-                                        session_id: phone,
-                                        status: 'human_requested'
+                                    await supabase.from('chat_sessions').insert([{ 
+                                        session_id: phone, 
+                                        status: 'human_requested',
+                                        platform: 'whatsapp'
                                     }]);
                                 } else {
-                                    // Update timestamp
-                                    await supabase.from('chat_sessions').update({ updated_at: new Date().toISOString() }).eq('session_id', phone);
+                                    await supabase.from('chat_sessions').update({ 
+                                        updated_at: new Date().toISOString(),
+                                        platform: 'whatsapp'
+                                    }).eq('session_id', phone);
                                 }
-                                
-                                // 2. Insert Message
-                                await supabase.from('chat_messages').insert([{
-                                    session_id: phone,
-                                    sender_type: 'user',
-                                    content: textBody
-                                }]);
+                                await supabase.from('chat_messages').insert([{ session_id: phone, sender_type: 'user', content: textBody }]);
                             } catch (dbError) {
                                 console.error('[WhatsApp Webhook] ❌ Failed to save message to DB:', dbError);
                             }
 
-                            // Check if text contains "تتبع" or "track" (including common typos)
                             const lowerBody = textBody.toLowerCase();
-                            if (lowerBody.includes('تتبع') || lowerBody.includes('تتعب') || lowerBody.includes('track')) {
+
+                            // 1. Order Tracking
+                            if (lowerBody.includes('تتبع') || lowerBody.includes('تتعب') || lowerBody.includes('فين طلبي') || lowerBody.includes('track')) {
                                 console.log(`[WhatsApp Webhook] 🔍 User ${phone} requested order tracking`);
-                                
                                 const orderService = require('./orderService');
                                 const order = await orderService.getLatestActiveOrderByPhone(phone);
                                 
                                 if (order) {
-                                    // Translate internal status to user friendly Arabic
                                     const statusMap = {
                                         'Pending': 'قيد الانتظار لمراجعته',
                                         'Processing': 'قيد التجهيز في المخزن',
@@ -296,13 +288,25 @@ class WhatsAppService {
                                     const arStatus = statusMap[order.status] || order.status;
                                     
                                     if (order.tracking_number) {
-                                        await this.sendTextMessage(phone, `أهلاً بك 🤍\nطلبك رقم #${order.order_number} تم تسليمه لشركة بوسطة للشحن.\n\nيمكنك تتبع خط سير الشحنة ومعرفة موعد وصولها مباشرة عبر هذا الرابط:\nhttps://bosta.co/ar-eg/tracking-shipments?shipment-number=${order.tracking_number}`);
+                                        await this.sendTextMessage(phone, `أهلاً بك 🤍\nطلبك رقم #${order.order_number} تم تسليمه لشركة بوسطة للشحن.\n\nيمكنك تتبع خط سير الشحنة مباشرة عبر هذا الرابط:\nhttps://bosta.co/ar-eg/tracking-shipments?shipment-number=${order.tracking_number}`);
                                     } else {
-                                        await this.sendTextMessage(phone, `أهلاً بك 🤍\nطلبك رقم #${order.order_number} حالياً: *${arStatus}*.\n\nسنقوم بتسليمه لشركة الشحن قريباً وسنرسل لك رابط التتبع بمجرد شحنه.`);
+                                        await this.sendTextMessage(phone, `أهلاً بك 🤍\nطلبك رقم #${order.order_number} حالياً: *${arStatus}*.\n\nسنرسل لك رابط التتبع بمجرد شحن الطلب.`);
                                     }
                                 } else {
-                                    await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلبات نشطة مرتبطة برقمك الحالي. 🛒");
+                                    await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلبات نشطة مرتبطة برقمك الحالي. يمكنك الطلب الآن من موقعنا: https://hwasi.com 🛒");
                                 }
+                            } 
+                            // 2. Pricing Info
+                            else if (lowerBody.includes('سعر') || lowerBody.includes('السعر') || lowerBody.includes('بكام')) {
+                                await this.sendTextMessage(phone, "أسعارنا تختلف حسب الموديل والخامة. يمكنك تصفح جميع المنتجات والأسعار الحالية عبر متجرنا الإلكتروني:\nhttps://hwasi.com 🛍️");
+                            }
+                            // 3. Greetings
+                            else if (lowerBody.includes('هاي') || lowerBody.includes('سلام') || lowerBody.includes('الو') || lowerBody.includes('hello')) {
+                                await this.sendTextMessage(phone, "أهلاً بك في Hawsni 👋\nكيف يمكننا مساعدتك اليوم؟\n\n- للاستفسار عن طلب: اكتب 'تتبع'\n- للطلب: زر موقعنا https://hwasi.com\n- للتحدث مع خدمة العملاء: انتظر قليلاً وسيرد عليك أحد ممثلينا.");
+                            }
+                            // 4. Ordering
+                            else if (lowerBody.includes('عايز اطلب') || lowerBody.includes('طلب جديد') || lowerBody.includes('كيف اطلب')) {
+                                await this.sendTextMessage(phone, "نسعد بطلبك! 😍\nأسهل وأسرع طريقة للطلب هي عبر موقعنا مباشرة:\nhttps://hwasi.com\n\nاختار المنتجات اللي تعجبك وكمل بيانات الشحن وسنقوم بتجهيز طلبك فوراً.");
                             }
                         }
                     }

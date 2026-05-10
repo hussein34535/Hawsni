@@ -36,6 +36,13 @@ exports.protect = async (req, res, next) => {
           });
         }
 
+        // Merge email from Supabase Auth if missing in profile
+        if (!userProfile.email && authUser.email) {
+          userProfile.email = authUser.email;
+          // Sync back to DB
+          supabase.from('users').update({ email: authUser.email }).eq('id', authUser.id).then();
+        }
+
         req.user = userProfile;
         return next();
       }
@@ -109,6 +116,13 @@ exports.protectOptional = async (req, res, next) => {
           .single();
 
         if (userProfile) {
+          // Merge email from Supabase Auth if missing in profile
+          if (!userProfile.email && authUser.email) {
+            userProfile.email = authUser.email;
+            // Sync back to DB
+            supabase.from('users').update({ email: authUser.email }).eq('id', authUser.id).then();
+          }
+
           req.user = userProfile;
           return next();
         }

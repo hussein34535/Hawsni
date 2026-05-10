@@ -361,9 +361,23 @@ class AuthService {
             }
 
             userRecord = newUser;
-        } else if (!userRecord.avatar_url && avatarUrl) {
-            // Update avatar if not set
-            await supabase.from('users').update({ avatar_url: avatarUrl }).eq('id', supabaseId);
+        } else {
+            // 4. Update existing user profile with Google data if missing
+            const updates: any = {};
+            if (!userRecord.email && email) updates.email = email;
+            if (!userRecord.name && name) updates.name = name;
+            if (!userRecord.avatar_url && avatarUrl) updates.avatar_url = avatarUrl;
+            
+            if (Object.keys(updates).length > 0) {
+                const { data: updatedUser } = await supabase
+                    .from('users')
+                    .update(updates)
+                    .eq('id', supabaseId)
+                    .select()
+                    .single();
+                
+                if (updatedUser) userRecord = updatedUser;
+            }
         }
 
         // Link guest orders asynchronously

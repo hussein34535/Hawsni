@@ -28,7 +28,7 @@ class ChatController {
                 // Session does not exist, insert it
                 const { data: newSession, error: insertErr } = await supabase
                     .from('chat_sessions')
-                    .insert([{ session_id: sessionId, status: 'bot_active', updated_at: now }])
+                    .insert([{ session_id: sessionId, status: 'bot_active', updated_at: now, platform: 'web' }])
                     .select()
                     .single();
 
