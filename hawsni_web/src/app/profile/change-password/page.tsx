@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Lock, Loader2, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import { authService } from '@/services/authService';
 import { useToastStore } from '@/store/toastStore';
@@ -125,6 +126,12 @@ export default function ChangePasswordPage() {
                             {isLoading ? <Loader2 className="animate-spin" /> : (isRTL ? 'حفظ التغييرات' : 'Save Changes')}
                         </button>
                     </form>
+
+                    <div className="mt-6 text-center">
+                        <Link href="/forgot-password" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
+                            {isRTL ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
+                        </Link>
+                    </div>
                 </div>
             </main>
         </div>

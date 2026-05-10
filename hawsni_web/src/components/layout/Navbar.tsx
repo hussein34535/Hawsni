@@ -45,10 +45,23 @@ export default function Navbar() {
                             Hwasi
                         </Link>
 
-                        {/* Notification Icon */}
-                        <div className="relative">
+                        {/* Profile + Notification Icons */}
+                        <div className="flex items-center gap-1">
+                            <Link href="/profile" className="p-2 text-gray-800 rounded-full block">
+                                {user && token ? (
+                                    user.avatar_url ? (
+                                        <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover border border-gray-200" />
+                                    ) : (
+                                        <div className="w-6 h-6 bg-[var(--color-brand-primary)]/10 rounded-full flex items-center justify-center">
+                                            <User size={14} className="text-[var(--color-brand-primary)]" />
+                                        </div>
+                                    )
+                                ) : (
+                                    <User size={24} />
+                                )}
+                            </Link>
                             <Link href="/notifications" className="p-2 text-gray-800 rounded-full block">
-                                <Bell size={26} />
+                                <Bell size={24} />
                                 <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                             </Link>
                         </div>

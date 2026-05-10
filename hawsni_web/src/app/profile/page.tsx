@@ -113,9 +113,6 @@ export default function ProfilePage() {
                         <div className="flex-1">
                             <h2 className="text-[18px] font-bold text-gray-900">{user?.name || 'User Name'}</h2>
                             <p className="text-sm text-gray-500">{user?.email || 'user@email.com'}</p>
-                            <div className="mt-2 inline-flex items-center px-3 py-1 bg-emerald-50 rounded-full">
-                                <span className="text-[10px] font-bold text-[var(--color-brand-primary)] uppercase tracking-wider">Premium Member</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -152,7 +149,6 @@ export default function ProfilePage() {
                     <MenuItem icon={MapPin} title={isRTL ? 'تتبع الطلب' : 'Track Order'} href="/track-order" />
                     <MenuItem icon={Heart} title={t.profile.items.wishlist} href="/wishlist" />
                     <MenuItem icon={MapPin} title={t.profile.items.addresses} href="/profile/addresses" />
-                    <MenuItem icon={Ticket} title={t.profile.items.coupons} href="/profile/coupons" />
                 </MenuSection>
 
                 <MenuSection isRTL={isRTL}>
