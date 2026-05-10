@@ -246,19 +246,18 @@ app.use((err, req, res, next) => {
   if (isHtmlRequest) {
     try {
       return res.status(status).render('error', {
-        message: message,
+        message: process.env.NODE_ENV === 'production' ? 'حدث خطأ في النظام' : message,
         error: process.env.NODE_ENV === 'development' ? err : { status }
       });
     } catch (renderError) {
-      // Last resort if rendering fails
-      return res.status(status).send(`<h1>Error ${status}</h1><p>${message}</p>`);
+      return res.status(status).send(`<h1>Error ${status}</h1>`);
     }
   }
 
   // Default to JSON response for API or other requests
   res.status(status).json({
     success: false,
-    message: message,
+    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });

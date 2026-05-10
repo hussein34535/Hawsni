@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase');
+const { supabaseAdmin } = require('../config/supabase');
 const { supabaseAuth } = require('../config/supabase');
 const jwt = require('jsonwebtoken');
 const emailService = require('./emailService');
@@ -17,7 +18,7 @@ class AuthService {
 
     async register(name, email, password, phone) {
         // 1. Register user in Supabase Auth using Admin API for immediate confirmation and robustness
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
             email: email,
             password: password,
             email_confirm: true,
@@ -29,11 +30,11 @@ class AuthService {
         });
 
         if (authError) {
-            // Check if user already exists
+            console.error('[AuthService] createUser error:', authError);
             if (authError.message.includes('already registered') || authError.status === 422) {
                 throw new Error('This email is already registered');
             }
-            throw new Error(authError.message);
+            throw new Error('Registration failed');
         }
 
         const user = authData.user;
@@ -79,17 +80,18 @@ class AuthService {
             if (profileError) {
                 console.error('Error creating user profile:', profileError);
                 // If it's still a foreign key error, we'll try to delete the auth user to stay in sync
-                await supabase.auth.admin.deleteUser(user.id);
-                throw new Error(`Database Error: ${profileError.message}`);
+                await supabaseAdmin.auth.admin.deleteUser(user.id);
+                throw new Error('Failed to create user profile');
             }
 
-            // 4. Generate Token for Auto-Login 🚀 (but still require OTP)
-            const token = this.generateToken(user.id, email, 'user');
-
-            // Log removed to prevent OTP leak
+            // 4. Sign in to get native Supabase JWT (works with middleware)
+            const { data: signInData, error: signInError } = await supabaseAuth.auth.signInWithPassword({ email, password });
+            const token = signInError ? this.generateToken(user.id, email, 'user') : signInData.session.access_token;
+            const refresh_token = signInError ? null : signInData.session.refresh_token;
 
             return {
                 token,
+                refresh_token,
                 user: {
                     id: user.id,
                     name: name,
@@ -139,7 +141,7 @@ class AuthService {
             .eq('id', user.id);
 
         // Also confirm email in Supabase Auth (so signInWithPassword works)
-        await supabase.auth.admin.updateUserById(user.id, { email_confirm: true });
+        await supabaseAdmin.auth.admin.updateUserById(user.id, { email_confirm: true });
 
         if (updateError) {
             throw new Error('Failed to verify user');
@@ -168,17 +170,17 @@ class AuthService {
 
     async login(email, password) {
         // 1. Sign in with Supabase
-        console.log(`[API LOGIN] Attempting login for: ${email}`);
+        console.log(`[API LOGIN] Attempting login`);
         const { data, error } = await supabaseAuth.auth.signInWithPassword({
             email,
             password
         });
 
         if (error) {
-            console.error(`[API LOGIN ERROR] Failed for ${email}: ${error.message} | Status: ${error.status}`);
+            console.error(`[API LOGIN ERROR] Failed: ${error.message} | Status: ${error.status}`);
             throw new Error('Invalid credentials');
         }
-        console.log(`[API LOGIN SUCCESS] Logged in as: ${data.user.id} (${data.user.email})`);
+        console.log(`[API LOGIN SUCCESS] Logged in as: ${data.user.id}`);
 
         const user = data.user;
         const session = data.session;
@@ -228,7 +230,8 @@ class AuthService {
             .eq('email', email);
 
         if (dbError) {
-            throw new Error(dbError.message);
+            console.error('[AuthService] forgotPassword dbError:', dbError);
+            throw new Error('Failed to process password reset request');
         }
 
         // Send reset email via Resend
@@ -261,17 +264,17 @@ class AuthService {
 
         // 3. Update password in Supabase Auth + confirm email (user proved ownership via code)
         console.log(`[RESET] Attempting to update password for UserID: ${user.id} (${user.email})`);
-        const { data: authUpdate, error: updateError } = await supabase.auth.admin.updateUserById(
+        const { data: authUpdate, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
             user.id,
             { password: newPassword, email_confirm: true }
         );
 
         if (updateError) {
             console.error(`[RESET ERROR] Failed to update Auth password: ${updateError.message}`);
-            throw new Error(updateError.message);
+            throw new Error('Failed to reset password');
         }
 
-        console.log(`[RESET SUCCESS] Auth password updated for ${user.email}`);
+        console.log(`[RESET SUCCESS] Auth password updated for UserID: ${user.id}`);
 
         // 4. Clear reset code
         await supabase
@@ -305,13 +308,14 @@ class AuthService {
         }
 
         // 3. Update to new password
-        const { error: updateError } = await supabase.auth.admin.updateUserById(
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
             userId,
             { password: newPassword }
         );
 
         if (updateError) {
-            throw new Error(updateError.message);
+            console.error('[AuthService] changePassword error:', updateError);
+            throw new Error('Failed to change password');
         }
 
         return { success: true, message: 'Password changed successfully' };

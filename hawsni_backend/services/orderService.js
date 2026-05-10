@@ -270,7 +270,8 @@ class OrderService {
                 whatsappService.sendOrderConfirmation(
                     shipping?.phone || guestInfo.guestPhone,
                     customerName,
-                    order
+                    order,
+                    order.items || items
                 ).catch(err => console.error('WhatsApp notification failed:', err));
             }
 
@@ -390,7 +391,7 @@ class OrderService {
     }
 
     async linkGuestOrders(userId, email, phone) {
-        console.log(`🔍 Linking guest orders for User: ${userId}, Email: ${email}, Phone: ${phone}`);
+        console.log(`🔍 Linking guest orders for User: ${userId}`);
 
         try {
             // Find orders where user_id is null AND (shipping_address->email = email OR shipping_address->phone = phone)

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '@/store/authStore';
 
 export const apiClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api/',
@@ -9,7 +10,7 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('token');
+        const { token } = useAuthStore.getState();
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -48,7 +49,7 @@ apiClient.interceptors.response.use(
                         { refresh_token: refreshToken }
                     );
                     if (res.data?.token) {
-                        localStorage.setItem('token', res.data.token);
+                        useAuthStore.getState().setUser(null, res.data.token);
                         if (res.data.refresh_token) {
                             localStorage.setItem('refresh_token', res.data.refresh_token);
                         }
@@ -66,9 +67,8 @@ apiClient.interceptors.response.use(
             }
 
             // No refresh token or refresh failed — logout
-            localStorage.removeItem('token');
+            useAuthStore.getState().logout();
             localStorage.removeItem('refresh_token');
-            localStorage.removeItem('user');
         }
 
         // Handle Non-JSON (HTML) errors like Vercel Lambda timeouts or 500s

@@ -1,4 +1,5 @@
 import apiClient from '@/lib/axios';
+import { useAuthStore } from '@/store/authStore';
 
 export const authService = {
     login: async (email: string, password: string): Promise<any> => {
@@ -89,8 +90,7 @@ export const authService = {
     },
 
     logout: async (): Promise<void> => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        useAuthStore.getState().logout();
         window.location.href = '/login';
     }
 };

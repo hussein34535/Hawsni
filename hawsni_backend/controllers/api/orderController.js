@@ -8,7 +8,8 @@ class OrderController {
             const orders = await OrderService.getAllOrders();
             res.json({ success: true, orders });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            console.error('[OrderController] Error:', error);
+            res.status(500).json({ success: false, message: 'حدث خطأ في النظام' });
         }
     }
 
@@ -17,7 +18,8 @@ class OrderController {
             const orders = await OrderService.getUserOrders(req.user.id);
             res.json({ success: true, orders });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            console.error('[OrderController] Error:', error);
+            res.status(500).json({ success: false, message: 'حدث خطأ في النظام' });
         }
     }
 
@@ -29,11 +31,14 @@ class OrderController {
                 return res.status(404).json({ success: false, message: 'Order not found' });
             }
 
-            // Check ownership if not admin (assuming role check is done elsewhere or we add it here)
-            // For now, just return order
+            if (order.user_id !== req.user.id && req.user.role !== 'admin') {
+                return res.status(403).json({ success: false, message: 'Not authorized to view this order' });
+            }
+
             res.json({ success: true, order });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            console.error('[OrderController] Error:', error);
+            res.status(500).json({ success: false, message: 'حدث خطأ في النظام' });
         }
     }
 
@@ -120,11 +125,12 @@ class OrderController {
                                 orderDiscount = Math.min(discountVal, safeSubtotal);
                             }
 
-                            // Increment usage
-                            supabase.from('coupons')
+                            // Increment usage atomically
+                            const { error: incErr } = await supabase
+                                .from('coupons')
                                 .update({ used_count: (coupon.used_count || 0) + 1 })
-                                .eq('id', coupon.id)
-                                .then(({ error }) => { if(error) console.error('Error incrementing coupon:', error); });
+                                .eq('id', coupon.id);
+                            if (incErr) console.error('Error incrementing coupon:', incErr);
                         }
                     }
                 } catch (err) {
@@ -160,18 +166,22 @@ class OrderController {
 
             res.status(201).json({ success: true, order });
         } catch (error) {
-            console.error('Error creating order:', error);
-            res.status(500).json({ success: false, message: error.message });
+            console.error('[OrderController] createOrder error:', error);
+            res.status(500).json({ success: false, message: 'حدث خطأ في النظام' });
         }
     }
 
     async updateStatus(req, res) {
         try {
+            if (req.user.role !== 'admin') {
+                return res.status(403).json({ success: false, message: 'Admin access required' });
+            }
             const { status } = req.body;
             const order = await OrderService.updateOrderStatus(req.params.id, status);
             res.json({ success: true, updatedOrder: order });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            console.error('[OrderController] Error:', error);
+            res.status(500).json({ success: false, message: 'حدث خطأ في النظام' });
         }
     }
 
@@ -183,6 +193,10 @@ class OrderController {
                 return res.status(404).json({ success: false, message: 'Order not found' });
             }
 
+            if (order.user_id !== req.user.id && req.user.role !== 'admin') {
+                return res.status(403).json({ success: false, message: 'Not authorized to cancel this order' });
+            }
+
             if (order.status !== 'Processing') {
                 return res.status(400).json({ success: false, message: 'Cannot cancel this order' });
             }
@@ -190,7 +204,8 @@ class OrderController {
             const cancelledOrder = await OrderService.cancelOrder(req.params.id);
             res.json({ success: true, cancelledOrder });
         } catch (error) {
-            res.status(500).json({ success: false, message: error.message });
+            console.error('[OrderController] Error:', error);
+            res.status(500).json({ success: false, message: 'حدث خطأ في النظام' });
         }
     }
 
@@ -233,8 +248,8 @@ class OrderController {
 
             res.render('orders', { orders: enhancedOrders });
         } catch (error) {
-            console.error('Error fetching orders:', error);
-            res.status(500).send(`خطأ في جلب الطلبات: ${error.message}`);
+            console.error('[OrderController] renderOrdersPage error:', error);
+            res.status(500).send('خطأ في جلب الطلبات');
         }
     }
 
@@ -244,8 +259,8 @@ class OrderController {
             await OrderService.updateOrderStatus(req.params.id, status);
             res.redirect('/orders');
         } catch (error) {
-            console.error('Error updating order status:', error);
-            res.status(500).send(`خطأ في تحديث حالة الطلب: ${error.message}`);
+            console.error('[OrderController] updateStatusAdmin error:', error);
+            res.status(500).send('خطأ في تحديث حالة الطلب');
         }
     }
 }

@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase');
+const jwt = require('jsonwebtoken');
 
 // Protect routes
 exports.protect = async (req, res, next) => {
@@ -17,32 +18,59 @@ exports.protect = async (req, res, next) => {
     }
 
     try {
-      // Verify token with Supabase Auth (This guarantees it's a valid Supabase JWT)
+      // Verify token with Supabase Auth (native Supabase JWT)
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
 
-      if (authError || !authUser) {
+      if (!authError && authUser) {
+        // Supabase JWT verified successfully — fetch profile
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+
+        if (profileError || !userProfile) {
+          return res.status(401).json({
+            success: false,
+            message: 'User profile not found'
+          });
+        }
+
+        req.user = userProfile;
+        return next();
+      }
+
+      // Fallback: try custom JWT signed with JWT_SECRET (for verifyOtp tokens)
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded || !decoded.id) {
+          return res.status(401).json({
+            success: false,
+            message: 'Invalid or expired token'
+          });
+        }
+
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', decoded.id)
+          .single();
+
+        if (profileError || !userProfile) {
+          return res.status(401).json({
+            success: false,
+            message: 'User profile not found'
+          });
+        }
+
+        req.user = userProfile;
+        return next();
+      } catch (jwtErr) {
         return res.status(401).json({
           success: false,
           message: 'Invalid or expired token'
         });
       }
-
-      // Check if user exists in our users table and get their role/data
-      const { data: userProfile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authUser.id)
-        .single();
-
-      if (profileError || !userProfile) {
-        return res.status(401).json({
-          success: false,
-          message: 'User profile not found'
-        });
-      }
-
-      req.user = userProfile;
-      next();
     } catch (err) {
       console.error('Auth Middleware Error:', err.message);
       return res.status(401).json({
@@ -70,11 +98,10 @@ exports.protectOptional = async (req, res, next) => {
     }
 
     try {
-      // Verify token with Supabase Auth
+      // Verify token with Supabase Auth (native Supabase JWT)
       const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
 
       if (!authError && authUser) {
-        // Fetch user profile
         const { data: userProfile } = await supabase
           .from('users')
           .select('*')
@@ -83,12 +110,29 @@ exports.protectOptional = async (req, res, next) => {
 
         if (userProfile) {
           req.user = userProfile;
+          return next();
         }
       }
-      // If error or no user, drop to guest
+
+      // Fallback: try custom JWT signed with JWT_SECRET
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded && decoded.id) {
+          const { data: userProfile } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', decoded.id)
+            .single();
+
+          if (userProfile) {
+            req.user = userProfile;
+          }
+        }
+      } catch (_) {}
+
+      // If error or no user, proceed as guest
       next();
     } catch (err) {
-      // Token invalid, proceed as guest
       next();
     }
   } catch (error) {

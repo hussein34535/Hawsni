@@ -273,18 +273,17 @@ function CheckoutForm({ isRTL, items, subtotal, shippingFee, discount, total, ap
                 conversionEventId: eventId,
             };
 
-            // Fire Client-Side Meta Pixel Event
-            trackEvent('Purchase', {
-                value: total,
-                currency: 'EGP',
-                content_ids: items.map((i: any) => i.productId),
-                content_type: 'product',
-                num_items: items.reduce((acc: number, i: any) => acc + i.quantity, 0)
-            }, { eventID: eventId });
-
             const res = await checkoutService.placeOrder(orderData);
             
             if (res.success) {
+                // Fire Meta Pixel only after server confirms the order
+                trackEvent('Purchase', {
+                    value: total,
+                    currency: 'EGP',
+                    content_ids: items.map((i: any) => i.productId),
+                    content_type: 'product',
+                    num_items: items.reduce((acc: number, i: any) => acc + i.quantity, 0)
+                }, { eventID: eventId });
                 // Professional redirect flow:
                 // 1. Lock the page (isRedirecting = true)
                 // 2. Clear the cart (safe now because of the lock)
