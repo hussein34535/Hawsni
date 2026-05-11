@@ -160,6 +160,46 @@ class WhatsAppService {
         }
     }
 
+    async sendInteractiveButtons(phone, bodyText, buttons) {
+        if (!this.phoneNumberId) return;
+        const cleanPhone = phone.replace(/\D/g, '');
+        let finalPhone = cleanPhone;
+        if (finalPhone.startsWith('01') && finalPhone.length === 11) finalPhone = '2' + finalPhone;
+
+        try {
+            const apiUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+            const payload = {
+                messaging_product: "whatsapp",
+                to: finalPhone,
+                type: "interactive",
+                interactive: {
+                    type: "button",
+                    body: { text: bodyText },
+                    action: {
+                        buttons: buttons.map((btn, index) => ({
+                            type: "reply",
+                            reply: {
+                                id: btn.id,
+                                title: btn.title
+                            }
+                        }))
+                    }
+                }
+            };
+
+            await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+        } catch (error) {
+            console.error('❌ WhatsApp Buttons Error:', error.message);
+        }
+    }
+
 
     // ─────────────────────────────────────────────
     //  AI SUPPORT HANDLER
@@ -241,67 +281,38 @@ class WhatsAppService {
                             const buttonId = buttonReply.id || buttonReply.payload;
                             const buttonText = buttonReply.title || buttonReply.text;
 
-                            if (buttonId === 'cancel_order' || buttonId === 'إلغاء الطلب' || (buttonText && buttonText.includes('إلغاء'))) {
+                            if (buttonId === 'cancel_order' || (buttonText && (buttonText.includes('إلغاء') || buttonText.includes('الغاء')))) {
                                 console.log(`[WhatsApp Webhook] 📲 User ${phone} requested order cancellation`);
-                                
-                                // Require orderService locally to prevent circular dependency
                                 const orderService = require('./orderService');
-                                
                                 const order = await orderService.getLatestActiveOrderByPhone(phone);
                                 
                                 if (order) {
-                                    console.log(`[WhatsApp Webhook] 🛑 Found order ${order.order_number}. Cancelling...`);
                                     await orderService.updateOrderStatus(order.id, 'Cancelled');
-                                    
-                                    // Send confirmation back to user
                                     await this.sendTextMessage(phone, "تم إلغاء طلبك بنجاح. نعتذر عن أي إزعاج ونتمنى خدمتك قريباً 🤍");
                                 } else {
-                                    console.log(`[WhatsApp Webhook] ⚠️ No active order found for ${phone}`);
-                                    await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلب نشط أو قيد التنفيذ مرتبط برقمك. ربما تم الإلغاء مسبقاً.");
+                                    await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلب نشط أو قيد التنفيذ مرتبط برقمك.");
                                 }
-                            } else if (buttonId === 'confirm_order' || (buttonText && (buttonText.trim() === 'موافق' || buttonText.trim() === 'Confirm'))) {
-                                // Send Vodafone Cash details + request sender number (softened)
-                                await this.sendTextMessage(
-                                    phone,
-                                    "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n\nتنبيه: يرجى إرسال صورة عملية التحويل هنا، وإذا أردت يمكنك أيضاً ذكر رقم الموبايل الذي حولت منه (اختياري) لتسريع عملية التأكيد. 🤍"
-                                );
-                            } else if (buttonText === 'الغاء' || buttonText === 'إلغاء') {
-                                // Ask for cancellation reason
-                                await this.sendTextMessage(
-                                    phone,
-                                    "نعتذر لسماع ذلك 😔. هل يمكنك إخبارنا بسبب عدم رغبتك في إكمال الطلب لمساعدتنا في تحسين خدماتنا؟"
-                                );
-                            } else if (buttonId === 'track_order' || buttonText === 'تتبع الطلب') {
-                                // Send direct tracking link as a BUTTON
+                            } else if (buttonId === 'track_order') {
                                 const orderService = require('./orderService');
                                 const order = await orderService.getLatestActiveOrderByPhone(phone);
                                 const trackUrl = order ? `https://hwasi.com/track-order?order_number=${order.order_number}` : 'https://hwasi.com/track-order';
-                                
-                                await this.sendUrlButtonMessage(
-                                    phone, 
-                                    "يمكنك تتبع حالة طلبك وتفاصيله مباشرة عبر الضغط على الزر أدناه: 🚚", 
-                                    "تتبع الطلب", 
-                                    trackUrl
-                                );
-                            } else if (buttonId === 'edit_order' || buttonText === 'تعديل الطلب') {
-                                // Check order status before allowing edit
+                                await this.sendUrlButtonMessage(phone, "إليك رابط تتبع طلبك 🚚", "فتح التتبع", trackUrl);
+                            } else if (buttonId === 'edit_order') {
                                 const orderService = require('./orderService');
                                 const order = await orderService.getLatestActiveOrderByPhone(phone);
                                 
                                 if (order && (order.status === 'Shipped' || order.status === 'Delivered')) {
-                                    await this.sendTextMessage(phone, `عذراً، طلبك رقم #${order.order_number} تم تسليمه بالفعل لشركة الشحن وهو الآن في طريقه إليك، لذا لا يمكن تعديله في هذه المرحلة. 🚚`);
+                                    await this.sendTextMessage(phone, `عذراً، طلبك رقم #${order.order_number} تم تسليمه بالفعل لشركة الشحن ولا يمكن تعديله الآن. 🚚`);
                                 } else {
-                                    // Send direct support button for editing
                                     const editUrl = order ? `https://hwasi.com/edit-order?order_number=${order.order_number}` : 'https://hwasi.com/edit-order';
-                                    await this.sendUrlButtonMessage(
-                                        phone, 
-                                        "يمكنك تعديل طلبك مباشرة عبر الموقع من الزر أدناه: 📝", 
-                                        "تعديل الطلب", 
-                                        editUrl
-                                    );
-                                    // Also update session to human requested
+                                    await this.sendUrlButtonMessage(phone, "يمكنك تعديل بيانات التوصيل من هنا 📝", "تعديل الطلب", editUrl);
                                     await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
                                 }
+                            } else if (buttonId === 'confirm_order' || (buttonText && (buttonText.trim() === 'موافق' || buttonText.trim() === 'Confirm'))) {
+                                await this.sendTextMessage(
+                                    phone,
+                                    "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n\nتنبيه: يرجى إرسال صورة عملية التحويل هنا لتأكيد طلبك. 🤍"
+                                );
                             }
 
                         } else if (msg.type === 'image' && msg.image) {
@@ -328,29 +339,18 @@ class WhatsAppService {
                                 console.error('[WhatsApp Webhook] ❌ Failed to save image to DB:', dbError);
                             }
 
-                            // 2. Send confirmation with URL Buttons
-                            const orderService = require('./orderService');
-                            const order = await orderService.getLatestActiveOrderByPhone(phone);
-                            
-                            // Use order_number if available, fallback to nothing (route now supports order_number)
-                            const trackUrl = order ? `https://hwasi.com/track-order?order_number=${order.order_number}` : 'https://hwasi.com/track-order';
-                            const editUrl  = order ? `https://hwasi.com/edit-order?order_number=${order.order_number}`   : 'https://hwasi.com/edit-order';
-                            
-                            // Send first message with Tracking Button
-                            await this.sendUrlButtonMessage(
-                                phone, 
-                                "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\nيمكنك تتبع حالة طلبك من هنا:", 
-                                "تتبع الطلب 🚚", 
-                                trackUrl
+                            // 2. Send confirmation with ONE message containing TWO buttons
+                            await this.sendInteractiveButtons(
+                                phone,
+                                "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\nماذا تريد أن تفعل الآن؟",
+                                [
+                                    { id: 'track_order', title: 'تتبع الطلب 🚚' },
+                                    { id: 'edit_order', title: 'تعديل الطلب 📝' }
+                                ]
                             );
                             
-                            // Send second message with Edit Button (Note: WhatsApp API allows only 1 CTA button per interactive message)
-                            await this.sendUrlButtonMessage(
-                                phone, 
-                                "أو يمكنك تعديل طلبك مباشرة من هذا الزر:", 
-                                "تعديل الطلب 📝", 
-                                editUrl
-                            );
+                            // Update session status
+                            await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
                         } else if (msg.type === 'text' && msg.text) {
                             await this._handleIncomingText(msg);
                         }

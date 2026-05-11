@@ -221,6 +221,7 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
         if (name.trim().split(/\s+/).length < 2) {
             showToast(isRTL ? 'يرجى إدخال الاسم ثنائياً على الأقل' : 'Please enter at least two names', 'error');
             setIsSubmitting(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
@@ -228,6 +229,7 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
         if (!phoneRegex.test(phone)) {
             showToast(isRTL ? 'يرجى إدخال رقم هاتف مصري صحيح' : 'Please enter a valid Egyptian phone number', 'error');
             setIsSubmitting(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
@@ -240,6 +242,7 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
         if (!governorateName || !cityName) {
             showToast(isRTL ? 'يرجى اختيار المحافظة والمدينة' : 'Please select governorate and city', 'error');
             setIsSubmitting(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 

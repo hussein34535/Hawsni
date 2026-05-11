@@ -48,6 +48,16 @@ class OrderService {
         return data;
     }
 
+    async updateOrder(id, orderData) {
+        const { error } = await supabase
+            .from('orders')
+            .update(orderData)
+            .eq('id', id);
+
+        if (error) throw error;
+        return this.getOrderById(id);
+    }
+
     async createOrder(orderData, items, guestInfo = {}) {
         // Generate unique 6-digit order number
         let orderNumber;

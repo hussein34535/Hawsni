@@ -92,4 +92,7 @@ router.get('/:id/cancel-email', async (req, res) => {
 // Get order by ID (Optional protection - must come AFTER specific routes)
 router.get('/:id', protectOptional, OrderController.getOrder);
 
+// Update order (Address/Notes)
+router.put('/:id', protectOptional, OrderController.updateOrder);
+
 module.exports = router;

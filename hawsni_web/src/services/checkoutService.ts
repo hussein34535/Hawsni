@@ -77,5 +77,14 @@ export const checkoutService = {
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to load order';
         }
+    },
+
+    updateOrder: async (id: string, orderData: any): Promise<{ success: boolean; order: any }> => {
+        try {
+            const response = await apiClient.put(`/orders/${id}`, orderData);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to update order';
+        }
     }
 };

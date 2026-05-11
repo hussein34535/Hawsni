@@ -217,6 +217,48 @@ class OrderController {
         }
     }
 
+    async updateOrder(req, res) {
+        try {
+            const order = await OrderService.getOrderById(req.params.id);
+
+            if (!order) {
+                return res.status(404).json({ success: false, message: 'Order not found' });
+            }
+
+            // Authorization check
+            if (req.user) {
+                if (order.user_id !== req.user.id && req.user.role !== 'admin') {
+                    return res.status(403).json({ success: false, message: 'Not authorized to update this order' });
+                }
+            } else {
+                // For guests, we could implement a token-based system, 
+                // but for now, we'll allow it if they have the ID (short-term solution)
+                if (order.user_id !== null) {
+                    return res.status(403).json({ success: false, message: 'Not authorized to update this order' });
+                }
+            }
+
+            if (order.status !== 'Processing') {
+                return res.status(400).json({ success: false, message: 'Cannot update order after it has been shipped' });
+            }
+
+            const { shippingAddress, notes, guestName, guestPhone, guestEmail } = req.body;
+            
+            const updateData = {};
+            if (shippingAddress) updateData.shipping_address = shippingAddress;
+            if (notes) updateData.notes = notes;
+            
+            // If it's a guest order, we might want to update the metadata too
+            // but the shipping_address already contains guest details in this system
+            
+            const updatedOrder = await OrderService.updateOrder(order.id, updateData);
+            res.json({ success: true, order: updatedOrder });
+        } catch (error) {
+            console.error('[OrderController] updateOrder Error:', error);
+            res.status(500).json({ success: false, message: 'حدث خطأ في النظام' });
+        }
+    }
+
     // Admin UI Methods
     async renderOrdersPage(req, res) {
         try {
