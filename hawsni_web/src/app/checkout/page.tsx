@@ -343,13 +343,13 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
             </div>
             */}
 
-            {/* بيانات التوصيل المجمعة بالترتيب المطلوب */}
+            {/* 1. بيانات التواصل */}
             <div className="bg-white p-5 md:p-6 rounded-[1.5rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50 space-y-4 relative overflow-hidden">
                 <div className="flex items-center gap-3 mb-2">
                     <div className="w-9 h-9 bg-gray-50 text-gray-700 rounded-lg flex items-center justify-center border border-gray-100">
                         <User className="w-4 h-4" />
                     </div>
-                    <h2 className="text-lg font-black text-gray-900 tracking-tight">{isRTL ? 'بيانات التوصيل' : 'Delivery Details'}</h2>
+                    <h2 className="text-lg font-black text-gray-900 tracking-tight">{isRTL ? 'بيانات التواصل' : 'Contact Information'}</h2>
                 </div>
 
                 {/* 1. Name */}
@@ -407,9 +407,19 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
                         dir="ltr"
                     />
                 </div>
+            </div>
+
+            {/* 2. عنوان التوصيل */}
+            <div className="bg-white p-5 md:p-6 rounded-[1.5rem] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-gray-100/50 space-y-4 relative overflow-hidden">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-9 h-9 bg-gray-50 text-gray-700 rounded-lg flex items-center justify-center border border-gray-100">
+                        <MapPin className="w-4 h-4" />
+                    </div>
+                    <h2 className="text-lg font-black text-gray-900 tracking-tight">{isRTL ? 'عنوان التوصيل' : 'Delivery Address'}</h2>
+                </div>
 
                 {/* 5 & 6. Governorate and City (Bosta) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-100/60 mt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="relative">
                         <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'المحافظة' : 'Governorate'}</label>
                         <select
@@ -479,14 +489,14 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
 
                 {/* 7. Detailed Address */}
                 <div>
-                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'العنوان بالتفصيل (الشارع، العمارة، الشقة)' : 'Detailed Address'}</label>
+                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'العنوان بالتفصيل' : 'Detailed Address'}</label>
                     <input
                         type="text"
                         name="street"
                         required
                         defaultValue=""
                         className={PREMIUM_INPUT_CLASS}
-                        placeholder={isRTL ? 'اسم الشارع، رقم العمارة، رقم الشقة...' : 'Street name, building no...'}
+                        placeholder={isRTL ? 'اسم الشارع، رقم العمارة، رقم الشقة...' : 'Street name, building no, apartment no...'}
                     />
                 </div>
 
