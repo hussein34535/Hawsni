@@ -241,21 +241,36 @@ body.dark .sidebar-brand h1 span { color: var(--brand-accent); }
     position: relative;
 }
 
+/* ── Iconic Colors ── */
 .nav-link i {
     font-size: 1.15rem;
     width: 24px;
     min-width: 24px;
     text-align: center;
     flex-shrink: 0;
-    transition: all 0.2s;
-    color: var(--text-muted);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
 }
+
+/* Assigning unique colors to each menu item */
+.nav-link[href*="dashboard"] i { color: #6366f1; } 
+.nav-link[href*="products"] i { color: #f59e0b; }  
+.nav-link[href*="categories"] i { color: #a855f7; } 
+.nav-link[href*="banners"] i { color: #ec4899; }    
+.nav-link[href*="orders"] i { color: #10b981; }     
+.nav-link[href*="users"] i { color: #06b6d4; }      
+.nav-link[href*="chat"] i { color: #14b8a6; }       
+.nav-link[href*="reviews"] i { color: #eab308; }    
+.nav-link[href*="settings"] i { color: #64748b; }   
+.nav-link[href*="shipping"] i { color: #f97316; }   
 
 .nav-link span {
     font-size: 0.95rem;
     opacity: 0;
     transition: opacity 0.2s 0.1s;
+    color: var(--text-main);
 }
+body.dark .nav-link span { color: rgba(255,255,255,0.7); }
 .sidebar:hover .nav-link span { opacity: 1; }
 
 .nav-link:hover {
@@ -267,25 +282,30 @@ body.dark .nav-link:hover {
     color: white;
 }
 
-.nav-link:hover i { transform: scale(1.1); color: var(--brand-primary); }
-body.dark .nav-link:hover i { color: var(--brand-accent); }
+.nav-link:hover i { 
+    transform: scale(1.2) rotate(5deg);
+    filter: drop-shadow(0 0 8px currentColor);
+}
 
 .nav-link.active {
     background: var(--brand-primary);
-    color: white;
+    color: white !important;
     box-shadow: 0 10px 20px rgba(14, 68, 53, 0.2);
 }
 body.dark .nav-link.active {
     background: var(--brand-accent);
-    color: #05080a;
+    color: #05080a !important;
     box-shadow: 0 10px 20px rgba(52, 211, 153, 0.2);
 }
 
-.nav-link.active i { color: white; }
-body.dark .nav-link.active i { color: #05080a; }
+.nav-link.active i {
+    color: white !important;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+}
+body.dark .nav-link.active i { color: #05080a !important; }
+body.dark .nav-link.active span { color: #05080a !important; }
 
-/* Remove the line indicator for a cleaner look */
-.nav-link.active::before { display: none; }
+
 
 
 /* Main Content Area */
@@ -331,7 +351,7 @@ body.dark .topbar {
     gap: 1rem;
 }
 
-/* Action Buttons - Glass Style */
+/* Action Buttons - Liquid Glass Style */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -361,29 +381,53 @@ body.dark .topbar {
     filter: brightness(1.1);
 }
 
+/* THE LIQUID GLASS BUTTON */
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
     color: var(--text-main);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.8);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.45);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    border-color: rgba(255, 255, 255, 0.8);
 }
+
+body.dark .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+body.dark .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 
 
 .btn-danger {
-    background: #FEE2E2;
+    background: rgba(248, 113, 113, 0.15);
+    backdrop-filter: blur(10px);
     color: var(--danger);
+    border: 1px solid rgba(248, 113, 113, 0.25);
 }
 
 .btn-danger:hover {
-    background: #FECACA;
+    background: rgba(248, 113, 113, 0.25);
+    color: var(--danger);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15);
 }
+
+body.dark .btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
 
 /* Cards & Content Sections */
 .content-wrapper {
