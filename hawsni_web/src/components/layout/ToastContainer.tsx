@@ -10,7 +10,7 @@ export default function ToastContainer() {
     const { isRTL } = useLanguage();
 
     return (
-        <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-3 w-full max-w-sm px-4`}>
+        <div className={`fixed top-10 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-3 w-full max-w-sm px-4`}>
             <AnimatePresence>
                 {toasts.map((toast) => (
                     <motion.div

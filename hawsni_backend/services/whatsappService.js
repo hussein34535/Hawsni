@@ -122,6 +122,45 @@ class WhatsAppService {
         }
     }
 
+    async sendUrlButtonMessage(phone, bodyText, buttonText, url) {
+        if (!this.phoneNumberId) return;
+        const cleanPhone = phone.replace(/\D/g, '');
+        let finalPhone = cleanPhone;
+        if (finalPhone.startsWith('01') && finalPhone.length === 11) finalPhone = '2' + finalPhone;
+
+        try {
+            const apiUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+            const payload = {
+                messaging_product: "whatsapp",
+                to: finalPhone,
+                type: "interactive",
+                interactive: {
+                    type: "cta_url",
+                    body: { text: bodyText },
+                    action: {
+                        name: "cta_url",
+                        parameters: {
+                            display_text: buttonText,
+                            url: url
+                        }
+                    }
+                }
+            };
+
+            await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+        } catch (error) {
+            console.error('❌ WhatsApp CTA Error:', error.message);
+        }
+    }
+
+
     // ─────────────────────────────────────────────
     //  AI SUPPORT HANDLER
     // ─────────────────────────────────────────────
@@ -224,7 +263,7 @@ class WhatsAppService {
                                 // Send Vodafone Cash details + request sender number (softened)
                                 await this.sendTextMessage(
                                     phone,
-                                    "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n\nتنبيه: برجاء إرسال صورة التحويل (سكرين شوت) ويفضل أيضاً ذكر رقم الموبايل الذي حولت منه لتسريع عملية التأكيد. 🤍"
+                                    "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n\nتنبيه: يرجى إرسال صورة عملية التحويل هنا، وإذا أردت يمكنك أيضاً ذكر رقم الموبايل الذي حولت منه (اختياري) لتسريع عملية التأكيد. 🤍"
                                 );
                             } else if (buttonText === 'الغاء' || buttonText === 'إلغاء') {
                                 // Ask for cancellation reason
@@ -233,8 +272,17 @@ class WhatsAppService {
                                     "نعتذر لسماع ذلك 😔. هل يمكنك إخبارنا بسبب عدم رغبتك في إكمال الطلب لمساعدتنا في تحسين خدماتنا؟"
                                 );
                             } else if (buttonId === 'track_order' || buttonText === 'تتبع الطلب') {
-                                // Send direct tracking link
-                                await this.sendTextMessage(phone, "يمكنك تتبع حالة طلبك وتفاصيله مباشرة عبر هذا الرابط: 🚚\nhttps://hwasi.com/track-order");
+                                // Send direct tracking link as a BUTTON
+                                const orderService = require('./orderService');
+                                const order = await orderService.getLatestActiveOrderByPhone(phone);
+                                const trackUrl = order ? `https://hwasi.com/track-order?order_number=${order.order_number}` : 'https://hwasi.com/track-order';
+                                
+                                await this.sendUrlButtonMessage(
+                                    phone, 
+                                    "يمكنك تتبع حالة طلبك وتفاصيله مباشرة عبر الضغط على الزر أدناه: 🚚", 
+                                    "تتبع الطلب", 
+                                    trackUrl
+                                );
                             } else if (buttonId === 'edit_order' || buttonText === 'تعديل الطلب') {
                                 // Check order status before allowing edit
                                 const orderService = require('./orderService');
@@ -243,13 +291,18 @@ class WhatsAppService {
                                 if (order && (order.status === 'Shipped' || order.status === 'Delivered')) {
                                     await this.sendTextMessage(phone, `عذراً، طلبك رقم #${order.order_number} تم تسليمه بالفعل لشركة الشحن وهو الآن في طريقه إليك، لذا لا يمكن تعديله في هذه المرحلة. 🚚`);
                                 } else {
-                                    // Send direct support link for editing
-                                    await this.sendTextMessage(phone, "لتعديل طلبك، يمكنك التواصل معنا مباشرة عبر هذا الرابط وسنقوم بمساعدتك فوراً: 💬\nhttps://wa.me/201038588564");
-                                    // Also update session to human requested so admin sees it in dashboard
+                                    // Send direct support button for editing
+                                    const editUrl = order ? `https://hwasi.com/edit-order?order_number=${order.order_number}` : 'https://hwasi.com/edit-order';
+                                    await this.sendUrlButtonMessage(
+                                        phone, 
+                                        "يمكنك تعديل طلبك مباشرة عبر الموقع من الزر أدناه: 📝", 
+                                        "تعديل الطلب", 
+                                        editUrl
+                                    );
+                                    // Also update session to human requested
                                     await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
                                 }
                             }
-
 
                         } else if (msg.type === 'image' && msg.image) {
                             const phone = msg.from;
@@ -275,12 +328,27 @@ class WhatsAppService {
                                 console.error('[WhatsApp Webhook] ❌ Failed to save image to DB:', dbError);
                             }
 
-                            // 2. Send confirmation with links
-                            const linksMsg = "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\n" +
-                                             "🔗 تتبع الطلب:\nhttps://hwasi.com/track-order\n\n" +
-                                             "🔗 تعديل الطلب:\nhttps://wa.me/201038588564";
+                            // 2. Send confirmation with URL Buttons
+                            const orderService = require('./orderService');
+                            const order = await orderService.getLatestActiveOrderByPhone(phone);
+                            const trackUrl = order ? `https://hwasi.com/track-order?order_number=${order.order_number}` : 'https://hwasi.com/track-order';
+                            const editUrl  = order ? `https://hwasi.com/edit-order?order_number=${order.order_number}`   : 'https://hwasi.com/edit-order';
                             
-                            await this.sendTextMessage(phone, linksMsg);
+                            // Send first message with Tracking Button
+                            await this.sendUrlButtonMessage(
+                                phone, 
+                                "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\nيمكنك تتبع حالة طلبك من هنا:", 
+                                "تتبع الطلب 🚚", 
+                                trackUrl
+                            );
+                            
+                            // Send second message with Edit Button (since one CTA button per message is allowed)
+                            await this.sendUrlButtonMessage(
+                                phone, 
+                                "أو يمكنك تعديل طلبك مباشرة من هذا الزر:", 
+                                "تعديل الطلب 📝", 
+                                editUrl
+                            );
                         } else if (msg.type === 'text' && msg.text) {
                             await this._handleIncomingText(msg);
                         }

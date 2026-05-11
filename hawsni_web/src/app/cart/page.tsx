@@ -38,7 +38,7 @@ export default function CartPage() {
                 <div className="w-10" />
             </div>
 
-            <div className="px-4 pb-[160px] text-right" dir="ltr">
+            <div className="px-4 pt-6 pb-[160px] text-right" dir="ltr">
                 <div className="max-w-2xl mx-auto flex flex-col gap-3">
                     <AnimatePresence mode="popLayout">
                         {items.length > 0 ? (
