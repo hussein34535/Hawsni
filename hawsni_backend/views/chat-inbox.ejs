@@ -1,18 +1,68 @@
 <%- include('partials/header') %>
 
 <style>
-    /* ── Reset content-wrapper for chat ──────────── */
+    /* ── Hide admin chrome for chat ─────────────── */
+    div.admin-layout > aside.sidebar,
+    div.admin-layout > main.main-content > div.topbar,
+    div.admin-layout > main.main-content > div#sidebarOverlay { display: none !important; }
+    div.admin-layout > main.main-content { margin-right: 0 !important; width: 100% !important; min-height: 0 !important; }
     .content-wrapper {
-        padding: 0 !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        height: calc(100vh - var(--topbar-height)) !important;
-        overflow: hidden !important;
-        animation: none !important;
+        padding: 0 !important; max-width: 100% !important; margin: 0 !important;
+        display: flex !important; flex-direction: column !important;
+        height: 100vh !important; overflow: hidden !important; animation: none !important;
     }
     .content-wrapper > * { animation: none !important; }
+
+    /* ── Dark Mode ──────────────────────────────── */
+    body.dark { background: #0f172a !important; color: #e2e8f0 !important; }
+    body.dark .sessions-panel,
+    body.dark .chat-top,
+    body.dark .input-bar  { background: #1e293b !important; border-color: #334155 !important; }
+    body.dark .sp-header,
+    body.dark .sp-filters { background: #1e293b !important; border-color: #334155 !important; }
+    body.dark .sp-search input { background: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+    body.dark .s-item { border-color: #1e293b !important; }
+    body.dark .s-item:hover { background: #0f172a !important; }
+    body.dark .s-item.active { background: #0E4435 !important; }
+    body.dark .s-name { color: #e2e8f0 !important; }
+    body.dark .msgs-area { background: #0b1523 !important; }
+    body.dark .by-agent .bubble { background: #1e293b !important; color: #e2e8f0 !important; }
+    body.dark .status-bar { background: #1e293b !important; border-color: #334155 !important; }
+    body.dark .input-pill { background: #0f172a !important; }
+    body.dark .input-pill input { color: #e2e8f0 !important; }
+    body.dark .chat-top-name,
+    body.dark .sp-header h3 { color: #22c55e !important; }
+
+    /* ── Mini Nav (hover slide-in from right) ─── */
+    .mini-nav {
+        position: fixed; top: 0; right: 0; width: 52px; height: 100vh;
+        background: #0E4435; z-index: 9999;
+        display: flex; flex-direction: column; align-items: center;
+        padding: 16px 0; gap: 6px;
+        overflow: hidden; transition: width 0.25s ease;
+    }
+    .mini-nav:hover { width: 200px; }
+    .mini-nav .nav-logo {
+        font-size: 20px; color: white; margin-bottom: 14px;
+        width: 100%; display: flex; align-items: center; padding: 0 14px; gap: 12px;
+        white-space: nowrap; overflow: hidden;
+    }
+    .mini-nav .nav-logo span { opacity: 0; transition: opacity 0.2s 0.1s; font-size: 15px; font-weight: 700; }
+    .mini-nav:hover .nav-logo span { opacity: 1; }
+    .mn-link {
+        width: 100%; display: flex; align-items: center; gap: 12px;
+        padding: 10px 14px; color: rgba(255,255,255,0.75);
+        text-decoration: none; border-radius: 0; transition: background 0.15s, color 0.15s;
+        white-space: nowrap; overflow: hidden;
+    }
+    .mn-link:hover { background: rgba(255,255,255,0.15); color: white; }
+    .mn-link.active-link { background: rgba(255,255,255,0.2); color: white; }
+    .mn-link i { width: 24px; text-align: center; font-size: 15px; flex-shrink: 0; }
+    .mn-link span { opacity: 0; transition: opacity 0.2s 0.1s; font-size: 13px; font-weight: 600; }
+    .mini-nav:hover .mn-link span { opacity: 1; }
+    .mn-sep { width: 30px; height: 1px; background: rgba(255,255,255,0.15); margin: 6px 0; transition: width 0.25s; }
+    .mini-nav:hover .mn-sep { width: 170px; }
+    .mn-btn { cursor: pointer; border: none; background: transparent; }
 
     :root {
         --primary: #0E4435;
@@ -21,12 +71,13 @@
         --muted: #64748b;
     }
 
-    /* ── Chat Layout ──────────────────────────────── */
+
     .chat-wrap {
         display: flex;
         flex: 1;
         min-height: 0;
         overflow: hidden;
+        padding-right: 52px; /* space for mini-nav */
     }
 
     /* ── Sessions Sidebar ────────────────────────── */
@@ -107,10 +158,10 @@
     .msg-row.by-agent { justify-content: flex-start; }
 
     .bubble {
-        max-width: 62%; padding: 10px 14px; border-radius: 12px;
+        max-width: 62%; padding: 8px 12px; border-radius: 12px;
         font-size: 14px; line-height: 1.55;
         box-shadow: 0 1px 1px rgba(0,0,0,0.07);
-        white-space: pre-wrap; word-break: break-word;
+        word-break: break-word;
     }
     .by-user  .bubble { background: #dcf8c6; color: #1e293b; border-bottom-left-radius: 2px; }
     .by-agent .bubble { background: white; color: #1e293b; border-bottom-right-radius: 2px; }
@@ -161,7 +212,9 @@
                     <div class="chat-top-sub" id="h-sub"></div>
                 </div>
             </div>
-            <div class="chat-top-actions">
+        <div class="chat-top-actions">
+                <a href="https://hwasi.com" target="_blank" title="عرض الموقع" style="width:34px;height:34px;border-radius:50%;background:#f0f2f5;color:#0E4435;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;"><i class="fas fa-external-link-alt"></i></a>
+                <button onclick="toggleDark()" id="dark-btn" title="الوضع الليلي" style="width:34px;height:34px;border-radius:50%;background:#f0f2f5;border:none;cursor:pointer;font-size:15px;">🌙</button>
                 <button id="btn-take" class="act-btn btn-take" onclick="takeOver()" style="display:none;">👨‍💼 استلام</button>
                 <button id="btn-end"  class="act-btn btn-end"  onclick="endConv()"  style="display:none;">✅ إنهاء</button>
                 <button id="btn-bot"  class="act-btn btn-bot"  onclick="toBot()"    style="display:none;">🤖 للبوت</button>
@@ -284,17 +337,12 @@
         elMsgs.innerHTML = messages.map(m => {
             const isUser  = m.sender_type === 'user';
             const isBot   = m.sender_type === 'bot';
-            const isAdmin = m.sender_type === 'admin';
-            const cls     = isUser ? 'by-user' : `by-agent ${isAdmin ? 'is-admin' : 'is-bot'}`;
-            const label   = isUser ? '👤 عميل' : isBot ? '🤖 هَوَسي' : '🧑‍💼 موظف';
-            const time    = new Date(m.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-            const txt     = (m.content || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            return `<div class="msg-row ${cls}">
-                <div class="bubble">
-                    <span class="b-label">${label}</span>${txt}
-                    <div class="b-time">${time}</div>
-                </div>
-            </div>`;
+            const cls     = isUser ? 'by-user' : `by-agent ${isBot ? 'is-bot' : 'is-admin'}`;
+            const icon    = isUser ? '👤' : isBot ? '🤖' : '🧑‍💼';
+            const name    = isUser ? 'عميل' : isBot ? 'هَوَسي' : 'موظف';
+            const time    = new Date(m.created_at).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+            const txt     = (m.content || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+            return `<div class="msg-row ${cls}"><div class="bubble"><span class="b-label">${icon} ${name}</span>${txt}<div class="b-time">${time}</div></div></div>`;
         }).join('');
         elMsgs.scrollTop = elMsgs.scrollHeight;
     }
@@ -343,6 +391,37 @@
     }));
     document.getElementById('search-input').addEventListener('input', renderSessions);
     elMsgInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMsg(); });
+
+    // Dark Mode
+    function toggleDark() {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        localStorage.setItem('chatDark', isDark);
+        document.getElementById('dark-btn').textContent = isDark ? '☀️' : '🌙';
+    }
+    if (localStorage.getItem('chatDark') === 'true') {
+        document.body.classList.add('dark');
+        document.getElementById('dark-btn').textContent = '☀️';
+    }
 </script>
+
+<!-- Mini Nav Strip -->
+<nav class="mini-nav">
+    <div class="nav-logo"><i class="fas fa-gem"></i><span>hwasi Admin</span></div>
+    <a class="mn-link" href="/admin/dashboard"><i class="fas fa-home"></i><span>لوحة التحكم</span></a>
+    <a class="mn-link" href="/admin/orders"><i class="fas fa-shopping-cart"></i><span>الطلبات</span></a>
+    <a class="mn-link" href="/admin/products"><i class="fas fa-box"></i><span>المنتجات</span></a>
+    <a class="mn-link" href="/admin/categories"><i class="fas fa-tags"></i><span>التصنيفات</span></a>
+    <a class="mn-link" href="/admin/banners"><i class="fas fa-images"></i><span>البنرات</span></a>
+    <a class="mn-link" href="/admin/users"><i class="fas fa-users"></i><span>المستخدمين</span></a>
+    <div class="mn-sep"></div>
+    <a class="mn-link active-link" href="/admin/chat"><i class="fas fa-comments"></i><span>الشات</span></a>
+    <a class="mn-link" href="/admin/reviews"><i class="fas fa-star"></i><span>التقييمات</span></a>
+    <div class="mn-sep"></div>
+    <a class="mn-link" href="/admin/settings"><i class="fas fa-cog"></i><span>الإعدادات</span></a>
+    <a class="mn-link" href="/admin/shipping"><i class="fas fa-truck"></i><span>الشحن</span></a>
+    <div style="margin-top:auto;"></div>
+    <a class="mn-link" href="/admin/logout" onclick="return confirm('تسجيل الخروج؟')" style="color:#ff9999;"><i class="fas fa-sign-out-alt"></i><span>خروج</span></a>
+</nav>
 
 <%- include('partials/footer') %>
