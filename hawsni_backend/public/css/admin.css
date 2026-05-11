@@ -1,56 +1,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-    /* Brand Colors - Premium Modern Slate/Indigo */
-    --brand-primary: #0F172A;      /* Slate 900 for a stark, modern look */
-    --brand-secondary: #1E293B;    /* Slate 800 */
-    --brand-light: #F8FAFC;        /* Slate 50 */
-    --brand-accent: #3B82F6;       /* Vibrant Blue accent */
-    --brand-accent-hover: #2563EB;
+    /* ── Brand: Hawsni Green ───────────────────── */
+    --brand-primary: #0E4435;
+    --brand-secondary: #1a6b56;
+    --brand-light: #f0fdf4;
+    --brand-accent: #22c55e;
+    --brand-accent-hover: #16a34a;
 
-    /* Neutrals - Sleek Slate/Zinc */
-    --bg-main: #F1F5F9;            /* Slate 100 */
-    --bg-card: #FFFFFF;
-    --text-main: #0F172A;          /* Slate 900 for sharp text */
-    --text-muted: #64748B;         /* Slate 500 */
-    --border-soft: #E2E8F0;        /* Slate 200 */
-    --border-medium: #CBD5E1;      /* Slate 300 */
+    /* ── Neutrals ─────────────────────────────── */
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-soft: #e2e8f0;
+    --border-medium: #cbd5e1;
+    --white: #ffffff;
 
-    --white: #FFFFFF;
+    /* ── State Colors ─────────────────────────── */
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --success-bg: #22c55e;
+    --warning-bg: #f59e0b;
+    --danger-bg: #ef4444;
+    --info-bg: #3b82f6;
 
-    --success: #10B981; /* Emerald 500 */
-    --warning: #F59E0B;
-    --danger: #EF4444;
-    --info: #3B82F6;
+    /* ── Shadows ──────────────────────────────── */
+    --shadow-sm: 0 1px 3px rgba(14,68,53,0.06);
+    --shadow-md: 0 4px 12px rgba(14,68,53,0.08);
+    --shadow-lg: 0 10px 30px rgba(14,68,53,0.1);
+    --shadow-xl: 0 20px 50px rgba(14,68,53,0.12);
+    --shadow-inner: inset 0 2px 4px rgba(0,0,0,0.02);
 
-    --success-bg: #10B981;
-    --warning-bg: #F59E0B;
-    --danger-bg: #EF4444;
-    --info-bg: #3B82F6;
-
-    /* Utilities */
-    --hidden: none;
-
-    /* Shadows - Ultra Soft & Layered for Premium SaaS Feel */
-    --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-    --shadow-lg: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-    --shadow-xl: 0 20px 40px -10px rgba(15, 23, 42, 0.12);
-    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
-
-    /* Spacing & Sizing */
+    /* ── Sizing ───────────────────────────────── */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 24px;
-    --sidebar-width: 60px;
+    --sidebar-width: 62px;
     --sidebar-expanded: 260px;
-    --topbar-height: 80px;
+    --topbar-height: 68px;
 
-    /* Transitions */
+    /* ── Transitions ──────────────────────────── */
     --trans-fast: 0.15s ease;
-    --trans-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --trans-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --trans-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+
 }
 
 /* Base Styles */
@@ -62,7 +59,7 @@
 
 body {
     font-family: 'Cairo', sans-serif;
-    background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
+    background: linear-gradient(145deg, #f0fdf4 0%, #f8fafc 50%, #ecfdf5 100%);
     background-attachment: fixed;
     color: var(--text-main);
     line-height: 1.6;
@@ -264,20 +261,21 @@ a {
     transition: none;
 }
 
-/* Topbar - Glass Effect */
+/* Topbar */
 .topbar {
     height: var(--topbar-height);
-    background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 2px solid #dcfce7;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 2.5rem;
+    padding: 0 2rem;
     position: sticky;
     top: 0;
     z-index: 99;
+    box-shadow: 0 1px 0 #e7fae7, 0 4px 16px rgba(14,68,53,0.04);
 }
 
 .page-title {
@@ -312,14 +310,14 @@ a {
 
 .btn-primary {
     background: var(--brand-primary);
-    color: var(--white);
-    box-shadow: 0 4px 10px rgba(14, 68, 53, 0.2);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(14,68,53,0.25);
 }
 
 .btn-primary:hover {
     background: var(--brand-secondary);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(14, 68, 53, 0.3);
+    box-shadow: 0 8px 20px rgba(14,68,53,0.35);
 }
 
 .btn-secondary {
@@ -1224,7 +1222,7 @@ tr:hover td {
    GLOBAL DARK MODE
    ═══════════════════════════════════════════════════════ */
 body.dark {
-    background: #0b1120 !important;
+    background: linear-gradient(145deg, #050d12 0%, #0b1120 60%, #071210 100%) !important;
     color: #e2e8f0 !important;
 }
 
