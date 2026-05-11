@@ -233,30 +233,24 @@ class WhatsAppService {
                                     "نعتذر لسماع ذلك 😔. هل يمكنك إخبارنا بسبب عدم رغبتك في إكمال الطلب لمساعدتنا في تحسين خدماتنا؟"
                                 );
                             } else if (buttonId === 'track_order' || buttonText === 'تتبع الطلب') {
-                                // Existing tracking logic can be triggered here or send a message
-                                await this.sendTextMessage(phone, "جاري الاستعلام عن حالة طلبك...");
-                                // Actually, we can just trigger the tracking logic below if we refactored it,
-                                // but for now a simple message is fine, or we can duplicate the tracking code.
-                                const orderService = require('./orderService');
-                                const activeOrder = await orderService.findActiveOrderByPhone(phone);
-                                if (activeOrder) {
-                                    const bostaService = require('./bostaService');
-                                    if (activeOrder.tracking_number) {
-                                        const trackingData = await bostaService.trackDelivery(activeOrder.tracking_number);
-                                        const stateText = bostaService.translateDeliveryState(trackingData.state);
-                                        await this.sendTextMessage(phone, `حالة طلبك رقم #${activeOrder.order_number}: ${stateText}`);
-                                    } else {
-                                        await this.sendTextMessage(phone, `طلبك رقم #${activeOrder.order_number} جاري تجهيزه ولم يتم تسليمه لشركة الشحن بعد.`);
-                                    }
-                                } else {
-                                    await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلب نشط مرتبط برقمك.");
-                                }
+                                // Send direct tracking link
+                                await this.sendTextMessage(phone, "يمكنك تتبع حالة طلبك وتفاصيله مباشرة عبر هذا الرابط: 🚚\nhttps://hwasi.com/track-order");
                             } else if (buttonId === 'edit_order' || buttonText === 'تعديل الطلب') {
-                                // Notify user that an admin will help
-                                await this.sendTextMessage(phone, "لتعديل طلبك، سيقوم أحد ممثلي خدمة العملاء بالرد عليك حالاً. ⏳");
-                                // Update session to human requested
-                                await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
+                                // Check order status before allowing edit
+                                const orderService = require('./orderService');
+                                const order = await orderService.getLatestActiveOrderByPhone(phone);
+                                
+                                if (order && (order.status === 'Shipped' || order.status === 'Delivered')) {
+                                    await this.sendTextMessage(phone, `عذراً، طلبك رقم #${order.order_number} تم تسليمه بالفعل لشركة الشحن وهو الآن في طريقه إليك، لذا لا يمكن تعديله في هذه المرحلة. 🚚`);
+                                } else {
+                                    // Send direct support link for editing
+                                    await this.sendTextMessage(phone, "لتعديل طلبك، يمكنك التواصل معنا مباشرة عبر هذا الرابط وسنقوم بمساعدتك فوراً: 💬\nhttps://wa.me/201038588564");
+                                    // Also update session to human requested so admin sees it in dashboard
+                                    await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
+                                }
                             }
+
+
                         } else if (msg.type === 'image' && msg.image) {
                             const phone = msg.from;
                             const mediaId = msg.image.id;
@@ -281,34 +275,12 @@ class WhatsAppService {
                                 console.error('[WhatsApp Webhook] ❌ Failed to save image to DB:', dbError);
                             }
 
-                            // 2. Send interactive confirmation
-                            const interactivePayload = {
-                                messaging_product: "whatsapp",
-                                to: phone,
-                                type: "interactive",
-                                interactive: {
-                                    type: "button",
-                                    body: {
-                                        text: "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍"
-                                    },
-                                    action: {
-                                        buttons: [
-                                            { type: "reply", reply: { id: "track_order", title: "تتبع الطلب" } },
-                                            { type: "reply", reply: { id: "edit_order", title: "تعديل الطلب" } }
-                                        ]
-                                    }
-                                }
-                            };
+                            // 2. Send confirmation with links
+                            const linksMsg = "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\n" +
+                                             "🔗 تتبع الطلب:\nhttps://hwasi.com/track-order\n\n" +
+                                             "🔗 تعديل الطلب:\nhttps://wa.me/201038588564";
                             
-                            const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
-                            await fetch(url, {
-                                method: 'POST',
-                                headers: {
-                                    'Authorization': `Bearer ${this.token}`,
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify(interactivePayload)
-                            });
+                            await this.sendTextMessage(phone, linksMsg);
                         } else if (msg.type === 'text' && msg.text) {
                             await this._handleIncomingText(msg);
                         }
