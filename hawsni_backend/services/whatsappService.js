@@ -311,6 +311,7 @@ class WhatsAppService {
                             });
                         } else if (msg.type === 'text' && msg.text) {
                             await this._handleIncomingText(msg);
+                        }
                     }
                 }
             }
