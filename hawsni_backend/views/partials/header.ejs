@@ -31,13 +31,13 @@
             <div class="sidebar-header">
                 <a href="/admin/dashboard" class="sidebar-brand">
                     <div class="brand-icon">هـ</div>
-                    <h1>hawsni <span>Admin</span></h1>
+                    <h1>hawsni <span>Admin Panel</span></h1>
                 </a>
             </div>
 
             <nav class="sidebar-nav">
                 <div class="nav-section">
-                    <div class="nav-section-title">القائمة الرئيسية</div>
+                    <div class="nav-section-title">الرئيسية</div>
                     <a href="/admin/dashboard" class="nav-link <%= page === 'dashboard' ? 'active' : '' %>">
                         <i class="fas fa-house"></i>
                         <span>لوحة التحكم</span>
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="nav-section">
-                    <div class="nav-section-title">إدارة المتجر</div>
+                    <div class="nav-section-title">المتجر</div>
                     <a href="/admin/products" class="nav-link <%= page === 'products' ? 'active' : '' %>">
                         <i class="fas fa-box-open"></i>
                         <span>المنتجات</span>
@@ -61,25 +61,25 @@
                 </div>
 
                 <div class="nav-section">
-                    <div class="nav-section-title">الطلبات والعملاء</div>
+                    <div class="nav-section-title">العملاء</div>
                     <a href="/admin/orders" class="nav-link <%= page === 'orders' ? 'active' : '' %>">
                         <i class="fas fa-receipt"></i>
                         <span>الطلبات</span>
                     </a>
                     <a href="/admin/users" class="nav-link <%= page === 'users' ? 'active' : '' %>">
-                        <i class="fas fa-user-group"></i>
+                        <i class="fas fa-users"></i>
                         <span>المستخدمين</span>
                     </a>
                 </div>
                 
                 <div class="nav-section">
-                    <div class="nav-section-title">التواصل والدعم</div>
+                    <div class="nav-section-title">الدعم</div>
                     <a href="/admin/chat" class="nav-link <%= locals.page === 'chat' ? 'active' : '' %>">
-                        <i class="fas fa-message" style="color:#0ea5e9;"></i>
+                        <i class="fas fa-comments"></i>
                         <span>شات الدعم</span>
                     </a>
                     <a href="/admin/reviews" class="nav-link <%= page === 'reviews' ? 'active' : '' %>">
-                        <i class="fas fa-star" style="color:#F59E0B;"></i>
+                        <i class="fas fa-star"></i>
                         <span>التقييمات</span>
                     </a>
                 </div>
@@ -88,21 +88,21 @@
                     <div class="nav-section-title">الإعدادات</div>
                     <a href="/admin/settings" class="nav-link <%= page === 'settings' ? 'active' : '' %>">
                         <i class="fas fa-sliders"></i>
-                        <span>إعدادات المتجر</span>
+                        <span>المتجر</span>
                     </a>
                     <a href="/admin/shipping" class="nav-link <%= page === 'shipping' ? 'active' : '' %>">
                         <i class="fas fa-truck"></i>
-                        <span>إعدادات الشحن</span>
+                        <span>الشحن</span>
                     </a>
                 </div>
             </nav>
 
             <!-- Logout -->
-            <div style="padding: 12px 8px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
-                <a href="/admin/logout" 
+            <div style="padding: 10px 8px; border-top: 1px solid rgba(255,255,255,0.08);">
+                <a href="/admin/logout"
                    onclick="return confirm('هل أنت متأكد من تسجيل الخروج؟')"
-                   class="nav-link" style="color: #fca5a5;">
-                    <i class="fas fa-sign-out-alt" style="color:#fca5a5;"></i>
+                   class="nav-link" style="color: rgba(255,150,150,0.85);">
+                    <i class="fas fa-sign-out-alt" style="color: rgba(255,150,150,0.85);"></i>
                     <span>تسجيل الخروج</span>
                 </a>
             </div>
