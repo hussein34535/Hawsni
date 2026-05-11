@@ -266,8 +266,10 @@
                         <div id="header-status" style="font-size: 11px; color: #22c55e; font-weight: 700;"><i class="fas fa-circle" style="font-size: 8px;"></i> متصل الآن</div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button id="take-over-btn" class="btn btn-sm btn-primary" style="background: var(--chat-primary); border-radius: 20px; font-size: 12px; padding: 6px 16px;">إيقاف البوت والرد</button>
+                <div style="display: flex; gap: 8px;">
+                    <button id="take-over-btn" onclick="takeOver()" class="btn btn-sm" style="background: var(--chat-primary); color:#fff; border-radius: 20px; font-size: 12px; padding: 6px 16px; border:none;">👨‍💼 استلام المحادثة</button>
+                    <button id="end-btn" onclick="endConversation()" class="btn btn-sm" style="display:none; background:#ef4444; color:#fff; border-radius: 20px; font-size: 12px; padding: 6px 16px; border:none;">✅ إنهاء المحادثة</button>
+                    <button id="bot-btn" onclick="returnToBot()" class="btn btn-sm" style="display:none; background:#f59e0b; color:#fff; border-radius: 20px; font-size: 12px; padding: 6px 16px; border:none;">🤖 تسليم للبوت</button>
                 </div>
             </div>
 
@@ -315,7 +317,13 @@
 
     async function fetchSessions() {
         const { data, error } = await chatSupabase.from('chat_sessions').select('*').order('updated_at', { ascending: false });
-        if (!error) { sessions = data; renderSessions(); }
+        if (error) {
+            console.error('[Chat] Failed to fetch sessions:', error);
+            return;
+        }
+        sessions = data || [];
+        console.log('[Chat] Loaded sessions:', sessions.length, sessions.map(s => ({ id: s.session_id, platform: s.platform })));
+        renderSessions();
     }
 
     function subscribeToSessions() {
@@ -462,22 +470,60 @@
         });
     };
 
-    document.getElementById('take-over-btn').onclick = async () => {
-        await chatSupabase.from('chat_sessions').update({ status: 'human_active' }).eq('session_id', activeSessionId);
-    };
+    document.getElementById('take-over-btn').onclick = null; // handled by onclick attr
+
+    async function takeOver() {
+        if (!activeSessionId) return;
+        const res = await fetch('/admin/chat/takeover', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: activeSessionId })
+        });
+        if ((await res.json()).success) {
+            document.getElementById('take-over-btn').style.display = 'none';
+            document.getElementById('end-btn').style.display = 'inline-block';
+            document.getElementById('bot-btn').style.display = 'inline-block';
+            inputPanel.style.display = 'flex';
+            botStatusMsg.style.display = 'none';
+        }
+    }
+
+    async function endConversation() {
+        if (!activeSessionId || !confirm('هل تريد إنهاء المحادثة وإرسال رسالة وداع للعميل؟')) return;
+        const res = await fetch('/admin/chat/end', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: activeSessionId })
+        });
+        if ((await res.json()).success) {
+            inputPanel.style.display = 'none';
+            document.getElementById('end-btn').style.display = 'none';
+            document.getElementById('bot-btn').style.display = 'none';
+            botStatusMsg.innerHTML = '✅ تم إنهاء المحادثة';
+            botStatusMsg.style.display = 'block';
+        }
+    }
+
+    async function returnToBot() {
+        if (!activeSessionId || !confirm('هل تريد إعادة المحادثة للمساعد الذكي؟')) return;
+        const res = await fetch('/admin/chat/return-to-bot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: activeSessionId })
+        });
+        if ((await res.json()).success) {
+            inputPanel.style.display = 'none';
+            document.getElementById('end-btn').style.display = 'none';
+            document.getElementById('bot-btn').style.display = 'none';
+            document.getElementById('take-over-btn').style.display = 'none';
+            botStatusMsg.innerHTML = '🤖 البوت يقوم بالرد تلقائياً الآن.';
+            botStatusMsg.style.display = 'block';
+        }
+    }
 
     function toggleSidebar() {
         document.getElementById('sidebar-panel').classList.toggle('active');
     }
 </script>
-
-        color: #64748b;
-        transition: all 0.2s;
-    }
-    .tab-btn.active {
-        background: #0E4435;
-        color: #fff;
-    }
-</style>
 
 <%- include('partials/footer') %>
