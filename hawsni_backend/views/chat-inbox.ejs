@@ -1,37 +1,54 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --chat-bg: #f0f2f5;
-            --sidebar-bg: #ffffff;
-            --primary: #0E4435;
-            --primary-light: #1a6b56;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --user-bubble: #ffffff;
-            --admin-bubble: #0E4435;
-            --bot-bubble: #1a6b56;
+        /* Sidebar Layout Fix */
+        .chat-app {
+            display: flex;
+            height: calc(100vh - 60px); /* Adjust based on your admin header height */
+            width: 100%;
+            background: #fff;
         }
-
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            font-family: 'Noto Sans Arabic', sans-serif;
-            background: var(--chat-bg);
+        
+        .admin-wrapper {
+            display: flex;
+            height: 100vh;
             overflow: hidden;
         }
 
-        .chat-app {
+        .admin-main-content {
+            flex: 1;
             display: flex;
-            height: 100vh;
-            width: 100vw;
+            flex-direction: column;
+            overflow: hidden;
         }
+    </style>
+</head>
+<body>
+
+<div class="admin-wrapper">
+    <!-- Include your existing admin sidebar here if it's a partial, or I'll add a simple back link -->
+    <div style="width: 260px; background: #0E4435; color: white; display: flex; flex-direction: column; padding: 20px;">
+        <h3 style="font-size: 18px; margin-bottom: 30px;">لوحة التحكم</h3>
+        <a href="/admin/dashboard" style="color: white; text-decoration: none; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-home"></i> الرئيسية
+        </a>
+        <a href="/admin/orders" style="color: white; text-decoration: none; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-shopping-cart"></i> الطلبات
+        </a>
+        <a href="/admin/products" style="color: white; text-decoration: none; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-box"></i> المنتجات
+        </a>
+        <a href="/admin/chat" style="color: #22c55e; text-decoration: none; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: bold;">
+            <i class="fas fa-comments"></i> شات الدعم
+        </a>
+        <div style="margin-top: auto;">
+            <a href="/admin/logout" style="color: #ff9999; text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-main-content">
+        <div class="chat-app">
+            <!-- Sidebar -->
+            <div class="sidebar">
 
         /* Sidebar Styling */
         .sidebar {
@@ -534,31 +551,45 @@
     }
 
     async function takeOver() {
+        if (!activeSessionId) return;
         const res = await fetch('/admin/chat/takeover', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId: activeSessionId })
         });
-        if ((await res.json()).success) fetchSessions();
+        const result = await res.json();
+        if (result.success) {
+            await fetchSessions();
+            await selectSession(activeSessionId); // Refresh UI to show input panel
+        }
     }
 
     async function endConversation() {
-        if (!confirm('إنهاء المحادثة؟')) return;
-        await fetch('/admin/chat/end', {
+        if (!activeSessionId || !confirm('إنهاء المحادثة؟')) return;
+        const res = await fetch('/admin/chat/end', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId: activeSessionId })
         });
-        fetchSessions();
+        const result = await res.json();
+        if (result.success) {
+            await fetchSessions();
+            await selectSession(activeSessionId);
+        }
     }
 
     async function returnToBot() {
-        await fetch('/admin/chat/return-to-bot', {
+        if (!activeSessionId || !confirm('إعادة المحادثة للبوت؟')) return;
+        const res = await fetch('/admin/chat/return-to-bot', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId: activeSessionId })
         });
-        fetchSessions();
+        const result = await res.json();
+        if (result.success) {
+            await fetchSessions();
+            await selectSession(activeSessionId);
+        }
     }
 
     function subscribeToSessions() {
