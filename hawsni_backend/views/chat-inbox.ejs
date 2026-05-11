@@ -317,12 +317,9 @@
 
     async function fetchSessions() {
         const { data, error } = await chatSupabase.from('chat_sessions').select('*').order('updated_at', { ascending: false });
-        if (error) {
-            console.error('[Chat] Failed to fetch sessions:', error);
-            return;
-        }
+        if (error) { console.error('[Chat] Failed to load sessions:', error); return; }
         sessions = data || [];
-        console.log('[Chat] Loaded sessions:', sessions.length, sessions.map(s => ({ id: s.session_id, platform: s.platform })));
+        console.log('[Chat] Loaded sessions:', sessions.length);
         renderSessions();
     }
 
@@ -434,20 +431,33 @@
     function renderMessages() {
         messagesContainerEl.innerHTML = '';
         messages.forEach(msg => {
-            const isMe = msg.sender_type === 'admin' || msg.sender_type === 'bot';
+            const isAdmin = msg.sender_type === 'admin';
+            const isBot   = msg.sender_type === 'bot';
+            const isUser  = msg.sender_type === 'user';
+
             const row = document.createElement('div');
-            row.className = `msg-row ${isMe ? 'received' : 'sent'}`;
-            
-            let content = msg.content;
+            row.className = `msg-row ${isUser ? 'sent' : 'received'}`;
+
+            let bubbleColor = '#fff';        // user = white
+            let textColor   = '#1e293b';
+            let label       = '';
+            if (isAdmin) { bubbleColor = '#0E4435'; textColor = '#fff'; label = '🧑‍💼 موظف'; }
+            if (isBot)   { bubbleColor = '#1a6b56'; textColor = '#fff'; label = '🤖 هَوَسي'; }
+            if (isUser)  { label = '👤 عميل'; }
+
+            let content = msg.content || '';
             if (content.startsWith('[IMAGE:')) {
-                const id = content.match(/\[IMAGE:(.+)\]/)[1];
-                content = `<img src="/admin/chat/media/${id}" style="max-width: 100%; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src)">`;
+                const id = content.match(/\[IMAGE:(.+)\]/)?.[1];
+                if (id) content = `<img src="/admin/chat/media/${id}" style="max-width:200px; border-radius:8px; cursor:pointer;" onclick="window.open(this.src)">`;
             }
 
             row.innerHTML = `
-                <div class="bubble">
-                    ${content}
-                    <div class="msg-time">${new Date(msg.created_at).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</div>
+                <div style="max-width:70%; display:flex; flex-direction:column; gap:2px;">
+                    <span style="font-size:10px; color:#94a3b8; font-weight:600; ${isUser ? '' : 'text-align:right;'}">${label}</span>
+                    <div style="background:${bubbleColor}; color:${textColor}; padding:10px 14px; border-radius:${isUser ? '12px 12px 12px 2px' : '12px 12px 2px 12px'}; font-size:14px; line-height:1.6; box-shadow:0 1px 2px rgba(0,0,0,0.1); white-space:pre-wrap;">
+                        ${content}
+                        <div style="font-size:10px; opacity:0.7; margin-top:4px; text-align:${isUser ? 'left' : 'right'}">${new Date(msg.created_at).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</div>
+                    </div>
                 </div>
             `;
             messagesContainerEl.appendChild(row);
