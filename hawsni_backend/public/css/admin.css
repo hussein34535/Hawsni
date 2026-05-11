@@ -59,7 +59,7 @@
 
 body {
     font-family: 'Cairo', sans-serif;
-    background: linear-gradient(145deg, #f0fdf4 0%, #f8fafc 50%, #ecfdf5 100%);
+    background: #f1f5f9;
     background-attachment: fixed;
     color: var(--text-main);
     line-height: 1.6;
@@ -264,10 +264,10 @@ a {
 /* Topbar */
 .topbar {
     height: var(--topbar-height);
-    background: rgba(255,255,255,0.92);
+    background: rgba(255,255,255,0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 2px solid #dcfce7;
+    border-bottom: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -275,7 +275,7 @@ a {
     position: sticky;
     top: 0;
     z-index: 99;
-    box-shadow: 0 1px 0 #e7fae7, 0 4px 16px rgba(14,68,53,0.04);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .page-title {
@@ -1219,65 +1219,115 @@ tr:hover td {
 }
 
 /* ═══════════════════════════════════════════════════════
-   GLOBAL DARK MODE
+   GLOBAL DARK MODE - PREMIUM TRUE BLACK
    ═══════════════════════════════════════════════════════ */
 body.dark {
-    background: linear-gradient(145deg, #050d12 0%, #0b1120 60%, #071210 100%) !important;
-    color: #e2e8f0 !important;
+    /* ── Colors ── */
+    --dm-bg: #0a0a0a;
+    --dm-surface: #111111;
+    --dm-surface-2: #181818;
+    --dm-border: #262626;
+    --dm-text: #f5f5f5;
+    --dm-text-muted: #888888;
+    --dm-topbar: #0d0d0d;
+    
+    background: var(--dm-bg) !important;
+    color: var(--dm-text) !important;
 }
 
-/* Topbar */
+/* Transitions for smooth theme switching */
+body, .card, .topbar, td, th, .form-control, .sidebar, .nav-link {
+    transition: background 0.3s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.3s ease !important;
+}
+
+/* Topbar Dark */
 body.dark .topbar {
-    background: rgba(15, 23, 42, 0.85) !important;
-    border-bottom-color: #1e293b !important;
+    background: var(--dm-topbar) !important;
+    border-bottom: 1px solid var(--dm-border) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
 }
-body.dark .page-title { color: #f1f5f9 !important; }
+body.dark .page-title { color: var(--dm-text) !important; }
 body.dark .btn-secondary {
-    background: #1e293b !important;
-    color: #94a3b8 !important;
-    border-color: #334155 !important;
+    background: var(--dm-surface) !important;
+    color: var(--dm-text) !important;
+    border: 1px solid var(--dm-border) !important;
 }
-body.dark .btn-secondary:hover { background: #334155 !important; color: #e2e8f0 !important; }
-
-/* Cards */
-body.dark .card {
-    background: rgba(30, 41, 59, 0.8) !important;
-    border-color: #334155 !important;
+body.dark .btn-secondary:hover {
+    background: var(--dm-surface-2) !important;
+    border-color: var(--brand-primary) !important;
 }
-body.dark .card-header { border-bottom-color: #334155 !important; }
-body.dark .card-title  { color: #f1f5f9 !important; }
 
-/* Stat Cards */
+/* Cards & Containers */
+body.dark .card, 
 body.dark .stat-card {
-    background: rgba(30, 41, 59, 0.8) !important;
-    border-color: #334155 !important;
+    background: var(--dm-surface) !important;
+    border: 1px solid var(--dm-border) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
 }
-body.dark .stat-label { color: #94a3b8 !important; }
-body.dark .stat-value { color: #f1f5f9 !important; }
+body.dark .card:hover,
+body.dark .stat-card:hover {
+    border-color: #333 !important;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3) !important;
+}
+body.dark .card-header { border-bottom-color: var(--dm-border) !important; }
+body.dark .card-title { color: var(--dm-text) !important; }
+body.dark .stat-label { color: var(--dm-text-muted) !important; }
+body.dark .stat-value { color: var(--dm-text) !important; }
 
-/* Tables */
-body.dark .table-container { border-color: #334155 !important; }
-body.dark th { background: #1e293b !important; color: #94a3b8 !important; border-color: #334155 !important; }
-body.dark td { color: #e2e8f0 !important; border-color: #1e293b !important; }
-body.dark tr:hover td { background: rgba(51,65,85,0.3) !important; }
+/* Tables Dark */
+body.dark .table-container { border-color: var(--dm-border) !important; }
+body.dark th {
+    background: #0f0f0f !important;
+    color: var(--dm-text-muted) !important;
+    border-bottom: 1px solid var(--dm-border) !important;
+}
+body.dark td {
+    color: #e0e0e0 !important;
+    border-bottom: 1px solid var(--dm-border) !important;
+}
+body.dark tr:hover td {
+    background: rgba(255,255,255,0.02) !important;
+}
 
-/* Forms */
-body.dark .form-control {
-    background: #1e293b !important;
-    border-color: #334155 !important;
-    color: #e2e8f0 !important;
+/* Forms Dark */
+body.dark .form-control,
+body.dark select.form-control,
+body.dark textarea.form-control {
+    background: var(--dm-surface-2) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text) !important;
 }
 body.dark .form-control:focus {
-    background: #0f172a !important;
-    border-color: #22c55e !important;
-    box-shadow: 0 0 0 3px rgba(34,197,94,0.15) !important;
+    background: #000 !important;
+    border-color: var(--brand-primary) !important;
+    box-shadow: 0 0 0 4px rgba(34,197,94,0.1) !important;
 }
-body.dark .form-label { color: #cbd5e1 !important; }
-body.dark select.form-control { background: #1e293b !important; color: #e2e8f0 !important; }
+body.dark .form-label { color: var(--dm-text-muted) !important; }
 
-/* Page background elements */
-body.dark .bg-main,
-body.dark .content-wrapper { background: transparent !important; }
+/* Dashboard Specifics */
+body.dark .profile-card,
+body.dark .address-card,
+body.dark .method-card {
+    background: var(--dm-surface-2) !important;
+    border-color: var(--dm-border) !important;
+}
 
-/* Scrollbar in dark */
-body.dark ::-webkit-scrollbar-thumb { background: #334155 !important; }
+/* Badges adjustments for Dark */
+body.dark .badge {
+    filter: saturate(0.8) brightness(0.9);
+}
+
+/* Scrollbars Dark */
+body.dark ::-webkit-scrollbar-thumb {
+    background: #333 !important;
+}
+body.dark ::-webkit-scrollbar-track {
+    background: #0a0a0a !important;
+}
+
+/* Fixes for layout wrappers */
+body.dark .content-wrapper,
+body.dark .main-content {
+    background: transparent !important;
+}
+

@@ -4,21 +4,28 @@
 
 <script src="/js/admin.js"></script>
 <script>
-    // ── Global Dark Mode ─────────────────────────
+    // Sync initial button icon state
     (function() {
-        if (localStorage.getItem('adminDark') === 'true') {
-            document.body.classList.add('dark');
-            const btn = document.getElementById('dark-mode-btn');
-            if (btn) btn.innerHTML = '<i class="fas fa-sun"></i>';
-        }
+        const isDark = document.body.classList.contains('dark') || localStorage.getItem('adminDark') === 'true';
+        const btn = document.getElementById('dark-mode-btn');
+        if (btn && isDark) btn.innerHTML = '<i class="fas fa-sun"></i>';
     })();
 
     window.toggleDark = function() {
+        // Add a transition class for the duration of the switch
+        document.body.classList.add('theme-transition');
         document.body.classList.toggle('dark');
+        
         const isDark = document.body.classList.contains('dark');
         localStorage.setItem('adminDark', isDark);
+        
         const btn = document.getElementById('dark-mode-btn');
         if (btn) btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        
+        // Remove the transition class after animation completes
+        setTimeout(() => {
+            document.body.classList.remove('theme-transition');
+        }, 400);
     };
 </script>
 

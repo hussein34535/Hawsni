@@ -14,24 +14,24 @@
     .content-wrapper > * { animation: none !important; }
 
     /* ── Dark Mode ──────────────────────────────── */
-    body.dark { background: #0f172a !important; color: #e2e8f0 !important; }
+    body.dark { background: var(--dm-bg) !important; color: var(--dm-text) !important; }
     body.dark .sessions-panel,
     body.dark .chat-top,
-    body.dark .input-bar  { background: #1e293b !important; border-color: #334155 !important; }
+    body.dark .input-bar  { background: var(--dm-surface) !important; border-color: var(--dm-border) !important; }
     body.dark .sp-header,
-    body.dark .sp-filters { background: #1e293b !important; border-color: #334155 !important; }
-    body.dark .sp-search input { background: #0f172a !important; color: #e2e8f0 !important; border-color: #334155 !important; }
-    body.dark .s-item { border-color: #1e293b !important; }
-    body.dark .s-item:hover { background: #0f172a !important; }
-    body.dark .s-item.active { background: #0E4435 !important; }
-    body.dark .s-name { color: #e2e8f0 !important; }
-    body.dark .msgs-area { background: #0b1523 !important; }
-    body.dark .by-agent .bubble { background: #1e293b !important; color: #e2e8f0 !important; }
-    body.dark .status-bar { background: #1e293b !important; border-color: #334155 !important; }
-    body.dark .input-pill { background: #0f172a !important; }
-    body.dark .input-pill input { color: #e2e8f0 !important; }
+    body.dark .sp-filters { background: var(--dm-surface) !important; border-color: var(--dm-border) !important; }
+    body.dark .sp-search input { background: var(--dm-bg) !important; color: var(--dm-text) !important; border-color: var(--dm-border) !important; }
+    body.dark .s-item { border-color: var(--dm-border) !important; }
+    body.dark .s-item:hover { background: var(--dm-surface-2) !important; }
+    body.dark .s-item.active { background: var(--brand-primary) !important; }
+    body.dark .s-name { color: var(--dm-text) !important; }
+    body.dark .msgs-area { background: #050505 !important; }
+    body.dark .by-agent .bubble { background: var(--dm-surface-2) !important; color: var(--dm-text) !important; }
+    body.dark .status-bar { background: var(--dm-surface) !important; border-color: var(--dm-border) !important; }
+    body.dark .input-pill { background: var(--dm-bg) !important; }
+    body.dark .input-pill input { color: var(--dm-text) !important; }
     body.dark .chat-top-name,
-    body.dark .sp-header h3 { color: #22c55e !important; }
+    body.dark .sp-header h3 { color: var(--brand-accent) !important; }
 
     /* ── Mini Nav (hover slide-in from right) ─── */
     .mini-nav {
