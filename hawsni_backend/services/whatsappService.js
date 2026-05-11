@@ -221,10 +221,10 @@ class WhatsAppService {
                                     await this.sendTextMessage(phone, "عذراً، لم نتمكن من العثور على طلب نشط أو قيد التنفيذ مرتبط برقمك. ربما تم الإلغاء مسبقاً.");
                                 }
                             } else if (buttonId === 'confirm_order' || (buttonText && (buttonText.trim() === 'موافق' || buttonText.trim() === 'Confirm'))) {
-                                // Send Vodafone Cash details
+                                // Send Vodafone Cash details + request sender number (softened)
                                 await this.sendTextMessage(
                                     phone,
-                                    "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n(تنبيه: برجاء إرسال صورة التحويل 'سكرين شوت' هنا في هذه المحادثة ليتم تأكيد طلبك فوراً)."
+                                    "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n\nتنبيه: برجاء إرسال صورة التحويل (سكرين شوت) ويفضل أيضاً ذكر رقم الموبايل الذي حولت منه لتسريع عملية التأكيد. 🤍"
                                 );
                             } else if (buttonText === 'الغاء' || buttonText === 'إلغاء') {
                                 // Ask for cancellation reason
