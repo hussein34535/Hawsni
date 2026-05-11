@@ -196,13 +196,13 @@ class WhatsAppService {
                         // Meta templates return buttons as type 'button'
                         if ((msg.type === 'interactive' && msg.interactive) || (msg.type === 'button' && msg.button)) {
                             const buttonReply = msg.interactive ? msg.interactive.button_reply : msg.button;
+                            const phone = msg.from;
                             
                             // Check if the user clicked our "Cancel Order" button
                             const buttonId = buttonReply.id || buttonReply.payload;
                             const buttonText = buttonReply.title || buttonReply.text;
 
                             if (buttonId === 'cancel_order' || buttonId === 'إلغاء الطلب' || (buttonText && buttonText.includes('إلغاء'))) {
-                                const phone = msg.from;
                                 console.log(`[WhatsApp Webhook] 📲 User ${phone} requested order cancellation`);
                                 
                                 // Require orderService locally to prevent circular dependency
