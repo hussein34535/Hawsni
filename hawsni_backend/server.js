@@ -159,15 +159,19 @@ app.use('/api/chat', chatRoutes);
 // ──────────────────────────────────────────────
 app.get('/track-order', async (req, res) => {
   try {
-    const { id } = req.query;
-    if (!id) return res.render('track-order', { order: null, tracking: null });
+    const { id, order_number } = req.query;
+    if (!id && !order_number) return res.render('track-order', { order: null, tracking: null });
 
     const supabase = require('./config/supabase');
-    const { data: order, error } = await supabase
-      .from('orders')
-      .select('*, order_items(*, products(name, images))')
-      .eq('id', id)
-      .single();
+    let query = supabase.from('orders').select('*, order_items(*, products(name, images))');
+
+    if (id) {
+        query = query.eq('id', id);
+    } else if (order_number) {
+        query = query.eq('order_number', order_number);
+    }
+
+    const { data: order, error } = await query.maybeSingle();
 
     if (error || !order) {
       return res.render('track-order', { order: null, tracking: null });

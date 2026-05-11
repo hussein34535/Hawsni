@@ -21,7 +21,7 @@ function TrackOrderContent() {
     const { isRTL } = useLanguage();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [orderId, setOrderId] = useState(searchParams.get('id') || '');
+    const [orderId, setOrderId] = useState(searchParams.get('id') || searchParams.get('order_number') || '');
     const [isTracking, setIsTracking] = useState(false);
     const [order, setOrder] = useState<any>(null);
     const [error, setError] = useState('');
@@ -35,6 +35,7 @@ function TrackOrderContent() {
         setOrder(null);
 
         try {
+            // id could be a UUID or an order_number. The backend getOrderById handles both.
             const res = await checkoutService.getOrder(id.replace('#', ''));
             if (res.success) {
                 setOrder(res.order);
@@ -49,7 +50,7 @@ function TrackOrderContent() {
     }, [orderId, isRTL]);
 
     useEffect(() => {
-        const id = searchParams.get('id');
+        const id = searchParams.get('id') || searchParams.get('order_number');
         if (id) {
             handleTrack(id);
         }

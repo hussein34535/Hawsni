@@ -26,11 +26,23 @@ class OrderService {
     }
 
     async getOrderById(id) {
-        const { data, error } = await supabase
+        if (!id) return null;
+        
+        let query = supabase
             .from('orders')
-            .select('*, order_items(*, products(name, images, price))')
-            .eq('id', id)
-            .single();
+            .select('*, order_items(*, products(name, images, price))');
+
+        // Check if id is a UUID
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        
+        if (isUUID) {
+            query = query.eq('id', id);
+        } else {
+            // Assume it's a 6-digit order_number or the short ID part
+            query = query.eq('order_number', id);
+        }
+
+        const { data, error } = await query.maybeSingle();
 
         if (error) throw error;
         return data;

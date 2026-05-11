@@ -331,6 +331,8 @@ class WhatsAppService {
                             // 2. Send confirmation with URL Buttons
                             const orderService = require('./orderService');
                             const order = await orderService.getLatestActiveOrderByPhone(phone);
+                            
+                            // Use order_number if available, fallback to nothing (route now supports order_number)
                             const trackUrl = order ? `https://hwasi.com/track-order?order_number=${order.order_number}` : 'https://hwasi.com/track-order';
                             const editUrl  = order ? `https://hwasi.com/edit-order?order_number=${order.order_number}`   : 'https://hwasi.com/edit-order';
                             
@@ -342,7 +344,7 @@ class WhatsAppService {
                                 trackUrl
                             );
                             
-                            // Send second message with Edit Button (since one CTA button per message is allowed)
+                            // Send second message with Edit Button (Note: WhatsApp API allows only 1 CTA button per interactive message)
                             await this.sendUrlButtonMessage(
                                 phone, 
                                 "أو يمكنك تعديل طلبك مباشرة من هذا الزر:", 
