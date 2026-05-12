@@ -266,7 +266,18 @@
     const elMsgInput    = document.getElementById('msg-input');
 
     // ── Init ────────────────────────────────────
-    (async () => { await loadSessions(); subSessions(); })();
+    (async () => { 
+        await loadSessions(); 
+        subSessions(); 
+        
+        // Handle direct link from orders (e.g. /admin/chat?sessionId=2010123...)
+        const urlParams = new URLSearchParams(window.location.search);
+        const sid = urlParams.get('sessionId');
+        if (sid) {
+            // Find session or wait a bit if not loaded
+            setTimeout(() => openSession(sid), 500);
+        }
+    })();
 
     // ── Sessions ─────────────────────────────────
     async function loadSessions() {

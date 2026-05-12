@@ -131,8 +131,15 @@
                                                 <div class="customer-name">
                                                     <%= cName %>
                                                 </div>
-                                                <div class="customer-phone">
+                                                <div class="customer-phone" style="display: flex; align-items: center; gap: 8px;">
                                                     <%= cPhone %>
+                                                    <% 
+                                                       let cp = (typeof cPhone === 'string' ? cPhone : '').replace(/\D/g, '');
+                                                       if (cp.startsWith('01') && cp.length === 11) cp = '2' + cp;
+                                                    %>
+                                                    <a href="/admin/chat?sessionId=<%= cp %>" onclick="event.stopPropagation()" title="فتح المحادثة" style="color: #25d366; text-decoration: none;">
+                                                       <i class="fab fa-whatsapp"></i>
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -182,8 +189,15 @@
                                                         : '' %>>ملغي</option>
                                                 </select>
                                             </form>
-                                            <button class="btn-icon text-danger"
-                                                onclick="deleteOrder('<%= order.id %>')" title="حذف الطلب">
+                                            <% 
+                                                let cleanActionPhone = (typeof cPhone === 'string' ? cPhone : '').replace(/\D/g, '');
+                                                if (cleanActionPhone.startsWith('01') && cleanActionPhone.length === 11) cleanActionPhone = '2' + cleanActionPhone;
+                                             %>
+                                             <a href="/admin/chat?sessionId=<%= cleanActionPhone %>" onclick="event.stopPropagation()" class="btn-icon" title="دردشة واتساب" style="color: #25d366; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                                                <i class="fab fa-whatsapp"></i>
+                                             </a>
+                                             <button class="btn-icon text-danger"
+                                                 onclick="deleteOrder('<%= order.id %>')" title="حذف الطلب">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                             <button class="btn-icon" onclick="showOrderDetails('<%= order.id %>')">
