@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close on link click (for mobile SPA-like feel if needed)
         sidebar.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) toggleMenu();
+                if (window.innerWidth <= 1024) toggleMenu();
             });
         });
     }

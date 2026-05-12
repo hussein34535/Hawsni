@@ -141,6 +141,53 @@
     /* ── Status Bar ──────────────────────────────── */
     .status-bar { padding: 10px 18px; background: #f8fafc; border-top: 1px solid var(--border); text-align: center; font-size: 13px; color: var(--muted); flex-shrink: 0; }
 
+    /* ── Responsive Chat ─────────────────────────── */
+    @media (max-width: 768px) {
+        .sessions-panel {
+            width: 100% !important;
+            border-left: none;
+        }
+        .chat-main {
+            display: none; /* Hidden by default on mobile */
+            position: fixed;
+            top: var(--topbar-height);
+            left: 0;
+            width: 100%;
+            height: calc(100vh - var(--topbar-height));
+            z-index: 1001;
+            background: #fff;
+        }
+        .chat-main.active {
+            display: flex;
+        }
+        .chat-wrap.chat-open .sessions-panel {
+            display: none;
+        }
+        .chat-top-actions .act-btn {
+            padding: 6px 10px;
+            font-size: 11px;
+        }
+        .bubble {
+            max-width: 85%;
+        }
+        .btn-back-chat {
+            display: flex !important;
+        }
+    }
+    .btn-back-chat {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: #f0f2f5;
+        color: var(--primary);
+        cursor: pointer;
+        margin-left: 8px;
+    }
+
     /* ── Input ───────────────────────────────────── */
     .input-bar { padding: 14px 18px; background: white; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
     .input-pill { flex: 1; background: #f0f2f5; border-radius: 22px; padding: 0 16px; display: flex; align-items: center; height: 42px; }
@@ -173,6 +220,7 @@
 
         <div class="chat-top" id="chat-top" style="display:none;">
             <div class="chat-top-left">
+                <button class="btn-back-chat" onclick="closeChatMobile()"><i class="fas fa-arrow-right"></i></button>
                 <div class="s-avatar" id="h-avatar" style="width:36px;height:36px;font-size:13px;">?</div>
                 <div>
                     <div class="chat-top-name" id="h-name"></div>
@@ -276,6 +324,19 @@
         updateBtns(s);
         await loadMessages(id);
         subMessages(id);
+
+        // Mobile: Show chat
+        if (window.innerWidth <= 768) {
+            document.querySelector('.chat-main').classList.add('active');
+            document.querySelector('.chat-wrap').classList.add('chat-open');
+        }
+    }
+
+    function closeChatMobile() {
+        document.querySelector('.chat-main').classList.remove('active');
+        document.querySelector('.chat-wrap').classList.remove('chat-open');
+        activeId = null;
+        renderSessions();
     }
 
     function updateBtns(s) {

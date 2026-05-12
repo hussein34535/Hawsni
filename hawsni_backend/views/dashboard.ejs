@@ -126,8 +126,11 @@
     .order-total { font-weight: 900; font-size: 1.2rem; color: var(--text-main); }
     
     @media (max-width: 768px) {
-        .clarity-grid { grid-template-columns: 1fr 1fr; }
+        .clarity-grid { grid-template-columns: 1fr; }
         .dash-welcome h2 { font-size: 1.4rem; }
+        .quick-actions-grid { grid-template-columns: 1fr 1fr; }
+        .order-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+        .order-item > div:last-child { text-align: right !important; width: 100%; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
     }
 </style>
 

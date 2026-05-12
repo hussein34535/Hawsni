@@ -41,9 +41,9 @@
                 <i class="fas fa-list-ul"></i> قائمة الطلبات الحالية
             </h2>
 
-            <div id="bulkBar" class="bulk-actions-bar" style="display:none; align-items: center; gap: 1rem;">
+            <div id="bulkBar" class="bulk-actions-bar" style="display:none; align-items: center; gap: 1rem; flex-wrap: wrap;">
                 <span id="selectedCount" class="badge badge-info" style="font-size: 0.9rem;">0 محدد</span>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
                     <select id="bulkStatusSelect" class="form-control" style="width: auto; height: 38px;">
                         <option value="">-- تغيير الحالة --</option>
                         <option value="Processing">قيد المعالجة</option>
@@ -52,12 +52,11 @@
                         <option value="Cancelled">ملغي</option>
                     </select>
                     <label style="display:flex; align-items:center; gap:4px; margin:0; font-size: 0.85rem; font-weight:bold; color: #475569; cursor: pointer;">
-                        <input type="checkbox" id="bulkSkipEmail" style="width:16px; height:16px; cursor: pointer;"> بدون إرسال إيميل
+                        <input type="checkbox" id="bulkSkipEmail" style="width:16px; height:16px; cursor: pointer;"> بدون إيميل
                     </label>
-                    <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm">تطبيق</button>
-                    <button onclick="bulkDelete()" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> حذف
-                        المحدد</button>
-                    <button onclick="clearSelection()" class="btn btn-secondary btn-sm">إلغاء</button>
+                    <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm" style="flex:1;">تطبيق</button>
+                    <button onclick="bulkDelete()" class="btn btn-danger btn-sm" style="flex:1;"><i class="fas fa-trash"></i> حذف</button>
+                    <button onclick="clearSelection()" class="btn btn-secondary btn-sm" style="flex:1;">إلغاء</button>
                 </div>
             </div>
         </div>
@@ -100,11 +99,11 @@
                                 const displayStatus = tMap[order.status] || (order.status ? order.status : 'غير محدد'); %>
                                 <tr id="row-<%= order.id %>" class="order-row"
                                     onclick="showOrderDetails('<%= order.id %>')">
-                                    <td onclick="event.stopPropagation()">
+                                    <td data-label="تحديد" onclick="event.stopPropagation()">
                                         <input type="checkbox" class="order-checkbox" value="<%= order.id %>"
                                             onchange="updateBulkBar()">
                                     </td>
-                                    <td>
+                                    <td data-label="المنتج">
                                         <div class="product-cell">
                                             <% if (order.product_image) { %>
                                                 <img src="<%= order.product_image %>" class="product-img-lg">
@@ -123,7 +122,7 @@
                                                         </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="العميل">
                                         <div class="customer-cell">
                                             <div class="avatar-small">
                                                 <%= cName==='غير معروف' ? '?' : cName.charAt(0) %>
@@ -138,10 +137,10 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="رقم الطلب">
                                         <span class="order-id">#<%= order.id.substring(0, 8) %></span>
                                     </td>
-                                    <td>
+                                    <td data-label="المبلغ">
                                         <% 
                                             const total = parseFloat(order.total || 0);
                                             const displayTotal = isNaN(total) ? '0.00' : total.toFixed(2);
@@ -150,12 +149,12 @@
                                             <%= displayTotal %> ج.م
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="الحالة">
                                         <span class="badge badge-<%= sClass %>">
                                             <%= displayStatus %>
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="التاريخ">
                                         <div class="date-cell">
                                             <%= new Date(order.created_at).toLocaleDateString('ar-EG', { day: 'numeric'
                                                 , month: 'short' }) %>
@@ -164,7 +163,7 @@
                                                 </span>
                                         </div>
                                     </td>
-                                    <td onclick="event.stopPropagation()">
+                                    <td data-label="تحكم" onclick="event.stopPropagation()">
                                         <div class="action-cell">
                                             <form method="POST" action="/admin/orders/<%= order.id %>/status">
                                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
