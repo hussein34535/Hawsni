@@ -58,10 +58,12 @@ class AdminChatController {
                 await whatsappService.sendTextMessage(sessionId, content);
             }
 
-            // Save to DB
-            await supabase.from('chat_messages').insert([{
-                session_id: sessionId, sender_type: 'admin', content
-            }]);
+            // Save to DB (Only for Web sessions, since WA is handled above)
+            if (session?.platform === 'web') {
+                await supabase.from('chat_messages').insert([{
+                    session_id: sessionId, sender_type: 'admin', content
+                }]);
+            }
 
             await supabase.from('chat_sessions')
                 .update({ status: 'human_active', updated_at: new Date().toISOString() })
@@ -87,7 +89,12 @@ class AdminChatController {
             if (session?.platform === 'whatsapp') {
                 const farewell = 'شكراً لتواصلك مع هَوَسي 🤍\nنتمنى أننا قدرنا نساعدك!\nفي انتظار خدمتك دائماً. ⭐';
                 await whatsappService.sendTextMessage(sessionId, farewell);
-                await supabase.from('chat_messages').insert([{
+            }
+
+            // Save to DB (Only for Web)
+            if (session?.platform === 'web') {
+                 const farewell = 'شكراً لتواصلك مع هَوَسي 🤍\nنتمنى أننا قدرنا نساعدك!\nفي انتظار خدمتك دائماً. ⭐';
+                 await supabase.from('chat_messages').insert([{
                     session_id: sessionId, sender_type: 'bot', content: farewell
                 }]);
             }
