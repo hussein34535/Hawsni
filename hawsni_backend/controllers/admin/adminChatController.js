@@ -34,15 +34,6 @@ class AdminChatController {
                 .update({ status: 'human_active', updated_at: new Date().toISOString() })
                 .eq('session_id', sessionId);
 
-            // Notify customer on WhatsApp
-            if (session?.platform === 'whatsapp') {
-                const notifyMsg = 'مرحباً 👋\nتم تحويلك لأحد ممثلي خدمة العملاء لدى هَوَسي.\nكيف يمكننا مساعدتك؟ 🤍';
-                await whatsappService.sendTextMessage(sessionId, notifyMsg);
-                await supabase.from('chat_messages').insert([{
-                    session_id: sessionId, sender_type: 'bot', content: notifyMsg
-                }]);
-            }
-
             res.json({ success: true });
         } catch (error) {
             console.error('Error in takeOver:', error);

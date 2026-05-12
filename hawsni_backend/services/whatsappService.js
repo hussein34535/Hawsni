@@ -11,16 +11,29 @@ class WhatsAppService {
 
     async _logMessage(sessionId, senderType, content) {
         try {
+            // 1. Ensure session exists (Bot initiated messages should also show up in the inbox)
+            const { data: session } = await supabase.from('chat_sessions').select('id').eq('session_id', sessionId).maybeSingle();
+            
+            if (!session) {
+                await supabase.from('chat_sessions').insert([{
+                    session_id: sessionId,
+                    status: 'bot_active',
+                    platform: 'whatsapp',
+                    updated_at: new Date().toISOString()
+                }]);
+            } else {
+                // Update session timestamp
+                await supabase.from('chat_sessions')
+                    .update({ updated_at: new Date().toISOString() })
+                    .eq('session_id', sessionId);
+            }
+
+            // 2. Insert message
             await supabase.from('chat_messages').insert([{
                 session_id: sessionId,
                 sender_type: senderType,
                 content: content
             }]);
-            
-            // Also update session updated_at
-            await supabase.from('chat_sessions')
-                .update({ updated_at: new Date().toISOString() })
-                .eq('session_id', sessionId);
         } catch (error) {
             console.error('❌ Failed to log message to DB:', error.message);
         }
@@ -240,21 +253,11 @@ class WhatsAppService {
         if (!textBody) return;
         const phone = msg.from;
 
-        // 1. Get or create session
-        let session = null;
-        const { data: existing } = await supabase.from('chat_sessions').select('*').eq('session_id', phone).single();
-        if (!existing) {
-            const { data: ns } = await supabase.from('chat_sessions')
-                .insert([{ session_id: phone, status: 'bot_active', platform: 'whatsapp' }])
-                .select().single();
-            session = ns;
-        } else {
-            await supabase.from('chat_sessions').update({ updated_at: new Date().toISOString(), platform: 'whatsapp' }).eq('session_id', phone);
-            session = existing;
-        }
+        // 1. Log user message and ensure session exists
+        await this._logMessage(phone, 'user', textBody);
 
-        // 2. Save user message to DB
-        await supabase.from('chat_messages').insert([{ session_id: phone, sender_type: 'user', content: textBody }]);
+        // 2. Get session to check status
+        const { data: session } = await supabase.from('chat_sessions').select('status, summary').eq('session_id', phone).single();
 
         // 3. If admin took over → silence the bot
         if (session?.status === 'human_active') {
@@ -283,8 +286,7 @@ class WhatsAppService {
             const aiResponse = await aiChatbotService.handleChat(textBody, formatted, phone, session?.summary || null);
 
             if (aiResponse?.reply) {
-                await supabase.from('chat_messages').insert([{ session_id: phone, sender_type: 'bot', content: aiResponse.reply }]);
-                await supabase.from('chat_sessions').update({ updated_at: new Date().toISOString() }).eq('session_id', phone);
+                // sendTextMessage already calls _logMessage which handles DB logging and session timestamps
                 await this.sendTextMessage(phone, aiResponse.reply);
                 console.log(`[WA] ✅ AI replied to ${phone}`);
             }
@@ -354,25 +356,8 @@ class WhatsAppService {
                             const phone = msg.from;
                             const mediaId = msg.image.id;
                             
-                            // 🟢 SAVE TO CHAT DATABASE
-                            try {
-                                const { data: session } = await supabase.from('chat_sessions').select('session_id').eq('session_id', phone).single();
-                                if (!session) {
-                                    await supabase.from('chat_sessions').insert([{ 
-                                        session_id: phone, 
-                                        status: 'human_requested',
-                                        platform: 'whatsapp'
-                                    }]);
-                                } else {
-                                    await supabase.from('chat_sessions').update({ 
-                                        updated_at: new Date().toISOString(),
-                                        platform: 'whatsapp'
-                                    }).eq('session_id', phone);
-                                }
-                                await supabase.from('chat_messages').insert([{ session_id: phone, sender_type: 'user', content: `[IMAGE:${mediaId}]` }]);
-                            } catch (dbError) {
-                                console.error('[WhatsApp Webhook] ❌ Failed to save image to DB:', dbError);
-                            }
+                            // 1. Log media to DB (ensures session exists)
+                            await this._logMessage(phone, 'user', `[IMAGE:${mediaId}]`);
 
                             // 2. Send confirmation with ONE message containing TWO buttons
                             await this.sendInteractiveButtons(
