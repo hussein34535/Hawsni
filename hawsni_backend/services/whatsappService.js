@@ -9,6 +9,23 @@ class WhatsAppService {
         this.apiVersion = 'v20.0';
     }
 
+    async _logMessage(sessionId, senderType, content) {
+        try {
+            await supabase.from('chat_messages').insert([{
+                session_id: sessionId,
+                sender_type: senderType,
+                content: content
+            }]);
+            
+            // Also update session updated_at
+            await supabase.from('chat_sessions')
+                .update({ updated_at: new Date().toISOString() })
+                .eq('session_id', sessionId);
+        } catch (error) {
+            console.error('❌ Failed to log message to DB:', error.message);
+        }
+    }
+
     async sendOrderConfirmation(phone, customerName, order, items = []) {
         if (!this.phoneNumberId) {
             console.warn('⚠️ WHATSAPP_PHONE_NUMBER_ID is not configured. WhatsApp message skipped.');
@@ -84,6 +101,10 @@ class WhatsAppService {
             }
 
             console.log(`✅ WhatsApp confirmation sent to ${finalPhone}`);
+            
+            // Log to chat messages
+            await this._logMessage(phone, 'bot', `[TEMPLATE:order_confirm] تم إرسال تأكيد الطلب بنجاح للعميل.`);
+            
             return result;
         } catch (error) {
             console.error('❌ WhatsApp Service Error:', error.message);
@@ -117,6 +138,9 @@ class WhatsAppService {
                 },
                 body: JSON.stringify(payload)
             });
+
+            // Log outgoing message
+            await this._logMessage(phone, 'bot', message);
         } catch (error) {
             console.error('❌ WhatsApp Text Error:', error.message);
         }
@@ -155,6 +179,9 @@ class WhatsAppService {
                 },
                 body: JSON.stringify(payload)
             });
+
+            // Log outgoing message
+            await this._logMessage(phone, 'bot', `${bodyText}\n\n[BUTTON: ${buttonText}]`);
         } catch (error) {
             console.error('❌ WhatsApp CTA Error:', error.message);
         }
@@ -195,6 +222,10 @@ class WhatsAppService {
                 },
                 body: JSON.stringify(payload)
             });
+
+            // Log outgoing choices
+            const btnTitles = buttons.map(b => b.title).join(' | ');
+            await this._logMessage(phone, 'bot', `${bodyText}\n\n[CHOICES: ${btnTitles}]`);
         } catch (error) {
             console.error('❌ WhatsApp Buttons Error:', error.message);
         }
@@ -276,6 +307,10 @@ class WhatsAppService {
                         if ((msg.type === 'interactive' && msg.interactive) || (msg.type === 'button' && msg.button)) {
                             const buttonReply = msg.interactive ? msg.interactive.button_reply : msg.button;
                             const phone = msg.from;
+                            
+                            // Log user click
+                            const clickTitle = buttonReply.title || buttonReply.text || 'زر غير معروف';
+                            await this._logMessage(phone, 'user', `[CLICKED: ${clickTitle}]`);
                             
                             // Check if the user clicked our "Cancel Order" button
                             const buttonId = buttonReply.id || buttonReply.payload;

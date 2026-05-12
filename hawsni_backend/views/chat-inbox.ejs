@@ -308,7 +308,23 @@
             const icon    = isUser ? '👤' : isBot ? '🤖' : '🧑‍💼';
             const name    = isUser ? 'عميل' : isBot ? 'هَوَسي' : 'موظف';
             const time    = new Date(m.created_at).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
-            const txt     = (m.content || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+            
+            let txt = (m.content || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+            
+            // Check for image tag [IMAGE:mediaId]
+            const imgMatch = txt.match(/\[IMAGE:(.+?)\]/);
+            if (imgMatch) {
+                const mediaId = imgMatch[1];
+                txt = txt.replace(imgMatch[0], `
+                    <div class="msg-image-wrap" style="margin-top:5px;">
+                        <img src="/admin/chat/media/${mediaId}" 
+                             style="max-width: 100%; max-height: 300px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(0,0,0,0.1);" 
+                             onclick="window.open(this.src, '_blank')"
+                             onerror="this.parentElement.innerHTML='<div style=\'padding:10px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:12px;\'><i class=\'fas fa-image\'></i> صورة (انتهت صلاحيتها أو غير متوفرة)</div>'" />
+                    </div>
+                `);
+            }
+
             return `<div class="msg-row ${cls}"><div class="bubble"><span class="b-label">${icon} ${name}</span>${txt}<div class="b-time">${time}</div></div></div>`;
         }).join('');
         elMsgs.scrollTop = elMsgs.scrollHeight;
