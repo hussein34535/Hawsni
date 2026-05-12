@@ -206,6 +206,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     const db = supabase.createClient('<%= supabaseUrl %>', '<%= supabaseAnonKey %>');
+    const CSRF_TOKEN = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>';
 
     let sessions = [], messages = [], activeId = null, filter = 'all', msgCh = null;
 
@@ -336,7 +337,11 @@
         if (!c || !activeId) return;
         elMsgInput.value = '';
         await fetch('/admin/chat/send', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            method: 'POST', 
+            headers: { 
+                'Content-Type': 'application/json',
+                'CSRF-Token': CSRF_TOKEN
+            },
             body: JSON.stringify({ sessionId: activeId, content: c })
         });
     }
@@ -346,7 +351,10 @@
         try {
             const r = await fetch(url, { 
                 method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': CSRF_TOKEN
+                }, 
                 body: JSON.stringify({ sessionId: activeId }) 
             });
             const res = await r.json();
