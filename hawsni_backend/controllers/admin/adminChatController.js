@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const supabase = require('../../config/supabase');
+const { supabaseAdmin: supabase } = require('../../config/supabase');
 const whatsappService = require('../../services/whatsappService');
 
 class AdminChatController {

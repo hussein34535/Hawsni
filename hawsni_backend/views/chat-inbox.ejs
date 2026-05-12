@@ -343,12 +343,46 @@
 
     // ── Actions ───────────────────────────────────
     async function callApi(url) {
-        const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: activeId }) });
-        return (await r.json()).success;
+        try {
+            const r = await fetch(url, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ sessionId: activeId }) 
+            });
+            const res = await r.json();
+            if (!res.success) console.error('API Error:', res.error);
+            return res.success;
+        } catch (e) {
+            console.error('Fetch Error:', e);
+            return false;
+        }
     }
-    async function takeOver() { if (await callApi('/admin/chat/takeover'))   { await loadSessions(); await openSession(activeId); } }
-    async function endConv()  { if (!confirm('إنهاء المحادثة؟')) return; if (await callApi('/admin/chat/end'))           { await loadSessions(); await openSession(activeId); } }
-    async function toBot()    { if (!confirm('تسليم للبوت؟')) return;     if (await callApi('/admin/chat/return-to-bot')) { await loadSessions(); await openSession(activeId); } }
+    async function takeOver() { 
+        if (await callApi('/admin/chat/takeover')) { 
+            await loadSessions(); 
+            if (activeId) await openSession(activeId); 
+        } else {
+            alert('فشل استلام المحادثة. يرجى التأكد من اتصال الإنترنت.');
+        }
+    }
+    async function endConv() { 
+        if (!confirm('إنهاء المحادثة؟')) return; 
+        if (await callApi('/admin/chat/end')) { 
+            await loadSessions(); 
+            if (activeId) await openSession(activeId); 
+        } else {
+            alert('فشل إنهاء المحادثة.');
+        }
+    }
+    async function toBot() { 
+        if (!confirm('إعادة المحادثة للبوت الذكي؟')) return; 
+        if (await callApi('/admin/chat/return-to-bot')) { 
+            await loadSessions(); 
+            if (activeId) await openSession(activeId); 
+        } else {
+            alert('فشل التحويل للبوت.');
+        }
+    }
 
     // ── Realtime ──────────────────────────────────
     function subSessions() {
