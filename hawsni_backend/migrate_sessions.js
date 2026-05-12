@@ -1,19 +1,19 @@
 const { supabaseAdmin } = require('./config/supabase');
 
-async function migrateFromOrders() {
-    console.log('🔍 Syncing chat sessions from orders...');
+async function migrateTemplatesFromOrders() {
+    console.log('🔍 Syncing templates from orders...');
     
     // 1. Get all orders
     const { data: orders, error: oError } = await supabaseAdmin
         .from('orders')
-        .select('shipping_address');
+        .select('shipping_address, created_at');
     
     if (oError) {
         console.error('Error fetching orders:', oError);
         return;
     }
 
-    const phones = new Set();
+    const customerData = new Map(); // phone -> createdAt
     orders.forEach(o => {
         let ship = o.shipping_address;
         if (typeof ship === 'string') {
@@ -22,40 +22,52 @@ async function migrateFromOrders() {
         if (ship && (ship.phone || ship.guestPhone)) {
             let p = (ship.phone || ship.guestPhone).replace(/\D/g, '');
             if (p.startsWith('01') && p.length === 11) p = '2' + p;
-            if (p) phones.add(p);
+            if (p) {
+                // Keep the latest order date
+                if (!customerData.has(p) || new Date(o.created_at) > new Date(customerData.get(p))) {
+                    customerData.set(p, o.created_at);
+                }
+            }
         }
     });
 
-    console.log(`Found ${phones.size} unique phone numbers in orders.`);
+    console.log(`Found ${customerData.size} unique customers in orders.`);
 
-    // 2. Get existing sessions
-    const { data: sessions, error: sError } = await supabaseAdmin
-        .from('chat_sessions')
-        .select('session_id');
-    
-    const existingIds = new Set(sessions.map(s => s.session_id));
+    // 2. Get existing sessions and messages
+    const { data: existingSessions } = await supabaseAdmin.from('chat_sessions').select('session_id');
+    const existingSessionIds = new Set(existingSessions.map(s => s.session_id));
 
-    // 3. Create missing
+    const { data: existingMessages } = await supabaseAdmin.from('chat_messages').select('session_id');
+    const idsWithMessages = new Set(existingMessages.map(m => m.session_id));
+
+    // 3. Process
     let count = 0;
-    for (const phone of phones) {
-        if (!existingIds.has(phone)) {
-            const { error: iError } = await supabaseAdmin
-                .from('chat_sessions')
-                .insert([{
-                    session_id: phone,
-                    status: 'bot_active',
-                    platform: 'whatsapp',
-                    updated_at: new Date().toISOString()
-                }]);
-            
-            if (!iError) {
-                console.log(`✅ Created session for order customer: ${phone}`);
-                count++;
-            }
+    for (const [phone, createdAt] of customerData.entries()) {
+        // Create session if missing
+        if (!existingSessionIds.has(phone)) {
+            await supabaseAdmin.from('chat_sessions').insert([{
+                session_id: phone,
+                status: 'bot_active',
+                platform: 'whatsapp',
+                updated_at: createdAt
+            }]);
+            console.log(`✅ Created session for: ${phone}`);
+        }
+
+        // Add placeholder message if no history exists for this phone
+        if (!idsWithMessages.has(phone)) {
+            await supabaseAdmin.from('chat_messages').insert([{
+                session_id: phone,
+                sender_type: 'bot',
+                content: '📦 [نظام] تم إرسال قالب تأكيد الطلب لهذا العميل سابقاً.',
+                created_at: createdAt
+            }]);
+            console.log(`📝 Added history placeholder for: ${phone}`);
+            count++;
         }
     }
 
-    console.log(`🎉 Migration completed. Added ${count} new sessions.`);
+    console.log(`🎉 Done. Added ${count} customers who received templates previously.`);
 }
 
-migrateFromOrders();
+migrateTemplatesFromOrders();
