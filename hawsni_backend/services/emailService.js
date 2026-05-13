@@ -761,23 +761,23 @@ async function sendOutOfStockAlert(productName, sku, size, color) {
 // ──────────────────────────────────────────────
 // 10. Live Chat Opened Notification
 // ──────────────────────────────────────────────
-async function sendNewChatNotification(sessionId, firstMessage) {
+async function sendNewChatNotification(sessionId, message, type = 'text') {
     return _send({
         to: ADMIN_EMAIL,
-        subject: `💬 محادثة جديدة قد تحتاج تدخلك!`,
+        subject: `💬 رسالة واتساب جديدة تحتاج رد`,
         htmlContent: `
         <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e8e8e8;">
-            <div style="background: #2563eb; padding: 25px; text-align: center;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 20px;">💬 محادثة جديدة مفتوحة</h1>
+            <div style="background: #25d366; padding: 25px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 20px;">💬 رسالة واتساب جديدة</h1>
             </div>
             <div style="padding: 30px;">
-                <p>تم بدء جلسة محادثة جديدة مع الذكاء الاصطناعي الآن.</p>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0; border: 1px solid #ddd;">
-                    <p style="margin: 0; font-size: 14px; font-weight: bold;">أول رسالة من العميل:</p>
-                    <p style="margin: 8px 0 0 0; font-size: 14px; color: #555;">"${firstMessage}"</p>
+                <p style="font-size: 14px; color: #666;">رقم العميل: <strong dir="ltr" style="color:#111;">${sessionId}</strong></p>
+                <div style="background: #f0faf0; padding: 15px; border-radius: 10px; margin: 20px 0; border: 1px solid #d1fae5;">
+                    <p style="margin: 0; font-size: 14px; font-weight: bold; color: #065f46;">${type === 'image' ? '🖼 أرسل صورة (إيصال تحويل)' : type === 'button' ? '🔘 نقر على زر: ' + message : '💬 الرسالة:'}</p>
+                    ${type === 'text' ? `<p style="margin: 8px 0 0 0; font-size: 14px; color: #555;">"${message}"</p>` : ''}
                 </div>
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="https://hwasibackend.vercel.app/admin/chat" style="background: #2563eb; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold;">متابعة الشات</a>
+                    <a href="https://hwasibackend.vercel.app/admin/chat?sessionId=${sessionId}" style="background: #25d366; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">فتح المحادثة في واتساب</a>
                 </div>
             </div>
         </div>`

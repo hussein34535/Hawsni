@@ -379,6 +379,30 @@ class WhatsAppService {
 
 
     // ─────────────────────────────────────────────
+    //  NOTIFICATION: Email admin on first unread message only
+    // ─────────────────────────────────────────────
+    async _notifyAdminOnFirstMessage(phone, message, type = 'text') {
+        try {
+            // Count existing unread user messages for this session (before logging new one)
+            const { count, error } = await supabase
+                .from('chat_messages')
+                .select('id', { count: 'exact', head: true })
+                .eq('session_id', phone)
+                .eq('sender_type', 'user')
+                .not('is_read', 'eq', true);
+
+            // If no unread messages exist, this is the first → send email
+            if (!error && (count === 0 || count === null)) {
+                const emailService = require('./emailService');
+                await emailService.sendNewChatNotification(phone, message, type);
+                console.log(`[WA] 📧 Email notification sent for ${phone}`);
+            }
+        } catch (err) {
+            console.error('[WA] ❌ Email notification error:', err.message);
+        }
+    }
+
+    // ─────────────────────────────────────────────
     //  AI SUPPORT HANDLER
     // ─────────────────────────────────────────────
     async _handleIncomingText(msg) {
@@ -386,7 +410,10 @@ class WhatsAppService {
         if (!textBody) return;
         const phone = msg.from;
 
-        // 1. Log user message and ensure session exists
+        // 1. Check if this is the first unread message → notify admin via email
+        await this._notifyAdminOnFirstMessage(phone, textBody, 'text');
+
+        // 2. Log user message and ensure session exists
         await this._logMessage(phone, 'user', textBody);
 
         // 2. Get session to check status
@@ -437,6 +464,9 @@ class WhatsAppService {
     async _handleImageMessage(msg) {
         const phone = msg.from;
         const mediaId = msg.image.id;
+
+        // Notify admin (first unread message)
+        await this._notifyAdminOnFirstMessage(phone, '[IMAGE] صورة إيصال', 'image');
 
         // 1. Log media to DB
         await this._logMessage(phone, 'user', `[IMAGE:${mediaId}]`);
@@ -535,6 +565,9 @@ class WhatsAppService {
                             const buttonReply = msg.interactive ? msg.interactive.button_reply : msg.button;
                             const phone = msg.from;
                             
+                            // Notify admin (first unread message)
+                            await this._notifyAdminOnFirstMessage(phone, `[نقر على زر: ${clickTitle}]`, 'button');
+
                             // Log user click
                             const clickTitle = buttonReply.title || buttonReply.text || 'زر غير معروف';
                             await this._logMessage(phone, 'user', `[CLICKED: ${clickTitle}]`);
