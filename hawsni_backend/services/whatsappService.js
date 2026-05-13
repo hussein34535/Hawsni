@@ -11,29 +11,38 @@ class WhatsAppService {
 
     async _logMessage(sessionId, senderType, content) {
         try {
-            // 1. Ensure session exists (Bot initiated messages should also show up in the inbox)
-            const { data: session } = await supabase.from('chat_sessions').select('id').eq('session_id', sessionId).maybeSingle();
-            
+            // 1. Ensure session exists
+            const { data: session, error: findErr } = await supabase.from('chat_sessions').select('session_id').eq('session_id', sessionId).maybeSingle();
+
+            if (findErr) {
+                console.error('[WA _logMessage] Find session error:', findErr);
+            }
+
             if (!session) {
-                await supabase.from('chat_sessions').insert([{
+                const { error: insertErr } = await supabase.from('chat_sessions').insert([{
                     session_id: sessionId,
                     status: 'bot_active',
                     platform: 'whatsapp',
                     updated_at: new Date().toISOString()
                 }]);
+                if (insertErr && insertErr.code !== '23505') {
+                    console.error('[WA _logMessage] Insert session error:', insertErr);
+                }
             } else {
-                // Update session timestamp
                 await supabase.from('chat_sessions')
                     .update({ updated_at: new Date().toISOString() })
                     .eq('session_id', sessionId);
             }
 
             // 2. Insert message
-            await supabase.from('chat_messages').insert([{
+            const { error: msgErr } = await supabase.from('chat_messages').insert([{
                 session_id: sessionId,
                 sender_type: senderType,
                 content: content
             }]);
+            if (msgErr) {
+                console.error('[WA _logMessage] Insert message error:', msgErr);
+            }
         } catch (error) {
             console.error('❌ Failed to log message to DB:', error.message);
         }
