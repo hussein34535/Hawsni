@@ -497,29 +497,34 @@
         panel.classList.add('active');
         el('order-body').innerHTML = '<div style="text-align:center;padding:40px 0;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:24px;margin-bottom:12px;display:block;"></i>جاري التحميل...</div>';
         try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000);
-            const r = await fetch('/admin/chat/orders/' + encodeURIComponent(activeId), { signal: controller.signal });
-            clearTimeout(timeout);
-            if (!r.ok) { el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">خطأ (' + r.status + ')</div>'; return; }
-            const data = await r.json();
-            if (!data.success) { el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">' + (data.error || 'خطأ') + '</div>'; return; }
-            if (!data.orders || !data.orders.length) {
+            const digits = activeId.replace(/\D/g, '');
+            const { data, error } = await db
+                .from('orders')
+                .select('id, order_number, status, total, created_at, shipping_address')
+                .gte('created_at', new Date(Date.now() - 90*24*60*60*1000).toISOString())
+                .order('created_at', { ascending: false })
+                .limit(50);
+            if (error) { el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">' + error.message + '</div>'; return; }
+            const matched = (data || []).filter(o => {
+                const phone = (o.shipping_address?.phone || '').replace(/\D/g, '');
+                return phone.includes(digits) || digits.includes(phone);
+            });
+            if (!matched.length) {
                 el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-box-open" style="font-size:40px;margin-bottom:12px;display:block;opacity:0.3;"></i>لا توجد طلبات لهذا الرقم</div>';
                 return;
             }
-            el('order-body').innerHTML = data.orders.map(o => {
+            el('order-body').innerHTML = matched.map(o => {
                 const statusColor = o.status === 'Delivered' ? '#16a34a' : o.status === 'Shipped' ? '#2563eb' : o.status === 'Cancelled' ? '#dc2626' : '#d97706';
                 return `<div class="order-card">
                     <h4><span>طلب #${o.order_number || o.id?.slice(0,8)}</span><span class="status-badge" style="background:${statusColor}20;color:${statusColor};">${o.status || 'قيد الانتظار'}</span></h4>
-                    <div class="row"><span>العميل</span><span>${o.customer_name || '—'}</span></div>
+                    <div class="row"><span>العميل</span><span>${o.shipping_address?.name || '—'}</span></div>
                     <div class="row"><span>الإجمالي</span><span>${o.total || 0} ج.م</span></div>
                     <div class="row"><span>التاريخ</span><span>${new Date(o.created_at).toLocaleDateString('ar-EG')}</span></div>
                 </div>`;
             }).join('');
         } catch (e) {
             console.error('Orders fetch error:', e);
-            el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">' + (e.name === 'AbortError' ? 'انتهت مهلة الطلب' : 'خطأ في الاتصال') + '</div>';
+            el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">' + e.message + '</div>';
         }
     }
 
