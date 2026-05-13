@@ -69,7 +69,8 @@
     }
 
     /* Full Chat */
-    .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; }
+    .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .chat-wrap.panel-hidden .sessions-panel { display: none; }
 
     .chat-top {
         height: 56px; background: var(--primary); color: white; padding: 0 12px;
@@ -250,7 +251,7 @@
 
     <div class="chat-main">
         <div class="chat-top" id="chat-top" style="display:none;">
-            <button class="chat-top-back" onclick="closeChatMobile()" title="رجوع"><i class="fas fa-arrow-right"></i></button>
+            <button class="chat-top-back" onclick="toggleSessions()" title="القائمة"><i class="fas fa-bars"></i></button>
             <div class="chat-top-avatar" id="h-avatar">?</div>
             <div class="chat-top-info">
                 <div class="chat-top-name" id="h-name"></div>
@@ -319,10 +320,12 @@
     const elMsgInput = el('msg-input');
 
     (async () => {
+        document.body.style.overflow = 'hidden';
+        document.body.style.height = '100vh';
         await loadSessions();
         subSessions();
-        const sid = new URLSearchParams(window.location.search).get('sessionId');
-        if (sid) setTimeout(() => openSession(sid), 500);
+        const sid = new URLSearchParams(window.location.search).get('sessionId') || localStorage.getItem('chatSessionId');
+        if (sid) { localStorage.setItem('chatSessionId', sid); setTimeout(() => openSession(sid), 500); }
     })();
 
     async function loadSessions() {
@@ -369,6 +372,7 @@
 
     async function openSession(id) {
         activeId = id;
+        localStorage.setItem('chatSessionId', id);
         const s = sessions.find(x => x.session_id === id);
         if (!s) return;
         el('chat-top').style.display = 'flex';
@@ -402,14 +406,19 @@
         }
     }
 
-    function closeChatMobile() {
-        document.querySelector('.chat-main').classList.remove('active');
-        document.querySelector('.chat-wrap').classList.remove('chat-open');
-        el('order-panel').classList.remove('active');
-        activeId = null;
-        elFooter.style.display = 'none';
-        el('chat-top').style.display = 'none';
-        renderSessions();
+    function toggleSessions() {
+        if (window.innerWidth <= 768) {
+            document.querySelector('.chat-main').classList.remove('active');
+            document.querySelector('.chat-wrap').classList.remove('chat-open');
+            el('order-panel').classList.remove('active');
+            activeId = null;
+            localStorage.removeItem('chatSessionId');
+            elFooter.style.display = 'none';
+            el('chat-top').style.display = 'none';
+            renderSessions();
+        } else {
+            document.querySelector('.chat-wrap').classList.toggle('panel-hidden');
+        }
     }
 
     function updateBtns(s) {
