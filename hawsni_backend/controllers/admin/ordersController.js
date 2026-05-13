@@ -438,6 +438,57 @@ class OrdersController {
             res.status(500).json({ success: false, message: 'خطأ في إنشاء الشحنة: ' + err.message });
         }
     }
+
+    // Update order details (Basic info)
+    async updateOrder(req, res) {
+        try {
+            const { id } = req.params;
+            const { customerName, customerPhone, customerAddress, total } = req.body;
+
+            // 1. Get current order to preserve other shipping details
+            const { data: order, error: fetchError } = await supabase
+                .from('orders')
+                .select('shipping_address')
+                .eq('id', id)
+                .single();
+
+            if (fetchError || !order) {
+                return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+            }
+
+            let ship = order.shipping_address;
+            if (typeof ship === 'string' && ship.trim().startsWith('{')) {
+                try { ship = JSON.parse(ship); } catch (e) { }
+            }
+
+            // Update shipping address object
+            const updatedShip = {
+                ...(typeof ship === 'object' ? ship : {}),
+                name: customerName,
+                phone: customerPhone,
+                address: customerAddress,
+                guestName: customerName, // Support both formats
+                guestPhone: customerPhone,
+                shippingAddress: customerAddress
+            };
+
+            // 2. Update database
+            const { error: updateError } = await supabase
+                .from('orders')
+                .update({
+                    shipping_address: updatedShip,
+                    total: parseFloat(total || 0)
+                })
+                .eq('id', id);
+
+            if (updateError) throw updateError;
+
+            res.json({ success: true, message: 'تم تحديث بيانات الطلب بنجاح' });
+        } catch (err) {
+            console.error('Error updating order:', err);
+            res.status(500).json({ success: false, message: 'خطأ في تحديث الطلب: ' + err.message });
+        }
+    }
 }
 
 module.exports = new OrdersController();
