@@ -4,7 +4,17 @@
     :root { --primary: #0E4435; --primary-light: #1a6b56; --chat-bg: #ece5dd; }
 
     div.admin-layout > main.main-content { margin-right: 0 !important; width: 100% !important; min-height: 0 !important; }
-    div.admin-layout > aside.sidebar { display: none !important; }
+    div.admin-layout > aside.sidebar {
+        display: flex !important; width: 280px !important; right: 0 !important; top: 0 !important;
+        height: 100vh !important; border-radius: 0 !important; z-index: 1100 !important;
+        transform: translateX(110%) !important; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    div.admin-layout > aside.sidebar.active { transform: translateX(0) !important; }
+    .sidebar-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+        z-index: 1099; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
     .topbar { display: none !important; }
     .content-wrapper {
         padding: 0 !important; max-width: 100% !important; margin: 0 !important;
@@ -246,7 +256,7 @@
     <div class="sessions-panel">
         <div class="sp-header">
             <div class="sp-header-top">
-                <button class="header-menu-btn" onclick="toggleSessions()" title="القائمة"><i class="fas fa-bars"></i></button>
+                <button class="header-menu-btn" onclick="toggleAdminMenu()" title="القائمة"><i class="fas fa-bars"></i></button>
                 <h3>المحادثات</h3>
             </div>
             <div class="sp-search">
@@ -417,6 +427,14 @@
             document.querySelector('.chat-main').classList.add('active');
             document.querySelector('.chat-wrap').classList.add('chat-open');
         }
+    }
+
+    function toggleAdminMenu() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar || !overlay) return;
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
     }
 
     function toggleSessions() {
