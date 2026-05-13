@@ -19,6 +19,59 @@ class AdminChatController {
         }
     }
 
+    // ── 0. List sessions with last message and unread count ──────
+    async getSessions(req, res) {
+        try {
+            const { data: sessions, error } = await supabase
+                .from('chat_sessions')
+                .select('*')
+                .order('updated_at', { ascending: false });
+
+            if (error) throw error;
+
+            const ids = sessions.map(s => s.session_id);
+            const enriched = [];
+
+            if (ids.length > 0) {
+                // Fetch all messages for these sessions (latest first) to build last-message map
+                const { data: allMsgs } = await supabase
+                    .from('chat_messages')
+                    .select('session_id, content, sender_type, created_at')
+                    .in('session_id', ids)
+                    .order('created_at', { ascending: false });
+
+                let lastMap = {};
+                let unreadMap = {};
+                if (allMsgs) {
+                    const seen = new Set();
+                    for (const m of allMsgs) {
+                        if (!seen.has(m.session_id)) {
+                            seen.add(m.session_id);
+                            lastMap[m.session_id] = { content: m.content, sender_type: m.sender_type };
+                        }
+                        if (m.sender_type !== 'user' && m.is_read === false) {
+                            unreadMap[m.session_id] = (unreadMap[m.session_id] || 0) + 1;
+                        }
+                    }
+                }
+
+                for (const s of sessions) {
+                    enriched.push({
+                        ...s,
+                        last_message: lastMap[s.session_id]?.content || null,
+                        last_sender_type: lastMap[s.session_id]?.sender_type || null,
+                        unread_count: unreadMap[s.session_id] || 0
+                    });
+                }
+            }
+
+            return res.json({ success: true, sessions: enriched });
+        } catch (error) {
+            console.error('[AdminChatController getSessions] Error:', error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
     // ── 1. Admin takes over session ─────────────────────────────
     async takeOver(req, res) {
         try {
@@ -135,6 +188,27 @@ class AdminChatController {
             res.json({ success: true });
         } catch (error) {
             console.error('Error returning to bot:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // ── 5.5 Mark messages as read ────────────────────────────────
+    async markRead(req, res) {
+        try {
+            const { sessionId } = req.body;
+            if (!sessionId) return res.status(400).json({ success: false, error: 'Missing sessionId' });
+
+            const { error } = await supabase
+                .from('chat_messages')
+                .update({ is_read: true })
+                .eq('session_id', sessionId)
+                .in('sender_type', ['bot', 'admin'])
+                .eq('is_read', false);
+
+            if (error) throw error;
+            res.json({ success: true });
+        } catch (error) {
+            console.error('[AdminChatController markRead] Error:', error);
             res.status(500).json({ success: false, error: error.message });
         }
     }

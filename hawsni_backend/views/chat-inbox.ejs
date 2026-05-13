@@ -87,6 +87,7 @@
     .s-name { font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 2px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .s-preview { font-size: 12px; color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .s-time { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+    .unread-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; border-radius: 9px; padding: 0 5px; margin-right: 5px; vertical-align: middle; }
 
     /* ── Main Chat ───────────────────────────────── */
     .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
@@ -256,7 +257,7 @@
     const db = supabase.createClient('<%= supabaseUrl %>', '<%= supabaseAnonKey %>');
     const CSRF_TOKEN = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>';
 
-    let sessions = [], messages = [], activeId = null, filter = 'all', msgCh = null;
+    let rawSessions = [], sessions = [], messages = [], activeId = null, filter = 'all', msgCh = null;
 
     const elSessionList = document.getElementById('session-list');
     const elMsgs        = document.getElementById('msgs-area');
@@ -281,9 +282,31 @@
 
     // ── Sessions ─────────────────────────────────
     async function loadSessions() {
-        const { data } = await db.from('chat_sessions').select('*').order('updated_at', { ascending: false });
-        sessions = data || [];
+        try {
+            const res = await fetch('/admin/chat/sessions');
+            const data = await res.json();
+            rawSessions = data.sessions || [];
+        } catch (e) {
+            console.error('Failed to load sessions', e);
+            rawSessions = [];
+        }
+        sessions = rawSessions;
         renderSessions();
+    }
+
+    function formatPreview(s) {
+        if (s.last_message) {
+            let txt = s.last_message;
+            if (txt.startsWith('[IMAGE:')) return '🖼️ صورة';
+            if (txt.startsWith('[TEMPLATE:')) return '📋 قالب';
+            if (txt.startsWith('[CLICKED:')) return '👆 ' + txt.replace('[CLICKED:', '').replace(']', '');
+            if (txt.startsWith('[CHOICES:')) return txt.replace('[CHOICES:', '').replace(']', '');
+            if (txt.length > 60) txt = txt.substring(0, 57) + '...';
+            return txt;
+        }
+        return s.status === 'human_requested' ? '⚠️ يطلب موظف'
+             : s.status === 'human_active'    ? '🧑‍💼 موظف نشط'
+             : '🤖 نشطة';
     }
 
     function renderSessions() {
@@ -304,15 +327,15 @@
             const init    = s.session_id.charAt(0).toUpperCase();
             const name    = isWA ? s.session_id : 'زائر الموقع';
             const icon    = isWA ? '<i class="fab fa-whatsapp" style="color:#25d366"></i>' : '<i class="fas fa-globe" style="color:#3b82f6"></i>';
-            const preview = s.status === 'human_requested' ? '⚠️ يطلب موظف'
-                          : s.status === 'human_active'    ? '🧑‍💼 موظف نشط'
-                          : '🤖 نشطة';
+            const preview = formatPreview(s);
             const time    = new Date(s.updated_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
             const cls     = s.session_id === activeId ? 'active' : '';
+            const unread  = s.unread_count || 0;
+            const badge   = unread > 0 ? `<span class="unread-badge">${unread > 99 ? '99+' : unread}</span>` : '';
             return `<div class="s-item ${cls}" onclick="openSession('${s.session_id}')">
-                <div class="s-avatar">${init}<div class="s-badge">${icon}</div></div>
+                <div class="s-avatar">${init}${badge ? '' : `<div class="s-badge">${icon}</div>`}</div>
                 <div class="s-info">
-                    <span class="s-name">${name}</span>
+                    <span class="s-name">${name} ${badge}</span>
                     <span class="s-preview">${preview}</span>
                 </div>
                 <span class="s-time">${time}</span>
@@ -335,6 +358,20 @@
         updateBtns(s);
         await loadMessages(id);
         subMessages(id);
+
+        // Mark messages as read
+        try {
+            await fetch('/admin/chat/mark-read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+                body: JSON.stringify({ sessionId: id })
+            });
+            // Update unread count locally
+            const s = sessions.find(x => x.session_id === id);
+            if (s) { s.unread_count = 0; renderSessions(); }
+        } catch (e) {
+            console.error('Failed to mark as read', e);
+        }
 
         // Mobile: Show chat
         if (window.innerWidth <= 768) {
@@ -476,7 +513,11 @@
         if (msgCh) db.removeChannel(msgCh);
         msgCh = db.channel('c-msgs-' + id).on('postgres_changes', {
             event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${id}`
-        }, p => { messages.push(p.new); renderMsgs(); }).subscribe();
+        }, p => {
+            messages.push(p.new); renderMsgs();
+            // Refresh sessions list to update preview + unread badge
+            loadSessions();
+        }).subscribe();
     }
 
     // ── Filters & Search ──────────────────────────
