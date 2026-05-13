@@ -164,10 +164,10 @@ class ChatController {
                 await emailService.sendNewChatNotification(sessionId, message);
             }
 
-            // 1. Insert user message to DB
+            // 1. Insert user message to DB (always marked as read)
             const { data: userMsg, error: insertErr } = await supabase
                 .from('chat_messages')
-                .insert([{ session_id: sessionId, sender_type: 'user', content: message }])
+                .insert([{ session_id: sessionId, sender_type: 'user', content: message, is_read: true }])
                 .select().single();
             if (insertErr) throw insertErr;
 
@@ -237,6 +237,56 @@ class ChatController {
                 { session_id: req.body?.sessionId, sender_type: 'bot', content: 'حدث خطأ، يرجى المحاولة لاحقاً.' }
             ]);
             return res.status(500).json({ success: false, error: 'حدث خطأ غير متوقع' });
+        }
+    }
+
+    /**
+     * GET /api/chat/unread/:sessionId
+     * Get unread message count for a session
+     */
+    async getUnreadCount(req, res) {
+        try {
+            const { sessionId } = req.params;
+            if (!sessionId) return res.status(400).json({ success: false, error: 'Session ID required' });
+
+            const { count, error } = await supabase
+                .from('chat_messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('session_id', sessionId)
+                .in('sender_type', ['bot', 'admin'])
+                .eq('is_read', false);
+
+            if (error) throw error;
+
+            return res.status(200).json({ success: true, unread: count || 0 });
+        } catch (error) {
+            console.error('[ChatController getUnreadCount] Error:', error);
+            return res.status(500).json({ success: false, error: 'حدث خطأ' });
+        }
+    }
+
+    /**
+     * POST /api/chat/mark-read
+     * Request body: { sessionId: "string" }
+     */
+    async markAsRead(req, res) {
+        try {
+            const { sessionId } = req.body;
+            if (!sessionId) return res.status(400).json({ success: false, error: 'Session ID required' });
+
+            const { error } = await supabase
+                .from('chat_messages')
+                .update({ is_read: true })
+                .eq('session_id', sessionId)
+                .in('sender_type', ['bot', 'admin'])
+                .eq('is_read', false);
+
+            if (error) throw error;
+
+            return res.status(200).json({ success: true });
+        } catch (error) {
+            console.error('[ChatController markAsRead] Error:', error);
+            return res.status(500).json({ success: false, error: 'حدث خطأ' });
         }
     }
 

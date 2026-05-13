@@ -35,6 +35,7 @@ export default function ChatWidget() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
   
    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const pathname = usePathname();
@@ -80,7 +81,7 @@ export default function ChatWidget() {
   // Hide on Checkout/Cart pages
   const shouldHideCompletely = pathname.includes('/checkout') || pathname.includes('/cart');
 
-  // 1. Initialize or Load Session and Fetch History
+  // 1. Initialize or Load Session
   useEffect(() => {
     let sid = localStorage.getItem('hwasi_chat_session');
     if (!sid) {
@@ -88,11 +89,22 @@ export default function ChatWidget() {
       localStorage.setItem('hwasi_chat_session', sid);
     }
     setSessionId(sid);
+  }, []);
 
+  // Fetch session data when chat opens, and mark messages as read
+  useEffect(() => {
+    if (!sessionId) return;
     if (isOpen) {
-      fetchSessionData(sid);
+      fetchSessionData(sessionId);
+      markMessagesAsRead(sessionId);
     }
-  }, [isOpen]);
+  }, [isOpen, sessionId]);
+
+  // Fetch unread count when sessionId is known (chat closed)
+  useEffect(() => {
+    if (!sessionId) return;
+    fetchUnreadCount(sessionId);
+  }, [sessionId]);
 
   const fetchSessionData = async (sid: string) => {
     try {
@@ -103,6 +115,31 @@ export default function ChatWidget() {
       }
     } catch (e) {
       console.error('Failed to load chat history', e);
+    }
+  };
+
+  const fetchUnreadCount = async (sid: string) => {
+    try {
+      const res = await fetch(`${API_URL}/chat/unread/${sid}`);
+      const data = await res.json();
+      if (data.success) {
+        setUnreadCount(data.unread);
+      }
+    } catch (e) {
+      console.error('Failed to fetch unread count', e);
+    }
+  };
+
+  const markMessagesAsRead = async (sid: string) => {
+    try {
+      await fetch(`${API_URL}/chat/mark-read`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sid })
+      });
+      setUnreadCount(0);
+    } catch (e) {
+      console.error('Failed to mark messages as read', e);
     }
   };
 
@@ -117,7 +154,7 @@ export default function ChatWidget() {
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
           (payload) => {
-            const newMessage = payload.new as ChatMessage;
+            const newMessage = payload.new as ChatMessage & { is_read?: boolean };
             
             setMessages((prev) => {
               // 1. If it's a message from 'user', we might have an optimistic version
@@ -133,6 +170,11 @@ export default function ChatWidget() {
               if (prev.some(m => m.id === newMessage.id)) return prev;
               return [...prev, newMessage];
             });
+
+            // 3. Increment unread count if chat is closed and message is from bot/admin
+            if (!isOpen && (newMessage.sender_type === 'bot' || newMessage.sender_type === 'admin')) {
+              setUnreadCount(prev => prev + 1);
+            }
           }
         )
         .subscribe();
@@ -140,7 +182,7 @@ export default function ChatWidget() {
       return () => {
         supabase!.removeChannel(channel);
       };
-    }, [sessionId]);
+    }, [sessionId, isOpen]);
 
     // Auto-scroll to latest message
     useEffect(() => {
@@ -300,12 +342,16 @@ export default function ChatWidget() {
               }}
             >
               <MessageCircle size={24} />
-              {isVisible && (
+              {isVisible && unreadCount > 0 && (
                 <motion.span 
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" 
-                />
+                  key={unreadCount}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                  className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 bg-red-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white px-1"
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </motion.span>
               )}
             </motion.button>
           )}
