@@ -20,7 +20,17 @@
         display: flex; flex-direction: column; flex-shrink: 0;
     }
     .sp-header { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
-    .sp-header h3 { margin: 0 0 10px; font-size: 17px; font-weight: 800; color: var(--primary); }
+    .sp-header-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .sp-header h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--primary); }
+    .sp-menu-btn {
+        width: 28px; height: 28px; border-radius: 6px; border: none;
+        background: #f0f2f5; color: var(--primary); cursor: pointer;
+        display: none; align-items: center; justify-content: center; flex-shrink: 0;
+        font-size: 13px;
+    }
+    .sp-menu-btn:hover { background: #e2e8f0; }
+    @media (min-width: 769px) { .sp-menu-btn { display: flex; } }
+    body.dark .sp-menu-btn { background: #2a2a2a; color: #25d366; }
     .sp-search { position: relative; }
     .sp-search input {
         width: 100%; padding: 9px 34px 9px 12px; border-radius: 10px;
@@ -77,11 +87,12 @@
         display: flex; align-items: center; gap: 8px; flex-shrink: 0;
     }
     .chat-top-back {
-        width: 40px; height: 40px; border-radius: 50%; border: none;
+        width: 32px; height: 32px; border-radius: 50%; border: none;
         background: transparent; color: white; cursor: pointer; flex-shrink: 0;
-        display: flex; align-items: center; justify-content: center; font-size: 18px;
+        display: none; align-items: center; justify-content: center; font-size: 14px;
     }
     .chat-top-back:hover { background: rgba(255,255,255,0.1); }
+    @media (max-width: 768px) { .chat-top-back { display: flex; } }
     .chat-top-avatar {
         width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.2);
         display: flex; align-items: center; justify-content: center;
@@ -235,7 +246,10 @@
 <div class="chat-wrap">
     <div class="sessions-panel">
         <div class="sp-header">
-            <h3>المحادثات</h3>
+            <div class="sp-header-top">
+                <button class="sp-menu-btn" onclick="toggleSessions()" title="إخفاء القائمة"><i class="fas fa-bars"></i></button>
+                <h3>المحادثات</h3>
+            </div>
             <div class="sp-search">
                 <i class="fas fa-search"></i>
                 <input type="text" id="search-input" placeholder="بحث...">
@@ -251,7 +265,7 @@
 
     <div class="chat-main">
         <div class="chat-top" id="chat-top" style="display:none;">
-            <button class="chat-top-back" onclick="toggleSessions()" title="القائمة"><i class="fas fa-bars"></i></button>
+            <button class="chat-top-back" onclick="toggleSessions()" title="رجوع"><i class="fas fa-arrow-right"></i></button>
             <div class="chat-top-avatar" id="h-avatar">?</div>
             <div class="chat-top-info">
                 <div class="chat-top-name" id="h-name"></div>
