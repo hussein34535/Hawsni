@@ -20,7 +20,16 @@
         display: flex; flex-direction: column; flex-shrink: 0;
     }
     .sp-header { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
-    .sp-header h3 { margin: 0 0 10px; font-size: 17px; font-weight: 800; color: var(--primary); }
+    .sp-header-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .sp-header h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--primary); }
+    .header-menu-btn {
+        width: 30px; height: 30px; border-radius: 8px; border: none;
+        background: #f0f2f5; color: var(--primary); cursor: pointer;
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        font-size: 14px; transition: background 0.15s;
+    }
+    .header-menu-btn:hover { background: #e2e8f0; }
+    body.dark .header-menu-btn { background: #2a2a2a; color: #25d366; }
     .sp-search { position: relative; }
     .sp-search input {
         width: 100%; padding: 9px 34px 9px 12px; border-radius: 10px;
@@ -36,15 +45,6 @@
         font-size: 12px; cursor: pointer; font-family: inherit; white-space: nowrap; color: #475569; font-weight: 600;
     }
     .tab-btn.active { background: var(--primary); color: white; }
-    .filter-menu-btn {
-        padding: 4px 8px; border-radius: 20px; border: none; background: transparent;
-        font-size: 14px; cursor: pointer; font-family: inherit; white-space: nowrap;
-        color: var(--primary); font-weight: 700; flex-shrink: 0;
-        display: flex; align-items: center; gap: 4px;
-    }
-    .filter-menu-btn:hover { background: #f0f2f5; }
-    body.dark .filter-menu-btn { color: #25d366; }
-    body.dark .filter-menu-btn:hover { background: #2a2a2a; }
 
     .session-list { flex: 1; overflow-y: auto; }
     .s-item {
@@ -245,14 +245,16 @@
 <div class="chat-wrap">
     <div class="sessions-panel">
         <div class="sp-header">
-            <h3>المحادثات</h3>
+            <div class="sp-header-top">
+                <button class="header-menu-btn" onclick="toggleSessions()" title="القائمة"><i class="fas fa-bars"></i></button>
+                <h3>المحادثات</h3>
+            </div>
             <div class="sp-search">
                 <i class="fas fa-search"></i>
                 <input type="text" id="search-input" placeholder="بحث...">
             </div>
         </div>
         <div class="sp-filters">
-            <button class="filter-menu-btn" onclick="toggleSessions()" title="إخفاء القائمة"><i class="fas fa-bars"></i></button>
             <button class="tab-btn active" data-filter="all">الكل</button>
             <button class="tab-btn" data-filter="whatsapp"><i class="fab fa-whatsapp"></i> واتساب</button>
             <button class="tab-btn" data-filter="web"><i class="fas fa-globe"></i> الموقع</button>
