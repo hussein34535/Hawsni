@@ -212,6 +212,31 @@ class AdminChatController {
         }
     }
 
+    // ── 6. Get orders for a session (by phone) ───────────────────
+    async getSessionOrders(req, res) {
+        try {
+            const { sessionId } = req.params;
+            if (!sessionId) return res.status(400).json({ success: false, error: 'Missing sessionId' });
+
+            const digits = sessionId.replace(/\D/g, '');
+            const phoneSuffix = digits.slice(-10);
+
+            const { data: orders, error } = await supabase
+                .from('orders')
+                .select('id, order_number, status, total, created_at, customer_name, customer_address')
+                .or(`customer_phone.ilike.%${digits}%,customer_phone.ilike.%${phoneSuffix}%`)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (error) throw error;
+
+            res.json({ success: true, orders: orders || [] });
+        } catch (error) {
+            console.error('[AdminChatController getSessionOrders] Error:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
     // ── 5. Proxy WhatsApp media ──────────────────────────────────
     async getWhatsAppMedia(req, res) {
         try {

@@ -112,6 +112,7 @@ router.post('/chat/send', adminChatController.sendMessage);
 router.post('/chat/takeover', adminChatController.takeOver);
 router.post('/chat/end', adminChatController.endConversation);
 router.post('/chat/return-to-bot', adminChatController.returnToBot);
+router.get('/chat/orders/:sessionId', adminChatController.getSessionOrders);
 router.post('/chat/mark-read', adminChatController.markRead);
 router.get('/chat/media/:mediaId', adminChatController.getWhatsAppMedia);
 
