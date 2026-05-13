@@ -219,18 +219,43 @@ class AdminChatController {
             if (!sessionId) return res.status(400).json({ success: false, error: 'Missing sessionId' });
 
             const digits = sessionId.replace(/\D/g, '');
-            const phoneSuffix = digits.slice(-10);
 
             const { data: orders, error } = await supabase
                 .from('orders')
-                .select('id, order_number, status, total, created_at, customer_name, customer_address')
-                .or(`customer_phone.ilike.%${digits}%,customer_phone.ilike.%${phoneSuffix}%`)
+                .select('id, order_number, status, total, created_at, shipping_address')
+                .ilike('shipping_address->>phone', `%${digits}%`)
                 .order('created_at', { ascending: false })
-                .limit(10);
+                .limit(20);
 
-            if (error) throw error;
+            if (error) {
+                // Fallback: fetch recent and filter in JS
+                const { data: recentOrders, err: fallbackErr } = await supabase
+                    .from('orders')
+                    .select('id, order_number, status, total, created_at, shipping_address')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                if (fallbackErr) throw fallbackErr;
+                const matched = (recentOrders || []).filter(o => {
+                    const phone = o.shipping_address?.phone || '';
+                    return phone.includes(digits) || digits.includes(phone.replace(/\D/g, ''));
+                });
+                const mapped = matched.map(o => ({
+                    id: o.id, order_number: o.order_number, status: o.status,
+                    total: o.total, created_at: o.created_at,
+                    customer_name: o.shipping_address?.name || o.shipping_address?.fullName || null,
+                    customer_address: o.shipping_address?.address || null
+                }));
+                return res.json({ success: true, orders: mapped });
+            }
 
-            res.json({ success: true, orders: orders || [] });
+            const mapped = (orders || []).map(o => ({
+                id: o.id, order_number: o.order_number, status: o.status,
+                total: o.total, created_at: o.created_at,
+                customer_name: o.shipping_address?.name || o.shipping_address?.fullName || null,
+                customer_address: o.shipping_address?.address || null
+            }));
+
+            res.json({ success: true, orders: mapped });
         } catch (error) {
             console.error('[AdminChatController getSessionOrders] Error:', error);
             res.status(500).json({ success: false, error: error.message });
