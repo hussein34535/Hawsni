@@ -33,6 +33,15 @@
                     <%= completedOrders %>
                 </div>
             </div>
+            <div class="stat-card" onclick="togglePendingFilter()" style="cursor:pointer; transition:0.2s;" id="pendingReceiptCard" title="عرض طلبات بانتظار التأكيد">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background:#ffedd5; color:#c2410c;"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="stat-label">بانتظار التأكيد</div>
+                </div>
+                <div class="stat-value" id="pendingReceiptCount" style="color:#c2410c;">
+                    <%= orders.filter(o => o.deposit_receipt_url && o.status !== 'Confirmed' && o.status !== 'Cancelled' && o.status !== 'Delivered').length %>
+                </div>
+            </div>
     </div>
 
     <div class="card">
@@ -118,9 +127,12 @@
                                                                 <%= order.product_name %>
                                                             </div>
                                                             <% if (order.items_count> 1) { %>
-                                                                <div class="product-count">+ <%= order.items_count - 1
-                                                                        %> منتجات أخرى</div>
-                                                                <% } %>
+                                                                 <div class="product-count">+ <%= order.items_count - 1
+                                                                         %> منتجات أخرى</div>
+                                                                 <% } %>
+                                                             <% if (order.deposit_receipt_url && order.status !== 'Confirmed' && order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
+                                                                 <div class="receipt-badge"><i class="fas fa-file-invoice-dollar"></i> إيصال</div>
+                                                             <% } %>
                                                         </div>
                                         </div>
                                     </td>
@@ -463,6 +475,37 @@
             'Delivered': 'تم التوصيل',
             'Cancelled': 'ملغي'
         };
+
+        // Pending receipt filter
+        let pendingFilterActive = false;
+
+        function togglePendingFilter() {
+            pendingFilterActive = !pendingFilterActive;
+            const card = document.getElementById('pendingReceiptCard');
+            const rows = document.querySelectorAll('.order-row');
+            if (pendingFilterActive) {
+                card.classList.add('active');
+                rows.forEach(row => {
+                    if (!row.dataset.hasPendingReceipt) row.style.display = 'none';
+                });
+            } else {
+                card.classList.remove('active');
+                rows.forEach(row => row.style.display = '');
+            }
+        }
+
+        // Mark rows with pending receipts on load
+        document.addEventListener('DOMContentLoaded', function() {
+            ordersData.forEach(o => {
+                if (o.deposit_receipt_url && o.status !== 'Confirmed' && o.status !== 'Cancelled' && o.status !== 'Delivered') {
+                    const row = document.getElementById('row-' + o.id);
+                    if (row) {
+                        row.classList.add('pending-receipt');
+                        row.dataset.hasPendingReceipt = 'true';
+                    }
+                }
+            });
+        });
 
         let currentOrderId = null;
         function showOrderDetails(orderId) {
@@ -1582,6 +1625,25 @@
             gap: 12px;
         }
 
+        .receipt-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #ffedd5; color: #c2410c;
+            font-size: 0.7rem; font-weight: 800;
+            padding: 3px 8px; border-radius: 6px;
+            margin-top: 4px;
+        }
+        tr.pending-receipt {
+            border-left: 4px solid #f97316 !important;
+            background: #fffcf0 !important;
+        }
+        tr.pending-receipt td {
+            background: #fffcf0 !important;
+        }
+        #pendingReceiptCard.active {
+            background: #ffedd5 !important;
+            box-shadow: 0 0 0 2px #f97316;
+        }
+
         .payment-item {
             display: flex;
             justify-content: space-between;
@@ -2347,6 +2409,46 @@
         }
     }
 
+    </script>
+
+    <!-- Supabase Realtime for receipt notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+    try {
+        const sbUrl = '<%= typeof supabaseUrl !== "undefined" ? supabaseUrl : "" %>';
+        const sbKey = '<%= typeof supabaseAnonKey !== "undefined" ? supabaseAnonKey : "" %>';
+        if (sbUrl && sbKey) {
+            const sbClient = supabase.createClient(sbUrl, sbKey);
+            sbClient.channel('orders-receipts')
+                .on('postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'orders' },
+                    async (payload) => {
+                        const oldOrder = payload.old;
+                        const newOrder = payload.new;
+                        // Only notify if receipt_url changed from null → non-null
+                        if (oldOrder && !oldOrder.deposit_receipt_url && newOrder.deposit_receipt_url) {
+                            if (newOrder.status !== 'Confirmed' && newOrder.status !== 'Cancelled' && newOrder.status !== 'Delivered') {
+                            // Update counter
+                            const countEl = document.getElementById('pendingReceiptCount');
+                            if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+                            // Highlight row
+                            const row = document.getElementById('row-' + order.id);
+                            if (row) {
+                                row.classList.add('pending-receipt');
+                                row.dataset.hasPendingReceipt = 'true';
+                            }
+                            // Toast
+                            const t = document.createElement('div');
+                            t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;background:#c2410c;color:#fff;padding:14px 20px;border-radius:14px;font-size:0.9rem;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,0.25);animation:fadeInUp 0.3s ease;font-family:"Cairo",sans-serif;max-width:350px;direction:rtl;';
+                            t.innerHTML = '<i class="fas fa-file-invoice-dollar"></i> إيصال جديد بانتظار التأكيد — <span style="opacity:0.8;">#' + (order.id ? order.id.substring(0,6) : '') + '</span>';
+                            document.body.appendChild(t);
+                            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 400); }, 5000);
+                        }
+                    }
+                )
+                .subscribe();
+        }
+    } catch (e) { console.log('[Receipt] Realtime init skipped:', e.message); }
     </script>
 
 <%- include('partials/footer') %>

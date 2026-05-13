@@ -71,7 +71,9 @@ class OrdersController {
                     page: pageNum,
                     limit: limitNum,
                     totalPages: Math.ceil(totalCount / limitNum)
-                }
+                },
+                supabaseUrl: process.env.SUPABASE_URL,
+                supabaseAnonKey: process.env.SUPABASE_ANON_KEY
             });
         } catch (err) {
             console.error('Error fetching orders:', err);
