@@ -245,6 +245,53 @@ class WhatsAppService {
         }
     }
 
+    /**
+     * Send the hwasi_order template (12h reminder with Pay / Cancel buttons)
+     */
+    async sendHwasiOrderReminder(phone) {
+        if (!this.phoneNumberId) return { success: false, error: 'WHATSAPP_NOT_CONFIGURED' };
+
+        const cleanPhone = phone.replace(/\D/g, '');
+        let finalPhone = cleanPhone;
+        if (finalPhone.startsWith('01') && finalPhone.length === 11) finalPhone = '2' + finalPhone;
+
+        try {
+            const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+            const payload = {
+                messaging_product: "whatsapp",
+                to: finalPhone,
+                type: "template",
+                template: {
+                    name: "hwasi_order",
+                    language: { code: "ar" }
+                }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                console.error('❌ WhatsApp hwasi_order Error:', result);
+                return { success: false, error: result?.error?.message || 'Failed to send hwasi_order' };
+            }
+
+            await this._logMessage(phone, 'bot', `[TEMPLATE:hwasi_order] تم إرسال تذكير الدفع للعميل.`);
+            console.log(`✅ WhatsApp hwasi_order reminder sent to ${finalPhone}`);
+            return { success: true };
+        } catch (error) {
+            console.error('❌ WhatsApp hwasi_order Error:', error.message);
+            return { success: false, error: error.message };
+        }
+    }
+
     async sendUrlButtonMessage(phone, bodyText, buttonText, url) {
         if (!this.phoneNumberId) return;
         const cleanPhone = phone.replace(/\D/g, '');
@@ -523,7 +570,7 @@ class WhatsAppService {
                                     await this.sendUrlButtonMessage(phone, "يمكنك تعديل بيانات التوصيل من هنا 📝", "تعديل الطلب", editUrl);
                                     await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
                                 }
-                            } else if (buttonId === 'confirm_order' || (buttonText && (buttonText.trim() === 'موافق' || buttonText.trim() === 'Confirm'))) {
+                            } else if (buttonId === 'confirm_order' || (buttonText && (buttonText.trim() === 'موافق' || buttonText.trim() === 'Confirm' || buttonText.includes('دفع')))) {
                                 await this.sendTextMessage(
                                     phone,
                                     "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n\nتنبيه: يرجى إرسال صورة عملية التحويل هنا لتأكيد طلبك. 🤍"

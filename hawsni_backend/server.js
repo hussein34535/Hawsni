@@ -295,6 +295,10 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
         }
       } catch (e) { /* silently fail */ }
     })();
+
+    // Start 12h reminder scheduler
+    const { startReminderScheduler } = require('./services/reminderScheduler');
+    startReminderScheduler();
   });
 }
 
