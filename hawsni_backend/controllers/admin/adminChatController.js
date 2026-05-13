@@ -49,7 +49,7 @@ class AdminChatController {
                             seen.add(m.session_id);
                             lastMap[m.session_id] = { content: m.content, sender_type: m.sender_type };
                         }
-                        if (m.sender_type !== 'user' && m.is_read === false) {
+                        if (m.sender_type !== 'user' && m.is_read !== true) {
                             unreadMap[m.session_id] = (unreadMap[m.session_id] || 0) + 1;
                         }
                     }
@@ -205,7 +205,7 @@ class AdminChatController {
                 .in('sender_type', ['bot', 'admin'])
                 .eq('is_read', false);
 
-            if (error) throw error;
+            if (error && !error.message?.includes('column')) throw error;
             res.json({ success: true });
         } catch (error) {
             console.error('[AdminChatController markRead] Error:', error);
