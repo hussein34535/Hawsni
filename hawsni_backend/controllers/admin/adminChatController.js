@@ -221,9 +221,11 @@ class AdminChatController {
             const digits = sessionId.replace(/\D/g, '');
 
             // Fetch recent orders and filter by phone in JS (avoids JSONB query issues)
+            const threeMonthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
             const { data: orders, error } = await supabase
                 .from('orders')
                 .select('id, order_number, status, total, created_at, shipping_address')
+                .gte('created_at', threeMonthsAgo)
                 .order('created_at', { ascending: false })
                 .limit(50);
 
