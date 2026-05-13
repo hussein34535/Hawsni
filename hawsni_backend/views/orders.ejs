@@ -2432,7 +2432,7 @@
                             const countEl = document.getElementById('pendingReceiptCount');
                             if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
                             // Highlight row
-                            const row = document.getElementById('row-' + order.id);
+                            const row = document.getElementById('row-' + newOrder.id);
                             if (row) {
                                 row.classList.add('pending-receipt');
                                 row.dataset.hasPendingReceipt = 'true';
@@ -2440,7 +2440,7 @@
                             // Toast
                             const t = document.createElement('div');
                             t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;background:#c2410c;color:#fff;padding:14px 20px;border-radius:14px;font-size:0.9rem;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,0.25);animation:fadeInUp 0.3s ease;font-family:"Cairo",sans-serif;max-width:350px;direction:rtl;';
-                            t.innerHTML = '<i class="fas fa-file-invoice-dollar"></i> إيصال جديد بانتظار التأكيد — <span style="opacity:0.8;">#' + (order.id ? order.id.substring(0,6) : '') + '</span>';
+                            t.innerHTML = '<i class="fas fa-file-invoice-dollar"></i> إيصال جديد بانتظار التأكيد — <span style="opacity:0.8;">#' + (newOrder.id ? newOrder.id.substring(0,6) : '') + '</span>';
                             document.body.appendChild(t);
                             setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 400); }, 5000);
                         }

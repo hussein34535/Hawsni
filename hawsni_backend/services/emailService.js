@@ -850,6 +850,60 @@ async function sendHumanAgentRequestNotification(sessionId, reason) {
     }).catch(err => console.error('Failed to send human agent alert:', err));
 }
 
+// ──────────────────────────────────────────────
+// 12. Deposit Receipt Notification (Admin)
+// ──────────────────────────────────────────────
+async function sendDepositReceiptNotification(order, customerPhone, receiptUrl) {
+    const orderNumber = order.order_number || String(order.id).substring(0, 6).toUpperCase();
+    const total = order.total || 0;
+    const customerName = order.shipping_address?.name || order.users?.name || 'عميل';
+
+    return _send({
+        to: ADMIN_EMAIL,
+        subject: `💰 إيصال ديبوزت جديد — طلب #${orderNumber}`,
+        htmlContent: `
+        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e8e8e8;">
+            <div style="background: linear-gradient(135deg, #0E4435, #1a6b54); padding: 30px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 10px;">💰</div>
+                <h1 style="color: #ffffff; margin: 0; font-size: 22px;">إيصال ديبوزت جديد!</h1>
+                <p style="color: rgba(255,255,255,0.7); margin: 6px 0 0 0; font-size: 14px;">طلب رقم #${orderNumber}</p>
+            </div>
+            <div style="padding: 30px;">
+                <div style="background: #f0faf5; border-radius: 16px; padding: 20px; margin-bottom: 25px; border: 1px solid #d1fae5;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 13px;">العميل</td>
+                            <td style="padding: 8px 0; font-weight: 700; color: #0E4435; text-align: left; font-size: 14px;">${customerName}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 13px;">رقم الهاتف</td>
+                            <td style="padding: 8px 0; font-weight: 700; color: #111; text-align: left; direction: ltr; font-size: 14px;">${customerPhone}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 13px;">إجمالي الطلب</td>
+                            <td style="padding: 8px 0; font-weight: 700; color: #0E4435; text-align: left; font-size: 14px;">${Number(total).toLocaleString()} ج.م</td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <p style="color: #666; font-size: 13px; margin-bottom: 12px;">صورة الإيصال المرفوعة:</p>
+                    <a href="${receiptUrl}" target="_blank" style="display: inline-block; background: #f5f5f5; border: 2px dashed #0E4435; border-radius: 16px; padding: 12px 24px; text-decoration: none; color: #0E4435; font-weight: 700;">
+                        📸 عرض صورة الإيصال
+                    </a>
+                </div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <a href="https://hwasibackend.vercel.app/admin/orders" style="background: #0E4435; color: white; text-decoration: none; padding: 14px 35px; border-radius: 50px; font-weight: 900; font-size: 14px; display: inline-block;">
+                        مراجعة الطلبات ←
+                    </a>
+                </div>
+                <p style="text-align: center; color: #999; font-size: 11px; margin-top: 25px; line-height: 1.6;">
+                    هذا الإيميل يتطلب منك مراجعة الإيصال وتأكيد دفع الديبوزت من لوحة التحكم.
+                </p>
+            </div>
+        </div>`
+    }).catch(err => console.error('Failed to send deposit receipt notification:', err));
+}
+
 module.exports = {
     sendOtpEmail,
     sendPasswordResetEmail,
@@ -863,4 +917,5 @@ module.exports = {
     sendNewChatNotification,
     sendCancellationRequestNotification,
     sendHumanAgentRequestNotification,
+    sendDepositReceiptNotification,
 };

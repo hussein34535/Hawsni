@@ -498,7 +498,15 @@ class WhatsAppService {
                         })
                         .eq('id', order.id);
 
-                    // 5. Notify customer
+                    // 5. Notify admin via email
+                    try {
+                        const emailService = require('./emailService');
+                        await emailService.sendDepositReceiptNotification(order, phone, receiptUrl);
+                    } catch (emailErr) {
+                        console.error('[WA] Failed to send deposit receipt email:', emailErr.message);
+                    }
+
+                    // 6. Notify customer
                     await this.sendTextMessage(phone, `📸 تم استلام صورة التحويل لطلب رقم #${order.id.substring(0, 6).toUpperCase()}!\nسيتم مراجعتها وتأكيد طلبك من قبل فريقنا في أقرب وقت ممكن 🤍`);
                 } else {
                     await this.sendTextMessage(phone, "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\n(ملاحظة: سيقوم أحد موظفينا بمراجعة الأمر يدوياً لتأكيد الربط بالطلب)");
@@ -565,16 +573,16 @@ class WhatsAppService {
                             const buttonReply = msg.interactive ? msg.interactive.button_reply : msg.button;
                             const phone = msg.from;
                             
-                            // Notify admin (first unread message)
-                            await this._notifyAdminOnFirstMessage(phone, `[نقر على زر: ${clickTitle}]`, 'button');
-
                             // Log user click
                             const clickTitle = buttonReply.title || buttonReply.text || 'زر غير معروف';
                             await this._logMessage(phone, 'user', `[CLICKED: ${clickTitle}]`);
+
+                            // Notify admin (first unread message)
+                            await this._notifyAdminOnFirstMessage(phone, `[نقر على زر: ${clickTitle}]`, 'button');
                             
                             // Check if the user clicked our "Cancel Order" button
                             const buttonId = buttonReply.id || buttonReply.payload;
-                            const buttonText = buttonReply.title || buttonReply.text;
+                            const buttonText = clickTitle;
 
                             if (buttonId === 'cancel_order' || (buttonText && (buttonText.includes('إلغاء') || buttonText.includes('الغاء')))) {
                                 console.log(`[WhatsApp Webhook] 📲 User ${phone} requested order cancellation`);
