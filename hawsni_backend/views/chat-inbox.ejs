@@ -497,7 +497,9 @@
         el('order-body').innerHTML = '<div style="text-align:center;padding:40px 0;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:24px;margin-bottom:12px;display:block;"></i>جاري التحميل...</div>';
         try {
             const r = await fetch('/admin/chat/orders/' + activeId);
+            if (!r.ok) { el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">خطأ في تحميل الطلبات (' + r.status + ')</div>'; return; }
             const data = await r.json();
+            if (!data.success) { el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">' + (data.error || 'خطأ') + '</div>'; return; }
             if (!data.orders || !data.orders.length) {
                 el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-box-open" style="font-size:40px;margin-bottom:12px;display:block;opacity:0.3;"></i>لا توجد طلبات</div>';
                 return;
@@ -512,7 +514,8 @@
                 </div>`;
             }).join('');
         } catch (e) {
-            el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">فشل تحميل الطلبات</div>';
+            console.error('Orders fetch error:', e);
+            el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">خطأ في الاتصال</div>';
         }
     }
 
