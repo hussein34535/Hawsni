@@ -167,7 +167,7 @@ class ChatController {
             // 1. Insert user message to DB (always marked as read)
             const { data: userMsg, error: insertErr } = await supabase
                 .from('chat_messages')
-                .insert([{ session_id: sessionId, sender_type: 'user', content: message }])
+                .insert([{ session_id: sessionId, sender_type: 'user', content: message, is_read: true }])
                 .select().single();
             if (insertErr) throw insertErr;
 
