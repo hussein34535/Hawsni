@@ -335,18 +335,17 @@ class WhatsAppService {
                 if (orders && orders.length > 0) {
                     const order = orders[0];
                     
-                    // 4. Update the order
+                    // 4. Save receipt URL (don't auto-confirm — wait for admin review)
                     await supabase
                         .from('orders')
                         .update({
-                            status: 'Confirmed',
                             deposit_receipt_url: receiptUrl,
                             updated_at: new Date().toISOString()
                         })
                         .eq('id', order.id);
 
                     // 5. Notify customer
-                    await this.sendTextMessage(phone, `✅ تم استلام صورة التحويل بنجاح وتأكيد طلبك رقم #${order.id.substring(0, 6).toUpperCase()}!\n\nشكراً لثقتك بـ Hawsni 🤍`);
+                    await this.sendTextMessage(phone, `📸 تم استلام صورة التحويل لطلب رقم #${order.id.substring(0, 6).toUpperCase()}!\nسيتم مراجعتها وتأكيد طلبك من قبل فريقنا في أقرب وقت ممكن 🤍`);
                 } else {
                     await this.sendTextMessage(phone, "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\n(ملاحظة: سيقوم أحد موظفينا بمراجعة الأمر يدوياً لتأكيد الربط بالطلب)");
                 }

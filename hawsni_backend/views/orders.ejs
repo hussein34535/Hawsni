@@ -192,18 +192,15 @@
                                                     <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected'
                                                         : '' %>>ملغي</option>
                                                 </select>
-                                            </form>
-                                             <% 
-                                                 let cleanActionPhone = (typeof cPhone === 'string' ? cPhone : '').replace(/\D/g, '');
-                                                 if (cleanActionPhone.startsWith('01') && cleanActionPhone.length === 11) cleanActionPhone = '2' + cleanActionPhone;
-                                                 let escName = (cName || '').replace(/'/g, "\\'");
-                                                 let escPhone = (cPhone || '').replace(/'/g, "\\'");
-                                                 let escAddr = (cAddr || '').replace(/\n|\r/g, ' ').replace(/'/g, "\\'");
-                                              %>
+                                             </form>
+                                              <% 
+                                                  let cleanActionPhone = (typeof cPhone === 'string' ? cPhone : '').replace(/\D/g, '');
+                                                  if (cleanActionPhone.startsWith('01') && cleanActionPhone.length === 11) cleanActionPhone = '2' + cleanActionPhone;
+                                               %>
                                               <a href="/admin/chat?sessionId=<%= cleanActionPhone %>" onclick="event.stopPropagation()" class="btn-icon" title="دردشة واتساب" style="color: #25d366; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
                                                  <i class="fab fa-whatsapp"></i>
                                               </a>
-                                              <button class="btn-icon" onclick="openEditModal('<%= order.id %>', '<%= escName %>', '<%= escPhone %>', '<%= escAddr %>', '<%= order.total %>')" title="تعديل الطلب" style="color: var(--info);">
+                                              <button class="btn-icon" onclick="event.stopPropagation(); openEditModal('<%= order.id %>')" title="تعديل الطلب" style="color: var(--info);">
                                                 <i class="fas fa-edit"></i>
                                              </button>
                                              <button class="btn-icon text-danger"
@@ -1911,94 +1908,445 @@
     });
     </script>
 
-    <!-- Edit Order Modal -->
-<div id="editOrderModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center;">
-    <div style="background:#fff; padding:25px; border-radius:15px; width:90%; max-width:500px; position:relative; box-shadow:0 20px 50px rgba(0,0,0,0.3);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;">
-            <h3 style="margin:0; color:#0E4435; font-size:1.1rem;">✏️ تعديل بيانات الطلب</h3>
-            <button onclick="closeEditModal()" style="background:none; border:none; font-size:26px; cursor:pointer; color:#999; line-height:1;">&times;</button>
+    <!-- Edit Order Modal (Full) -->
+    <div id="editOrderModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:20px; width:100%; max-width:780px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+            
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid #e2e8f0; position:sticky; top:0; background:#fff; z-index:10; border-radius:20px 20px 0 0;">
+                <h3 style="margin:0; color:#0E4435; font-size:1.15rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-edit"></i> تعديل الطلب <span id="editOrderLabel" style="color:#94a3b8; font-size:0.85rem;"></span>
+                </h3>
+                <button onclick="closeEditModal()" style="background:#f1f5f9; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:18px; color:#64748b; display:flex; align-items:center; justify-content:center; transition:0.2s;">&times;</button>
+            </div>
+            
+            <form id="editOrderForm" onsubmit="submitOrderEdit(event)" style="padding:24px;">
+                <input type="hidden" id="edit-order-id">
+                
+                <!-- ===== Section 1: Customer Info ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-user-circle" style="color:#0E4435;"></i> بيانات العميل
+                    </h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الاسم</label>
+                            <input type="text" id="edit-customer-name" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;" required>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الإيميل</label>
+                            <input type="email" id="edit-customer-email" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">رقم الهاتف</label>
+                            <input type="text" id="edit-customer-phone" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;" required>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">هاتف بديل</label>
+                            <input type="text" id="edit-customer-altphone" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Section 2: Shipping Address ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-map-marker-alt" style="color:#0E4435;"></i> عنوان التوصيل
+                    </h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">المحافظة</label>
+                            <input type="text" id="edit-state" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">المدينة / المنطقة</label>
+                            <input type="text" id="edit-city" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;">
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الشارع</label>
+                        <input type="text" id="edit-street" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                    </div>
+                    <div style="margin-top:14px;">
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">العنوان بالكامل</label>
+                        <textarea id="edit-customer-address" style="width:100%; height:60px; padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; resize:vertical; box-sizing:border-box;"></textarea>
+                    </div>
+                </div>
+
+                <!-- ===== Section 3: Products ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-shopping-bag" style="color:#0E4435;"></i> المنتجات
+                    </h4>
+                    <div id="editItemsContainer" style="display:flex; flex-direction:column; gap:10px;">
+                        <!-- populated by JS -->
+                    </div>
+                    <button type="button" onclick="addEditItemRow()" style="margin-top:12px; width:100%; padding:10px; border:2px dashed #cbd5e1; border-radius:12px; background:#f8fafc; color:#64748b; font-weight:700; cursor:pointer; transition:0.2s; font-size:0.85rem; font-family:'Cairo',sans-serif;">
+                        <i class="fas fa-plus-circle"></i> إضافة منتج
+                    </button>
+                </div>
+
+                <!-- ===== Section 4: Financial ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-receipt" style="color:#0E4435;"></i> المالية
+                    </h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الخصم (ج.م)</label>
+                            <input type="number" id="edit-discount" step="0.01" min="0" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الإجمالي (ج.م)</label>
+                            <input type="number" id="edit-order-total" step="0.01" min="0" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box; font-weight:800; color:#0E4435;" required>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">طريقة الدفع</label>
+                            <select id="edit-payment-method" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box; background:#fff;">
+                                <option value="Cash on Delivery">الدفع عند الاستلام</option>
+                                <option value="Credit Card">بطاقة ائتمان</option>
+                                <option value="Bank Transfer">تحويل بنكي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Section 5: Notes ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-sticky-note" style="color:#0E4435;"></i> ملاحظات
+                    </h4>
+                    <textarea id="edit-notes" style="width:100%; height:70px; padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; resize:vertical; box-sizing:border-box;"></textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display:flex; gap:10px; border-top:1px solid #e2e8f0; padding-top:20px;">
+                    <button type="submit" id="edit-submit-btn" style="flex:1; background:#0E4435; color:#fff; padding:12px; border:none; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.95rem; transition:0.2s; font-family:'Cairo',sans-serif;">
+                        <i class="fas fa-save"></i> حفظ كل التعديلات
+                    </button>
+                    <button type="button" onclick="closeEditModal()" style="flex:0.5; background:#f1f5f9; color:#475569; padding:12px; border:none; border-radius:12px; font-weight:700; cursor:pointer; font-size:0.9rem; transition:0.2s; font-family:'Cairo',sans-serif;">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
         </div>
-        <form id="editOrderForm" onsubmit="submitOrderEdit(event)">
-            <input type="hidden" id="edit-order-id">
-            <div style="margin-bottom:14px;">
-                <label style="display:block; margin-bottom:5px; font-weight:700; font-size:0.85rem; color:#475569;">اسم العميل</label>
-                <input type="text" id="edit-customer-name" style="width:100%; height:44px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.95rem; box-sizing:border-box;" required>
-            </div>
-            <div style="margin-bottom:14px;">
-                <label style="display:block; margin-bottom:5px; font-weight:700; font-size:0.85rem; color:#475569;">رقم الهاتف</label>
-                <input type="text" id="edit-customer-phone" style="width:100%; height:44px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.95rem; box-sizing:border-box;" required>
-            </div>
-            <div style="margin-bottom:14px;">
-                <label style="display:block; margin-bottom:5px; font-weight:700; font-size:0.85rem; color:#475569;">العنوان</label>
-                <textarea id="edit-customer-address" style="width:100%; height:80px; padding:10px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.95rem; resize:vertical; box-sizing:border-box;"></textarea>
-            </div>
-            <div style="margin-bottom:14px;">
-                <label style="display:block; margin-bottom:5px; font-weight:700; font-size:0.85rem; color:#475569;">الإجمالي (ج.م)</label>
-                <input type="number" id="edit-order-total" step="0.01" style="width:100%; height:44px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:0.95rem; box-sizing:border-box;" required>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:20px;">
-                <button type="submit" id="edit-submit-btn" style="flex:1; background:#0E4435; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.95rem;">حفظ التعديلات</button>
-                <button type="button" onclick="closeEditModal()" style="flex:1; background:#f1f5f9; color:#475569; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.95rem;">إلغاء</button>
-            </div>
-        </form>
     </div>
-</div>
 
-<script>
-function openEditModal(id, name, phone, address, total) {
-    document.getElementById('edit-order-id').value = id;
-    document.getElementById('edit-customer-name').value = name;
-    document.getElementById('edit-customer-phone').value = phone;
-    document.getElementById('edit-customer-address').value = address;
-    document.getElementById('edit-order-total').value = total;
-    document.getElementById('editOrderModal').style.display = 'flex';
-}
+    <!-- Product Search Modal (for adding items) -->
+    <div id="productSearchModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.5); z-index:100000; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:20px; width:100%; max-width:500px; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 25px 60px rgba(0,0,0,0.25);" onclick="event.stopPropagation()">
+            <div style="padding:16px 20px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="margin:0; font-size:0.95rem; color:#0E4435; font-weight:800;"><i class="fas fa-search"></i> اختيار منتج</h4>
+                <button onclick="closeProductSearch()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#94a3b8;">&times;</button>
+            </div>
+            <div style="padding:12px 20px;">
+                <input type="text" id="productSearchInput" placeholder="ابحث عن منتج..." oninput="filterProductList(this.value)" style="width:100%; height:40px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.85rem; box-sizing:border-box;">
+            </div>
+            <div id="productSearchResults" style="flex:1; overflow-y:auto; padding:0 20px 16px;">
+                <!-- populated by JS -->
+            </div>
+        </div>
+    </div>
 
-function closeEditModal() {
-    document.getElementById('editOrderModal').style.display = 'none';
-}
+    <script>
+    let productCatalog = []; // All products fetched once
+    let editItemsData = []; // Current items in the edit form
 
-// Close when clicking outside
-document.getElementById('editOrderModal').addEventListener('click', function(e) {
-    if (e.target === this) closeEditModal();
-});
+    // ===== Edit Modal =====
+    function openEditModal(id, name, phone, address, total) {
+        const order = ordersData.find(o => o.id === id);
+        if (!order) return;
 
-async function submitOrderEdit(event) {
-    event.preventDefault();
-    const id = document.getElementById('edit-order-id').value;
-    const btn = document.getElementById('edit-submit-btn');
-    const data = {
-        customerName: document.getElementById('edit-customer-name').value,
-        customerPhone: document.getElementById('edit-customer-phone').value,
-        customerAddress: document.getElementById('edit-customer-address').value,
-        total: document.getElementById('edit-order-total').value
-    };
+        document.getElementById('edit-order-id').value = id;
+        document.getElementById('editOrderLabel').textContent = '# ' + id.substring(0, 8);
+        document.getElementById('editOrderModal').style.display = 'flex';
 
-    btn.innerText = 'جاري الحفظ...';
-    btn.disabled = true;
+        // Customer Info
+        document.getElementById('edit-customer-name').value = name || '';
 
-    try {
-        const response = await fetch('/admin/orders/' + id + '/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
-            body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        if (result.success) {
-            alert('✅ تم تحديث بيانات الطلب بنجاح');
-            window.location.reload();
+        let ship = order.shipping_address;
+        if (typeof ship === 'string') { try { ship = JSON.parse(ship); } catch(e) { ship = {}; } }
+
+        document.getElementById('edit-customer-phone').value = (ship && ship.phone) || phone || '';
+        document.getElementById('edit-customer-email').value = (ship && (ship.email || ship.guestEmail)) || '';
+        document.getElementById('edit-customer-altphone').value = (ship && ship.alternative_phone) || '';
+
+        // Address
+        document.getElementById('edit-state').value = (ship && (ship.state || '')) || '';
+        document.getElementById('edit-city').value = (ship && (ship.city || '')) || '';
+        document.getElementById('edit-street').value = (ship && (ship.street || '')) || '';
+        document.getElementById('edit-customer-address').value = (ship && (ship.address || ship.shippingAddress || '')) || address || '';
+
+        // Financial
+        document.getElementById('edit-discount').value = order.discount || 0;
+        document.getElementById('edit-order-total').value = total || order.total || 0;
+        document.getElementById('edit-payment-method').value = order.payment_method || 'Cash on Delivery';
+
+        // Notes
+        document.getElementById('edit-notes').value = order.notes || '';
+
+        // Items - build editItemsData from order
+        const allItems = order.order_items || order.items || [];
+        editItemsData = allItems.map(item => ({
+            id: item.id || null,
+            product_id: item.product_id || (item.products && item.products.id) || null,
+            name: (item.products && item.products.name) || item.name || 'منتج',
+            size: item.size || '',
+            color: item.color || '',
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+            image_url: item.image_url || (item.products && item.products.images && item.products.images[0]) || '',
+            _removed: false
+        }));
+        renderEditItems();
+
+        // Prefetch products for add-item search if not already loaded
+        if (productCatalog.length === 0) {
+            fetch('/api/products?limit=200')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.products) productCatalog = d.products;
+                    else if (Array.isArray(d)) productCatalog = d;
+                    else productCatalog = d.data || [];
+                })
+                .catch(() => { productCatalog = []; });
+        }
+    }
+
+    function closeEditModal() {
+        document.getElementById('editOrderModal').style.display = 'none';
+    }
+    document.getElementById('editOrderModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+
+    // ===== Items Rendering =====
+    function renderEditItems() {
+        const container = document.getElementById('editItemsContainer');
+        const activeItems = editItemsData.filter(i => !i._removed);
+        if (activeItems.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem; font-weight:600;">لا توجد منتجات — أضف أول منتج</div>';
+            return;
+        }
+        container.innerHTML = activeItems.map((item, idx) => {
+            const actualIdx = editItemsData.indexOf(item);
+            return `
+                <div style="display:grid; grid-template-columns:1fr 80px 70px 80px 36px; gap:8px; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${item.name}</div>
+                        <div style="display:flex; gap:6px; margin-top:4px;">
+                            <select onchange="updateEditItem(${actualIdx},'size',this.value)" style="padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem; background:#fff;">
+                                <option value="">مقاس</option>
+                                ${(item._sizes || []).map(s => `<option value="${s}" ${item.size === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                <option value="__custom__" ${!['','XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? 'selected' : ''}>أخرى...</option>
+                            </select>
+                            ${!['XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? `<input type="text" value="${item.size}" onchange="updateEditItem(${actualIdx},'size',this.value)" style="width:50px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">` : ''}
+                            <input type="text" placeholder="لون" value="${item.color}" onchange="updateEditItem(${actualIdx},'color',this.value)" style="width:60px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">الكمية</label>
+                        <input type="number" min="1" value="${item.quantity}" onchange="updateEditItem(${actualIdx},'quantity',parseInt(this.value)||1)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">السعر</label>
+                        <input type="number" min="0" step="0.01" value="${item.price}" onchange="updateEditItem(${actualIdx},'price',parseFloat(this.value)||0)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div style="text-align:center;">
+                        <button type="button" onclick="removeEditItem(${actualIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem; padding:4px;" title="حذف المنتج">&times;</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function updateEditItem(idx, field, value) {
+        if (editItemsData[idx]) {
+            editItemsData[idx][field] = value;
+        }
+    }
+
+    function removeEditItem(idx) {
+        if (editItemsData[idx]) {
+            if (editItemsData[idx].id) {
+                editItemsData[idx]._removed = true; // Mark for deletion on save
+            } else {
+                editItemsData.splice(idx, 1); // New item, just remove
+            }
+            renderEditItems();
+        }
+    }
+
+    // ===== Product Search =====
+    let _addItemCallback = null;
+
+    function addEditItemRow() {
+        if (productCatalog.length === 0) {
+            // Try fetching
+            fetch('/api/products?limit=200')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.products) productCatalog = d.products;
+                    else if (Array.isArray(d)) productCatalog = d;
+                    else productCatalog = d.data || [];
+                    showProductSearch();
+                })
+                .catch(() => { productCatalog = []; showProductSearch(); });
         } else {
-            alert('❌ خطأ: ' + result.message);
-            btn.innerText = 'حفظ التعديلات';
+            showProductSearch();
+        }
+    }
+
+    function showProductSearch() {
+        const results = document.getElementById('productSearchResults');
+        document.getElementById('productSearchInput').value = '';
+        renderProductList(productCatalog);
+        document.getElementById('productSearchModal').style.display = 'flex';
+    }
+
+    function closeProductSearch() {
+        document.getElementById('productSearchModal').style.display = 'none';
+    }
+    document.getElementById('productSearchModal').addEventListener('click', function(e) {
+        if (e.target === this) closeProductSearch();
+    });
+
+    function renderProductList(products) {
+        const container = document.getElementById('productSearchResults');
+        if (!products || products.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem;">لا توجد منتجات</div>';
+            return;
+        }
+        container.innerHTML = products.map(p => `
+            <div onclick="selectProductForEdit('${p.id}')" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; cursor:pointer; transition:0.15s; margin-bottom:4px; border:1px solid transparent;" 
+                 onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#e2e8f0'" 
+                 onmouseout="this.style.background='transparent'; this.style.borderColor='transparent'">
+                <div style="width:36px; height:36px; border-radius:8px; overflow:hidden; flex-shrink:0; background:#f1f5f9;">
+                    ${p.images && p.images[0] ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;"><i class="fas fa-box"></i></div>'}
+                </div>
+                <div style="flex:1;">
+                    <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${p.name}</div>
+                    <div style="font-size:0.72rem; color:#64748b;">${parseFloat(p.price).toFixed(2)} ج.م</div>
+                </div>
+                <div style="color:#0E4435; font-size:0.75rem; font-weight:700;"><i class="fas fa-plus-circle"></i> إضافة</div>
+            </div>
+        `).join('');
+    }
+
+    function filterProductList(query) {
+        const q = query.trim().toLowerCase();
+        if (!q) { renderProductList(productCatalog); return; }
+        const filtered = productCatalog.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            (p.description && p.description.toLowerCase().includes(q))
+        );
+        renderProductList(filtered);
+    }
+
+    function selectProductForEdit(productId) {
+        const p = productCatalog.find(pr => pr.id === productId);
+        if (!p) return;
+        
+        const sizes = p.sizes || [];
+        editItemsData.push({
+            id: null,
+            product_id: p.id,
+            name: p.name,
+            size: sizes.length > 0 ? sizes[0] : '',
+            color: '',
+            quantity: 1,
+            price: parseFloat(p.price) || 0,
+            image_url: (p.images && p.images[0]) || '',
+            _removed: false,
+            _sizes: sizes
+        });
+        
+        // Re-fetch with sizes for this product
+        const activeItems = editItemsData.filter(i => !i._removed);
+        const lastItem = activeItems[activeItems.length - 1];
+        if (lastItem && lastItem.product_id) {
+            fetch('/api/products/' + lastItem.product_id)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.product) {
+                        const idx = editItemsData.indexOf(lastItem);
+                        if (idx > -1) {
+                            editItemsData[idx]._sizes = d.product.sizes || [];
+                            renderEditItems();
+                        }
+                    }
+                })
+                .catch(() => {});
+        }
+        
+        closeProductSearch();
+        renderEditItems();
+    }
+
+    // ===== Submit =====
+    async function submitOrderEdit(event) {
+        event.preventDefault();
+        const id = document.getElementById('edit-order-id').value;
+        const btn = document.getElementById('edit-submit-btn');
+        
+        const items = editItemsData.filter(i => !i._removed).map(i => ({
+            id: i.id || null,
+            product_id: i.product_id || null,
+            name: i.name,
+            size: i.size || null,
+            color: i.color || null,
+            quantity: parseInt(i.quantity) || 1,
+            price: parseFloat(i.price) || 0,
+            image_url: i.image_url || null
+        }));
+
+        // Also include removed items that were in DB so controller can delete them
+        editItemsData.filter(i => i._removed && i.id).forEach(i => {
+            items.push({ id: i.id, _removed: true });
+        });
+
+        const data = {
+            customerName: document.getElementById('edit-customer-name').value,
+            customerPhone: document.getElementById('edit-customer-phone').value,
+            customerEmail: document.getElementById('edit-customer-email').value,
+            customerAltPhone: document.getElementById('edit-customer-altphone').value,
+            customerAddress: document.getElementById('edit-customer-address').value,
+            state: document.getElementById('edit-state').value,
+            city: document.getElementById('edit-city').value,
+            street: document.getElementById('edit-street').value,
+            items: items,
+            discount: document.getElementById('edit-discount').value || 0,
+            total: document.getElementById('edit-order-total').value,
+            paymentMethod: document.getElementById('edit-payment-method').value,
+            notes: document.getElementById('edit-notes').value
+        };
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/admin/orders/' + id + '/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('✅ تم تحديث الطلب بالكامل بنجاح');
+                window.location.reload();
+            } else {
+                alert('❌ خطأ: ' + (result.message || 'فشل التحديث'));
+                btn.innerHTML = '<i class="fas fa-save"></i> حفظ كل التعديلات';
+                btn.disabled = false;
+            }
+        } catch (err) {
+            console.error('Update Error:', err);
+            alert('❌ حدث خطأ في الاتصال');
+            btn.innerHTML = '<i class="fas fa-save"></i> حفظ كل التعديلات';
             btn.disabled = false;
         }
-    } catch (err) {
-        console.error('Update Error:', err);
-        alert('❌ حدث خطأ في الاتصال');
-        btn.innerText = 'حفظ التعديلات';
-        btn.disabled = false;
     }
-}
-</script>
+
+    </script>
 
 <%- include('partials/footer') %>

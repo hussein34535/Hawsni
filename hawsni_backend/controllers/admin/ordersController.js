@@ -439,16 +439,21 @@ class OrdersController {
         }
     }
 
-    // Update order details (Basic info)
+    // Update order details (Full edit — items, address, notes, discount, etc.)
     async updateOrder(req, res) {
         try {
             const { id } = req.params;
-            const { customerName, customerPhone, customerAddress, total } = req.body;
+            const {
+                customerName, customerPhone, customerEmail,
+                customerAltPhone,
+                customerAddress, state, city, street,
+                items, discount, notes, paymentMethod, total
+            } = req.body;
 
-            // 1. Get current order to preserve other shipping details
+            // 1. Get current order
             const { data: order, error: fetchError } = await supabase
                 .from('orders')
-                .select('shipping_address')
+                .select('shipping_address, order_items(id)')
                 .eq('id', id)
                 .single();
 
@@ -461,29 +466,79 @@ class OrdersController {
                 try { ship = JSON.parse(ship); } catch (e) { }
             }
 
-            // Update shipping address object
+            // 2. Build updated shipping address
             const updatedShip = {
-                ...(typeof ship === 'object' ? ship : {}),
+                ...(typeof ship === 'object' && ship !== null ? ship : {}),
                 name: customerName,
                 phone: customerPhone,
+                email: customerEmail,
+                alternative_phone: customerAltPhone || ship?.alternative_phone || null,
                 address: customerAddress,
-                guestName: customerName, // Support both formats
+                state: state || ship?.state || null,
+                city: city || ship?.city || null,
+                street: street || ship?.street || null,
+                guestName: customerName,
                 guestPhone: customerPhone,
+                guestEmail: customerEmail,
                 shippingAddress: customerAddress
             };
 
-            // 2. Update database
+            // 3. Build update payload
+            const updatePayload = {
+                shipping_address: updatedShip,
+                total: parseFloat(total || 0),
+                discount: parseFloat(discount || 0),
+                notes: notes || null,
+                updated_at: new Date().toISOString()
+            };
+
+            if (paymentMethod) {
+                updatePayload.payment_method = paymentMethod;
+            }
+
+            // 4. Handle order items if provided
+            if (Array.isArray(items)) {
+                const oldItemIds = (order.order_items || []).map(i => i.id).filter(Boolean);
+
+                for (const item of items) {
+                    if (item._removed && item.id) {
+                        // Delete item that was removed in UI
+                        await supabase.from('order_items').delete().eq('id', item.id);
+                    } else if (item.id && oldItemIds.includes(item.id)) {
+                        // Update existing item
+                        await supabase.from('order_items').update({
+                            size: item.size || null,
+                            color: item.color || null,
+                            quantity: parseInt(item.quantity) || 1,
+                            price: parseFloat(item.price) || 0,
+                            image_url: item.image_url || null
+                        }).eq('id', item.id);
+                    } else if (item.product_id && !item._removed) {
+                        // Insert new item
+                        const insertData = {
+                            order_id: id,
+                            product_id: item.product_id || null,
+                            name: item.name || 'منتج',
+                            quantity: parseInt(item.quantity) || 1,
+                            price: parseFloat(item.price) || 0,
+                            size: item.size || null,
+                            color: item.color || null,
+                            image_url: item.image_url || null
+                        };
+                        await supabase.from('order_items').insert(insertData);
+                    }
+                }
+            }
+
+            // 5. Update order record
             const { error: updateError } = await supabase
                 .from('orders')
-                .update({
-                    shipping_address: updatedShip,
-                    total: parseFloat(total || 0)
-                })
+                .update(updatePayload)
                 .eq('id', id);
 
             if (updateError) throw updateError;
 
-            res.json({ success: true, message: 'تم تحديث بيانات الطلب بنجاح' });
+            res.json({ success: true, message: 'تم تحديث الطلب بالكامل بنجاح' });
         } catch (err) {
             console.error('Error updating order:', err);
             res.status(500).json({ success: false, message: 'خطأ في تحديث الطلب: ' + err.message });
