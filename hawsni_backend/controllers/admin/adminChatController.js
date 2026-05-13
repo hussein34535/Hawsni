@@ -36,7 +36,7 @@ class AdminChatController {
                 // Fetch all messages for these sessions (latest first) to build last-message map
                 const { data: allMsgs } = await supabase
                     .from('chat_messages')
-                    .select('session_id, content, sender_type, created_at')
+                    .select('session_id, content, sender_type, created_at, is_read')
                     .in('session_id', ids)
                     .order('created_at', { ascending: false });
 
