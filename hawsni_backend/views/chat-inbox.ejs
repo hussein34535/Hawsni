@@ -494,6 +494,18 @@
         elMsgs.scrollTop = elMsgs.scrollHeight;
     }
 
+    // Toast notification
+    function showToast(msg, type) {
+        const existing = document.getElementById('wa-toast');
+        if (existing) existing.remove();
+        const t = document.createElement('div');
+        t.id = 'wa-toast';
+        t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:9999;background:#1e293b;color:#fff;padding:10px 20px;border-radius:12px;font-size:0.8rem;font-weight:700;max-width:90%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.3);animation:fadeInUp 0.3s ease;font-family:"Cairo",sans-serif;';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 400); }, 4000);
+    }
+
     function sendMsg() {
         const c = elMsgInput.value.trim();
         if (!c || !activeId) return;
@@ -501,7 +513,16 @@
         fetch('/admin/chat/send', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
             body: JSON.stringify({ sessionId: activeId, content: c })
-        });
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (!d.success && d.waError) {
+                showToast(d.message || 'فشل إرسال رسالة واتساب', 'warning');
+            } else if (d.fallback) {
+                showToast('تم الإرسال عبر القالب (قد يختلف الشكل عن النص الأصلي)', 'info');
+            }
+        })
+        .catch(() => {});
     }
 
     async function callApi(url) {

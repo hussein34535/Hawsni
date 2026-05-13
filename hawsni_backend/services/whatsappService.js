@@ -134,10 +134,13 @@ class WhatsAppService {
     }
 
     /**
-     * Send a generic text message (Only works if customer contacted first within 24h)
+     * Send a generic text message via WhatsApp Cloud API.
+     * Only works within the 24h customer service window.
+     * Falls back to the order_confirm template if the window is closed.
+     * Returns { success, error } for callers to handle.
      */
     async sendTextMessage(phone, message) {
-        if (!this.phoneNumberId) return;
+        if (!this.phoneNumberId) return { success: false, error: 'WHATSAPP_NOT_CONFIGURED' };
 
         const cleanPhone = phone.replace(/\D/g, '');
         let finalPhone = cleanPhone;
@@ -152,7 +155,7 @@ class WhatsAppService {
                 text: { body: message }
             };
 
-            await fetch(url, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -161,10 +164,84 @@ class WhatsAppService {
                 body: JSON.stringify(payload)
             });
 
+            const result = await response.json();
+
+            if (!response.ok) {
+                const errCode = result?.error?.code;
+                // 131026 / 131008 / 132001 = messaging window / template not allowed errors
+                if (errCode === 131026 || errCode === 131008 || errCode === 132001 || errCode === 131005) {
+                    console.warn(`⚠️ 24h messaging window closed for ${finalPhone}, falling back to template...`);
+                    return await this._sendAsTemplateFallback(phone, message);
+                }
+                console.error('❌ WhatsApp Text API Error:', result);
+                await this._logMessage(phone, 'bot', message);
+                return { success: false, error: result?.error?.message || 'WhatsApp API Error' };
+            }
+
             // Log outgoing message
             await this._logMessage(phone, 'bot', message);
+            return { success: true };
         } catch (error) {
             console.error('❌ WhatsApp Text Error:', error.message);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
+     * Fallback: Send a message using the order_confirm template when the 24h window is closed.
+     * Tries to embed the admin message into the template body.
+     */
+    async _sendAsTemplateFallback(phone, message) {
+        const cleanPhone = phone.replace(/\D/g, '');
+        let finalPhone = cleanPhone;
+        if (finalPhone.startsWith('01') && finalPhone.length === 11) finalPhone = '2' + finalPhone;
+
+        // Truncate the message to fit template parameters
+        const shortMsg = message.length > 100 ? message.substring(0, 97) + '...' : message;
+
+        try {
+            const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+            // order_confirm template parameters: customerName, orderNumber, total, products
+            const payload = {
+                messaging_product: "whatsapp",
+                to: finalPhone,
+                type: "template",
+                template: {
+                    name: "order_confirm",
+                    language: { code: "ar" },
+                    components: [{
+                        type: "body",
+                        parameters: [
+                            { type: "text", text: "عميلنا العزيز" },
+                            { type: "text", text: "------" },
+                            { type: "text", text: "0" },
+                            { type: "text", text: shortMsg }
+                        ]
+                    }]
+                }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const result = await response.json();
+                console.error('❌ WhatsApp Template Fallback Error:', result);
+                return { success: false, error: result?.error?.message || 'Template fallback failed' };
+            }
+
+            await this._logMessage(phone, 'bot', message);
+            console.log(`✅ WhatsApp template fallback sent to ${finalPhone}`);
+            return { success: true, fallback: true };
+        } catch (error) {
+            console.error('❌ WhatsApp Template Fallback Error:', error.message);
+            return { success: false, error: error.message };
         }
     }
 

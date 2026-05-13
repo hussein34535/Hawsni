@@ -108,10 +108,33 @@ class AdminChatController {
 
             // Send via WhatsApp only if WhatsApp session
             if (session?.platform === 'whatsapp') {
-                await whatsappService.sendTextMessage(sessionId, content);
+                const waResult = await whatsappService.sendTextMessage(sessionId, content);
+                
+                // Save to DB always (for history)
+                await supabase.from('chat_messages').insert([{
+                    session_id: sessionId, sender_type: 'admin', content
+                }]);
+
+                await supabase.from('chat_sessions')
+                    .update({ status: 'human_active', updated_at: new Date().toISOString() })
+                    .eq('session_id', sessionId);
+
+                if (!waResult.success) {
+                    return res.json({ 
+                        success: false, 
+                        error: waResult.error,
+                        waError: true,
+                        message: 'فشل إرسال رسالة واتساب — العميل خارج نافذة 24 ساعة. الرجاء استخدام القالب التأكيدي.'
+                    });
+                }
+                return res.json({ 
+                    success: true, 
+                    message: 'تم الإرسال بنجاح',
+                    fallback: waResult.fallback || false 
+                });
             }
 
-            // Save to DB (Only for Web sessions, since WA is handled above)
+            // Save to DB for web sessions
             if (session?.platform === 'web') {
                 await supabase.from('chat_messages').insert([{
                     session_id: sessionId, sender_type: 'admin', content
