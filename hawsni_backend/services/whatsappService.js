@@ -265,7 +265,8 @@ class WhatsAppService {
             return;
         }
 
-        // 4. Let Gemini AI handle everything
+        // 4. AI Handling (DISABLED BY USER REQUEST)
+        /*
         try {
             console.log(`[WA] 🤖 AI handling message from ${phone}: "${textBody}"`);
 
@@ -294,6 +295,10 @@ class WhatsAppService {
             console.error('[WA] ❌ AI failed:', err.message);
             await this.sendTextMessage(phone, 'شكراً لتواصلك مع هَوَسي 🤍\nسيرد عليك فريقنا في أقرب وقت ممكن!');
         }
+        */
+        
+        // Instead of AI, we can just notify the admin or leave it for manual response
+        console.log(`[WA] 📲 Message from ${phone} received (AI Disabled).`);
     }
 
     async handleWebhook(payload) {
