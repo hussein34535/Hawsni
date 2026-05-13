@@ -515,8 +515,16 @@
             event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${id}`
         }, p => {
             messages.push(p.new); renderMsgs();
-            // Refresh sessions list to update preview + unread badge
-            loadSessions();
+            // If new message arrives in the active session, mark it read immediately
+            if (activeId === id) {
+                fetch('/admin/chat/mark-read', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+                    body: JSON.stringify({ sessionId: id })
+                }).catch(() => {}).then(() => loadSessions());
+            } else {
+                loadSessions();
+            }
         }).subscribe();
     }
 
