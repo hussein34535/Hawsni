@@ -271,6 +271,30 @@ if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    // Run startup migration check
+    (async () => {
+      try {
+        const { supabaseAdmin } = require('./config/supabase');
+        const fetch = require('node-fetch');
+        const { error } = await supabaseAdmin.from('orders').select('deposit_receipt_url').limit(1);
+        if (error && (error.message?.includes('column') || error.code === 'PGRST116')) {
+          console.log('⚠️  deposit_receipt_url column missing. Attempting auto-migration...');
+          // Attempt via Supabase Data API
+          const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+              'Authorization': 'Bearer ' + process.env.SUPABASE_SERVICE_ROLE_KEY
+            }
+          });
+          if (!res.ok) {
+            console.log('⚠️  Run this SQL in Supabase Dashboard → SQL Editor:');
+            console.log('   ALTER TABLE orders ADD COLUMN IF NOT EXISTS deposit_receipt_url TEXT;');
+          }
+        }
+      } catch (e) { /* silently fail */ }
+    })();
   });
 }
 

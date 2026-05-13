@@ -47,6 +47,7 @@
                     <select id="bulkStatusSelect" class="form-control" style="width: auto; height: 38px;">
                         <option value="">-- تغيير الحالة --</option>
                         <option value="Processing">قيد المعالجة</option>
+                        <option value="Confirmed">تم التأكيد</option>
                         <option value="In Transit">مع شركة الشحن</option>
                         <option value="Delivered">تم التوصيل</option>
                         <option value="Cancelled">ملغي</option>
@@ -87,11 +88,12 @@
                                 !==null) { cName=ship.name || ship.guestName || cName; cPhone=ship.phone ||
                                 ship.guestPhone || cPhone; cAddr=ship.address || ship.shippingAddress || cAddr; } else
                                 if (typeof ship==='string' && ship.trim() !=='' ) { cAddr=ship; } const
-                                sMap={ 'Processing' : 'warning', 'In Transit' : 'info'
+                                sMap={ 'Processing' : 'warning', 'Confirmed': 'primary', 'In Transit' : 'info'
                                 , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; 
                                 const sClass = sMap[order.status] || 'warning'; 
                                 const tMap = { 
                                     'Processing' : 'قيد المعالجة', 
+                                    'Confirmed': 'تم التأكيد',
                                     'In Transit' : 'مع شركة الشحن', 
                                     'Delivered' : 'تم التوصيل', 
                                     'Cancelled' : 'ملغي' 
@@ -176,11 +178,13 @@
                                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                                 <select name="status" class="status-select select-<%= sClass %>"
                                                     onchange="this.form.submit()">
-                                                    <% if (!['Processing', 'In Transit', 'Delivered', 'Cancelled'].includes(order.status)) { %>
+                                                    <% if (!['Processing', 'Confirmed', 'In Transit', 'Delivered', 'Cancelled'].includes(order.status)) { %>
                                                         <option value="" selected disabled>-- اختيار الحالة --</option>
                                                     <% } %>
                                                     <option value="Processing" <%=order.status==='Processing'
                                                         ? 'selected' : '' %>>قيد المعالجة</option>
+                                                    <option value="Confirmed" <%=order.status==='Confirmed'
+                                                        ? 'selected' : '' %>>تم التأكيد</option>
                                                     <option value="In Transit" <%=order.status==='In Transit'
                                                         ? 'selected' : '' %>>مع شركة الشحن</option>
                                                     <option value="Delivered" <%=order.status==='Delivered' ? 'selected'
@@ -261,6 +265,7 @@
                         <div id="modalStatusBadge" class="badge" style="border: none; padding: 6px 12px; font-size: 0.8rem;"></div>
                         <select id="modalStatusSelect" class="status-select" onchange="changeModalStatus(this.value)" style="border: none; background: transparent; padding: 0;">
                             <option value="Processing">قيد المعالجة</option>
+                            <option value="Confirmed">تم التأكيد</option>
                             <option value="In Transit">مع شركة الشحن</option>
                             <option value="Delivered">تم التوصيل</option>
                             <option value="Cancelled">ملغي</option>
@@ -1975,7 +1980,7 @@ async function submitOrderEdit(event) {
     try {
         const response = await fetch('/admin/orders/' + id + '/update', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
             body: JSON.stringify(data)
         });
         const result = await response.json();
