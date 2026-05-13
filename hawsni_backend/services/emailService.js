@@ -300,6 +300,14 @@ async function sendOrderConfirmationEmail(toEmail, userName, order) {
 // 4. Order Status Update Email (Customer)
 // ──────────────────────────────────────────────
 const STATUS_CONFIG = {
+    'Confirmed': {
+        ar: 'تم تأكيد طلبك بنجاح!',
+        emoji: '✅',
+        color: '#0E4435',
+        icon: '✔️',
+        message: 'تم استلام تأكيد التحويل الخاص بك وتأكيد الطلب. نحن الآن نجهز منتجاتك للشحن في أقرب وقت ممكن!',
+        step: 1
+    },
     'Processing': {
         ar: 'جاري تجهيز طلبك',
         emoji: '📦',

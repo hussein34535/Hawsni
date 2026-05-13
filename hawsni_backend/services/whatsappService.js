@@ -310,6 +310,94 @@ class WhatsAppService {
         console.log(`[WA] 📲 Message from ${phone} received (AI Disabled).`);
     }
 
+    async _handleImageMessage(msg) {
+        const phone = msg.from;
+        const mediaId = msg.image.id;
+
+        // 1. Log media to DB
+        await this._logMessage(phone, 'user', `[IMAGE:${mediaId}]`);
+
+        try {
+            // 2. Download from WhatsApp & Upload to Supabase
+            const receiptUrl = await this._processWhatsAppMedia(mediaId, 'receipts');
+
+            if (receiptUrl) {
+                // 3. Find the latest order for this customer
+                const normalizedPhone = phone.startsWith('20') ? phone.substring(2) : phone;
+                
+                const { data: orders, error } = await supabase
+                    .from('orders')
+                    .select('*, users(*)')
+                    .or(`shipping_address->>phone.ilike.%${normalizedPhone}%,users.phone.ilike.%${normalizedPhone}%`)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (orders && orders.length > 0) {
+                    const order = orders[0];
+                    
+                    // 4. Update the order
+                    await supabase
+                        .from('orders')
+                        .update({
+                            status: 'Confirmed',
+                            deposit_receipt_url: receiptUrl,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', order.id);
+
+                    // 5. Notify customer
+                    await this.sendTextMessage(phone, `✅ تم استلام صورة التحويل بنجاح وتأكيد طلبك رقم #${order.id.substring(0, 6).toUpperCase()}!\n\nشكراً لثقتك بـ Hawsni 🤍`);
+                } else {
+                    await this.sendTextMessage(phone, "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\n(ملاحظة: سيقوم أحد موظفينا بمراجعة الأمر يدوياً لتأكيد الربط بالطلب)");
+                }
+            } else {
+                throw new Error("Failed to process media");
+            }
+        } catch (error) {
+            console.error("Error processing image message:", error);
+            await this.sendTextMessage(phone, "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍");
+        }
+
+        await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
+    }
+
+    async _processWhatsAppMedia(mediaId, bucket) {
+        try {
+            const response = await fetch(`https://graph.facebook.com/${this.apiVersion}/${mediaId}`, {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            const mediaData = await response.json();
+            const mediaUrl = mediaData.url;
+
+            if (!mediaUrl) return null;
+
+            const mediaRes = await fetch(mediaUrl, {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            const buffer = await mediaRes.buffer();
+
+            const fileName = `${mediaId}_${Date.now()}.jpg`;
+
+            const { data, error } = await supabase.storage
+                .from(bucket)
+                .upload(fileName, buffer, {
+                    contentType: 'image/jpeg',
+                    upsert: true
+                });
+
+            if (error) throw error;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from(bucket)
+                .getPublicUrl(fileName);
+
+            return publicUrl;
+        } catch (error) {
+            console.error("Error processing WhatsApp media:", error);
+            return null;
+        }
+    }
+
     async handleWebhook(payload) {
         try {
             // Meta webhooks have this specific nested structure
@@ -367,24 +455,7 @@ class WhatsAppService {
                             }
 
                         } else if (msg.type === 'image' && msg.image) {
-                            const phone = msg.from;
-                            const mediaId = msg.image.id;
-                            
-                            // 1. Log media to DB (ensures session exists)
-                            await this._logMessage(phone, 'user', `[IMAGE:${mediaId}]`);
-
-                            // 2. Send confirmation with ONE message containing TWO buttons
-                            await this.sendInteractiveButtons(
-                                phone,
-                                "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\nماذا تريد أن تفعل الآن؟",
-                                [
-                                    { id: 'track_order', title: 'تتبع الطلب 🚚' },
-                                    { id: 'edit_order', title: 'تعديل الطلب 📝' }
-                                ]
-                            );
-                            
-                            // Update session status
-                            await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
+                            await this._handleImageMessage(msg);
                         } else if (msg.type === 'text' && msg.text) {
                             await this._handleIncomingText(msg);
                         }
