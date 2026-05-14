@@ -144,8 +144,11 @@
     .by-agent.is-admin .bubble { background: #e1f3fb; border-bottom-left-radius: 2px; }
     .by-agent.is-bot   .bubble { background: #fff; }
     .bubble img { max-width: 100%; max-height: 220px; border-radius: 6px; cursor: pointer; display: block; margin: 2px 0; }
-    .b-label { font-size: 10px; font-weight: 700; margin-bottom: 2px; opacity: 0.55; }
-    .b-time  { font-size: 10px; margin-top: 4px; text-align: left; opacity: 0.5; }
+    .b-label { font-size: 11px; font-weight: 800; margin-bottom: 6px; opacity: 0.5; }
+    .b-time  { font-size: 10px; margin-top: 6px; text-align: left; opacity: 0.45; }
+    .date-sep { text-align: center; font-size: 11px; font-weight: 700; color: #64748b; padding: 8px 0 4px; position: sticky; top: 0; z-index: 1; }
+    .date-sep span { background: #e2e8f0; padding: 3px 14px; border-radius: 8px; display: inline-block; }
+    body.dark .date-sep span { background: #2a2a2a; color: #94a3b8; }
 
     .chat-footer {
         background: #f0f2f5; padding: 6px 10px; flex-shrink: 0;
@@ -470,25 +473,44 @@
     function closeLightbox(e) { if (e) e.stopPropagation(); el('lightbox').classList.remove('active'); }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(e); });
 
+    function fmtDate(d) {
+        const now = new Date();
+        const day = new Date(d);
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const msgDate = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+        const diff = Math.floor((today - msgDate) / (1000*60*60*24));
+        if (diff === 0) return 'اليوم';
+        if (diff === 1) return 'أمس';
+        return day.toLocaleDateString('ar-EG', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    }
     function renderMsgs() {
         if (!messages.length) {
             elMsgs.innerHTML = '<div class="empty-chat"><i class="fas fa-comment-slash"></i><p style="color:#94a3b8;">لا رسائل بعد</p></div>';
             return;
         }
-        elMsgs.innerHTML = messages.map(m => {
+        let lastDate = '';
+        let html = '';
+        messages.forEach(m => {
+            const d = new Date(m.created_at);
+            const dateKey = d.toDateString();
+            if (dateKey !== lastDate) {
+                lastDate = dateKey;
+                html += `<div class="date-sep"><span>${fmtDate(m.created_at)}</span></div>`;
+            }
             const u = m.sender_type === 'user';
             const b = m.sender_type === 'bot';
             const cls = u ? 'by-user' : `by-agent ${b ? 'is-bot' : 'is-admin'}`;
             const icon = u ? '👤' : b ? '🤖' : '🧑‍💼';
             const label = u ? 'عميل' : b ? 'هَوَسي' : 'موظف';
-            const time = new Date(m.created_at).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+            const time = d.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
             let txt = (m.content || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
             const img = txt.match(/\[IMAGE:(.+?)\]/);
             if (img) {
                 txt = txt.replace(img[0], `<img src="/admin/chat/media/${img[1]}" onclick="openLightbox(this.src)" onerror="this.outerHTML='<span style=color:#999;font-size:12px;>🖼️ الصورة غير متاحة</span>'">`);
             }
-            return `<div class="msg-row ${cls}"><div class="bubble"><span class="b-label">${icon} ${label}</span>${txt}<div class="b-time">${time}</div></div></div>`;
-        }).join('');
+            html += `<div class="msg-row ${cls}"><div class="bubble"><span class="b-label">${icon} ${label}</span>${txt}<div class="b-time">${time}</div></div></div>`;
+        });
+        elMsgs.innerHTML = html;
         elMsgs.scrollTop = elMsgs.scrollHeight;
     }
 
