@@ -1,0 +1,257 @@
+<!-- Summary Stats -->
+<div class="stats-grid">
+    <% const totalRevenue=orders.reduce((acc, o)=> acc + parseFloat(o.total || 0), 0);
+        const pendingOrders = orders.filter(o => o.status === 'Processing').length;
+        const completedOrders = orders.filter(o => o.status === 'Delivered').length;
+        %>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: var(--brand-light); color: var(--brand-primary);"><i class="fas fa-dollar-sign"></i></div>
+                <div class="stat-label">إجمالي المبيعات</div>
+            </div>
+            <div class="stat-value">
+                <%= totalRevenue.toLocaleString() %> ج.م
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: var(--warning-bg); color: var(--warning);"><i class="fas fa-clock"></i></div>
+                <div class="stat-label">طلبات قيد المعالجة</div>
+            </div>
+            <div class="stat-value">
+                <%= pendingOrders %>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon" style="background: var(--success-bg); color: var(--success);"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-label">طلبات مكتملة</div>
+            </div>
+            <div class="stat-value">
+                <%= completedOrders %>
+            </div>
+        </div>
+        <div class="stat-card" onclick="togglePendingFilter()" style="cursor:pointer; transition:0.2s;" id="pendingReceiptCard" title="عرض طلبات بانتظار التأكيد">
+            <div class="stat-header">
+                <div class="stat-icon" style="background:#ffedd5; color:#c2410c;"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="stat-label">بانتظار التأكيد</div>
+            </div>
+            <div class="stat-value" id="pendingReceiptCount" style="color:#c2410c;">
+                <%= orders.filter(o => o.deposit_receipt_url && o.status !== 'Confirmed' && o.status !== 'Cancelled' && o.status !== 'Delivered').length %>
+            </div>
+        </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i class="fas fa-list-ul"></i> قائمة الطلبات الحالية
+        </h2>
+
+        <div id="bulkBar" class="bulk-actions-bar" style="display:none; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <span id="selectedCount" class="badge badge-info" style="font-size: 0.9rem;">0 محدد</span>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <select id="bulkStatusSelect" class="form-control" style="width: auto; height: 38px;">
+                    <option value="">-- تغيير الحالة --</option>
+                    <option value="Processing">قيد المعالجة</option>
+                    <option value="Confirmed">تم التأكيد</option>
+                    <option value="In Transit">مع شركة الشحن</option>
+                    <option value="Delivered">تم التوصيل</option>
+                    <option value="Cancelled">ملغي</option>
+                </select>
+                <label style="display:flex; align-items:center; gap:4px; margin:0; font-size: 0.85rem; font-weight:bold; color: #475569; cursor: pointer;">
+                    <input type="checkbox" id="bulkSkipEmail" style="width:16px; height:16px; cursor: pointer;"> بدون إيميل
+                </label>
+                <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm" style="flex:1;">تطبيق</button>
+                <button onclick="bulkDelete()" class="btn btn-danger btn-sm" style="flex:1;"><i class="fas fa-trash"></i> حذف</button>
+                <button onclick="clearSelection()" class="btn btn-secondary btn-sm" style="flex:1;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <% if (orders && orders.length> 0) { %>
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">
+                            <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
+                        </th>
+                        <th>المنتج</th>
+                        <th>العميل</th>
+                        <th>رقم الطلب</th>
+                        <th>المبلغ</th>
+                        <th>الحالة</th>
+                        <th>التاريخ</th>
+                        <th style="width: 150px;">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order=> { %>
+                        <% let cName='غير معروف' ; let cPhone='-' ; let cAddr='بدون عنوان' ; if (order.users) {
+                            cName=order.users.name || cName; cPhone=order.users.phone || cPhone; } let
+                            ship=order.shipping_address; if (typeof ship==='string' && ship.trim().startsWith('{'))
+                            { try { ship=JSON.parse(ship); } catch (e) { } } if (typeof ship==='object' && ship
+                            !==null) { cName=ship.name || ship.guestName || cName; cPhone=ship.phone ||
+                            ship.guestPhone || cPhone; cAddr=ship.address || ship.shippingAddress || cAddr; } else
+                            if (typeof ship==='string' && ship.trim() !=='' ) { cAddr=ship; } const
+                            sMap={ 'Processing' : 'warning', 'Confirmed': 'primary', 'In Transit' : 'info'
+                            , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; 
+                            const sClass = sMap[order.status] || 'warning'; 
+                            const tMap = { 
+                                'Processing' : 'قيد المعالجة', 
+                                'Confirmed': 'تم التأكيد',
+                                'In Transit' : 'مع شركة الشحن', 
+                                'Delivered' : 'تم التوصيل', 
+                                'Cancelled' : 'ملغي' 
+                            };
+                            const displayStatus = tMap[order.status] || (order.status ? order.status : 'غير محدد'); %>
+                            <tr id="row-<%= order.id %>" class="order-row"
+                                onclick="showOrderDetails('<%= order.id %>')">
+                                <td data-label="تحديد" onclick="event.stopPropagation()">
+                                    <input type="checkbox" class="order-checkbox" value="<%= order.id %>"
+                                        onchange="updateBulkBar()">
+                                </td>
+                                <td data-label="المنتج">
+                                    <div class="product-cell">
+                                        <% if (order.product_image) { %>
+                                            <img src="<%= order.product_image %>" class="product-img-lg">
+                                            <% } else { %>
+                                                <div class="product-img-placeholder"><i class="fas fa-box"></i>
+                                                </div>
+                                                <% } %>
+                                                    <div>
+                                                        <div class="product-title">
+                                                            <%= order.product_name %>
+                                                        </div>
+                                                        <% if (order.items_count> 1) { %>
+                                                             <div class="product-count">+ <%= order.items_count - 1
+                                                                     %> منتجات أخرى</div>
+                                                             <% } %>
+                                                         <% if (order.deposit_receipt_url && order.status !== 'Confirmed' && order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
+                                                             <div class="receipt-badge"><i class="fas fa-file-invoice-dollar"></i> إيصال</div>
+                                                         <% } %>
+                                                    </div>
+                                    </div>
+                                </td>
+                                <td data-label="العميل">
+                                    <div class="customer-cell">
+                                        <div class="avatar-small">
+                                            <%= cName==='غير معروف' ? '?' : cName.charAt(0) %>
+                                        </div>
+                                        <div>
+                                            <div class="customer-name">
+                                                <%= cName %>
+                                            </div>
+                                            <div class="customer-phone" style="display: flex; align-items: center; gap: 8px;">
+                                                <%= cPhone %>
+                                                <% 
+                                                   let cp = (typeof cPhone === 'string' ? cPhone : '').replace(/\D/g, '');
+                                                   if (cp.startsWith('01') && cp.length === 11) cp = '2' + cp;
+                                                %>
+                                                <a href="/admin/chat?sessionId=<%= cp %>" onclick="event.stopPropagation()" title="فتح المحادثة" style="color: #25d366; text-decoration: none;">
+                                                   <i class="fab fa-whatsapp"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td data-label="رقم الطلب">
+                                    <span class="order-id">#<%= order.id.substring(0, 8) %></span>
+                                </td>
+                                <td data-label="المبلغ">
+                                    <% 
+                                        const total = parseFloat(order.total || 0);
+                                        const displayTotal = isNaN(total) ? '0.00' : total.toFixed(2);
+                                    %>
+                                    <span class="order-amount">
+                                        <%= displayTotal %> ج.م
+                                    </span>
+                                </td>
+                                <td data-label="الحالة">
+                                    <span class="badge badge-<%= sClass %>">
+                                        <%= displayStatus %>
+                                    </span>
+                                </td>
+                                <td data-label="التاريخ">
+                                    <div class="date-cell">
+                                        <%= new Date(order.created_at).toLocaleDateString('ar-EG', { day: 'numeric'
+                                            , month: 'short' }) %>
+                                            <span>
+                                                <%= new Date(order.created_at).getFullYear() %>
+                                            </span>
+                                    </div>
+                                </td>
+                                <td data-label="تحكم" onclick="event.stopPropagation()">
+                                    <div class="action-cell">
+                                        <form method="POST" action="/admin/orders/<%= order.id %>/status">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <select name="status" class="status-select select-<%= sClass %>"
+                                                onchange="this.form.submit()">
+                                                <% if (!['Processing', 'Confirmed', 'In Transit', 'Delivered', 'Cancelled'].includes(order.status)) { %>
+                                                    <option value="" selected disabled>-- اختيار الحالة --</option>
+                                                <% } %>
+                                                <option value="Processing" <%=order.status==='Processing'
+                                                    ? 'selected' : '' %>>قيد المعالجة</option>
+                                                <option value="Confirmed" <%=order.status==='Confirmed'
+                                                    ? 'selected' : '' %>>تم التأكيد</option>
+                                                <option value="In Transit" <%=order.status==='In Transit'
+                                                    ? 'selected' : '' %>>مع شركة الشحن</option>
+                                                <option value="Delivered" <%=order.status==='Delivered' ? 'selected'
+                                                    : '' %>>تم التوصيل</option>
+                                                <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected'
+                                                    : '' %>>ملغي</option>
+                                            </select>
+                                         </form>
+                                          <% 
+                                              let cleanActionPhone = (typeof cPhone === 'string' ? cPhone : '').replace(/\D/g, '');
+                                              if (cleanActionPhone.startsWith('01') && cleanActionPhone.length === 11) cleanActionPhone = '2' + cleanActionPhone;
+                                           %>
+                                          <a href="/admin/chat?sessionId=<%= cleanActionPhone %>" onclick="event.stopPropagation()" class="btn-icon" title="دردشة واتساب" style="color: #25d366; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                                             <i class="fab fa-whatsapp"></i>
+                                          </a>
+                                          <button class="btn-icon" onclick="event.stopPropagation(); openEditModal('<%= order.id %>')" title="تعديل الطلب" style="color: var(--info);">
+                                            <i class="fas fa-edit"></i>
+                                         </button>
+                                         <button class="btn-icon text-danger"
+                                             onclick="deleteOrder('<%= order.id %>')" title="حذف الطلب">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                        <button class="btn-icon" onclick="showOrderDetails('<%= order.id %>')">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <% } else { %>
+            <div class="empty-state">
+                <i class="fas fa-shopping-cart"></i>
+                <p>لا توجد طلبات حتى الآن</p>
+            </div>
+            <% } %>
+    
+    <!-- Pagination UI -->
+    <% if (pagination && pagination.totalPages > 1) { %>
+        <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding: 20px;">
+            <% if (pagination.page > 1) { %>
+                <a href="/admin/orders?page=<%= pagination.page - 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                    <i class="fas fa-chevron-right" style="margin-left: 5px;"></i> السابق
+                </a>
+            <% } %>
+
+            <div class="pagination-info" style="font-weight: bold; color: #64748b; font-size: 0.9rem;">
+                صفحة <%= pagination.page %> من <%= pagination.totalPages %>
+            </div>
+
+            <% if (pagination.page < pagination.totalPages) { %>
+                <a href="/admin/orders?page=<%= pagination.page + 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                    التالي <i class="fas fa-chevron-left" style="margin-right: 5px;"></i>
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+</div>

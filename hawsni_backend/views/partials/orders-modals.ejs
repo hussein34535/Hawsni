@@ -1,0 +1,360 @@
+<!-- Order Details Modal -->
+<div id="orderModal" class="modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <div class="header-main">
+                <div class="header-id-group">
+                    <span class="header-badge">تفاصيل الطلب</span>
+                    <h3 id="modalOrderId" class="modal-title"></h3>
+                </div>
+                <p id="modalOrderDate" class="modal-subtitle"></p>
+            </div>
+            <div class="header-actions">
+                <div class="status-pill-group">
+                    <div id="modalStatusBadge" class="badge" style="border: none; padding: 6px 12px; font-size: 0.8rem;"></div>
+                    <select id="modalStatusSelect" class="status-select" onchange="changeModalStatus(this.value)" style="border: none; background: transparent; padding: 0;">
+                        <option value="Processing">قيد المعالجة</option>
+                        <option value="Confirmed">تم التأكيد</option>
+                        <option value="In Transit">مع شركة الشحن</option>
+                        <option value="Delivered">تم التوصيل</option>
+                        <option value="Cancelled">ملغي</option>
+                    </select>
+                </div>
+                <label style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top:5px; font-size: 0.75rem; color:#64748b; cursor: pointer;">
+                    <input type="checkbox" id="modalSkipEmail" style="cursor: pointer;"> بدون إيميل
+                </label>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <div class="modal-body">
+            <div class="modal-grid">
+                <!-- Left Column: Products & Payment -->
+                <div class="column-main">
+                    <div class="detail-section">
+                        <h4 class="section-title"><i class="fas fa-shopping-bag"></i> منتجات الطلب</h4>
+                        <div id="modalItemsList" class="items-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="detail-section payment-summary">
+                        <h4 class="section-title"><i class="fas fa-receipt"></i> ملخص الدفع</h4>
+                        <div class="payment-grid">
+                            <div class="payment-item">
+                                <span>المجموع الفرعي:</span>
+                                <span id="modalSubtotal"></span>
+                            </div>
+                            <div id="discountRow" class="payment-item discount">
+                                <span>الخصم (كوبون):</span>
+                                <span id="modalDiscount"></span>
+                            </div>
+                            <div class="payment-item total">
+                                <span>الإجمالي:</span>
+                                <span id="modalTotalAmount"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Email Box -->
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-top: 16px;">
+                        <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #475569; font-weight: 800;"><i class="fas fa-magic" style="color: #8b5cf6;"></i> إيميل AI مخصص للتواصل</h5>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="aiEmailPrompt" placeholder="أكتب توجيه للذكاء الاصطناعي... (مثال: اعتذر عن التأخير وأبلغهم بشحن الطلب غداً)" style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.8rem; outline: none;">
+                            <button id="generateAiBtn" onclick="generateAiEmail()" style="background: #8b5cf6; color: white; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif;">
+                                توليد رسالة
+                            </button>
+                        </div>
+                        <div id="aiPreviewBox" style="display: none; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 12px; max-height: 200px; overflow-y: auto;">
+                            <div id="aiEmailContent" style="font-size: 0.8rem; color: #334155;"></div>
+                        </div>
+                        <button id="sendAiEmailBtn" onclick="sendAiEmail()" style="display: none; width: 100%; justify-content: center; align-items: center; gap: 8px; background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif; margin-top: 12px;">
+                            <i class="fas fa-paper-plane"></i> إرسال الإيميل للعميل الآن
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Customer, Shipping & Actions -->
+                <div class="column-side">
+                    <div class="detail-section customer-info">
+                        <h4 class="section-title"><i class="fas fa-user-circle"></i> بيانات العميل</h4>
+                        <div class="profile-card" style="padding: 20px; box-shadow: none; border: 1px solid rgba(0,0,0,0.05);">
+                            <div id="modalAvatar" class="profile-avatar" style="width: 50px; height: 50px; font-size: 1.2rem;"></div>
+                            <div class="profile-details">
+                                <h5 id="modalCustomerName" style="font-size: 1rem;"></h5>
+                                <p id="modalCustomerPhone" style="direction: ltr; text-align: right; margin-bottom: 2px; font-weight: 800; color: #334155; font-size: 0.9rem;"></p>
+                                <p id="modalCustomerPhone2" style="direction: ltr; text-align: right; font-size: 0.75rem; color: #94a3b8; display: none;"></p>
+                                <p id="modalCustomerEmail" class="email-text" style="font-size: 0.8rem;"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detail-section shipping-info">
+                        <h4 class="section-title"><i class="fas fa-map-marker-alt"></i> عنوان التوصيل</h4>
+                        <div class="address-card" style="padding: 20px; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                <div class="address-item">
+                                    <label>المحافظة:</label>
+                                    <p id="shipState"></p>
+                                </div>
+                                <div class="address-item">
+                                    <label>المدينة/المنطقة:</label>
+                                    <p id="shipCity"></p>
+                                </div>
+                            </div>
+                            <div class="address-item" style="margin-bottom: 16px;">
+                                <label>الشارع:</label>
+                                <p id="shipStreet"></p>
+                            </div>
+                            <div class="address-full">
+                                <label>العنوان بالكامل:</label>
+                                <p id="modalAddressFull"></p>
+                            </div>
+                            <button class="btn-copy-address" onclick="copyAddress()" style="margin-top: 16px; border: none; background: #e0f2fe; color: #0284c7;">
+                                <i class="fas fa-copy"></i> نسخ العنوان
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="modalNotesSection" class="detail-section" style="display: none;">
+                        <h4 class="section-title"><i class="fas fa-sticky-note"></i> ملاحظات الطلب</h4>
+                        <div class="address-card" style="border-color: #f59e0b; background: #fffcf0; padding: 15px;">
+                            <p id="modalNotesText" style="margin: 0; font-weight: 700; color: #92400e; line-height: 1.6; font-size: 0.9rem;"></p>
+                        </div>
+                    </div>
+
+                    <!-- Action Control Center -->
+                    <div class="detail-section">
+                        <h4 class="section-title"><i class="fas fa-bolt"></i> خيارات وإجراءات</h4>
+                        
+                        <!-- Payment Method Box -->
+                        <div class="method-card" style="margin-bottom: 16px; padding: 16px;">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span id="modalPaymentMethod">الدفع عند الاستلام</span>
+                        </div>
+
+                        <!-- No Answer Box -->
+                        <button id="noAnswerBtn" onclick="sendNoAnswerEmail()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: #fffcf0; border: 1px solid #fcd34d; color: #b45309; padding: 12px; border-radius: 12px; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: all 0.2s; font-family: 'Cairo', sans-serif; margin-bottom: 16px;">
+                            <i class="fas fa-phone-slash"></i> إرسال تنبيه "لم يرد" للعميل
+                        </button>
+
+                        <div id="receiptBox" style="display: none; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+                            <h5 style="margin: 0 0 10px 0; font-size: 0.85rem; color: #0369a1; font-weight: 800;">
+                                <i class="fas fa-file-invoice-dollar"></i> إيصال التحويل
+                            </h5>
+                            <a id="receiptLink" href="#" target="_blank" style="display: block; border-radius: 12px; overflow: hidden; border: 1px solid #7dd3fc; position: relative; background: #fff;">
+                                <img id="receiptPreview" src="" style="width: 100%; height: 120px; object-fit: cover; transition: 0.3s; cursor: zoom-in;" alt="Receipt">
+                                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(3,105,161,0.8); color: white; padding: 4px; font-size: 0.7rem; text-align: center; font-weight: 700;">
+                                    عرض الصورة كاملة <i class="fas fa-external-link-alt" style="font-size: 0.6rem;"></i>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Bosta Shipping Box -->
+                        <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 16px; padding: 16px;">
+                            <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #e11d48; font-weight: 800;"><i class="fas fa-truck-fast"></i> الشحن (بوسطة)</h5>
+                            
+                            <div id="bostaNotSentBox" style="display: none;">
+                                <div style="margin-bottom: 12px;">
+                                    <select id="bostaPackageSize" style="width: 100%; padding: 8px; border: 1px solid #fda4af; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.85rem; color: #be123c; background: #fff;">
+                                        <option value="SMALL">حجم صغير (مجوهرات/إكسسوار)</option>
+                                        <option value="MEDIUM" selected>حجم متوسط (ملابس/أحذية)</option>
+                                        <option value="LARGE">حجم كبير</option>
+                                    </select>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                    <input type="checkbox" id="bostaAllowOpen" checked style="width: 14px; height: 14px; accent-color: #e11d48;">
+                                    <label for="bostaAllowOpen" style="font-size: 0.8rem; font-weight: 700; color: #9f1239; cursor: pointer;">فتح الشحنة مسموح للعميل</label>
+                                </div>
+                                <button id="sendBostaBtn" onclick="sendToBosta()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: #e11d48; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif;">
+                                    إرسال الطلب لبوسطة <i class="fas fa-arrow-left" style="font-size: 0.8rem;"></i>
+                                </button>
+                            </div>
+
+                            <div id="bostaSentBox" style="display: none;">
+                                <div style="background: white; padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; color: #1e40af; text-align: center; margin-bottom: 12px; border: 1px dashed #bfdbfe;">
+                                    <i class="fas fa-check-circle" style="color: #3b82f6;"></i> رقم البوليصة: <br>
+                                    <span id="bostaTrackingNumber" style="font-size: 1.1rem; letter-spacing: 1px; display: inline-block; margin-top: 4px;"></span>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    <button onclick="openTrackingModal()" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 6px; background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; text-decoration: none; border: none; cursor: pointer; font-family: 'Cairo', sans-serif;">
+                                        <i class="fas fa-search-location"></i> تتبع الشحنة
+                                    </button>
+                                    <button onclick="showResendBosta()" style="flex: 1; border: 1px solid #cbd5e1; background: white; color: #64748b; padding: 8px; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.8rem;">
+                                        تعديل
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Bosta Live Tracking Modal ===== -->
+<div id="bostaTrackingModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:white; border-radius:24px; width:100%; max-width:480px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.3); direction:rtl;">
+        <!-- Modal Header -->
+        <div style="background:linear-gradient(135deg,#0E4435,#1a6b54); padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+                <div style="color:rgba(255,255,255,0.7); font-size:0.75rem; font-weight:700; margin-bottom:4px;">📦 تتبع الشحنة</div>
+                <div id="trackingModalNumber" style="color:white; font-size:1.1rem; font-weight:900; letter-spacing:2px;"></div>
+            </div>
+            <button onclick="closeTrackingModal()" style="background:rgba(255,255,255,0.2); border:none; color:white; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;">✕</button>
+        </div>
+        <!-- Modal Body -->
+        <div id="trackingModalBody" style="padding:24px; min-height:150px; display:flex; align-items:center; justify-content:center;">
+            <div style="text-align:center; color:#94a3b8;">
+                <div style="font-size:2rem; margin-bottom:8px;">⏳</div>
+                <div style="font-weight:700;">جاري جلب بيانات التتبع...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Order Modal (Full) -->
+<div id="editOrderModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:20px; width:100%; max-width:780px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+        
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid #e2e8f0; position:sticky; top:0; background:#fff; z-index:10; border-radius:20px 20px 0 0;">
+            <h3 style="margin:0; color:#0E4435; font-size:1.15rem; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-edit"></i> تعديل الطلب <span id="editOrderLabel" style="color:#94a3b8; font-size:0.85rem;"></span>
+            </h3>
+            <button onclick="closeEditModal()" style="background:#f1f5f9; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:18px; color:#64748b; display:flex; align-items:center; justify-content:center; transition:0.2s;">&times;</button>
+        </div>
+        
+        <form id="editOrderForm" onsubmit="submitOrderEdit(event)" style="padding:24px;">
+            <input type="hidden" id="edit-order-id">
+            
+            <!-- ===== Section 1: Customer Info ===== -->
+            <div style="margin-bottom:28px;">
+                <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                    <i class="fas fa-user-circle" style="color:#0E4435;"></i> بيانات العميل
+                </h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الاسم</label>
+                        <input type="text" id="edit-customer-name" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;" required>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الإيميل</label>
+                        <input type="email" id="edit-customer-email" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">رقم الهاتف</label>
+                        <input type="text" id="edit-customer-phone" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;" required>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">هاتف بديل</label>
+                        <input type="text" id="edit-customer-altphone" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Section 2: Shipping Address ===== -->
+            <div style="margin-bottom:28px;">
+                <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                    <i class="fas fa-map-marker-alt" style="color:#0E4435;"></i> عنوان التوصيل
+                </h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">المحافظة</label>
+                        <input type="text" id="edit-state" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">المدينة / المنطقة</label>
+                        <input type="text" id="edit-city" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                    </div>
+                </div>
+                <div style="margin-top:14px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الشارع</label>
+                    <input type="text" id="edit-street" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                </div>
+                <div style="margin-top:14px;">
+                    <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">العنوان بالكامل</label>
+                    <textarea id="edit-customer-address" style="width:100%; height:60px; padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; resize:vertical; box-sizing:border-box;"></textarea>
+                </div>
+            </div>
+
+            <!-- ===== Section 3: Products ===== -->
+            <div style="margin-bottom:28px;">
+                <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                    <i class="fas fa-shopping-bag" style="color:#0E4435;"></i> المنتجات
+                </h4>
+                <div id="editItemsContainer" style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- populated by JS -->
+                </div>
+                <button type="button" onclick="addEditItemRow()" style="margin-top:12px; width:100%; padding:10px; border:2px dashed #cbd5e1; border-radius:12px; background:#f8fafc; color:#64748b; font-weight:700; cursor:pointer; transition:0.2s; font-size:0.85rem; font-family:'Cairo',sans-serif;">
+                    <i class="fas fa-plus-circle"></i> إضافة منتج
+                </button>
+            </div>
+
+            <!-- ===== Section 4: Financial ===== -->
+            <div style="margin-bottom:28px;">
+                <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                    <i class="fas fa-receipt" style="color:#0E4435;"></i> المالية
+                </h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الخصم (ج.م)</label>
+                        <input type="number" id="edit-discount" step="0.01" min="0" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الإجمالي (ج.م)</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="number" id="edit-order-total" step="0.01" min="0" style="flex:1; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box; font-weight:800; color:#0E4435;" required>
+                            <button type="button" onclick="applyDepositDiscount()" style="background:#c2410c; color:#fff; border:none; padding:0 12px; border-radius:10px; font-size:0.75rem; font-weight:800; cursor:pointer; white-space:nowrap; transition:0.2s;" title="خصم 70 جنيه ديبوزت">
+                                - 70 ج.م
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">طريقة الدفع</label>
+                        <select id="edit-payment-method" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box; background:#fff;">
+                            <option value="Cash on Delivery">الدفع عند الاستلام</option>
+                            <option value="Credit Card">بطاقة ائتمان</option>
+                            <option value="Bank Transfer">تحويل بنكي</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Section 5: Notes ===== -->
+            <div style="margin-bottom:28px;">
+                <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                    <i class="fas fa-sticky-note" style="color:#0E4435;"></i> ملاحظات
+                </h4>
+                <textarea id="edit-notes" style="width:100%; height:70px; padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; resize:vertical; box-sizing:border-box;"></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div style="display:flex; gap:10px; border-top:1px solid #e2e8f0; padding-top:20px;">
+                <button type="submit" id="edit-submit-btn" style="flex:1; background:#0E4435; color:#fff; padding:12px; border:none; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.95rem; transition:0.2s; font-family:'Cairo',sans-serif;">
+                    <i class="fas fa-save"></i> حفظ كل التعديلات
+                </button>
+                <button type="button" onclick="closeEditModal()" style="flex:0.5; background:#f1f5f9; color:#475569; padding:12px; border:none; border-radius:12px; font-weight:700; cursor:pointer; font-size:0.9rem; transition:0.2s; font-family:'Cairo',sans-serif;">
+                    إلغاء
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Product Search Modal (for adding items) -->
+<div id="productSearchModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.5); z-index:100000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:20px; width:100%; max-width:500px; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 25px 60px rgba(0,0,0,0.25);" onclick="event.stopPropagation()">
+        <div style="padding:16px 20px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+            <h4 style="margin:0; font-size:0.95rem; color:#0E4435; font-weight:800;"><i class="fas fa-search"></i> اختيار منتج</h4>
+            <button onclick="closeProductSearch()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#94a3b8;">&times;</button>
+        </div>
+        <div style="padding:12px 20px;">
+            <input type="text" id="productSearchInput" placeholder="ابحث عن منتج..." oninput="filterProductList(this.value)" style="width:100%; height:40px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.85rem; box-sizing:border-box;">
+        </div>
+        <div id="productSearchResults" style="flex:1; overflow-y:auto; padding:0 20px 16px;">
+            <!-- populated by JS -->
+        </div>
+    </div>
+</div>

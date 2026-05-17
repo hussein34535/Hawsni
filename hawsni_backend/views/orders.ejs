@@ -2060,7 +2060,12 @@
                         </div>
                         <div>
                             <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الإجمالي (ج.م)</label>
-                            <input type="number" id="edit-order-total" step="0.01" min="0" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box; font-weight:800; color:#0E4435;" required>
+                            <div style="display:flex; gap:8px;">
+                                <input type="number" id="edit-order-total" step="0.01" min="0" style="flex:1; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box; font-weight:800; color:#0E4435;" required>
+                                <button type="button" onclick="applyDepositDiscount()" style="background:#c2410c; color:#fff; border:none; padding:0 12px; border-radius:10px; font-size:0.75rem; font-weight:800; cursor:pointer; white-space:nowrap; transition:0.2s;" title="خصم 70 جنيه ديبوزت">
+                                    - 70 ج.م
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">طريقة الدفع</label>
@@ -2172,6 +2177,70 @@
                     else productCatalog = d.data || [];
                 })
                 .catch(() => { productCatalog = []; });
+        }
+    }
+
+    function closeEditModal() {
+        document.getElementById('editOrderModal').style.display = 'none';
+    }
+    document.getElementById('editOrderModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+
+    // ===== Items Rendering =====
+    function renderEditItems() {
+        const container = document.getElementById('editItemsContainer');
+        const activeItems = editItemsData.filter(i => !i._removed);
+        if (activeItems.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem; font-weight:600;">لا توجد منتجات — أضف أول منتج</div>';
+            return;
+        }
+        container.innerHTML = activeItems.map((item, idx) => {
+            const actualIdx = editItemsData.indexOf(item);
+            return `
+                <div style="display:grid; grid-template-columns:1fr 80px 70px 80px 36px; gap:8px; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${item.name}</div>
+                        <div style="display:flex; gap:6px; margin-top:4px;">
+                            <select onchange="updateEditItem(${actualIdx},'size',this.value)" style="padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem; background:#fff;">
+                                <option value="">مقاس</option>
+                                ${(item._sizes || []).map(s => `<option value="${s}" ${item.size === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                <option value="__custom__" ${!['','XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? 'selected' : ''}>أخرى...</option>
+                            </select>
+                            ${!['XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? `<input type="text" value="${item.size}" onchange="updateEditItem(${actualIdx},'size',this.value)" style="width:50px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">` : ''}
+                            <input type="text" placeholder="لون" value="${item.color}" onchange="updateEditItem(${actualIdx},'color',this.value)" style="width:60px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">الكمية</label>
+                        <input type="number" min="1" value="${item.quantity}" onchange="updateEditItem(${actualIdx},'quantity',parseInt(this.value)||1)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">السعر</label>
+                        <input type="number" min="0" step="0.01" value="${item.price}" onchange="updateEditItem(${actualIdx},'price',parseFloat(this.value)||0)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div style="text-align:center;">
+                        <button type="button" onclick="removeEditItem(${actualIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem; padding:4px;" title="حذف المنتج">&times;</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function updateEditItem(idx, field, value) {
+        if (editItemsData[idx]) {
+            editItemsData[idx][field] = value;
+        }
+    }
+
+    function removeEditItem(idx) {
+        if (editItemsData[idx]) {
+            if (editItemsData[idx].id) {
+                editItemsData[idx]._removed = true; // Mark for deletion on save
+            } else {
+                editItemsData.splice(idx, 1); // New item, just remove
+            }
+            renderEditItems();
         }
     }
 
@@ -2409,16 +2478,28 @@
         }
     }
 
-    </script>
+    function applyDepositDiscount() {
+        const totalInput = document.getElementById('edit-order-total');
+        const discountInput = document.getElementById('edit-discount');
+        
+        let currentTotal = parseFloat(totalInput.value) || 0;
+        let currentDiscount = parseFloat(discountInput.value) || 0;
+        
+        if (currentTotal >= 70) {
+            totalInput.value = (currentTotal - 70).toFixed(2);
+            discountInput.value = (currentDiscount + 70).toFixed(2);
+            
+            // Animation effect to show it happened
+            totalInput.style.background = '#fff7ed';
+            setTimeout(() => totalInput.style.background = '#fff', 500);
+        } else {
+            alert('الإجمالي أقل من 70 جنيه!');
+        }
+    }
 
-    <!-- Supabase Realtime for receipt notifications -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
+    // ===== Supabase Realtime for Deposits =====
     try {
-        const sbUrl = '<%= typeof supabaseUrl !== "undefined" ? supabaseUrl : "" %>';
-        const sbKey = '<%= typeof supabaseAnonKey !== "undefined" ? supabaseAnonKey : "" %>';
-        if (sbUrl && sbKey) {
-            const sbClient = supabase.createClient(sbUrl, sbKey);
+        if (typeof sbClient !== 'undefined') {
             sbClient.channel('orders-receipts')
                 .on('postgres_changes',
                     { event: 'UPDATE', schema: 'public', table: 'orders' },
@@ -2443,6 +2524,7 @@
                             t.innerHTML = '<i class="fas fa-file-invoice-dollar"></i> إيصال جديد بانتظار التأكيد — <span style="opacity:0.8;">#' + (newOrder.id ? newOrder.id.substring(0,6) : '') + '</span>';
                             document.body.appendChild(t);
                             setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 400); }, 5000);
+                            }
                         }
                     }
                 )
