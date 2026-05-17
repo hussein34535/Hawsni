@@ -1335,11 +1335,10 @@
             const scrapedColors = [...new Set(scrapedVariantsCache.filter(v => v.color).map(v => v.color.trim()))];
             let smartColorMap = {};
             
-            // If the user added exactly the same number of colors as scraped, map them by index!
-            if (domColors.length > 0 && domColors.length === scrapedColors.length) {
-                domColors.forEach((hexColor, index) => {
-                    smartColorMap[hexColor.toLowerCase()] = scrapedColors[index];
-                });
+            // Map colors by index regardless of exact length match (Best effort mapping)
+            const minLen = Math.min(domColors.length, scrapedColors.length);
+            for(let i=0; i<minLen; i++){
+                smartColorMap[domColors[i].toLowerCase()] = scrapedColors[i];
             }
             
             const rows = document.querySelectorAll('#variantsTable tbody tr');
@@ -1363,7 +1362,11 @@
                 
                 // Find matching variant from cache (Flexible matching for size and color)
                 const match = scrapedVariantsCache.find(v => {
-                    const sizeMatch = v.size.toString().trim() === trSize.toString().trim();
+                    // Extract only numbers from both sizes to guarantee match (e.g. "مقاس 41" == "41")
+                    const vSizeClean = v.size.toString().replace(/\D/g, '');
+                    const trSizeClean = trSize.toString().replace(/\D/g, '');
+                    const sizeMatch = vSizeClean === trSizeClean && vSizeClean !== '';
+                    
                     const colorMatch = v.color.trim() === trColor.trim() || 
                                        v.color.trim() === trColorName || 
                                        (mappedColorName && v.color.trim() === mappedColorName);
