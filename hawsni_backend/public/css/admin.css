@@ -157,8 +157,9 @@ body.dark .sidebar:hover {
     gap: 12px;
     color: var(--text-main);
     text-decoration: none;
-    padding: 0 14px;
+    padding: 0 13px; /* 13+13=26px padding + 38px logo = 64px (Perfectly Centered) */
     white-space: nowrap;
+    overflow: hidden;
 }
 
 .sidebar-brand .brand-icon {

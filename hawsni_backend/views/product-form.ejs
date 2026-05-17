@@ -314,9 +314,14 @@
                         <p class="text-muted" style="font-size: 0.9em;">
                             قم بإدخال المقاسات والألوان في الأعلى، ثم انقر على "توليد/تحديث الجدول" لإنشاء صف لكل مزيج وإدخال الكمية المتوفرة ورقم الـ SKU الخاص به.
                         </p>
-                        <button type="button" class="btn btn-outline-primary mb-3" onclick="generateVariantsTable()">
-                            <i class="fas fa-sync-alt"></i> توليد / تحديث الجدول
-                        </button>
+                        <div style="display: flex; gap: 10px; margin-bottom: 1rem; align-items: center;">
+                            <button type="button" class="btn btn-outline-primary" onclick="generateVariantsTable()">
+                                <i class="fas fa-sync-alt"></i> توليد / تحديث الجدول
+                            </button>
+                            <button type="button" class="btn btn-outline-success" id="btnSyncScrapedStock" onclick="syncScrapedStock()" style="display: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); font-weight: 600;">
+                                <i class="fas fa-boxes"></i> استرجاع وتعبئة المخزون
+                            </button>
+                        </div>
                         
                         <div class="table-responsive">
                             <table class="table table-bordered" id="variantsTable" style="display: none; background: white;">
@@ -1299,6 +1304,62 @@
                 mainStockInput.style.cursor = '';
                 if (stockSyncHint) stockSyncHint.style.display = 'none';
             }
+        }
+
+        // === Scraped Stock Sync Logic ===
+        let scrapedVariantsCache = null;
+
+        window.addEventListener('hwasi-data-pasted', function(e) {
+            const product = e.detail;
+            if (product && product.variants && product.variants.length > 0) {
+                scrapedVariantsCache = product.variants;
+                const btnSync = document.getElementById('btnSyncScrapedStock');
+                if(btnSync) {
+                    btnSync.style.display = 'inline-block';
+                    btnSync.classList.add('pulse-anim'); // Add a slight pulse to notify user
+                }
+                if(typeof showToast === 'function') {
+                    showToast('تم استقبال المخزون! أضف الألوان واضغط على "استرجاع وتعبئة المخزون".', 'info');
+                }
+            }
+        });
+
+        function syncScrapedStock() {
+            if (!scrapedVariantsCache || scrapedVariantsCache.length === 0) {
+                if(typeof showToast === 'function') showToast('لا توجد بيانات مخزون مسحوبة.', 'warning');
+                return;
+            }
+            
+            const rows = document.querySelectorAll('#variantsTable tbody tr');
+            let matchedCount = 0;
+            
+            rows.forEach(tr => {
+                const trSize = tr.dataset.size || '';
+                const trColor = tr.dataset.color || '';
+                
+                // Find matching variant from cache
+                const match = scrapedVariantsCache.find(v => v.size === trSize && v.color === trColor);
+                if (match) {
+                    const stockInput = tr.querySelector('.variant-stock');
+                    if (stockInput) {
+                        stockInput.value = match.stock;
+                        matchedCount++;
+                    }
+                }
+            });
+            
+            updateVariantsInput();
+            
+            if(typeof showToast === 'function') {
+                if (matchedCount > 0) {
+                    showToast(`تم تعبئة المخزون لـ ${matchedCount} متغيرات بنجاح!`, 'success');
+                } else {
+                    showToast('لم يتم العثور على تطابق في المقاسات والألوان مع البيانات المسحوبة.', 'warning');
+                }
+            }
+            
+            const btnSync = document.getElementById('btnSyncScrapedStock');
+            if(btnSync) btnSync.classList.remove('pulse-anim');
         }
 
         // ==========================
