@@ -1330,15 +1330,50 @@
                 return;
             }
             
+            // Smart Fallback Mapping (Map Hex colors to Scraped color names by order)
+            const domColors = typeof colors !== 'undefined' ? colors.map(c => c.color) : [];
+            const scrapedColors = [...new Set(scrapedVariantsCache.filter(v => v.color).map(v => v.color.trim()))];
+            let smartColorMap = {};
+            
+            // If the user added exactly the same number of colors as scraped, map them by index!
+            if (domColors.length > 0 && domColors.length === scrapedColors.length) {
+                domColors.forEach((hexColor, index) => {
+                    smartColorMap[hexColor.toLowerCase()] = scrapedColors[index];
+                });
+            }
+            
             const rows = document.querySelectorAll('#variantsTable tbody tr');
             let matchedCount = 0;
             
             rows.forEach(tr => {
                 const trSize = tr.dataset.size || '';
-                const trColor = tr.dataset.color || '';
+                const trColor = tr.dataset.color || ''; // Usually the HEX code
                 
-                // Find matching variant from cache
-                const match = scrapedVariantsCache.find(v => v.size === trSize && v.color === trColor);
+                // Retrieve the color name if the user provided it (e.g. "اسود")
+                let trColorName = trColor;
+                if (typeof colors !== 'undefined' && Array.isArray(colors)) {
+                    const colorObj = colors.find(c => c.color.toLowerCase() === trColor.toLowerCase());
+                    if (colorObj && colorObj.name && colorObj.name.trim() !== '') {
+                        trColorName = colorObj.name.trim();
+                    }
+                }
+                
+                // Get the smart mapped color just in case
+                const mappedColorName = smartColorMap[trColor.toLowerCase()];
+                
+                // Find matching variant from cache (Flexible matching for size and color)
+                const match = scrapedVariantsCache.find(v => {
+                    const sizeMatch = v.size.toString().trim() === trSize.toString().trim();
+                    const colorMatch = v.color.trim() === trColor.trim() || 
+                                       v.color.trim() === trColorName || 
+                                       (mappedColorName && v.color.trim() === mappedColorName);
+                    
+                    // If the scraped data didn't have a color, just match by size
+                    if (!v.color && !trColor) return sizeMatch;
+                    
+                    return sizeMatch && colorMatch;
+                });
+
                 if (match) {
                     const stockInput = tr.querySelector('.variant-stock');
                     if (stockInput) {
@@ -1354,7 +1389,7 @@
                 if (matchedCount > 0) {
                     showToast(`تم تعبئة المخزون لـ ${matchedCount} متغيرات بنجاح!`, 'success');
                 } else {
-                    showToast('لم يتم العثور على تطابق في المقاسات والألوان مع البيانات المسحوبة.', 'warning');
+                    showToast('لم يتم العثور على تطابق! تأكد من كتابة "اسم اللون" (مثل: اسود، بني) ليتعرف عليه النظام.', 'warning');
                 }
             }
             
