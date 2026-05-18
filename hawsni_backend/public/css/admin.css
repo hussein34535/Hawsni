@@ -242,6 +242,18 @@ body.dark .sidebar-brand h1 span { color: var(--brand-accent); }
     position: relative;
 }
 
+/* Fix Icon Centering in Collapsed State */
+.sidebar:not(:hover) .nav-link {
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 0;
+    justify-content: center;
+}
+.sidebar:not(:hover) .nav-link span {
+    width: 0;
+    margin: 0;
+}
+
 /* ── Iconic Colors ── */
 .nav-link i {
     font-size: 1.15rem;
