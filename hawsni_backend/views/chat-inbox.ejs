@@ -6,7 +6,7 @@
     div.admin-layout > main.main-content { margin-right: 0 !important; width: 100% !important; min-height: 0 !important; }
     div.admin-layout > aside.sidebar {
         display: flex !important; width: 280px !important; right: 0 !important; top: 0 !important;
-        height: 100vh !important; border-radius: 0 !important; z-index: 1100 !important;
+        height: 100dvh !important; border-radius: 0 !important; z-index: 1100 !important;
         transform: translateX(110%) !important; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     div.admin-layout > aside.sidebar.active { transform: translateX(0) !important; }
@@ -17,12 +17,12 @@
     .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
     .topbar { display: none !important; }
     .content-wrapper {
-        padding: 0 !important; max-width: 100% !important; margin: 0 !important;
+        padding: 0 !important; width: 100vw !important; max-width: 100vw !important; margin: 0 !important;
         display: flex !important; flex-direction: column !important;
-        height: 100vh !important; overflow: hidden !important;
+        height: 100dvh !important; overflow: hidden !important; box-sizing: border-box;
     }
 
-    .chat-wrap { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+    .chat-wrap { display: flex; flex: 1; min-height: 0; width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box; }
 
     /* Sessions List */
     .sessions-panel {
@@ -345,7 +345,9 @@
 
     (async () => {
         document.body.style.overflow = 'hidden';
-        document.body.style.height = '100vh';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.height = '100dvh';
         await loadSessions();
         subSessions();
         const sid = new URLSearchParams(window.location.search).get('sessionId') || localStorage.getItem('chatSessionId');

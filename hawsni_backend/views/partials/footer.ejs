@@ -21,12 +21,44 @@
         
         const btn = document.getElementById('dark-mode-btn');
         if (btn) btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        const mobileBtn = document.getElementById('mobile-dark-btn');
+        if (mobileBtn) mobileBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         
         // Remove the transition class after animation completes
         setTimeout(() => {
             document.body.classList.remove('theme-transition');
         }, 400);
     };
+
+    // Mobile menu toggle
+    window.toggleMobileMenu = function() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (!sidebar) return;
+        sidebar.classList.toggle('active');
+        if (overlay) overlay.classList.toggle('active');
+    };
+
+    window.closeMobileMenu = function() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (sidebar) sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+    };
+
+    // Close sidebar on nav link click (mobile)
+    if (window.innerWidth <= 768) {
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+            link.addEventListener('click', () => closeMobileMenu());
+        });
+    }
+
+    // Sync dark mode icon on mobile
+    (function() {
+        const isDark = document.body.classList.contains('dark');
+        const mBtn = document.getElementById('mobile-dark-btn');
+        if (mBtn && isDark) mBtn.innerHTML = '<i class="fas fa-sun"></i>';
+    })();
 </script>
 
 </body>

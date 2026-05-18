@@ -5,14 +5,15 @@
             <h2 class="card-title">
                 <i class="fas fa-users"></i> جميع المستخدمين
             </h2>
+            <span class="badge badge-info" style="font-size:0.85rem;"><%= users ? users.length : 0 %> مستخدم</span>
         </div>
 
-        <% if (users && users.length> 0) { %>
+        <% if (users && users.length > 0) { %>
             <div class="table-responsive">
-                <table>
+                <table class="modern-table" style="width:100%;">
                     <thead>
                         <tr>
-                            <th>الاسم</th>
+                            <th>المستخدم</th>
                             <th>البريد الإلكتروني</th>
                             <th>رقم الهاتف</th>
                             <th>الحالة</th>
@@ -20,50 +21,48 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% users.forEach(user=> { %>
+                        <% users.forEach(user => { %>
                             <tr>
-                                <td>
+                                <td data-label="المستخدم">
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                                         <% if (user.avatar_url) { %>
                                             <img src="<%= user.avatar_url %>" alt="<%= user.name %>"
-                                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                                            <% } else { %>
-                                                <div
-                                                    style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--dark);">
-                                                    <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
-                                                </div>
-                                                <% } %>
-                                                    <span style="font-weight: 600;">
-                                                        <%= user.name || 'غير متوفر' %>
-                                                    </span>
+                                                style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink:0;">
+                                        <% } else { %>
+                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--brand-light); display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--brand-primary); flex-shrink:0;">
+                                                <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+                                            </div>
+                                        <% } %>
+                                        <span style="font-weight: 700; font-size:0.9rem;">
+                                            <%= user.name || 'غير متوفر' %>
+                                        </span>
                                     </div>
                                 </td>
-                                <td>
-                                    <%= user.email %>
+                                <td data-label="البريد الإلكتروني" style="direction:ltr; text-align:right;">
+                                    <%= user.email || '—' %>
                                 </td>
-                                <td>
-                                    <%= user.phone || '-' %>
+                                <td data-label="رقم الهاتف" style="direction:ltr; text-align:right; font-weight:700;">
+                                    <%= user.phone || '—' %>
                                 </td>
-                                <td>
-                                    <span
-                                        class="badge <%= user.is_phone_verified ? 'badge-success' : 'badge-warning' %>">
-                                        <%= user.is_phone_verified ? 'موثق' : 'غير موثق' %>
+                                <td data-label="الحالة">
+                                    <span class="badge <%= user.is_phone_verified ? 'badge-success' : 'badge-warning' %>">
+                                        <%= user.is_phone_verified ? '✓ موثق' : 'غير موثق' %>
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="تاريخ التسجيل">
                                     <%= new Date(user.created_at).toLocaleDateString('ar-EG') %>
                                 </td>
                             </tr>
-                            <% }) %>
+                        <% }) %>
                     </tbody>
                 </table>
             </div>
-            <% } else { %>
-                <div class="text-center" style="padding: 3rem; color: var(--medium-gray);">
-                    <i class="fas fa-users" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-                    <p style="font-size: 1.1rem;">لا يوجد مستخدمين حتى الآن</p>
-                </div>
-                <% } %>
+        <% } else { %>
+            <div class="text-center" style="padding: 3rem; color: var(--text-muted);">
+                <i class="fas fa-users" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3; display:block;"></i>
+                <p style="font-size: 1.1rem;">لا يوجد مستخدمين حتى الآن</p>
+            </div>
+        <% } %>
     </div>
 
     <%- include('partials/footer') %>

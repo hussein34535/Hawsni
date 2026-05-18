@@ -691,22 +691,63 @@
     }
 
     @media (max-width: 768px) {
-        .modal-grid {
-            grid-template-columns: 1fr;
+        /* Modal becomes full-screen sheet on mobile */
+        .modal {
+            padding: 0 !important;
+            align-items: flex-end !important;
         }
 
         .modal-content {
-            width: 95%;
-            margin-top: 20px;
+            width: 100% !important;
+            max-width: 100% !important;
+            max-height: 95dvh !important;
+            border-radius: 28px 28px 0 0 !important;
+            margin: 0 !important;
         }
 
-        .modal-body {
-            padding: 20px;
+        .modal-header {
+            padding: 16px 16px 12px !important;
+            flex-wrap: wrap !important;
+            gap: 10px !important;
         }
 
-        .modern-table thead {
-            display: none;
+        .modal-title { font-size: 1.2rem !important; }
+        .modal-subtitle { font-size: 0.75rem !important; }
+
+        .header-actions {
+            flex-wrap: wrap !important;
+            gap: 8px !important;
         }
+
+        .status-pill-group { flex-wrap: wrap !important; }
+
+        .modal-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .column-main {
+            padding: 20px !important;
+            gap: 20px !important;
+        }
+
+        .column-side {
+            padding: 20px !important;
+            gap: 16px !important;
+        }
+
+        .premium-item-row {
+            gap: 12px !important;
+        }
+
+        .item-visual {
+            width: 52px !important;
+            height: 52px !important;
+        }
+
+        .item-price-col { min-width: 70px !important; }
+
+        /* Users table as cards */
+        .modern-table thead { display: none; }
 
         .modern-table tr {
             display: block;
@@ -714,6 +755,7 @@
             border-radius: 16px;
             border: 1px solid var(--border-color);
             overflow: hidden;
+            padding: 12px;
         }
 
         .modern-table td {
@@ -721,25 +763,19 @@
             justify-content: space-between;
             align-items: center;
             border: none;
-            padding: 12px 16px;
+            padding: 8px 4px;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
         }
 
-        .modern-table td:first-child,
-        .modern-table td:last-child {
-            border: none;
-            border-radius: 0;
-        }
+        .modern-table td:last-child { border-bottom: none; }
 
         .modern-table td::before {
             content: attr(data-label);
             font-weight: 700;
             color: var(--medium-gray);
-            font-size: 0.8rem;
-        }
-
-        .modern-table td:first-child {
-            background: #fafafa;
-            border-bottom: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            margin-left: 8px;
         }
     }
 </style>

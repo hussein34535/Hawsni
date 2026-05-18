@@ -130,6 +130,17 @@
                 </div>
             </div>
 
-            <div id="sidebarOverlay" class="sidebar-overlay"></div>
+            <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeMobileMenu()"></div>
+
+            <!-- Mobile Topbar (shows only on mobile) -->
+            <div class="mobile-topbar" id="mobileTopbar">
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="mobile-page-title"><%= locals.pageTitle || locals.title || 'لوحة التحكم' %></span>
+                <button onclick="toggleDark()" class="mobile-menu-btn" title="الوضع الليلي" id="mobile-dark-btn">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
 
             <div class="content-wrapper">
