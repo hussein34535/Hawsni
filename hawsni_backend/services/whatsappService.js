@@ -188,6 +188,55 @@ class WhatsAppService {
     }
 
     /**
+     * Send an image message via WhatsApp Cloud API.
+     * Only works within the 24h customer service window.
+     * Returns { success, error } for callers to handle.
+     */
+    async sendImageMessage(phone, imageUrl, senderType = 'bot') {
+        if (!this.phoneNumberId) return { success: false, error: 'WHATSAPP_NOT_CONFIGURED' };
+
+        const cleanPhone = phone.replace(/\D/g, '');
+        let finalPhone = cleanPhone;
+        if (finalPhone.startsWith('01') && finalPhone.length === 11) finalPhone = '2' + finalPhone;
+
+        try {
+            const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+            const payload = {
+                messaging_product: "whatsapp",
+                to: finalPhone,
+                type: "image",
+                image: {
+                    link: imageUrl
+                }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                console.error('❌ WhatsApp Image API Error:', result);
+                await this._logMessage(phone, senderType, `[IMAGE_URL:${imageUrl}]`);
+                return { success: false, error: result?.error?.message || 'WhatsApp API Error' };
+            }
+
+            // Log outgoing image
+            await this._logMessage(phone, senderType, `[IMAGE_URL:${imageUrl}]`);
+            return { success: true };
+        } catch (error) {
+            console.error('❌ WhatsApp Image Error:', error.message);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
      * Fallback: Send a message using the order_confirm template when the 24h window is closed.
      * Tries to embed the admin message into the template body.
      */

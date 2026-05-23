@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const { supabaseAdmin: supabase } = require('../../config/supabase');
 const whatsappService = require('../../services/whatsappService');
+const uploadToCloudinary = require('../../utils/fileUpload');
 
 class AdminChatController {
     async renderChatInbox(req, res) {
@@ -149,6 +150,58 @@ class AdminChatController {
         } catch (error) {
             console.error('Error sending message:', error);
             res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
+    // ── 2.5 Send image (platform-aware) ─────────────────────────
+    async sendImage(req, res) {
+        try {
+            const { sessionId } = req.body;
+            if (!sessionId) {
+                return res.status(400).json({ success: false, error: 'Missing sessionId' });
+            }
+            if (!req.file) {
+                return res.status(400).json({ success: false, error: 'Missing image file' });
+            }
+
+            // 1. Upload image to Cloudinary
+            const result = await uploadToCloudinary(req.file, 'chat_media');
+            const imageUrl = result.url;
+
+            // 2. Get session platform
+            const { data: session } = await supabase
+                .from('chat_sessions').select('platform').eq('session_id', sessionId).single();
+
+            // 3. Send via WhatsApp only if WhatsApp session
+            if (session?.platform === 'whatsapp') {
+                const waResult = await whatsappService.sendImageMessage(sessionId, imageUrl, 'admin');
+                
+                if (!waResult.success) {
+                    return res.json({ 
+                        success: false, 
+                        error: waResult.error,
+                        waError: true,
+                        message: 'فشل إرسال الصورة عبر واتساب. يرجى التأكد من نافذة 24 ساعة.'
+                    });
+                }
+            } else if (session?.platform === 'web') {
+                // Save to DB for web sessions (outgoing admin image)
+                await supabase.from('chat_messages').insert([{
+                    session_id: sessionId, 
+                    sender_type: 'admin', 
+                    content: `[IMAGE_URL:${imageUrl}]`
+                }]);
+            }
+
+            // 4. Update session status
+            await supabase.from('chat_sessions')
+                .update({ status: 'human_active', updated_at: new Date().toISOString() })
+                .eq('session_id', sessionId);
+
+            return res.json({ success: true, url: imageUrl });
+        } catch (error) {
+            console.error('Error sending image:', error);
+            return res.status(500).json({ success: false, error: error.message });
         }
     }
 

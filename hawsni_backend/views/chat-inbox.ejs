@@ -174,6 +174,15 @@
         justify-content: center; flex-shrink: 0; transition: opacity 0.15s;
     }
     .send-btn:active { opacity: 0.7; }
+    .attach-btn {
+        width: 44px; height: 44px; border-radius: 50%;
+        background: #fff; color: var(--primary); border: none;
+        cursor: pointer; display: flex; align-items: center;
+        justify-content: center; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        transition: opacity 0.15s, background 0.15s;
+    }
+    .attach-btn:hover { background: #f1f5f9; }
+    body.dark .attach-btn { background: #2a2a2a !important; color: #25d366 !important; }
 
     /* Order Panel */
     .order-panel {
@@ -300,6 +309,11 @@
         <div class="chat-footer" id="chat-footer" style="display:none;">
             <div class="status-text" id="status-text">🤖 البوت يرد آلياً</div>
             <div class="chat-input-row" id="input-row" style="display:none;">
+                <button class="attach-btn" onclick="triggerFileUpload()" title="إرفاق صورة">
+                    <i class="fas fa-paperclip" id="attach-icon"></i>
+                    <i class="fas fa-spinner fa-spin" id="attach-loading" style="display:none;"></i>
+                </button>
+                <input type="file" id="chat-file-input" style="display:none;" accept="image/*" onchange="uploadImage(this)">
                 <div class="input-pill">
                     <input type="text" id="msg-input" placeholder="اكتب رسالتك...">
                 </div>
@@ -510,6 +524,10 @@
             if (img) {
                 txt = txt.replace(img[0], `<img src="/admin/chat/media/${img[1]}" onclick="openLightbox(this.src)" onerror="this.outerHTML='<span style=color:#999;font-size:12px;>🖼️ الصورة غير متاحة</span>'">`);
             }
+            const imgUrl = txt.match(/\[IMAGE_URL:(.+?)\]/);
+            if (imgUrl) {
+                txt = txt.replace(imgUrl[0], `<img src="${imgUrl[1]}" onclick="openLightbox(this.src)" onerror="this.outerHTML='<span style=color:#999;font-size:12px;>🖼️ الصورة غير متاحة</span>'">`);
+            }
             html += `<div class="msg-row ${cls}"><div class="bubble"><span class="b-label">${icon} ${label}</span>${txt}<div class="b-time">${time}</div></div></div>`;
         });
         elMsgs.innerHTML = html;
@@ -526,6 +544,50 @@
         t.textContent = msg;
         document.body.appendChild(t);
         setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 400); }, 4000);
+    }
+
+    function triggerFileUpload() {
+        el('chat-file-input').click();
+    }
+
+    async function uploadImage(input) {
+        const file = input.files[0];
+        if (!file || !activeId) return;
+
+        // Show loading state
+        el('attach-icon').style.display = 'none';
+        el('attach-loading').style.display = 'inline-block';
+        el('chat-file-input').disabled = true;
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('sessionId', activeId);
+
+        try {
+            const response = await fetch('/admin/chat/send-image', {
+                method: 'POST',
+                headers: {
+                    'CSRF-Token': CSRF_TOKEN
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast('تم إرسال الصورة بنجاح', 'success');
+            } else {
+                showToast(data.message || 'فشل إرسال الصورة', 'danger');
+            }
+        } catch (e) {
+            console.error('Error uploading image:', e);
+            showToast('حدث خطأ أثناء رفع الصورة', 'danger');
+        } finally {
+            // Reset input and state
+            input.value = '';
+            el('attach-icon').style.display = 'inline-block';
+            el('attach-loading').style.display = 'none';
+            el('chat-file-input').disabled = false;
+        }
     }
 
     function sendMsg() {

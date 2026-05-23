@@ -262,6 +262,10 @@ export default function ChatWidget() {
     }, [input, isLoading, sessionId]);
 
     const formatText = (text: string) => {
+      const imageUrlMatch = text.match(/\[IMAGE_URL:(.+?)\]/);
+      if (imageUrlMatch) {
+        return `<img src="${imageUrlMatch[1]}" alt="image" class="max-w-full max-h-48 rounded-lg mt-2 cursor-pointer" onclick="window.open('${imageUrlMatch[1]}', '_blank')" />`;
+      }
       return text
         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
         .replace(/\n/g, '<br/>');

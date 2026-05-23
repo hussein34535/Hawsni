@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:hwasi_app/core/themes/app_theme.dart';
@@ -241,14 +242,81 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                               ],
                             ),
-                            child: Text(
-                              msg['content'] ?? '',
-                              style: TextStyle(
-                                color: isUser || isAdmin ? Colors.white : const Color(0xFF1E293B),
-                                fontSize: 14,
-                                height: 1.6,
-                              ),
-                            ),
+                            child: () {
+                              final content = msg['content'] ?? '';
+                              final isImage = content.startsWith('[IMAGE_URL:');
+                              final imageUrl = isImage ? content.substring(11, content.length - 1) : '';
+                              final isWhatsAppImage = content.startsWith('[IMAGE:');
+                              final waImageId = isWhatsAppImage ? content.substring(7, content.length - 1) : '';
+                              final waImageUrl = isWhatsAppImage 
+                                  ? 'https://hwasibackend.vercel.app/api/admin/chat/media/$waImageId' 
+                                  : '';
+
+                              if (isImage || isWhatsAppImage) {
+                                return ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => Scaffold(
+                                            backgroundColor: Colors.black,
+                                            appBar: AppBar(
+                                              backgroundColor: Colors.black,
+                                              foregroundColor: Colors.white,
+                                              elevation: 0,
+                                            ),
+                                            body: Center(
+                                              child: InteractiveViewer(
+                                                child: CachedNetworkImage(
+                                                  imageUrl: isImage ? imageUrl : waImageUrl,
+                                                  placeholder: (context, url) => const CircularProgressIndicator(color: Colors.white),
+                                                  errorWidget: (context, url, error) => const Icon(Icons.broken_image, color: Colors.white, size: 60),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: CachedNetworkImage(
+                                      imageUrl: isImage ? imageUrl : waImageUrl,
+                                      placeholder: (context, url) => const SizedBox(
+                                        width: 150,
+                                        height: 150,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => const Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.broken_image, color: Colors.grey, size: 40),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            'فشل تحميل الصورة',
+                                            style: TextStyle(color: Colors.grey, fontSize: 11),
+                                          ),
+                                        ],
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return Text(
+                                content,
+                                style: TextStyle(
+                                  color: isUser || isAdmin ? Colors.white : const Color(0xFF1E293B),
+                                  fontSize: 14,
+                                  height: 1.6,
+                                ),
+                              );
+                            }(),
                           ),
                         );
                       },
