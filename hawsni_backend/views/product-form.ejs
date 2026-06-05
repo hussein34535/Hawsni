@@ -214,8 +214,8 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                                 <div class="form-group">
                                     <label class="form-label">السعر <span style="color: var(--danger);">*</span></label>
-                                    <input type="number" name="price" class="form-control" step="0.01"
-                                        value="<%= product ? product.price : '' %>" required>
+                                    <input type="number" name="price" class="form-control" step="1"
+                                        value="<%= product ? Math.round(product.price) : '' %>" required>
                                 </div>
 
                                 <div class="form-group">
@@ -227,14 +227,14 @@
                                         </div>
                                     </div>
                                     <div style="position: relative;">
-                                        <input type="number" id="discountInput" class="form-control" step="0.01" min="0" 
-                                            value="<%= product ? product.discount : 0 %>" oninput="handleDiscountInput()">
-                                        <input type="hidden" name="discount" id="hiddenDiscount" value="<%= product ? product.discount : 0 %>">
+                                        <input type="number" id="discountInput" class="form-control" step="1" min="0" 
+                                            value="<%= product ? Math.round(product.discount) : 0 %>" oninput="handleDiscountInput()">
+                                        <input type="hidden" name="discount" id="hiddenDiscount" value="<%= product ? Math.round(product.discount) : 0 %>">
                                         <span id="discountLabel" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 0.8rem;">%</span>
                                     </div>
                                     <small id="discountHint" class="text-muted" style="font-size: 0.7rem; display: block; margin-top: 4px; height: 1.2em;">
                                         <% if (product && product.discount > 0) { %>
-                                            السعر بعد الخصم: <%= (product.price * (1 - product.discount/100)).toFixed(2) %> ج.م
+                                            السعر بعد الخصم: <%= Math.round(product.price * (1 - product.discount/100)) %> ج.م
                                         <% } %>
                                     </small>
                                 </div>
@@ -1506,14 +1506,14 @@
                 btnPrice.style.background = 'transparent';
                 btnPrice.style.color = '#64748b';
                 label.textContent = '%';
-                input.value = currentDiscount;
+                input.value = Math.round(currentDiscount);
             } else {
                 btnPrice.style.background = 'var(--primary)';
                 btnPrice.style.color = 'white';
                 btnPercent.style.background = 'transparent';
                 btnPercent.style.color = '#64748b';
                 label.textContent = 'ج.م';
-                input.value = (price * (1 - currentDiscount / 100)).toFixed(2);
+                input.value = Math.round(price * (1 - currentDiscount / 100));
             }
             handleDiscountInput();
         }
@@ -1525,14 +1525,16 @@
             const hint = document.getElementById('discountHint');
 
             if (discountMode === 'percent') {
-                hiddenInput.value = inputVal;
-                const finalPrice = price * (1 - inputVal / 100);
-                hint.textContent = inputVal > 0 ? `السعر بعد الخصم: ${finalPrice.toFixed(2)} ج.م` : '';
+                const roundedDiscount = Math.round(inputVal);
+                hiddenInput.value = roundedDiscount;
+                const finalPrice = Math.round(price * (1 - roundedDiscount / 100));
+                hint.textContent = roundedDiscount > 0 ? `السعر بعد الخصم: ${finalPrice} ج.م` : '';
             } else {
                 if (price > 0) {
                     const percentage = Math.max(0, Math.min(100, (1 - (inputVal / price)) * 100));
-                    hiddenInput.value = percentage;
-                    hint.textContent = inputVal > 0 ? `نسبة الخصم المحسوبة: ${percentage.toFixed(2)}%` : '';
+                    const roundedDiscount = Math.round(percentage);
+                    hiddenInput.value = roundedDiscount;
+                    hint.textContent = inputVal > 0 ? `نسبة الخصم المحسوبة: ${roundedDiscount}%` : '';
                 } else {
                     hiddenInput.value = 0;
                     hint.textContent = 'أدخل سعر المنتج أولاً';

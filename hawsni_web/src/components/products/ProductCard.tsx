@@ -18,7 +18,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     const _id = product._id || (product as any).id;
     const { name, price } = product;
     const discount = product.discount || 0;
-    const finalPrice = discount > 0 ? price - (price * discount / 100) : price;
+    const finalPrice = discount > 0 ? Math.round(price - (price * discount / 100)) : price;
     const images = product.images ?? [];
     const colors = product.colors ?? [];
     const isVideoUrl = (url: string) => {

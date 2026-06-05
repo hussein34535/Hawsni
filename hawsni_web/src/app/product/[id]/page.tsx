@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const product = res.product;
     const finalPrice = product.discount 
-      ? (product.price - (product.price * product.discount / 100)).toFixed(2) 
-      : product.price.toFixed(2);
+      ? Math.round(product.price - (product.price * product.discount / 100)).toString() 
+      : Math.round(product.price).toString();
 
     const title = `${product.name} | هوسي للأزياء`;
     const description = `اشتري ${product.name} الآن بسعر ${finalPrice} ج.م. جودة متميزة وتصاميم فريدة من هوسي للأزياء. توصيل سريع لجميع المحافظات.`;
@@ -70,8 +70,8 @@ export default async function ProductPage({ params }: Props) {
 
   const product = res.product as Product;
   const finalPrice = product.discount 
-    ? (product.price - (product.price * product.discount / 100)).toFixed(2) 
-    : product.price.toFixed(2);
+    ? Math.round(product.price - (product.price * product.discount / 100)).toString() 
+    : Math.round(product.price).toString();
 
   const jsonLd = {
     '@context': 'https://schema.org',

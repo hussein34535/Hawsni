@@ -322,7 +322,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const getBasePrice = () => {
         if (!product) return 0;
         const discount = product.discount || 0;
-        return discount > 0 ? product.price - (product.price * discount / 100) : product.price;
+        return discount > 0 ? Math.round(product.price - (product.price * discount / 100)) : product.price;
     };
 
     const getAccessoriesTotal = () => {
@@ -404,7 +404,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                     }
 
                     const discount = data.product.discount || 0;
-                    const finalPrice = discount > 0 ? data.product.price - (data.product.price * discount / 100) : data.product.price;
+                    const finalPrice = discount > 0 ? Math.round(data.product.price - (data.product.price * discount / 100)) : data.product.price;
                     trackEvent('ViewContent', {
                         content_name: data.product.name,
                         content_ids: [data.product.id || data.product._id],
@@ -778,7 +778,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                         </div>
                                     ) : null}
                                     <div className={`flex items-baseline gap-1 font-black text-2xl ${product.discount ? 'text-red-500' : 'text-gray-900'}`}>
-                                        <span>{((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
+                                        <span>{Math.round((product.discount || 0) > 0 ? product.price - (product.price * product.discount! / 100) : product.price).toLocaleString('en-US')}</span>
                                         <span className="text-xs uppercase font-bold text-gray-400">{isRTL ? 'ج.م' : 'EGP'}</span>
                                     </div>
                                 </div>
