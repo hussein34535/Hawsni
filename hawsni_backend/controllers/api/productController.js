@@ -123,8 +123,8 @@ class ProductController {
         return {
             name: body.name,
             description: body.description,
-            price: Math.round(parseFloat(body.price || 0) * 100) / 100,
-            discount: parseFloat(body.discount || 0) || 0,
+            price: Math.round(parseFloat(body.price || 0)),
+            discount: Math.round(parseFloat(body.discount || 0)) || 0,
             stock: parseInt(body.stock || 0) || 0,
             category_id: categoryIds[0] || null,
             category_ids: categoryIds,
