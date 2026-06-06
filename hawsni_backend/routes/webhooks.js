@@ -33,18 +33,36 @@ router.post('/bosta', async (req, res) => {
         }
 
         // We only care about state updates
-        if (state && state.value) {
-            const bostaState = state.value.toUpperCase();
+        if (state) {
+            // Use numeric state.code (reliable, language-independent)
+            const stateCode = state.code !== undefined ? Number(state.code) : null;
             let hawsniStatus = null;
             
-            // Map Bosta State to Hawsni Status
-            // Bosta typical states: "Ticket created", "Pickup requested", "Picked up", "Delivered", "Returned to business", "Cancelled"
-            if (bostaState.includes('DELIVERED')) {
-                hawsniStatus = 'Delivered';
-            } else if (bostaState.includes('PICKED UP') || bostaState.includes('IN TRANSIT') || bostaState.includes('PICKED_UP')) {
-                hawsniStatus = 'Shipped'; // Use 'Shipped' instead of 'In Transit' to match typical Hawsni status
-            } else if (bostaState.includes('CANCELLED') || bostaState.includes('RETURNED') || bostaState.includes('EXCEPTION')) {
-                hawsniStatus = 'Cancelled';
+            if (stateCode !== null) {
+                // Map Bosta numeric state codes to Hawsni Status
+                // Reference: BOSTA_STATUS_MAP in bostaService.js
+                //   21 = تم استلام الشحنة من المتجر  → Shipped
+                //   30 = في الطريق للمستودع           → Shipped
+                //   41 = في الطريق للمستودع الرئيسي    → Shipped
+                //   42 = وصلت المستودع               → Shipped
+                //   43 = في الطريق للتوصيل لمحافظتك   → Shipped
+                //   44 = في عهدة مندوب التوصيل       → Shipped
+                //   45 = تم التسليم بنجاح             → Delivered
+                //   46 = قيد المرتجع                  → Cancelled
+                //   47 = مشكلة في التوصيل             → Cancelled
+                //   49 = تم إلغاء الشحنة              → Cancelled
+                //   50 = تم الإرجاع للمحل بنجاح       → Cancelled
+                if (stateCode === 45) {
+                    hawsniStatus = 'Delivered';
+                } else if (stateCode >= 21 && stateCode <= 44) {
+                    hawsniStatus = 'Shipped';
+                } else if (stateCode === 46 || stateCode === 47 || stateCode === 49 || stateCode === 50) {
+                    hawsniStatus = 'Cancelled';
+                } else {
+                    console.log(`[Bosta Webhook] Unmapped state code: ${stateCode} — ignoring`);
+                }
+            } else {
+                console.log('[Bosta Webhook] No state.code in payload — ignoring');
             }
 
             if (hawsniStatus) {

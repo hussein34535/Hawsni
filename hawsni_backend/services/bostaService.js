@@ -478,6 +478,10 @@ class BostaService {
             const subtotal = parseFloat(orderData.total || 0) - parseFloat(orderData.shipping_fee || 0);
             let declaredValue = Math.max(0, subtotal - 100);
 
+            // Generate webhook URL for Bosta status updates
+            const bostaWebhookUrl = process.env.BOSTA_WEBHOOK_URL;
+            const webhookSecret = process.env.BOSTA_WEBHOOK_SECRET;
+
             // بناء الـ Payload طبقات للهيكل اللى بوسطة بتطلبه (v0 API)
             const payload = {
                 type: 10, // Package Delivery
@@ -494,6 +498,8 @@ class BostaService {
                 cod: parseFloat(orderData.total || 0), // Cash on Delivery amount
                 businessReference: String(orderData.order_number || orderData.id),
                 allowToOpenPackage: options.allowToOpenPackage !== undefined ? options.allowToOpenPackage : true,
+                ...(bostaWebhookUrl ? { webhookUrl: bostaWebhookUrl } : {}),
+                ...(bostaWebhookUrl && webhookSecret ? { webhookCustomHeaders: { Authorization: webhookSecret } } : {}),
                 notes: orderData.notes || 'لا يوجد ملاحظات',
                 receiver: {
                     firstName: customerName.split(' ')[0] || 'Customer',
