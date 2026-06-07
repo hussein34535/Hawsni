@@ -468,12 +468,12 @@ class OrdersController {
                 const batch = orders.slice(i, i + concurrency);
                 const results = await Promise.allSettled(
                     batch.map(async (order) => {
-                        const bostaResult = await bostaService.getDeliveryDetails(order.tracking_number);
-                        if (!bostaResult || !bostaResult.state) {
+                        const bostaResult = await bostaService.getShipmentStatus(order.tracking_number);
+                        if (!bostaResult || !bostaResult.stateCode) {
                             details.push({ order: order.order_number || order.id, status: 'no_bosta_data' });
                             return;
                         }
-                        const stateCode = Number(bostaResult.state.code);
+                        const stateCode = Number(bostaResult.stateCode);
                         let hawsniStatus = null;
                         if (stateCode === 45) {
                             hawsniStatus = 'Delivered';
