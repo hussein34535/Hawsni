@@ -441,6 +441,83 @@ class OrdersController {
         }
     }
 
+    // Sync Bosta statuses for all orders with tracking numbers
+    async bostaSyncOrders(req, res) {
+        try {
+            const bostaService = require('../../services/bostaService');
+
+            // Fetch orders with tracking_number that aren't already in a final state
+            const { data: orders, error } = await supabase
+                .from('orders')
+                .select('id, order_number, tracking_number, bosta_id, status')
+                .not('tracking_number', 'is', null)
+                .not('status', 'in', '("Delivered","Cancelled")');
+
+            if (error) throw error;
+            if (!orders || orders.length === 0) {
+                return res.json({ success: true, total: 0, updated: 0, errors: 0, message: 'لا توجد طلبات للمزامنة' });
+            }
+
+            let updated = 0;
+            let errors = 0;
+            const details = [];
+
+            // Process with concurrency limit of 5
+            const concurrency = 5;
+            for (let i = 0; i < orders.length; i += concurrency) {
+                const batch = orders.slice(i, i + concurrency);
+                const results = await Promise.allSettled(
+                    batch.map(async (order) => {
+                        const bostaResult = await bostaService.getDeliveryDetails(order.tracking_number);
+                        if (!bostaResult || !bostaResult.state) {
+                            details.push({ order: order.order_number || order.id, status: 'no_bosta_data' });
+                            return;
+                        }
+                        const stateCode = Number(bostaResult.state.code);
+                        let hawsniStatus = null;
+                        if (stateCode === 45) {
+                            hawsniStatus = 'Delivered';
+                        } else if (stateCode >= 21 && stateCode <= 44) {
+                            hawsniStatus = 'Shipped';
+                        } else if (stateCode === 46 || stateCode === 47 || stateCode === 49 || stateCode === 50) {
+                            hawsniStatus = 'Cancelled';
+                        }
+
+                        if (hawsniStatus && order.status !== hawsniStatus) {
+                            const { error: updateError } = await supabase
+                                .from('orders')
+                                .update({ status: hawsniStatus })
+                                .eq('id', order.id);
+                            if (updateError) throw updateError;
+                            updated++;
+                            details.push({ order: order.order_number || order.id, from: order.status, to: hawsniStatus });
+                        } else {
+                            details.push({ order: order.order_number || order.id, status: 'no_change' });
+                        }
+                    })
+                );
+                // Count errors in this batch
+                for (const result of results) {
+                    if (result.status === 'rejected') {
+                        errors++;
+                        console.error('[Bosta Sync] Error:', result.reason);
+                    }
+                }
+            }
+
+            res.json({
+                success: true,
+                total: orders.length,
+                updated,
+                errors,
+                details
+            });
+        } catch (err) {
+            console.error('[Bosta Sync] Critical error:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
+
     // Update order details (Full edit — items, address, notes, discount, etc.)
     async updateOrder(req, res) {
         try {
