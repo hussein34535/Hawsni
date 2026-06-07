@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
+const { supabaseAdmin } = require('../config/supabase');
 const emailService = require('../services/emailService');
 const whatsappService = require('../services/whatsappService');
 
@@ -80,7 +81,7 @@ router.post('/bosta', async (req, res) => {
                 if (order) {
                     // Only update if the status changed
                     if (order.status !== hawsniStatus) {
-                        const { error: updateError } = await supabase
+                        const { error: updateError } = await supabaseAdmin
                             .from('orders')
                             .update({ status: hawsniStatus })
                             .eq('id', order.id);
