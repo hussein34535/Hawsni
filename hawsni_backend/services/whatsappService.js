@@ -174,12 +174,9 @@ class WhatsAppService {
                     return await this._sendAsTemplateFallback(phone, message);
                 }
                 console.error('❌ WhatsApp Text API Error:', result);
-                await this._logMessage(phone, 'bot', message);
                 return { success: false, error: result?.error?.message || 'WhatsApp API Error' };
             }
 
-            // Log outgoing message
-            await this._logMessage(phone, 'bot', message);
             return { success: true };
         } catch (error) {
             console.error('❌ WhatsApp Text Error:', error.message);
@@ -223,12 +220,9 @@ class WhatsAppService {
 
             if (!response.ok) {
                 console.error('❌ WhatsApp Image API Error:', result);
-                await this._logMessage(phone, senderType, `[IMAGE_URL:${imageUrl}]`);
                 return { success: false, error: result?.error?.message || 'WhatsApp API Error' };
             }
 
-            // Log outgoing image
-            await this._logMessage(phone, senderType, `[IMAGE_URL:${imageUrl}]`);
             return { success: true };
         } catch (error) {
             console.error('❌ WhatsApp Image Error:', error.message);
@@ -285,7 +279,6 @@ class WhatsAppService {
                 return { success: false, error: result?.error?.message || 'Template fallback failed' };
             }
 
-            await this._logMessage(phone, 'bot', message);
             console.log(`✅ WhatsApp template fallback sent to ${finalPhone}`);
             return { success: true, fallback: true };
         } catch (error) {
