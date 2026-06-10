@@ -109,6 +109,7 @@ router.delete('/reviews/:id', adminReviewsController.delete);
 // Live Chat Inbox
 router.get('/chat', adminChatController.renderChatInbox);
 router.get('/chat/sessions', adminChatController.getSessions);
+router.get('/chat/unread-count', adminChatController.getUnreadCount);
 router.post('/chat/send', adminChatController.sendMessage);
 router.post('/chat/send-image', upload.single('image'), adminChatController.sendImage);
 router.post('/chat/takeover', adminChatController.takeOver);

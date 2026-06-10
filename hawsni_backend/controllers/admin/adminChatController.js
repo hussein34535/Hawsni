@@ -73,6 +73,23 @@ class AdminChatController {
         }
     }
 
+    // ── 0.5 Get total unread count (for sidebar badge) ─────────
+    async getUnreadCount(req, res) {
+        try {
+            const { count, error } = await supabase
+                .from('chat_messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('is_read', false)
+                .eq('sender_type', 'user');
+
+            if (error) throw error;
+            return res.json({ success: true, count: count || 0 });
+        } catch (error) {
+            console.error('[AdminChatController getUnreadCount] Error:', error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
     // ── 1. Admin takes over session ─────────────────────────────
     async takeOver(req, res) {
         try {

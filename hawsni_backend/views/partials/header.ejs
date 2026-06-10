@@ -74,9 +74,10 @@
                 
                 <div class="nav-section">
                     <div class="nav-section-title">الدعم</div>
-                    <a href="/admin/chat" class="nav-link <%= locals.page === 'chat' ? 'active' : '' %>">
+                    <a href="/admin/chat" class="nav-link <%= locals.page === 'chat' ? 'active' : '' %>" id="chat-nav-link">
                         <i class="fas fa-comments"></i>
                         <span>شات الدعم</span>
+                        <span id="chat-unread-badge" style="display:none;background:#e74c3c;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-right:auto;"></span>
                     </a>
                     <a href="/admin/reviews" class="nav-link <%= page === 'reviews' ? 'active' : '' %>">
                         <i class="fas fa-star"></i>
@@ -144,3 +145,23 @@
             </div>
 
             <div class="content-wrapper">
+<script>
+(function() {
+    const badge = document.getElementById('chat-unread-badge');
+    if (!badge) return;
+    async function updateBadge() {
+        try {
+            const r = await fetch('/admin/chat/unread-count');
+            const d = await r.json();
+            if (d.success && d.count > 0) {
+                badge.textContent = d.count > 99 ? '99+' : d.count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch(e) {}
+    }
+    updateBadge();
+    setInterval(updateBadge, 30000);
+})();
+</script>
