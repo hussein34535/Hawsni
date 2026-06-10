@@ -320,7 +320,7 @@
                     <i class="fas fa-paperclip" id="attach-icon"></i>
                     <i class="fas fa-spinner fa-spin" id="attach-loading" style="display:none;"></i>
                 </button>
-                <input type="file" id="chat-file-input" style="display:none;" accept="image/*" onchange="previewImage(this)">
+                <input type="file" id="chat-file-input" style="display:none;" accept="image/*" onchange="selectChatImage(this)">
                 <div class="input-pill">
                     <input type="text" id="msg-input" placeholder="اكتب رسالتك...">
                 </div>
@@ -559,7 +559,7 @@
 
     let pendingImageFile = null;
 
-    function previewImage(input) {
+    function selectChatImage(input) {
         const file = input.files[0];
         if (!file || !activeId) return;
 

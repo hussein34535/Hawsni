@@ -193,6 +193,13 @@ class AdminChatController {
             if (session?.platform === 'whatsapp') {
                 const waResult = await whatsappService.sendImageMessage(sessionId, imageUrl, 'admin');
                 
+                // Save to DB always (for history)
+                await supabase.from('chat_messages').insert([{
+                    session_id: sessionId, 
+                    sender_type: 'admin', 
+                    content: `[IMAGE_URL:${imageUrl}]`
+                }]);
+
                 if (!waResult.success) {
                     return res.json({ 
                         success: false, 
