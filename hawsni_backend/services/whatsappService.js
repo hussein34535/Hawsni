@@ -19,12 +19,12 @@ class WhatsAppService {
             }
 
             if (!session) {
-                const { error: insertErr } = await supabase.from('chat_sessions').insert([{
+                const { error: insertErr } = await supabase.from('chat_sessions').upsert([{
                     session_id: sessionId,
                     status: 'bot_active',
                     platform: 'whatsapp',
                     updated_at: new Date().toISOString()
-                }]);
+                }], { onConflict: 'session_id' });
                 if (insertErr && insertErr.code !== '23505') {
                     console.error('[WA _logMessage] Insert session error:', insertErr);
                 }
