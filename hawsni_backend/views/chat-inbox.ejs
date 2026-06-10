@@ -308,12 +308,19 @@
 
         <div class="chat-footer" id="chat-footer" style="display:none;">
             <div class="status-text" id="status-text">🤖 البوت يرد آلياً</div>
+            <div id="image-preview" style="display:none;padding:8px 12px;background:rgba(37,211,102,0.1);border-top:1px solid rgba(37,211,102,0.2);">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <img id="preview-img" src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">
+                    <span style="flex:1;font-size:13px;color:#25d366;">صورة جاهزة للإرسال</span>
+                    <button onclick="cancelImage()" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:18px;padding:4px 8px;">✕</button>
+                </div>
+            </div>
             <div class="chat-input-row" id="input-row" style="display:none;">
                 <button class="attach-btn" onclick="triggerFileUpload()" title="إرفاق صورة">
                     <i class="fas fa-paperclip" id="attach-icon"></i>
                     <i class="fas fa-spinner fa-spin" id="attach-loading" style="display:none;"></i>
                 </button>
-                <input type="file" id="chat-file-input" style="display:none;" accept="image/*" onchange="uploadImage(this)">
+                <input type="file" id="chat-file-input" style="display:none;" accept="image/*" onchange="previewImage(this)">
                 <div class="input-pill">
                     <input type="text" id="msg-input" placeholder="اكتب رسالتك...">
                 </div>
@@ -550,25 +557,42 @@
         el('chat-file-input').click();
     }
 
-    async function uploadImage(input) {
+    let pendingImageFile = null;
+
+    function previewImage(input) {
         const file = input.files[0];
         if (!file || !activeId) return;
 
-        // Show loading state
+        pendingImageFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            el('preview-img').src = e.target.result;
+            el('image-preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function cancelImage() {
+        pendingImageFile = null;
+        el('chat-file-input').value = '';
+        el('image-preview').style.display = 'none';
+    }
+
+    async function uploadPendingImage() {
+        if (!pendingImageFile || !activeId) return;
+
         el('attach-icon').style.display = 'none';
         el('attach-loading').style.display = 'inline-block';
-        el('chat-file-input').disabled = true;
+        el('image-preview').style.display = 'none';
 
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('image', pendingImageFile);
         formData.append('sessionId', activeId);
 
         try {
             const response = await fetch('/admin/chat/send-image', {
                 method: 'POST',
-                headers: {
-                    'CSRF-Token': CSRF_TOKEN
-                },
+                headers: { 'CSRF-Token': CSRF_TOKEN },
                 body: formData
             });
 
@@ -582,31 +606,38 @@
             console.error('Error uploading image:', e);
             showToast('حدث خطأ أثناء رفع الصورة', 'danger');
         } finally {
-            // Reset input and state
-            input.value = '';
+            pendingImageFile = null;
+            el('chat-file-input').value = '';
             el('attach-icon').style.display = 'inline-block';
             el('attach-loading').style.display = 'none';
-            el('chat-file-input').disabled = false;
         }
     }
 
     function sendMsg() {
         const c = elMsgInput.value.trim();
-        if (!c || !activeId) return;
-        elMsgInput.value = '';
-        fetch('/admin/chat/send', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
-            body: JSON.stringify({ sessionId: activeId, content: c })
-        })
-        .then(r => r.json())
-        .then(d => {
-            if (!d.success && d.waError) {
-                showToast(d.message || 'فشل إرسال رسالة واتساب', 'warning');
-            } else if (d.fallback) {
-                showToast('تم الإرسال عبر القالب (قد يختلف الشكل عن النص الأصلي)', 'info');
-            }
-        })
-        .catch(() => {});
+        if (!c && !pendingImageFile) return;
+        if (!activeId) return;
+
+        if (pendingImageFile) {
+            uploadPendingImage();
+        }
+
+        if (c) {
+            elMsgInput.value = '';
+            fetch('/admin/chat/send', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+                body: JSON.stringify({ sessionId: activeId, content: c })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (!d.success && d.waError) {
+                    showToast(d.message || 'فشل إرسال رسالة واتساب', 'warning');
+                } else if (d.fallback) {
+                    showToast('تم الإرسال عبر القالب (قد يختلف الشكل عن النص الأصلي)', 'info');
+                }
+            })
+            .catch(() => {});
+        }
     }
 
     async function callApi(url) {
