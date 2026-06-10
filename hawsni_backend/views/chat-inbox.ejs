@@ -526,7 +526,7 @@
             }
             const imgUrl = txt.match(/\[IMAGE_URL:(.+?)\]/);
             if (imgUrl) {
-                txt = txt.replace(imgUrl[0], `<img src="${imgUrl[1]}" onclick="openLightbox(this.src)" onerror="this.outerHTML='<span style=color:#999;font-size:12px;>🖼️ الصورة غير متاحة</span>'">`);
+                txt = txt.replace(imgUrl[0], `<img src="${imgUrl[1]}" onclick="openLightbox(this.src)" onerror="this.outerHTML='<span style=color:#999;font-size:12px;>️ الصورة غير متاحة</span>'" style="max-width:200px;border-radius:8px;margin:4px 0;">`);
             }
             html += `<div class="msg-row ${cls}"><div class="bubble"><span class="b-label">${icon} ${label}</span>${txt}<div class="b-time">${time}</div></div></div>`;
         });
