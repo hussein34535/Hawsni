@@ -367,12 +367,21 @@ class AdminChatController {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const urlData = await urlResponse.json();
-            if (!urlData.url) return res.status(404).send('Media not found');
+            if (!urlData.url) {
+                // Return placeholder for expired media
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150"><rect width="200" height="150" fill="#f1f5f9" rx="8"/><text x="100" y="65" text-anchor="middle" fill="#94a3b8" font-size="32">🖼️</text><text x="100" y="100" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="sans-serif">انتهت صلاحية الصورة</text></svg>`;
+                res.setHeader('Content-Type', 'image/svg+xml');
+                return res.send(svg);
+            }
 
             const mediaResponse = await fetch(urlData.url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!mediaResponse.ok) return res.status(mediaResponse.status).send('Failed to fetch media');
+            if (!mediaResponse.ok) {
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150"><rect width="200" height="150" fill="#f1f5f9" rx="8"/><text x="100" y="65" text-anchor="middle" fill="#94a3b8" font-size="32">🖼️</text><text x="100" y="100" text-anchor="middle" fill="#94a3b8" font-size="12" font-family="sans-serif">انتهت صلاحية الصورة</text></svg>`;
+                res.setHeader('Content-Type', 'image/svg+xml');
+                return res.send(svg);
+            }
 
             res.setHeader('Content-Type', urlData.mime_type || 'image/jpeg');
             mediaResponse.body.pipe(res);
