@@ -510,8 +510,29 @@ class WhatsAppService {
         // Notify admin (first unread message)
         await this._notifyAdminOnFirstMessage(phone, '[IMAGE] صورة إيصال', 'image');
 
-        // 1. Log media to DB
-        await this._logMessage(phone, 'user', `[IMAGE:${mediaId}]`);
+        // 1. Download image from WhatsApp & upload to Cloudinary for permanent storage
+        let imageUrl = null;
+        try {
+            const mediaResponse = await fetch(`https://graph.facebook.com/${this.apiVersion}/${mediaId}`, {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            const mediaData = await mediaResponse.json();
+            if (mediaData.url) {
+                const imageRes = await fetch(mediaData.url, {
+                    headers: { 'Authorization': `Bearer ${this.token}` }
+                });
+                const buffer = await imageRes.buffer();
+                const uploadToCloudinary = require('../utils/fileUpload');
+                const result = await uploadToCloudinary({ buffer, originalname: `${mediaId}.jpg`, mimetype: 'image/jpeg' }, 'chat_media');
+                imageUrl = result.url;
+            }
+        } catch (uploadErr) {
+            console.error('[WA] Failed to upload image to Cloudinary:', uploadErr.message);
+        }
+
+        // 2. Log to DB with permanent URL
+        const content = imageUrl ? `[IMAGE_URL:${imageUrl}]` : `[IMAGE:${mediaId}]`;
+        await this._logMessage(phone, 'user', content);
 
         try {
             // 2. Download from WhatsApp & Upload to Supabase
