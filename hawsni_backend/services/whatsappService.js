@@ -169,7 +169,7 @@ class WhatsAppService {
             if (!response.ok) {
                 const errCode = result?.error?.code;
                 // 131026 / 131008 / 132001 = messaging window / template not allowed errors
-                if (errCode === 131026 || errCode === 131008 || errCode === 132001 || errCode === 131005) {
+                if (errCode === 131026 || errCode === 131008 || errCode === 132001 || errCode === 131005 || errCode === 131047) {
                     console.warn(`⚠️ 24h messaging window closed for ${finalPhone}, falling back to template...`);
                     return await this._sendAsTemplateFallback(phone, message);
                 }
