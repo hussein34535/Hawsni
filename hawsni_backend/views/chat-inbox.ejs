@@ -145,10 +145,21 @@
     .by-agent.is-bot   .bubble { background: #fff; }
     .bubble img { max-width: 100%; max-height: 220px; border-radius: 6px; cursor: pointer; display: block; margin: 2px 0; }
     .b-label { font-size: 11px; font-weight: 800; margin-bottom: 6px; opacity: 0.5; }
-    .b-time  { font-size: 10px; margin-top: 6px; text-align: left; opacity: 0.45; }
+    .b-time  { font-size: 10px; margin-top: 6px; text-align: left; opacity: 0.45; display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
     .date-sep { text-align: center; font-size: 11px; font-weight: 700; color: #64748b; padding: 8px 0 4px; position: sticky; top: 0; z-index: 1; }
     .date-sep span { background: #e2e8f0; padding: 3px 14px; border-radius: 8px; display: inline-block; }
     body.dark .date-sep span { background: #2a2a2a; color: #94a3b8; }
+
+    /* Message Status Ticks */
+    .msg-status { font-size: 12px; line-height: 1; }
+    .msg-status.sent     { color: rgba(0,0,0,0.35); }
+    .msg-status.delivered{ color: rgba(0,0,0,0.45); }
+    .msg-status.read     { color: #4fc3f7; }
+    .msg-status.failed   { color: #ef4444; }
+    body.dark .msg-status.sent     { color: rgba(255,255,255,0.3); }
+    body.dark .msg-status.delivered{ color: rgba(255,255,255,0.45); }
+    body.dark .msg-status.read     { color: #29b6f6; }
+    body.dark .msg-status.failed   { color: #f87171; }
 
     .chat-footer {
         background: #f0f2f5; padding: 6px 10px; flex-shrink: 0;
@@ -523,7 +534,7 @@
             const u = m.sender_type === 'user';
             const b = m.sender_type === 'bot';
             const cls = u ? 'by-user' : `by-agent ${b ? 'is-bot' : 'is-admin'}`;
-            const icon = u ? '👤' : b ? '🤖' : '🧑‍💼';
+            const icon = u ? '👤' : b ? '🤖' : '🧑\u200d💼';
             const label = u ? 'عميل' : b ? 'هَوَسي' : 'موظف';
             const time = d.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
             let txt = (m.content || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
@@ -535,7 +546,23 @@
             if (imgUrl) {
                 txt = txt.replace(imgUrl[0], `<img src="${imgUrl[1]}" onclick="openLightbox(this.src)" onerror="this.outerHTML='<span style=color:#999;font-size:12px;>️ الصورة غير متاحة</span>'" style="max-width:200px;border-radius:8px;margin:4px 0;">`);
             }
-            html += `<div class="msg-row ${cls}"><div class="bubble"><span class="b-label">${icon} ${label}</span>${txt}<div class="b-time">${time}</div></div></div>`;
+
+            // Message status ticks (only for admin/bot outgoing messages)
+            let statusTick = '';
+            if (!u) {
+                const st = m.wa_status;
+                if (st === 'read') {
+                    statusTick = '<span class="msg-status read" title="تم القراءة">✓✓</span>';
+                } else if (st === 'delivered') {
+                    statusTick = '<span class="msg-status delivered" title="تم التوصيل">✓✓</span>';
+                } else if (st === 'sent') {
+                    statusTick = '<span class="msg-status sent" title="تم الإرسال">✓</span>';
+                } else if (st === 'failed') {
+                    statusTick = '<span class="msg-status failed" title="فشل الإرسال">✗</span>';
+                }
+            }
+
+            html += `<div class="msg-row ${cls}" data-msg-id="${m.id || ''}"><div class="bubble"><span class="b-label">${icon} ${label}</span>${txt}<div class="b-time"><span>${time}</span>${statusTick}</div></div></div>`;
         });
         elMsgs.innerHTML = html;
         elMsgs.scrollTop = elMsgs.scrollHeight;
@@ -748,7 +775,18 @@
                     body: JSON.stringify({ sessionId: id })
                 }).catch(() => {}).then(() => loadSessions());
             } else { loadSessions(); }
-        }).subscribe();
+        })
+        // Also listen for UPDATE events to catch wa_status changes (delivery ticks)
+        .on('postgres_changes', {
+            event: 'UPDATE', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${id}`
+        }, p => {
+            const idx = messages.findIndex(m => m.id === p.new.id);
+            if (idx !== -1) {
+                messages[idx] = { ...messages[idx], ...p.new };
+                renderMsgs();
+            }
+        })
+        .subscribe();
     }
 
     document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {

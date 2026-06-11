@@ -9,7 +9,7 @@ class WhatsAppService {
         this.apiVersion = 'v20.0';
     }
 
-    async _logMessage(sessionId, senderType, content) {
+    async _logMessage(sessionId, senderType, content, waMessageId = null) {
         try {
             // 1. Ensure session exists
             const { data: session, error: findErr } = await supabase.from('chat_sessions').select('session_id').eq('session_id', sessionId).maybeSingle();
@@ -35,16 +35,23 @@ class WhatsAppService {
             }
 
             // 2. Insert message
-            const { error: msgErr } = await supabase.from('chat_messages').insert([{
+            const msgData = {
                 session_id: sessionId,
                 sender_type: senderType,
                 content: content
-            }]);
+            };
+            if (waMessageId) {
+                msgData.wa_message_id = waMessageId;
+                msgData.wa_status = 'sent';
+            }
+            const { data: inserted, error: msgErr } = await supabase.from('chat_messages').insert([msgData]).select('id').single();
             if (msgErr) {
                 console.error('[WA _logMessage] Insert message error:', msgErr);
             }
+            return inserted?.id || null;
         } catch (error) {
             console.error('❌ Failed to log message to DB:', error.message);
+            return null;
         }
     }
 
@@ -177,7 +184,9 @@ class WhatsAppService {
                 return { success: false, error: result?.error?.message || 'WhatsApp API Error' };
             }
 
-            return { success: true };
+            // Save wamid for status tracking
+            const wamid = result?.messages?.[0]?.id || null;
+            return { success: true, wamid };
         } catch (error) {
             console.error('❌ WhatsApp Text Error:', error.message);
             return { success: false, error: error.message };
@@ -219,11 +228,18 @@ class WhatsAppService {
             const result = await response.json();
 
             if (!response.ok) {
+                const errCode = result?.error?.code;
+                // If outside 24h window, images can't be sent as templates — report clearly
+                if (errCode === 131026 || errCode === 131008 || errCode === 132001 || errCode === 131005 || errCode === 131047) {
+                    console.warn(`⚠️ 24h messaging window closed for ${finalPhone}. Image cannot be sent.`);
+                    return { success: false, error: 'خارج نافذة 24 ساعة — لا يمكن إرسال صور', windowClosed: true };
+                }
                 console.error('❌ WhatsApp Image API Error:', result);
                 return { success: false, error: result?.error?.message || 'WhatsApp API Error' };
             }
 
-            return { success: true };
+            const wamid = result?.messages?.[0]?.id || null;
+            return { success: true, wamid };
         } catch (error) {
             console.error('❌ WhatsApp Image Error:', error.message);
             return { success: false, error: error.message };
@@ -622,11 +638,46 @@ class WhatsAppService {
         }
     }
 
+    // ─────────────────────────────────────────────
+    //  Handle message status updates (sent/delivered/read/failed)
+    // ─────────────────────────────────────────────
+    async _handleStatusUpdate(status) {
+        try {
+            const wamid = status.id;
+            const newStatus = status.status; // sent, delivered, read, failed
+            if (!wamid || !newStatus) return;
+
+            // Map WhatsApp statuses to our statuses
+            // 'sent' = ✓, 'delivered' = ✓✓ (grey), 'read' = ✓✓ (blue), 'failed' = ✗
+            const { error } = await supabase
+                .from('chat_messages')
+                .update({ wa_status: newStatus })
+                .eq('wa_message_id', wamid);
+
+            if (error && !error.message?.includes('column')) {
+                console.error('[WA Status] DB update error:', error);
+            } else {
+                console.log(`[WA Status] Message ${wamid} → ${newStatus}`);
+            }
+        } catch (err) {
+            console.error('[WA Status] Error handling status:', err.message);
+        }
+    }
+
     async handleWebhook(payload) {
         try {
             // Meta webhooks have this specific nested structure
             if (payload.object === 'whatsapp_business_account' && payload.entry && payload.entry[0]) {
                 const changes = payload.entry[0].changes;
+                
+                // Handle status updates (delivery receipts)
+                if (changes && changes[0] && changes[0].value && changes[0].value.statuses) {
+                    const statuses = changes[0].value.statuses;
+                    for (const status of statuses) {
+                        await this._handleStatusUpdate(status);
+                    }
+                }
+
                 if (changes && changes[0] && changes[0].value && changes[0].value.messages) {
                     const messages = changes[0].value.messages;
                     

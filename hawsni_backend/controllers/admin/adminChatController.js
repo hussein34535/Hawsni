@@ -129,9 +129,14 @@ class AdminChatController {
                 const waResult = await whatsappService.sendTextMessage(sessionId, content);
                 
                 // Save to DB always (for history)
-                await supabase.from('chat_messages').insert([{
-                    session_id: sessionId, sender_type: 'admin', content
-                }]);
+                const msgRow = { session_id: sessionId, sender_type: 'admin', content };
+                if (waResult.wamid) {
+                    msgRow.wa_message_id = waResult.wamid;
+                    msgRow.wa_status = 'sent';
+                } else if (!waResult.success) {
+                    msgRow.wa_status = 'failed';
+                }
+                await supabase.from('chat_messages').insert([msgRow]);
 
                 await supabase.from('chat_sessions')
                     .update({ status: 'human_active', updated_at: new Date().toISOString() })
@@ -194,18 +199,23 @@ class AdminChatController {
                 const waResult = await whatsappService.sendImageMessage(sessionId, imageUrl, 'admin');
                 
                 // Save to DB always (for history)
-                await supabase.from('chat_messages').insert([{
-                    session_id: sessionId, 
-                    sender_type: 'admin', 
-                    content: `[IMAGE_URL:${imageUrl}]`
-                }]);
+                const msgRow = { session_id: sessionId, sender_type: 'admin', content: `[IMAGE_URL:${imageUrl}]` };
+                if (waResult.wamid) {
+                    msgRow.wa_message_id = waResult.wamid;
+                    msgRow.wa_status = 'sent';
+                } else if (!waResult.success) {
+                    msgRow.wa_status = 'failed';
+                }
+                await supabase.from('chat_messages').insert([msgRow]);
 
                 if (!waResult.success) {
                     return res.json({ 
                         success: false, 
                         error: waResult.error,
                         waError: true,
-                        message: 'فشل إرسال الصورة عبر واتساب. يرجى التأكد من نافذة 24 ساعة.'
+                        message: waResult.windowClosed
+                            ? 'العميل خارج نافذة 24 ساعة — لا يمكن إرسال صور خارج النافذة.'
+                            : 'فشل إرسال الصورة عبر واتساب. يرجى التأكد من نافذة 24 ساعة.'
                     });
                 }
             } else if (session?.platform === 'web') {
