@@ -3,26 +3,83 @@
 <style>
     :root { --primary: #0E4435; --primary-light: #1a6b56; --chat-bg: #ece5dd; }
 
-    div.admin-layout > main.main-content { margin-right: 0 !important; width: 100% !important; min-height: 0 !important; }
+    /* ════════════════════════════════════════════════
+       FULL-SCREEN CHAT LOCK — kills ALL external bars
+       ════════════════════════════════════════════════ */
+    html, body {
+        height: 100% !important;
+        overflow: hidden !important;
+        background-attachment: scroll !important; /* prevents iOS resize on scroll */
+    }
+    body {
+        background-image: none !important; /* remove gradients that cause repaints */
+    }
+
+    /* Kill every bar that's not part of the chat UI */
+    .mobile-topbar    { display: none !important; }
+    .topbar           { display: none !important; }
+    #mobileTopbar     { display: none !important; }
+    #menuToggle       { display: none !important; }
+
+    /* Admin layout: full-screen, no scrolling */
+    .admin-layout {
+        height: 100dvh !important;
+        overflow: hidden !important;
+        display: flex !important;
+    }
+
+    /* Sidebar: slide out on all screen sizes (chat-only mode) */
     div.admin-layout > aside.sidebar {
         display: flex !important; width: 280px !important; right: 0 !important; top: 0 !important;
         height: 100dvh !important; border-radius: 0 !important; z-index: 1100 !important;
         transform: translateX(110%) !important; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     }
     div.admin-layout > aside.sidebar.active { transform: translateX(0) !important; }
+
+    /* Sidebar overlay */
     .sidebar-overlay {
         position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
         z-index: 1099; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
     }
     .sidebar-overlay.active { opacity: 1; pointer-events: auto; }
-    .topbar { display: none !important; }
-    .content-wrapper {
-        padding: 0 !important; width: 100vw !important; max-width: 100vw !important; margin: 0 !important;
-        display: flex !important; flex-direction: column !important;
-        height: 100dvh !important; overflow: hidden !important; box-sizing: border-box;
+
+    /* Main content: full width, no padding, locked height */
+    div.admin-layout > main.main-content {
+        margin-right: 0 !important;
+        width: 100% !important;
+        min-height: 0 !important;
+        height: 100dvh !important;
+        padding-bottom: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
 
-    .chat-wrap { display: flex; flex: 1; min-height: 0; width: 100%; max-width: 100%; overflow: hidden; box-sizing: border-box; }
+    /* Content wrapper: fill everything below header */
+    .content-wrapper {
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        box-sizing: border-box;
+    }
+
+    /* Chat wrap: fills the content-wrapper exactly */
+    .chat-wrap {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+        box-sizing: border-box;
+    }
 
     /* Sessions List */
     .sessions-panel {
@@ -255,9 +312,12 @@
     body.dark .order-card h4 { color: #25d366 !important; }
 
     @media (max-width: 768px) {
-        .sessions-panel { width: 100% !important; }
-        .chat-main { display: none; }
+        /* Mobile: sessions takes full width */
+        .sessions-panel { width: 100% !important; flex-shrink: 0; }
+        /* Chat hidden by default on mobile — slides in */
+        .chat-main { display: none; position: fixed; inset: 0; z-index: 50; flex-direction: column; }
         .chat-main.active { display: flex !important; }
+        /* When chat is open, hide sessions behind */
         .chat-wrap.chat-open .sessions-panel { display: none; }
         .s-item { padding: 10px 14px; }
         .s-avatar { width: 42px; height: 42px; font-size: 14px; }
@@ -375,11 +435,26 @@
     const elInputRow = el('input-row');
     const elMsgInput = el('msg-input');
 
+    // ── Fix white space caused by mobile keyboard ───────────────
+    // Use Visual Viewport API to lock the chat height to visible area
+    function lockChatHeight() {
+        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        document.documentElement.style.setProperty('--real-vh', vh + 'px');
+        const chatMain = document.querySelector('.chat-main');
+        if (chatMain && window.innerWidth <= 768) {
+            chatMain.style.height = vh + 'px';
+        }
+    }
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', lockChatHeight);
+    }
+    window.addEventListener('resize', lockChatHeight);
+    lockChatHeight();
+
     (async () => {
         document.body.style.overflow = 'hidden';
         document.body.style.margin = '0';
         document.body.style.padding = '0';
-        document.body.style.height = '100dvh';
         await loadSessions();
         subSessions();
         const sid = new URLSearchParams(window.location.search).get('sessionId') || localStorage.getItem('chatSessionId');
@@ -455,7 +530,8 @@
             if (ss) { ss.unread_count = 0; renderSessions(); }
         } catch (e) {}
 
-        elFooter.style.display = 'block';
+        elFooter.style.display = 'flex';
+        elFooter.style.flexDirection = 'column';
         el('order-panel').classList.remove('active');
 
         if (window.innerWidth <= 768) {
