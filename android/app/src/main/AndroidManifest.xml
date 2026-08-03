@@ -35,8 +35,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="hawsni.com" />
-                <data android:scheme="https" android:host="hawsni.com" />
+                <data android:scheme="http" android:host="hwasi.com" />
+                <data android:scheme="https" android:host="hwasi.com" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

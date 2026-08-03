@@ -1,5 +1,5 @@
-require('dotenv').config({ path: './hawsni_backend/.env' });
-const aiChatbotService = require('./hawsni_backend/services/aiChatbotService');
+require('dotenv').config({ path: './hwasi_backend/.env' });
+const aiChatbotService = require('./hwasi_backend/services/aiChatbotService');
 
 async function test() {
     try {

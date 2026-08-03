@@ -57,7 +57,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   String _couponType = 'percentage';
   String? _couponError;
 
-  final String _selectedPaymentMethod = 'Cash on Delivery';
+  String _selectedPaymentMethod = 'Cash on Delivery';
 
   // Shipping
 
@@ -245,7 +245,7 @@ class _CheckoutScreenState extends State<CheckoutScreen>
       };
     }
 
-    _submitOrder(cartItems, subtotal, shippingAddress, 'Cash on Delivery');
+    _submitOrder(cartItems, subtotal, shippingAddress, _selectedPaymentMethod);
   }
 
   void _saveAddress() {
@@ -736,36 +736,120 @@ class _CheckoutScreenState extends State<CheckoutScreen>
   // ─── Payment Card ──────────────────────────────────────────────────────────
 
   Widget _buildPaymentCard() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Icon(Icons.payments_outlined, color: Colors.white, size: 20),
+        _buildPaymentOption(
+          value: 'Vodafone Cash',
+          icon: Icons.smartphone_outlined,
+          iconColor: Colors.red,
+          iconBg: Colors.red.withValues(alpha: 0.08),
+          title: 'فودافون كاش',
+          subtitle: 'ادفع مقدمًا عن طريق فودافون كاش',
         ),
-        const SizedBox(width: 14),
-        const Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('الدفع عند الاستلام', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black)),
-              Text('Cash on Delivery', style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: Colors.grey)),
-            ],
-          ),
+        const SizedBox(height: 10),
+        _buildPaymentOption(
+          value: 'Cash on Delivery',
+          icon: Icons.payments_outlined,
+          iconColor: Colors.amber.shade800,
+          iconBg: Colors.amber.withValues(alpha: 0.12),
+          title: 'الدفع عند الاستلام',
+          subtitle: 'ادفع كاش عند وصول الطلب',
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
+        if (_selectedPaymentMethod == 'Cash on Delivery') ...[
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, size: 18, color: Colors.amber.shade800),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'مع العلم أن الدفع عند الاستلام يتطلب دفع مبلغ ديبوزت (مقدم) مقدمًا، والدفع المتبقي عند استلام الطلب.',
+                    style: TextStyle(fontFamily: 'Cairo', color: Colors.amber, fontSize: 12, height: 1.5),
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: const Text('محدد', style: TextStyle(fontFamily: 'Cairo', color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
-        ),
+        ],
       ],
+    );
+  }
+
+  Widget _buildPaymentOption({
+    required String value,
+    required IconData icon,
+    required Color iconColor,
+    required Color iconBg,
+    required String title,
+    required String subtitle,
+  }) {
+    final isSelected = _selectedPaymentMethod == value;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedPaymentMethod = value),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF0E4435).withValues(alpha: 0.05) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF0E4435) : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF0E4435) : iconBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: isSelected ? Colors.white : iconColor, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black)),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, color: Colors.grey)),
+                ],
+              ),
+            ),
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF0E4435) : Colors.grey.shade300,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? const Padding(
+                      padding: EdgeInsets.all(3.5),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(color: Color(0xFF0E4435), shape: BoxShape.circle),
+                      ),
+                    )
+                  : null,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

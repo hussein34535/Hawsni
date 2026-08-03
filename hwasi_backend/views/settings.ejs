@@ -1,0 +1,151 @@
+<%- include('partials/header', { title: 'الإعدادات' , pageTitle: 'الإعدادات' , page: 'settings' }) %>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-cog"></i> إعدادات المتجر
+            </h2>
+        </div>
+
+        <form method="POST" action="/admin/settings">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <!-- General Info -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-store"></i> معلومات المتجر</h2>
+                </div>
+                <div style="padding: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">اسم المتجر</label>
+                        <input type="text" name="store_name" class="form-control"
+                            value="<%= settings.store_name || 'Hwasi Store' %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">وصف المتجر</label>
+                        <textarea name="store_description" class="form-control"
+                            rows="3"><%= settings.store_description || '' %></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">رابط الشعار (URL)</label>
+                        <input type="url" name="logo_url" class="form-control" value="<%= settings.logo_url || '' %>"
+                            placeholder="https://example.com/logo.png">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-address-card"></i> معلومات الاتصال</h2>
+                </div>
+                <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <input type="email" name="contact_email" class="form-control"
+                            value="<%= settings.contact_email || '' %>">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">رقم الهاتف</label>
+                        <input type="tel" name="contact_phone" class="form-control"
+                            value="<%= settings.contact_phone || '' %>">
+                    </div>
+
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label">العنوان</label>
+                        <input type="text" name="address" class="form-control" value="<%= settings.address || '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-share-alt"></i> روابط التواصل الاجتماعي</h2>
+                </div>
+                <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <% const social=settings.social_links || {}; %>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fab fa-facebook" style="color: #1877F2;"></i>
+                                Facebook</label>
+                            <input type="url" name="facebook" class="form-control" value="<%= social.facebook || '' %>">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fab fa-instagram" style="color: #E4405F;"></i>
+                                Instagram</label>
+                            <input type="url" name="instagram" class="form-control"
+                                value="<%= social.instagram || '' %>">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                                WhatsApp</label>
+                            <input type="text" name="whatsapp" class="form-control" value="<%= social.whatsapp || '' %>"
+                                placeholder="+20...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label"><i class="fab fa-tiktok" style="color: #000000;"></i>
+                                TikTok</label>
+                            <input type="url" name="tiktok" class="form-control" value="<%= social.tiktok || '' %>">
+                        </div>
+                </div>
+            </div>
+
+            <!-- Marketing & Tracking -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fas fa-chart-line"></i> التسويق والتتبع</h2>
+                </div>
+                <div style="padding: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fab fa-facebook-f" style="color: #1877F2;"></i> Meta Pixel ID
+                        </label>
+                        <input type="text" name="meta_pixel_id" class="form-control"
+                            value="<%= settings.meta_pixel_id || '' %>" placeholder="مثال: 123456789012345">
+                        <small style="color: #666; margin-top: 0.5rem; display: block;">
+                            تستخدم Meta Pixel لتتبع التحويلات وتحسين الحملات الإعلانية على فيسبوك وإنستجرام.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Free Delivery Toggle -->
+            <div class="card" style="margin-bottom: 1.5rem; border: 2px solid #1DBF73;">
+                <div class="card-header" style="background: linear-gradient(135deg,#1DBF73,#0AA65B); color:#fff;">
+                    <h2 class="card-title" style="color:#fff;"><i class="fas fa-truck"></i> التوصيل المجاني</h2>
+                </div>
+                <div
+                    style="padding: 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+                    <div>
+                        <p style="font-weight:bold; margin:0 0 4px;">تفعيل عرض التوصيل المجاني</p>
+                        <small style="color:#666;">لما يتفعل، يظهر بانر العد التنازلي في صفحة المنتج وتكون قيمة التوصيل
+                            صفر تلقائياً عند الدفع.</small>
+                    </div>
+                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;">
+                        <input type="checkbox" name="free_delivery_enabled" id="free_delivery_enabled"
+                            <%=settings.free_delivery_enabled ? 'checked' : '' %>
+                        style="width:20px;height:20px;accent-color:#1DBF73;"
+                        onchange="var l=document.getElementById('freeDeliveryLabel');l.textContent=this.checked?'✅ مفعّل':'❌ معطّل';l.style.color=this.checked?'#1DBF73':'#999';">
+                        <span id="freeDeliveryLabel"
+                            style="font-weight:bold;font-size:1rem;color:<%- settings.free_delivery_enabled ? '#1DBF73' : '#999' %>;">
+                            <%=settings.free_delivery_enabled ? '✅ مفعّل' : '❌ معطّل' %>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> حفظ الإعدادات
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <%- include('partials/footer') %>

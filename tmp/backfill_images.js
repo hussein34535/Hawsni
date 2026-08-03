@@ -1,4 +1,4 @@
-const supabase = require('../hawsni_backend/config/supabase');
+const supabase = require('../hwasi_backend/config/supabase');
 
 async function backfill() {
     console.log('🚀 Starting backfill of product thumbnails...');

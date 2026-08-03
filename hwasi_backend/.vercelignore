@@ -1,0 +1,2 @@
+# Ignore uploaded files (they live in Cloudinary)
+public/uploads/

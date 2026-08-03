@@ -1,0 +1,2536 @@
+<%- include('partials/header', { title: 'إدارة الطلبات' , pageTitle: 'الطلبات' , page: 'orders' }) %>
+
+    <!-- Summary Stats -->
+    <div class="stats-grid">
+        <% const totalRevenue=orders.reduce((acc, o)=> acc + parseFloat(o.total || 0), 0);
+            const pendingOrders = orders.filter(o => o.status === 'Processing').length;
+            const completedOrders = orders.filter(o => o.status === 'Delivered').length;
+            %>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: var(--brand-light); color: var(--brand-primary);"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-label">إجمالي المبيعات</div>
+                </div>
+                <div class="stat-value">
+                    <%= totalRevenue.toLocaleString() %> ج.م
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: var(--warning-bg); color: var(--warning);"><i class="fas fa-clock"></i></div>
+                    <div class="stat-label">طلبات قيد المعالجة</div>
+                </div>
+                <div class="stat-value">
+                    <%= pendingOrders %>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: var(--success-bg); color: var(--success);"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-label">طلبات مكتملة</div>
+                </div>
+                <div class="stat-value">
+                    <%= completedOrders %>
+                </div>
+            </div>
+            <div class="stat-card" onclick="togglePendingFilter()" style="cursor:pointer; transition:0.2s;" id="pendingReceiptCard" title="عرض طلبات بانتظار التأكيد">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background:#ffedd5; color:#c2410c;"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="stat-label">بانتظار التأكيد</div>
+                </div>
+                <div class="stat-value" id="pendingReceiptCount" style="color:#c2410c;">
+                    <%= orders.filter(o => o.deposit_receipt_url && o.status !== 'Confirmed' && o.status !== 'Cancelled' && o.status !== 'Delivered').length %>
+                </div>
+            </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-list-ul"></i> قائمة الطلبات الحالية
+            </h2>
+
+            <div id="bulkBar" class="bulk-actions-bar" style="display:none; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <span id="selectedCount" class="badge badge-info" style="font-size: 0.9rem;">0 محدد</span>
+                <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                    <select id="bulkStatusSelect" class="form-control" style="width: auto; height: 38px;">
+                        <option value="">-- تغيير الحالة --</option>
+                        <option value="Processing">قيد المعالجة</option>
+                        <option value="Confirmed">تم التأكيد</option>
+                        <option value="In Transit">مع شركة الشحن</option>
+                        <option value="Delivered">تم التوصيل</option>
+                        <option value="Cancelled">ملغي</option>
+                    </select>
+                    <label style="display:flex; align-items:center; gap:4px; margin:0; font-size: 0.85rem; font-weight:bold; color: #475569; cursor: pointer;">
+                        <input type="checkbox" id="bulkSkipEmail" style="width:16px; height:16px; cursor: pointer;"> بدون إيميل
+                    </label>
+                    <button onclick="bulkChangeStatus()" class="btn btn-primary btn-sm" style="flex:1;">تطبيق</button>
+                    <button onclick="bulkDelete()" class="btn btn-danger btn-sm" style="flex:1;"><i class="fas fa-trash"></i> حذف</button>
+                    <button onclick="clearSelection()" class="btn btn-secondary btn-sm" style="flex:1;">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
+        <% if (orders && orders.length> 0) { %>
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">
+                                <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
+                            </th>
+                            <th>المنتج</th>
+                            <th>العميل</th>
+                            <th>رقم الطلب</th>
+                            <th>المبلغ</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                            <th style="width: 150px;">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order=> { %>
+                            <% let cName='غير معروف' ; let cPhone='-' ; let cAddr='بدون عنوان' ; if (order.users) {
+                                cName=order.users.name || cName; cPhone=order.users.phone || cPhone; } let
+                                ship=order.shipping_address; if (typeof ship==='string' && ship.trim().startsWith('{'))
+                                { try { ship=JSON.parse(ship); } catch (e) { } } if (typeof ship==='object' && ship
+                                !==null) { cName=ship.name || ship.guestName || cName; cPhone=ship.phone ||
+                                ship.guestPhone || cPhone; cAddr=ship.address || ship.shippingAddress || cAddr; } else
+                                if (typeof ship==='string' && ship.trim() !=='' ) { cAddr=ship; } const
+                                sMap={ 'Processing' : 'warning', 'Confirmed': 'primary', 'In Transit' : 'info'
+                                , 'Delivered' : 'success' , 'Cancelled' : 'danger' }; 
+                                const sClass = sMap[order.status] || 'warning'; 
+                                const tMap = { 
+                                    'Processing' : 'قيد المعالجة', 
+                                    'Confirmed': 'تم التأكيد',
+                                    'In Transit' : 'مع شركة الشحن', 
+                                    'Delivered' : 'تم التوصيل', 
+                                    'Cancelled' : 'ملغي' 
+                                };
+                                const displayStatus = tMap[order.status] || (order.status ? order.status : 'غير محدد'); %>
+                                <tr id="row-<%= order.id %>" class="order-row"
+                                    onclick="showOrderDetails('<%= order.id %>')">
+                                    <td data-label="تحديد" onclick="event.stopPropagation()">
+                                        <input type="checkbox" class="order-checkbox" value="<%= order.id %>"
+                                            onchange="updateBulkBar()">
+                                    </td>
+                                    <td data-label="المنتج">
+                                        <div class="product-cell">
+                                            <% if (order.product_image) { %>
+                                                <img src="<%= order.product_image %>" class="product-img-lg">
+                                                <% } else { %>
+                                                    <div class="product-img-placeholder"><i class="fas fa-box"></i>
+                                                    </div>
+                                                    <% } %>
+                                                        <div>
+                                                            <div class="product-title">
+                                                                <%= order.product_name %>
+                                                            </div>
+                                                            <% if (order.items_count> 1) { %>
+                                                                 <div class="product-count">+ <%= order.items_count - 1
+                                                                         %> منتجات أخرى</div>
+                                                                 <% } %>
+                                                             <% if (order.deposit_receipt_url && order.status !== 'Confirmed' && order.status !== 'Cancelled' && order.status !== 'Delivered') { %>
+                                                                 <div class="receipt-badge"><i class="fas fa-file-invoice-dollar"></i> إيصال</div>
+                                                             <% } %>
+                                                        </div>
+                                        </div>
+                                    </td>
+                                    <td data-label="العميل">
+                                        <div class="customer-cell">
+                                            <div class="avatar-small">
+                                                <%= cName==='غير معروف' ? '?' : cName.charAt(0) %>
+                                            </div>
+                                            <div>
+                                                <div class="customer-name">
+                                                    <%= cName %>
+                                                </div>
+                                                <div class="customer-phone" style="display: flex; align-items: center; gap: 8px;">
+                                                    <%= cPhone %>
+                                                    <% 
+                                                       let cp = (typeof cPhone === 'string' ? cPhone : '').replace(/\D/g, '');
+                                                       if (cp.startsWith('01') && cp.length === 11) cp = '2' + cp;
+                                                    %>
+                                                    <a href="/admin/chat?sessionId=<%= cp %>" onclick="event.stopPropagation()" title="فتح المحادثة" style="color: #25d366; text-decoration: none;">
+                                                       <i class="fab fa-whatsapp"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td data-label="رقم الطلب">
+                                        <span class="order-id">#<%= order.id.substring(0, 8) %></span>
+                                    </td>
+                                    <td data-label="المبلغ">
+                                        <% 
+                                            const total = parseFloat(order.total || 0);
+                                            const displayTotal = isNaN(total) ? '0.00' : total.toFixed(2);
+                                        %>
+                                        <span class="order-amount">
+                                            <%= displayTotal %> ج.م
+                                        </span>
+                                    </td>
+                                    <td data-label="الحالة">
+                                        <span class="badge badge-<%= sClass %>">
+                                            <%= displayStatus %>
+                                        </span>
+                                    </td>
+                                    <td data-label="التاريخ">
+                                        <div class="date-cell">
+                                            <%= new Date(order.created_at).toLocaleDateString('ar-EG', { day: 'numeric'
+                                                , month: 'short' }) %>
+                                                <span>
+                                                    <%= new Date(order.created_at).getFullYear() %>
+                                                </span>
+                                        </div>
+                                    </td>
+                                    <td data-label="تحكم" onclick="event.stopPropagation()">
+                                        <div class="action-cell">
+                                            <form method="POST" action="/admin/orders/<%= order.id %>/status">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <select name="status" class="status-select select-<%= sClass %>"
+                                                    onchange="this.form.submit()">
+                                                    <% if (!['Processing', 'Confirmed', 'In Transit', 'Delivered', 'Cancelled'].includes(order.status)) { %>
+                                                        <option value="" selected disabled>-- اختيار الحالة --</option>
+                                                    <% } %>
+                                                    <option value="Processing" <%=order.status==='Processing'
+                                                        ? 'selected' : '' %>>قيد المعالجة</option>
+                                                    <option value="Confirmed" <%=order.status==='Confirmed'
+                                                        ? 'selected' : '' %>>تم التأكيد</option>
+                                                    <option value="In Transit" <%=order.status==='In Transit'
+                                                        ? 'selected' : '' %>>مع شركة الشحن</option>
+                                                    <option value="Delivered" <%=order.status==='Delivered' ? 'selected'
+                                                        : '' %>>تم التوصيل</option>
+                                                    <option value="Cancelled" <%=order.status==='Cancelled' ? 'selected'
+                                                        : '' %>>ملغي</option>
+                                                </select>
+                                             </form>
+                                              <% 
+                                                  let cleanActionPhone = (typeof cPhone === 'string' ? cPhone : '').replace(/\D/g, '');
+                                                  if (cleanActionPhone.startsWith('01') && cleanActionPhone.length === 11) cleanActionPhone = '2' + cleanActionPhone;
+                                               %>
+                                              <a href="/admin/chat?sessionId=<%= cleanActionPhone %>" onclick="event.stopPropagation()" class="btn-icon" title="دردشة واتساب" style="color: #25d366; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                                                 <i class="fab fa-whatsapp"></i>
+                                              </a>
+                                              <button class="btn-icon" onclick="event.stopPropagation(); openEditModal('<%= order.id %>')" title="تعديل الطلب" style="color: var(--info);">
+                                                <i class="fas fa-edit"></i>
+                                             </button>
+                                             <button class="btn-icon text-danger"
+                                                 onclick="deleteOrder('<%= order.id %>')" title="حذف الطلب">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                            <button class="btn-icon" onclick="showOrderDetails('<%= order.id %>')">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>لا توجد طلبات حتى الآن</p>
+                </div>
+                <% } %>
+        
+        <!-- Pagination UI -->
+        <% if (pagination && pagination.totalPages > 1) { %>
+            <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding: 20px;">
+                <% if (pagination.page > 1) { %>
+                    <a href="/admin/orders?page=<%= pagination.page - 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                        <i class="fas fa-chevron-right" style="margin-left: 5px;"></i> السابق
+                    </a>
+                <% } %>
+
+                <div class="pagination-info" style="font-weight: bold; color: #64748b; font-size: 0.9rem;">
+                    صفحة <%= pagination.page %> من <%= pagination.totalPages %>
+                </div>
+
+                <% if (pagination.page < pagination.totalPages) { %>
+                    <a href="/admin/orders?page=<%= pagination.page + 1 %>&limit=<%= pagination.limit %>" class="btn btn-secondary btn-sm" style="background: white; color: var(--brand-primary); border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                        التالي <i class="fas fa-chevron-left" style="margin-right: 5px;"></i>
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="header-main">
+                    <div class="header-id-group">
+                        <span class="header-badge">تفاصيل الطلب</span>
+                        <h3 id="modalOrderId" class="modal-title"></h3>
+                    </div>
+                    <p id="modalOrderDate" class="modal-subtitle"></p>
+                </div>
+                <div class="header-actions">
+                    <div class="status-pill-group">
+                        <div id="modalStatusBadge" class="badge" style="border: none; padding: 6px 12px; font-size: 0.8rem;"></div>
+                        <select id="modalStatusSelect" class="status-select" onchange="changeModalStatus(this.value)" style="border: none; background: transparent; padding: 0;">
+                            <option value="Processing">قيد المعالجة</option>
+                            <option value="Confirmed">تم التأكيد</option>
+                            <option value="In Transit">مع شركة الشحن</option>
+                            <option value="Delivered">تم التوصيل</option>
+                            <option value="Cancelled">ملغي</option>
+                        </select>
+                    </div>
+                    <label style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top:5px; font-size: 0.75rem; color:#64748b; cursor: pointer;">
+                        <input type="checkbox" id="modalSkipEmail" style="cursor: pointer;"> بدون إيميل
+                    </label>
+                    <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <!-- Left Column: Products & Payment -->
+                    <div class="column-main">
+                        <div class="detail-section">
+                            <h4 class="section-title"><i class="fas fa-shopping-bag"></i> منتجات الطلب</h4>
+                            <div id="modalItemsList" class="items-container">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="detail-section payment-summary">
+                            <h4 class="section-title"><i class="fas fa-receipt"></i> ملخص الدفع</h4>
+                            <div class="payment-grid">
+                                <div class="payment-item">
+                                    <span>المجموع الفرعي:</span>
+                                    <span id="modalSubtotal"></span>
+                                </div>
+                                <div id="discountRow" class="payment-item discount">
+                                    <span>الخصم (كوبون):</span>
+                                    <span id="modalDiscount"></span>
+                                </div>
+                                <div class="payment-item total">
+                                    <span>الإجمالي:</span>
+                                    <span id="modalTotalAmount"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Email Box (Moved here based on request) -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-top: 16px;">
+                            <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #475569; font-weight: 800;"><i class="fas fa-magic" style="color: #8b5cf6;"></i> إيميل AI مخصص للتواصل</h5>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="aiEmailPrompt" placeholder="أكتب توجيه للذكاء الاصطناعي... (مثال: اعتذر عن التأخير وأبلغهم بشحن الطلب غداً)" style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.8rem; outline: none;">
+                                <button id="generateAiBtn" onclick="generateAiEmail()" style="background: #8b5cf6; color: white; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif;">
+                                    توليد رسالة
+                                </button>
+                            </div>
+                            <div id="aiPreviewBox" style="display: none; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-top: 12px; max-height: 200px; overflow-y: auto;">
+                                <div id="aiEmailContent" style="font-size: 0.8rem; color: #334155;"></div>
+                            </div>
+                            <button id="sendAiEmailBtn" onclick="sendAiEmail()" style="display: none; width: 100%; justify-content: center; align-items: center; gap: 8px; background: #0ea5e9; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif; margin-top: 12px;">
+                                <i class="fas fa-paper-plane"></i> إرسال الإيميل للعميل الآن
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Customer, Shipping & Actions -->
+                    <div class="column-side">
+                        <div class="detail-section customer-info">
+                            <h4 class="section-title"><i class="fas fa-user-circle"></i> بيانات العميل</h4>
+                            <div class="profile-card" style="padding: 20px; box-shadow: none; border: 1px solid rgba(0,0,0,0.05);">
+                                <div id="modalAvatar" class="profile-avatar" style="width: 50px; height: 50px; font-size: 1.2rem;"></div>
+                                <div class="profile-details">
+                                    <h5 id="modalCustomerName" style="font-size: 1rem;"></h5>
+                                    <p id="modalCustomerPhone" style="direction: ltr; text-align: right; margin-bottom: 2px; font-weight: 800; color: #334155; font-size: 0.9rem;"></p>
+                                    <p id="modalCustomerPhone2" style="direction: ltr; text-align: right; font-size: 0.75rem; color: #94a3b8; display: none;"></p>
+                                    <p id="modalCustomerEmail" class="email-text" style="font-size: 0.8rem;"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-section shipping-info">
+                            <h4 class="section-title"><i class="fas fa-map-marker-alt"></i> عنوان التوصيل</h4>
+                            <div class="address-card" style="padding: 20px; border: 1px solid rgba(0,0,0,0.05);">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                    <div class="address-item">
+                                        <label>المحافظة:</label>
+                                        <p id="shipState"></p>
+                                    </div>
+                                    <div class="address-item">
+                                        <label>المدينة/المنطقة:</label>
+                                        <p id="shipCity"></p>
+                                    </div>
+                                </div>
+                                <div class="address-item" style="margin-bottom: 16px;">
+                                    <label>الشارع:</label>
+                                    <p id="shipStreet"></p>
+                                </div>
+                                <div class="address-full">
+                                    <label>العنوان بالكامل:</label>
+                                    <p id="modalAddressFull"></p>
+                                </div>
+                                <button class="btn-copy-address" onclick="copyAddress()" style="margin-top: 16px; border: none; background: #e0f2fe; color: #0284c7;">
+                                    <i class="fas fa-copy"></i> نسخ العنوان
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="modalNotesSection" class="detail-section" style="display: none;">
+                            <h4 class="section-title"><i class="fas fa-sticky-note"></i> ملاحظات الطلب</h4>
+                            <div class="address-card" style="border-color: #f59e0b; background: #fffcf0; padding: 15px;">
+                                <p id="modalNotesText" style="margin: 0; font-weight: 700; color: #92400e; line-height: 1.6; font-size: 0.9rem;"></p>
+                            </div>
+                        </div>
+
+                        <!-- Action Control Center -->
+                        <div class="detail-section">
+                            <h4 class="section-title"><i class="fas fa-bolt"></i> خيارات وإجراءات</h4>
+                            
+                            <!-- Payment Method Box -->
+                            <div class="method-card" style="margin-bottom: 16px; padding: 16px;">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span id="modalPaymentMethod">الدفع عند الاستلام</span>
+                            </div>
+
+                            <!-- No Answer Box -->
+                            <button id="noAnswerBtn" onclick="sendNoAnswerEmail()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: #fffcf0; border: 1px solid #fcd34d; color: #b45309; padding: 12px; border-radius: 12px; font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: all 0.2s; font-family: 'Cairo', sans-serif; margin-bottom: 16px;">
+                                <i class="fas fa-phone-slash"></i> إرسال تنبيه "لم يرد" للعميل
+                            </button>
+
+                            <div id="receiptBox" style="display: none; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+                                <h5 style="margin: 0 0 10px 0; font-size: 0.85rem; color: #0369a1; font-weight: 800;">
+                                    <i class="fas fa-file-invoice-dollar"></i> إيصال التحويل
+                                </h5>
+                                <a id="receiptLink" href="#" target="_blank" style="display: block; border-radius: 12px; overflow: hidden; border: 1px solid #7dd3fc; position: relative; background: #fff;">
+                                    <img id="receiptPreview" src="" style="width: 100%; height: 120px; object-fit: cover; transition: 0.3s; cursor: zoom-in;" alt="Receipt">
+                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(3,105,161,0.8); color: white; padding: 4px; font-size: 0.7rem; text-align: center; font-weight: 700;">
+                                        عرض الصورة كاملة <i class="fas fa-external-link-alt" style="font-size: 0.6rem;"></i>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- AI Email Box (Moved to left column) -->
+
+                            <!-- Bosta Shipping Box -->
+                            <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 16px; padding: 16px;">
+                                <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #e11d48; font-weight: 800;"><i class="fas fa-truck-fast"></i> الشحن (بوسطة)</h5>
+                                
+                                <div id="bostaNotSentBox" style="display: none;">
+                                    <div style="margin-bottom: 12px;">
+                                        <select id="bostaPackageSize" style="width: 100%; padding: 8px; border: 1px solid #fda4af; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.85rem; color: #be123c; background: #fff;">
+                                            <option value="SMALL">حجم صغير (مجوهرات/إكسسوار)</option>
+                                            <option value="MEDIUM" selected>حجم متوسط (ملابس/أحذية)</option>
+                                            <option value="LARGE">حجم كبير</option>
+                                        </select>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                        <input type="checkbox" id="bostaAllowOpen" checked style="width: 14px; height: 14px; accent-color: #e11d48;">
+                                        <label for="bostaAllowOpen" style="font-size: 0.8rem; font-weight: 700; color: #9f1239; cursor: pointer;">فتح الشحنة مسموح للعميل</label>
+                                    </div>
+                                    <button id="sendBostaBtn" onclick="sendToBosta()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: #e11d48; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif;">
+                                        إرسال الطلب لبوسطة <i class="fas fa-arrow-left" style="font-size: 0.8rem;"></i>
+                                    </button>
+                                </div>
+
+                                <div id="bostaSentBox" style="display: none;">
+                                    <div style="background: white; padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; color: #1e40af; text-align: center; margin-bottom: 12px; border: 1px dashed #bfdbfe;">
+                                        <i class="fas fa-check-circle" style="color: #3b82f6;"></i> رقم البوليصة: <br>
+                                        <span id="bostaTrackingNumber" style="font-size: 1.1rem; letter-spacing: 1px; display: inline-block; margin-top: 4px;"></span>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button onclick="openTrackingModal()" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 6px; background: #2563eb; color: white; padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; text-decoration: none; border: none; cursor: pointer; font-family: 'Cairo', sans-serif;">
+                                            <i class="fas fa-search-location"></i> تتبع الشحنة
+                                        </button>
+                                        <button onclick="showResendBosta()" style="flex: 1; border: 1px solid #cbd5e1; background: white; color: #64748b; padding: 8px; border-radius: 8px; font-weight: 800; cursor: pointer; font-family: 'Cairo', sans-serif; font-size: 0.8rem;">
+                                            تعديل
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script id="orders-data" type="application/json">
+        <%- JSON.stringify(orders) %>
+    </script>
+    <script>
+        const ordersData = JSON.parse(document.getElementById('orders-data').textContent || '[]');
+        const CSRF_TOKEN = '<%= csrfToken %>';
+        const sMap = {
+            'Processing': 'warning',
+            'Confirmed': 'primary',
+            'In Transit': 'info',
+            'Delivered': 'success',
+            'Cancelled': 'danger'
+        };
+        const tMap = {
+            'Processing': 'قيد المعالجة',
+            'Confirmed': 'تم التأكيد',
+            'In Transit': 'مع شركة الشحن',
+            'Delivered': 'تم التوصيل',
+            'Cancelled': 'ملغي'
+        };
+
+        // Pending receipt filter
+        let pendingFilterActive = false;
+
+        function togglePendingFilter() {
+            pendingFilterActive = !pendingFilterActive;
+            const card = document.getElementById('pendingReceiptCard');
+            const rows = document.querySelectorAll('.order-row');
+            if (pendingFilterActive) {
+                card.classList.add('active');
+                rows.forEach(row => {
+                    if (!row.dataset.hasPendingReceipt) row.style.display = 'none';
+                });
+            } else {
+                card.classList.remove('active');
+                rows.forEach(row => row.style.display = '');
+            }
+        }
+
+        // Mark rows with pending receipts on load
+        document.addEventListener('DOMContentLoaded', function() {
+            ordersData.forEach(o => {
+                if (o.deposit_receipt_url && o.status !== 'Confirmed' && o.status !== 'Cancelled' && o.status !== 'Delivered') {
+                    const row = document.getElementById('row-' + o.id);
+                    if (row) {
+                        row.classList.add('pending-receipt');
+                        row.dataset.hasPendingReceipt = 'true';
+                    }
+                }
+            });
+        });
+
+        let currentOrderId = null;
+        function showOrderDetails(orderId) {
+            currentOrderId = orderId;
+            const order = ordersData.find(o => o.id === orderId);
+            if (!order) return;
+
+            // Reset No Answer Button state
+            const noAnswerBtn = document.getElementById('noAnswerBtn');
+            if (noAnswerBtn) {
+                noAnswerBtn.innerHTML = '<span>📞</span><span>إرسال تنبيه "لم يرد"</span>';
+                noAnswerBtn.disabled = false;
+                noAnswerBtn.style.borderColor = '#f59e0b';
+                noAnswerBtn.style.color = '#92400e';
+            }
+
+            // Reset AI Box state
+            document.getElementById('aiEmailPrompt').value = '';
+            document.getElementById('aiPreviewBox').style.display = 'none';
+            document.getElementById('aiEmailContent').innerHTML = '';
+            document.getElementById('sendAiEmailBtn').style.display = 'none';
+
+            // Check Bosta state
+            if (order.bosta_id || order.tracking_number) {
+                document.getElementById('bostaNotSentBox').style.display = 'none';
+                document.getElementById('bostaSentBox').style.display = 'block';
+                document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + order.tracking_number;
+                document.getElementById('bostaTrackingNumber').dataset.trackingNum = order.tracking_number;
+                document.getElementById('sendBostaBtn').disabled = false;
+                document.getElementById('sendBostaBtn').innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
+            } else {
+                document.getElementById('bostaNotSentBox').style.display = 'block';
+                document.getElementById('bostaSentBox').style.display = 'none';
+                document.getElementById('sendBostaBtn').disabled = false;
+                document.getElementById('sendBostaBtn').innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
+            }
+
+            // Receipt logic
+            const receiptBox = document.getElementById('receiptBox');
+            if (order.deposit_receipt_url) {
+                document.getElementById('receiptPreview').src = order.deposit_receipt_url;
+                document.getElementById('receiptLink').href = order.deposit_receipt_url;
+                receiptBox.style.display = 'block';
+            } else {
+                receiptBox.style.display = 'none';
+            }
+
+            // Update Header & Badge
+            document.getElementById('modalOrderId').textContent = 'طلب رقم #' + order.id.substring(0, 8);
+            document.getElementById('modalOrderDate').textContent = new Date(order.created_at).toLocaleString('ar-EG', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            const statusBadge = document.getElementById('modalStatusBadge');
+            const statusText = tMap[order.status] || order.status || 'قيد المعالجة';
+            statusBadge.textContent = statusText;
+            statusBadge.className = 'badge badge-' + (sMap[order.status] || 'warning');
+
+            const statusSelect = document.getElementById('modalStatusSelect');
+            if (statusSelect) {
+                statusSelect.value = order.status || 'Processing';
+                statusSelect.className = 'status-select select-' + (sMap[order.status] || 'warning');
+            }
+
+            // Customer Details logic
+            let cName = 'غير معروف';
+            let cPhone = '-';
+            let cEmail = 'لا يوجد إيميل';
+            let ship = order.shipping_address;
+
+            // Try to extract from linked user first
+            if (order.users) {
+                cName = order.users.name || cName;
+                cPhone = order.users.phone || cPhone;
+            }
+
+            // Override with structured shipping address if available
+            if (ship && typeof ship === 'object') {
+                cName = ship.name || ship.guestName || cName;
+                cPhone = ship.phone || ship.guestPhone || cPhone;
+                cEmail = ship.email || ship.guestEmail || cEmail;
+
+                let displayState = ship.state || null;
+                let displayCity = ship.city || null;
+                let displayStreet = ship.street || null;
+                let fullAddress = ship.address || ship.shippingAddress || '-';
+
+                // Fallback parsing for older orders where we only saved a concatenated string
+                if (!displayState && !displayCity && fullAddress && typeof fullAddress === 'string' && fullAddress.includes(',')) {
+                    const parts = fullAddress.split(',').map(s => s.trim());
+                    if (parts.length >= 3) {
+                        displayStreet = parts.slice(0, -2).join(', ');
+                        displayCity = parts[parts.length - 2];
+                        displayState = parts[parts.length - 1];
+                    } else if (parts.length === 2) {
+                        displayStreet = parts[0];
+                        displayState = parts[1];
+                    }
+                }
+
+                document.getElementById('shipState').textContent = displayState || '-';
+                document.getElementById('shipCity').textContent = displayCity || '-';
+                document.getElementById('shipStreet').textContent = displayStreet || fullAddress;
+                document.getElementById('modalAddressFull').textContent = fullAddress;
+            } else {
+                let displayState = '-';
+                let displayCity = '-';
+                let displayStreet = '-';
+                let fullAddress = ship || 'لا يوجد عنوان';
+
+                if (typeof fullAddress === 'string' && fullAddress.includes(',')) {
+                    const parts = fullAddress.split(',').map(s => s.trim());
+                    if (parts.length >= 3) {
+                        displayStreet = parts.slice(0, -2).join(', ');
+                        displayCity = parts[parts.length - 2];
+                        displayState = parts[parts.length - 1];
+                    } else if (parts.length === 2) {
+                        displayStreet = parts[0];
+                        displayState = parts[1];
+                    }
+                }
+
+                document.getElementById('shipState').textContent = displayState;
+                document.getElementById('shipCity').textContent = displayCity;
+                document.getElementById('shipStreet').textContent = displayStreet || fullAddress;
+                document.getElementById('modalAddressFull').textContent = fullAddress;
+            }
+
+            document.getElementById('modalCustomerName').textContent = cName;
+            document.getElementById('modalCustomerPhone').textContent = cPhone;
+            
+            const phone2Elem = document.getElementById('modalCustomerPhone2');
+            if (ship && ship.alternative_phone) {
+                phone2Elem.textContent = 'هاتف بديل: ' + ship.alternative_phone;
+                phone2Elem.style.display = 'block';
+            } else {
+                phone2Elem.style.display = 'none';
+            }
+
+            document.getElementById('modalCustomerEmail').textContent = cEmail;
+            document.getElementById('modalAvatar').textContent = cName === 'غير معروف' ? '?' : cName.charAt(0).toUpperCase();
+            document.getElementById('modalPaymentMethod').textContent = order.payment_method || 'Cash on Delivery';
+            
+            // Handle Order Notes
+            const notesSection = document.getElementById('modalNotesSection');
+            const notesText = document.getElementById('modalNotesText');
+            if (order.notes && order.notes.trim() !== '') {
+                notesText.textContent = order.notes;
+                notesSection.style.display = 'block';
+            } else {
+                notesSection.style.display = 'none';
+            }
+
+            // Items List Overhaul
+            const itemsList = document.getElementById('modalItemsList');
+            itemsList.innerHTML = '';
+
+            (order.order_items || order.items || []).forEach(item => {
+                const p = item.products || {};
+                let img = item.image_url || ((p.images && p.images.length > 0) ? p.images[0] : '/placeholder.png');
+
+                // Final safety: if the stored URL is a placeholder, try product gallery again
+                if (img.includes('placeholder.png') && p.images && p.images.length > 0) {
+                    img = p.images[0];
+                }
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'premium-item-row';
+                itemDiv.innerHTML = `
+                    <div class="item-visual">
+                        <img src="${img}" onerror="this.onerror=null; this.src='/placeholder.png';" class="item-img-detailed">
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name-row">
+                            <span class="item-main-name">${p.name || item.name || 'منتج غير معروف'}</span>
+                            <span class="item-qty">x${item.quantity}</span>
+                        </div>
+                        <div class="item-specs">
+                            ${item.size ? `<span class="spec-tag">المقاس: ${item.size}</span>` : ''}
+                            ${item.color ? `
+                                <span class="spec-tag">
+                                    اللون: 
+                                    ${item.color.startsWith('#') ? `<span class="color-circle" style="background-color: ${item.color}"></span>` : ''}
+                                    ${item.color}
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="item-price-col">
+                        <div class="unit-price">${parseFloat(item.price).toFixed(2)} ج.م</div>
+                        <div class="total-line">${(item.quantity * item.price).toFixed(2)} ج.م</div>
+                    </div>
+                `;
+                itemsList.appendChild(itemDiv);
+            });
+
+            // Financials — use order_items if available, fallback to subtotal field from DB
+            const allItems = order.order_items || order.items || [];
+            const subtotal = allItems.length > 0
+                ? allItems.reduce((acc, item) => acc + (parseFloat(item.price || 0) * parseInt(item.quantity || 1)), 0)
+                : parseFloat(order.subtotal || order.total || 0);
+            document.getElementById('modalSubtotal').textContent = subtotal.toFixed(2) + ' ج.م';
+
+            const discount = order.discount || 0;
+            if (discount > 0) {
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('modalDiscount').textContent = '-' + parseFloat(discount).toFixed(2) + ' ج.م';
+            } else {
+                document.getElementById('discountRow').style.display = 'none';
+            }
+
+            const totalAmount = parseFloat(order.total || 0);
+            document.getElementById('modalTotalAmount').textContent = (isNaN(totalAmount) ? '0.00' : totalAmount.toFixed(2)) + ' ج.م';
+
+            document.getElementById('orderModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        async function changeModalStatus(newStatus) {
+            if (!currentOrderId) return;
+            const statusSelect = document.getElementById('modalStatusSelect');
+            const statusBadge = document.getElementById('modalStatusBadge');
+            const originalStatus = statusSelect.value;
+            
+            // Show loading state
+            statusSelect.disabled = true;
+            statusBadge.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحديث...';
+            
+            try {
+                const skipEmail = document.getElementById('modalSkipEmail').checked;
+                const res = await fetch(`/admin/orders/${currentOrderId}/status`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-Token': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({ status: newStatus, skipEmail })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Update order in ordersData local cache
+                    const orderIdx = ordersData.findIndex(o => o.id === currentOrderId);
+                    if (orderIdx > -1) ordersData[orderIdx].status = newStatus;
+                    
+                    // Update Modal UI
+                    statusBadge.textContent = tMap[newStatus] || newStatus;
+                    statusBadge.className = 'badge badge-' + (sMap[newStatus] || 'warning');
+                    statusSelect.className = 'status-select select-' + (sMap[newStatus] || 'warning');
+                    
+                    // Optional: update the row in the main table behind the modal
+                    const row = document.getElementById(`row-${currentOrderId}`);
+                    if (row) {
+                        const rowBadge = row.querySelector('.badge');
+                        if (rowBadge) {
+                            rowBadge.textContent = tMap[newStatus] || newStatus;
+                            rowBadge.className = 'badge badge-' + (sMap[newStatus] || 'warning');
+                        }
+                        const rowSelect = row.querySelector('.status-select');
+                        if (rowSelect) {
+                            rowSelect.value = newStatus;
+                            rowSelect.className = 'status-select select-' + (sMap[newStatus] || 'warning');
+                        }
+                    }
+                } else {
+                    alert('خطأ: ' + (data.message || 'فشل التحديث'));
+                    statusSelect.value = originalStatus;
+                }
+            } catch (err) {
+                console.error('Update status error:', err);
+                alert('حدث خطأ في الاتصال');
+                statusSelect.value = originalStatus;
+            } finally {
+                statusSelect.disabled = false;
+            }
+        }
+
+        function closeModal(event) {
+            // If an event is passed and the clicked target isn't the backdrop, ignore it.
+            if (event && event.target.id !== 'orderModal') {
+                return;
+            }
+            document.getElementById('orderModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function copyAddress() {
+            const addr = document.getElementById('modalAddressFull').textContent;
+            navigator.clipboard.writeText(addr);
+            alert('تم نسخ العنوان بنجاح');
+        }
+
+        // Bulk Actions
+        function getSelectedIds() {
+            return [...document.querySelectorAll('.order-checkbox:checked')].map(cb => cb.value);
+        }
+
+        function updateBulkBar() {
+            const ids = getSelectedIds();
+            const bar = document.getElementById('bulkBar');
+            document.getElementById('selectedCount').textContent = ids.length + ' محدد';
+            bar.style.display = ids.length > 0 ? 'flex' : 'none';
+        }
+
+        function toggleAll(cb) {
+            document.querySelectorAll('.order-checkbox').forEach(c => c.checked = cb.checked);
+            updateBulkBar();
+        }
+
+        async function bulkChangeStatus() {
+            const ids = getSelectedIds();
+            const status = document.getElementById('bulkStatusSelect').value;
+            const skipEmail = document.getElementById('bulkSkipEmail').checked;
+            if (!ids.length || !status) return;
+
+            try {
+                const res = await fetch('/admin/orders/bulk-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                    body: JSON.stringify({ ids, status, skipEmail })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.reload();
+                }
+            } catch (e) { }
+        }
+
+        async function bulkDelete() {
+            const ids = getSelectedIds();
+            if (!ids.length) {
+                alert('الرجاء تحديد طلب واحد على الأقل للحذف.');
+                return;
+            }
+
+            showConfirm(`تحذير: هل أنت متأكد من حذف ${ids.length} طلب نهائياً؟ لا يمكن التراجع عن هذه الخطوة.`, async () => {
+                const deleteBtn = document.querySelector('button[onclick="bulkDelete()"]');
+                if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحذف...'; deleteBtn.disabled = true; }
+
+                try {
+                    const res = await fetch('/admin/orders/bulk-delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                        body: JSON.stringify({ ids })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('تم الحذف بنجاح');
+                        setTimeout(() => window.location.reload(), 200);
+                    } else {
+                        alert('خطأ من الخادم: ' + (data.message || 'غير معروف'));
+                        if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف'; deleteBtn.disabled = false; }
+                    }
+                } catch (e) {
+                    console.error('Fetch error:', e);
+                    alert('حدث خطأ في الاتصال أثناء الحذف');
+                    if (deleteBtn) { deleteBtn.innerHTML = '<i class="fas fa-trash"></i> حذف'; deleteBtn.disabled = false; }
+                }
+            });
+        }
+
+        async function deleteOrder(orderId) {
+            console.log('Attempting delete for:', orderId);
+            showConfirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟', async () => {
+                // Find the delete button in the row to show loading state
+                const row = document.getElementById(`row-${orderId}`);
+                const deleteBtn = row ? row.querySelector('.btn-icon.text-danger') : null;
+                const originalIcon = deleteBtn ? deleteBtn.innerHTML : '';
+
+                if (deleteBtn) {
+                    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    deleteBtn.disabled = true;
+                }
+
+                try {
+                    const res = await fetch(`/admin/orders/${orderId}/delete`, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'X-CSRF-Token': CSRF_TOKEN }
+                    });
+
+                    console.log(`Frontend: Delete response status: ${res.status}`);
+
+                    if (!res.ok) {
+                        const text = await res.text();
+                        console.error(`Frontend: Delete failed with status ${res.status}. Response:`, text);
+                        alert(`فشل الحذف (Status ${res.status}): يرجى التأكد من صلاحياتك.`);
+                        if (deleteBtn) {
+                            deleteBtn.innerHTML = originalIcon;
+                            deleteBtn.disabled = false;
+                        }
+                        return;
+                    }
+
+                    const data = await res.json();
+                    console.log('Frontend: Delete response data:', data);
+
+                    if (data.success) {
+                        alert('تم حذف الطلب بنجاح');
+                        if (row) row.style.opacity = '0.5';
+                        setTimeout(() => window.location.reload(), 300);
+                    } else {
+                        alert('فشل الحذف: ' + (data.message || 'خطأ غير معروف'));
+                        if (deleteBtn) {
+                            deleteBtn.innerHTML = originalIcon;
+                            deleteBtn.disabled = false;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Frontend: Critical error during deleteOrder:', err);
+                    alert('حدث خطأ فني أثناء الحذف. راجع الكونسول لمزيد من التفاصيل.');
+                    if (deleteBtn) {
+                        deleteBtn.innerHTML = originalIcon;
+                        deleteBtn.disabled = false;
+                    }
+                }
+            });
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+
+        async function sendNoAnswerEmail() {
+            if (!currentOrderId) return;
+            const btn = document.getElementById('noAnswerBtn');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span><span>جاري الإرسال...</span>';
+            btn.disabled = true;
+            try {
+                const res = await fetch(`/admin/orders/${currentOrderId}/no-answer`, { 
+                    method: 'POST',
+                    headers: { 'X-CSRF-Token': CSRF_TOKEN }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    btn.innerHTML = '<span>✅</span><span>تم الإرسال!</span>';
+                    btn.style.borderColor = '#16a34a';
+                    btn.style.color = '#15803d';
+                } else {
+                    alert('خطأ: ' + data.message);
+                    btn.innerHTML = orig;
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                alert('حدث خطأ في الاتصال');
+                btn.innerHTML = orig;
+                btn.disabled = false;
+            }
+        }
+
+        let currentGeneratedHtml = '';
+
+        async function generateAiEmail() {
+            if (!currentOrderId) return;
+            const promptInput = document.getElementById('aiEmailPrompt');
+            const prompt = promptInput.value.trim();
+            if(!prompt) {
+                alert('الرجاء كتابة الفكرة أولاً');
+                return;
+            }
+
+            const btn = document.getElementById('generateAiBtn');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/admin/orders/${currentOrderId}/generate-ai-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                    body: JSON.stringify({ prompt })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    currentGeneratedHtml = data.generatedHtml;
+                    const emailPreviewTemplate = `
+                        <div dir="rtl" style="font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 100%; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e8e8e8; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+                            <!-- Header -->
+                            <div style="background: linear-gradient(135deg, #0E4435 0%, #1a6b54 100%); padding: 20px; text-align: center;">
+                                <h1 style="color: #ffffff; margin: 0; font-size: 18px; font-weight: 900;">Hwasi</h1>
+                                <p style="color: rgba(255,255,255,0.6); margin: 5px 0 0 0; font-size: 11px; font-weight: 600;">الفخامة في كل تفصيلة</p>
+                            </div>
+                            <!-- AI Body Content -->
+                            <div style="padding: 24px 20px; font-size: 13px; color: #334155; line-height: 1.6;">
+                                <p style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">إلى: عميل المتجر</p>
+                                ${currentGeneratedHtml}
+                            </div>
+                            <!-- Footer -->
+                            <div style="background: #f5f5f5; padding: 15px; text-align: center; border-top: 1px solid #eee;">
+                                <p style="color: #0E4435; font-size: 11px; font-weight: 900; margin: 0;">Hwasi — Premium Fashion ✨</p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('aiEmailContent').innerHTML = emailPreviewTemplate;
+                    // remove visual max height and padding from parent container as preview is self-contained
+                    document.getElementById('aiPreviewBox').style.padding = '0';
+                    document.getElementById('aiPreviewBox').style.background = 'transparent';
+                    document.getElementById('aiPreviewBox').style.border = 'none';
+                    document.getElementById('aiPreviewBox').style.display = 'block';
+                    document.getElementById('sendAiEmailBtn').style.display = 'flex';
+                } else {
+                    alert('خطأ: ' + data.message);
+                }
+            } catch (err) {
+                alert('حدث خطأ أثناء التوليد');
+            } finally {
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }
+        }
+
+        async function sendAiEmail() {
+            if (!currentOrderId || !currentGeneratedHtml) return;
+            
+            const btn = document.getElementById('sendAiEmailBtn');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/admin/orders/${currentOrderId}/send-ai-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                    body: JSON.stringify({ htmlContent: currentGeneratedHtml })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    btn.innerHTML = '<i class="fas fa-check"></i> تم الإرسال بنجاح!';
+                    btn.style.background = '#16a34a';
+                    setTimeout(() => {
+                        document.getElementById('aiPreviewBox').style.display = 'none';
+                        document.getElementById('aiEmailPrompt').value = '';
+                        btn.style.display = 'none';
+                        btn.style.background = '#0ea5e9';
+                        btn.innerHTML = origHTML;
+                    }, 3000);
+                } else {
+                    alert('خطأ: ' + data.message);
+                    btn.innerHTML = origHTML;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert('حدث خطأ في الإرسال');
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }
+        }
+
+        function showResendBosta() {
+            if (confirm('هل أنت متأكد من إنشاء بوليصة شحن جديدة لهذا الطلب في بوسطة؟ \n(الضغط هنا سيفتح نافذة الإرسال لتقوم بتحديد الإعدادات مجدداً)')) {
+                document.getElementById('bostaSentBox').style.display = 'none';
+                document.getElementById('bostaNotSentBox').style.display = 'block';
+            }
+        }
+
+        async function sendToBosta() {
+            if (!currentOrderId) return;
+            const btn = document.getElementById('sendBostaBtn');
+            const sizeSelector = document.getElementById('bostaPackageSize');
+            const allowOpenCheck = document.getElementById('bostaAllowOpen');
+            
+            const payload = {
+                size: sizeSelector ? sizeSelector.value : 'MEDIUM',
+                allowToOpenPackage: allowOpenCheck ? allowOpenCheck.checked : true
+            };
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إرسال الطلب...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/admin/orders/${currentOrderId}/bosta-ship`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Update Local Data Cache
+                    const orderIdx = ordersData.findIndex(o => o.id === currentOrderId);
+                    if (orderIdx > -1) {
+                        ordersData[orderIdx].tracking_number = data.trackingNumber;
+                    }
+                    
+                    // Update Modal UI successfully
+                    document.getElementById('bostaNotSentBox').style.display = 'none';
+                    document.getElementById('bostaSentBox').style.display = 'block';
+                    document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + data.trackingNumber;
+                    document.getElementById('bostaTrackingNumber').dataset.trackingNum = data.trackingNumber;
+                    
+                    alert('تم إنشاء الشحنة في بوسطة بنجاح!');
+                } else {
+                    alert('خطأ: ' + data.message);
+                    btn.innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('حدث خطأ أثناء إرسال الطلب لبوسطة');
+                btn.innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+    <style>
+        .modern-table {
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin-top: -8px;
+            border: none;
+        }
+
+        .modern-table tr {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
+        }
+
+        .order-row {
+            cursor: pointer;
+        }
+
+        .order-row:hover {
+            transform: translateY(-4px) scale(1.002);
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.12);
+            z-index: 10;
+        }
+
+        .order-row td {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 20px 16px;
+            transition: var(--trans-base);
+        }
+
+        .order-row:hover td {
+            background: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .order-row td:first-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 0 24px 24px 0;
+        }
+
+        .order-row td:last-child {
+            border-left: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px 0 0 24px;
+        }
+
+        .product-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .product-img-lg {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 2px solid #FFFFFF;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .product-img-placeholder {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--brand-light);
+            color: var(--brand-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            border: 2px solid #FFFFFF;
+        }
+
+        .product-title {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .product-count {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .customer-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: #e0e7ff;
+            color: #4338ca;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+        }
+
+        .customer-name {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+
+        .customer-phone {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .order-id {
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: var(--primary-light);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .order-amount {
+            font-weight: 800;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        .date-cell {
+            display: flex;
+            flex-direction: column;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--medium-gray);
+        }
+
+        .date-cell span {
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        .action-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-select {
+            border: 1px solid var(--border-color);
+            background: #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            min-width: 120px;
+            transition: all 0.2s;
+        }
+
+        .status-select:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .status-select.select-warning {
+            color: #92400e;
+        }
+
+        .status-select.select-info {
+            color: #1e40af;
+        }
+
+        .status-select.select-success {
+            color: #065f46;
+        }
+
+        .status-select.select-danger {
+            color: #991b1b;
+        }
+
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--trans-bounce);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-icon:hover {
+            background: var(--brand-primary);
+            color: #FFFFFF;
+            transform: translateY(-3px) rotate(8deg);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Modal Styles Redesign */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            width: 100%;
+            max-width: 1200px;
+            border-radius: 32px;
+            padding: 0;
+            overflow: hidden;
+            transform: translateY(40px) scale(0.98);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-height: 94vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            padding: 24px 40px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            z-index: 10;
+        }
+
+        .header-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-id-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-badge {
+            background: var(--brand-primary);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--dark);
+            margin: 0;
+            letter-spacing: -0.5px;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .modal-subtitle {
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-pill-group {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 16px;
+            gap: 8px;
+        }
+
+        .modal-close {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+        }
+
+        .modal-close:hover {
+            background: #ffe4e6;
+            color: #e11d48;
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            min-height: 100%;
+        }
+
+        .column-main {
+            padding: 40px;
+            border-left: 1px solid rgba(0,0,0,0.05);
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .column-side {
+            padding: 40px;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #334155;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .color-circle {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1);
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+
+        .spec-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .section-title i {
+            font-size: 1.2rem;
+            color: var(--brand-primary);
+            opacity: 0.8;
+        }
+
+        /* Items List */
+        .items-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .premium-item-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all 0.2s;
+        }
+
+        .premium-item-row:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .item-visual {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid #eee;
+        }
+
+        .item-img-detailed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-info {
+            flex-grow: 1;
+        }
+
+        .item-name-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .item-main-name {
+            font-weight: 800;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .item-qty {
+            font-weight: 800;
+            color: var(--primary-color);
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .item-specs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .spec-tag {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            background: #f1f5f9;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .item-price-col {
+            text-align: left;
+            min-width: 100px;
+        }
+
+        .unit-price {
+            font-size: 0.75rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .total-line {
+            font-weight: 900;
+            color: var(--dark);
+            font-size: 1rem;
+        }
+
+        /* Payment Summary */
+        .payment-grid {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .receipt-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #ffedd5; color: #c2410c;
+            font-size: 0.7rem; font-weight: 800;
+            padding: 3px 8px; border-radius: 6px;
+            margin-top: 4px;
+        }
+        tr.pending-receipt {
+            border-left: 4px solid #f97316 !important;
+            background: #fffcf0 !important;
+        }
+        tr.pending-receipt td {
+            background: #fffcf0 !important;
+        }
+        #pendingReceiptCard.active {
+            background: #ffedd5 !important;
+            box-shadow: 0 0 0 2px #f97316;
+        }
+
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        .payment-item.discount {
+            color: #ef4444;
+        }
+
+        .payment-item.total {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px dashed var(--border-color);
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--dark);
+        }
+
+        /* Profile Card */
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #4f46e5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+        }
+
+        .profile-details h5 {
+            margin: 0 0 4px 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .profile-details p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .email-text {
+            color: var(--primary-color) !important;
+            text-decoration: underline;
+            margin-top: 2px !important;
+        }
+
+        /* Address Card */
+        .address-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .address-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .address-item label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--medium-gray);
+            font-weight: 800;
+        }
+
+        .address-item p {
+            margin: 0;
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .address-full {
+            margin-top: 8px;
+            padding-top: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .address-full label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--medium-gray);
+            font-weight: 800;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .address-full p {
+            margin: 0;
+            font-weight: 600;
+            line-height: 1.6;
+            color: var(--dark-gray);
+        }
+
+        .btn-copy-address {
+            margin-top: 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-copy-address:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Method Card */
+        .method-card {
+            padding: 20px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 16px;
+            color: #065f46;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .method-card i {
+            font-size: 1.25rem;
+        }
+
+        .empty-state {
+            padding: 60px;
+            text-align: center;
+            color: var(--medium-gray);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            opacity: 0.2;
+            margin-bottom: 20px;
+        }
+
+        .empty-state p {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin-top: 20px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modern-table thead {
+                display: none;
+            }
+
+            .modern-table tr {
+                display: block;
+                margin-bottom: 16px;
+                border-radius: 16px;
+                border: 1px solid var(--border-color);
+                overflow: hidden;
+            }
+
+            .modern-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border: none;
+                padding: 12px 16px;
+            }
+
+            .modern-table td:first-child,
+            .modern-table td:last-child {
+                border: none;
+                border-radius: 0;
+            }
+
+            .modern-table td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: var(--medium-gray);
+                font-size: 0.8rem;
+            }
+
+            .modern-table td:first-child {
+                background: #fafafa;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+    </style>
+
+    <!-- ===== Bosta Live Tracking Modal ===== -->
+    <div id="bostaTrackingModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:white; border-radius:24px; width:100%; max-width:480px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.3); direction:rtl;">
+            <!-- Modal Header -->
+            <div style="background:linear-gradient(135deg,#0E4435,#1a6b54); padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <div style="color:rgba(255,255,255,0.7); font-size:0.75rem; font-weight:700; margin-bottom:4px;">📦 تتبع الشحنة</div>
+                    <div id="trackingModalNumber" style="color:white; font-size:1.1rem; font-weight:900; letter-spacing:2px;"></div>
+                </div>
+                <button onclick="closeTrackingModal()" style="background:rgba(255,255,255,0.2); border:none; color:white; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
+            <!-- Modal Body -->
+            <div id="trackingModalBody" style="padding:24px; min-height:150px; display:flex; align-items:center; justify-content:center;">
+                <div style="text-align:center; color:#94a3b8;">
+                    <div style="font-size:2rem; margin-bottom:8px;">⏳</div>
+                    <div style="font-weight:700;">جاري جلب بيانات التتبع...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let currentTrackingNumber = null;
+
+    function openTrackingModal() {
+        const trackingNumEl = document.getElementById('bostaTrackingNumber');
+        if (!trackingNumEl) return;
+        // Read from data attribute first, fallback to stripping non-digits from text
+        const num = trackingNumEl.dataset.trackingNum || trackingNumEl.textContent.replace(/[^0-9]/g, '');
+        if (!num) {
+            alert('لا يوجد رقم تتبع لهذا الطلب بعد.');
+            return;
+        }
+        currentTrackingNumber = num;
+        document.getElementById('trackingModalNumber').textContent = num;
+        document.getElementById('bostaTrackingModal').style.display = 'flex';
+        loadTrackingData(num);
+    }
+
+    function closeTrackingModal() {
+        document.getElementById('bostaTrackingModal').style.display = 'none';
+    }
+
+    async function loadTrackingData(trackingNumber) {
+        const body = document.getElementById('trackingModalBody');
+        body.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;"><div style="font-size:2rem; margin-bottom:8px;">⏳</div><div style="font-weight:700;">جاري جلب بيانات التتبع...</div></div>';
+
+        try {
+            const res = await fetch('/api/track/' + trackingNumber);
+            const json = await res.json();
+
+            if (!res.ok || !json.success) {
+                body.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;"><div style="font-size:2rem; margin-bottom:8px;">⚠️</div><div style="font-weight:700;">' + (json.message || 'لم يتم العثور على الشحنة') + '</div></div>';
+                return;
+            }
+
+            const t = json.data;
+            const statusColor = t.isDelivered ? '#15803d' : t.isCancelled ? '#dc2626' : '#0E4435';
+
+            let timelineHtml = '';
+            if (t.timeline && t.timeline.length > 0) {
+                timelineHtml = '<div style="margin-top:20px; border-top:1px solid #f1f5f9; padding-top:16px;"><div style="font-size:0.7rem; font-weight:800; color:#94a3b8; letter-spacing:1px; margin-bottom:12px;">سجل التتبع</div>';
+                t.timeline.slice(0, 6).forEach((ev, i) => {
+                    const dot = i === 0 ? '#0E4435' : '#e2e8f0';
+                    const dateStr = ev.timestamp ? new Date(ev.timestamp).toLocaleString('ar-EG', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+                    timelineHtml += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:flex-start;">
+                        <div style="width:9px; height:9px; border-radius:50%; background:${dot}; flex-shrink:0; margin-top:5px;"></div>
+                        <div>
+                            <div style="font-size:0.85rem; font-weight:800; color:${i===0?'#0E4435':'#475569'};">${ev.status}</div>
+                            ${dateStr ? `<div style="font-size:0.72rem; color:#94a3b8; margin-top:2px;">${dateStr}</div>` : ''}
+                        </div>
+                    </div>`;
+                });
+                timelineHtml += '</div>';
+            } else {
+                timelineHtml = '<div style="margin-top:16px; text-align:center; color:#94a3b8; font-size:0.85rem;">الشحنة في مرحلة الاستلام، التفاصيل ستظهر قريباً...</div>';
+            }
+
+            body.innerHTML = `
+                <div>
+                    <div style="background:#f8fffe; border:1.5px solid #e0f0ea; border-radius:14px; padding:16px; margin-bottom:4px;">
+                        <div style="font-size:1rem; font-weight:900; color:${statusColor}; margin-bottom:6px;">${t.status}</div>
+                        ${t.city ? `<div style="font-size:0.8rem; color:#64748b;">📍 ${t.city}</div>` : ''}
+                    </div>
+                    ${timelineHtml}
+                </div>`;
+        } catch(e) {
+            body.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;"><div style="font-size:2rem; margin-bottom:8px;">❌</div><div style="font-weight:700;">خطأ في الاتصال بالسيرفر</div></div>';
+        }
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('bostaTrackingModal').addEventListener('click', function(e) {
+        if (e.target === this) closeTrackingModal();
+    });
+    </script>
+
+    <!-- Edit Order Modal (Full) -->
+    <div id="editOrderModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:20px; width:100%; max-width:780px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+            
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid #e2e8f0; position:sticky; top:0; background:#fff; z-index:10; border-radius:20px 20px 0 0;">
+                <h3 style="margin:0; color:#0E4435; font-size:1.15rem; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-edit"></i> تعديل الطلب <span id="editOrderLabel" style="color:#94a3b8; font-size:0.85rem;"></span>
+                </h3>
+                <button onclick="closeEditModal()" style="background:#f1f5f9; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:18px; color:#64748b; display:flex; align-items:center; justify-content:center; transition:0.2s;">&times;</button>
+            </div>
+            
+            <form id="editOrderForm" onsubmit="submitOrderEdit(event)" style="padding:24px;">
+                <input type="hidden" id="edit-order-id">
+                
+                <!-- ===== Section 1: Customer Info ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-user-circle" style="color:#0E4435;"></i> بيانات العميل
+                    </h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الاسم</label>
+                            <input type="text" id="edit-customer-name" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;" required>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الإيميل</label>
+                            <input type="email" id="edit-customer-email" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">رقم الهاتف</label>
+                            <input type="text" id="edit-customer-phone" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;" required>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">هاتف بديل</label>
+                            <input type="text" id="edit-customer-altphone" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Section 2: Shipping Address ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-map-marker-alt" style="color:#0E4435;"></i> عنوان التوصيل
+                    </h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">المحافظة</label>
+                            <input type="text" id="edit-state" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">المدينة / المنطقة</label>
+                            <input type="text" id="edit-city" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div style="margin-top:14px;">
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الشارع</label>
+                        <input type="text" id="edit-street" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                    </div>
+                    <div style="margin-top:14px;">
+                        <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">العنوان بالكامل</label>
+                        <textarea id="edit-customer-address" style="width:100%; height:60px; padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; resize:vertical; box-sizing:border-box;"></textarea>
+                    </div>
+                </div>
+
+                <!-- ===== Section 3: Products ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-shopping-bag" style="color:#0E4435;"></i> المنتجات
+                    </h4>
+                    <div id="editItemsContainer" style="display:flex; flex-direction:column; gap:10px;">
+                        <!-- populated by JS -->
+                    </div>
+                    <button type="button" onclick="addEditItemRow()" style="margin-top:12px; width:100%; padding:10px; border:2px dashed #cbd5e1; border-radius:12px; background:#f8fafc; color:#64748b; font-weight:700; cursor:pointer; transition:0.2s; font-size:0.85rem; font-family:'Cairo',sans-serif;">
+                        <i class="fas fa-plus-circle"></i> إضافة منتج
+                    </button>
+                </div>
+
+                <!-- ===== Section 4: Financial ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-receipt" style="color:#0E4435;"></i> المالية
+                    </h4>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الخصم (ج.م)</label>
+                            <input type="number" id="edit-discount" step="0.01" min="0" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">الإجمالي (ج.م)</label>
+                            <div style="display:flex; gap:8px;">
+                                <input type="number" id="edit-order-total" step="0.01" min="0" style="flex:1; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box; font-weight:800; color:#0E4435;" required>
+                                <button type="button" onclick="applyDepositDiscount()" style="background:#c2410c; color:#fff; border:none; padding:0 12px; border-radius:10px; font-size:0.75rem; font-weight:800; cursor:pointer; white-space:nowrap; transition:0.2s;" title="خصم 70 جنيه ديبوزت">
+                                    - 70 ج.م
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:4px; font-weight:700; font-size:0.8rem; color:#475569;">طريقة الدفع</label>
+                            <select id="edit-payment-method" style="width:100%; height:42px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; box-sizing:border-box; background:#fff;">
+                                <option value="Cash on Delivery">الدفع عند الاستلام</option>
+                                <option value="Credit Card">بطاقة ائتمان</option>
+                                <option value="Bank Transfer">تحويل بنكي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Section 5: Notes ===== -->
+                <div style="margin-bottom:28px;">
+                    <h4 style="margin:0 0 16px 0; font-size:0.9rem; color:#0E4435; font-weight:800; display:flex; align-items:center; gap:8px; border-bottom:2px solid #ecfdf5; padding-bottom:8px;">
+                        <i class="fas fa-sticky-note" style="color:#0E4435;"></i> ملاحظات
+                    </h4>
+                    <textarea id="edit-notes" style="width:100%; height:70px; padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.9rem; resize:vertical; box-sizing:border-box;"></textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div style="display:flex; gap:10px; border-top:1px solid #e2e8f0; padding-top:20px;">
+                    <button type="submit" id="edit-submit-btn" style="flex:1; background:#0E4435; color:#fff; padding:12px; border:none; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.95rem; transition:0.2s; font-family:'Cairo',sans-serif;">
+                        <i class="fas fa-save"></i> حفظ كل التعديلات
+                    </button>
+                    <button type="button" onclick="closeEditModal()" style="flex:0.5; background:#f1f5f9; color:#475569; padding:12px; border:none; border-radius:12px; font-weight:700; cursor:pointer; font-size:0.9rem; transition:0.2s; font-family:'Cairo',sans-serif;">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Search Modal (for adding items) -->
+    <div id="productSearchModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.5); z-index:100000; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:20px; width:100%; max-width:500px; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 25px 60px rgba(0,0,0,0.25);" onclick="event.stopPropagation()">
+            <div style="padding:16px 20px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                <h4 style="margin:0; font-size:0.95rem; color:#0E4435; font-weight:800;"><i class="fas fa-search"></i> اختيار منتج</h4>
+                <button onclick="closeProductSearch()" style="background:none; border:none; font-size:20px; cursor:pointer; color:#94a3b8;">&times;</button>
+            </div>
+            <div style="padding:12px 20px;">
+                <input type="text" id="productSearchInput" placeholder="ابحث عن منتج..." oninput="filterProductList(this.value)" style="width:100%; height:40px; padding:0 12px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:0.85rem; box-sizing:border-box;">
+            </div>
+            <div id="productSearchResults" style="flex:1; overflow-y:auto; padding:0 20px 16px;">
+                <!-- populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let productCatalog = []; // All products fetched once
+    let editItemsData = []; // Current items in the edit form
+
+    // ===== Edit Modal =====
+    function openEditModal(id, name, phone, address, total) {
+        const order = ordersData.find(o => o.id === id);
+        if (!order) return;
+
+        document.getElementById('edit-order-id').value = id;
+        document.getElementById('editOrderLabel').textContent = '# ' + id.substring(0, 8);
+        document.getElementById('editOrderModal').style.display = 'flex';
+
+        // Customer Info
+        document.getElementById('edit-customer-name').value = name || '';
+
+        let ship = order.shipping_address;
+        if (typeof ship === 'string') { try { ship = JSON.parse(ship); } catch(e) { ship = {}; } }
+
+        document.getElementById('edit-customer-phone').value = (ship && ship.phone) || phone || '';
+        document.getElementById('edit-customer-email').value = (ship && (ship.email || ship.guestEmail)) || '';
+        document.getElementById('edit-customer-altphone').value = (ship && ship.alternative_phone) || '';
+
+        // Address
+        document.getElementById('edit-state').value = (ship && (ship.state || '')) || '';
+        document.getElementById('edit-city').value = (ship && (ship.city || '')) || '';
+        document.getElementById('edit-street').value = (ship && (ship.street || '')) || '';
+        document.getElementById('edit-customer-address').value = (ship && (ship.address || ship.shippingAddress || '')) || address || '';
+
+        // Financial
+        document.getElementById('edit-discount').value = order.discount || 0;
+        document.getElementById('edit-order-total').value = total || order.total || 0;
+        document.getElementById('edit-payment-method').value = order.payment_method || 'Cash on Delivery';
+
+        // Notes
+        document.getElementById('edit-notes').value = order.notes || '';
+
+        // Items - build editItemsData from order
+        const allItems = order.order_items || order.items || [];
+        editItemsData = allItems.map(item => ({
+            id: item.id || null,
+            product_id: item.product_id || (item.products && item.products.id) || null,
+            name: (item.products && item.products.name) || item.name || 'منتج',
+            size: item.size || '',
+            color: item.color || '',
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+            image_url: item.image_url || (item.products && item.products.images && item.products.images[0]) || '',
+            _removed: false
+        }));
+        renderEditItems();
+
+        // Prefetch products for add-item search if not already loaded
+        if (productCatalog.length === 0) {
+            fetch('/api/products?limit=200')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.products) productCatalog = d.products;
+                    else if (Array.isArray(d)) productCatalog = d;
+                    else productCatalog = d.data || [];
+                })
+                .catch(() => { productCatalog = []; });
+        }
+    }
+
+    function closeEditModal() {
+        document.getElementById('editOrderModal').style.display = 'none';
+    }
+    document.getElementById('editOrderModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+
+    // ===== Items Rendering =====
+    function renderEditItems() {
+        const container = document.getElementById('editItemsContainer');
+        const activeItems = editItemsData.filter(i => !i._removed);
+        if (activeItems.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem; font-weight:600;">لا توجد منتجات — أضف أول منتج</div>';
+            return;
+        }
+        container.innerHTML = activeItems.map((item, idx) => {
+            const actualIdx = editItemsData.indexOf(item);
+            return `
+                <div style="display:grid; grid-template-columns:1fr 80px 70px 80px 36px; gap:8px; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${item.name}</div>
+                        <div style="display:flex; gap:6px; margin-top:4px;">
+                            <select onchange="updateEditItem(${actualIdx},'size',this.value)" style="padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem; background:#fff;">
+                                <option value="">مقاس</option>
+                                ${(item._sizes || []).map(s => `<option value="${s}" ${item.size === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                <option value="__custom__" ${!['','XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? 'selected' : ''}>أخرى...</option>
+                            </select>
+                            ${!['XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? `<input type="text" value="${item.size}" onchange="updateEditItem(${actualIdx},'size',this.value)" style="width:50px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">` : ''}
+                            <input type="text" placeholder="لون" value="${item.color}" onchange="updateEditItem(${actualIdx},'color',this.value)" style="width:60px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">الكمية</label>
+                        <input type="number" min="1" value="${item.quantity}" onchange="updateEditItem(${actualIdx},'quantity',parseInt(this.value)||1)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">السعر</label>
+                        <input type="number" min="0" step="0.01" value="${item.price}" onchange="updateEditItem(${actualIdx},'price',parseFloat(this.value)||0)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div style="text-align:center;">
+                        <button type="button" onclick="removeEditItem(${actualIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem; padding:4px;" title="حذف المنتج">&times;</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function updateEditItem(idx, field, value) {
+        if (editItemsData[idx]) {
+            editItemsData[idx][field] = value;
+        }
+    }
+
+    function removeEditItem(idx) {
+        if (editItemsData[idx]) {
+            if (editItemsData[idx].id) {
+                editItemsData[idx]._removed = true; // Mark for deletion on save
+            } else {
+                editItemsData.splice(idx, 1); // New item, just remove
+            }
+            renderEditItems();
+        }
+    }
+
+    function closeEditModal() {
+        document.getElementById('editOrderModal').style.display = 'none';
+    }
+    document.getElementById('editOrderModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+
+    // ===== Items Rendering =====
+    function renderEditItems() {
+        const container = document.getElementById('editItemsContainer');
+        const activeItems = editItemsData.filter(i => !i._removed);
+        if (activeItems.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem; font-weight:600;">لا توجد منتجات — أضف أول منتج</div>';
+            return;
+        }
+        container.innerHTML = activeItems.map((item, idx) => {
+            const actualIdx = editItemsData.indexOf(item);
+            return `
+                <div style="display:grid; grid-template-columns:1fr 80px 70px 80px 36px; gap:8px; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+                    <div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${item.name}</div>
+                        <div style="display:flex; gap:6px; margin-top:4px;">
+                            <select onchange="updateEditItem(${actualIdx},'size',this.value)" style="padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem; background:#fff;">
+                                <option value="">مقاس</option>
+                                ${(item._sizes || []).map(s => `<option value="${s}" ${item.size === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                <option value="__custom__" ${!['','XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? 'selected' : ''}>أخرى...</option>
+                            </select>
+                            ${!['XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? `<input type="text" value="${item.size}" onchange="updateEditItem(${actualIdx},'size',this.value)" style="width:50px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">` : ''}
+                            <input type="text" placeholder="لون" value="${item.color}" onchange="updateEditItem(${actualIdx},'color',this.value)" style="width:60px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">الكمية</label>
+                        <input type="number" min="1" value="${item.quantity}" onchange="updateEditItem(${actualIdx},'quantity',parseInt(this.value)||1)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">السعر</label>
+                        <input type="number" min="0" step="0.01" value="${item.price}" onchange="updateEditItem(${actualIdx},'price',parseFloat(this.value)||0)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div style="text-align:center;">
+                        <button type="button" onclick="removeEditItem(${actualIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem; padding:4px;" title="حذف المنتج">&times;</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function updateEditItem(idx, field, value) {
+        if (editItemsData[idx]) {
+            editItemsData[idx][field] = value;
+        }
+    }
+
+    function removeEditItem(idx) {
+        if (editItemsData[idx]) {
+            if (editItemsData[idx].id) {
+                editItemsData[idx]._removed = true; // Mark for deletion on save
+            } else {
+                editItemsData.splice(idx, 1); // New item, just remove
+            }
+            renderEditItems();
+        }
+    }
+
+    // ===== Product Search =====
+    let _addItemCallback = null;
+
+    function addEditItemRow() {
+        if (productCatalog.length === 0) {
+            // Try fetching
+            fetch('/api/products?limit=200')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.products) productCatalog = d.products;
+                    else if (Array.isArray(d)) productCatalog = d;
+                    else productCatalog = d.data || [];
+                    showProductSearch();
+                })
+                .catch(() => { productCatalog = []; showProductSearch(); });
+        } else {
+            showProductSearch();
+        }
+    }
+
+    function showProductSearch() {
+        const results = document.getElementById('productSearchResults');
+        document.getElementById('productSearchInput').value = '';
+        renderProductList(productCatalog);
+        document.getElementById('productSearchModal').style.display = 'flex';
+    }
+
+    function closeProductSearch() {
+        document.getElementById('productSearchModal').style.display = 'none';
+    }
+    document.getElementById('productSearchModal').addEventListener('click', function(e) {
+        if (e.target === this) closeProductSearch();
+    });
+
+    function renderProductList(products) {
+        const container = document.getElementById('productSearchResults');
+        if (!products || products.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem;">لا توجد منتجات</div>';
+            return;
+        }
+        container.innerHTML = products.map(p => `
+            <div onclick="selectProductForEdit('${p.id}')" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; cursor:pointer; transition:0.15s; margin-bottom:4px; border:1px solid transparent;" 
+                 onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#e2e8f0'" 
+                 onmouseout="this.style.background='transparent'; this.style.borderColor='transparent'">
+                <div style="width:36px; height:36px; border-radius:8px; overflow:hidden; flex-shrink:0; background:#f1f5f9;">
+                    ${p.images && p.images[0] ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;"><i class="fas fa-box"></i></div>'}
+                </div>
+                <div style="flex:1;">
+                    <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${p.name}</div>
+                    <div style="font-size:0.72rem; color:#64748b;">${parseFloat(p.price).toFixed(2)} ج.م</div>
+                </div>
+                <div style="color:#0E4435; font-size:0.75rem; font-weight:700;"><i class="fas fa-plus-circle"></i> إضافة</div>
+            </div>
+        `).join('');
+    }
+
+    function filterProductList(query) {
+        const q = query.trim().toLowerCase();
+        if (!q) { renderProductList(productCatalog); return; }
+        const filtered = productCatalog.filter(p =>
+            p.name.toLowerCase().includes(q) ||
+            (p.description && p.description.toLowerCase().includes(q))
+        );
+        renderProductList(filtered);
+    }
+
+    function selectProductForEdit(productId) {
+        const p = productCatalog.find(pr => pr.id === productId);
+        if (!p) return;
+        
+        const sizes = p.sizes || [];
+        editItemsData.push({
+            id: null,
+            product_id: p.id,
+            name: p.name,
+            size: sizes.length > 0 ? sizes[0] : '',
+            color: '',
+            quantity: 1,
+            price: parseFloat(p.price) || 0,
+            image_url: (p.images && p.images[0]) || '',
+            _removed: false,
+            _sizes: sizes
+        });
+        
+        // Re-fetch with sizes for this product
+        const activeItems = editItemsData.filter(i => !i._removed);
+        const lastItem = activeItems[activeItems.length - 1];
+        if (lastItem && lastItem.product_id) {
+            fetch('/api/products/' + lastItem.product_id)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.product) {
+                        const idx = editItemsData.indexOf(lastItem);
+                        if (idx > -1) {
+                            editItemsData[idx]._sizes = d.product.sizes || [];
+                            renderEditItems();
+                        }
+                    }
+                })
+                .catch(() => {});
+        }
+        
+        closeProductSearch();
+        renderEditItems();
+    }
+
+    // ===== Submit =====
+    async function submitOrderEdit(event) {
+        event.preventDefault();
+        const id = document.getElementById('edit-order-id').value;
+        const btn = document.getElementById('edit-submit-btn');
+        
+        const items = editItemsData.filter(i => !i._removed).map(i => ({
+            id: i.id || null,
+            product_id: i.product_id || null,
+            name: i.name,
+            size: i.size || null,
+            color: i.color || null,
+            quantity: parseInt(i.quantity) || 1,
+            price: parseFloat(i.price) || 0,
+            image_url: i.image_url || null
+        }));
+
+        // Also include removed items that were in DB so controller can delete them
+        editItemsData.filter(i => i._removed && i.id).forEach(i => {
+            items.push({ id: i.id, _removed: true });
+        });
+
+        const data = {
+            customerName: document.getElementById('edit-customer-name').value,
+            customerPhone: document.getElementById('edit-customer-phone').value,
+            customerEmail: document.getElementById('edit-customer-email').value,
+            customerAltPhone: document.getElementById('edit-customer-altphone').value,
+            customerAddress: document.getElementById('edit-customer-address').value,
+            state: document.getElementById('edit-state').value,
+            city: document.getElementById('edit-city').value,
+            street: document.getElementById('edit-street').value,
+            items: items,
+            discount: document.getElementById('edit-discount').value || 0,
+            total: document.getElementById('edit-order-total').value,
+            paymentMethod: document.getElementById('edit-payment-method').value,
+            notes: document.getElementById('edit-notes').value
+        };
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/admin/orders/' + id + '/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('✅ تم تحديث الطلب بالكامل بنجاح');
+                window.location.reload();
+            } else {
+                alert('❌ خطأ: ' + (result.message || 'فشل التحديث'));
+                btn.innerHTML = '<i class="fas fa-save"></i> حفظ كل التعديلات';
+                btn.disabled = false;
+            }
+        } catch (err) {
+            console.error('Update Error:', err);
+            alert('❌ حدث خطأ في الاتصال');
+            btn.innerHTML = '<i class="fas fa-save"></i> حفظ كل التعديلات';
+            btn.disabled = false;
+        }
+    }
+
+    function applyDepositDiscount() {
+        const totalInput = document.getElementById('edit-order-total');
+        const discountInput = document.getElementById('edit-discount');
+        
+        let currentTotal = parseFloat(totalInput.value) || 0;
+        let currentDiscount = parseFloat(discountInput.value) || 0;
+        
+        if (currentTotal >= 70) {
+            totalInput.value = (currentTotal - 70).toFixed(2);
+            discountInput.value = (currentDiscount + 70).toFixed(2);
+            
+            // Animation effect to show it happened
+            totalInput.style.background = '#fff7ed';
+            setTimeout(() => totalInput.style.background = '#fff', 500);
+        } else {
+            alert('الإجمالي أقل من 70 جنيه!');
+        }
+    }
+
+    // ===== Supabase Realtime for Deposits =====
+    try {
+        if (typeof sbClient !== 'undefined') {
+            sbClient.channel('orders-receipts')
+                .on('postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'orders' },
+                    async (payload) => {
+                        const oldOrder = payload.old;
+                        const newOrder = payload.new;
+                        // Only notify if receipt_url changed from null → non-null
+                        if (oldOrder && !oldOrder.deposit_receipt_url && newOrder.deposit_receipt_url) {
+                            if (newOrder.status !== 'Confirmed' && newOrder.status !== 'Cancelled' && newOrder.status !== 'Delivered') {
+                            // Update counter
+                            const countEl = document.getElementById('pendingReceiptCount');
+                            if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+                            // Highlight row
+                            const row = document.getElementById('row-' + newOrder.id);
+                            if (row) {
+                                row.classList.add('pending-receipt');
+                                row.dataset.hasPendingReceipt = 'true';
+                            }
+                            // Toast
+                            const t = document.createElement('div');
+                            t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;background:#c2410c;color:#fff;padding:14px 20px;border-radius:14px;font-size:0.9rem;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,0.25);animation:fadeInUp 0.3s ease;font-family:"Cairo",sans-serif;max-width:350px;direction:rtl;';
+                            t.innerHTML = '<i class="fas fa-file-invoice-dollar"></i> إيصال جديد بانتظار التأكيد — <span style="opacity:0.8;">#' + (newOrder.id ? newOrder.id.substring(0,6) : '') + '</span>';
+                            document.body.appendChild(t);
+                            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 400); }, 5000);
+                            }
+                        }
+                    }
+                )
+                .subscribe();
+        }
+    } catch (e) { console.log('[Receipt] Realtime init skipped:', e.message); }
+    </script>
+
+<%- include('partials/footer') %>
