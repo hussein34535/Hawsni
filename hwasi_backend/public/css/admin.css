@@ -1882,4 +1882,323 @@ body.dark .btn-copy-address:hover {
     border-color: var(--dm-accent) !important;
     color: var(--dm-accent) !important;
 }
-
+
+/* ============================================================
+   APPLE DARK MODE 2.0 — FULL COVERAGE (all pages)
+   ============================================================ */
+
+/* ---------- Global text darkening ---------- */
+body.dark .modal-title,
+body.dark .modal-subtitle,
+body.dark .section-title,
+body.dark .product-title,
+body.dark .customer-name,
+body.dark .order-amount,
+body.dark .item-main-name,
+body.dark .total-line,
+body.dark .address-item p,
+body.dark .address-full p,
+body.dark .payment-item.total,
+body.dark .dash-welcome,
+body.dark .customer-info,
+body.dark .product-count,
+body.dark .unit-price,
+body.dark .payment-item,
+body.dark .address-item label,
+body.dark .date-cell,
+body.dark .customer-phone,
+body.dark .empty-state,
+body.dark .item-specs,
+body.dark .profile-details p,
+body.dark .email-text {
+    color: var(--dm-text) !important;
+}
+body.dark .modal-subtitle { color: var(--dm-text-muted) !important; }
+body.dark .section-title { color: var(--dm-text) !important; }
+body.dark .unit-price, body.dark .customer-phone, body.dark .date-cell,
+body.dark .payment-item, body.dark .empty-state { color: var(--dm-text-muted) !important; }
+body.dark .address-item label, body.dark .profile-details p { color: var(--dm-text-muted) !important; }
+body.dark .product-count { color: var(--dm-text-muted) !important; }
+
+/* ---------- Orders page: modern table rows ---------- */
+body.dark .order-row td {
+    background: var(--dm-surface) !important;
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    border-top: 1px solid var(--dm-border) !important;
+    border-bottom: 1px solid var(--dm-border) !important;
+}
+body.dark .order-row:hover td { background: var(--dm-surface-2) !important; }
+body.dark .order-row td:first-child { border-right: 1px solid var(--dm-border) !important; }
+body.dark .order-row td:last-child { border-left: 1px solid var(--dm-border) !important; }
+
+body.dark .order-id {
+    background: rgba(10, 132, 255, 0.14) !important;
+    color: var(--dm-accent) !important;
+}
+body.dark .avatar-small {
+    background: rgba(10, 132, 255, 0.16) !important;
+    color: var(--dm-accent) !important;
+}
+body.dark .item-qty {
+    background: rgba(10, 132, 255, 0.14) !important;
+    color: var(--dm-accent) !important;
+}
+
+body.dark .status-select {
+    background: var(--dm-surface-2) !important;
+    color: var(--dm-text) !important;
+    border-color: var(--dm-border-strong) !important;
+}
+body.dark .status-select:hover {
+    border-color: var(--dm-accent) !important;
+    background: rgba(10, 132, 255, 0.14) !important;
+}
+body.dark .status-select.select-warning { color: #ffd60a !important; }
+body.dark .status-select.select-info { color: #64d2ff !important; }
+body.dark .status-select.select-success { color: #30d158 !important; }
+body.dark .status-select.select-danger { color: #ff453a !important; }
+body.dark select.form-control option { background: #1c1c1e !important; }
+
+body.dark .btn-icon {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--dm-border) !important;
+    color: var(--dm-text-muted) !important;
+}
+body.dark .btn-icon:hover {
+    background: var(--dm-accent) !important;
+    color: #fff !important;
+}
+
+/* ---------- Orders page: modals ---------- */
+body.dark .modal { background: rgba(0, 0, 0, 0.55) !important; }
+body.dark .modal-content {
+    background: #1c1c1e !important;
+    border: 1px solid var(--dm-border-strong) !important;
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7) !important;
+}
+body.dark .modal-header { background: #1c1c1e !important; border-bottom-color: var(--dm-border) !important; }
+body.dark .column-main { background: #1c1c1e !important; border-left-color: var(--dm-border) !important; }
+body.dark .column-side { background: #242426 !important; }
+body.dark .modal-body { background: #1c1c1e !important; }
+body.dark .modal-footer { background: #1c1c1e !important; border-top: 1px solid var(--dm-border) !important; }
+body.dark .status-pill-group { background: rgba(255, 255, 255, 0.06) !important; }
+body.dark .modal-close {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--dm-text-muted) !important;
+}
+body.dark .modal-close:hover {
+    background: rgba(255, 69, 58, 0.18) !important;
+    color: var(--dm-danger) !important;
+}
+
+body.dark .premium-item-row {
+    background: var(--dm-surface) !important;
+    border-color: var(--dm-border) !important;
+}
+body.dark .premium-item-row:hover { border-color: var(--dm-accent) !important; }
+body.dark .item-visual { border-color: var(--dm-border-strong) !important; }
+body.dark .product-img-lg, body.dark .product-img-placeholder { border-color: var(--dm-surface) !important; }
+
+/* ---------- Orders page: payment / profile / method cards ---------- */
+body.dark .payment-grid { background: var(--dm-surface) !important; }
+body.dark .profile-card {
+    background: var(--dm-surface) !important;
+    border-color: var(--dm-border) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+body.dark .address-card { background: var(--dm-surface) !important; border-color: var(--dm-border) !important; }
+body.dark .address-full { border-top-color: var(--dm-border) !important; }
+body.dark .method-card {
+    background: rgba(48, 209, 88, 0.12) !important;
+    border-color: rgba(48, 209, 88, 0.25) !important;
+    color: var(--dm-success) !important;
+}
+body.dark .receipt-badge {
+    background: rgba(255, 159, 10, 0.16) !important;
+    color: var(--dm-warning) !important;
+}
+body.dark .spec-tag {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: var(--dm-text-muted) !important;
+}
+body.dark tr.pending-receipt { background: rgba(255, 159, 10, 0.08) !important; }
+body.dark tr.pending-receipt td { background: rgba(255, 159, 10, 0.08) !important; }
+body.dark #pendingReceiptCard.active {
+    background: rgba(255, 159, 10, 0.12) !important;
+    box-shadow: 0 0 0 2px rgba(255, 159, 10, 0.4) !important;
+}
+
+/* ---------- Dashboard page ---------- */
+body.dark .dash-welcome { color: var(--dm-text) !important; }
+body.dark .orders-list { display: flex; flex-direction: column; gap: 12px; }
+body.dark .clarity-grid { gap: 12px; }
+body.dark .stat-card-link { color: inherit; }
+body.dark .clarity-timer-icon { color: var(--dm-accent) !important; }
+
+/* ---------- Chat inbox page ---------- */
+body.dark .chat-wrap { background: #1c1c1e !important; }
+body.dark .chat-main,
+body.dark .sessions-panel,
+body.dark .chat-top,
+body.dark .sp-header,
+body.dark .chat-footer,
+body.dark .order-panel,
+body.dark .order-panel-header {
+    background: #1c1c1e !important;
+    border-color: var(--dm-border) !important;
+}
+body.dark .s-item {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: var(--dm-border) !important;
+}
+body.dark .s-item:hover, body.dark .s-item.active {
+    background: rgba(10, 132, 255, 0.12) !important;
+    border-color: rgba(10, 132, 255, 0.3) !important;
+}
+body.dark .s-name { color: var(--dm-text) !important; }
+body.dark .s-preview, body.dark .s-time, body.dark .b-time, body.dark .status-text { color: var(--dm-text-muted) !important; }
+body.dark .s-unread-dot { background: var(--dm-accent) !important; color: #fff !important; }
+body.dark .unread-count { background: var(--dm-accent) !important; color: #fff !important; }
+body.dark .sp-search {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text) !important;
+}
+body.dark .sp-search::placeholder { color: var(--dm-text-muted) !important; }
+body.dark .tab-btn { color: var(--dm-text-muted) !important; }
+body.dark .tab-btn.active { color: var(--dm-accent) !important; background: rgba(10, 132, 255, 0.12) !important; }
+
+body.dark .msgs-area { background: #1c1c1e !important; }
+body.dark .bubble {
+    background: var(--dm-surface-2) !important;
+    color: var(--dm-text) !important;
+    border: 1px solid var(--dm-border) !important;
+}
+body.dark .bubble.sent, body.dark .msg-row.sent .bubble {
+    background: rgba(10, 132, 255, 0.22) !important;
+    border-color: rgba(10, 132, 255, 0.3) !important;
+    color: var(--dm-text) !important;
+}
+body.dark .b-label { color: var(--dm-text-muted) !important; }
+body.dark .msg-status { color: var(--dm-text-muted) !important; }
+body.dark .msg-status.sent, body.dark .msg-status.delivered, body.dark .msg-status.read { color: var(--dm-accent) !important; }
+body.dark .date-sep { color: var(--dm-text-muted) !important; }
+body.dark .date-sep::before, body.dark .date-sep::after { background: var(--dm-border) !important; }
+body.dark .empty-chat { color: var(--dm-text-muted) !important; }
+body.dark .s-avatar {
+    background: rgba(10, 132, 255, 0.16) !important;
+    color: var(--dm-accent) !important;
+}
+body.dark .s-avatar-badge { background: var(--dm-success) !important; border-color: #1c1c1e !important; }
+body.dark .input-pill {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: var(--dm-border) !important;
+    color: var(--dm-text) !important;
+}
+body.dark .input-pill::placeholder { color: var(--dm-text-muted) !important; }
+body.dark .send-btn, body.dark .attach-btn, body.dark .header-menu-btn {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: var(--dm-text-muted) !important;
+    border: 1px solid var(--dm-border) !important;
+}
+body.dark .send-btn:hover { background: var(--dm-accent) !important; color: #fff !important; }
+body.dark .order-panel-body { background: #242426 !important; }
+body.dark .order-card { background: var(--dm-surface) !important; border-color: var(--dm-border) !important; }
+body.dark .status-badge { color: var(--dm-text) !important; }
+body.dark .chat-top-name { color: var(--dm-text) !important; }
+body.dark .chat-top-sub { color: var(--dm-text-muted) !important; }
+
+/* ---------- Orders page: filters & pagination ---------- */
+body.dark .filters-bar,
+body.dark .filter-group,
+body.dark .bulk-actions-bar {
+    background: transparent !important;
+}
+body.dark .pagination-container {
+    background: var(--dm-surface) !important;
+    border-color: var(--dm-border) !important;
+}
+body.dark .pagination-info { color: var(--dm-text-muted) !important; }
+
+/* ---------- Products / categories / users / settings pages ---------- */
+body.dark .product-row,
+body.dark .category-row,
+body.dark .user-row {
+    background: var(--dm-surface) !important;
+    border-color: var(--dm-border) !important;
+}
+body.dark .product-info-main { color: var(--dm-text) !important; }
+body.dark .product-name, body.dark .category-name, body.dark .user-name { color: var(--dm-text) !important; }
+body.dark .product-price { color: var(--dm-accent) !important; }
+
+/* ---------- Inline-style boxes in orders page (AI, Bosta, receipt) ---------- */
+body.dark [style*="background: #f8fafc"] { background: #242426 !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
+body.dark [style*="background:#f8fafc"] { background: #242426 !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
+body.dark [style*="background: #f1f5f9"] { background: #242426 !important; color: var(--dm-text) !important; }
+body.dark [style*="background:#f1f5f9"] { background: #242426 !important; color: var(--dm-text) !important; }
+body.dark [style*="background: #fffcf0"] { background: rgba(255, 159, 10, 0.08) !important; border-color: rgba(255, 159, 10, 0.25) !important; }
+body.dark [style*="background:#fffcf0"] { background: rgba(255, 159, 10, 0.08) !important; border-color: rgba(255, 159, 10, 0.25) !important; }
+body.dark [style*="background: #fff1f2"] { background: rgba(255, 69, 58, 0.08) !important; border-color: rgba(255, 69, 58, 0.25) !important; }
+body.dark [style*="background:#fff1f2"] { background: rgba(255, 69, 58, 0.08) !important; border-color: rgba(255, 69, 58, 0.25) !important; }
+body.dark [style*="background: #f0f9ff"] { background: rgba(10, 132, 255, 0.08) !important; border-color: rgba(10, 132, 255, 0.25) !important; }
+body.dark [style*="background:#f0f9ff"] { background: rgba(10, 132, 255, 0.08) !important; border-color: rgba(10, 132, 255, 0.25) !important; }
+body.dark [style*="background: #ffedd5"] { background: rgba(255, 159, 10, 0.14) !important; color: var(--dm-warning) !important; }
+body.dark [style*="background:#ffedd5"] { background: rgba(255, 159, 10, 0.14) !important; color: var(--dm-warning) !important; }
+body.dark [style*="background: #e0e7ff"] { background: rgba(10, 132, 255, 0.14) !important; }
+body.dark [style*="background:#e0e7ff"] { background: rgba(10, 132, 255, 0.14) !important; }
+body.dark [style*="background: white"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="background:#fff"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="background: #fff"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="background:#ffffff"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="background: #ffffff"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="border-color: #e2e8f0"] { border-color: var(--dm-border) !important; }
+body.dark [style*="border-color:#e2e8f0"] { border-color: var(--dm-border) !important; }
+body.dark [style*="border: 1px solid #cbd5e1"] { border-color: var(--dm-border) !important; background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="border:1px solid #cbd5e1"] { border-color: var(--dm-border) !important; background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="background: #f5f5f5"] { background: #242426 !important; color: var(--dm-text) !important; }
+body.dark [style*="background:#f5f5f5"] { background: #242426 !important; color: var(--dm-text) !important; }
+
+/* ---------- Login page ---------- */
+body.dark .login-card,
+body.dark .auth-card {
+    background: var(--dm-surface) !important;
+    border: 1px solid var(--dm-border) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55) !important;
+}
+body.dark .login-card h1, body.dark .login-card h2, body.dark .auth-card h1, body.dark .auth-card h2 { color: var(--dm-text) !important; }
+body.dark .login-card p, body.dark .auth-card p { color: var(--dm-text-muted) !important; }
+body.dark .login-container { background: #000 !important; }
+body.dark .login-box { background: #1c1c1e !important; border-color: var(--dm-border) !important; }
+body.dark .login-box input { background: rgba(255, 255, 255, 0.06) !important; border-color: var(--dm-border) !important; color: var(--dm-text) !important; }
+body.dark .login-box input:focus { border-color: var(--dm-accent) !important; box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.18) !important; }
+body.dark .login-box label { color: var(--dm-text) !important; }
+
+/* ---------- Error page ---------- */
+body.dark .error-page { background: #000 !important; color: var(--dm-text) !important; }
+body.dark .error-page .error-card { background: var(--dm-surface) !important; border-color: var(--dm-border) !important; }
+
+/* ---------- Track order page ---------- */
+body.dark .track-order-card { background: var(--dm-surface) !important; border-color: var(--dm-border) !important; }
+
+/* ---------- Radius refinement: everything Apple-smooth ---------- */
+body.dark .modal-content { border-radius: 28px !important; }
+body.dark .order-row td:first-child { border-radius: 0 20px 20px 0 !important; }
+body.dark .order-row td:last-child { border-radius: 20px 0 0 20px !important; }
+body.dark .form-control { border-radius: 12px !important; }
+body.dark .btn { border-radius: 12px !important; }
+body.dark .badge { border-radius: 100px !important; }
+body.dark [style*="background:white"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="background:#fff"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="background:#ffffff"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
+body.dark [style*="background: #f8fafc"] { background: #242426 !important; }
+body.dark [style*="background:#fafafa"] { background: #242426 !important; }
+body.dark [style*="background: #fafafa"] { background: #242426 !important; }
+body.dark [style*="background:#f5f5f5"] { background: #242426 !important; }
+body.dark [style*="background: #eef2f7"] { background: #1c1c1e !important; }
+body.dark [style*="background:#eef2f7"] { background: #1c1c1e !important; }
+body.dark [style*="color:#334155"], body.dark [style*="color: #334155"] { color: var(--dm-text) !important; }
+body.dark [style*="color:#475569"], body.dark [style*="color: #475569"] { color: var(--dm-text-muted) !important; }
+body.dark [style*="color:#64748b"], body.dark [style*="color: #64748b"] { color: var(--dm-text-muted) !important; }
+body.dark [style*="color:#92400e"], body.dark [style*="color: #92400e"] { color: var(--dm-warning) !important; }
+body.dark [style*="color:#c2410c"], body.dark [style*="color: #c2410c"] { color: var(--dm-warning) !important; }
+body.dark [style*="color:#065f46"], body.dark [style*="color: #065f46"] { color: var(--dm-success) !important; }
