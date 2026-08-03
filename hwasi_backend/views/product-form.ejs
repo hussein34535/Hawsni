@@ -219,6 +219,17 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="form-label">سعر التكلفة <i class="fas fa-info-circle" style="color:#8b5cf6; font-size:0.75rem;" title="الثمن اللي بتشتري بيه القطعة — بيساعدك تحسب الربح الحقيقي في المحاسبة"></i></label>
+                                    <input type="number" name="cost_price" class="form-control" step="1" min="0"
+                                        value="<%= product ? Math.round(product.cost_price || 0) : '' %>">
+                                    <small class="text-muted" style="font-size: 0.7rem; display: block; margin-top: 4px;">
+                                        <% if (product && product.cost_price > 0 && product.price > 0) { %>
+                                            ربح القطعة: <%= Math.round(product.price * (1 - (product.discount||0)/100)) - Math.round(product.cost_price) %> ج.م
+                                        <% } %>
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                         <label class="form-label" style="margin-bottom: 0;">الخصم</label>
                                         <div class="discount-type-toggle" style="display: flex; background: #f1f5f9; border-radius: 6px; padding: 2px;">

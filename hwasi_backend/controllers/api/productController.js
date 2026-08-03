@@ -124,6 +124,7 @@ class ProductController {
             name: body.name,
             description: body.description,
             price: Math.round(parseFloat(body.price || 0)),
+            cost_price: Math.round(parseFloat(body.cost_price || 0)) || 0,
             discount: Math.round(parseFloat(body.discount || 0)) || 0,
             stock: parseInt(body.stock || 0) || 0,
             category_id: categoryIds[0] || null,

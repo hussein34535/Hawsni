@@ -594,12 +594,22 @@ class OrdersController {
                         }).eq('id', item.id);
                     } else if (item.product_id && !item._removed) {
                         // Insert new item
+                        let costSnapshot = parseFloat(item.cost_price) || 0;
+                        if (item.product_id) {
+                            const { data: prod } = await supabase
+                                .from('products')
+                                .select('cost_price')
+                                .eq('id', item.product_id)
+                                .maybeSingle();
+                            if (prod && prod.cost_price != null) costSnapshot = prod.cost_price;
+                        }
                         const insertData = {
                             order_id: id,
                             product_id: item.product_id || null,
                             name: item.name || 'منتج',
                             quantity: parseInt(item.quantity) || 1,
                             price: parseFloat(item.price) || 0,
+                            cost_price: Math.round(parseFloat(costSnapshot) * 100) / 100,
                             size: item.size || null,
                             color: item.color || null,
                             image_url: item.image_url || null

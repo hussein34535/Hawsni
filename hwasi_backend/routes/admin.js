@@ -16,6 +16,7 @@ const settingsController = require('../controllers/admin/settingsController');
 const adminAuthController = require('../controllers/admin/adminAuthController');
 const adminReviewsController = require('../controllers/admin/reviewsController');
 const adminChatController = require('../controllers/admin/adminChatController');
+const financeController = require('../controllers/admin/financeController');
 const { adminProtect } = require('../middleware/adminAuth');
 
 // Auth Routes (Public for Admin)
@@ -105,6 +106,14 @@ router.post('/settings', settingsController.update);
 router.get('/reviews', adminReviewsController.index);
 router.post('/reviews', adminReviewsController.create);
 router.delete('/reviews/:id', adminReviewsController.delete);
+
+// Finance / Accounting Routes
+router.get('/finance', financeController.index);
+router.post('/finance/expenses', financeController.addExpense);
+router.post('/finance/expenses/:id/delete', financeController.deleteExpense);
+router.post('/finance/capital', financeController.addCapitalEntry);
+router.post('/finance/capital/:id/delete', financeController.deleteCapitalEntry);
+router.post('/finance/orders/:id/collected', financeController.toggleCollected);
 
 // Live Chat Inbox
 router.get('/chat', adminChatController.renderChatInbox);

@@ -1,0 +1,476 @@
+<%- include('partials/header', { title: 'المحاسبة', pageTitle: 'المحاسبة', page: 'finance' }) %>
+
+<style>
+    .fin-hero { margin-bottom: 2rem; }
+    .fin-hero h2 { font-size: 1.7rem; color: var(--brand-primary); margin-bottom: 4px; }
+    .fin-hero p { color: var(--text-muted); font-weight: 600; }
+    .fin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2.5rem; }
+    .fin-stat { background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.7); border-radius: var(--radius-xl); padding: 1.4rem 1.2rem; box-shadow: 0 4px 12px rgba(15,23,42,0.03); }
+    .fin-stat-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 12px; }
+    .fin-stat-value { font-size: 1.5rem; font-weight: 900; color: var(--text-main); line-height: 1.1; }
+    .fin-stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; margin-top: 4px; }
+    .fin-stat-sub { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; margin-top: 6px; }
+    .fin-section { margin-bottom: 2.5rem; }
+    .fin-card { background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.7); border-radius: var(--radius-xl); padding: 1.5rem; box-shadow: 0 4px 12px rgba(15,23,42,0.03); }
+    .fin-card-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; }
+    .fin-card-title h3 { margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .fin-card-title h3 i { color: var(--brand-primary); }
+    .fin-table-wrap { overflow-x: auto; }
+    .fin-table { width: 100%; border-collapse: collapse; }
+    .fin-table th { background: rgba(15,23,42,0.03); padding: 0.9rem 1rem; text-align: right; font-size: 0.78rem; font-weight: 800; color: var(--text-muted); border-bottom: 1px solid rgba(15,23,42,0.06); white-space: nowrap; }
+    .fin-table td { padding: 0.9rem 1rem; border-bottom: 1px solid rgba(15,23,42,0.05); color: var(--text-main); font-weight: 500; font-size: 0.85rem; white-space: nowrap; }
+    .fin-table tr:last-child td { border-bottom: none; }
+    .fin-positive { color: var(--success); font-weight: 800; }
+    .fin-negative { color: var(--danger); font-weight: 800; }
+    .fin-muted { color: var(--text-muted); font-weight: 600; }
+    .fin-total-row td { font-weight: 900; font-size: 0.9rem; background: rgba(14,68,53,0.03); }
+    .fin-actions { display: flex; gap: 6px; }
+    .fin-btn-mini { padding: 5px 12px; border: none; border-radius: 50px; font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif; }
+    .fin-btn-green { background: #0E4435; color: #fff; }
+    .fin-btn-green:hover { background: #0a3327; }
+    .fin-btn-outline { background: rgba(15,23,42,0.04); color: var(--text-muted); }
+    .fin-btn-outline:hover { background: rgba(15,23,42,0.08); }
+    .fin-btn-danger { background: #fee2e2; color: #b91c1c; }
+    .fin-btn-danger:hover { background: #fecaca; }
+    .fin-chart { display: flex; align-items: flex-end; gap: 10px; height: 150px; padding-top: 10px; }
+    .fin-chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+    .fin-chart-bar-wrap { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 3px; }
+    .fin-chart-bar { width: 40%; border-radius: 6px 6px 2px 2px; min-height: 2px; }
+    .fin-chart-bar.revenue { background: #0E4435; }
+    .fin-chart-bar.profit { background: #2ecc71; }
+    .fin-chart-bar.expense { background: #e74c3c; }
+    .fin-chart-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; }
+    .fin-chart-legend { display: flex; gap: 16px; justify-content: center; margin-top: 14px; font-size: 0.75rem; color: var(--text-muted); font-weight: 700; }
+    .fin-chart-legend span { display: flex; align-items: center; gap: 5px; }
+    .fin-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .fin-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+    .fin-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .fin-modal-overlay.show { display: flex; }
+    .fin-modal { background: #fff; border-radius: 24px; width: 100%; max-width: 460px; padding: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.25); }
+    .fin-modal h3 { margin: 0 0 16px; font-size: 1rem; color: #0E4435; font-weight: 800; }
+    .fin-field { margin-bottom: 12px; }
+    .fin-field label { display: block; margin-bottom: 4px; font-weight: 700; font-size: 0.78rem; color: #475569; }
+    .fin-field input, .fin-field select, .fin-field textarea { width: 100%; height: 42px; padding: 0 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.85rem; box-sizing: border-box; background: #fff; color: #334155; font-family: 'Cairo', sans-serif; }
+    .fin-field textarea { height: auto; padding: 10px 12px; resize: vertical; }
+    .fin-field input:focus, .fin-field select:focus { outline: none; border-color: #0E4435; }
+    .fin-modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .fin-empty { text-align: center; padding: 2rem; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; }
+    .fin-progress-note { background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.3); color: #92400e; border-radius: 12px; padding: 10px 14px; font-size: 0.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; }
+    @media (max-width: 768px) {
+        .fin-grid { grid-template-columns: 1fr 1fr; }
+        .fin-stat-value { font-size: 1.15rem; }
+        .fin-modal { max-width: 100%; }
+    }
+</style>
+
+<div class="fin-hero">
+    <h2>💹 المحاسبة</h2>
+    <p>أرباحك الحقيقية، مصروفاتك، وتحصيلاتك — كل حاجة في مكان واحد</p>
+</div>
+
+<% if (typeof missingCost === 'undefined' || !missingCost) { %>
+<div class="fin-progress-note">
+    <i class="fas fa-info-circle"></i>
+    <span>الربح المحسوب يعتمد على "سعر التكلفة" في كل منتج — حدّثه من صفحة المنتجات عشان النتائج تكون دقيقة.</span>
+</div>
+<% } %>
+
+<!-- Stats Cards -->
+<div class="fin-grid">
+    <div class="fin-stat">
+        <div class="fin-stat-icon" style="background: rgba(14,68,53,0.1); color: #0E4435;"><i class="fas fa-chart-line"></i></div>
+        <div class="fin-stat-value <%= netProfit >= 0 ? 'fin-positive' : 'fin-negative' %>"><%= Number(netProfit).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</div>
+        <div class="fin-stat-label">صافي الربح <span style="font-weight:400;">(مبيعات − تكلفة − مصروفات)</span></div>
+    </div>
+    <div class="fin-stat">
+        <div class="fin-stat-icon" style="background: rgba(37,99,235,0.1); color: #2563eb;"><i class="fas fa-sack-dollar"></i></div>
+        <div class="fin-stat-value"><%= Number(revenue).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</div>
+        <div class="fin-stat-label">إجمالي المبيعات</div>
+    </div>
+    <div class="fin-stat">
+        <div class="fin-stat-icon" style="background: rgba(16,185,129,0.1); color: #10b981;"><i class="fas fa-hand-holding-dollar"></i></div>
+        <div class="fin-stat-value fin-positive"><%= Number(collected).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</div>
+        <div class="fin-stat-label">محصل فعلياً</div>
+        <div class="fin-stat-sub">فلوس وصلت (COD / تحويل)</div>
+    </div>
+    <div class="fin-stat">
+        <div class="fin-stat-icon" style="background: rgba(245,158,11,0.12); color: #d97706;"><i class="fas fa-clock"></i></div>
+        <div class="fin-stat-value" style="color: #d97706;"><%= Number(pending).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</div>
+        <div class="fin-stat-label">مستحق عليك (تحصيل لسه)</div>
+        <div class="fin-stat-sub">طلبات متوصلة/في الطريق</div>
+    </div>
+    <div class="fin-stat">
+        <div class="fin-stat-icon" style="background: rgba(139,92,246,0.1); color: #8b5cf6;"><i class="fas fa-boxes-stacked"></i></div>
+        <div class="fin-stat-value"><%= Number(cogs).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</div>
+        <div class="fin-stat-label">تكلفة البضاعة المباعة</div>
+    </div>
+    <div class="fin-stat">
+        <div class="fin-stat-icon" style="background: rgba(220,38,38,0.1); color: #dc2626;"><i class="fas fa-receipt"></i></div>
+        <div class="fin-stat-value fin-negative"><%= Number(expenses).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</div>
+        <div class="fin-stat-label">المصروفات</div>
+    </div>
+    <div class="fin-stat">
+        <div class="fin-stat-icon" style="background: rgba(14,68,53,0.12); color: #0E4435;"><i class="fas fa-piggy-bank"></i></div>
+        <div class="fin-stat-value"><%= Number(capital).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</div>
+        <div class="fin-stat-label">رأس المال</div>
+        <div class="fin-stat-sub">بداية + إيداعات − سحوبات</div>
+    </div>
+</div>
+
+<!-- Monthly Chart -->
+<div class="fin-section">
+    <div class="fin-card">
+        <div class="fin-card-title">
+            <h3><i class="fas fa-chart-column"></i> آخر 6 شهور</h3>
+        </div>
+        <% const maxV = Math.max(...monthly.map(m => Math.max(Math.abs(m.revenue), Math.abs(m.expenses), Math.abs(m.profit))), 1); %>
+        <div class="fin-chart">
+            <% monthly.forEach(m => { %>
+                <div class="fin-chart-col">
+                    <div class="fin-chart-bar-wrap">
+                        <div class="fin-chart-bar revenue" title="مبيعات: <%= Math.round(m.revenue) %>" style="height: <%= Math.max(2, Math.abs(m.revenue) / maxV * 100) %>%"></div>
+                        <div class="fin-chart-bar expense" title="مصروفات: <%= Math.round(m.expenses) %>" style="height: <%= Math.max(2, Math.abs(m.expenses) / maxV * 100) %>%"></div>
+                        <div class="fin-chart-bar profit" title="صافي: <%= Math.round(m.profit) %>" style="height: <%= Math.max(2, Math.abs(m.profit) / maxV * 100) %>%"></div>
+                    </div>
+                    <div class="fin-chart-label"><%= m.label %></div>
+                    <div class="fin-chart-label" style="font-size:0.62rem;"><%= Math.round(m.profit).toLocaleString('en-EG') %></div>
+                </div>
+            <% }) %>
+        </div>
+        <div class="fin-chart-legend">
+            <span><span class="fin-dot" style="background:#0E4435;"></span> مبيعات</span>
+            <span><span class="fin-dot" style="background:#2ecc71;"></span> صافي ربح</span>
+            <span><span class="fin-dot" style="background:#e74c3c;"></span> مصروفات</span>
+        </div>
+    </div>
+</div>
+
+<!-- Orders Collection -->
+<div class="fin-section">
+    <div class="fin-card">
+        <div class="fin-card-title">
+            <h3><i class="fas fa-truck-ramp-box"></i> تحصيل الطلبات</h3>
+            <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.8rem;" onclick="window.location='/admin/orders'">عرض كل الطلبات</button>
+        </div>
+        <% if (!orders || orders.length === 0) { %>
+            <div class="fin-empty">لا توجد طلبات بعد</div>
+        <% } else { %>
+        <div class="fin-table-wrap">
+            <table class="fin-table">
+                <thead>
+                    <tr>
+                        <th>طلب</th>
+                        <th>العميل</th>
+                        <th>الإجمالي</th>
+                        <th>التكلفة</th>
+                        <th>ربح الطلب</th>
+                        <th>الحالة</th>
+                        <th>التحصيل</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.slice(0, 15).forEach(o => { %>
+                        <tr id="fin-row-<%= o.id %>">
+                            <td style="font-weight:800; font-family:monospace;">#<%= o.order_number %></td>
+                            <td><%= o.customer %></td>
+                            <td><strong><%= Number(o.total).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</strong></td>
+                            <td class="fin-muted"><%= Number(o.cogs).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</td>
+                            <td class="<%= o.profit >= 0 ? 'fin-positive' : 'fin-negative' %>"><%= Number(o.profit).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</td>
+                            <td>
+                                <% if (['Delivered', 'Shipped', 'In Transit', 'Confirmed'].includes(o.status)) { %>
+                                    <span class="badge <%= o.status === 'Delivered' ? 'badge-success' : 'badge-info' %>"><%= { 'Delivered': 'تم التوصيل', 'Shipped': 'تم الشحن', 'In Transit': 'في الطريق', 'Confirmed': 'مؤكد' }[o.status] || o.status %></span>
+                                <% } else if (o.status === 'Cancelled') { %>
+                                    <span class="badge badge-danger">ملغي</span>
+                                <% } else { %>
+                                    <span class="badge badge-secondary"><%= o.status %></span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <span id="fin-collect-<%= o.id %>" class="badge <%= o.is_collected ? 'badge-success' : 'badge-warning' %>"><%= o.is_collected ? 'تم التحصيل ✓' : 'لم يُحصل' %></span>
+                            </td>
+                            <td>
+                                <% if (!['Cancelled', 'Out of Stock'].includes(o.status)) { %>
+                                    <button class="fin-btn-mini <%= o.is_collected ? 'fin-btn-outline' : 'fin-btn-green' %>" onclick="toggleCollected('<%= o.id %>', <%= !o.is_collected %>)">
+                                        <%= o.is_collected ? 'إلغاء' : 'تحصيل ✓' %>
+                                    </button>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Expenses -->
+<div class="fin-section">
+    <div class="fin-card">
+        <div class="fin-card-title">
+            <h3><i class="fas fa-fire"></i> المصروفات</h3>
+            <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.8rem;" onclick="openModal('expenseModal')"><i class="fas fa-plus"></i> إضافة مصروف</button>
+        </div>
+        <% if (expenseCategories.length > 0) { %>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+                <% expenseCategories.forEach(c => { %>
+                    <span class="badge badge-warning"><%= c.label %>: <%= Number(c.amount).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</span>
+                <% }) %>
+            </div>
+        <% } %>
+        <% if (!expenseList || expenseList.length === 0) { %>
+            <div class="fin-empty">مفيش مصروفات مسجلة — سجّل إعلاناتك وتسويقك عشان صافي الربح يكون حقيقي</div>
+        <% } else { %>
+        <div class="fin-table-wrap">
+            <table class="fin-table">
+                <thead>
+                    <tr>
+                        <th>الوصف</th>
+                        <th>التصنيف</th>
+                        <th>التاريخ</th>
+                        <th>المبلغ</th>
+                        <th>ملاحظات</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% expenseList.slice(0, 15).forEach(e => { %>
+                        <tr>
+                            <td style="font-weight:800;"><%= e.title %></td>
+                            <td><span class="badge badge-secondary"><%= (catLabels && catLabels[e.category]) || e.category %></span></td>
+                            <td class="fin-muted"><%= new Date(e.expense_date).toLocaleDateString('ar-EG') %></td>
+                            <td class="fin-negative"><%= Number(e.amount).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</td>
+                            <td class="fin-muted"><%= e.notes || '—' %></td>
+                            <td>
+                                <button class="fin-btn-mini fin-btn-danger" onclick="deleteExpense('<%= e.id %>')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Capital -->
+<div class="fin-section">
+    <div class="fin-card">
+        <div class="fin-card-title">
+            <h3><i class="fas fa-piggy-bank"></i> رأس المال والسحوبات</h3>
+            <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.8rem;" onclick="openModal('capitalModal')"><i class="fas fa-plus"></i> إضافة</button>
+        </div>
+        <% if (!capitalList || capitalList.length === 0) { %>
+            <div class="fin-empty">حدد رأس مالك الأولي وكل سحب شخصي — كده تعرف الفلوس راحت فين</div>
+        <% } else { %>
+        <div class="fin-table-wrap">
+            <table class="fin-table">
+                <thead>
+                    <tr>
+                        <th>النوع</th>
+                        <th>التاريخ</th>
+                        <th>المبلغ</th>
+                        <th>ملاحظات</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% capitalList.slice(0, 15).forEach(e => { %>
+                        <tr>
+                            <td>
+                                <% if (e.type === 'capital') { %><span class="badge badge-primary">رأس مال</span><% } %>
+                                <% if (e.type === 'deposit') { %><span class="badge badge-success">إيداع</span><% } %>
+                                <% if (e.type === 'withdrawal') { %><span class="badge badge-danger">سحب شخصي</span><% } %>
+                            </td>
+                            <td class="fin-muted"><%= new Date(e.entry_date).toLocaleDateString('ar-EG') %></td>
+                            <td class="<%= e.type === 'withdrawal' ? 'fin-negative' : 'fin-positive' %>"><%= e.type === 'withdrawal' ? '−' : '+' %><%= Number(e.amount).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</td>
+                            <td class="fin-muted"><%= e.notes || '—' %></td>
+                            <td><button class="fin-btn-mini fin-btn-danger" onclick="deleteCapital('<%= e.id %>')"><i class="fas fa-trash"></i></button></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="fin-modal-overlay" id="expenseModal" onclick="if(event.target===this)closeModal('expenseModal')">
+    <div class="fin-modal">
+        <h3><i class="fas fa-fire" style="color:#dc2626;"></i> إضافة مصروف</h3>
+        <div class="fin-field">
+            <label>الوصف *</label>
+            <input type="text" id="exp-title" placeholder="مثال: إعلان فيسبوك — حملة جديدة">
+        </div>
+        <div class="fin-form-grid">
+            <div class="fin-field">
+                <label>المبلغ (ج.م) *</label>
+                <input type="number" id="exp-amount" min="0" step="0.01" placeholder="0">
+            </div>
+            <div class="fin-field">
+                <label>التاريخ</label>
+                <input type="date" id="exp-date">
+            </div>
+        </div>
+        <div class="fin-field">
+            <label>التصنيف</label>
+            <select id="exp-category">
+                <option value="marketing">تسويق وإعلانات</option>
+                <option value="shipping">شحن وبوستة</option>
+                <option value="purchases">شراء بضاعة</option>
+                <option value="rent">إيجار</option>
+                <option value="salaries">مرتبات</option>
+                <option value="packaging">تغليف</option>
+                <option value="returns">مرتجعات وتعويضات</option>
+                <option value="other">أخرى</option>
+            </select>
+        </div>
+        <div class="fin-field">
+            <label>ملاحظات</label>
+            <textarea id="exp-notes" rows="2" placeholder="أي تفاصيل إضافية..."></textarea>
+        </div>
+        <div class="fin-modal-actions">
+            <button class="btn btn-primary" style="flex:1;" onclick="saveExpense()"><i class="fas fa-save"></i> حفظ</button>
+            <button class="btn btn-secondary" onclick="closeModal('expenseModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- Capital Modal -->
+<div class="fin-modal-overlay" id="capitalModal" onclick="if(event.target===this)closeModal('capitalModal')">
+    <div class="fin-modal">
+        <h3><i class="fas fa-piggy-bank" style="color:#0E4435;"></i> إضافة معاملة رأس مال</h3>
+        <div class="fin-field">
+            <label>النوع *</label>
+            <select id="cap-type">
+                <option value="capital">رأس مال أولي</option>
+                <option value="deposit">إيداع في البيزنس</option>
+                <option value="withdrawal">سحب شخصي (شيلت فلوس)</option>
+            </select>
+        </div>
+        <div class="fin-form-grid">
+            <div class="fin-field">
+                <label>المبلغ (ج.م) *</label>
+                <input type="number" id="cap-amount" min="0" step="0.01" placeholder="0">
+            </div>
+            <div class="fin-field">
+                <label>التاريخ</label>
+                <input type="date" id="cap-date">
+            </div>
+        </div>
+        <div class="fin-field">
+            <label>ملاحظات</label>
+            <textarea id="cap-notes" rows="2" placeholder="سبب السحب أو الإيداع..."></textarea>
+        </div>
+        <div class="fin-modal-actions">
+            <button class="btn btn-primary" style="flex:1;" onclick="saveCapital()"><i class="fas fa-save"></i> حفظ</button>
+            <button class="btn btn-secondary" onclick="closeModal('capitalModal')">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const CSRF_TOKEN = '<%= csrfToken %>';
+    const fmt = n => Number(n).toLocaleString('en-EG', { maximumFractionDigits: 0 });
+
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    async function toggleCollected(orderId, collected) {
+        try {
+            const res = await fetch('/admin/finance/orders/' + orderId + '/collected', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                body: JSON.stringify({ collected })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'خطأ');
+            const badge = document.getElementById('fin-collect-' + orderId);
+            badge.textContent = collected ? 'تم التحصيل ✓' : 'لم يُحصل';
+            badge.className = 'badge ' + (collected ? 'badge-success' : 'badge-warning');
+            const btn = badge.closest('tr').querySelector('.fin-btn-mini');
+            btn.className = 'fin-btn-mini ' + (collected ? 'fin-btn-outline' : 'fin-btn-green');
+            btn.textContent = collected ? 'إلغاء' : 'تحصيل ✓';
+            btn.onclick = () => toggleCollected(orderId, !collected);
+            location.reload();
+        } catch (err) {
+            alert('خطأ: ' + err.message);
+        }
+    }
+
+    async function saveExpense() {
+        const title = document.getElementById('exp-title').value.trim();
+        const amount = document.getElementById('exp-amount').value;
+        if (!title || !amount || parseFloat(amount) <= 0) { alert('اكتب الوصف والمبلغ'); return; }
+        try {
+            const res = await fetch('/admin/finance/expenses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                body: JSON.stringify({
+                    title,
+                    amount,
+                    category: document.getElementById('exp-category').value,
+                    expense_date: document.getElementById('exp-date').value || undefined,
+                    notes: document.getElementById('exp-notes').value.trim() || null
+                })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            location.reload();
+        } catch (err) { alert('خطأ: ' + err.message); }
+    }
+
+    async function deleteExpense(id) {
+        if (!confirm('حذف المصروف؟')) return;
+        try {
+            const res = await fetch('/admin/finance/expenses/' + id + '/delete', {
+                method: 'POST',
+                headers: { 'X-CSRF-Token': CSRF_TOKEN }
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            location.reload();
+        } catch (err) { alert('خطأ: ' + err.message); }
+    }
+
+    async function saveCapital() {
+        const amount = document.getElementById('cap-amount').value;
+        const type = document.getElementById('cap-type').value;
+        if (!amount || parseFloat(amount) <= 0) { alert('اكتب المبلغ'); return; }
+        try {
+            const res = await fetch('/admin/finance/capital', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+                body: JSON.stringify({
+                    type,
+                    amount,
+                    entry_date: document.getElementById('cap-date').value || undefined,
+                    notes: document.getElementById('cap-notes').value.trim() || null
+                })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            location.reload();
+        } catch (err) { alert('خطأ: ' + err.message); }
+    }
+
+    async function deleteCapital(id) {
+        if (!confirm('حذف المعاملة؟')) return;
+        try {
+            const res = await fetch('/admin/finance/capital/' + id + '/delete', {
+                method: 'POST',
+                headers: { 'X-CSRF-Token': CSRF_TOKEN }
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message);
+            location.reload();
+        } catch (err) { alert('خطأ: ' + err.message); }
+    }
+
+    document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('cap-date').value = new Date().toISOString().split('T')[0];
+</script>
+
+<%- include('partials/footer') %>

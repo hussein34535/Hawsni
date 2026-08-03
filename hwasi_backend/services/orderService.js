@@ -88,7 +88,7 @@ class OrderService {
             const productIds = items.map(item => item.product || item.productId || item.product_id);
             const { data: dbProducts } = await supabase
                 .from('products')
-                .select('id, images')
+                .select('id, images, cost_price')
                 .in('id', productIds);
 
             const orderItems = await Promise.all(items.map(async (item) => {
@@ -124,6 +124,7 @@ class OrderService {
                     image_url: finalImage,
                     quantity: Math.round(item.quantity || 1), // Force Integer
                     price: Math.round((item.price || 0) * 100) / 100,
+                    cost_price: Math.round((parseFloat(dbProduct?.cost_price) || 0) * 100) / 100,
                     size: item.size || null,
                     color: item.color || null,
                     accessories: item.accessories || null

@@ -18,3 +18,4 @@ hwasi_backend/node_modules/
 Thumbs.db
 hwasi_scraper_extension/
 test_scraper/
+.vercel/
