@@ -20,7 +20,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'hwasibackend.vercel.app',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'aff.ven-door.com',
+      },
     ],
   },
 };
