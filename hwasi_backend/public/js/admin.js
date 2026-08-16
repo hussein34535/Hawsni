@@ -137,22 +137,26 @@ async function handleDelete(url, itemName) {
         }
 
         try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
             // 4. Try Standard DELETE Request
             const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken
                 }
             });
 
             if (response.ok) {
                 showToast('تم الحذف بنجاح', 'success');
                 setTimeout(() => location.reload(), 1000);
-            } else if (response.status === 404 || response.status === 405) {
+            } else if (response.status === 403 || response.status === 404 || response.status === 405) {
                 // 5. Fallback: Try POST with _method=DELETE (for legacy support)
                 console.warn('DELETE failed, trying POST fallback...');
                 const formData = new URLSearchParams();
                 formData.append('_method', 'DELETE');
+                formData.append('_csrf', csrfToken);
 
                 const fallbackRes = await fetch(url, {
                     method: 'POST',

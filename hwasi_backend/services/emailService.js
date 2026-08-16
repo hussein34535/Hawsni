@@ -65,7 +65,7 @@ function isValidEmail(email) {
  * Low-level Resend send helper.
  * @param {Object} opts – { to, subject, htmlContent }
  */
-async function _send({ to, subject, htmlContent }) {
+async function _send({ to, subject, htmlContent, attachments }) {
     if (!to) {
         console.error('❌ Resend email error: No recipient provided');
         return null;
@@ -82,18 +82,29 @@ async function _send({ to, subject, htmlContent }) {
         throw new Error(`Invalid email address: ${sanitizedTo}. Please ensure it follows the correct format.`);
     }
 
+    const emailPayload = {
+        from: SENDER,
+        to: [sanitizedTo],
+        subject,
+        html: htmlContent,
+    };
+
+    // 3. Attach files (used for embedding receipt images as cid:)
+    if (attachments && attachments.length > 0) {
+        emailPayload.attachments = attachments.map(a => ({
+            filename: a.filename,
+            content: a.content, // base64 string
+            content_id: a.contentId
+        }));
+    }
+
     const res = await fetch(RESEND_URL, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${RESEND_API_KEY}`,
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            from: SENDER,
-            to: [sanitizedTo],
-            subject,
-            html: htmlContent,
-        }),
+        body: JSON.stringify(emailPayload),
     });
 
     if (!res.ok) {
@@ -858,6 +869,32 @@ async function sendDepositReceiptNotification(order, customerPhone, receiptUrl) 
     const total = order.total || 0;
     const customerName = order.shipping_address?.name || order.users?.name || 'عميل';
 
+    // Download the receipt image and embed it inside the email (cid:) so the admin sees it directly
+    let embeddedImage = null;
+    let receiptHtml = `
+        <a href="${receiptUrl}" target="_blank" style="display: inline-block; background: #f5f5f5; border: 2px dashed #0E4435; border-radius: 16px; padding: 12px 24px; text-decoration: none; color: #0E4435; font-weight: 700;">
+            📸 عرض صورة الإيصال
+        </a>`;
+    try {
+        if (receiptUrl) {
+            const imgRes = await fetch(receiptUrl);
+            if (imgRes.ok) {
+                const arrayBuffer = await imgRes.arrayBuffer();
+                const base64 = Buffer.from(arrayBuffer).toString('base64');
+                const mime = imgRes.headers.get('content-type') || 'image/jpeg';
+                const ext = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : mime.includes('gif') ? 'gif' : 'jpg';
+                embeddedImage = {
+                    filename: `receipt-${orderNumber}.${ext}`,
+                    content: base64,
+                    contentId: 'receipt-image'
+                };
+                receiptHtml = `<img src="cid:receipt-image" alt="صورة الإيصال" style="max-width: 100%; border-radius: 12px; border: 1px solid #e8e8e8; display: block; margin: 0 auto;" />`;
+            }
+        }
+    } catch (imgErr) {
+        console.error('Failed to embed receipt image, falling back to link:', imgErr.message);
+    }
+
     return _send({
         to: ADMIN_EMAIL,
         subject: `💰 إيصال ديبوزت جديد — طلب #${orderNumber}`,
@@ -887,9 +924,7 @@ async function sendDepositReceiptNotification(order, customerPhone, receiptUrl) 
                 </div>
                 <div style="text-align: center; margin-bottom: 25px;">
                     <p style="color: #666; font-size: 13px; margin-bottom: 12px;">صورة الإيصال المرفوعة:</p>
-                    <a href="${receiptUrl}" target="_blank" style="display: inline-block; background: #f5f5f5; border: 2px dashed #0E4435; border-radius: 16px; padding: 12px 24px; text-decoration: none; color: #0E4435; font-weight: 700;">
-                        📸 عرض صورة الإيصال
-                    </a>
+                    ${receiptHtml}
                 </div>
                 <div style="text-align: center; margin-top: 25px;">
                     <a href="https://hwasibackend.vercel.app/admin/orders" style="background: #0E4435; color: white; text-decoration: none; padding: 14px 35px; border-radius: 50px; font-weight: 900; font-size: 14px; display: inline-block;">
@@ -900,7 +935,8 @@ async function sendDepositReceiptNotification(order, customerPhone, receiptUrl) 
                     هذا الإيميل يتطلب منك مراجعة الإيصال وتأكيد دفع الديبوزت من لوحة التحكم.
                 </p>
             </div>
-        </div>`
+        </div>`,
+        attachments: embeddedImage ? [embeddedImage] : undefined
     }).catch(err => console.error('Failed to send deposit receipt notification:', err));
 }
 

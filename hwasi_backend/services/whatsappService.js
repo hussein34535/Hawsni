@@ -585,6 +585,19 @@ class WhatsAppService {
                         console.error('[WA] Failed to send deposit receipt email:', emailErr.message);
                     }
 
+                    // 5.5 Notify admin via WhatsApp (image + order details)
+                    try {
+                        const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER || '01016270395';
+                        const orderNumber = order.order_number || String(order.id).substring(0, 6).toUpperCase();
+                        const customerName = order.shipping_address?.name || order.users?.name || 'عميل';
+                        await this.sendImageMessage(adminPhone, receiptUrl, 'admin');
+                        const adminMsg = `💰 إيصال ديبوزت جديد — طلب #${orderNumber}\n👤 العميل: ${customerName}\n📱 هاتف: ${phone}\n💰 الإجمالي: ${Number(order.total || 0).toLocaleString()} ج.م\n\nراجع الطلب من اللوحة: https://hwasibackend.vercel.app/admin/orders`;
+                        await this.sendTextMessage(adminPhone, adminMsg);
+                        console.log(`[WA] Sent receipt notification to admin ${adminPhone}`);
+                    } catch (adminErr) {
+                        console.error('[WA] Failed to notify admin via WhatsApp:', adminErr.message);
+                    }
+
                     // 6. Notify customer
                     await this.sendTextMessage(phone, `📸 تم استلام صورة التحويل لطلب رقم #${order.id.substring(0, 6).toUpperCase()}!\nسيتم مراجعتها وتأكيد طلبك من قبل فريقنا في أقرب وقت ممكن 🤍`);
                 } else {
