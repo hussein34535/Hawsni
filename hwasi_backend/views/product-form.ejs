@@ -150,17 +150,16 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                                 <div class="form-group">
                                     <label class="form-label">المقاسات</label>
-                                    <input type="text" name="sizes" id="sizesInput" class="form-control"
-                                        value="<%= product && product.sizes ? product.sizes.join(', ') : '' %>"
-                                        placeholder="S, M, L, XL">
-                                    <small class="text-muted">افصل بينها بفواصل</small>
+                                    <textarea name="sizes" id="sizesInput" class="form-control" rows="4"
+                                        placeholder="M&#10;L&#10;XL&#10;XXL"><%= product && product.sizes ? product.sizes.join('\n') : '' %></textarea>
+                                    <small class="text-muted">كل مقاس في سطر منفصل</small>
                                 </div>
 
                                 <div class="form-group" style="grid-column: 1 / -1;">
                                     <label class="form-label">دليل المقاسات</label>
-                                    <textarea name="size_guide" class="form-control" rows="3"
-                                        placeholder="مثال: S=صدر 90سم، M=صدر 95سم، L=صدر 100سم"><%= product && product.size_guide ? product.size_guide : '' %></textarea>
-                                    <small class="text-muted">أدخل تفاصيل المقاسات لعرضها في التطبيق</small>
+                                    <textarea name="size_guide" class="form-control" rows="4"
+                                        placeholder="مثال (كل مقاس في سطر):&#10;S = صدر 90سم&#10;M = صدر 95سم&#10;L = صدر 100سم"><%= product && product.size_guide ? product.size_guide : '' %></textarea>
+                                    <small class="text-muted">أدخل كل مقاس مع تفاصيله في سطر منفصل</small>
                                 </div>
 
                                 <div class="form-group">
@@ -1197,7 +1196,7 @@
         
         function parseSizes() {
             const input = document.getElementById('sizesInput').value || '';
-            return input.split(/[,،]/).map(s => s.trim()).filter(s => s);
+            return input.split(/[\n,،]/).map(s => s.trim()).filter(s => s);
         }
 
         function buildCombinations() {
