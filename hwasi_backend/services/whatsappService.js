@@ -247,6 +247,33 @@ class WhatsAppService {
     }
 
     /**
+     * Notify the admin of a new deposit receipt.
+     * Sends a TEXT message first (which always reaches the admin, opening the
+     * conversation / 24h window), then attempts to send the receipt IMAGE.
+     */
+    async notifyAdminReceipt(customerPhone, receiptUrl, order) {
+        const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER || '01016270395';
+        const orderNumber = order.order_number || String(order.id).substring(0, 6).toUpperCase();
+        const customerName = order.shipping_address?.name || order.users?.name || 'عميل';
+        const total = Number(order.total || 0).toLocaleString();
+
+        // 1. Text first — always delivered (falls back to template if 24h window closed)
+        const adminMsg = `💰 إيصال ديبوزت جديد — طلب #${orderNumber}\n👤 العميل: ${customerName}\n📱 هاتف: ${customerPhone}\n💰 الإجمالي: ${total} ج.م\n\n📸 صورة الإيصال: ${receiptUrl}\n\nراجع الطلب من اللوحة: https://hwasibackend.vercel.app/admin/orders`;
+        const textResult = await this.sendTextMessage(adminPhone, adminMsg);
+
+        // 2. Image — only delivered if the 24h window is open (admin replied within 24h)
+        const imgResult = await this.sendImageMessage(adminPhone, receiptUrl, 'admin');
+
+        if (imgResult.success) {
+            console.log(`[WA] ✅ Receipt image sent to admin ${adminPhone}`);
+        } else if (imgResult.windowClosed) {
+            console.log(`[WA] ⏳ Admin window closed — text sent with image link. Admin must reply to open the window for future images.`);
+        }
+
+        return { textResult, imgResult };
+    }
+
+    /**
      * Fallback: Send a message using the order_confirm template when the 24h window is closed.
      * Tries to embed the admin message into the template body.
      */
@@ -585,15 +612,9 @@ class WhatsAppService {
                         console.error('[WA] Failed to send deposit receipt email:', emailErr.message);
                     }
 
-                    // 5.5 Notify admin via WhatsApp (image + order details)
+                    // 5.5 Notify admin via WhatsApp (text first to open the window, then image)
                     try {
-                        const adminPhone = process.env.ADMIN_WHATSAPP_NUMBER || '01016270395';
-                        const orderNumber = order.order_number || String(order.id).substring(0, 6).toUpperCase();
-                        const customerName = order.shipping_address?.name || order.users?.name || 'عميل';
-                        await this.sendImageMessage(adminPhone, receiptUrl, 'admin');
-                        const adminMsg = `💰 إيصال ديبوزت جديد — طلب #${orderNumber}\n👤 العميل: ${customerName}\n📱 هاتف: ${phone}\n💰 الإجمالي: ${Number(order.total || 0).toLocaleString()} ج.م\n\nراجع الطلب من اللوحة: https://hwasibackend.vercel.app/admin/orders`;
-                        await this.sendTextMessage(adminPhone, adminMsg);
-                        console.log(`[WA] Sent receipt notification to admin ${adminPhone}`);
+                        await this.notifyAdminReceipt(phone, receiptUrl, order);
                     } catch (adminErr) {
                         console.error('[WA] Failed to notify admin via WhatsApp:', adminErr.message);
                     }
