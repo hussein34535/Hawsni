@@ -150,9 +150,20 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                                 <div class="form-group">
                                     <label class="form-label">المقاسات</label>
-                                    <textarea name="sizes" id="sizesInput" class="form-control" rows="4"
-                                        placeholder="M&#10;L&#10;XL&#10;XXL"><%= product && product.sizes ? product.sizes.join('\n') : '' %></textarea>
-                                    <small class="text-muted">كل مقاس في سطر منفصل</small>
+                                    <div class="d-flex align-items-center gap-2" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+                                        <input type="text" id="sizeNameInput" class="form-control"
+                                            style="flex: 1; height: 40px;" placeholder="أدخل المقاس (مثال: L)">
+                                        <button type="button" class="btn btn-outline-primary" onclick="addSize()"
+                                            style="height: 40px; padding: 0 1rem; flex-shrink: 0;">
+                                            <i class="fas fa-plus"></i> إضافة
+                                        </button>
+                                    </div>
+                                    <input type="hidden" name="sizes" id="sizesInput"
+                                        value="<%= product && product.sizes ? product.sizes.join(',') : '' %>">
+                                    <div id="sizesContainer" class="d-flex flex-wrap" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                        <!-- Size chips rendered here -->
+                                    </div>
+                                    <small class="text-muted">أضف كل مقاس كخانة منفصلة — يمكنك حذفه بزر ×</small>
                                 </div>
 
                                 <div class="form-group" style="grid-column: 1 / -1;">
@@ -1193,10 +1204,64 @@
 
         // === Variants Logic ===
         let activeVariants = [];
-        
+
+        function getSizesArray() {
+            const input = document.getElementById('sizesInput');
+            if (!input) return [];
+            return input.value.split(/[,،\n]/).map(s => s.trim()).filter(s => s);
+        }
+
+        function updateSizesInput() {
+            const input = document.getElementById('sizesInput');
+            if (input) input.value = getSizesArray().join(',');
+        }
+
+        function renderSizes() {
+            const container = document.getElementById('sizesContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            getSizesArray().forEach((size, index) => {
+                const chip = document.createElement('div');
+                chip.style.cssText = 'display: inline-flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 14px; border-radius: 50px; border: 1px solid #e2e8f0; font-size: 0.85rem; font-weight: 600;';
+                chip.innerHTML = `<span>${size}</span>
+                    <span style="color:#dc3545; cursor:pointer; padding: 2px 4px;" onclick="event.stopPropagation(); removeSize(${index})">
+                        <i class="fas fa-times" style="font-size: 11px;"></i>
+                    </span>`;
+                container.appendChild(chip);
+            });
+        }
+
+        function addSize() {
+            const nameInput = document.getElementById('sizeNameInput');
+            const size = nameInput.value.trim();
+            if (!size) {
+                if (typeof showToast === 'function') showToast('أدخل اسم المقاس أولاً', 'warning');
+                return;
+            }
+            const sizes = getSizesArray();
+            if (sizes.includes(size)) {
+                if (typeof showToast === 'function') showToast('هذا المقاس مضاف بالفعل', 'warning');
+                return;
+            }
+            sizes.push(size);
+            document.getElementById('sizesInput').value = sizes.join(',');
+            nameInput.value = '';
+            renderSizes();
+            updateSizesInput();
+            generateVariantsTable();
+        }
+
+        function removeSize(index) {
+            const sizes = getSizesArray();
+            sizes.splice(index, 1);
+            document.getElementById('sizesInput').value = sizes.join(',');
+            renderSizes();
+            updateSizesInput();
+            generateVariantsTable();
+        }
+
         function parseSizes() {
-            const input = document.getElementById('sizesInput').value || '';
-            return input.split(/[\n,،]/).map(s => s.trim()).filter(s => s);
+            return getSizesArray();
         }
 
         function buildCombinations() {
@@ -1487,6 +1552,7 @@
         // On Load initialization
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
+                renderSizes();
                 generateVariantsTable();
             }, 500); // Wait for sizes and colors to finish parsing
 
@@ -1494,6 +1560,16 @@
             if (sInput) {
                 sInput.addEventListener('input', () => {
                     generateVariantsTable();
+                });
+            }
+
+            const sizeNameInput = document.getElementById('sizeNameInput');
+            if (sizeNameInput) {
+                sizeNameInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addSize();
+                    }
                 });
             }
         });
