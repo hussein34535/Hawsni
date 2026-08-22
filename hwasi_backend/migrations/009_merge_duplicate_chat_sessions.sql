@@ -4,17 +4,19 @@
 -- customer to appear as two separate sessions in the admin inbox.
 -- Canonical form: country-code format "20XXXXXXXXXX".
 --
--- ORDER MATTERS: the canonical chat_sessions row must exist BEFORE
--- moving chat_messages rows, otherwise the FK
--- (chat_messages_session_id_fkey) rejects the update.
+-- NOTES:
+-- - ORDER MATTERS: the canonical chat_sessions row must exist BEFORE
+--   moving chat_messages rows, otherwise the FK
+--   (chat_messages_session_id_fkey) rejects the update.
+-- - The live schema has NO "summary" column on chat_sessions
+--   (only referenced by disabled AI code paths), so it is not touched here.
 
 -- 1) Create canonical sessions FIRST (so messages have somewhere to go)
-INSERT INTO chat_sessions (session_id, platform, status, updated_at, summary)
+INSERT INTO chat_sessions (session_id, platform, status, updated_at)
 SELECT '20' || substring(d.session_id from 2),
        COALESCE(d.platform, 'whatsapp'),
        d.status,
-       d.updated_at,
-       d.summary
+       d.updated_at
 FROM   chat_sessions d
 WHERE  d.session_id ~ '^0[0-9]{10}$'
 ON CONFLICT (session_id) DO NOTHING;
