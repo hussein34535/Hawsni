@@ -9,6 +9,17 @@ class WhatsAppService {
         this.apiVersion = 'v20.0';
     }
 
+    // Canonical Egyptian phone format for session IDs.
+    // Meta webhooks send "201016270395" while some legacy rows use "01016270395".
+    // Normalizing prevents the same customer from appearing as two sessions.
+    normalizePhone(phone) {
+        if (!phone) return phone;
+        let p = String(phone).replace(/\D/g, '');
+        if (p.startsWith('20') && p.length >= 12) return p;          // already canonical
+        if (p.startsWith('0')) return '20' + p.substring(1);         // local 01x → 201x
+        return p;
+    }
+
     async _logMessage(sessionId, senderType, content, waMessageId = null) {
         try {
             // 1. Ensure session exists
@@ -493,7 +504,7 @@ class WhatsAppService {
     async _handleIncomingText(msg) {
         const textBody = (msg.text.body || '').trim();
         if (!textBody) return;
-        const phone = msg.from;
+        const phone = this.normalizePhone(msg.from);
 
         // 1. Check if this is the first unread message → notify admin via email
         await this._notifyAdminOnFirstMessage(phone, textBody, 'text');
@@ -547,7 +558,7 @@ class WhatsAppService {
     }
 
     async _handleImageMessage(msg) {
-        const phone = msg.from;
+        const phone = this.normalizePhone(msg.from);
         const mediaId = msg.image.id;
 
         // Notify admin (first unread message)
@@ -719,7 +730,7 @@ class WhatsAppService {
                         // Meta templates return buttons as type 'button'
                         if ((msg.type === 'interactive' && msg.interactive) || (msg.type === 'button' && msg.button)) {
                             const buttonReply = msg.interactive ? msg.interactive.button_reply : msg.button;
-                            const phone = msg.from;
+                            const phone = this.normalizePhone(msg.from);
                             
                             // Log user click
                             const clickTitle = buttonReply.title || buttonReply.text || 'زر غير معروف';

@@ -45,6 +45,15 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
         }
 
+        /* === Dark Mode === */
+        body.dark .image-card {
+            background: var(--dm-surface-2);
+            border-color: var(--dm-border);
+        }
+        body.dark .sortable-ghost {
+            background: var(--dm-surface-3) !important;
+        }
+
         .sortable-drag {
             opacity: 0.9;
             cursor: grabbing;
@@ -188,12 +197,12 @@
                                         </button>
                                         <div id="imageSelectorContainer" style="flex: 1; position: relative;">
                                             <div id="selectedImagePreview"
-                                                style="display: none; border: 2px solid #dee2e6; border-radius: 8px; padding: 4px; background: white; cursor: pointer;"
+                                                style="display: none; border: 2px solid var(--dm-border, #dee2e6); border-radius: 8px; padding: 4px; background: var(--dm-surface, white); cursor: pointer;"
                                                 onclick="toggleImageDropdown()">
                                                 <img id="selectedImageThumb"
                                                     style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px;">
                                                 <div
-                                                    style="text-align: center; font-size: 0.75rem; color: #666; margin-top: 2px;">
+                                                    style="text-align: center; font-size: 0.75rem; color: var(--dm-text-muted, #666); margin-top: 2px;">
                                                     انقر للتغيير</div>
                                             </div>
                                             <button type="button" id="noImageButton" class="btn btn-outline-secondary"
@@ -201,7 +210,7 @@
                                                 بدون صورة (اختياري) ▼
                                             </button>
                                             <div id="imageDropdown"
-                                                style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #dee2e6; border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                                style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--dm-surface, white); border: 1px solid var(--dm-border, #dee2e6); border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                                                 <!-- Images will be added here -->
                                             </div>
                                         </div>
@@ -1024,81 +1033,17 @@
             img.src = src;
         }
 
-        function addColor() {
-            const hex = document.getElementById('colorPicker').value;
-            const name = document.getElementById('colorNameInput').value.trim();
-            const imageIndex = selectedImageIndex;
-            const imageId = selectedImageIndex !== null ? imageState[selectedImageIndex].id : null;
-
-            if (colors.some(c => c.color === hex && c.name === name)) {
-                showToast('هذا اللون مضاف بالفعل', 'warning');
-                return;
-            }
-
-            colors.push({ color: hex, name: name, imageIndex, imageId });
-            renderColors();
-            updateColorsInput();
-            
-            // Clear name input
-            document.getElementById('colorNameInput').value = '';
-        }
-
-        function renderColors() {
-            const container = document.getElementById('colorsContainer');
-            container.innerHTML = '';
-            colors.forEach((c, index) => {
-                const swatch = document.createElement('div');
-                swatch.className = 'color-swatch-item';
-                swatch.style.cssText = 'display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 12px; border-radius: 50px; border: 1px solid #e2e8f0;';
-                
-                const circle = document.createElement('div');
-                circle.style.cssText = `width: 16px; height: 16px; border-radius: 50%; background-color: ${c.color}; border: 1px solid rgba(0,0,0,0.1);`;
-                
-                const text = document.createElement('span');
-                text.style.cssText = 'font-size: 0.85rem; font-weight: 700;';
-                text.textContent = c.name || c.color;
-                
-                if (c.imageIndex !== null && imageState[c.imageIndex]) {
-                    const imgThumb = document.createElement('img');
-                    imgThumb.src = imageState[c.imageIndex].url;
-                    imgThumb.style.cssText = 'width: 20px; height: 20px; border-radius: 4px; object-fit: cover;';
-                    swatch.appendChild(imgThumb);
-                }
-
-                const removeBtn = document.createElement('button');
-                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                removeBtn.type = 'button';
-                removeBtn.style.cssText = 'border: none; background: none; color: #94a3b8; cursor: pointer; padding: 0 0 0 4px; font-size: 0.8rem;';
-                removeBtn.onclick = () => {
-                    colors.splice(index, 1);
-                    renderColors();
-                    updateColorsInput();
-                };
-
-                swatch.appendChild(circle);
-                swatch.appendChild(text);
-                swatch.appendChild(removeBtn);
-                container.appendChild(swatch);
-            });
-        }
-
         function rgbToHex(r, g, b) {
             return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toLowerCase();
         }
 
-        // Colors Rendering
-        if (typeof renderColors === 'undefined') {
-            // Re-define renderColors if it was lost or keep existing logic structure
-            // Just putting a placeholder here assuming standard logic
-        }
-
-
-        // --- Colors Utility Functions (Copied from original to ensure they exist) ---
+        // --- Colors Utility Functions ---
         function updateColorsInput() {
             const colorsInput = document.getElementById('colorsInput');
             if (colorsInput) {
-                // Strip the temporary DOM 'imageId' before sending to the database
-                const cleanColors = colors.map(c => ({ color: c.color, imageIndex: c.imageIndex }));
+                // Strip the temporary DOM 'imageId' before sending to the database,
+                // but KEEP the color name so it persists.
+                const cleanColors = colors.map(c => ({ color: c.color, name: c.name || '', imageIndex: c.imageIndex }));
                 colorsInput.value = JSON.stringify(cleanColors);
             }
         }
@@ -1111,14 +1056,14 @@
             colors.forEach((c, idx) => {
                 const div = document.createElement('div');
                 div.className = 'color-swatch-item';
-                div.style.cssText = 'display:inline-flex; align-items:center; gap:8px; background:#f8f9fa; padding:6px 14px; border-radius:50px; margin:5px; border:1px solid #ddd; cursor:pointer; transition: all 0.2s;';
+                div.style.cssText = 'display:inline-flex; align-items:center; gap:8px; background:var(--dm-surface, #f8f9fa); color:var(--dm-text, inherit); padding:6px 14px; border-radius:50px; margin:5px; border:1px solid var(--dm-border, #ddd); cursor:pointer; transition: all 0.2s;';
                 div.onmouseover = () => { div.style.borderColor = 'var(--primary)'; div.style.transform = 'translateY(-2px)'; div.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)'; };
-                div.onmouseout = () => { div.style.borderColor = '#ddd'; div.style.transform = 'none'; div.style.boxShadow = 'none'; };
+                div.onmouseout = () => { div.style.borderColor = 'var(--dm-border, #ddd)'; div.style.transform = 'none'; div.style.boxShadow = 'none'; };
                 div.onclick = () => editColor(idx);
                 
                 div.innerHTML = `
                     <div style="width:18px;height:18px;border-radius:50%;background:${c.color};border:1px solid rgba(0,0,0,0.1);"></div>
-                    <span style="font-size: 13px; font-weight: 500;">${c.color}</span>
+                    <span style="font-size: 13px; font-weight: 600;">${c.name || c.color}</span>
                     ${c.imageIndex !== null ? `<i class="fas fa-link" style="color:var(--primary); font-size: 11px;" title="مرتبط بصورة ${c.imageIndex + 1}"></i>` : '<i class="fas fa-link-slash" style="color:#999; font-size: 11px;" title="غير مرتبط بصورة"></i>'}
                     <span style="color:#dc3545; cursor:pointer; margin-right:5px; padding: 2px 5px;" onclick="event.stopPropagation(); removeColor(${idx})">
                         <i class="fas fa-trash" style="font-size: 11px;"></i>
@@ -1165,8 +1110,10 @@
 
         function addColor() {
             const picker = document.getElementById('colorPicker');
+            const nameInput = document.getElementById('colorNameInput');
             const color = picker.value.toLowerCase(); // Standardize to lowercase
-            
+            const name = nameInput ? nameInput.value.trim() : '';
+
             let imageId = null;
             if (selectedImageIndex !== null && imageState[selectedImageIndex]) {
                 imageId = imageState[selectedImageIndex].id;
@@ -1178,21 +1125,26 @@
                 exists.imageIndex = selectedImageIndex;
                 exists.imageId = imageId;
                 exists.color = color; // Sync with picker value
+                if (name) exists.name = name;
+                showToast('تم تحديث اللون الموجود', 'info');
             } else {
-                colors.push({ color, imageIndex: selectedImageIndex, imageId });
+                colors.push({ color, name, imageIndex: selectedImageIndex, imageId });
             }
 
             // Reset selection state
             selectedImageIndex = null;
             document.getElementById('selectedImagePreview').style.display = 'none';
             document.getElementById('noImageButton').style.display = 'block';
-            
+
+            // Clear the color name input
+            if (nameInput) nameInput.value = '';
+
             // Reset visual feedback on swatches
             const container = document.getElementById('colorsContainer');
             if (container) {
                 Array.from(container.children).forEach(child => {
-                    child.style.background = '#f8f9fa';
-                    child.style.borderColor = '#ddd';
+                    child.style.background = 'var(--dm-surface, #f8f9fa)';
+                    child.style.borderColor = 'var(--dm-border, #ddd)';
                     child.style.boxShadow = 'none';
                 });
             }
@@ -1222,7 +1174,7 @@
             container.innerHTML = '';
             getSizesArray().forEach((size, index) => {
                 const chip = document.createElement('div');
-                chip.style.cssText = 'display: inline-flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 14px; border-radius: 50px; border: 1px solid #e2e8f0; font-size: 0.85rem; font-weight: 600;';
+                chip.style.cssText = 'display: inline-flex; align-items: center; gap: 8px; background: var(--dm-surface-2, #f8fafc); color: var(--dm-text, inherit); padding: 6px 14px; border-radius: 50px; border: 1px solid var(--dm-border, #e2e8f0); font-size: 0.85rem; font-weight: 600;';
                 chip.innerHTML = `<span>${size}</span>
                     <span style="color:#dc3545; cursor:pointer; padding: 2px 4px;" onclick="event.stopPropagation(); removeSize(${index})">
                         <i class="fas fa-times" style="font-size: 11px;"></i>
@@ -1386,6 +1338,7 @@
 
         window.addEventListener('hwasi-data-pasted', function(e) {
             const product = e.detail;
+            if (typeof renderSizes === 'function') renderSizes();
             if (product && product.variants && product.variants.length > 0) {
                 scrapedVariantsCache = product.variants;
                 const btnSync = document.getElementById('btnSyncScrapedStock');
@@ -1403,6 +1356,45 @@
             if (!scrapedVariantsCache || scrapedVariantsCache.length === 0) {
                 if(typeof showToast === 'function') showToast('لا توجد بيانات مخزون مسحوبة.', 'warning');
                 return;
+            }
+
+            // Convert a hex color to the closest Arabic name. Used ONLY for
+            // matching scraped stock against legacy hex colors in the variants
+            // table (e.g. #25263b → كحلي). The extension remains responsible
+            // for naming colors on paste; this just unifies the match language.
+            function hexToColorName(hex) {
+                if (!hex || typeof hex !== 'string') return '';
+                const clean = hex.replace('#', '').trim();
+                const norm = clean.length === 3 ? clean.split('').map(ch => ch + ch).join('') : clean;
+                const n = parseInt(norm, 16);
+                if (isNaN(n)) return '';
+                const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+                const palette = [
+                    ['أسود', 20, 22, 30], ['كحلي', 37, 38, 61], ['كحلي غامق', 35, 45, 65],
+                    ['بنفسجي غامق', 40, 25, 55], ['كحلي', 50, 60, 90],
+                    ['رمادي غامق', 80, 82, 90], ['رمادي', 120, 120, 125],
+                    ['رمادي فاتح', 182, 182, 184], ['أبيض', 250, 250, 252],
+                    ['بني غامق', 80, 50, 40], ['بني', 90, 60, 50],
+                    ['بني فاتح', 140, 95, 60], ['كاكي', 160, 140, 90],
+                    ['بيج', 220, 200, 170], ['أحمر', 180, 40, 40],
+                    ['عنابي', 124, 61, 69], ['بني محمر', 140, 70, 55],
+                    ['وردي', 230, 130, 160], ['وردي فاتح', 245, 190, 205],
+                    ['موف', 160, 120, 200], ['بنفسجي', 130, 60, 150],
+                    ['أزرق', 40, 80, 180], ['أزرق فاتح', 110, 160, 220],
+                    ['سماوي', 100, 190, 220], ['تركواز', 40, 160, 170],
+                    ['أخضر', 50, 140, 70], ['أخضر غامق', 40, 90, 55],
+                    ['زيتي', 90, 110, 55], ['أخضر فاتح', 150, 200, 120],
+                    ['أصفر', 230, 190, 50], ['ذهبي', 200, 160, 60],
+                    ['برتقالي', 220, 110, 40], ['فوشيا', 200, 40, 120],
+                    ['نيلي', 60, 70, 140], ['فضي', 200, 200, 205]
+                ];
+                let best = '';
+                let bestDist = Infinity;
+                palette.forEach(([name, pr, pg, pb]) => {
+                    const d = Math.sqrt((r - pr) ** 2 + (g - pg) ** 2 + (b - pb) ** 2);
+                    if (d < bestDist) { bestDist = d; best = name; }
+                });
+                return best;
             }
             
             // Smart Fallback Mapping (Map Hex colors to Scraped color names by order)
@@ -1432,19 +1424,53 @@
                     }
                 }
                 
+                // If the table color is a hex code, translate it to its Arabic
+                // name so it can match the scraped stock names (e.g. كحلي).
+                if (/^#?[0-9a-fA-F]{3,8}$/.test(trColor.trim())) {
+                    const named = hexToColorName(trColor.trim());
+                    if (named) trColorName = named;
+                }
+                
                 // Get the smart mapped color just in case
                 const mappedColorName = smartColorMap[trColor.toLowerCase()];
                 
                 // Find matching variant from cache (Flexible matching for size and color)
                 const match = scrapedVariantsCache.find(v => {
-                    // Extract only numbers from both sizes to guarantee match (e.g. "مقاس 41" == "41")
-                    const vSizeClean = v.size.toString().replace(/\D/g, '');
-                    const trSizeClean = trSize.toString().replace(/\D/g, '');
-                    const sizeMatch = vSizeClean === trSizeClean && vSizeClean !== '';
-                    
-                    const colorMatch = v.color.trim() === trColor.trim() || 
-                                       v.color.trim() === trColorName || 
-                                       (mappedColorName && v.color.trim() === mappedColorName);
+                    // Normalize sizes for matching. Supports letter sizes
+                    // (M/L/XL/XXL) AND numeric sizes (e.g. "مقاس 41" == "41").
+                    const normSize = (s) => {
+                        let x = String(s || '').trim().toUpperCase()
+                            .replace(/مقاس\s*/gi, '')
+                            .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                            .replace(/\s+/g, '');
+                        // Unify equivalent spellings: 2XL == XXL, 3XL == XXXL...
+                        x = x.replace(/^(\d+)X([SML]+)$/, (m, n, rest) => 'X'.repeat(Number(n)) + rest);
+                        return x;
+                    };
+
+                    const vSizeNorm = normSize(v.size);
+                    const trSizeNorm = normSize(trSize);
+                    const vSizeClean = vSizeNorm.replace(/\D/g, '');
+                    const trSizeClean = trSizeNorm.replace(/\D/g, '');
+                    // Prefer exact normalized match (letters or numbers); fall back to
+                    // digits-only match for cases like "مقاس 41" vs "41".
+                    const sizeMatch = (vSizeNorm === trSizeNorm && vSizeNorm !== '') ||
+                                     (vSizeClean === trSizeClean && vSizeClean !== '');
+
+                    // Normalize scraped color: hex → Arabic name, and unify spelling
+                    let vColor = (v.color || '').trim();
+                    if (/^#?[0-9a-fA-F]{3,8}$/.test(vColor)) {
+                        const named = hexToColorName(vColor);
+                        if (named) vColor = named;
+                    }
+                    const norm = (s) => (s || '').trim()
+                        .replace(/كحلى/g, 'كحلي').replace(/كحلي/g, 'كحلي')
+                        .replace(/بنى/g, 'بني').replace(/أ/gi, 'ا').replace(/[أإآ]/g, 'ا')
+                        .replace(/ة/g, 'ه').replace(/\s+/g, ' ').toLowerCase();
+
+                    const colorMatch = norm(vColor) === norm(trColor.trim()) ||
+                                       norm(vColor) === norm(trColorName) ||
+                                       (mappedColorName && norm(vColor) === norm(mappedColorName));
                     
                     // If the scraped data didn't have a color, just match by size
                     if (!v.color && !trColor) return sizeMatch;
@@ -1559,6 +1585,7 @@
             const sInput = document.getElementById('sizesInput');
             if (sInput) {
                 sInput.addEventListener('input', () => {
+                    renderSizes();
                     generateVariantsTable();
                 });
             }

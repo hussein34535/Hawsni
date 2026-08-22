@@ -46,12 +46,13 @@
         if (overlay) overlay.classList.remove('active');
     };
 
-    // Close sidebar on nav link click (mobile)
-    if (window.innerWidth <= 768) {
-        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-            link.addEventListener('click', () => closeMobileMenu());
+    // Close sidebar on nav link click (mobile) — re-evaluated on every click
+    // so resizing the window later still works correctly.
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 768) closeMobileMenu();
         });
-    }
+    });
 
     // Sync dark mode icon on mobile
     (function() {

@@ -17,15 +17,19 @@
             const isDark = localStorage.getItem('adminDark') === 'true';
             if (isDark) {
                 document.documentElement.classList.add('dark');
-                document.addEventListener('DOMContentLoaded', () => {
-                    document.body.classList.add('dark');
-                });
             }
         })();
     </script>
 </head>
 
 <body>
+    <script>
+        // Apply dark to <body> immediately — before any content paints.
+        // (CSS rules target body.dark; DOMContentLoaded would be too late.)
+        if (localStorage.getItem('adminDark') === 'true') {
+            document.body.classList.add('dark');
+        }
+    </script>
     <div class="admin-layout">
         <!-- Collapsible Sidebar -->
         <aside class="sidebar">
@@ -111,8 +115,8 @@
             <div style="padding: 10px 8px; border-top: 1px solid rgba(255,255,255,0.08);">
                 <a href="/admin/logout"
                    onclick="return confirm('هل أنت متأكد من تسجيل الخروج؟')"
-                   class="nav-link" style="color: rgba(255,150,150,0.85);">
-                    <i class="fas fa-sign-out-alt" style="color: rgba(255,150,150,0.85);"></i>
+                   class="nav-link nav-logout">
+                    <i class="fas fa-sign-out-alt"></i>
                     <span>تسجيل الخروج</span>
                 </a>
             </div>
@@ -131,7 +135,7 @@
                 </div>
 
                 <div class="topbar-actions">
-                    <a href="https://hwasi.com" target="_blank" class="btn btn-secondary" title="عرض المتجر" style="width:40px;height:40px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                    <a href="<%= typeof process !== 'undefined' && process.env.STOREFRONT_URL ? process.env.STOREFRONT_URL : 'https://hwasi.com' %>" target="_blank" class="btn btn-secondary" title="عرض المتجر" style="width:40px;height:40px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
                         <i class="fas fa-external-link-alt"></i>
                     </a>
                     <button id="dark-mode-btn" onclick="toggleDark()" class="btn btn-secondary" title="الوضع الليلي" style="width:40px;height:40px;padding:0;border-radius:50%;">
@@ -159,6 +163,8 @@
     const badge = document.getElementById('chat-unread-badge');
     if (!badge) return;
     async function updateBadge() {
+        // Skip network chatter when the tab is hidden or the page is bfcached
+        if (document.hidden) return;
         try {
             const r = await fetch('/admin/chat/unread-count');
             const d = await r.json();

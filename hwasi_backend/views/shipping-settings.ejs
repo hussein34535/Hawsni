@@ -138,6 +138,58 @@
             border: 1px solid rgba(0,0,0,0.05);
             z-index: 100;
         }
+
+        /* === Dark Mode === */
+        body.dark .shipping-card {
+            background: var(--dm-surface);
+            border-color: var(--dm-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        body.dark .shipping-card-header {
+            background: var(--dm-surface-2);
+            border-bottom-color: var(--dm-border);
+        }
+        body.dark .shipping-card-title { color: var(--dm-text); }
+        body.dark .gov-table-header {
+            background: var(--dm-surface-2);
+            color: var(--dm-text-muted);
+        }
+        body.dark .gov-row {
+            background: var(--dm-surface);
+            border-bottom-color: var(--dm-border);
+        }
+        body.dark .gov-row:hover {
+            background: var(--dm-surface-2);
+            border-color: var(--dm-border-strong);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        body.dark .gov-row input {
+            background: var(--dm-surface-2) !important;
+            border-color: var(--dm-border) !important;
+            color: var(--dm-text) !important;
+        }
+        body.dark .gov-row input:focus {
+            background: var(--dm-surface-3) !important;
+        }
+        body.dark .remove-btn {
+            color: #ff453a;
+            background: rgba(255, 69, 58, 0.12);
+        }
+        body.dark .add-gov-btn {
+            background: var(--dm-surface);
+            border-color: var(--dm-border-strong);
+            color: var(--dm-text-muted);
+        }
+        body.dark .info-pill {
+            background: rgba(10, 132, 255, 0.12);
+            color: #64d2ff;
+            border-color: rgba(100, 210, 255, 0.2);
+        }
+        body.dark .save-bar {
+            background: var(--dm-surface);
+            border-color: var(--dm-border);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
         @media (max-width: 768px) {
             .gov-table-header { display: none; }
             .gov-row {

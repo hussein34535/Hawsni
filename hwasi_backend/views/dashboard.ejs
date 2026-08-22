@@ -124,7 +124,35 @@
     }
     .order-id { font-family: monospace; font-weight: 800; color: var(--brand-accent); font-size: 1rem; }
     .order-total { font-weight: 900; font-size: 1.2rem; color: var(--text-main); }
-    
+
+    /* === Dark Mode === */
+    body.dark .clarity-stat {
+        background: var(--dm-surface);
+        border-color: var(--dm-border);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    body.dark .clarity-timer {
+        background: var(--dm-surface);
+        border-color: var(--dm-border);
+    }
+    body.dark .quick-action-card {
+        background: var(--dm-surface);
+        border-color: var(--dm-border);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    body.dark .quick-action-card:hover {
+        background: var(--dm-surface-2);
+        border-color: var(--dm-border-strong);
+        box-shadow: 0 15px 30px -10px rgba(0,0,0,0.6);
+    }
+    body.dark .order-item {
+        background: var(--dm-surface);
+        border-color: var(--dm-border);
+    }
+    body.dark .order-item:hover {
+        background: var(--dm-surface-2);
+    }
+
     @media (max-width: 768px) {
         .clarity-grid { grid-template-columns: 1fr; }
         .dash-welcome h2 { font-size: 1.4rem; }

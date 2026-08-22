@@ -1,0 +1,49 @@
+# Flutter build artifacts & tools
+build/
+.dart_tool/
+.flutter-plugins*
+.metadata
+android/
+ios/
+linux/
+macos/
+windows/
+web/
+lib/
+assets/
+test/
+test_scraper/
+
+# Node deps (backend installs its own)
+node_modules/
+**/node_modules/
+
+# Git & VCS
+.git/
+.gitignore
+
+# Local env (secrets never uploaded)
+*.env
+.env*
+hwasi_scraper_extension/
+
+# Scratch / temp / logs
+scratch/
+tmp/
+*.log
+hs_err_pid*.log
+replay_pid*.log
+debug_products.js
+list_products_local.js
+check_cols.js
+download_fonts.js
+fetch_angazny.py
+
+# IDE
+.idea/
+.vscode/
+
+# The actual deploy target — backend only
+hwasi_web/
+api/
+.vercel/

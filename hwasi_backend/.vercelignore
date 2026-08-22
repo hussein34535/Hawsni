@@ -1,2 +1,15 @@
 # Ignore uploaded files (they live in Cloudinary)
 public/uploads/
+
+# Dev/temp/scratch — never upload
+scratch/
+*.log
+hs_err_pid*.log
+replay_pid*.log
+test_*.js
+list_models.js
+debug_*.js
+
+# Local env & secrets
+*.env
+.env*

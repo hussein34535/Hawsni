@@ -1871,6 +1871,25 @@
                 border-bottom: 1px solid var(--border-color);
             }
         }
+
+        /* === Dark Mode === */
+        body.dark .order-row td {
+            background: var(--dm-surface);
+            border-top-color: var(--dm-border);
+            border-bottom-color: var(--dm-border);
+        }
+        body.dark .order-row:hover td {
+            background: var(--dm-surface-2) !important;
+        }
+        body.dark .order-row td:first-child {
+            border-right-color: var(--dm-border);
+        }
+        body.dark .order-row td:last-child {
+            border-left-color: var(--dm-border);
+        }
+        body.dark .product-img-lg {
+            border-color: var(--dm-surface-3);
+        }
     </style>
 
     <!-- ===== Bosta Live Tracking Modal ===== -->

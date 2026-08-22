@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-    /* ── Brand ──────────────────────────────── */
+    /* â”€â”€ Brand â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     --brand-primary: #0E4435;
     --brand-secondary: #196649;
     --brand-light: #f0fdf4;
@@ -9,7 +9,7 @@
     --brand-accent-hover: #10b981;
     --brand-glow: rgba(52, 211, 153, 0.25);
 
-    /* ── Neutrals ──────────────────────────── */
+    /* â”€â”€ Neutrals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     --bg-main: #f0f4f8;
     --bg-card: #ffffff;
     --text-main: #0d1117;
@@ -18,25 +18,25 @@
     --border-medium: #c8d4df;
     --white: #ffffff;
 
-    /* ── State Colors ───────────────────────── */
+    /* â”€â”€ State Colors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     --success: #34d399;
     --warning: #fbbf24;
     --danger: #f87171;
     --info: #60a5fa;
 
-    /* ── Liquid Glass Tokens ─────────────────── */
+    /* â”€â”€ Liquid Glass Tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     --glass-bg: rgba(255, 255, 255, 0.55);
     --glass-border: rgba(255, 255, 255, 0.7);
     --glass-shadow: 0 8px 32px rgba(14, 68, 53, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
     --glass-blur: blur(24px) saturate(180%);
 
-    /* ── Shadows ────────────────────────────── */
+    /* â”€â”€ Shadows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
     --shadow-md: 0 4px 16px rgba(14,68,53,0.08);
     --shadow-lg: 0 12px 40px rgba(14,68,53,0.1);
     --shadow-xl: 0 24px 60px rgba(14,68,53,0.14);
 
-    /* ── Sizing ──────────────────────────────── */
+    /* â”€â”€ Sizing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     --radius-sm: 8px;
     --radius-md: 14px;
     --radius-lg: 18px;
@@ -45,7 +45,7 @@
     --sidebar-expanded: 264px;
     --topbar-height: 66px;
 
-    /* ── Transitions ────────────────────────── */
+    /* â”€â”€ Transitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
     --trans-fast: 0.15s ease;
     --trans-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     --trans-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -144,7 +144,7 @@ body.dark .sidebar:hover {
     background: rgba(15, 20, 25, 0.75);
 }
 
-/* ── Logo Glass ───────────────────────────────── */
+/* â”€â”€ Logo Glass â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .sidebar-header {
     padding: 24px 0 20px;
     flex-shrink: 0;
@@ -197,7 +197,7 @@ body.dark .sidebar-brand h1 span { color: var(--brand-accent); }
 
 .sidebar:hover .sidebar-brand h1 { opacity: 1; }
 
-/* ── Nav Glass ────────────────────────────────── */
+/* â”€â”€ Nav Glass â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .sidebar-nav {
     flex: 1;
     overflow-y: auto;
@@ -254,7 +254,7 @@ body.dark .sidebar-brand h1 span { color: var(--brand-accent); }
     margin: 0;
 }
 
-/* ── Iconic Colors ── */
+/* â”€â”€ Iconic Colors â”€â”€ */
 .nav-link i {
     font-size: 1.15rem;
     width: 24px;
@@ -321,7 +321,7 @@ body.dark .nav-link.active span { color: #05080a !important; }
 
 
 
-/* ── Mobile Topbar ───────────────────────────────── */
+/* â”€â”€ Mobile Topbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .mobile-topbar {
     display: none;
     position: sticky;
@@ -382,7 +382,7 @@ body.dark .mobile-menu-btn { background: rgba(255,255,255,0.08); color: #25d366;
     transition: margin var(--trans-base), width var(--trans-base);
 }
 
-/* Topbar — Liquid Glass */
+/* Topbar â€” Liquid Glass */
 .topbar {
     height: var(--topbar-height);
     background: rgba(240, 244, 248, 0.7);
@@ -1084,11 +1084,11 @@ tr:hover td {
     font-size: 1.5rem;
 }
 
-/* ═══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    COMPREHENSIVE MOBILE RESPONSIVE OVERHAUL
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Topbar Mobile ─────────────────────────────────────── */
+/* â”€â”€ Topbar Mobile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 768px) {
     .topbar {
         padding: 0 0.8rem;
@@ -1120,12 +1120,12 @@ tr:hover td {
         max-width: 160px;
     }
 
-    /* ── Content Wrapper ── */
+    /* â”€â”€ Content Wrapper â”€â”€ */
     .content-wrapper {
         padding: 0.8rem;
     }
 
-    /* ── Cards ── */
+    /* â”€â”€ Cards â”€â”€ */
     .card {
         padding: 1rem;
         border-radius: var(--radius-lg);
@@ -1148,7 +1148,7 @@ tr:hover td {
         justify-content: center;
     }
 
-    /* ── Stats Grid ── */
+    /* â”€â”€ Stats Grid â”€â”€ */
     .stats-grid {
         grid-template-columns: 1fr 1fr;
         gap: 0.75rem;
@@ -1174,7 +1174,7 @@ tr:hover td {
         font-size: 0.7rem;
     }
 
-    /* ── Tables ── */
+    /* â”€â”€ Tables â”€â”€ */
     .table-responsive {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -1191,7 +1191,7 @@ tr:hover td {
         white-space: nowrap;
     }
 
-    /* ── Forms ── */
+    /* â”€â”€ Forms â”€â”€ */
     .form-control {
         height: 48px;
         font-size: 0.9rem;
@@ -1205,7 +1205,7 @@ tr:hover td {
         grid-template-columns: 1fr !important;
     }
 
-    /* ── Buttons ── */
+    /* â”€â”€ Buttons â”€â”€ */
     .btn {
         padding: 0.65rem 1rem;
         font-size: 0.9rem;
@@ -1217,7 +1217,7 @@ tr:hover td {
     }
 }
 
-/* ── Extra Small Phones ─────────────────────────────────── */
+/* â”€â”€ Extra Small Phones â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 420px) {
     .stats-grid {
         grid-template-columns: 1fr 1fr;
@@ -1245,9 +1245,9 @@ tr:hover td {
     }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CHAT INBOX MOBILE LAYOUT
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* Chat page mobile: stack sessions list on top of chat area */
 @media (max-width: 768px) {
@@ -1304,9 +1304,9 @@ tr:hover td {
     }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ORDERS PAGE MOBILE
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 768px) {
     /* Filters bar stacks vertically */
     .filters-bar {
@@ -1342,9 +1342,9 @@ tr:hover td {
     }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    PRODUCTS PAGE MOBILE
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 768px) {
     /* Products list items */
     .product-row {
@@ -1356,9 +1356,9 @@ tr:hover td {
     }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MODAL MOBILE FIX
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 768px) {
     /* Modal should be full-screen on small phones */
     .modal-container {
@@ -1386,9 +1386,9 @@ tr:hover td {
     }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    SIDEBAR MOBILE IMPROVEMENTS
-   ═══════════════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 @media (max-width: 1024px) {
     .sidebar {
         width: 280px;
@@ -1414,7 +1414,7 @@ tr:hover td {
     }
 }
 
-/* ── Safe Area for notch phones (iOS/Android) ───────────── */
+/* â”€â”€ Safe Area for notch phones (iOS/Android) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
     @media (max-width: 768px) {
         .topbar {
@@ -1427,7 +1427,7 @@ tr:hover td {
     }
 }
 
-/* ── Touch-friendly tap targets ─────────────────────────── */
+/* â”€â”€ Touch-friendly tap targets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 768px) {
     .nav-link,
     .btn,
@@ -1444,9 +1444,9 @@ tr:hover td {
         height: 20px;
     }
 
-    /* ═══════════════════════════════════════
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        MOBILE SIDEBAR FIX
-       ═══════════════════════════════════════ */
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .sidebar {
         right: 0 !important;
         top: 0 !important;
@@ -1500,9 +1500,9 @@ tr:hover td {
         gap: 0.75rem !important;
     }
 
-    /* ═══════════════════════════════════════
-       MOBILE ORDERS TABLE → CARDS
-       ═══════════════════════════════════════ */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       MOBILE ORDERS TABLE â†’ CARDS
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
     .table-responsive { overflow-x: hidden !important; }
     
     .modern-table thead { display: none !important; }
@@ -1576,12 +1576,12 @@ tr:hover td {
     .stat-value { font-size: 1.6rem !important; }
 }
 
-/* ═══════════════════════════════════════════════════════
-   APPLE DARK MODE — macOS Big Sur / iOS Style
-   ═══════════════════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   APPLE DARK MODE â€” macOS Big Sur / iOS Style
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 body.dark {
-    /* ── Apple Dark Palette ── */
+    /* â”€â”€ Apple Dark Palette â”€â”€ */
     --dm-bg: #000000;
     --dm-bg-glow-1: rgba(10, 132, 255, 0.07);
     --dm-bg-glow-2: rgba(255, 255, 255, 0.02);
@@ -1599,7 +1599,7 @@ body.dark {
     --dm-danger: #ff453a;
     --dm-info: #64d2ff;
 
-    /* ── Map brand tokens so inline styles adapt ── */
+    /* â”€â”€ Map brand tokens so inline styles adapt â”€â”€ */
     --brand-primary: #0a84ff;
     --brand-secondary: #3aa2ff;
     --brand-light: rgba(10, 132, 255, 0.12);
@@ -1607,11 +1607,18 @@ body.dark {
     --brand-accent-hover: #3aa2ff;
     --text-main: #f2f2f7;
     --text-muted: #98989d;
+    --success: #30d158;
+    --warning: #ffd60a;
+    --danger: #ff453a;
+    --info: #64d2ff;
+    --bg-main: #0a0a0c;
+    --bg-card: #1c1c1e;
+    --brand-glow: rgba(10, 132, 255, 0.25);
     --border-soft: rgba(255, 255, 255, 0.08);
     --border-medium: rgba(255, 255, 255, 0.16);
     --white: #1c1c1e;
 
-    /* ── Glass tokens for dark ── */
+    /* â”€â”€ Glass tokens for dark â”€â”€ */
     --glass-bg: rgba(28, 28, 30, 0.55);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
@@ -1630,16 +1637,16 @@ body.dark {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Tahoma, sans-serif;
 }
 
-/* ── Transitions for smooth theme switching ── */
+/* â”€â”€ Transitions for smooth theme switching â”€â”€ */
 body, .card, .topbar, td, th, .form-control, .sidebar, .nav-link, .stat-card, .badge, .btn {
     transition: background 0.4s ease, color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.4s ease, box-shadow 0.3s ease !important;
 }
 
-/* ── Custom Scrollbar (dark) ── */
+/* â”€â”€ Custom Scrollbar (dark) â”€â”€ */
 body.dark ::-webkit-scrollbar-thumb { background: #3a3a3c; }
 body.dark ::-webkit-scrollbar-thumb:hover { background: #4a4a4c; }
 
-/* ── Topbar — frosted Apple bar ── */
+/* â”€â”€ Topbar â€” frosted Apple bar â”€â”€ */
 body.dark .topbar {
     background: rgba(22, 22, 23, 0.78) !important;
     backdrop-filter: blur(40px) saturate(200%) !important;
@@ -1649,7 +1656,7 @@ body.dark .topbar {
 }
 body.dark .page-title { color: var(--dm-text) !important; letter-spacing: -0.02em; }
 
-/* ── Sidebar — floating dark glass ── */
+/* â”€â”€ Sidebar â€” floating dark glass â”€â”€ */
 body.dark .sidebar {
     background: rgba(22, 22, 23, 0.72) !important;
     backdrop-filter: blur(40px) saturate(180%) !important;
@@ -1670,7 +1677,7 @@ body.dark .nav-section-title { color: var(--dm-text-muted) !important; }
 body.dark .nav-link { color: var(--dm-text-muted) !important; }
 body.dark .nav-link span { color: rgba(255, 255, 255, 0.75) !important; }
 
-/* Icon colors — Apple-tinted, subtle */
+/* Icon colors â€” Apple-tinted, subtle */
 body.dark .nav-link[href*="dashboard"] i { color: #0a84ff; }
 body.dark .nav-link[href*="products"] i { color: #ff9f0a; }
 body.dark .nav-link[href*="categories"] i { color: #bf5af2; }
@@ -1701,7 +1708,7 @@ body.dark .nav-link.active span { color: var(--dm-accent) !important; }
 body.dark .sidebar a[href*="logout"] { color: rgba(255, 69, 58, 0.75) !important; }
 body.dark .sidebar a[href*="logout"] i { color: rgba(255, 69, 58, 0.75) !important; }
 
-/* ── Buttons — Apple frosted / solid ── */
+/* â”€â”€ Buttons â€” Apple frosted / solid â”€â”€ */
 body.dark .btn-secondary {
     background: rgba(255, 255, 255, 0.07) !important;
     color: var(--dm-text) !important;
@@ -1731,7 +1738,7 @@ body.dark .btn-danger:hover {
     background: rgba(255, 69, 58, 0.22) !important;
 }
 
-/* ── Cards — iOS surface ── */
+/* â”€â”€ Cards â€” iOS surface â”€â”€ */
 body.dark .card,
 body.dark .stat-card {
     background: var(--dm-surface) !important;
@@ -1750,7 +1757,7 @@ body.dark .stat-card:hover {
 body.dark .card-header { border-bottom-color: var(--dm-border) !important; }
 body.dark .card-title { color: var(--dm-text) !important; }
 
-/* ── Stat cards ── */
+/* â”€â”€ Stat cards â”€â”€ */
 body.dark .stat-icon {
     background: rgba(255, 255, 255, 0.06) !important;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.5) !important;
@@ -1758,7 +1765,7 @@ body.dark .stat-icon {
 body.dark .stat-value { color: var(--dm-text) !important; }
 body.dark .stat-label { color: var(--dm-text-muted) !important; }
 
-/* ── Dashboard-specific dark glass ── */
+/* â”€â”€ Dashboard-specific dark glass â”€â”€ */
 body.dark .clarity-stat,
 body.dark .clarity-timer,
 body.dark .quick-action-card,
@@ -1780,7 +1787,7 @@ body.dark .order-id { color: var(--dm-accent) !important; }
 body.dark .order-total { color: var(--dm-text) !important; }
 body.dark .clarity-timer-countdown { color: var(--dm-accent) !important; }
 
-/* ── Tables — Apple list style ── */
+/* â”€â”€ Tables â€” Apple list style â”€â”€ */
 body.dark .table-container {
     background: var(--dm-surface) !important;
     border: 1px solid var(--dm-border) !important;
@@ -1801,7 +1808,7 @@ body.dark tr:hover td {
     background: rgba(255, 255, 255, 0.03) !important;
 }
 
-/* ── Badges — iOS tinted pills ── */
+/* â”€â”€ Badges â€” iOS tinted pills â”€â”€ */
 body.dark .badge {
     color: #fff !important;
     font-weight: 600 !important;
@@ -1814,7 +1821,7 @@ body.dark .badge-info { background: #64d2ff !important; }
 body.dark .badge-primary, body.dark .badge-processing { background: #0a84ff !important; }
 body.dark .badge-secondary { background: #48484a !important; }
 
-/* ── Forms — iOS fields ── */
+/* â”€â”€ Forms â€” iOS fields â”€â”€ */
 body.dark .form-control {
     background: rgba(255, 255, 255, 0.06) !important;
     border: 1px solid var(--dm-border) !important;
@@ -1831,7 +1838,7 @@ body.dark .form-control:focus {
 body.dark .form-label { color: var(--dm-text) !important; }
 body.dark select.form-control option { background: #1c1c1e !important; color: var(--dm-text) !important; }
 
-/* ── Payment / profile / method cards in modals ── */
+/* â”€â”€ Payment / profile / method cards in modals â”€â”€ */
 body.dark .profile-card,
 body.dark .address-card,
 body.dark .method-card {
@@ -1843,7 +1850,7 @@ body.dark .address-item p { color: var(--dm-text) !important; }
 body.dark .address-full p { color: var(--dm-text) !important; }
 body.dark .method-card { color: var(--dm-accent) !important; }
 
-/* ── Mobile topbar ── */
+/* â”€â”€ Mobile topbar â”€â”€ */
 body.dark .mobile-topbar {
     background: rgba(22, 22, 23, 0.9) !important;
     border-bottom: 1px solid var(--dm-border) !important;
@@ -1851,13 +1858,13 @@ body.dark .mobile-topbar {
 body.dark .mobile-page-title { color: var(--dm-text) !important; }
 body.dark .mobile-menu-btn { background: rgba(255, 255, 255, 0.08) !important; color: var(--dm-accent) !important; }
 
-/* ── Mobile sidebar open state ── */
+/* â”€â”€ Mobile sidebar open state â”€â”€ */
 body.dark .sidebar.active {
     background: rgba(10, 12, 14, 0.97) !important;
     border: 1px solid var(--dm-border) !important;
 }
 
-/* ── Modern table rows (orders page) ── */
+/* â”€â”€ Modern table rows (orders page) â”€â”€ */
 body.dark .modern-table tr {
     background: rgba(28, 28, 30, 0.8) !important;
     border: 1px solid var(--dm-border) !important;
@@ -1866,7 +1873,7 @@ body.dark .modern-table tr {
 }
 body.dark .modern-table td { border-bottom-color: rgba(255, 255, 255, 0.05) !important; }
 
-/* ── Text colors everywhere dark ── */
+/* â”€â”€ Text colors everywhere dark â”€â”€ */
 body.dark .total-line { color: var(--dm-accent) !important; }
 body.dark .unit-price { color: var(--dm-text-muted) !important; }
 body.dark .payment-item { color: var(--dm-text-muted) !important; }
@@ -1884,7 +1891,7 @@ body.dark .btn-copy-address:hover {
 }
 
 /* ============================================================
-   APPLE DARK MODE 2.0 � FULL COVERAGE (all pages)
+   APPLE DARK MODE 2.0 — FULL COVERAGE (all pages)
    ============================================================ */
 
 /* ---------- Global text darkening ---------- */
@@ -2188,12 +2195,8 @@ body.dark .form-control { border-radius: 12px !important; }
 body.dark .btn { border-radius: 12px !important; }
 body.dark .badge { border-radius: 100px !important; }
 body.dark [style*="background:white"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
-body.dark [style*="background:#fff"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
-body.dark [style*="background:#ffffff"] { background: var(--dm-surface) !important; color: var(--dm-text) !important; }
-body.dark [style*="background: #f8fafc"] { background: #242426 !important; }
 body.dark [style*="background:#fafafa"] { background: #242426 !important; }
 body.dark [style*="background: #fafafa"] { background: #242426 !important; }
-body.dark [style*="background:#f5f5f5"] { background: #242426 !important; }
 body.dark [style*="background: #eef2f7"] { background: #1c1c1e !important; }
 body.dark [style*="background:#eef2f7"] { background: #1c1c1e !important; }
 body.dark [style*="color:#334155"], body.dark [style*="color: #334155"] { color: var(--dm-text) !important; }
@@ -2202,3 +2205,81 @@ body.dark [style*="color:#64748b"], body.dark [style*="color: #64748b"] { color:
 body.dark [style*="color:#92400e"], body.dark [style*="color: #92400e"] { color: var(--dm-warning) !important; }
 body.dark [style*="color:#c2410c"], body.dark [style*="color: #c2410c"] { color: var(--dm-warning) !important; }
 body.dark [style*="color:#065f46"], body.dark [style*="color: #065f46"] { color: var(--dm-success) !important; }
+
+/* html.dark: dark tokens applied at the root element so they are active
+   the instant <html> gets .dark (head script) â€” before <body> exists. */
+html.dark {
+    --dm-bg: #000000;
+    --dm-bg-glow-1: rgba(10, 132, 255, 0.07);
+    --dm-bg-glow-2: rgba(255, 255, 255, 0.02);
+    --dm-surface: #1c1c1e;
+    --dm-surface-2: #2c2c2e;
+    --dm-surface-3: #3a3a3c;
+    --dm-border: rgba(255, 255, 255, 0.08);
+    --dm-border-strong: rgba(255, 255, 255, 0.14);
+    --dm-text: #f2f2f7;
+    --dm-text-muted: #98989d;
+    --dm-accent: #0a84ff;
+    --dm-accent-hover: #3aa2ff;
+    --dm-success: #30d158;
+    --dm-warning: #ffd60a;
+    --dm-danger: #ff453a;
+    --dm-info: #64d2ff;
+
+    --brand-primary: #0a84ff;
+    --brand-secondary: #3aa2ff;
+    --brand-light: rgba(10, 132, 255, 0.12);
+    --brand-accent: #0a84ff;
+    --brand-accent-hover: #3aa2ff;
+    --text-main: #f2f2f7;
+    --text-muted: #98989d;
+    --success: #30d158;
+    --warning: #ffd60a;
+    --danger: #ff453a;
+    --info: #64d2ff;
+    --bg-main: #0a0a0c;
+    --bg-card: #1c1c1e;
+    --brand-glow: rgba(10, 132, 255, 0.25);
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --border-medium: rgba(255, 255, 255, 0.16);
+    --white: #1c1c1e;
+
+    --glass-bg: rgba(28, 28, 30, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    --glass-blur: blur(30px) saturate(160%);
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.55);
+    --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.6);
+
+    background: var(--dm-bg);
+}
+
+/* Dark mode generic surfaces for pages with hardcoded light styles */
+body.dark .table,
+body.dark .table-bordered,
+body.dark .table th,
+body.dark .table td {
+    background: var(--dm-surface);
+    color: var(--dm-text);
+    border-color: var(--dm-border);
+}
+body.dark .form-control,
+body.dark .form-select {
+    background: var(--dm-surface-2);
+    color: var(--dm-text);
+    border-color: var(--dm-border);
+}
+
+/* Logout nav link — readable red on both light & dark glass sidebars */
+.nav-logout {
+    color: #dc2626 !important;
+    font-weight: 700;
+}
+.nav-logout i { color: #dc2626 !important; }
+.nav-logout:hover { background: rgba(220, 38, 38, 0.1) !important; color: #b91c1c !important; }
+body.dark .nav-logout { color: #ff6961 !important; }
+body.dark .nav-logout i { color: #ff6961 !important; }
+body.dark .nav-logout:hover { background: rgba(255, 105, 97, 0.12) !important; color: #ff8a82 !important; }

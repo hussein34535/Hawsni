@@ -245,7 +245,7 @@
     .by-agent.is-admin .bubble { background: #e1f3fb; border-bottom-left-radius: 2px; }
     .by-agent.is-bot   .bubble { background: #fff; }
     .bubble img { max-width: 100%; max-height: 220px; border-radius: 6px; cursor: pointer; display: block; margin: 2px 0; }
-    .b-label { font-size: 11px; font-weight: 800; margin-bottom: 6px; opacity: 0.5; }
+    .b-label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 6px; opacity: 0.55; }
     .b-time  { font-size: 10px; margin-top: 6px; text-align: left; opacity: 0.45; display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
     .date-sep { text-align: center; font-size: 11px; font-weight: 700; color: #64748b; padding: 8px 0 4px; position: sticky; top: 0; z-index: 1; }
     .date-sep span { background: #e2e8f0; padding: 3px 14px; border-radius: 8px; display: inline-block; }
@@ -521,12 +521,15 @@
     }
 
     function previewText(s) {
-        if (!s.last_message) return s.status === 'human_requested' ? '⚠️ يطلب موظف' : s.status === 'human_active' ? '🧑‍💼 نشط' : '🤖 نشطة';
+        if (!s.last_message) return s.status === 'human_requested' ? 'طلب التحدث لموظف' : s.status === 'human_active' ? 'محادثة جارية' : 'رسالة جديدة';
         let t = s.last_message;
-        if (t.startsWith('[IMAGE:')) return '🖼️ صورة';
+        if (t.startsWith('[IMAGE:') || t.startsWith('[IMAGE_URL:')) return '📷 صورة';
         if (t.startsWith('[TEMPLATE:')) return '📋 قالب';
-        if (t.startsWith('[CLICKED:')) return '👆 ' + t.slice(8, -1);
+        if (t.startsWith('[CLICKED:')) return '🖱️ ' + t.slice(8, -1);
         if (t.startsWith('[CHOICES:')) return t.slice(8, -1);
+        // Bare media links (e.g. Cloudinary) → friendly label instead of raw URL
+        if (/https?:\/\/\S+\.(jpe?g|png|gif|webp)(\?\S*)?$/i.test(t.trim())) return '📷 صورة';
+        if (/^https?:\/\/\S+$/i.test(t.trim())) return '🔗 رابط';
         return t.length > 55 ? t.slice(0, 52) + '...' : t;
     }
 
