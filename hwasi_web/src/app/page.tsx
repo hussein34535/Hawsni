@@ -19,6 +19,16 @@ interface ApiData {
     data?: Banner[] | { banners?: Banner[] };
 }
 
+// The /banners endpoint returns a raw array; older shapes wrapped it in
+// { data: [...] } or { data: { banners: [...] } }. Handle all of them.
+function extractBanners(payload: unknown): Banner[] {
+    if (Array.isArray(payload)) return payload;
+    const obj = payload as { data?: Banner[] | { banners?: Banner[] } } | null | undefined;
+    if (Array.isArray(obj?.data)) return obj.data;
+    if (Array.isArray(obj?.data?.banners)) return obj.data.banners;
+    return [];
+}
+
 async function fetchJson<T>(url: string): Promise<T | null> {
     try {
         const res = await fetch(url, { next: { revalidate: 300 } });
@@ -48,8 +58,7 @@ export default async function HomePage() {
     const products: Product[] = prodData?.products || [];
     const featuredProducts: Product[] = featData?.products || [];
 
-    const bannerPayload = bannerData?.data;
-    const banners: Banner[] = Array.isArray(bannerPayload) ? bannerPayload : (bannerPayload?.banners || []);
+    const banners: Banner[] = extractBanners(bannerData);
 
     return (
         <HomePageClient

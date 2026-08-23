@@ -13,11 +13,8 @@ export const metadata: Metadata = {
   title: 'Hwasi - Premium Fashion & Style in Egypt | هَوَسي للأزياء',
   description: 'Shop the latest fashion trends at Hwasi (هَوَسي). Premium quality, local craftsmanship, and unique styles delivered to your doorstep in Egypt. اكتشف أحدث صيحات الموضة مع هَوَسي.',
   keywords: 'hwasi, Hwasi, هَوَسي, الهَوَسي, fashion, Egypt, style, clothing, premium, ecommerce, ملابس, أزياء, تسوق, مصر',
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-    shortcut: "/logo.png",
-  },
+  // Favicon served from src/app/favicon.ico + icon.png + apple-icon.png
+  // (Next.js App Router auto-generates the <link> tags for these files)
   openGraph: {
     title: 'Hwasi - Premium Fashion & Style | هَوَسي',
     description: 'Discover the ultimate fashion destination in Egypt. Shop unique collections at Hwasi (هَوَسي).',

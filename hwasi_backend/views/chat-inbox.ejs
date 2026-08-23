@@ -223,7 +223,6 @@
         display: flex;
         width: 100%;
         box-sizing: border-box;
-        overflow: hidden;
     }
     .msg-row.by-user  { justify-content: flex-end; }
     .msg-row.by-agent { justify-content: flex-start; }
@@ -339,6 +338,16 @@
     }
 
     body.dark { background: #111; color: #ddd; }
+    /* Force bubble text visibility — belt & suspenders against any
+       inherited/global rule that could dim or hide message content */
+    .bubble { color: var(--text-main); }
+    body.dark .bubble,
+    body.dark .bubble * { color: #e8e8ed; -webkit-text-fill-color: #e8e8ed; }
+    body.dark .by-user .bubble,
+    body.dark .by-user .bubble * { color: #f0fff4; -webkit-text-fill-color: #f0fff4; }
+    body.dark .bubble .b-time,
+    body.dark .by-agent.is-admin .bubble .b-time { color: rgba(255,255,255,0.45); -webkit-text-fill-color: rgba(255,255,255,0.45); }
+    body.dark .by-user .bubble .b-time { color: rgba(240,255,244,0.5); -webkit-text-fill-color: rgba(240,255,244,0.5); }
     body.dark .sessions-panel,
     body.dark .chat-footer { background: #1a1a1a !important; border-color: #2a2a2a !important; }
     body.dark .sp-header h3 { color: #25d366; }
