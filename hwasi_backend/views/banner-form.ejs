@@ -7,12 +7,12 @@
                 <i class="fas fa-<%= banner ? 'edit' : 'plus' %>"></i>
                 <%= banner ? 'تعديل بنر' : 'إضافة بنر جديد' %>
             </h2>
-            <a href="/banners" class="btn btn-secondary">
+                        <a href="/admin/banners" class="btn btn-secondary">
                 <i class="fas fa-arrow-right"></i> رجوع
             </a>
         </div>
 
-        <form action="<%= banner ? `/banners/${banner.id}` : '/banners' %>" method="POST" enctype="multipart/form-data"
+        <form action="<%= banner ? `/admin/banners/${banner.id}` : '/admin/banners' %>" method="POST" enctype="multipart/form-data"
             onsubmit="return handleBannerSubmit(event)" id="bannerForm">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
@@ -54,12 +54,14 @@
                         </div>
                     </div>
 
-                    <!-- Image Preview with Aspect Ratio Guide -->
+                    <!-- Image Preview with Aspect Ratio Guide + Crop -->
                     <div class="form-group">
                         <label class="form-label">معاينة الصورة (نسبة 3:1)</label>
-                        <div class="banner-preview-box">
+                        <div class="banner-preview-box" id="bannerPreviewBox">
                             <img id="imagePreview" src="<%= banner ? banner.image_url : '' %>"
-                                class="<%= banner ? 'd-block' : 'd-none' %>">
+                                class="<%= banner ? 'd-block' : 'd-none' %>" draggable="false" style="object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
+                            <div class="crop-crosshair" id="cropCrosshair"></div>
+                            <div class="crop-hint"><i class="fas fa-arrows-alt"></i> اسحب لتحريك الصورة</div>
                             <div id="placeholderText"
                                 class="<%= banner ? 'd-none' : 'd-block' %>">
                                 <i class="fas fa-image"></i>
@@ -67,6 +69,23 @@
                                 <small>1200 × 400 بكسل</small>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Crop Position Controls -->
+                    <div class="form-group" id="cropControls" style="background: var(--light); padding: 1.25rem; border-radius: var(--radius-md); border: 1px dashed var(--border-medium);">
+                        <label class="form-label"><i class="fas fa-crop-alt"></i> تحكم في الجزء الظاهر من الصورة</label>
+                        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 0.75rem;">اسحب الصورة داخل المعاينة أو استخدم الأشرطة لتحديد الجزء الذي يظهر للزوار (المعاينة مطابقة تماماً لما سيظهر في الموقع)</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label class="form-label" style="font-size: 0.85rem;">أفقي: <span id="focalXValue"><%= banner ? (banner.focal_x ?? 50) : 50 %></span>%</label>
+                                <input type="range" id="focalX" name="focal_x" min="0" max="100" value="<%= banner ? (banner.focal_x ?? 50) : 50 %>" oninput="updateCropPosition()" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label class="form-label" style="font-size: 0.85rem;">عمودي: <span id="focalYValue"><%= banner ? (banner.focal_y ?? 50) : 50 %></span>%</label>
+                                <input type="range" id="focalY" name="focal_y" min="0" max="100" value="<%= banner ? (banner.focal_y ?? 50) : 50 %>" oninput="updateCropPosition()" style="width: 100%;">
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="resetCrop()" style="margin-top: 0.75rem;"><i class="fas fa-crosshairs"></i> إعادة للوسط</button>
                     </div>
 
                     <!-- Text Content Section -->
@@ -252,7 +271,7 @@
                             <i class="fas fa-save"></i>
                             <%= banner ? 'حفظ التعديلات' : 'إضافة البنر' %>
                         </button>
-                        <a href="/banners" class="btn btn-secondary">إلغاء</a>
+                        <a href="/admin/banners" class="btn btn-secondary">إلغاء</a>
                     </div>
         </form>
     </div>
@@ -285,6 +304,8 @@
                     preview.src = e.target.result;
                     preview.style.display = 'block';
                     placeholder.style.display = 'none';
+                    preview.classList.remove('d-none'); preview.classList.add('d-block');
+                    updateCropPosition();
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -297,6 +318,10 @@
                 preview.src = input.value;
                 preview.style.display = 'block';
                 placeholder.style.display = 'none';
+                preview.classList.remove('d-none'); preview.classList.add('d-block');
+                // Wait for image load to ensure preview size is known
+                preview.onload = () => updateCropPosition();
+                updateCropPosition();
             }
         }
 
@@ -402,11 +427,83 @@
             }
         }
 
+        // === Crop / Focal position ===
+        function updateCropPosition() {
+            const xEl = document.getElementById('focalX');
+            const yEl = document.getElementById('focalY');
+            if (!xEl || !yEl) return;
+            const x = xEl.value, y = yEl.value;
+            const xv = document.getElementById('focalXValue');
+            const yv = document.getElementById('focalYValue');
+            if (xv) xv.textContent = x;
+            if (yv) yv.textContent = y;
+            const img = document.getElementById('imagePreview');
+            if (img) img.style.objectPosition = `${x}% ${y}%`;
+            const cross = document.getElementById('cropCrosshair');
+            if (cross) { cross.style.left = `${x}%`; cross.style.top = `${y}%`; }
+            const box = document.getElementById('bannerPreviewBox');
+            if (box && img && img.src && img.style.display !== 'none' && !img.classList.contains('d-none')) {
+                box.classList.add('has-image');
+            }
+        }
+        function resetCrop() {
+            const xEl = document.getElementById('focalX');
+            const yEl = document.getElementById('focalY');
+            if (xEl) xEl.value = 50;
+            if (yEl) yEl.value = 50;
+            updateCropPosition();
+        }
+        // Drag to move focal point
+        (function initCropDrag() {
+            const box = document.getElementById('bannerPreviewBox');
+            const img = document.getElementById('imagePreview');
+            if (!box || !img) return;
+            let isDragging = false, startX = 0, startY = 0, startFX = 50, startFY = 50;
+            const getFocal = () => ({
+                x: parseInt(document.getElementById('focalX')?.value) || 50,
+                y: parseInt(document.getElementById('focalY')?.value) || 50
+            });
+            const onMove = (e) => {
+                if (!isDragging) return;
+                const ce = e.touches ? e.touches[0] : e;
+                const dx = ce.clientX - startX;
+                const dy = ce.clientY - startY;
+                const rect = box.getBoundingClientRect();
+                const deltaX = -(dx / rect.width) * 100;
+                const deltaY = -(dy / rect.height) * 100;
+                let nx = Math.min(100, Math.max(0, startFX + deltaX));
+                let ny = Math.min(100, Math.max(0, startFY + deltaY));
+                const xEl = document.getElementById('focalX');
+                const yEl = document.getElementById('focalY');
+                if (xEl) xEl.value = Math.round(nx);
+                if (yEl) yEl.value = Math.round(ny);
+                updateCropPosition();
+            };
+            const onUp = () => { isDragging = false; if (box) box.style.cursor = ''; };
+            const onDown = (e) => {
+                const im = document.getElementById('imagePreview');
+                if (!im || !im.src || im.style.display === 'none' || im.classList.contains('d-none')) return;
+                isDragging = true;
+                const ce = e.touches ? e.touches[0] : e;
+                startX = ce.clientX; startY = ce.clientY;
+                const f = getFocal(); startFX = f.x; startFY = f.y;
+                box.style.cursor = 'grabbing';
+                e.preventDefault();
+            };
+            box.addEventListener('mousedown', onDown);
+            box.addEventListener('touchstart', onDown, { passive: false });
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove, { passive: false });
+            window.addEventListener('mouseup', onUp);
+            window.addEventListener('touchend', onUp);
+        })();
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function () {
             toggleImageInput();
             updatePreview();
             updateBlur();
+            updateCropPosition();
         });
 
         // === Compress image to max 4MB ===

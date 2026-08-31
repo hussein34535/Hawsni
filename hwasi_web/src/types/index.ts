@@ -24,6 +24,18 @@ export interface Banner {
     buttonText?: string;
     button_text?: string;
     buttonText_ar?: string;
+    focal_x?: number;
+    focal_y?: number;
+    button_opacity?: number;
+    image_blur?: number;
+    button_color?: string;
+    button_style?: string;
+    button_size?: string;
+    button_position?: string;
+    button_link?: string;
+    link?: string;
+    is_active?: boolean;
+    sort_order?: number;
 }
 
 export interface Product {

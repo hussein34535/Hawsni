@@ -38,6 +38,8 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
 
     const banner = banners[index];
     const bannerImage = banner.image_url || banner.imageUrl || banner.image || '/logo.png';
+    const focalX = (banner as any).focal_x ?? 50;
+    const focalY = (banner as any).focal_y ?? 50;
 
     // Translation logic with fallbacks
     const h = language === 'ar' ? (banner.heading_ar || banner.heading_text || 'وصل حديثاً') : (banner.heading_text || banner.heading || banner.title || 'New Arrival');
@@ -63,6 +65,7 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                         priority={index === 0}
                         quality={85}
                         className="object-cover"
+                        style={{ objectPosition: `${focalX}% ${focalY}%` }}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
                     />
 

@@ -30,7 +30,8 @@ class BannersController {
             const {
                 title, image_url, link, sort_order, is_active,
                 heading_text, subheading_text,
-                button_text, button_color, button_style, button_size, button_position, button_link
+                button_text, button_color, button_style, button_size, button_position, button_link,
+                focal_x, focal_y, button_opacity, image_blur
             } = req.body;
             let finalImageUrl = image_url;
 
@@ -64,7 +65,12 @@ class BannersController {
                 button_style: button_style || 'rounded',
                 button_size: button_size || 'medium',
                 button_position: button_position || 'right',
-                button_link: button_link || null
+                button_link: button_link || null,
+                // Crop / focal position (0-100)
+                focal_x: Math.min(100, Math.max(0, parseInt(focal_x) || 50)),
+                focal_y: Math.min(100, Math.max(0, parseInt(focal_y) || 50)),
+                button_opacity: Math.min(1, Math.max(0, parseFloat(button_opacity) || 1)),
+                image_blur: Math.min(20, Math.max(0, parseFloat(image_blur) || 0))
             };
 
             const { data, error } = await supabase
@@ -74,6 +80,13 @@ class BannersController {
                 .single();
 
             if (error) {
+                // Fallback if new columns don't exist yet (migration not run) - retry without them
+                if (error.code === 'PGRST204' || error.message.includes('focal_') || error.message.includes('button_opacity') || error.message.includes('image_blur')) {
+                    delete bannerData.focal_x; delete bannerData.focal_y; delete bannerData.button_opacity; delete bannerData.image_blur;
+                    const retry = await supabase.from('banners').insert([bannerData]).select().single();
+                    if (retry.error) throw retry.error;
+                    return res.redirect('/admin/banners');
+                }
                 console.error('Supabase error:', error);
                 throw error;
             }
@@ -116,7 +129,8 @@ class BannersController {
             const {
                 title, image_url, link, sort_order, is_active,
                 heading_text, subheading_text,
-                button_text, button_color, button_style, button_size, button_position, button_link
+                button_text, button_color, button_style, button_size, button_position, button_link,
+                focal_x, focal_y, button_opacity, image_blur
             } = req.body;
             let finalImageUrl = image_url;
 
@@ -150,16 +164,26 @@ class BannersController {
                 button_style: button_style || 'rounded',
                 button_size: button_size || 'medium',
                 button_position: button_position || 'right',
-                button_link: button_link || null
+                button_link: button_link || null,
+                focal_x: Math.min(100, Math.max(0, parseInt(focal_x) || 50)),
+                focal_y: Math.min(100, Math.max(0, parseInt(focal_y) || 50)),
+                button_opacity: Math.min(1, Math.max(0, parseFloat(button_opacity) || 1)),
+                image_blur: Math.min(20, Math.max(0, parseFloat(image_blur) || 0))
             };
 
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from('banners')
                 .update(updateData)
                 .eq('id', id)
                 .select()
                 .single();
 
+            if (error && (error.code === 'PGRST204' || error.message.includes('focal_') || error.message.includes('button_opacity') || error.message.includes('image_blur'))) {
+                delete updateData.focal_x; delete updateData.focal_y; delete updateData.button_opacity; delete updateData.image_blur;
+                const retry = await supabase.from('banners').update(updateData).eq('id', id).select().single();
+                if (retry.error) throw retry.error;
+                return res.redirect('/admin/banners');
+            }
             if (error) {
                 console.error('Supabase error:', error);
                 throw error;
