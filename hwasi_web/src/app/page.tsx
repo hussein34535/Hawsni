@@ -29,9 +29,12 @@ function extractBanners(payload: unknown): Banner[] {
     return [];
 }
 
-async function fetchJson<T>(url: string): Promise<T | null> {
+async function fetchJson<T>(url: string, opts?: { revalidate?: number | false }): Promise<T | null> {
     try {
-        const res = await fetch(url, { next: { revalidate: 300 } });
+        const fetchOpts: RequestInit & { next?: { revalidate?: number | false } } = opts?.revalidate === false
+            ? { cache: 'no-store' as const }
+            : { next: { revalidate: opts?.revalidate ?? 300 } };
+        const res = await fetch(url, fetchOpts);
         if (!res.ok) return null;
         const contentType = res.headers.get('content-type') || '';
         if (contentType.includes('text/html')) return null;
@@ -47,7 +50,7 @@ export default async function HomePage() {
         fetchJson<ApiData>(`${API_URL}/categories`),
         fetchJson<ApiData>(`${API_URL}/products`),
         fetchJson<ApiData>(`${API_URL}/products/featured`),
-        fetchJson<ApiData>(`${API_URL}/banners`),
+        fetchJson<ApiData>(`${API_URL}/banners`, { revalidate: false }),
     ]);
 
     const categories: Category[] = (catData?.categories || []).map((cat: Category) => ({
