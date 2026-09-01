@@ -4,7 +4,7 @@ import { Category, Product, Banner } from '@/types';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
 const BASE_URL = API_URL.replace(/\/api$/, '');
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
 
 const formatImageUrl = (url: string) => {
     if (!url) return '';

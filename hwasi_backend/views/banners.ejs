@@ -11,9 +11,13 @@
         </div>
 
         <% if (banners && banners.length> 0) { %>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;"><i class="fas fa-arrows-alt"></i> اسحب البطاقات لإعادة ترتيب البنرات</p>
+            <div id="bannersGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
                 <% banners.forEach(banner=> { %>
-                    <div class="card" style="margin: 0;">
+                    <div class="card banner-sortable-card" data-id="<%= banner.id %>" style="margin: 0; cursor: grab;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; color: var(--text-muted); font-size: 0.8rem;">
+                            <i class="fas fa-grip-vertical" style="opacity: 0.5;"></i> اسحب للترتيب
+                        </div>
                         <div
                             style="position: relative; height: 180px; border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
                             <% const isVideo = banner.image_url && (banner.image_url.endsWith('.mp4') || banner.image_url.endsWith('.webm') || banner.image_url.endsWith('.mov')); %>
@@ -69,7 +73,35 @@
                 <% } %>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script>
+        // Drag to reorder banners
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.getElementById('bannersGrid');
+            if (!grid || typeof Sortable === 'undefined') return;
+            new Sortable(grid, {
+                animation: 180,
+                handle: '.banner-sortable-card',
+                ghostClass: 'sortable-ghost',
+                onEnd: async () => {
+                    const cards = [...grid.querySelectorAll('.banner-sortable-card')];
+                    const payload = cards.map((el, idx) => ({ id: el.dataset.id, sort_order: idx + 1 }));
+                    try {
+                        const res = await fetch('/admin/banners/reorder', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'CSRF-Token': '<%= csrfToken %>' },
+                            body: JSON.stringify({ banners: payload })
+                        });
+                        const data = await res.json();
+                        if (data.success) showToast('تم تحديث الترتيب', 'success');
+                        else showToast(data.message || 'فشل تحديث الترتيب', 'error');
+                    } catch (e) {
+                        showToast('خطأ في تحديث الترتيب', 'error');
+                    }
+                }
+            });
+        });
+
         async function handleDelete(url, itemName) {
             showConfirm(`هل أنت متأكد من حذف ${itemName}؟`, async () => {
                 try {

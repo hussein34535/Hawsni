@@ -88,6 +88,32 @@
                         <button type="button" class="btn btn-secondary btn-sm" onclick="resetCrop()" style="margin-top: 0.75rem;"><i class="fas fa-crosshairs"></i> إعادة للوسط</button>
                     </div>
 
+                    <!-- Device Preview (Mobile / Tablet / Desktop) -->
+                    <div class="form-group" style="background: var(--light); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0;">
+                        <label class="form-label"><i class="fas fa-mobile-alt"></i> معاينة على الأجهزة المختلفة</label>
+                        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">هكذا سيظهر البنر للزوار — نفس الـ crop على كل مقاس شاشة</p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div>
+                                <div style="text-align: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-mobile-alt"></i> موبايل <span style="color: var(--text-muted); font-weight: 400;">375×160</span></div>
+                                <div style="width: 100%; max-width: 260px; height: 120px; border: 6px solid #222; border-radius: 14px; overflow: hidden; margin: 0 auto; background: white; position: relative;">
+                                    <img id="devicePreviewMobile" src="<%= banner ? banner.image_url : '' %>" style="width: 100%; height: 100%; object-fit: cover; object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
+                                </div>
+                            </div>
+                            <div>
+                                <div style="text-align: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-tablet-alt"></i> تابلت <span style="color: var(--text-muted); font-weight: 400;">768×280</span></div>
+                                <div style="width: 100%; height: 140px; border: 6px solid #222; border-radius: 14px; overflow: hidden; background: white; position: relative;">
+                                    <img id="devicePreviewTablet" src="<%= banner ? banner.image_url : '' %>" style="width: 100%; height: 100%; object-fit: cover; object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
+                                </div>
+                            </div>
+                            <div>
+                                <div style="text-align: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-desktop"></i> ديسكتوب <span style="color: var(--text-muted); font-weight: 400;">1200×400</span></div>
+                                <div style="width: 100%; height: 140px; border: 6px solid #222; border-radius: 14px; overflow: hidden; background: white; position: relative;">
+                                    <img id="devicePreviewDesktop" src="<%= banner ? banner.image_url : '' %>" style="width: 100%; height: 100%; object-fit: cover; object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Text Content Section -->
                     <div
                         style="background: var(--light); padding: 1.5rem; border-radius: var(--radius-md); margin: 2rem 0;">
@@ -445,6 +471,14 @@
             if (box && img && img.src && img.style.display !== 'none' && !img.classList.contains('d-none')) {
                 box.classList.add('has-image');
             }
+            // Sync device previews
+            ['devicePreviewMobile','devicePreviewTablet','devicePreviewDesktop'].forEach(id => {
+                const dimg = document.getElementById(id);
+                if (dimg) {
+                    dimg.style.objectPosition = `${x}% ${y}%`;
+                    if (img && img.src && !img.classList.contains('d-none')) dimg.src = img.src;
+                }
+            });
         }
         function resetCrop() {
             const xEl = document.getElementById('focalX');

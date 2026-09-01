@@ -196,6 +196,26 @@ class BannersController {
         }
     }
 
+    // Reorder banners (drag & drop)
+    async reorder(req, res) {
+        try {
+            const { banners } = req.body;
+            if (!banners || !Array.isArray(banners)) {
+                return res.status(400).json({ success: false, message: 'بيانات الترتيب غير صالحة' });
+            }
+            const updates = banners.map(({ id, sort_order }) =>
+                supabase.from('banners').update({ sort_order: parseInt(sort_order) }).eq('id', id)
+            );
+            const results = await Promise.all(updates);
+            const errors = results.filter(r => r.error);
+            if (errors.length > 0) throw new Error(errors.map(e => e.error.message).join(', '));
+            res.json({ success: true });
+        } catch (err) {
+            console.error('Error reordering banners:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    }
+
     // Delete a banner
     async delete(req, res) {
         try {

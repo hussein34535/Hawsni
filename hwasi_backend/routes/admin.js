@@ -51,6 +51,7 @@ router.post('/scrape-product', scraperController.scrape);
 router.get('/banners', bannersController.index);
 router.get('/banners/new', bannersController.new);
 router.post('/banners', upload.single('banner_image'), bannersController.create);
+router.post('/banners/reorder', bannersController.reorder);
 router.get('/banners/:id/edit', bannersController.edit);
 router.post('/banners/:id', upload.single('banner_image'), bannersController.update);
 router.delete('/banners/:id', bannersController.delete);
