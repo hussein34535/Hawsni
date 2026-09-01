@@ -514,15 +514,6 @@
             }
             updateResponsivePreviews();
         }
-            // Sync device previews
-            ['devicePreviewMobile','devicePreviewTablet','devicePreviewDesktop'].forEach(id => {
-                const dimg = document.getElementById(id);
-                if (dimg) {
-                    dimg.style.objectPosition = `${x}% ${y}%`;
-                    if (img && img.src && !img.classList.contains('d-none')) dimg.src = img.src;
-                }
-            });
-        }
         function resetCrop() {
             const xEl = document.getElementById('focalX');
             const yEl = document.getElementById('focalY');
