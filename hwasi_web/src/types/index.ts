@@ -26,6 +26,12 @@ export interface Banner {
     buttonText_ar?: string;
     focal_x?: number;
     focal_y?: number;
+    mobile_image_url?: string;
+    tablet_image_url?: string;
+    mobile_focal_x?: number;
+    mobile_focal_y?: number;
+    tablet_focal_x?: number;
+    tablet_focal_y?: number;
     button_opacity?: number;
     image_blur?: number;
     button_color?: string;

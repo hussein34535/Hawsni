@@ -114,6 +114,47 @@
                         </div>
                     </div>
 
+                    <!-- Responsive Images per Device (optional) -->
+                    <div class="form-group" style="background: #fffbeb; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid #fcd34d; margin: 1rem 0;">
+                        <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-weight: 800; font-size: 0.95rem;">
+                            <input type="checkbox" id="enableResponsiveImages" onchange="toggleResponsiveImages()" <%= (banner && (banner.mobile_image_url || banner.tablet_image_url)) ? 'checked' : '' %>>
+                            <i class="fas fa-images" style="color: #d97706;"></i> تخصيص شكل مختلف لكل جهاز (اختياري)
+                        </label>
+                        <p class="text-muted" style="font-size: 0.82rem; margin: 0.4rem 0 0 0;">لو عايز صورة مربعة للموبايل وصورة عريضة للديسكتوب — فعّل الاختيار وحمّل صور مخصصة. لو سيبته فاضي هيستخدم الصورة الأساسية تلقائياً.</p>
+                        <div id="responsiveImagesSection" style="display: <%= (banner && (banner.mobile_image_url || banner.tablet_image_url)) ? 'block' : 'none' %>; margin-top: 1rem;">
+                            <!-- Mobile -->
+                            <div style="background: white; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #f3f4f6;">
+                                <h4 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 0.6rem;"><i class="fas fa-mobile-alt"></i> صورة الموبايل <small style="color: var(--text-muted); font-weight: 400;">— لو فاضية = نفس صورة الديسكتوب</small></h4>
+                                <input type="url" name="mobile_image_url" id="mobileImageUrl" class="form-control" placeholder="https://.../banner-mobile.jpg" value="<%= banner ? (banner.mobile_image_url || '') : '' %>" oninput="updateResponsivePreviews()">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem;">
+                                    <div>
+                                        <label style="font-size: 0.8rem;">أفقي: <span id="mobileFocalXValue"><%= banner ? (banner.mobile_focal_x ?? 50) : 50 %></span>%</label>
+                                        <input type="range" id="mobileFocalX" name="mobile_focal_x" min="0" max="100" value="<%= banner ? (banner.mobile_focal_x ?? 50) : 50 %>" oninput="updateResponsivePreviews()" style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.8rem;">عمودي: <span id="mobileFocalYValue"><%= banner ? (banner.mobile_focal_y ?? 50) : 50 %></span>%</label>
+                                        <input type="range" id="mobileFocalY" name="mobile_focal_y" min="0" max="100" value="<%= banner ? (banner.mobile_focal_y ?? 50) : 50 %>" oninput="updateResponsivePreviews()" style="width: 100%;">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Tablet -->
+                            <div style="background: white; padding: 1rem; border-radius: 10px; border: 1px solid #e5e7eb;">
+                                <h4 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 0.6rem;"><i class="fas fa-tablet-alt"></i> صورة التابلت <small style="color: var(--text-muted); font-weight: 400;">— لو فاضية = نفس صورة الديسكتوب</small></h4>
+                                <input type="url" name="tablet_image_url" id="tabletImageUrl" class="form-control" placeholder="https://.../banner-tablet.jpg" value="<%= banner ? (banner.tablet_image_url || '') : '' %>" oninput="updateResponsivePreviews()">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem;">
+                                    <div>
+                                        <label style="font-size: 0.8rem;">أفقي: <span id="tabletFocalXValue"><%= banner ? (banner.tablet_focal_x ?? 50) : 50 %></span>%</label>
+                                        <input type="range" id="tabletFocalX" name="tablet_focal_x" min="0" max="100" value="<%= banner ? (banner.tablet_focal_x ?? 50) : 50 %>" oninput="updateResponsivePreviews()" style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 0.8rem;">عمودي: <span id="tabletFocalYValue"><%= banner ? (banner.tablet_focal_y ?? 50) : 50 %></span>%</label>
+                                        <input type="range" id="tabletFocalY" name="tablet_focal_y" min="0" max="100" value="<%= banner ? (banner.tablet_focal_y ?? 50) : 50 %>" oninput="updateResponsivePreviews()" style="width: 100%;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Text Content Section -->
                     <div
                         style="background: var(--light); padding: 1.5rem; border-radius: var(--radius-md); margin: 2rem 0;">
@@ -471,6 +512,8 @@
             if (box && img && img.src && img.style.display !== 'none' && !img.classList.contains('d-none')) {
                 box.classList.add('has-image');
             }
+            updateResponsivePreviews();
+        }
             // Sync device previews
             ['devicePreviewMobile','devicePreviewTablet','devicePreviewDesktop'].forEach(id => {
                 const dimg = document.getElementById(id);
@@ -486,6 +529,51 @@
             if (xEl) xEl.value = 50;
             if (yEl) yEl.value = 50;
             updateCropPosition();
+        }
+        function toggleResponsiveImages() {
+            const cb = document.getElementById('enableResponsiveImages');
+            const sec = document.getElementById('responsiveImagesSection');
+            if (!cb || !sec) return;
+            sec.style.display = cb.checked ? 'block' : 'none';
+            updateResponsivePreviews();
+        }
+        function updateResponsivePreviews() {
+            ['mobileFocalX','mobileFocalY','tabletFocalX','tabletFocalY'].forEach(id => {
+                const el = document.getElementById(id);
+                const v = document.getElementById(id + 'Value');
+                if (el && v) v.textContent = el.value;
+            });
+            const mainImg = document.getElementById('imagePreview');
+            const mainSrc = mainImg ? mainImg.src : '';
+            const enabled = document.getElementById('enableResponsiveImages')?.checked;
+            const mobileImg = document.getElementById('devicePreviewMobile');
+            const tabletImg = document.getElementById('devicePreviewTablet');
+            const desktopImg = document.getElementById('devicePreviewDesktop');
+            const fx = document.getElementById('focalX')?.value || 50;
+            const fy = document.getElementById('focalY')?.value || 50;
+            if (enabled) {
+                const mUrl = document.getElementById('mobileImageUrl')?.value.trim();
+                const tUrl = document.getElementById('tabletImageUrl')?.value.trim();
+                if (mobileImg) {
+                    if (mUrl) mobileImg.src = mUrl;
+                    else if (mainSrc && mainImg && !mainImg.classList.contains('d-none')) mobileImg.src = mainSrc;
+                    const mx = document.getElementById('mobileFocalX')?.value || 50;
+                    const my = document.getElementById('mobileFocalY')?.value || 50;
+                    mobileImg.style.objectPosition = `${mx}% ${my}%`;
+                }
+                if (tabletImg) {
+                    if (tUrl) tabletImg.src = tUrl;
+                    else if (mainSrc && mainImg && !mainImg.classList.contains('d-none')) tabletImg.src = mainSrc;
+                    const tx = document.getElementById('tabletFocalX')?.value || 50;
+                    const ty = document.getElementById('tabletFocalY')?.value || 50;
+                    tabletImg.style.objectPosition = `${tx}% ${ty}%`;
+                }
+                if (desktopImg) desktopImg.style.objectPosition = `${fx}% ${fy}%`;
+            } else {
+                if (mobileImg) mobileImg.style.objectPosition = `${fx}% ${fy}%`;
+                if (tabletImg) tabletImg.style.objectPosition = `${fx}% ${fy}%`;
+                if (desktopImg) desktopImg.style.objectPosition = `${fx}% ${fy}%`;
+            }
         }
         // Drag to move focal point
         (function initCropDrag() {

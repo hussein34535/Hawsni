@@ -40,6 +40,13 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
     const bannerImage = banner.image_url || banner.imageUrl || banner.image || '/logo.png';
     const focalX = (banner as any).focal_x ?? 50;
     const focalY = (banner as any).focal_y ?? 50;
+    // Responsive per-device images & focals (fallback to desktop)
+    const mobileImage = (banner as any).mobile_image_url || bannerImage;
+    const tabletImage = (banner as any).tablet_image_url || bannerImage;
+    const mobileFocalX = (banner as any).mobile_focal_x ?? focalX;
+    const mobileFocalY = (banner as any).mobile_focal_y ?? focalY;
+    const tabletFocalX = (banner as any).tablet_focal_x ?? focalX;
+    const tabletFocalY = (banner as any).tablet_focal_y ?? focalY;
 
     // Translation logic with fallbacks
     const h = language === 'ar' ? (banner.heading_ar || banner.heading_text || 'وصل حديثاً') : (banner.heading_text || banner.heading || banner.title || 'New Arrival');
@@ -58,16 +65,45 @@ export default function HeroCarousel({ banners, isLoading }: HeroCarouselProps) 
                     className="absolute inset-0 cursor-zoom-in"
                     onClick={() => setIsLightboxOpen(true)}
                 >
-                    <Image
-                        src={bannerImage}
-                        alt={s}
-                        fill
-                        priority={index === 0}
-                        quality={85}
-                        className="object-cover"
-                        style={{ objectPosition: `${focalX}% ${focalY}%` }}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
-                    />
+                    {/* Mobile image */}
+                    <div className="absolute inset-0 block md:hidden">
+                        <Image
+                            src={mobileImage}
+                            alt={s}
+                            fill
+                            priority={index === 0}
+                            quality={85}
+                            className="object-cover"
+                            style={{ objectPosition: `${mobileFocalX}% ${mobileFocalY}%` }}
+                            sizes="100vw"
+                        />
+                    </div>
+                    {/* Tablet image */}
+                    <div className="absolute inset-0 hidden md:block lg:hidden">
+                        <Image
+                            src={tabletImage}
+                            alt={s}
+                            fill
+                            priority={index === 0}
+                            quality={85}
+                            className="object-cover"
+                            style={{ objectPosition: `${tabletFocalX}% ${tabletFocalY}%` }}
+                            sizes="100vw"
+                        />
+                    </div>
+                    {/* Desktop image */}
+                    <div className="absolute inset-0 hidden lg:block">
+                        <Image
+                            src={bannerImage}
+                            alt={s}
+                            fill
+                            priority={index === 0}
+                            quality={85}
+                            className="object-cover"
+                            style={{ objectPosition: `${focalX}% ${focalY}%` }}
+                            sizes="100vw"
+                        />
+                    </div>
 
                     {/* The text content overlay has been removed per user request */}
                 </motion.div>
