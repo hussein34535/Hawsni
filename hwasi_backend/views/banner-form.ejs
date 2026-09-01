@@ -54,14 +54,12 @@
                         </div>
                     </div>
 
-                    <!-- Image Preview with Aspect Ratio Guide + Crop -->
+                    <!-- Image Preview (upload check) -->
                     <div class="form-group">
-                        <label class="form-label">معاينة الصورة (نسبة 3:1)</label>
-                        <div class="banner-preview-box" id="bannerPreviewBox">
+                        <label class="form-label">معاينة الصورة (نسبة 3:1 — المقاس المثالي 1200×400)</label>
+                        <div class="banner-preview-box">
                             <img id="imagePreview" src="<%= banner ? banner.image_url : '' %>"
-                                class="<%= banner ? 'd-block' : 'd-none' %>" draggable="false" style="object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
-                            <div class="crop-crosshair" id="cropCrosshair"></div>
-                            <div class="crop-hint"><i class="fas fa-arrows-alt"></i> اسحب لتحريك الصورة</div>
+                                class="<%= banner ? 'd-block' : 'd-none' %>" draggable="false">
                             <div id="placeholderText"
                                 class="<%= banner ? 'd-none' : 'd-block' %>">
                                 <i class="fas fa-image"></i>
@@ -71,88 +69,60 @@
                         </div>
                     </div>
 
-                    <!-- Crop Position Controls -->
-                    <div class="form-group" id="cropControls" style="background: var(--light); padding: 1.25rem; border-radius: var(--radius-md); border: 1px dashed var(--border-medium);">
-                        <label class="form-label"><i class="fas fa-crop-alt"></i> تحكم في الجزء الظاهر من الصورة</label>
-                        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 0.75rem;">اسحب الصورة داخل المعاينة أو استخدم الأشرطة لتحديد الجزء الذي يظهر للزوار (المعاينة مطابقة تماماً لما سيظهر في الموقع)</p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div>
-                                <label class="form-label" style="font-size: 0.85rem;">أفقي: <span id="focalXValue"><%= banner ? (banner.focal_x ?? 50) : 50 %></span>%</label>
-                                <input type="range" id="focalX" name="focal_x" min="0" max="100" value="<%= banner ? (banner.focal_x ?? 50) : 50 %>" oninput="updateCropPosition()" style="width: 100%;">
-                            </div>
-                            <div>
-                                <label class="form-label" style="font-size: 0.85rem;">عمودي: <span id="focalYValue"><%= banner ? (banner.focal_y ?? 50) : 50 %></span>%</label>
-                                <input type="range" id="focalY" name="focal_y" min="0" max="100" value="<%= banner ? (banner.focal_y ?? 50) : 50 %>" oninput="updateCropPosition()" style="width: 100%;">
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="resetCrop()" style="margin-top: 0.75rem;"><i class="fas fa-crosshairs"></i> إعادة للوسط</button>
-                    </div>
-
-                    <!-- Device Preview (Mobile / Tablet / Desktop) -->
+                    <!-- Crop: drag on each device frame -->
                     <div class="form-group" style="background: var(--light); padding: 1.5rem; border-radius: var(--radius-md); margin: 1rem 0;">
-                        <label class="form-label"><i class="fas fa-mobile-alt"></i> معاينة على الأجهزة المختلفة</label>
-                        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">هكذا سيظهر البنر للزوار — نفس الـ crop على كل مقاس شاشة</p>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                            <div>
-                                <div style="text-align: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-mobile-alt"></i> موبايل <span style="color: var(--text-muted); font-weight: 400;">375×160</span></div>
-                                <div style="width: 100%; max-width: 260px; height: 120px; border: 6px solid #222; border-radius: 14px; overflow: hidden; margin: 0 auto; background: white; position: relative;">
-                                    <img id="devicePreviewMobile" src="<%= banner ? banner.image_url : '' %>" style="width: 100%; height: 100%; object-fit: cover; object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
-                                </div>
-                            </div>
-                            <div>
-                                <div style="text-align: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-tablet-alt"></i> تابلت <span style="color: var(--text-muted); font-weight: 400;">768×280</span></div>
-                                <div style="width: 100%; height: 140px; border: 6px solid #222; border-radius: 14px; overflow: hidden; background: white; position: relative;">
-                                    <img id="devicePreviewTablet" src="<%= banner ? banner.image_url : '' %>" style="width: 100%; height: 100%; object-fit: cover; object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
-                                </div>
-                            </div>
-                            <div>
-                                <div style="text-align: center; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem;"><i class="fas fa-desktop"></i> ديسكتوب <span style="color: var(--text-muted); font-weight: 400;">1200×400</span></div>
-                                <div style="width: 100%; height: 140px; border: 6px solid #222; border-radius: 14px; overflow: hidden; background: white; position: relative;">
-                                    <img id="devicePreviewDesktop" src="<%= banner ? banner.image_url : '' %>" style="width: 100%; height: 100%; object-fit: cover; object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Responsive Images per Device (optional) -->
-                    <div class="form-group" style="background: #fffbeb; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid #fcd34d; margin: 1rem 0;">
-                        <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-weight: 800; font-size: 0.95rem;">
-                            <input type="checkbox" id="enableResponsiveImages" onchange="toggleResponsiveImages()" <%= (banner && (banner.mobile_image_url || banner.tablet_image_url)) ? 'checked' : '' %>>
-                            <i class="fas fa-images" style="color: #d97706;"></i> تخصيص شكل مختلف لكل جهاز (اختياري)
-                        </label>
-                        <p class="text-muted" style="font-size: 0.82rem; margin: 0.4rem 0 0 0;">لو عايز صورة مربعة للموبايل وصورة عريضة للديسكتوب — فعّل الاختيار وحمّل صور مخصصة. لو سيبته فاضي هيستخدم الصورة الأساسية تلقائياً.</p>
-                        <div id="responsiveImagesSection" style="display: <%= (banner && (banner.mobile_image_url || banner.tablet_image_url)) ? 'block' : 'none' %>; margin-top: 1rem;">
+                        <label class="form-label"><i class="fas fa-crop-alt"></i> تخصيص الجزء الظاهر على كل جهاز</label>
+                        <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;"><i class="fas fa-hand-pointer"></i> اسحب الصورة داخل أي إطار — المعاينة مطابقة تماماً لما سيظهر للزوار على كل جهاز</p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; align-items: end;">
                             <!-- Mobile -->
-                            <div style="background: white; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid #f3f4f6;">
-                                <h4 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 0.6rem;"><i class="fas fa-mobile-alt"></i> صورة الموبايل <small style="color: var(--text-muted); font-weight: 400;">— لو فاضية = نفس صورة الديسكتوب</small></h4>
-                                <input type="url" name="mobile_image_url" id="mobileImageUrl" class="form-control" placeholder="https://.../banner-mobile.jpg" value="<%= banner ? (banner.mobile_image_url || '') : '' %>" oninput="updateResponsivePreviews()">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem;">
-                                    <div>
-                                        <label style="font-size: 0.8rem;">أفقي: <span id="mobileFocalXValue"><%= banner ? (banner.mobile_focal_x ?? 50) : 50 %></span>%</label>
-                                        <input type="range" id="mobileFocalX" name="mobile_focal_x" min="0" max="100" value="<%= banner ? (banner.mobile_focal_x ?? 50) : 50 %>" oninput="updateResponsivePreviews()" style="width: 100%;">
-                                    </div>
-                                    <div>
-                                        <label style="font-size: 0.8rem;">عمودي: <span id="mobileFocalYValue"><%= banner ? (banner.mobile_focal_y ?? 50) : 50 %></span>%</label>
-                                        <input type="range" id="mobileFocalY" name="mobile_focal_y" min="0" max="100" value="<%= banner ? (banner.mobile_focal_y ?? 50) : 50 %>" oninput="updateResponsivePreviews()" style="width: 100%;">
-                                    </div>
+                            <div>
+                                <div class="device-frame" id="frameMobile" style="aspect-ratio: 375/160;">
+                                    <img id="cropMobile" src="<%= banner ? (banner.mobile_image_url || banner.image_url) : '' %>" draggable="false"
+                                        style="object-position: <%= banner ? (banner.mobile_focal_x ?? 50) : 50 %>% <%= banner ? (banner.mobile_focal_y ?? 50) : 50 %>%;">
+                                    <span class="drag-chip"><i class="fas fa-hand-pointer"></i> اسحب</span>
                                 </div>
+                                <div class="frame-meta">
+                                    <span><i class="fas fa-mobile-alt"></i> موبايل</span>
+                                    <span id="mobileFocalLabel" class="focal-label"></span>
+                                </div>
+                                <input type="hidden" name="mobile_focal_x" id="mobileFocalX" value="<%= banner ? (banner.mobile_focal_x ?? 50) : 50 %>">
+                                <input type="hidden" name="mobile_focal_y" id="mobileFocalY" value="<%= banner ? (banner.mobile_focal_y ?? 50) : 50 %>">
+                                <button type="button" class="btn btn-link btn-sm" onclick="toggleDeviceImage('mobile')" style="padding: 0.15rem 0; font-size: 0.78rem;"><i class="fas fa-image"></i> صورة مختلفة للموبايل</button>
+                                <input type="url" name="mobile_image_url" id="mobileImageUrl" class="form-control" style="display: <%= (banner && banner.mobile_image_url) ? 'block' : 'none' %>; font-size: 0.8rem;" placeholder="https://.../banner-mobile.jpg" value="<%= banner ? (banner.mobile_image_url || '') : '' %>" oninput="onDeviceImageInput('mobile')">
                             </div>
                             <!-- Tablet -->
-                            <div style="background: white; padding: 1rem; border-radius: 10px; border: 1px solid #e5e7eb;">
-                                <h4 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 0.6rem;"><i class="fas fa-tablet-alt"></i> صورة التابلت <small style="color: var(--text-muted); font-weight: 400;">— لو فاضية = نفس صورة الديسكتوب</small></h4>
-                                <input type="url" name="tablet_image_url" id="tabletImageUrl" class="form-control" placeholder="https://.../banner-tablet.jpg" value="<%= banner ? (banner.tablet_image_url || '') : '' %>" oninput="updateResponsivePreviews()">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem;">
-                                    <div>
-                                        <label style="font-size: 0.8rem;">أفقي: <span id="tabletFocalXValue"><%= banner ? (banner.tablet_focal_x ?? 50) : 50 %></span>%</label>
-                                        <input type="range" id="tabletFocalX" name="tablet_focal_x" min="0" max="100" value="<%= banner ? (banner.tablet_focal_x ?? 50) : 50 %>" oninput="updateResponsivePreviews()" style="width: 100%;">
-                                    </div>
-                                    <div>
-                                        <label style="font-size: 0.8rem;">عمودي: <span id="tabletFocalYValue"><%= banner ? (banner.tablet_focal_y ?? 50) : 50 %></span>%</label>
-                                        <input type="range" id="tabletFocalY" name="tablet_focal_y" min="0" max="100" value="<%= banner ? (banner.tablet_focal_y ?? 50) : 50 %>" oninput="updateResponsivePreviews()" style="width: 100%;">
-                                    </div>
+                            <div>
+                                <div class="device-frame" id="frameTablet" style="aspect-ratio: 768/280;">
+                                    <img id="cropTablet" src="<%= banner ? (banner.tablet_image_url || banner.image_url) : '' %>" draggable="false"
+                                        style="object-position: <%= banner ? (banner.tablet_focal_x ?? 50) : 50 %>% <%= banner ? (banner.tablet_focal_y ?? 50) : 50 %>%;">
+                                    <span class="drag-chip"><i class="fas fa-hand-pointer"></i> اسحب</span>
+                                </div>
+                                <div class="frame-meta">
+                                    <span><i class="fas fa-tablet-alt"></i> تابلت</span>
+                                    <span id="tabletFocalLabel" class="focal-label"></span>
+                                </div>
+                                <input type="hidden" name="tablet_focal_x" id="tabletFocalX" value="<%= banner ? (banner.tablet_focal_x ?? 50) : 50 %>">
+                                <input type="hidden" name="tablet_focal_y" id="tabletFocalY" value="<%= banner ? (banner.tablet_focal_y ?? 50) : 50 %>">
+                                <button type="button" class="btn btn-link btn-sm" onclick="toggleDeviceImage('tablet')" style="padding: 0.15rem 0; font-size: 0.78rem;"><i class="fas fa-image"></i> صورة مختلفة للتابلت</button>
+                                <input type="url" name="tablet_image_url" id="tabletImageUrl" class="form-control" style="display: <%= (banner && banner.tablet_image_url) ? 'block' : 'none' %>; font-size: 0.8rem;" placeholder="https://.../banner-tablet.jpg" value="<%= banner ? (banner.tablet_image_url || '') : '' %>" oninput="onDeviceImageInput('tablet')">
+                            </div>
+                            <!-- Desktop -->
+                            <div>
+                                <div class="device-frame" id="frameDesktop" style="aspect-ratio: 3/1;">
+                                    <img id="cropDesktop" src="<%= banner ? banner.image_url : '' %>" draggable="false"
+                                        style="object-position: <%= banner ? (banner.focal_x ?? 50) : 50 %>% <%= banner ? (banner.focal_y ?? 50) : 50 %>%;">
+                                    <span class="drag-chip"><i class="fas fa-hand-pointer"></i> اسحب</span>
+                                </div>
+                                <div class="frame-meta">
+                                    <span><i class="fas fa-desktop"></i> ديسكتوب</span>
+                                    <span id="desktopFocalLabel" class="focal-label"></span>
                                 </div>
                             </div>
                         </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="resetAllCrops()" style="margin-top: 0.75rem;"><i class="fas fa-crosshairs"></i> إعادة الكل للوسط</button>
+                        <!-- Hidden focal inputs (desktop) -->
+                        <input type="hidden" name="focal_x" id="focalX" value="<%= banner ? (banner.focal_x ?? 50) : 50 %>">
+                        <input type="hidden" name="focal_y" id="focalY" value="<%= banner ? (banner.focal_y ?? 50) : 50 %>">
                     </div>
 
                     <!-- Text Content Section -->
@@ -372,7 +342,7 @@
                     preview.style.display = 'block';
                     placeholder.style.display = 'none';
                     preview.classList.remove('d-none'); preview.classList.add('d-block');
-                    updateCropPosition();
+                    syncCropImages();
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -386,9 +356,8 @@
                 preview.style.display = 'block';
                 placeholder.style.display = 'none';
                 preview.classList.remove('d-none'); preview.classList.add('d-block');
-                // Wait for image load to ensure preview size is known
-                preview.onload = () => updateCropPosition();
-                updateCropPosition();
+                preview.onload = () => syncCropImages();
+                syncCropImages();
             }
         }
 
@@ -494,129 +463,98 @@
             }
         }
 
-        // === Crop / Focal position ===
-        function updateCropPosition() {
-            const xEl = document.getElementById('focalX');
-            const yEl = document.getElementById('focalY');
-            if (!xEl || !yEl) return;
-            const x = xEl.value, y = yEl.value;
-            const xv = document.getElementById('focalXValue');
-            const yv = document.getElementById('focalYValue');
-            if (xv) xv.textContent = x;
-            if (yv) yv.textContent = y;
+        // === Crop: drag directly on each device frame ===
+        function focalLabel(y) {
+            if (y < 35) return 'فوق ' + y + '%';
+            if (y > 65) return 'تحت ' + y + '%';
+            return 'وسط';
+        }
+        function hasBannerImage() {
             const img = document.getElementById('imagePreview');
-            if (img) img.style.objectPosition = `${x}% ${y}%`;
-            const cross = document.getElementById('cropCrosshair');
-            if (cross) { cross.style.left = `${x}%`; cross.style.top = `${y}%`; }
-            const box = document.getElementById('bannerPreviewBox');
-            if (box && img && img.src && img.style.display !== 'none' && !img.classList.contains('d-none')) {
-                box.classList.add('has-image');
-            }
-            updateResponsivePreviews();
+            return img && img.src && !img.classList.contains('d-none');
         }
-        function resetCrop() {
-            const xEl = document.getElementById('focalX');
-            const yEl = document.getElementById('focalY');
-            if (xEl) xEl.value = 50;
-            if (yEl) yEl.value = 50;
-            updateCropPosition();
-        }
-        function toggleResponsiveImages() {
-            const cb = document.getElementById('enableResponsiveImages');
-            const sec = document.getElementById('responsiveImagesSection');
-            if (!cb || !sec) return;
-            sec.style.display = cb.checked ? 'block' : 'none';
-            updateResponsivePreviews();
-        }
-        function updateResponsivePreviews() {
-            ['mobileFocalX','mobileFocalY','tabletFocalX','tabletFocalY'].forEach(id => {
-                const el = document.getElementById(id);
-                const v = document.getElementById(id + 'Value');
-                if (el && v) v.textContent = el.value;
-            });
-            const mainImg = document.getElementById('imagePreview');
-            const mainSrc = mainImg ? mainImg.src : '';
-            const enabled = document.getElementById('enableResponsiveImages')?.checked;
-            const mobileImg = document.getElementById('devicePreviewMobile');
-            const tabletImg = document.getElementById('devicePreviewTablet');
-            const desktopImg = document.getElementById('devicePreviewDesktop');
-            const fx = document.getElementById('focalX')?.value || 50;
-            const fy = document.getElementById('focalY')?.value || 50;
-            if (enabled) {
-                const mUrl = document.getElementById('mobileImageUrl')?.value.trim();
-                const tUrl = document.getElementById('tabletImageUrl')?.value.trim();
-                if (mobileImg) {
-                    if (mUrl) mobileImg.src = mUrl;
-                    else if (mainSrc && mainImg && !mainImg.classList.contains('d-none')) mobileImg.src = mainSrc;
-                    const mx = document.getElementById('mobileFocalX')?.value || 50;
-                    const my = document.getElementById('mobileFocalY')?.value || 50;
-                    mobileImg.style.objectPosition = `${mx}% ${my}%`;
-                }
-                if (tabletImg) {
-                    if (tUrl) tabletImg.src = tUrl;
-                    else if (mainSrc && mainImg && !mainImg.classList.contains('d-none')) tabletImg.src = mainSrc;
-                    const tx = document.getElementById('tabletFocalX')?.value || 50;
-                    const ty = document.getElementById('tabletFocalY')?.value || 50;
-                    tabletImg.style.objectPosition = `${tx}% ${ty}%`;
-                }
-                if (desktopImg) desktopImg.style.objectPosition = `${fx}% ${fy}%`;
-            } else {
-                if (mobileImg) mobileImg.style.objectPosition = `${fx}% ${fy}%`;
-                if (tabletImg) tabletImg.style.objectPosition = `${fx}% ${fy}%`;
-                if (desktopImg) desktopImg.style.objectPosition = `${fx}% ${fy}%`;
-            }
-        }
-        // Drag to move focal point
-        (function initCropDrag() {
-            const box = document.getElementById('bannerPreviewBox');
-            const img = document.getElementById('imagePreview');
-            if (!box || !img) return;
-            let isDragging = false, startX = 0, startY = 0, startFX = 50, startFY = 50;
-            const getFocal = () => ({
-                x: parseInt(document.getElementById('focalX')?.value) || 50,
-                y: parseInt(document.getElementById('focalY')?.value) || 50
-            });
-            const onMove = (e) => {
-                if (!isDragging) return;
-                const ce = e.touches ? e.touches[0] : e;
-                const dx = ce.clientX - startX;
-                const dy = ce.clientY - startY;
-                const rect = box.getBoundingClientRect();
-                const deltaX = -(dx / rect.width) * 100;
-                const deltaY = -(dy / rect.height) * 100;
-                let nx = Math.min(100, Math.max(0, startFX + deltaX));
-                let ny = Math.min(100, Math.max(0, startFY + deltaY));
-                const xEl = document.getElementById('focalX');
-                const yEl = document.getElementById('focalY');
-                if (xEl) xEl.value = Math.round(nx);
-                if (yEl) yEl.value = Math.round(ny);
-                updateCropPosition();
+        function applyFrame(device) {
+            const map = {
+                mobile:  { img: 'cropMobile',  x: 'mobileFocalX', y: 'mobileFocalY', label: 'mobileFocalLabel' },
+                tablet:  { img: 'cropTablet',  x: 'tabletFocalX', y: 'tabletFocalY', label: 'tabletFocalLabel' },
+                desktop: { img: 'cropDesktop', x: 'focalX',       y: 'focalY',       label: 'desktopFocalLabel' }
             };
-            const onUp = () => { isDragging = false; if (box) box.style.cursor = ''; };
-            const onDown = (e) => {
-                const im = document.getElementById('imagePreview');
-                if (!im || !im.src || im.style.display === 'none' || im.classList.contains('d-none')) return;
-                isDragging = true;
-                const ce = e.touches ? e.touches[0] : e;
-                startX = ce.clientX; startY = ce.clientY;
-                const f = getFocal(); startFX = f.x; startFY = f.y;
-                box.style.cursor = 'grabbing';
+            const m = map[device];
+            const img = document.getElementById(m.img);
+            const x = document.getElementById(m.x).value;
+            const y = document.getElementById(m.y).value;
+            if (img) img.style.objectPosition = x + '% ' + y + '%';
+            const label = document.getElementById(m.label);
+            if (label) label.textContent = focalLabel(parseInt(y));
+        }
+        function applyAllFrames() { ['mobile', 'tablet', 'desktop'].forEach(applyFrame); }
+        function syncCropImages() {
+            const mainSrc = hasBannerImage() ? document.getElementById('imagePreview').src : '';
+            // Desktop always mirrors the main image
+            const d = document.getElementById('cropDesktop');
+            if (d && mainSrc) d.src = mainSrc;
+            // Mobile/tablet use their custom image if set, else mirror main
+            ['mobile', 'tablet'].forEach(dev => {
+                const urlInput = document.getElementById(dev + 'ImageUrl');
+                const frame = document.getElementById('crop' + dev.charAt(0).toUpperCase() + dev.slice(1));
+                if (!frame) return;
+                const custom = urlInput && urlInput.value.trim();
+                if (custom) frame.src = custom;
+                else if (mainSrc) frame.src = mainSrc;
+            });
+            applyAllFrames();
+        }
+        function toggleDeviceImage(device) {
+            const input = document.getElementById(device + 'ImageUrl');
+            if (!input) return;
+            input.style.display = input.style.display === 'none' ? 'block' : 'none';
+            onDeviceImageInput(device);
+        }
+        function onDeviceImageInput(device) {
+            syncCropImages();
+        }
+        function resetAllCrops() {
+            document.getElementById('focalX').value = 50;
+            document.getElementById('focalY').value = 50;
+            document.getElementById('mobileFocalX').value = 50;
+            document.getElementById('mobileFocalY').value = 50;
+            document.getElementById('tabletFocalX').value = 50;
+            document.getElementById('tabletFocalY').value = 50;
+            applyAllFrames();
+        }
+        function bindCropDrag(frameId, xId, yId, device) {
+            const frame = document.getElementById(frameId);
+            if (!frame) return;
+            let dragging = false;
+            function move(e) {
+                const r = frame.getBoundingClientRect();
+                const x = Math.round(Math.min(100, Math.max(0, (e.clientX - r.left) / r.width * 100)));
+                const y = Math.round(Math.min(100, Math.max(0, (e.clientY - r.top) / r.height * 100)));
+                document.getElementById(xId).value = x;
+                document.getElementById(yId).value = y;
+                applyFrame(device);
+            }
+            frame.addEventListener('pointerdown', (e) => {
+                if (!hasBannerImage()) return;
+                dragging = true;
+                try { frame.setPointerCapture(e.pointerId); } catch (err) {}
+                move(e);
                 e.preventDefault();
-            };
-            box.addEventListener('mousedown', onDown);
-            box.addEventListener('touchstart', onDown, { passive: false });
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('touchmove', onMove, { passive: false });
-            window.addEventListener('mouseup', onUp);
-            window.addEventListener('touchend', onUp);
-        })();
+            });
+            frame.addEventListener('pointermove', (e) => { if (dragging) move(e); });
+            ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev =>
+                frame.addEventListener(ev, () => { dragging = false; }));
+        }
+        bindCropDrag('frameMobile', 'mobileFocalX', 'mobileFocalY', 'mobile');
+        bindCropDrag('frameTablet', 'tabletFocalX', 'tabletFocalY', 'tablet');
+        bindCropDrag('frameDesktop', 'focalX', 'focalY', 'desktop');
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function () {
             toggleImageInput();
             updatePreview();
             updateBlur();
-            updateCropPosition();
+            syncCropImages();
         });
 
         // === Compress image to max 4MB ===

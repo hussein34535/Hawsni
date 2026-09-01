@@ -1,5 +1,7 @@
 const { supabaseAdmin: supabase } = require('../../config/supabase');
 const { uploadToSupabase } = require('../../utils/fileUpload');
+const bannerService = require('../../services/bannerService');
+const { buildConfigJson, unwrapBannerConfig } = bannerService;
 
 class BannersController {
     // List all banners
@@ -30,10 +32,7 @@ class BannersController {
             const {
                 title, image_url, link, sort_order, is_active,
                 heading_text, subheading_text,
-                button_text, button_color, button_style, button_size, button_position, button_link,
-                focal_x, focal_y, button_opacity, image_blur,
-                mobile_image_url, tablet_image_url,
-                mobile_focal_x, mobile_focal_y, tablet_focal_x, tablet_focal_y
+                button_text, button_color, button_style, button_size, button_position, button_link
             } = req.body;
             let finalImageUrl = image_url;
 
@@ -58,28 +57,16 @@ class BannersController {
                 link: link || null,
                 sort_order: parseInt(sort_order) || 1,
                 is_active: is_active === 'true',
-                // Text content
                 heading_text: heading_text || null,
                 subheading_text: subheading_text || null,
-                // Button customization
                 button_text: button_text,
                 button_color: button_color || '#D4AF37',
                 button_style: button_style || 'rounded',
                 button_size: button_size || 'medium',
                 button_position: button_position || 'right',
                 button_link: button_link || null,
-                // Crop / focal position (0-100)
-                focal_x: Math.min(100, Math.max(0, parseInt(focal_x) || 50)),
-                focal_y: Math.min(100, Math.max(0, parseInt(focal_y) || 50)),
-                button_opacity: Math.min(1, Math.max(0, parseFloat(button_opacity) || 1)),
-                image_blur: Math.min(20, Math.max(0, parseFloat(image_blur) || 0)),
-                // Responsive per-device images & focals (optional, fallback to main)
-                mobile_image_url: mobile_image_url?.trim() || null,
-                tablet_image_url: tablet_image_url?.trim() || null,
-                mobile_focal_x: Math.min(100, Math.max(0, parseInt(mobile_focal_x) || 50)),
-                mobile_focal_y: Math.min(100, Math.max(0, parseInt(mobile_focal_y) || 50)),
-                tablet_focal_x: Math.min(100, Math.max(0, parseInt(tablet_focal_x) || 50)),
-                tablet_focal_y: Math.min(100, Math.max(0, parseInt(tablet_focal_y) || 50))
+                // Crop/responsive config stored self-contained (no schema dependency)
+                subtitle: JSON.stringify(buildConfigJson(req.body))
             };
 
             const { data, error } = await supabase
@@ -89,17 +76,6 @@ class BannersController {
                 .single();
 
             if (error) {
-                // Fallback if new columns don't exist yet (migration not run) - retry without them
-                if (error.code === 'PGRST204' || error.message.includes('focal_') || error.message.includes('mobile_') || error.message.includes('tablet_') || error.message.includes('button_opacity') || error.message.includes('image_blur')) {
-                    delete bannerData.focal_x; delete bannerData.focal_y;
-                    delete bannerData.mobile_image_url; delete bannerData.tablet_image_url;
-                    delete bannerData.mobile_focal_x; delete bannerData.mobile_focal_y;
-                    delete bannerData.tablet_focal_x; delete bannerData.tablet_focal_y;
-                    delete bannerData.button_opacity; delete bannerData.image_blur;
-                    const retry = await supabase.from('banners').insert([bannerData]).select().single();
-                    if (retry.error) throw retry.error;
-                    return res.redirect('/admin/banners');
-                }
                 console.error('Supabase error:', error);
                 throw error;
             }
@@ -116,7 +92,7 @@ class BannersController {
         try {
             const { id } = req.params;
 
-            const { data: banner, error } = await supabase
+            const { data: raw, error } = await supabase
                 .from('banners')
                 .select('*')
                 .eq('id', id)
@@ -124,10 +100,11 @@ class BannersController {
 
             if (error) throw error;
 
-            if (!banner) {
+            if (!raw) {
                 return res.status(404).send('البنر غير موجود');
             }
 
+            const banner = unwrapBannerConfig(raw);
             res.render('banner-form', { banner });
         } catch (err) {
             console.error('Error fetching banner:', err);
@@ -142,10 +119,7 @@ class BannersController {
             const {
                 title, image_url, link, sort_order, is_active,
                 heading_text, subheading_text,
-                button_text, button_color, button_style, button_size, button_position, button_link,
-                focal_x, focal_y, button_opacity, image_blur,
-                mobile_image_url, tablet_image_url,
-                mobile_focal_x, mobile_focal_y, tablet_focal_x, tablet_focal_y
+                button_text, button_color, button_style, button_size, button_position, button_link
             } = req.body;
             let finalImageUrl = image_url;
 
@@ -170,45 +144,22 @@ class BannersController {
                 link: link || null,
                 sort_order: parseInt(sort_order) || 1,
                 is_active: is_active === 'true',
-                // Text content
                 heading_text: heading_text || null,
                 subheading_text: subheading_text || null,
-                // Button customization
                 button_text: button_text,
                 button_color: button_color || '#D4AF37',
                 button_style: button_style || 'rounded',
                 button_size: button_size || 'medium',
                 button_position: button_position || 'right',
                 button_link: button_link || null,
-                focal_x: Math.min(100, Math.max(0, parseInt(focal_x) || 50)),
-                focal_y: Math.min(100, Math.max(0, parseInt(focal_y) || 50)),
-                button_opacity: Math.min(1, Math.max(0, parseFloat(button_opacity) || 1)),
-                image_blur: Math.min(20, Math.max(0, parseFloat(image_blur) || 0)),
-                mobile_image_url: mobile_image_url?.trim() || null,
-                tablet_image_url: tablet_image_url?.trim() || null,
-                mobile_focal_x: Math.min(100, Math.max(0, parseInt(mobile_focal_x) || 50)),
-                mobile_focal_y: Math.min(100, Math.max(0, parseInt(mobile_focal_y) || 50)),
-                tablet_focal_x: Math.min(100, Math.max(0, parseInt(tablet_focal_x) || 50)),
-                tablet_focal_y: Math.min(100, Math.max(0, parseInt(tablet_focal_y) || 50))
+                subtitle: JSON.stringify(buildConfigJson(req.body))
             };
 
-            let { data, error } = await supabase
+            const { error } = await supabase
                 .from('banners')
                 .update(updateData)
-                .eq('id', id)
-                .select()
-                .single();
+                .eq('id', id);
 
-            if (error && (error.code === 'PGRST204' || error.message.includes('focal_') || error.message.includes('mobile_') || error.message.includes('tablet_') || error.message.includes('button_opacity') || error.message.includes('image_blur'))) {
-                delete updateData.focal_x; delete updateData.focal_y;
-                delete updateData.mobile_image_url; delete updateData.tablet_image_url;
-                delete updateData.mobile_focal_x; delete updateData.mobile_focal_y;
-                delete updateData.tablet_focal_x; delete updateData.tablet_focal_y;
-                delete updateData.button_opacity; delete updateData.image_blur;
-                const retry = await supabase.from('banners').update(updateData).eq('id', id).select().single();
-                if (retry.error) throw retry.error;
-                return res.redirect('/admin/banners');
-            }
             if (error) {
                 console.error('Supabase error:', error);
                 throw error;
