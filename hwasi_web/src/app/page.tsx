@@ -4,7 +4,7 @@ import { Category, Product, Banner } from '@/types';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
 const BASE_URL = API_URL.replace(/\/api$/, '');
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const formatImageUrl = (url: string) => {
     if (!url) return '';
@@ -29,12 +29,9 @@ function extractBanners(payload: unknown): Banner[] {
     return [];
 }
 
-async function fetchJson<T>(url: string, opts?: { revalidate?: number | false }): Promise<T | null> {
+async function fetchJson<T>(url: string): Promise<T | null> {
     try {
-        const fetchOpts: RequestInit & { next?: { revalidate?: number | false } } = opts?.revalidate === false
-            ? { cache: 'no-store' as const }
-            : { next: { revalidate: opts?.revalidate ?? 300 } };
-        const res = await fetch(url, fetchOpts);
+        const res = await fetch(url, { next: { revalidate: 60 } });
         if (!res.ok) return null;
         const contentType = res.headers.get('content-type') || '';
         if (contentType.includes('text/html')) return null;
@@ -50,7 +47,7 @@ export default async function HomePage() {
         fetchJson<ApiData>(`${API_URL}/categories`),
         fetchJson<ApiData>(`${API_URL}/products`),
         fetchJson<ApiData>(`${API_URL}/products/featured`),
-        fetchJson<ApiData>(`${API_URL}/banners`, { revalidate: false }),
+        fetchJson<ApiData>(`${API_URL}/banners`),
     ]);
 
     const categories: Category[] = (catData?.categories || []).map((cat: Category) => ({
