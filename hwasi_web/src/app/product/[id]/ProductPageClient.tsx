@@ -663,11 +663,11 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             </div>
 
             <main className="max-w-7xl mx-auto pb-40">
-                <div className="grid grid-cols-1 lg:grid-cols-2">
+                <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-start">
 
                     <div
                         ref={galleryRef}
-                        className="relative aspect-[4/5] bg-[#F4F4F4] overflow-hidden lg:rounded-b-[4rem] group"
+                        className="relative aspect-[4/5] bg-[#F4F4F4] overflow-hidden group lg:aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
                     >
                         <div
                             ref={sliderRef}
@@ -712,7 +712,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                     fill
                                                     priority={i === 0}
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                                    className="object-cover select-none"
+                                                    className="object-contain select-none"
                                                 />
                                             )}
                                         </div>
@@ -787,19 +787,27 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                     className={`flex flex-col gap-1 cursor-pointer group ${isRTL ? 'items-start' : 'items-end'}`}
                                     onClick={() => reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                                 >
-                                    <div className="flex items-center gap-2" dir="ltr">
-                                        <div className="flex gap-0.5 text-amber-400">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
-                                            ))}
-                                        </div>
-                                        <span className="text-sm font-black text-gray-900">
-                                            {product.rating?.toFixed(1) || '0.0'}
+                                    {(product.num_reviews || 0) > 0 ? (
+                                        <>
+                                            <div className="flex items-center gap-2" dir="ltr">
+                                                <div className="flex gap-0.5 text-amber-400">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} size={14} fill={i < Math.round(product.rating || 0) ? 'currentColor' : 'none'} strokeWidth={2} />
+                                                    ))}
+                                                </div>
+                                                <span className="text-sm font-black text-gray-900">
+                                                    {product.rating?.toFixed(1) || '0.0'}
+                                                </span>
+                                            </div>
+                                            <span className={`text-[11px] font-bold text-gray-400 group-hover:text-[var(--color-brand-primary)] transition-colors ${isRTL ? 'text-right' : 'text-left'}`}>
+                                                {isRTL ? `(${product.num_reviews || 0}) عرض التقييمات` : `View Reviews (${product.num_reviews || 0})`}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-[13px] font-bold text-gray-400 group-hover:text-[var(--color-brand-primary)] transition-colors">
+                                            {isRTL ? 'لا تقييمات بعد — كن أول من يقيّم' : 'No reviews yet — be the first!'}
                                         </span>
-                                    </div>
-                                    <span className={`text-[11px] font-bold text-gray-400 group-hover:text-[var(--color-brand-primary)] transition-colors ${isRTL ? 'text-right' : 'text-left'}`}>
-                                        {isRTL ? `(${product.num_reviews || 0}) عرض التقييمات` : `View Reviews (${product.num_reviews || 0})`}
-                                    </span>
+                                    )}
                                 </div>
                             </div>
                         </div>

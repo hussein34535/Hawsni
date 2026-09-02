@@ -538,8 +538,8 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
                             : 'border-gray-100 bg-white hover:border-gray-200'
                             }`}
                     >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${paymentMethod === 'vodafone_cash' ? 'bg-[#0E4435]' : 'bg-red-50'}`}>
-                            <span className="text-sm font-black text-[#E60000]">V</span>
+                        <div className="w-14 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-white border border-gray-100 overflow-hidden">
+                            <img src="/payments/vodafone-cash.png" alt="Vodafone Cash" className="max-h-8 max-w-[48px] object-contain" />
                         </div>
                         <div className="flex-1">
                             <p className="text-[15px] font-black text-gray-900">{isRTL ? 'فودافون كاش' : 'Vodafone Cash'}</p>
@@ -559,8 +559,8 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
                             : 'border-gray-100 bg-white hover:border-gray-200'
                             }`}
                     >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${paymentMethod === 'cash_on_delivery' ? 'bg-[#0E4435]' : 'bg-amber-50'}`}>
-                            <svg className="w-5 h-5 text-amber-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+                        <div className="w-14 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-white border border-gray-100 overflow-hidden">
+                            <img src="/payments/cod.svg" alt="Cash on Delivery" className="w-9 h-9 object-contain" />
                         </div>
                         <div className="flex-1">
                             <p className="text-[15px] font-black text-gray-900">{isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}</p>
