@@ -115,9 +115,17 @@ class SettingsController {
                 .select('*')
                 .single();
 
+            // Payment instructions use the same operating values as the WhatsApp
+            // deposit flow unless overridden with environment variables.
+            const configuredDeposit = parseFloat(process.env.PAYMENT_VODAFONE_DEPOSIT_AMOUNT);
             res.json({
                 success: true,
-                data: settings
+                data: settings,
+                payment: {
+                    vodafoneWalletNumber: process.env.PAYMENT_VODAFONE_WALLET_NUMBER || '01038588564',
+                    vodafoneDepositAmount: Number.isFinite(configuredDeposit) ? configuredDeposit : 70,
+                    whatsappNumber: settings?.social_links?.whatsapp || null
+                }
             });
         } catch (err) {
             res.status(500).json({ success: false, message: err.message });

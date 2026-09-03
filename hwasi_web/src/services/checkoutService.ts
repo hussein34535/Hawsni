@@ -79,6 +79,15 @@ export const checkoutService = {
         }
     },
 
+    getPaymentSettings: async (): Promise<{ success: boolean; payment?: any; data?: any }> => {
+        try {
+            const response = await apiClient.get('/settings/public');
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to load payment settings';
+        }
+    },
+
     updateOrder: async (id: string, orderData: any): Promise<{ success: boolean; order: any }> => {
         try {
             const response = await apiClient.put(`/orders/${id}`, orderData);

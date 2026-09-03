@@ -3,6 +3,7 @@ const router = express.Router();
 const ProductController = require('../controllers/api/productController');
 const upload = require('../middleware/upload');
 const { productSchema } = require('../middleware/validation');
+const { protect, authorize } = require('../middleware/auth');
 
 // @route   GET /api/products/search
 // @desc    Search products
@@ -32,22 +33,22 @@ router.get('/:id/related', ProductController.getRelatedProducts.bind(ProductCont
 // @route   POST /api/products
 // @desc    Create product (Admin only)
 // @access  Private/Admin
-router.post('/', upload.array('images', 5), productSchema, ProductController.createProduct.bind(ProductController));
+router.post('/', protect, authorize('admin'), upload.array('images', 5), productSchema, ProductController.createProduct.bind(ProductController));
 
 // @route   PUT /api/products/:id
 // @desc    Update product (Admin only)
 // @access  Private/Admin
-router.put('/:id', upload.array('images', 5), productSchema, ProductController.updateProduct.bind(ProductController));
+router.put('/:id', protect, authorize('admin'), upload.array('images', 5), productSchema, ProductController.updateProduct.bind(ProductController));
 
 // @route   DELETE /api/products/:id
 // @desc    Delete product (Admin only)
 // @access  Private/Admin
-router.delete('/:id', ProductController.deleteProduct.bind(ProductController));
+router.delete('/:id', protect, authorize('admin'), ProductController.deleteProduct.bind(ProductController));
 
 // Image Management Routes (Admin UI)
 router.get('/:id/images', ProductController.renderImageManagementPage.bind(ProductController));
-router.post('/:id/images', upload.array('images', 5), ProductController.uploadProductImages.bind(ProductController));
-router.post('/:id/images/reorder', ProductController.reorderProductImages.bind(ProductController));
-router.delete('/:id/images/:imageIndex', ProductController.deleteProductImage.bind(ProductController));
+router.post('/:id/images', protect, authorize('admin'), upload.array('images', 5), ProductController.uploadProductImages.bind(ProductController));
+router.post('/:id/images/reorder', protect, authorize('admin'), ProductController.reorderProductImages.bind(ProductController));
+router.delete('/:id/images/:imageIndex', protect, authorize('admin'), ProductController.deleteProductImage.bind(ProductController));
 
 module.exports = router;

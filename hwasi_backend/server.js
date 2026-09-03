@@ -116,7 +116,15 @@ const corsOptions = {
 app.use('/api/', cors(corsOptions));
 // Also handle preflight for /api/
 app.options('/api/*', cors(corsOptions));
-app.use(express.json({ limit: '4mb' }));
+app.use(express.json({
+    limit: '4mb',
+    verify: (req, res, buf) => {
+        // Keep the exact webhook payload for HMAC signature verification.
+        if (req.originalUrl && req.originalUrl.startsWith('/api/webhooks/')) {
+            req.rawBody = buf;
+        }
+    }
+}));
 app.use(express.urlencoded({ extended: true, limit: '4mb' }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));

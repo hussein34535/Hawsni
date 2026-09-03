@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
@@ -8,16 +9,16 @@ const whatsappService = require('../services/whatsappService');
 // POST /api/webhooks/bosta
 router.post('/bosta', async (req, res) => {
     try {
-        // --- Security Check ---
+        // --- Security Check: fail closed when the secret is missing ---
         const webhookSecret = process.env.BOSTA_WEBHOOK_SECRET;
-        if (webhookSecret) {
-            const authHeader = req.headers['authorization'];
-            if (!authHeader || authHeader !== `${webhookSecret}` && authHeader !== `Bearer ${webhookSecret}`) {
-                console.warn('[Bosta Webhook] 🚨 Unauthorized attempt from:', req.ip);
-                return res.status(401).json({ success: false, message: 'Unauthorized' });
-            }
-        } else {
-            console.warn('[Bosta Webhook] ⚠️ WARNING: BOSTA_WEBHOOK_SECRET is not set! Webhook is vulnerable.');
+        if (!webhookSecret) {
+            console.error('[Bosta Webhook] BOSTA_WEBHOOK_SECRET is not set; rejecting webhook.');
+            return res.status(500).json({ success: false, message: 'Webhook secret is not configured' });
+        }
+        const authHeader = req.headers['authorization'];
+        if (!authHeader || (authHeader !== `${webhookSecret}` && authHeader !== `Bearer ${webhookSecret}`)) {
+            console.warn('[Bosta Webhook] 🚨 Unauthorized attempt from:', req.ip);
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
         }
 
         console.log('[Bosta Webhook] Raw headers:', JSON.stringify(req.headers));
@@ -179,9 +180,24 @@ router.get('/whatsapp', (req, res) => {
 // POST /api/webhooks/whatsapp (Message/Event Reception)
 router.post('/whatsapp', async (req, res) => {
     try {
+        const appSecret = process.env.WHATSAPP_APP_SECRET;
+        if (!appSecret) {
+            console.error('[WhatsApp Webhook] WHATSAPP_APP_SECRET is not set; rejecting webhook.');
+            return res.status(500).send('Webhook app secret is not configured');
+        }
+
+        const signature = req.headers['x-hub-signature-256'];
+        const expected = 'sha256=' + crypto.createHmac('sha256', appSecret).update(req.rawBody || Buffer.from(JSON.stringify(req.body || {}))).digest('hex');
+        const received = Buffer.from(String(signature || ''));
+        const expectedBuf = Buffer.from(expected);
+        if (received.length !== expectedBuf.length || !crypto.timingSafeEqual(received, expectedBuf)) {
+            console.warn('[WhatsApp Webhook] 🔴 Invalid signature');
+            return res.status(401).send('Invalid signature');
+        }
+
         console.log('[WhatsApp Webhook] 📩 Received event payload:');
         console.log(JSON.stringify(req.body, null, 2));
-        
+
         // Pass the payload to the service to process
         await whatsappService.handleWebhook(req.body);
         

@@ -8,8 +8,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const routes = [
         '',
         '/cart',
-        '/profile',
-        '/products',
     ].map((route) => ({
         url: `${BASE_URL}${route}`,
         lastModified: new Date(),
@@ -19,9 +17,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     try {
         // Fetch products for dynamic routes
-        const productsRes = await fetch(`${API_URL}/products`);
+        const productsRes = await fetch(`${API_URL}/products?limit=1000`);
         const productsData = await productsRes.json();
-        const products = productsData.data || [];
+        const products = Array.isArray(productsData?.products) ? productsData.products : [];
 
         const productRoutes = products.map((product: any) => ({
             url: `${BASE_URL}/product/${product.id}`,
@@ -33,10 +31,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         // Fetch categories
         const categoriesRes = await fetch(`${API_URL}/categories`);
         const categoriesData = await categoriesRes.json();
-        const categories = categoriesData.data || [];
+        const categories = Array.isArray(categoriesData?.categories) ? categoriesData.categories : [];
 
         const categoryRoutes = categories.map((cat: any) => ({
-            url: `${BASE_URL}/products?category=${cat.id}`,
+            url: `${BASE_URL}/search?category=${cat.id}`,
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.5,
