@@ -152,7 +152,18 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
 
     // Payment Method State
     const [paymentMethod, setPaymentMethod] = useState('vodafone_cash');
-    
+
+    // Payment instructions (wallet number + deposit) from backend settings
+    const [paymentInfo, setPaymentInfo] = useState<any>(null);
+    const [copiedWallet, setCopiedWallet] = useState(false);
+
+    useEffect(() => {
+        checkoutService.getPaymentSettings()
+            .then(res => {
+                if (res?.success && res.payment) setPaymentInfo(res.payment);
+            })
+            .catch(() => { /* instructions simply stay hidden on failure */ });
+    }, []);
     // Searchable District States
     const [districtSearch, setDistrictSearch] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -549,6 +560,47 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
                             {paymentMethod === 'vodafone_cash' && <div className="w-2.5 h-2.5 rounded-full bg-[#0E4435]" />}
                         </div>
                     </button>
+
+                    {/* تفاصيل فودافون كاش: رقم المحفظة والديبوزت قبل تأكيد الطلب */}
+                    {paymentMethod === 'vodafone_cash' && paymentInfo?.vodafoneWalletNumber && (
+                        <div className="flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200/70 rounded-2xl">
+                            <svg className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <div className="flex-1 text-[13px] font-bold text-emerald-900 leading-relaxed">
+                                <p>
+                                    {isRTL ? 'حوّل الديبوزت على رقم فودافون كاش:' : 'Send the deposit to this Vodafone Cash number:'}
+                                </p>
+                                <div className="mt-2 flex flex-wrap items-center gap-2" dir="ltr">
+                                    <span className="px-3 py-1.5 bg-white border border-emerald-200 rounded-lg font-black text-gray-900 tracking-wider">
+                                        {paymentInfo.vodafoneWalletNumber}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            navigator.clipboard?.writeText(paymentInfo.vodafoneWalletNumber).then(() => {
+                                                setCopiedWallet(true);
+                                                setTimeout(() => setCopiedWallet(false), 1500);
+                                            }).catch(() => {});
+                                        }}
+                                        className="px-3 py-1.5 bg-gray-900 text-white rounded-lg text-xs font-black active:scale-95"
+                                    >
+                                        {copiedWallet ? (isRTL ? 'تم النسخ' : 'Copied') : (isRTL ? 'نسخ' : 'Copy')}
+                                    </button>
+                                </div>
+                                {typeof paymentInfo.vodafoneDepositAmount === 'number' && paymentInfo.vodafoneDepositAmount > 0 && (
+                                    <p className="mt-2">
+                                        {isRTL
+                                            ? `الديبوزت المطلوب: ${paymentInfo.vodafoneDepositAmount} جنيه — والباقي عند الاستلام أو حسب الاتفاق.`
+                                            : `Required deposit: ${paymentInfo.vodafoneDepositAmount} EGP — the rest is paid as agreed.`}
+                                    </p>
+                                )}
+                                <p className="mt-1 text-emerald-700/80">
+                                    {isRTL
+                                        ? 'بعد تأكيد الطلب ستجد زر إرسال الإيصال على واتساب.'
+                                        : 'After confirming the order you will find a WhatsApp button to send the receipt.'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Cash on Delivery */}
                     <button
