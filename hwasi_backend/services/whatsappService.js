@@ -2,6 +2,25 @@ const fetch = require('node-fetch');
 const { supabaseAdmin: supabase } = require('../config/supabase');
 const aiChatbotService = require('./aiChatbotService');
 
+function normalizeApprovalText(value) {
+    return String(value || '')
+        .normalize('NFKC')
+        .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+        .replace(/[أإآ]/g, 'ا')
+        .replace(/ة/g, 'ه')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+}
+
+function isDepositApprovalClick(buttonId, rawText) {
+    if (String(buttonId || '').trim().toLowerCase() === 'confirm_order') return true;
+    const text = normalizeApprovalText(rawText);
+    if (!text) return false;
+    if (['موافق', 'اوافق', 'تاكيد', 'تم الدفع', 'ادفع', 'confirm', 'ok', 'okay', 'yes'].includes(text)) return true;
+    return /(موافق|اوافق|تاكيد|الدفع|دفع|confirm)/.test(text);
+}
+
 class WhatsAppService {
     constructor() {
         this.token = process.env.WHATSAPP_TOKEN;
@@ -770,7 +789,7 @@ class WhatsAppService {
                                     await this.sendUrlButtonMessage(phone, "يمكنك تعديل بيانات التوصيل من هنا 📝", "تعديل الطلب", editUrl);
                                     await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
                                 }
-                            } else if (buttonId === 'confirm_order' || (buttonText && (buttonText.trim() === 'موافق' || buttonText.trim() === 'Confirm' || buttonText.includes('دفع')))) {
+                            } else if (isDepositApprovalClick(buttonId, buttonText)) {
                                 await this.sendTextMessage(
                                     phone,
                                     "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n\nتنبيه: يرجى إرسال صورة عملية التحويل هنا لتأكيد طلبك. 🤍"
