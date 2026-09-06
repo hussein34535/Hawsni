@@ -114,36 +114,44 @@ class WhatsAppService {
             }
         }
 
-        const components = [
-            {
-                type: "body",
-                parameters: [
-                    { type: "text", text: customerName || "عميلنا العزيز" },
-                    { type: "text", text: order.order_number || (order.id ? order.id.substring(0, 8) : "123456") },
-                    { type: "text", text: order.total ? order.total.toString() : "0" },
-                    { type: "text", text: productsNames }
-                ]
-            }
+        // Dynamic order identifier used by the template's URL buttons
+        // ([0] تعديل الطلب / [1] تتبع الطلب). order_number is a 6-digit
+        // code, safe to embed in a URL query param.
+        const orderIdentifier = String(order.order_number || order.id || '');
+
+        const bodyComponent = {
+            type: "body",
+            parameters: [
+                { type: "text", text: customerName || "عميلنا العزيز" },
+                { type: "text", text: order.order_number || (order.id ? order.id.substring(0, 8) : "123456") },
+                { type: "text", text: order.total ? order.total.toString() : "0" },
+                { type: "text", text: productsNames }
+            ]
+        };
+
+        // URL button components. Each URL button owns its own {{1}} variable
+        // (= the order identifier); numbering is independent of body {{1}}-{{4}}.
+        const urlButtonComponents = [
+            { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: orderIdentifier }] },
+            { type: "button", sub_type: "url", index: "1", parameters: [{ type: "text", text: orderIdentifier }] }
         ];
 
-
-        try {
-            const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
-            
+        const templateUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
+        const sendTemplatePayload = async (withButtons) => {
             const payload = {
                 messaging_product: "whatsapp",
                 to: finalPhone,
                 type: "template",
                 template: {
-                    name: "order_confirm", 
+                    name: "order_confirm",
                     language: {
                         code: "ar"
                     },
-                    components: components
+                    components: withButtons ? [bodyComponent, ...urlButtonComponents] : [bodyComponent]
                 }
             };
 
-            const response = await fetch(url, {
+            const response = await fetch(templateUrl, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -151,8 +159,24 @@ class WhatsAppService {
                 },
                 body: JSON.stringify(payload)
             });
-
             const result = await response.json();
+            return { response, result };
+        };
+
+        const isParamMismatch = (result) =>
+            result?.error?.code === 132000 ||
+            /parameter/i.test(result?.error?.message || '');
+
+        try {
+            // 1) Try with URL buttons (works once the updated template is approved).
+            let { response, result } = await sendTemplatePayload(true);
+
+            // 2) If Meta rejects the button params (old template still live while
+            //    the new one is under review), retry body-only so delivery continues.
+            if (!response.ok && isParamMismatch(result)) {
+                console.warn(`⚠️ order_confirm URL buttons rejected (template update may still be under review). Retrying body-only for ${finalPhone}...`);
+                ({ response, result } = await sendTemplatePayload(false));
+            }
 
             if (!response.ok) {
                 console.error('❌ WhatsApp API Error:', result);
@@ -307,7 +331,7 @@ class WhatsAppService {
      * Fallback: Send a message using the order_confirm template when the 24h window is closed.
      * Tries to embed the admin message into the template body.
      */
-    async _sendAsTemplateFallback(phone, message) {
+    async _sendAsTemplateFallback(phone, message, orderRef = null) {
         const cleanPhone = phone.replace(/\D/g, '');
         let finalPhone = cleanPhone;
         if (finalPhone.startsWith('01') && finalPhone.length === 11) finalPhone = '2' + finalPhone;
@@ -315,39 +339,58 @@ class WhatsAppService {
         // Truncate the message to fit template parameters
         const shortMsg = message.length > 100 ? message.substring(0, 97) + '...' : message;
 
+        // The order_confirm template carries URL buttons (تعديل/تتبع) whose
+        // {{1}} variable is mandatory once approved. Fall back to a harmless
+        // placeholder when no order reference is available.
+        const buttonIdentifier = String(orderRef || '------');
+        const fallbackBody = {
+            type: "body",
+            parameters: [
+                { type: "text", text: "عميلنا العزيز" },
+                { type: "text", text: "------" },
+                { type: "text", text: "0" },
+                { type: "text", text: shortMsg }
+            ]
+        };
+        const fallbackButtons = [
+            { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: buttonIdentifier }] },
+            { type: "button", sub_type: "url", index: "1", parameters: [{ type: "text", text: buttonIdentifier }] }
+        ];
+
         try {
             const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
             // order_confirm template parameters: customerName, orderNumber, total, products
-            const payload = {
+            const buildPayload = (withButtons) => ({
                 messaging_product: "whatsapp",
                 to: finalPhone,
                 type: "template",
                 template: {
                     name: "order_confirm",
                     language: { code: "ar" },
-                    components: [{
-                        type: "body",
-                        parameters: [
-                            { type: "text", text: "عميلنا العزيز" },
-                            { type: "text", text: "------" },
-                            { type: "text", text: "0" },
-                            { type: "text", text: shortMsg }
-                        ]
-                    }]
+                    components: withButtons ? [fallbackBody, ...fallbackButtons] : [fallbackBody]
                 }
+            });
+            const postPayload = async (withButtons) => {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(buildPayload(withButtons))
+                });
+                return { response, result: await response.json() };
             };
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
+            let { response, result } = await postPayload(true);
+            const isParamMismatch = result?.error?.code === 132000 ||
+                /parameter/i.test(result?.error?.message || '');
+            if (!response.ok && isParamMismatch) {
+                console.warn(`⚠️ order_confirm URL buttons rejected in fallback (template update may still be under review). Retrying body-only for ${finalPhone}...`);
+                ({ response, result } = await postPayload(false));
+            }
 
             if (!response.ok) {
-                const result = await response.json();
                 console.error('❌ WhatsApp Template Fallback Error:', result);
                 return { success: false, error: result?.error?.message || 'Template fallback failed' };
             }
