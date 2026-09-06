@@ -25,11 +25,28 @@ export default function CheckoutPage() {
     const { isRTL } = useLanguage();
     const { showToast } = useToastStore();
 
-    const [shippingFee] = useState(90);
+    const [shippingSettings, setShippingSettings] = useState<any>(null);
+    const [selectedGovName, setSelectedGovName] = useState('');
     const [discount, setDiscount] = useState(0);
     const [appliedCoupon, setAppliedCoupon] = useState('');
 
     const subtotal = getTotal();
+
+    useEffect(() => {
+        checkoutService.getShippingSettings()
+            .then((res) => { if (res?.success) setShippingSettings(res.settings || null); })
+            .catch(() => { });
+    }, []);
+
+    // تكلفة الشحن من إعدادات لوحة التحكم (تكلفة التوصيل + overrides المحافظات + حد الشحن المجاني)
+    const govOverrides = shippingSettings?.governorate_settings || {};
+    const govConfig = selectedGovName ? govOverrides[selectedGovName] : null;
+    const baseShippingCost = govConfig && govConfig.cost !== undefined
+        ? (parseFloat(govConfig.cost) || 0)
+        : (parseFloat(shippingSettings?.delivery_cost) || 0);
+    const freeShippingThreshold = parseFloat(shippingSettings?.free_shipping_threshold) || 0;
+    const shippingFee = freeShippingThreshold > 0 && subtotal >= freeShippingThreshold ? 0 : baseShippingCost;
+
     const total = subtotal + shippingFee - discount;
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -109,6 +126,7 @@ export default function CheckoutPage() {
                             showToast={showToast}
                             setDiscount={setDiscount}
                             setAppliedCoupon={setAppliedCoupon}
+                            onGovernorateChange={setSelectedGovName}
                             isSubmitting={isSubmitting}
                             setIsSubmitting={setIsSubmitting}
                             setIsRedirecting={setIsRedirecting}
@@ -122,7 +140,7 @@ export default function CheckoutPage() {
                             discount={discount}
                             total={total}
                             couponApplied={!!appliedCoupon}
-                            selectedGov="القاهرة"
+                            selectedGov={selectedGovName}
                             deliveryEstimate={{ min: 2, max: 5 }}
                         />
                     </div>
@@ -141,7 +159,7 @@ export default function CheckoutPage() {
 const PREMIUM_INPUT_CLASS = "w-full h-[52px] px-4 bg-[#F9FAFB] border border-gray-200 text-gray-900 text-[15px] font-bold rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0E4435]/15 focus:border-[#0E4435] transition-all placeholder:text-gray-400 placeholder:font-medium appearance-none shadow-sm";
 const PREMIUM_LABEL_CLASS = "block text-[13px] font-black text-gray-600 mb-1.5 px-1 tracking-wide";
 
-function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon, isSubmitting, setIsSubmitting, setIsRedirecting }: any) {
+function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, total, appliedCoupon, clearCart, router, showToast, setDiscount, setAppliedCoupon, onGovernorateChange, isSubmitting, setIsSubmitting, setIsRedirecting }: any) {
     
     // Bosta API States
     const [cities, setCities] = useState<any[]>([]);
@@ -432,7 +450,11 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
                             name="governorate"
                             required
                             value={selectedCityId}
-                            onChange={(e) => setSelectedCityId(e.target.value)}
+                            onChange={(e) => {
+                                setSelectedCityId(e.target.value);
+                                const gov = cities.find((c: any) => String(c.id) === String(e.target.value));
+                                if (onGovernorateChange) onGovernorateChange(gov ? (isRTL ? gov.arabicName : gov.name) : '');
+                            }}
                             className={`${PREMIUM_INPUT_CLASS} cursor-pointer pr-10`}
                             disabled={isLoadingCities}
                         >
@@ -529,10 +551,6 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
                 </div>
 
                 <div className="space-y-3">
-                    <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl text-[13px] font-bold text-gray-500">
-                        {isRTL ? 'طريقة الدفع المتاحة حالياً: الدفع عند الاستلام فقط.' : 'Currently available payment method: Cash on Delivery only.'}
-                    </div>
-
                     {/* Cash on Delivery */}
                     <button
                         type="button"

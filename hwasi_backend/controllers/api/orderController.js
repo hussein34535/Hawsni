@@ -100,9 +100,29 @@ class OrderController {
             });
 
             // --- Server-side Shipping Fee Verification ---
-            // Force fixed 90 EGP shipping for all orders as requested
-            let verifiedShippingFee = 90;
-            const finalShippingFee = 90;
+            // Dynamic fee from admin shipping settings: delivery_cost,
+            // per-governorate overrides, and free-shipping threshold.
+            let finalShippingFee = 0;
+            try {
+                const { data: shippingSettingsArray } = await supabase
+                    .from('shipping_settings')
+                    .select('*')
+                    .order('updated_at', { ascending: false })
+                    .limit(1);
+                const shippingSettings = shippingSettingsArray && shippingSettingsArray.length > 0 ? shippingSettingsArray[0] : null;
+                if (shippingSettings) {
+                    finalShippingFee = parseFloat(shippingSettings.delivery_cost) || 0;
+                    const govSettings = shippingSettings.governorate_settings || {};
+                    const stateName = (finalShippingAddress.state || '').trim();
+                    if (stateName && govSettings[stateName] && govSettings[stateName].cost !== undefined) {
+                        finalShippingFee = parseFloat(govSettings[stateName].cost) || 0;
+                    }
+                    const freeThreshold = parseFloat(shippingSettings.free_shipping_threshold) || 0;
+                    if (freeThreshold > 0 && safeSubtotal >= freeThreshold) finalShippingFee = 0;
+                }
+            } catch (shippingErr) {
+                console.error('[OrderController] Failed to load shipping settings:', shippingErr.message);
+            }
 
             // --- Server-side Coupon Validation ---
             let orderDiscount = 0;
