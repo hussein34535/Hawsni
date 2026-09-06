@@ -114,30 +114,53 @@ class WhatsAppService {
             }
         }
 
+        // Named template parameters. Meta rejects positional {{1}} on edited
+        // templates — variables must be named ({{customer_name}}, ...).
+        // These names MUST match the order_confirm template exactly.
+        const PARAMS = {
+            customerName: 'customer_name',
+            orderNumber: 'order_number',
+            total: 'total',
+            orderDetails: 'order_details',
+            editRef: 'edit_ref',
+            trackRef: 'track_ref'
+        };
+        const named = (name, text) => ({ type: 'text', parameter_name: name, text });
+        const positional = (text) => ({ type: 'text', text });
+
         // Dynamic order identifier used by the template's URL buttons
         // ([0] تعديل الطلب / [1] تتبع الطلب). order_number is a 6-digit
         // code, safe to embed in a URL query param.
         const orderIdentifier = String(order.order_number || order.id || '');
+        const bodyValues = [
+            customerName || "عميلنا العزيز",
+            order.order_number || (order.id ? order.id.substring(0, 8) : "123456"),
+            order.total ? order.total.toString() : "0",
+            productsNames
+        ];
+        const bodyNames = [PARAMS.customerName, PARAMS.orderNumber, PARAMS.total, PARAMS.orderDetails];
 
-        const bodyComponent = {
-            type: "body",
-            parameters: [
-                { type: "text", text: customerName || "عميلنا العزيز" },
-                { type: "text", text: order.order_number || (order.id ? order.id.substring(0, 8) : "123456") },
-                { type: "text", text: order.total ? order.total.toString() : "0" },
-                { type: "text", text: productsNames }
-            ]
+        // mode: 'named-buttons' (new template) | 'positional-buttons' |
+        // 'positional-body' (old template still live during Meta review).
+        const buildComponents = (mode) => {
+            const bodyParams = mode === 'named-buttons'
+                ? bodyValues.map((text, i) => named(bodyNames[i], text))
+                : bodyValues.map(positional);
+            const comps = [{ type: "body", parameters: bodyParams }];
+            if (mode !== 'positional-body') {
+                const btn = (index, name) => ({
+                    type: "button",
+                    sub_type: "url",
+                    index,
+                    parameters: [mode === 'named-buttons' ? named(name, orderIdentifier) : positional(orderIdentifier)]
+                });
+                comps.push(btn("0", PARAMS.editRef), btn("1", PARAMS.trackRef));
+            }
+            return comps;
         };
 
-        // URL button components. Each URL button owns its own {{1}} variable
-        // (= the order identifier); numbering is independent of body {{1}}-{{4}}.
-        const urlButtonComponents = [
-            { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: orderIdentifier }] },
-            { type: "button", sub_type: "url", index: "1", parameters: [{ type: "text", text: orderIdentifier }] }
-        ];
-
         const templateUrl = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
-        const sendTemplatePayload = async (withButtons) => {
+        const sendTemplatePayload = async (mode) => {
             const payload = {
                 messaging_product: "whatsapp",
                 to: finalPhone,
@@ -147,7 +170,7 @@ class WhatsAppService {
                     language: {
                         code: "ar"
                     },
-                    components: withButtons ? [bodyComponent, ...urlButtonComponents] : [bodyComponent]
+                    components: buildComponents(mode)
                 }
             };
 
@@ -168,19 +191,27 @@ class WhatsAppService {
             /parameter/i.test(result?.error?.message || '');
 
         try {
-            // 1) Try with URL buttons (works once the updated template is approved).
-            let { response, result } = await sendTemplatePayload(true);
-
-            // 2) If Meta rejects the button params (old template still live while
-            //    the new one is under review), retry body-only so delivery continues.
-            if (!response.ok && isParamMismatch(result)) {
-                console.warn(`⚠️ order_confirm URL buttons rejected (template update may still be under review). Retrying body-only for ${finalPhone}...`);
-                ({ response, result } = await sendTemplatePayload(false));
+            // Walk the modes from newest to oldest template format; stop at
+            // the first delivery. Non-parameter errors (bad phone, auth, ...)
+            // abort the chain immediately instead of blind-retries.
+            const modes = ['named-buttons', 'positional-buttons', 'positional-body'];
+            let delivered = false;
+            let usedMode = null;
+            let lastResult = null;
+            for (const mode of modes) {
+                const { response, result } = await sendTemplatePayload(mode);
+                lastResult = result;
+                if (response.ok) { delivered = true; usedMode = mode; break; }
+                if (!isParamMismatch(result)) break;
+                console.warn(`⚠️ order_confirm send as ${mode} rejected (template format mismatch) — trying next fallback for ${finalPhone}...`);
             }
 
-            if (!response.ok) {
-                console.error('❌ WhatsApp API Error:', result);
-                throw new Error(result.error?.message || 'Failed to send WhatsApp message');
+            if (!delivered) {
+                console.error('❌ WhatsApp API Error:', lastResult);
+                throw new Error(lastResult.error?.message || 'Failed to send WhatsApp message');
+            }
+            if (usedMode !== 'named-buttons') {
+                console.log(`ℹ️ order_confirm delivered via ${usedMode} fallback (new template may still be under review).`);
             }
 
             console.log(`✅ WhatsApp confirmation sent to ${finalPhone}`);
@@ -340,59 +371,70 @@ class WhatsAppService {
         const shortMsg = message.length > 100 ? message.substring(0, 97) + '...' : message;
 
         // The order_confirm template carries URL buttons (تعديل/تتبع) whose
-        // {{1}} variable is mandatory once approved. Fall back to a harmless
+        // variables are mandatory once approved. Fall back to a harmless
         // placeholder when no order reference is available.
         const buttonIdentifier = String(orderRef || '------');
-        const fallbackBody = {
-            type: "body",
-            parameters: [
-                { type: "text", text: "عميلنا العزيز" },
-                { type: "text", text: "------" },
-                { type: "text", text: "0" },
-                { type: "text", text: shortMsg }
-            ]
-        };
-        const fallbackButtons = [
-            { type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: buttonIdentifier }] },
-            { type: "button", sub_type: "url", index: "1", parameters: [{ type: "text", text: buttonIdentifier }] }
-        ];
+        const fallbackValues = ["عميلنا العزيز", "------", "0", shortMsg];
+        const fallbackNames = ['customer_name', 'order_number', 'total', 'order_details'];
+        const fNamed = (name, text) => ({ type: 'text', parameter_name: name, text });
+        const fPositional = (text) => ({ type: 'text', text });
 
         try {
             const url = `https://graph.facebook.com/${this.apiVersion}/${this.phoneNumberId}/messages`;
             // order_confirm template parameters: customerName, orderNumber, total, products
-            const buildPayload = (withButtons) => ({
-                messaging_product: "whatsapp",
-                to: finalPhone,
-                type: "template",
-                template: {
-                    name: "order_confirm",
-                    language: { code: "ar" },
-                    components: withButtons ? [fallbackBody, ...fallbackButtons] : [fallbackBody]
+            const buildPayload = (mode) => {
+                const bodyParams = mode === 'named-buttons'
+                    ? fallbackValues.map((text, i) => fNamed(fallbackNames[i], text))
+                    : fallbackValues.map(fPositional);
+                const comps = [{ type: "body", parameters: bodyParams }];
+                if (mode !== 'positional-body') {
+                    const btn = (index, name) => ({
+                        type: "button",
+                        sub_type: "url",
+                        index,
+                        parameters: [mode === 'named-buttons' ? fNamed(name, buttonIdentifier) : fPositional(buttonIdentifier)]
+                    });
+                    comps.push(btn("0", 'edit_ref'), btn("1", 'track_ref'));
                 }
-            });
-            const postPayload = async (withButtons) => {
+                return {
+                    messaging_product: "whatsapp",
+                    to: finalPhone,
+                    type: "template",
+                    template: {
+                        name: "order_confirm",
+                        language: { code: "ar" },
+                        components: comps
+                    }
+                };
+            };
+            const postPayload = async (mode) => {
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${this.token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(buildPayload(withButtons))
+                    body: JSON.stringify(buildPayload(mode))
                 });
                 return { response, result: await response.json() };
             };
+            const isParamMismatch = (res) => res?.error?.code === 132000 ||
+                /parameter/i.test(res?.error?.message || '');
 
-            let { response, result } = await postPayload(true);
-            const isParamMismatch = result?.error?.code === 132000 ||
-                /parameter/i.test(result?.error?.message || '');
-            if (!response.ok && isParamMismatch) {
-                console.warn(`⚠️ order_confirm URL buttons rejected in fallback (template update may still be under review). Retrying body-only for ${finalPhone}...`);
-                ({ response, result } = await postPayload(false));
+            const modes = ['named-buttons', 'positional-buttons', 'positional-body'];
+            let delivered = false;
+            let lastResult = null;
+            for (const mode of modes) {
+                const { response, result } = await postPayload(mode);
+                lastResult = result;
+                if (response.ok) { delivered = true; break; }
+                if (!isParamMismatch(result)) break;
+                console.warn(`⚠️ order_confirm fallback as ${mode} rejected (template format mismatch) — trying next for ${finalPhone}...`);
             }
 
-            if (!response.ok) {
-                console.error('❌ WhatsApp Template Fallback Error:', result);
-                return { success: false, error: result?.error?.message || 'Template fallback failed' };
+            if (!delivered) {
+                console.error('❌ WhatsApp Template Fallback Error:', lastResult);
+                return { success: false, error: lastResult?.error?.message || 'Template fallback failed' };
             }
 
             console.log(`✅ WhatsApp template fallback sent to ${finalPhone}`);
