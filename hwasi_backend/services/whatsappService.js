@@ -581,7 +581,7 @@ class WhatsAppService {
         const mediaId = msg.image.id;
 
         // Notify admin (first unread message)
-        await this._notifyAdminOnFirstMessage(phone, '[IMAGE] صورة إيصال', 'image');
+        await this._notifyAdminOnFirstMessage(phone, '[IMAGE] صورة واردة', 'image');
 
         // 1. Download image from WhatsApp & upload to Cloudinary for permanent storage
         let imageUrl = null;
@@ -607,62 +607,10 @@ class WhatsAppService {
         const content = imageUrl ? `[IMAGE_URL:${imageUrl}]` : `[IMAGE:${mediaId}]`;
         await this._logMessage(phone, 'user', content);
 
-        try {
-            // 2. Download from WhatsApp & Upload to Supabase
-            const receiptUrl = await this._processWhatsAppMedia(mediaId, 'receipts');
-
-            if (receiptUrl) {
-                // 3. Find the latest order for this customer
-                const normalizedPhone = phone.startsWith('20') ? phone.substring(2) : phone;
-                
-                const { data: orders, error } = await supabase
-                    .from('orders')
-                    .select('*, users(*)')
-                    .or(`shipping_address->>phone.ilike.%${normalizedPhone}%,users.phone.ilike.%${normalizedPhone}%`)
-                    .order('created_at', { ascending: false })
-                    .limit(1);
-
-                if (orders && orders.length > 0) {
-                    const order = orders[0];
-                    
-                    // 4. Save receipt URL (don't auto-confirm — wait for admin review)
-                    await supabase
-                        .from('orders')
-                        .update({
-                            deposit_receipt_url: receiptUrl,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', order.id);
-
-                    // 5. Notify admin via email
-                    try {
-                        const emailService = require('./emailService');
-                        await emailService.sendDepositReceiptNotification(order, phone, receiptUrl);
-                    } catch (emailErr) {
-                        console.error('[WA] Failed to send deposit receipt email:', emailErr.message);
-                    }
-
-                    // 5.5 Notify admin via WhatsApp (text first to open the window, then image)
-                    try {
-                        await this.notifyAdminReceipt(phone, receiptUrl, order);
-                    } catch (adminErr) {
-                        console.error('[WA] Failed to notify admin via WhatsApp:', adminErr.message);
-                    }
-
-                    // 6. Notify customer
-                    await this.sendTextMessage(phone, `📸 تم استلام صورة التحويل لطلب رقم #${order.id.substring(0, 6).toUpperCase()}!\nسيتم مراجعتها وتأكيد طلبك من قبل فريقنا في أقرب وقت ممكن 🤍`);
-                } else {
-                    await this.sendTextMessage(phone, "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍\n\n(ملاحظة: سيقوم أحد موظفينا بمراجعة الأمر يدوياً لتأكيد الربط بالطلب)");
-                }
-            } else {
-                throw new Error("Failed to process media");
-            }
-        } catch (error) {
-            console.error("Error processing image message:", error);
-            await this.sendTextMessage(phone, "شكراً لك! تم استلام صورة التحويل وجاري مراجعتها وتأكيد طلبك 🤍");
-        }
-
+        // Deposit-receipt linking is temporarily disabled. Inbound images are
+        // kept in the chat transcript only; they are not attached to orders.
         await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
+        console.log(`[WA] 🖼️ Image received from ${phone}; automatic deposit-receipt handling is temporarily disabled.`);
     }
 
     async _processWhatsAppMedia(mediaId, bucket) {
@@ -790,10 +738,9 @@ class WhatsAppService {
                                     await supabase.from('chat_sessions').update({ status: 'human_requested', updated_at: new Date().toISOString() }).eq('session_id', phone);
                                 }
                             } else if (isDepositApprovalClick(buttonId, buttonText)) {
-                                await this.sendTextMessage(
-                                    phone,
-                                    "رائع! يرجى تحويل ديبوزيت بقيمة 70 جنيه على رقم فودافون كاش: 01038588564 📱\n\nتنبيه: يرجى إرسال صورة عملية التحويل هنا لتأكيد طلبك. 🤍"
-                                );
+                                // Deposit flow is temporarily disabled: log the approval click
+                                // and leave the conversation for manual follow-up.
+                                console.log(`[WA] 📲 Approval click received from ${phone}; deposit auto-reply is temporarily disabled.`);
                             }
 
                         } else if (msg.type === 'image' && msg.image) {

@@ -150,7 +150,7 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
     const [isLoadingCities, setIsLoadingCities] = useState(true);
     const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
 
-    // Payment Method State — Vodafone Cash is temporarily hidden
+    // Payment Method State
     const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
 
     // Searchable District States
@@ -555,17 +555,6 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
                     </button>
                 </div>
 
-                {/* رسالة الديبوزت للدفع عند الاستلام */}
-                {paymentMethod === 'cash_on_delivery' && (
-                    <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200/70 rounded-2xl">
-                        <svg className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <p className="text-[13px] font-bold text-amber-800 leading-relaxed">
-                            {isRTL
-                                ? 'مع العلم أن الدفع عند الاستلام يتطلب سداد ديبوزت مقدمًا، والدفع المتبقي عند استلام الطلب.'
-                                : 'Note: Cash on Delivery requires paying a deposit in advance; the remaining amount is paid upon delivery.'}
-                        </p>
-                    </div>
-                )}
             </div>
 
             {/* شريط تأكيد الطلب السفلي الثابت - بلون صلب بدون ضبابية لمنع التعليق */}

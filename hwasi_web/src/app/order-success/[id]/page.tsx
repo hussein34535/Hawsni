@@ -30,25 +30,12 @@ export default function OrderSuccessPage() {
     const { clearCart } = useCartStore();
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [payment, setPayment] = useState<any>(null);
-    const [storeSocial, setStoreSocial] = useState<any>(null);
-    const [copiedWallet, setCopiedWallet] = useState(false);
 
     useEffect(() => {
         const fetchOrder = async () => {
             try {
                 const res = await checkoutService.getOrder(id as string);
                 if (res.success) setOrder(res.order);
-            } catch (err) {
-                console.error(err);
-            }
-
-            try {
-                const settings = await checkoutService.getPaymentSettings();
-                if (settings?.success) {
-                    setPayment(settings.payment || null);
-                    setStoreSocial(settings.data?.social_links || null);
-                }
             } catch (err) {
                 console.error(err);
             } finally {
@@ -72,36 +59,6 @@ export default function OrderSuccessPage() {
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
         }, 250);
     }, [id]);
-
-    const digitsOnly = (value: any) => String(value || '').replace(/\D/g, '');
-    const paymentMethod = order?.payment_method;
-    const isVodafone = paymentMethod === 'vodafone_cash' || paymentMethod === 'Vodafone Cash';
-    const isCOD = paymentMethod === 'cash_on_delivery' || paymentMethod === 'Cash on Delivery';
-    const isNewOrder = (order?.status || 'Processing') === 'Processing';
-    const walletNumber = payment?.vodafoneWalletNumber || '';
-    const depositAmount = Number(payment?.vodafoneDepositAmount);
-    const hasDeposit = Number.isFinite(depositAmount) && depositAmount > 0;
-    const remainingAmount = order && hasDeposit
-        ? Math.max(0, Math.round(((order.total || 0) - depositAmount) * 100) / 100)
-        : null;
-    const receiptTarget = storeSocial?.whatsapp || walletNumber;
-    let receiptDigits = digitsOnly(receiptTarget);
-    if (/^01\d{9}$/.test(receiptDigits)) receiptDigits = '2' + receiptDigits.slice(1);
-    const receiptHref = receiptDigits
-        ? `https://wa.me/${receiptDigits}?text=${encodeURIComponent(`إيصال الديبوزت للطلب ${order?.order_number || id}`)}`
-        : null;
-    const showPaymentSteps = isNewOrder && (isVodafone || isCOD) && Boolean(walletNumber);
-
-    const copyWallet = async () => {
-        if (!walletNumber) return;
-        try {
-            await navigator.clipboard.writeText(walletNumber);
-            setCopiedWallet(true);
-            setTimeout(() => setCopiedWallet(false), 1500);
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-white">
@@ -134,65 +91,15 @@ export default function OrderSuccessPage() {
                         transition={{ delay: 0.2 }}
                     >
                         <h1 className="text-4xl md:text-6xl font-black text-gray-900 mb-4 tracking-tighter">
-                            {showPaymentSteps
-                                ? (isRTL ? 'طلبك اتسجل — فاضل خطوة الدفع' : 'Order received — one payment step left')
-                                : (isRTL ? 'مبروك، تم تأكيد طلبك!' : 'Yay! Order Confirmed!')}
+                            {isRTL ? 'مبروك، تم تأكيد طلبك!' : 'Yay! Order Confirmed!'}
                         </h1>
                         <p className="text-gray-400 font-bold text-lg md:text-xl max-w-xl mx-auto leading-relaxed">
-                            {showPaymentSteps
-                                ? (isRTL
-                                    ? 'حوّل الديبوزت وأرسل صورة الإيصال على واتساب، وسيتم مراجعته يدويًا قبل تأكيد طلبك.'
-                                    : 'Send the deposit and share the receipt on WhatsApp. Your order will be confirmed after manual review.')
-                                : (isRTL
-                                    ? 'طلبك الآن في طريقه للتجهيز. فريق هوسي يعمل بكل حب لتصلك القطع في أسرع وقت.'
-                                    : 'Your order is being prepared. Hawsni team is working with love to deliver your pieces ASAP.')}
+                            {isRTL
+                                ? 'طلبك الآن في طريقه للتجهيز. فريق هوسي يعمل بكل حب لتصلك القطع في أسرع وقت.'
+                                : 'Your order is being prepared. Hawsni team is working with love to deliver your pieces ASAP.'}
                         </p>
                     </motion.div>
                 </div>
-
-                {showPaymentSteps && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="mb-8 bg-white rounded-[2rem] border border-emerald-100 shadow-xl shadow-emerald-900/5 overflow-hidden"
-                    >
-                        <div className="p-6 md:p-8">
-                            <h2 className="text-xl font-black text-gray-900 mb-4">
-                                {isRTL ? 'خطوات إتمام الدفع' : 'Payment steps'}
-                            </h2>
-                            <ol className="space-y-3 text-sm font-bold text-gray-700 leading-relaxed" dir={isRTL ? 'rtl' : 'ltr'}>
-                                <li>
-                                    {isRTL ? '١- حوّل الديبوزت إلى رقم فودافون كاش التالي:' : '1- Send the deposit to this Vodafone Cash number:'}
-                                    <div className="mt-2 flex flex-wrap items-center gap-3">
-                                        <span dir="ltr" className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl font-black text-gray-900 tracking-wider">{walletNumber}</span>
-                                        <button type="button" onClick={copyWallet} className="px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-black active:scale-95">
-                                            {copiedWallet ? (isRTL ? 'تم النسخ' : 'Copied') : (isRTL ? 'نسخ الرقم' : 'Copy number')}
-                                        </button>
-                                        {hasDeposit && (
-                                            <span className="text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2 text-xs font-black">
-                                                {isRTL ? `الديبوزت: ${depositAmount} جنيه` : `Deposit: ${depositAmount} EGP`}
-                                            </span>
-                                        )}
-                                    </div>
-                                </li>
-                                <li>
-                                    {isRTL ? '٢- أرسل صورة الإيصال على واتساب مع رقم الطلب.' : '2- Send the receipt screenshot on WhatsApp with the order number.'}
-                                    {receiptHref && (
-                                        <div className="mt-2">
-                                            <a href={receiptHref} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-xl text-xs font-black active:scale-95">
-                                                {isRTL ? 'إرسال الإيصال على واتساب' : 'Send receipt on WhatsApp'}
-                                            </a>
-                                        </div>
-                                    )}
-                                </li>
-                                {isCOD && remainingAmount !== null && (
-                                    <li>{isRTL ? `٣- الباقي عند الاستلام: ${remainingAmount.toLocaleString()} جنيه.` : `3- Remaining cash on delivery: ${remainingAmount.toLocaleString()} EGP.`}</li>
-                                )}
-                            </ol>
-                        </div>
-                    </motion.div>
-                )}
 
                 {/* Order Summary Card */}
                 <motion.div
