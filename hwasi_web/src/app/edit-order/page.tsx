@@ -21,13 +21,18 @@ import MeshBackground from '@/components/checkout/MeshBackground';
 const PREMIUM_INPUT_CLASS = "w-full h-[52px] px-4 bg-[#F9FAFB] border border-gray-200 text-gray-900 text-[15px] font-bold rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0E4435]/15 focus:border-[#0E4435] transition-all placeholder:text-gray-400 placeholder:font-medium appearance-none shadow-sm";
 const PREMIUM_LABEL_CLASS = "block text-[13px] font-black text-gray-600 mb-1.5 px-1 tracking-wide";
 
+// WhatsApp URL buttons append the order number as a suffix; if a template
+// glitch ever leaks a literal {{variable}} into the URL, strip it here so
+// the page still resolves the real order number.
+const cleanOrderRef = (value: string) => value.replace(/\{\{[^}]*\}\}/g, '').trim();
+
 function EditOrderContent() {
     const { isRTL } = useLanguage();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { showToast } = useToastStore();
 
-    const orderNumberParam = searchParams.get('order_number') || searchParams.get('id') || '';
+    const orderNumberParam = cleanOrderRef(searchParams.get('order_number') || searchParams.get('id') || '');
     
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);

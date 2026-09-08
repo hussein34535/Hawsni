@@ -191,10 +191,13 @@ class WhatsAppService {
             /parameter/i.test(result?.error?.message || '');
 
         try {
-            // Walk the modes from newest to oldest template format; stop at
-            // the first delivery. Non-parameter errors (bad phone, auth, ...)
-            // abort the chain immediately instead of blind-retries.
-            const modes = ['named-buttons', 'positional-buttons', 'positional-body'];
+            // Walk the modes from the proven-working format to the others;
+            // stop at the first delivery. Non-parameter errors (bad phone,
+            // auth, ...) abort the chain immediately instead of blind-retries.
+            // 'positional-buttons' is first: Meta's send API maps positional
+            // params onto named template variables by order (verified live),
+            // and the template's dynamic URL buttons use per-button {{1}}.
+            const modes = ['positional-buttons', 'named-buttons', 'positional-body'];
             let delivered = false;
             let usedMode = null;
             let lastResult = null;
@@ -421,7 +424,7 @@ class WhatsAppService {
             const isParamMismatch = (res) => res?.error?.code === 132000 ||
                 /parameter/i.test(res?.error?.message || '');
 
-            const modes = ['named-buttons', 'positional-buttons', 'positional-body'];
+            const modes = ['positional-buttons', 'named-buttons', 'positional-body'];
             let delivered = false;
             let lastResult = null;
             for (const mode of modes) {

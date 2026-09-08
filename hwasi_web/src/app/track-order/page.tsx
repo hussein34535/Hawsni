@@ -17,17 +17,22 @@ import { useLanguage } from '@/context/LanguageContext';
 import { checkoutService } from '@/services/checkoutService';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// WhatsApp URL buttons append the order number as a suffix; if a template
+// glitch ever leaks a literal {{variable}} into the URL, strip it here so
+// tracking still resolves the real order number.
+const cleanOrderRef = (value: string) => value.replace(/\{\{[^}]*\}\}/g, '').trim();
+
 function TrackOrderContent() {
     const { isRTL } = useLanguage();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [orderId, setOrderId] = useState(searchParams.get('id') || searchParams.get('order_number') || '');
+    const [orderId, setOrderId] = useState(cleanOrderRef(searchParams.get('id') || searchParams.get('order_number') || ''));
     const [isTracking, setIsTracking] = useState(false);
     const [order, setOrder] = useState<any>(null);
     const [error, setError] = useState('');
 
     const handleTrack = useCallback(async (idToTrack?: string) => {
-        const id = idToTrack || orderId;
+        const id = cleanOrderRef(idToTrack || orderId);
         if (!id) return;
 
         setIsTracking(true);
