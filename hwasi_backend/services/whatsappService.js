@@ -105,8 +105,11 @@ class WhatsAppService {
         let imageUrl = null;
 
         if (items && items.length > 0) {
-            productsNames = items.map(item => item.name || item.product_name || 'منتج').join(' و ');
-            if (productsNames.length > 100) productsNames = productsNames.substring(0, 97) + '...';
+            // One product per line with quantity — cleaner than a "و"-joined run-on line
+            productsNames = items
+                .map(item => `• ${item.name || item.product_name || 'منتج'} ×${item.quantity || 1}`)
+                .join('\n');
+            if (productsNames.length > 400) productsNames = productsNames.substring(0, 397) + '...';
 
             const firstImg = items[0].image_url || items[0].imageUrl || items[0].image || (items[0].products && items[0].products.images ? items[0].products.images[0] : null);
             if (firstImg && typeof firstImg === 'string' && firstImg.startsWith('http')) {
@@ -371,7 +374,7 @@ class WhatsAppService {
         if (finalPhone.startsWith('01') && finalPhone.length === 11) finalPhone = '2' + finalPhone;
 
         // Truncate the message to fit template parameters
-        const shortMsg = message.length > 100 ? message.substring(0, 97) + '...' : message;
+        const shortMsg = message.length > 250 ? message.substring(0, 247) + '...' : message;
 
         // The order_confirm template carries URL buttons (تعديل/تتبع) whose
         // variables are mandatory once approved. Fall back to a harmless
