@@ -858,7 +858,7 @@
                 return;
             }
             el('order-body').innerHTML = matched.map(o => {
-                const statusColor = o.status === 'Delivered' ? '#16a34a' : o.status === 'Shipped' ? '#2563eb' : o.status === 'Cancelled' ? '#dc2626' : '#d97706';
+                    const statusColor = o.status === 'Delivered' ? '#16a34a' : o.status === 'Shipped' || o.status === 'In Transit' ? '#2563eb' : o.status === 'Cancelled' ? '#dc2626' : '#d97706';
                 return `<div class="order-card">
                     <h4><span>طلب #${o.order_number || o.id?.slice(0,8)}</span><span class="status-badge" style="background:${statusColor}20;color:${statusColor};">${o.status || 'قيد الانتظار'}</span></h4>
                     <div class="row"><span>العميل</span><span>${o.shipping_address?.name || '—'}</span></div>
@@ -876,7 +876,7 @@
                     return;
                 }
                 el('order-body').innerHTML = d.orders.map(o => {
-                    const statusColor = o.status === 'Delivered' ? '#16a34a' : o.status === 'Shipped' ? '#2563eb' : o.status === 'Cancelled' ? '#dc2626' : '#d97706';
+                const statusColor = o.status === 'Delivered' ? '#16a34a' : o.status === 'Shipped' || o.status === 'In Transit' ? '#2563eb' : o.status === 'Cancelled' ? '#dc2626' : '#d97706';
                     return `<div class="order-card">
                         <h4><span>طلب #${o.order_number || o.id?.slice(0,8)}</span><span class="status-badge" style="background:${statusColor}20;color:${statusColor};">${o.status || 'قيد الانتظار'}</span></h4>
                         <div class="row"><span>العميل</span><span>${o.customer_name || '—'}</span></div>

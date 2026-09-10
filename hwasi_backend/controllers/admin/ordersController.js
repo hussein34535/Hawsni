@@ -477,7 +477,9 @@ class OrdersController {
                         let hwasiStatus = null;
                         if (stateCode === 45) {
                             hwasiStatus = 'Delivered';
-                        } else if (stateCode >= 21 && stateCode <= 44) {
+                        } else if (stateCode === 21) {
+                            hwasiStatus = 'In Transit';
+                        } else if (stateCode >= 22 && stateCode <= 44) {
                             hwasiStatus = 'Shipped';
                         } else if (stateCode === 46 || stateCode === 47 || stateCode === 49 || stateCode === 50) {
                             hwasiStatus = 'Cancelled';

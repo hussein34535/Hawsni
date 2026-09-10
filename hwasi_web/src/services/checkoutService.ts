@@ -95,5 +95,14 @@ export const checkoutService = {
         } catch (error: any) {
             throw error.response?.data?.message || 'Failed to update order';
         }
+    },
+
+    cancelOrder: async (id: string): Promise<{ success: boolean; cancelledOrder?: any; message?: string }> => {
+        try {
+            const response = await apiClient.put(`/orders/${id}/cancel`);
+            return response.data;
+        } catch (error: any) {
+            throw error.response?.data?.message || 'Failed to cancel order';
+        }
     }
 };

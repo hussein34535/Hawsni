@@ -221,8 +221,16 @@ class OrderController {
                 return res.status(404).json({ success: false, message: 'Order not found' });
             }
 
-            if (order.user_id !== req.user.id && req.user.role !== 'admin') {
-                return res.status(403).json({ success: false, message: 'Not authorized to cancel this order' });
+            // Authorization: logged-in users must own the order (or be admin);
+            // guests may only cancel guest orders (user_id is null).
+            if (req.user) {
+                if (order.user_id !== req.user.id && req.user.role !== 'admin') {
+                    return res.status(403).json({ success: false, message: 'Not authorized to cancel this order' });
+                }
+            } else {
+                if (order.user_id !== null) {
+                    return res.status(403).json({ success: false, message: 'Not authorized to cancel this order' });
+                }
             }
 
             if (order.status !== 'Processing') {
@@ -262,14 +270,33 @@ class OrderController {
                 return res.status(400).json({ success: false, message: 'Cannot update order after it has been shipped' });
             }
 
-            const { shippingAddress, notes, guestName, guestPhone, guestEmail } = req.body;
-            
+            const { shippingAddress, notes, guestName, guestPhone, guestAlternativePhone, guestEmail } = req.body;
+
             const updateData = {};
             if (shippingAddress) updateData.shipping_address = shippingAddress;
-            if (notes) updateData.notes = notes;
-            
-            // If it's a guest order, we might want to update the metadata too
-            // but the shipping_address already contains guest details in this system
+            if (notes !== undefined && notes !== null) updateData.notes = notes;
+
+            // Contact details live inside the shipping_address object
+            let finalShip = updateData.shipping_address;
+            if (typeof finalShip === 'string') {
+                try { finalShip = JSON.parse(finalShip); } catch (e) { finalShip = null; }
+            }
+            if (finalShip && typeof finalShip === 'object') {
+                if (guestName) finalShip.name = guestName;
+                if (guestPhone) finalShip.phone = guestPhone;
+                if (guestAlternativePhone) finalShip.alternative_phone = guestAlternativePhone;
+                if (guestEmail) finalShip.email = guestEmail;
+                updateData.shipping_address = finalShip;
+
+                // Light server-side validation for Egyptian phone numbers
+                const phoneRegex = /^01[0125][0-9]{8}$/;
+                if (finalShip.phone && !phoneRegex.test(String(finalShip.phone))) {
+                    return res.status(400).json({ success: false, message: 'رقم الهاتف غير صحيح' });
+                }
+                if (finalShip.alternative_phone && !phoneRegex.test(String(finalShip.alternative_phone))) {
+                    return res.status(400).json({ success: false, message: 'رقم الهاتف البديل غير صحيح' });
+                }
+            }
             
             const updatedOrder = await OrderService.updateOrder(order.id, updateData);
             res.json({ success: true, order: updatedOrder });

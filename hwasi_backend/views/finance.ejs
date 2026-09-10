@@ -179,7 +179,7 @@
                             <td class="<%= o.profit >= 0 ? 'fin-positive' : 'fin-negative' %>"><%= Number(o.profit).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</td>
                             <td>
                                 <% if (['Delivered', 'Shipped', 'In Transit', 'Confirmed'].includes(o.status)) { %>
-                                    <span class="badge <%= o.status === 'Delivered' ? 'badge-success' : 'badge-info' %>"><%= { 'Delivered': 'تم التوصيل', 'Shipped': 'تم الشحن', 'In Transit': 'في الطريق', 'Confirmed': 'مؤكد' }[o.status] || o.status %></span>
+                                    <span class="badge <%= o.status === 'Delivered' ? 'badge-success' : 'badge-info' %>"><%= { 'Delivered': 'تم التوصيل', 'Shipped': 'في الطريق', 'In Transit': 'مع شركة الشحن', 'Confirmed': 'مؤكد' }[o.status] || o.status %></span>
                                 <% } else if (o.status === 'Cancelled') { %>
                                     <span class="badge badge-danger">ملغي</span>
                                 <% } else { %>

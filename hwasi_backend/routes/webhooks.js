@@ -43,20 +43,22 @@ router.post('/bosta', async (req, res) => {
             if (stateCode !== null) {
                 // Map Bosta numeric state codes to Hwasi Status
                 // Reference: BOSTA_STATUS_MAP in bostaService.js
-                //   21 = تم استلام الشحنة من المتجر  → Shipped
-                //   30 = في الطريق للمستودع           → Shipped
-                //   41 = في الطريق للمستودع الرئيسي    → Shipped
-                //   42 = وصلت المستودع               → Shipped
-                //   43 = في الطريق للتوصيل لمحافظتك   → Shipped
-                //   44 = في عهدة مندوب التوصيل       → Shipped
-                //   45 = تم التسليم بنجاح             → Delivered
+                //   21 = تم استلام الشحنة من المتجر    → In Transit (مع شركة الشحن)
+                //   30 = في الطريق للمستودع            → Shipped
+                //   41 = في الطريق للمستودع الرئيسي     → Shipped
+                //   42 = وصلت المستودع                → Shipped
+                //   43 = في الطريق للتوصيل لمحافظتك    → Shipped
+                //   44 = في عهدة مندوب التوصيل        → Shipped
+                //   45 = تم التسليم بنجاح              → Delivered
                 //   46 = قيد المرتجع                  → Cancelled
                 //   47 = مشكلة في التوصيل             → Cancelled
                 //   49 = تم إلغاء الشحنة              → Cancelled
                 //   50 = تم الإرجاع للمحل بنجاح       → Cancelled
                 if (stateCode === 45) {
                     hwasiStatus = 'Delivered';
-                } else if (stateCode >= 21 && stateCode <= 44) {
+                } else if (stateCode === 21) {
+                    hwasiStatus = 'In Transit';
+                } else if (stateCode >= 22 && stateCode <= 44) {
                     hwasiStatus = 'Shipped';
                 } else if (stateCode === 46 || stateCode === 47 || stateCode === 49 || stateCode === 50) {
                     hwasiStatus = 'Cancelled';

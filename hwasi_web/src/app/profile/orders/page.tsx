@@ -71,7 +71,8 @@ export default function OrdersPage() {
         const statuses: any = {
             'pending': language === 'ar' ? 'قيد الانتظار' : 'Pending',
             'processing': language === 'ar' ? 'جاري التنفيذ' : 'Processing',
-            'shipped': language === 'ar' ? 'تم الشحن' : 'Shipped',
+            'in transit': language === 'ar' ? 'مع شركة الشحن' : 'With Shipping Company',
+            'shipped': language === 'ar' ? 'في الطريق' : 'On the Way',
             'delivered': language === 'ar' ? 'تم التوصيل' : 'Delivered',
             'cancelled': language === 'ar' ? 'ملغي' : 'Cancelled',
         };

@@ -386,9 +386,9 @@
                     const statusSteps = {
                         'Processing': 1,
                         'Confirmed': 1,
-                        'Shipped': 2,
                         'In Transit': 2,
-                        'Delivered': 3,
+                        'Shipped': 3,
+                        'Delivered': 4,
                         'Cancelled': -1
                     };
                     const currentStep = statusSteps[order.status] || 1;
@@ -398,22 +398,23 @@
                     });
                     const steps = [
                         { icon: '✅', label: 'تم استقبال الطلب', desc: 'حصلنا على طلبك وبنجهزه بكل حب' },
-                        { icon: '🚚', label: 'في الطريق إليك', desc: 'طلبك مع مندوب الشحن الآن' },
+                        { icon: '📦', label: 'مع شركة الشحن', desc: 'طلبك اتسلم لشركة الشحن' },
+                        { icon: '🚚', label: 'في الطريق إليك', desc: 'الشحنة في طريقها لمحافظتك' },
                         { icon: '🎉', label: 'تم التسليم', desc: 'تم تسليم الشحنة بنجاح' },
                     ];
                     const statusBadgeClass = {
                         'Processing': 'processing',
                         'Confirmed': 'processing',
-                        'Shipped': 'transit',
                         'In Transit': 'transit',
+                        'Shipped': 'transit',
                         'Delivered': 'delivered',
                         'Cancelled': 'cancelled'
                     }[order.status] || 'processing';
                     const statusText = {
                         'Processing': '⏳ جاري التجهيز',
                         'Confirmed': '✅ تم التأكيد',
-                        'Shipped': '🚚 تم الشحن',
-                        'In Transit': '🚚 في الطريق',
+                        'In Transit': '📦 مع شركة الشحن',
+                        'Shipped': '🚚 في الطريق',
                         'Delivered': '✅ تم التسليم',
                         'Cancelled': '❌ ملغي'
                     }[order.status] || 'قيد المعالجة';

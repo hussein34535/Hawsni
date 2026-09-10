@@ -330,7 +330,7 @@
                     </div>
                     <div style="text-align: left;">
                         <div class="order-total"><%= parseFloat(order.total).toFixed(0) %> ج.م</div>
-                        <% const statusMap = { 'Processing': 'warning', 'Shipped': 'info', 'Delivered': 'success', 'Cancelled': 'danger' }; %>
+                        <% const statusMap = { 'Processing': 'warning', 'Confirmed': 'primary', 'In Transit': 'info', 'Shipped': 'info', 'Delivered': 'success', 'Cancelled': 'danger' }; %>
                         <span class="badge badge-<%= statusMap[order.status] || 'warning' %>" style="margin-top: 6px; display: inline-block;">
                             <%= order.status || 'معلق' %>
                         </span>

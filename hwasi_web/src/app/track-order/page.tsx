@@ -62,7 +62,7 @@ function TrackOrderContent() {
     }, [searchParams, handleTrack]);
 
     const getStatusIndex = (status: string) => {
-        const statuses = ['Processing', 'Shipped', 'Delivered'];
+        const statuses = ['Processing', 'In Transit', 'Shipped', 'Delivered'];
         return statuses.indexOf(status);
     };
 
@@ -155,7 +155,11 @@ function TrackOrderContent() {
                                     </p>
                                 </div>
                                 <div className="bg-emerald-50 px-4 py-2 rounded-2xl">
-                                    <span className="text-[#0E4435] font-black text-xs">{isRTL ? 'نشط' : 'Active'}</span>
+                                    <span className="text-[#0E4435] font-black text-xs">
+                                        {order.status === 'Cancelled'
+                                            ? (isRTL ? 'ملغي ❌' : 'Cancelled')
+                                            : (isRTL ? 'نشط' : 'Active')}
+                                    </span>
                                 </div>
                             </div>
 
@@ -165,7 +169,8 @@ function TrackOrderContent() {
 
                                 {[
                                     { key: 'Processing', label: isRTL ? 'تم استقبال الطلب' : 'Order Received', desc: isRTL ? 'جاري تجهيز طلبك في مستودعاتنا' : 'We are preparing your order in our warehouse', icon: Package, color: 'emerald' },
-                                    { key: 'Shipped', label: isRTL ? 'في الطريق' : 'In Transit', desc: isRTL ? 'طلبك مع مندوب الشحن الآن' : 'Your order is on the way with delivery partner', icon: Truck, color: 'blue' },
+                                    { key: 'In Transit', label: isRTL ? 'مع شركة الشحن' : 'With Shipping Company', desc: isRTL ? 'طلبك اتسلم لشركة الشحن' : 'Your order was handed to our shipping partner', icon: Truck, color: 'amber' },
+                                    { key: 'Shipped', label: isRTL ? 'في الطريق' : 'On the Way', desc: isRTL ? 'الشحنة في طريقها لمحافظتك' : 'Your shipment is on its way to you', icon: MapPin, color: 'blue' },
                                     { key: 'Delivered', label: isRTL ? 'تم التوصيل' : 'Delivered', desc: isRTL ? 'تم تسليم الشحنة بنجاح' : 'Package has been delivered successfully', icon: CheckCircle2, color: 'emerald' }
                                 ].map((step, idx) => {
                                     const currentIndex = getStatusIndex(order.status);

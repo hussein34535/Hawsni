@@ -14,8 +14,8 @@ router.post('/', protectOptional, orderSchema, OrderController.createOrder);
 // Update order status (Admin)
 router.put('/:id/status', protect, OrderController.updateStatus);
 
-// Cancel order (authenticated)
-router.put('/:id/cancel', protect, OrderController.cancelOrder);
+// Cancel order (owner, admin, or guest order via the edit link)
+router.put('/:id/cancel', protectOptional, OrderController.cancelOrder);
 
 // Cancel order via email link (no auth required - anyone with the link can cancel)
 router.get('/:id/cancel-email', async (req, res) => {

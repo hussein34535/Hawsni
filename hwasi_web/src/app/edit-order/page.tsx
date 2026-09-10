@@ -11,7 +11,8 @@ import {
     CheckCircle2, 
     MapPin,
     AlertCircle,
-    Edit3
+    Edit3,
+    XCircle
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToastStore } from '@/store/toastStore';
@@ -36,6 +37,7 @@ function EditOrderContent() {
     
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
     const [order, setOrder] = useState<any>(null);
     const [error, setError] = useState('');
 
@@ -136,12 +138,32 @@ function EditOrderContent() {
         setIsSubmitting(true);
         
         const formData = new FormData(e.currentTarget);
+        const customerName = formData.get('name') as string;
+        const phone = formData.get('phone') as string;
+        const phone2 = formData.get('phone2') as string;
+        const email = formData.get('email') as string;
         const citySelect = e.currentTarget.elements.namedItem('governorate') as HTMLSelectElement;
         const governorateName = citySelect?.options[citySelect.selectedIndex]?.text || '';
         const cityName = districtSearch;
         const street = formData.get('street') as string;
         const notes = formData.get('notes') as string;
 
+        const phoneRegex = /^01[0125][0-9]{8}$/;
+        if (!customerName || customerName.trim().split(/\s+/).length < 2) {
+            showToast(isRTL ? 'يرجى إدخال الاسم ثنائياً على الأقل' : 'Please enter at least two names', 'error');
+            setIsSubmitting(false);
+            return;
+        }
+        if (!phoneRegex.test(phone)) {
+            showToast(isRTL ? 'يرجى إدخال رقم هاتف مصري صحيح' : 'Please enter a valid Egyptian phone number', 'error');
+            setIsSubmitting(false);
+            return;
+        }
+        if (phone2 && !phoneRegex.test(phone2)) {
+            showToast(isRTL ? 'رقم الهاتف البديل غير صحيح' : 'Invalid alternative phone number', 'error');
+            setIsSubmitting(false);
+            return;
+        }
         if (!governorateName || !cityName || !street) {
             showToast(isRTL ? 'يرجى إكمال جميع البيانات' : 'Please complete all details', 'error');
             setIsSubmitting(false);
@@ -152,11 +174,19 @@ function EditOrderContent() {
             const updateData = {
                 shippingAddress: {
                     ...order.shipping_address,
+                    name: customerName,
+                    phone: phone,
+                    alternative_phone: phone2 || undefined,
+                    email: email || undefined,
                     street: street,
                     city: cityName,
                     state: governorateName,
                 },
-                notes: notes
+                notes: notes,
+                guestName: customerName,
+                guestPhone: phone,
+                guestAlternativePhone: phone2 || undefined,
+                guestEmail: email || undefined
             };
 
             const res = await checkoutService.updateOrder(order.id, updateData);
@@ -170,6 +200,32 @@ function EditOrderContent() {
             showToast(err || 'System error', 'error');
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleCancelOrder = async () => {
+        if (isCancelling) return;
+        const confirmed = window.confirm(
+            isRTL
+                ? `متأكد إنك عايز تلغي الطلب #${order.order_number}؟ مش هتقدر ترجّعه بعد الإلغاء.`
+                : `Are you sure you want to cancel order #${order.order_number}? This cannot be undone.`
+        );
+        if (!confirmed) return;
+
+        setIsCancelling(true);
+        try {
+            const res = await checkoutService.cancelOrder(order.id);
+            if (res.success) {
+                showToast(isRTL ? 'تم إلغاء طلبك بنجاح' : 'Order cancelled successfully', 'success');
+                router.push(`/track-order?order_number=${order.order_number}`);
+            } else {
+                showToast(res.message || (isRTL ? 'تعذر إلغاء الطلب' : 'Failed to cancel order'), 'error');
+            }
+        } catch (err: any) {
+            const msg = typeof err === 'string' ? err : (err?.response?.data?.message || (isRTL ? 'حدث خطأ أثناء الإلغاء' : 'Failed to cancel order'));
+            showToast(msg, 'error');
+        } finally {
+            setIsCancelling(false);
         }
     };
 
@@ -230,6 +286,60 @@ function EditOrderContent() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Contact Details Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-black text-gray-900 flex items-center gap-2">
+                                <User size={16} className="text-[#0E4435]" />
+                                {isRTL ? 'بيانات التواصل' : 'Contact Details'}
+                            </h3>
+                            <div>
+                                <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'الاسم بالكامل' : 'Full Name'}</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    required
+                                    defaultValue={order.shipping_address?.name || ""}
+                                    className={PREMIUM_INPUT_CLASS}
+                                    placeholder={isRTL ? 'الاسم الأول والثاني...' : 'First and last name...'}
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'رقم الهاتف' : 'Phone Number'}</label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        required
+                                        inputMode="numeric"
+                                        defaultValue={order.shipping_address?.phone || ""}
+                                        className={PREMIUM_INPUT_CLASS}
+                                        placeholder="01xxxxxxxxx"
+                                    />
+                                </div>
+                                <div>
+                                    <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'رقم بديل (اختياري)' : 'Alt. Phone (Optional)'}</label>
+                                    <input
+                                        type="tel"
+                                        name="phone2"
+                                        inputMode="numeric"
+                                        defaultValue={order.shipping_address?.alternative_phone || ""}
+                                        className={PREMIUM_INPUT_CLASS}
+                                        placeholder="01xxxxxxxxx"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className={PREMIUM_LABEL_CLASS}>{isRTL ? 'البريد الإلكتروني (اختياري)' : 'Email (Optional)'}</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    defaultValue={order.shipping_address?.email || ""}
+                                    className={PREMIUM_INPUT_CLASS}
+                                    placeholder="email@example.com"
+                                />
+                            </div>
+                        </div>
+
                         {/* Delivery Address Section */}
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -314,7 +424,7 @@ function EditOrderContent() {
                         <div className="pt-6 border-t border-gray-100">
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isCancelling}
                                 className="w-full h-14 bg-[#0E4435] text-white rounded-2xl font-black text-base flex items-center justify-center gap-2 shadow-xl shadow-emerald-950/20 disabled:opacity-60 active:scale-95 transition-all hover:bg-[#0a3126]"
                             >
                                 {isSubmitting ? (
@@ -329,6 +439,25 @@ function EditOrderContent() {
                                     </>
                                 )}
                             </button>
+
+                            <button
+                                type="button"
+                                onClick={handleCancelOrder}
+                                disabled={isSubmitting || isCancelling}
+                                className="w-full h-14 mt-3 bg-white border-2 border-red-100 text-red-600 rounded-2xl font-black text-base flex items-center justify-center gap-2 hover:bg-red-50 hover:border-red-200 disabled:opacity-60 active:scale-95 transition-all"
+                            >
+                                {isCancelling ? (
+                                    <>
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                        <span>{isRTL ? 'جاري الإلغاء...' : 'Cancelling...'}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <XCircle size={18} />
+                                        <span>{isRTL ? 'إلغاء الطلب' : 'Cancel Order'}</span>
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -337,8 +466,8 @@ function EditOrderContent() {
                     <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
                     <p className="text-sm font-bold text-amber-800 leading-relaxed">
                         {isRTL 
-                            ? 'يمكنك تعديل العنوان والملاحظات فقط طالما أن الطلب لم يتم شحنه بعد. لتغيير المنتجات يرجى التواصل مع الدعم.' 
-                            : 'You can only edit the address and notes as long as the order hasn\'t been shipped yet. To change items, please contact support.'}
+                            ? 'يمكنك تعديل بياناتك وإلغاء الطلب قبل تسليمه لشركة الشحن. لتغيير المنتجات يرجى التواصل مع الدعم.'
+                            : 'You can edit your details or cancel the order until it is handed to the shipping company. To change items, please contact support.'}
                     </p>
                 </div>
             </main>
