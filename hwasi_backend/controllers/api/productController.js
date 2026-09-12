@@ -5,6 +5,36 @@ const { cleanImageUrls } = require('../../utils/imageUtils');
 
 
 class ProductController {
+    /**
+     * Insert a product, tolerating a missing vto_image_index column.
+     * If the 012 migration hasn't been applied yet, PostgREST rejects the
+     * write with a schema-cache error — in that case we retry without the
+     * field so product saves keep working (the VTO default just won't
+     * persist until the migration runs).
+     */
+    async _insertProductTolerant(payload) {
+        let { data, error } = await supabase.from('products').insert(payload).select().single();
+        if (error && /vto_image_index/.test(error.message || '')) {
+            console.warn('[Products] vto_image_index column missing — run migrations/012_add_vto_image_index.sql. Saving without it.');
+            delete payload.vto_image_index;
+            ({ data, error } = await supabase.from('products').insert(payload).select().single());
+        }
+        return { data, error };
+    }
+
+    /**
+     * Same tolerance for product updates.
+     */
+    async _updateProductTolerant(id, payload) {
+        let { error } = await supabase.from('products').update(payload).eq('id', id);
+        if (error && /vto_image_index/.test(error.message || '')) {
+            console.warn('[Products] vto_image_index column missing — run migrations/012_add_vto_image_index.sql. Saving without it.');
+            delete payload.vto_image_index;
+            ({ error } = await supabase.from('products').update(payload).eq('id', id));
+        }
+        return { error };
+    }
+
     async getProducts(req, res) {
         try {
             const { category, search, minPrice, maxPrice, sort, featured, page, limit } = req.query;
@@ -312,7 +342,7 @@ class ProductController {
                 productData.images = [...productData.images, ...uploadedUrls];
             }
 
-            const { data: newProduct, error } = await supabase.from('products').insert({
+            const { data: newProduct, error } = await this._insertProductTolerant({
                 name: productData.name,
                 description: productData.description,
                 price: productData.price,
@@ -328,7 +358,7 @@ class ProductController {
                 accessories: productData.accessories,
                 images: productData.images,
                 size_guide: productData.size_guide
-            }).select().single();
+            });
 
             if (error) throw error;
 
@@ -413,7 +443,7 @@ class ProductController {
             }
 
             // Perform Update
-            const { error: updateError } = await supabase.from('products').update({
+            const { error: updateError } = await this._updateProductTolerant(req.params.id, {
                 name: productData.name,
                 description: productData.description,
                 price: productData.price,
@@ -429,7 +459,7 @@ class ProductController {
                 accessories: productData.accessories,
                 images: productData.images,
                 size_guide: productData.size_guide
-            }).eq('id', req.params.id);
+            });
 
             if (updateError) throw updateError;
 
