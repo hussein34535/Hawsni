@@ -641,6 +641,8 @@
 
         function renderGallery() {
             const grid = document.getElementById('unifiedImageConfigs');
+            // Stop any playing previews before rebuilding (prevents stacked audio)
+            grid.querySelectorAll('video').forEach(v => { try { v.pause(); } catch (e) {} });
             // Clear current content
             grid.innerHTML = '';
 
@@ -663,9 +665,19 @@
                     mediaEl = document.createElement('video');
                     mediaEl.src = img.url;
                     mediaEl.setAttribute('draggable', 'false');
+                    // Muted MUST be an attribute (not just a JS property):
+                    // SortableJS clones cards while dragging and clones copy
+                    // attributes only — a property-only mute leaves the ghost
+                    // clone playing WITH sound, stacking audio on every move.
+                    mediaEl.setAttribute('muted', '');
+                    mediaEl.setAttribute('playsinline', '');
+                    mediaEl.setAttribute('loop', '');
+                    mediaEl.setAttribute('autoplay', '');
+                    mediaEl.setAttribute('preload', 'metadata');
+                    mediaEl.muted = true;
+                    mediaEl.defaultMuted = true;
                     mediaEl.autoplay = true;
                     mediaEl.loop = true;
-                    mediaEl.muted = true;
                     mediaEl.style.cssText = 'width: 100%; height: 100%; object-fit: cover; pointer-events: none; display: block;';
                 } else {
                     mediaEl = document.createElement('img');
@@ -684,7 +696,7 @@
 
                 const badge = document.createElement('span');
                 badge.className = 'image-badge';
-                badge.textContent = `${index + 1}. ${(img.type === 'file' ? 'ملف' : (img.type === 'scraped' ? 'مستورد' : 'موجود'))}`;
+                badge.textContent = `${index + 1}. ${(img.type === 'file' ? 'ملف' : (img.type === 'scraped' ? 'مستورد' : 'موجود'))}${img.isVideo ? ' 🎬' : ''}`;
 
                 card.appendChild(mediaEl);
                 card.appendChild(deleteBtn);
