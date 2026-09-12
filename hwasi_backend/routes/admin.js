@@ -18,6 +18,7 @@ const adminReviewsController = require('../controllers/admin/reviewsController')
 const adminChatController = require('../controllers/admin/adminChatController');
 const financeController = require('../controllers/admin/financeController');
 const { adminProtect } = require('../middleware/adminAuth');
+const { csrfProtection } = require('../middleware/csrf');
 
 // Auth Routes (Public for Admin)
 // These will be available at /admin/login and /admin/logout
@@ -50,10 +51,10 @@ router.post('/scrape-product', scraperController.scrape);
 // Banners Routes
 router.get('/banners', bannersController.index);
 router.get('/banners/new', bannersController.new);
-router.post('/banners', upload.single('banner_image'), bannersController.create);
+router.post('/banners', upload.single('banner_image'), csrfProtection, bannersController.create);
 router.post('/banners/reorder', bannersController.reorder);
 router.get('/banners/:id/edit', bannersController.edit);
-router.post('/banners/:id', upload.single('banner_image'), bannersController.update);
+router.post('/banners/:id', upload.single('banner_image'), csrfProtection, bannersController.update);
 router.delete('/banners/:id', bannersController.delete);
 
 // Users Routes
@@ -78,22 +79,22 @@ const CategoryController = require('../controllers/api/categoryController');
 // Products Routes
 router.get('/products', ProductController.renderProductsPage.bind(ProductController));
 router.get('/products/new', ProductController.renderNewProductPage.bind(ProductController));
-router.post('/products', ProductController.createProductAdmin.bind(ProductController));
+router.post('/products', upload.any(), csrfProtection, ProductController.createProductAdmin.bind(ProductController));
 router.get('/products/:id/edit', ProductController.renderEditProductPage.bind(ProductController));
-router.post('/products/:id', ProductController.updateProductAdmin.bind(ProductController));
+router.post('/products/:id', upload.any(), csrfProtection, ProductController.updateProductAdmin.bind(ProductController));
 router.delete('/products/:id', ProductController.deleteProductAdmin.bind(ProductController));
 
 // Products Bulk Routes
 router.post('/products/bulk-delete', ProductController.bulkDelete.bind(ProductController));
 router.post('/products/bulk-update', ProductController.bulkUpdate.bind(ProductController));
 
-// Categories Routes
+// Categories Routes (reorder must be registered BEFORE /:id so it isn't shadowed)
 router.get('/categories', CategoryController.renderCategoriesPage.bind(CategoryController));
-router.post('/categories', upload.single('image'), CategoryController.createCategoryAdmin.bind(CategoryController));
-router.get('/categories/:id/edit', CategoryController.renderEditPage.bind(CategoryController));
-router.post('/categories/:id', upload.single('image'), CategoryController.updateCategoryAdmin.bind(CategoryController));
-router.delete('/categories/:id', CategoryController.deleteCategoryAdmin.bind(CategoryController));
 router.post('/categories/reorder', CategoryController.reorderCategories.bind(CategoryController));
+router.post('/categories', upload.single('image'), csrfProtection, CategoryController.createCategoryAdmin.bind(CategoryController));
+router.get('/categories/:id/edit', CategoryController.renderEditPage.bind(CategoryController));
+router.post('/categories/:id', upload.single('image'), csrfProtection, CategoryController.updateCategoryAdmin.bind(CategoryController));
+router.delete('/categories/:id', CategoryController.deleteCategoryAdmin.bind(CategoryController));
 
 // Shipping Settings Routes
 router.get('/shipping', shippingController.index);
@@ -121,7 +122,7 @@ router.get('/chat', adminChatController.renderChatInbox);
 router.get('/chat/sessions', adminChatController.getSessions);
 router.get('/chat/unread-count', adminChatController.getUnreadCount);
 router.post('/chat/send', adminChatController.sendMessage);
-router.post('/chat/send-image', upload.single('image'), adminChatController.sendImage);
+router.post('/chat/send-image', upload.single('image'), csrfProtection, adminChatController.sendImage);
 router.post('/chat/takeover', adminChatController.takeOver);
 router.post('/chat/end', adminChatController.endConversation);
 router.post('/chat/return-to-bot', adminChatController.returnToBot);

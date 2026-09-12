@@ -42,9 +42,13 @@
         </div>
 
         <% if (categories && categories.length> 0) { %>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+            <p style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 1rem;">
+                <i class="fas fa-arrows-alt"></i> اسحب أي تصنيف وغير مكانه لترتيبها زي ما تحب — الترتيب بيتحفظ تلقائي.
+            </p>
+            <div id="categoryGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
                 <% categories.forEach(category=> { %>
-                    <div class="card" style="margin: 0; transition: transform var(--transition-fast); cursor: pointer;">
+                    <div class="card category-card" draggable="true" data-id="<%= category.id %>" data-sort="<%= category.sort_order %>"
+                        style="margin: 0; transition: transform var(--transition-fast); cursor: grab;">
                         <% if (category.image) { %>
                             <div
                                 style="height: 150px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1rem;">
@@ -123,6 +127,64 @@
                 }
             });
         }
+
+        // ===== Drag & drop reorder =====
+        (function () {
+            const grid = document.getElementById('categoryGrid');
+            if (!grid) return;
+            let dragEl = null;
+
+            grid.addEventListener('dragstart', (e) => {
+                const card = e.target.closest('.category-card');
+                if (!card) return;
+                dragEl = card;
+                card.style.opacity = '0.4';
+                e.dataTransfer.effectAllowed = 'move';
+                try { e.dataTransfer.setData('text/plain', card.dataset.id); } catch (err) { }
+            });
+
+            grid.addEventListener('dragend', () => {
+                if (dragEl) {
+                    dragEl.style.opacity = '';
+                    dragEl = null;
+                    persistOrder();
+                }
+            });
+
+            grid.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (!dragEl) return;
+                const target = e.target.closest('.category-card');
+                if (!target || target === dragEl) return;
+                const rect = target.getBoundingClientRect();
+                const isAfter = (e.clientX - rect.left) > rect.width / 2;
+                grid.insertBefore(dragEl, isAfter ? target.nextSibling : target);
+            });
+
+            async function persistOrder() {
+                const cards = [...grid.querySelectorAll('.category-card')];
+                const payload = cards.map((c, i) => ({ id: c.dataset.id, sort_order: i + 1 }));
+                try {
+                    const res = await fetch('/admin/categories/reorder', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'CSRF-Token': '<%= csrfToken %>'
+                        },
+                        body: JSON.stringify({ categories: payload })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('تم حفظ الترتيب بنجاح', 'success');
+                    } else {
+                        showToast(data.message || 'فشل حفظ الترتيب', 'error');
+                    }
+                } catch (err) {
+                    showToast('حدث خطأ أثناء حفظ الترتيب', 'error');
+                }
+            }
+        })();
     </script>
 
     <%- include('partials/footer') %>

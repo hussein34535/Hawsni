@@ -876,6 +876,12 @@
                 document.getElementById('scrapedImagesInput').value = '[]';
                 document.getElementById('retainedImagesInput').value = '[]';
 
+                // 6.5 Clear the raw file input — files were already uploaded to
+                // Cloudinary above; otherwise multer would parse them on the
+                // native submit and the backend would upload them again.
+                const adderInput = document.getElementById('imageAdder');
+                if (adderInput) adderInput.value = '';
+
                 // 7. Submit form normally
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
                 form.submit();

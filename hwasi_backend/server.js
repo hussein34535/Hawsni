@@ -134,14 +134,9 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get('/favicon.png', (req, res) => res.status(204).end());
 
 // CSRF Protection specific for SSR (EJS) Admin UI
-const csurf = require('csurf');
-const csrfProtection = csurf({ 
-    cookie: { 
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict'
-    } 
-});
+// csrfGate skips multipart POST/PUT (verified at route level after multer);
+// see middleware/csrf.js for the full explanation.
+const { csrfProtection, csrfGate } = require('./middleware/csrf');
 
 
 // General API Routes
@@ -232,7 +227,7 @@ const injectCsrfToken = (req, res, next) => {
 // Admin / Dashboard Routes - Apply CSRF and Injection
 // Mounted at /admin to separate from root and public APIs
 // Note: adminProtect is applied internally within adminRoutes for all paths except /login
-app.use('/admin', csrfProtection, injectCsrfToken, adminRoutes);
+app.use('/admin', csrfGate, injectCsrfToken, adminRoutes);
 
 // Root redirect for backward compatibility or simple entry
 app.get('/dashboard', (req, res) => res.redirect('/admin/dashboard'));
