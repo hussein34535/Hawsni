@@ -215,6 +215,102 @@
             border: 1px solid #ddd;
         }
 
+        .products-section {
+            border-top: 2px solid #ecf0f1;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+        }
+
+        .products-section h3 {
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .products-hint {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 0.75rem;
+        }
+
+        #productSearch {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .products-list {
+            max-height: 420px;
+            overflow-y: auto;
+            border: 1px solid #ecf0f1;
+            border-radius: 8px;
+        }
+
+        .product-check {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #f4f6f7;
+            cursor: pointer;
+        }
+
+        .product-check:last-child {
+            border-bottom: none;
+        }
+
+        .product-check:hover {
+            background: #f8f9fa;
+        }
+
+        .product-check.selected {
+            background: #eafaf1;
+        }
+
+        .product-check input {
+            width: 18px;
+            height: 18px;
+            accent-color: #27ae60;
+            flex-shrink: 0;
+        }
+
+        .product-check img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            flex-shrink: 0;
+            background: #f4f6f7;
+        }
+
+        .product-check .p-name {
+            flex: 1;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .product-check .p-price {
+            font-size: 0.85rem;
+            color: #27ae60;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .product-check .p-inactive {
+            font-size: 0.7rem;
+            background: #fdecea;
+            color: #c0392b;
+            border-radius: 4px;
+            padding: 1px 6px;
+        }
+
         .form-buttons {
             display: flex;
             gap: 0.5rem;
@@ -306,6 +402,29 @@
                     <input type="checkbox" id="is_active" name="is_active" <%=category.is_active ? 'checked' : '' %>>
                     <label for="is_active">مفعل</label>
                 </div>
+
+                <div class="products-section">
+                    <h3><i class="fas fa-box-open"></i> منتجات التصنيف</h3>
+                    <p class="products-hint">اختار المنتجات اللي هتظهر في التصنيف ده (المنتجات متخانة دلوقتي: <%= (typeof linkedProductIds !== 'undefined' ? linkedProductIds.length : 0) %>)</p>
+                    <input type="text" id="productSearch" placeholder="🔍 ابحث باسم المنتج..." autocomplete="off">
+                    <div class="products-list" id="productsList">
+                        <% (typeof products !== 'undefined' ? products : []).forEach(function(p) {
+                            const isLinked = linkedProductIds.includes(p.id); %>
+                            <label class="product-check <%= isLinked ? 'selected' : '' %>">
+                                <input type="checkbox" name="product_ids" value="<%= p.id %>" <%= isLinked ? 'checked' : '' %>
+                                    onchange="this.closest('.product-check').classList.toggle('selected', this.checked)">
+                                <img src="<%= (p.images && p.images[0]) || '/placeholder.png' %>" alt="<%= p.name %>" onerror="this.src='/placeholder.png'">
+                                <span class="p-name"><%= p.name %>
+                                    <% if (p.is_active === false) { %><span class="p-inactive">موقوف</span><% } %>
+                                </span>
+                                <span class="p-price"><%= parseFloat(p.price || 0).toFixed(0) %> ج.م</span>
+                            </label>
+                        <% }); %>
+                        <% if (!products || products.length === 0) { %>
+                            <div style="padding: 1rem; text-align: center; color: #95a5a6;">مفيش منتجات — ضيف منتجات الأول من صفحة المنتجات</div>
+                        <% } %>
+                    </div>
+                </div>
                 <div class="form-buttons">
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-save"></i> حفظ
@@ -339,6 +458,18 @@
             sidebar.classList.remove('active');
             sidebarOverlay.classList.remove('active');
         });
+
+        // Client-side product filter
+        const productSearch = document.getElementById('productSearch');
+        if (productSearch) {
+            productSearch.addEventListener('input', () => {
+                const q = productSearch.value.trim().toLowerCase();
+                document.querySelectorAll('#productsList .product-check').forEach(item => {
+                    const name = item.querySelector('.p-name').textContent.trim().toLowerCase();
+                    item.style.display = (!q || name.includes(q)) ? 'flex' : 'none';
+                });
+            });
+        }
     </script>
 </body>
 

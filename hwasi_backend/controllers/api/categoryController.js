@@ -115,7 +115,25 @@ class CategoryController {
                 return res.status(404).send('التصنيف غير موجود');
             }
 
-            res.render('category-edit', { category });
+            // Fetch all products and the ones currently linked to this category
+            // so the category page can manage its own product assignments.
+            const [productsRes, linksRes] = await Promise.all([
+                supabase.from('products').select('id, name, images, price, is_active').order('created_at', { ascending: false }),
+                supabase.from('product_category_links').select('product_id').eq('category_id', category.id)
+            ]);
+
+            if (productsRes.error) {
+                console.error('❌ Supabase error (products):', productsRes.error);
+                return res.status(500).send(`خطأ في جلب المنتجات: ${productsRes.error.message}`);
+            }
+
+            const linkedProductIds = (linksRes.data || []).map(l => l.product_id);
+
+            res.render('category-edit', {
+                category,
+                products: productsRes.data || [],
+                linkedProductIds
+            });
         } catch (error) {
             console.error('Error rendering edit page:', error);
             res.status(500).send(`خطأ في عرض صفحة التعديل: ${error.message}`);
@@ -198,6 +216,80 @@ class CategoryController {
 
             if (!data) {
                 return res.status(404).send('التصنيف غير موجود');
+            }
+
+            // --- Sync product assignments from the CATEGORY side ---
+            // The form posts checkbox values as product_ids; empty/missing
+            // means "no products in this category" (checkboxes were all
+            // unchecked).
+            const rawIds = req.body.product_ids;
+            const selectedIds = (Array.isArray(rawIds) ? rawIds : (rawIds ? [rawIds] : []))
+                .filter(id => typeof id === 'string' && id.length > 0);
+
+            const { data: currentLinks, error: linksErr } = await supabase
+                .from('product_category_links')
+                .select('product_id')
+                .eq('category_id', data.id);
+
+            if (linksErr) {
+                console.error('❌ Supabase error (links):', linksErr);
+                return res.status(500).send(`خطأ في جلب روابط التصنيف: ${linksErr.message}`);
+            }
+
+            const currentIds = (currentLinks || []).map(l => l.product_id);
+            const toAdd = selectedIds.filter(pid => !currentIds.includes(pid));
+            const toRemove = currentIds.filter(pid => !selectedIds.includes(pid));
+
+            if (toAdd.length > 0) {
+                const links = toAdd.map(pid => ({ product_id: pid, category_id: data.id }));
+                const { error: addErr } = await supabase.from('product_category_links').insert(links);
+                if (addErr) {
+                    console.error('❌ Supabase error (add links):', addErr);
+                    return res.status(500).send(`خطأ في ربط المنتجات: ${addErr.message}`);
+                }
+
+                // Mirror the product-form behavior: append to category_ids and
+                // fill category_id when the product has no primary category.
+                const { data: addedProducts } = await supabase
+                    .from('products')
+                    .select('id, category_id, category_ids')
+                    .in('id', toAdd);
+
+                for (const p of (addedProducts || [])) {
+                    const ids = Array.isArray(p.category_ids) ? p.category_ids : [];
+                    if (!ids.includes(data.id)) {
+                        const updateFields = { category_ids: [...ids, data.id] };
+                        if (!p.category_id) updateFields.category_id = data.id;
+                        await supabase.from('products').update(updateFields).eq('id', p.id);
+                    }
+                }
+            }
+
+            if (toRemove.length > 0) {
+                const { error: delErr } = await supabase
+                    .from('product_category_links')
+                    .delete()
+                    .eq('category_id', data.id)
+                    .in('product_id', toRemove);
+                if (delErr) {
+                    console.error('❌ Supabase error (remove links):', delErr);
+                    return res.status(500).send(`خطأ في إزالة المنتجات: ${delErr.message}`);
+                }
+
+                const { data: removedProducts } = await supabase
+                    .from('products')
+                    .select('id, category_id, category_ids, product_category_links(category_id)')
+                    .in('id', toRemove);
+
+                for (const p of (removedProducts || [])) {
+                    const remaining = (p.product_category_links || []).map(l => l.category_id);
+                    const ids = (Array.isArray(p.category_ids) ? p.category_ids : []).filter(cid => cid !== data.id);
+                    const updateFields = { category_ids: ids };
+                    if (p.category_id === data.id) {
+                        updateFields.category_id = remaining[0] || null;
+                    }
+                    await supabase.from('products').update(updateFields).eq('id', p.id);
+                }
             }
 
             console.log('✅ Category updated successfully:', data);
