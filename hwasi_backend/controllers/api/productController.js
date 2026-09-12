@@ -131,6 +131,7 @@ class ProductController {
             category_ids: categoryIds,
             is_featured: isTrue(body.is_featured),
             is_vto_enabled: isTrue(body.is_vto_enabled),
+            vto_image_index: Math.max(0, parseInt(body.vto_image_index) || 0),
             sizes: sizesArray.length > 0 ? sizesArray : null,
             colors: colorsArray.length > 0 ? colorsArray : null,
             accessories: body.accessories ? (typeof body.accessories === 'string' ? JSON.parse(body.accessories) : body.accessories) : null,
@@ -321,6 +322,7 @@ class ProductController {
                 category_id: productData.category_id,
                 is_featured: productData.is_featured,
                 is_vto_enabled: productData.is_vto_enabled,
+                vto_image_index: productData.vto_image_index,
                 sizes: productData.sizes,
                 colors: productData.colors,
                 accessories: productData.accessories,
@@ -421,6 +423,7 @@ class ProductController {
                 category_id: productData.category_id,
                 is_featured: productData.is_featured,
                 is_vto_enabled: productData.is_vto_enabled,
+                vto_image_index: productData.vto_image_index,
                 sizes: productData.sizes,
                 colors: productData.colors,
                 accessories: productData.accessories,
@@ -593,7 +596,7 @@ class ProductController {
             }
 
             // Whitelist allowed fields for safety
-            const allowed = ['category_id', 'is_featured', 'discount'];
+            const allowed = ['category_id', 'is_featured', 'discount', 'vto_image_index'];
             const safeUpdates = Object.fromEntries(
                 Object.entries(updates).filter(([k]) => allowed.includes(k))
             );

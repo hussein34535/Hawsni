@@ -287,10 +287,17 @@
 
                             <div class="form-group">
                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="checkbox" name="is_vto_enabled" <%= (product && product.is_vto_enabled === true) ? 'checked' : '' %>>
+                                    <input type="checkbox" name="is_vto_enabled" id="vtoEnabledCheckbox" <%= (product && product.is_vto_enabled === true) ? 'checked' : '' %>>
                                     <span class="form-label" style="margin: 0;">تفعيل ميزة الذكاء الاصطناعي VTO لهذا
                                         المنتج</span>
                                 </label>
+                            </div>
+                            <div class="form-group" id="vtoImageGroup" style="display: none;">
+                                <label class="form-label">🤖 صورة الذكاء الاصطناعي الافتراضية</label>
+                                <select name="vto_image_index" id="vtoImageSelect" class="form-control"
+                                    data-selected="<%= product && product.vto_image_index != null ? product.vto_image_index : 0 %>"></select>
+                                <small class="text-muted">الصورة اللي الـ AI هيشتغل عليها تلقائيًا للمنتجات اللي من
+                                    غير ألوان. (مع الألوان، كل لون بيستخدم صورته المرتبطة).</small>
                             </div>
                             <!-- Scraped Images Input (Hidden JSON) -->
                             <input type="hidden" name="scraped_images" id="scrapedImagesInput">
@@ -477,6 +484,11 @@
                     updateImageDropdown();
                 }
             });
+
+            // 1b. VTO image selector visibility follows the VTO checkbox
+            const vtoCb = document.getElementById('vtoEnabledCheckbox');
+            if (vtoCb) vtoCb.addEventListener('change', toggleVtoImageGroup);
+            toggleVtoImageGroup();
 
             // 2. Load Existing Images (Server Rendered)
             const productDataEl = document.getElementById('server-product-data');
@@ -703,6 +715,43 @@
                 card.appendChild(badge);
                 grid.appendChild(card);
             });
+
+            refreshVtoImageOptions();
+        }
+
+        // === VTO default image selector ===
+        // Rebuilt from the gallery on every render so option numbers always
+        // match the current image order. The user's choice is preserved via
+        // dataset.selected and clamped when images are removed.
+        function refreshVtoImageOptions() {
+            const sel = document.getElementById('vtoImageSelect');
+            if (!sel) return;
+            const raw = sel.value !== '' ? sel.value : sel.dataset.selected;
+            const keep = parseInt(raw || '0', 10);
+            sel.innerHTML = '';
+            if (imageState.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '0';
+                opt.textContent = 'لا توجد صور بعد';
+                sel.appendChild(opt);
+            } else {
+                imageState.forEach((img, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = String(i);
+                    opt.textContent = `صورة ${i + 1}${img.isVideo ? ' (فيديو)' : ''}`;
+                    sel.appendChild(opt);
+                });
+            }
+            const maxIdx = Math.max(imageState.length - 1, 0);
+            const clamped = Math.min(Math.max(isNaN(keep) ? 0 : keep, 0), maxIdx);
+            sel.value = String(clamped);
+            sel.dataset.selected = String(clamped);
+        }
+
+        function toggleVtoImageGroup() {
+            const cb = document.getElementById('vtoEnabledCheckbox');
+            const group = document.getElementById('vtoImageGroup');
+            if (cb && group) group.style.display = cb.checked ? 'block' : 'none';
         }
 
         function updateInputs() {

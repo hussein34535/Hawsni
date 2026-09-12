@@ -56,6 +56,7 @@ export interface Product {
     category: string | Category;
     isFeatured: boolean;
     is_vto_enabled?: boolean;
+    vto_image_index?: number;
     colors?: any[];
     sizes?: string[];
     rating?: number;

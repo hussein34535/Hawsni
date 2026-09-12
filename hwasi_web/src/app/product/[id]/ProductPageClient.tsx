@@ -457,6 +457,21 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
     const safeImages = Array.isArray(product?.images) ? product.images : [];
 
+    // Garments for the AI try-on: per-color images when colors exist,
+    // otherwise the full gallery. The admin-chosen default index only
+    // applies to colorless products (colors already map to their images).
+    const vtoColorList = parseColors((product as any)?.colors);
+    const vtoGarmentImages = vtoColorList.length > 0
+        ? vtoColorList.map(c =>
+            (c.imageIndex !== undefined && c.imageIndex !== null && safeImages[c.imageIndex])
+                ? safeImages[c.imageIndex]
+                : safeImages[0]
+        ).filter((img): img is string => !!img)
+        : safeImages;
+    const vtoDefaultIndex = vtoColorList.length > 0
+        ? 0
+        : Math.min(Math.max((product as any)?.vto_image_index ?? 0, 0), Math.max(vtoGarmentImages.length - 1, 0));
+
     useEffect(() => {
         if (safeImages.length > 1 && typeof window !== 'undefined') {
             const seen = localStorage.getItem('hwasi_seen_gallery_swipe');
@@ -1182,13 +1197,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             <VirtualTryOnModal
                 isOpen={isVTOOpen}
                 onClose={() => setIsVTOOpen(false)}
-                productImages={parseColors((product as any).colors).length > 0
-                    ? parseColors((product as any).colors).map(c =>
-                        (c.imageIndex !== undefined && c.imageIndex !== null && safeImages[c.imageIndex])
-                            ? safeImages[c.imageIndex]
-                            : safeImages[0]
-                    ).filter((img): img is string => !!img)
-                    : safeImages}
+                productImages={vtoGarmentImages}
+                defaultGarmentIndex={vtoDefaultIndex}
+                hasColorVariants={vtoColorList.length > 0}
                 productId={productId}
                 productName={product.name}
             />

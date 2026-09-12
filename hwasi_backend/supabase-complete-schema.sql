@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS products (
   is_featured BOOLEAN DEFAULT false,
   is_active BOOLEAN DEFAULT true,
   is_vto_enabled BOOLEAN DEFAULT false,
+  vto_image_index INTEGER DEFAULT 0,
   size_guide TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()

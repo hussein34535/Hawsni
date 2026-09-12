@@ -40,17 +40,22 @@ interface VirtualTryOnModalProps {
     productImages: string[];
     productId: string;
     productName?: string;
+    /** Index into productImages used as the default garment (from the admin panel). */
+    defaultGarmentIndex?: number;
+    /** True when the garment list represents color variants (label wording). */
+    hasColorVariants?: boolean;
 }
 
 type VtoStatus = 'idle' | 'uploading' | 'processing' | 'succeeded' | 'failed';
 
-export default function VirtualTryOnModal({ isOpen, onClose, productImages, productId, productName }: VirtualTryOnModalProps) {
+export default function VirtualTryOnModal({ isOpen, onClose, productImages, productId, productName, defaultGarmentIndex = 0, hasColorVariants = false }: VirtualTryOnModalProps) {
     const { t, isRTL } = useLanguage();
     const [status, setStatus] = useState<VtoStatus>('idle');
     const [userImage, setUserImage] = useState<string | null>(null);
     const [resultImageUrl, setResultImageUrl] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
-    const [selectedGarment, setSelectedGarment] = useState(0);
+    const clampGarment = (idx: number) => Math.min(Math.max(idx || 0, 0), Math.max(productImages.length - 1, 0));
+    const [selectedGarment, setSelectedGarment] = useState(() => clampGarment(defaultGarmentIndex));
     const [showLimitReached, setShowLimitReached] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -62,6 +67,18 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
             if (pollingTimerRef.current) clearInterval(pollingTimerRef.current);
         };
     }, []);
+
+    // Reset the garment to the admin-chosen default every time the modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setSelectedGarment(clampGarment(defaultGarmentIndex));
+            setUserImage(null);
+            setResultImageUrl(null);
+            setStatus('idle');
+            setErrorMessage('');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen]);
 
     const handleDownload = async () => {
         if (!resultImageUrl) return;
@@ -283,7 +300,9 @@ export default function VirtualTryOnModal({ isOpen, onClose, productImages, prod
                                     {productImages.length > 1 && (
                                         <div className="space-y-1.5">
                                             <p className="text-[10px] font-bold text-gray-400 font-cairo">
-                                                {isRTL ? 'اختر اللون للمعاينة:' : 'Pick color for try-on:'}
+                                                {hasColorVariants
+                                                    ? (isRTL ? 'اختر اللون للمعاينة:' : 'Pick color for try-on:')
+                                                    : (isRTL ? 'اختر الصورة للمعاينة:' : 'Pick an image for try-on:')}
                                             </p>
                                             <div className="flex gap-2 justify-center flex-wrap">
                                                 {productImages.map((img, idx) => (
