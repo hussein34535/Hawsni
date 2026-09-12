@@ -1,254 +1,96 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<%- include('partials/header', { title: 'تعديل التصنيف', pageTitle: 'تعديل التصنيف', page: 'categories' }) %>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تعديل التصنيف - hwasi Admin</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <div class="card" style="max-width: 860px; margin: 0 auto;">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-edit"></i> تعديل التصنيف
+            </h2>
+            <a href="/admin/categories" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> رجوع
+            </a>
+        </div>
+
+        <form method="POST" action="/admin/categories/<%= category.id %>" enctype="multipart/form-data" id="categoryForm">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+            <div class="form-group">
+                <label class="form-label">اسم التصنيف <span style="color: var(--danger);">*</span></label>
+                <input type="text" id="name" name="name" class="form-control" value="<%= category.name %>" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">الوصف</label>
+                <textarea id="description" name="description" class="form-control" rows="2"><%= category.description || '' %></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">صورة التصنيف</label>
+                <input type="file" id="image" name="image" class="form-control" accept="image/*" onchange="previewImage(this)">
+                <% if (category.image) { %>
+                    <div id="imagePreview" style="margin-top: 0.75rem;">
+                        <img src="<%= category.image %>" alt="صورة التصنيف" id="previewImg"
+                            style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--border-color, #ddd);">
+                    </div>
+                <% } else { %>
+                    <div id="imagePreview" style="margin-top: 0.75rem; display: none;">
+                        <img src="" alt="" id="previewImg"
+                            style="width: 80px; height: 80px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--border-color, #ddd);">
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; background: var(--light-gray); padding: 0.75rem 1rem; border-radius: var(--radius-md);">
+                <input type="checkbox" id="is_active" name="is_active" <%= category.is_active ? 'checked' : '' %> style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                <label for="is_active" style="font-weight: bold; cursor: pointer;">مفعل</label>
+            </div>
+
+            <div class="form-group">
+                <div class="card-title" style="font-size: 1rem; margin-bottom: 0.25rem;">
+                    <i class="fas fa-box-open"></i> منتجات التصنيف
+                </div>
+                <p style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 0.75rem;">
+                    اختار المنتجات اللي هتظهر في التصنيف ده (المنتجات متخانة دلوقتي: <%= linkedProductIds.length %>)
+                </p>
+                <input type="text" id="productSearch" class="form-control" placeholder="🔍 ابحث باسم المنتج..." autocomplete="off" style="margin-bottom: 0.75rem;">
+                <div class="products-list" id="productsList">
+                    <% (typeof products !== 'undefined' ? products : []).forEach(function(p) {
+                        const isLinked = linkedProductIds.includes(p.id); %>
+                        <label class="product-check <%= isLinked ? 'selected' : '' %>">
+                            <input type="checkbox" name="product_ids" value="<%= p.id %>" <%= isLinked ? 'checked' : '' %>
+                                onchange="this.closest('.product-check').classList.toggle('selected', this.checked)">
+                            <img src="<%= (p.images && p.images[0]) || '/placeholder.png' %>" alt="<%= p.name %>" onerror="this.src='/placeholder.png'">
+                            <span class="p-name"><%= p.name %>
+                                <% if (p.is_active === false) { %><span class="p-inactive">موقوف</span><% } %>
+                            </span>
+                            <span class="p-price"><%= parseFloat(p.price || 0).toFixed(0) %> ج.م</span>
+                        </label>
+                    <% }); %>
+                    <% if (!products || products.length === 0) { %>
+                        <div style="padding: 1.5rem; text-align: center; color: var(--medium-gray);">
+                            مفيش منتجات — ضيف منتجات الأول من صفحة المنتجات
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">
+                    <i class="fas fa-save"></i> حفظ التعديلات
+                </button>
+                <a href="/admin/categories" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> إلغاء
+                </a>
+            </div>
+        </form>
+    </div>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .navbar {
-            background: #2c3e50;
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .navbar h1 {
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .back-btn {
-            color: white;
-            text-decoration: none;
-            font-size: 1.2rem;
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        .sidebar {
-            position: fixed;
-            right: -250px;
-            top: 0;
-            width: 250px;
-            height: 100vh;
-            background: #2c3e50;
-            padding: 1rem;
-            transition: right 0.3s ease;
-            z-index: 1000;
-            overflow-y: auto;
-        }
-
-        .sidebar.active {
-            right: 0;
-        }
-
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            z-index: 999;
-        }
-
-        .sidebar-overlay.active {
-            display: block;
-        }
-
-        .close-sidebar {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            float: left;
-            margin-bottom: 1rem;
-        }
-
-        .sidebar nav a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-
-        .sidebar nav a:hover,
-        .sidebar nav a.active {
-            background: #34495e;
-        }
-
-        .sidebar nav a i {
-            margin-left: 0.5rem;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 1rem auto;
-            padding: 0 1rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 1rem;
-        }
-
-        .card h2 {
-            font-size: 1.2rem;
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.25rem;
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 0.9rem;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .form-group.checkbox {
-            display: flex;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 0.5rem;
-            border-radius: 4px;
-        }
-
-        .form-group.checkbox input {
-            width: auto;
-            margin-left: 0.5rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin: 0.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .image-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-
-        .image-preview img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        .products-section {
-            border-top: 2px solid #ecf0f1;
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-        }
-
-        .products-section h3 {
-            color: #2c3e50;
-            margin-bottom: 0.25rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .products-hint {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            margin-bottom: 0.75rem;
-        }
-
-        #productSearch {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            margin-bottom: 0.75rem;
-        }
-
         .products-list {
             max-height: 420px;
             overflow-y: auto;
-            border: 1px solid #ecf0f1;
-            border-radius: 8px;
+            border: 1px solid var(--border-color, #e8e8e8);
+            border-radius: var(--radius-md);
+            background: var(--bg-card, #fff);
         }
 
         .product-check {
@@ -256,26 +98,21 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid #f4f6f7;
+            border-bottom: 1px solid var(--border-color, #f4f6f7);
             cursor: pointer;
+            transition: background var(--transition-fast);
         }
 
-        .product-check:last-child {
-            border-bottom: none;
-        }
+        .product-check:last-child { border-bottom: none; }
 
-        .product-check:hover {
-            background: #f8f9fa;
-        }
+        .product-check:hover { background: var(--light-gray); }
 
-        .product-check.selected {
-            background: #eafaf1;
-        }
+        .product-check.selected { background: rgba(14, 68, 53, 0.06); }
 
         .product-check input {
             width: 18px;
             height: 18px;
-            accent-color: #27ae60;
+            accent-color: var(--primary-color);
             flex-shrink: 0;
         }
 
@@ -283,181 +120,52 @@
             width: 42px;
             height: 42px;
             object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid #eee;
+            border-radius: 8px;
+            border: 1px solid var(--border-color, #eee);
             flex-shrink: 0;
-            background: #f4f6f7;
+            background: var(--light-gray);
         }
 
         .product-check .p-name {
             flex: 1;
             font-weight: bold;
             font-size: 0.9rem;
-            color: #333;
+            color: var(--dark-gray);
         }
 
         .product-check .p-price {
             font-size: 0.85rem;
-            color: #27ae60;
+            color: var(--primary-color);
             font-weight: bold;
             white-space: nowrap;
         }
 
         .product-check .p-inactive {
             font-size: 0.7rem;
-            background: #fdecea;
-            color: #c0392b;
+            background: var(--danger);
+            color: #fff;
             border-radius: 4px;
             padding: 1px 6px;
+            margin-inline-start: 4px;
         }
 
-        .form-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-
-        @media (max-width: 480px) {
-            .form-group.checkbox {
-                justify-content: space-between;
-            }
-
-            .form-buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                margin: 0.25rem 0;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .sidebar {
-                right: 0;
-                width: 250px;
-            }
-
-            .menu-toggle {
-                display: none;
-            }
-        }
+        body.dark .product-check { border-bottom-color: var(--dm-border); }
+        body.dark .product-check.selected { background: rgba(255, 255, 255, 0.06); }
     </style>
-</head>
-
-<body>
-    <nav class="navbar">
-        <button class="menu-toggle" id="menuToggle">
-            <i class="fas fa-bars"></i>
-        </button>
-        <h1>✏️ تعديل التصنيف</h1>
-    </nav>
-
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <div class="sidebar" id="sidebar">
-        <button class="close-sidebar" id="closeSidebar">
-            <i class="fas fa-times"></i>
-        </button>
-        <nav>
-            <a href="/">
-                <i class="fas fa-home"></i> الرئيسية
-            </a>
-            <a href="/products">
-                <i class="fas fa-box"></i> المنتجات
-            </a>
-            <a href="/categories" class="active">
-                <i class="fas fa-tags"></i> التصنيفات
-            </a>
-            <a href="/orders">
-                <i class="fas fa-shopping-cart"></i> الطلبات
-            </a>
-        </nav>
-    </div>
-
-    <div class="container">
-        <div class="card">
-            <h2>معلومات التصنيف</h2>
-            <form method="POST" action="/categories/<%= category.id %>" enctype="multipart/form-data">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <input type="hidden" name="_method" value="PUT">
-                <div class="form-group">
-                    <label for="name">اسم التصنيف *</label>
-                    <input type="text" id="name" name="name" value="<%= category.name %>" required>
-                </div>
-                <div class="form-group">
-                    <label for="description">الوصف</label>
-                    <textarea id="description" name="description" rows="2"><%= category.description || '' %></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="image">صورة التصنيف</label>
-                    <input type="file" id="image" name="image" accept="image/*">
-                    <% if (category.image) { %>
-                        <div class="image-preview">
-                            <img src="<%= category.image %>" alt="Category image">
-                        </div>
-                        <% } %>
-                </div>
-                <div class="form-group checkbox">
-                    <input type="checkbox" id="is_active" name="is_active" <%=category.is_active ? 'checked' : '' %>>
-                    <label for="is_active">مفعل</label>
-                </div>
-
-                <div class="products-section">
-                    <h3><i class="fas fa-box-open"></i> منتجات التصنيف</h3>
-                    <p class="products-hint">اختار المنتجات اللي هتظهر في التصنيف ده (المنتجات متخانة دلوقتي: <%= (typeof linkedProductIds !== 'undefined' ? linkedProductIds.length : 0) %>)</p>
-                    <input type="text" id="productSearch" placeholder="🔍 ابحث باسم المنتج..." autocomplete="off">
-                    <div class="products-list" id="productsList">
-                        <% (typeof products !== 'undefined' ? products : []).forEach(function(p) {
-                            const isLinked = linkedProductIds.includes(p.id); %>
-                            <label class="product-check <%= isLinked ? 'selected' : '' %>">
-                                <input type="checkbox" name="product_ids" value="<%= p.id %>" <%= isLinked ? 'checked' : '' %>
-                                    onchange="this.closest('.product-check').classList.toggle('selected', this.checked)">
-                                <img src="<%= (p.images && p.images[0]) || '/placeholder.png' %>" alt="<%= p.name %>" onerror="this.src='/placeholder.png'">
-                                <span class="p-name"><%= p.name %>
-                                    <% if (p.is_active === false) { %><span class="p-inactive">موقوف</span><% } %>
-                                </span>
-                                <span class="p-price"><%= parseFloat(p.price || 0).toFixed(0) %> ج.م</span>
-                            </label>
-                        <% }); %>
-                        <% if (!products || products.length === 0) { %>
-                            <div style="padding: 1rem; text-align: center; color: #95a5a6;">مفيش منتجات — ضيف منتجات الأول من صفحة المنتجات</div>
-                        <% } %>
-                    </div>
-                </div>
-                <div class="form-buttons">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> حفظ
-                    </button>
-                    <a href="/categories" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> إلغاء
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <script>
-        // Sidebar functionality
-        const menuToggle = document.getElementById('menuToggle');
-        const closeSidebar = document.getElementById('closeSidebar');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.add('active');
-            sidebarOverlay.classList.add('active');
-        });
-
-        closeSidebar.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
-        });
-
-        sidebarOverlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            sidebarOverlay.classList.remove('active');
-        });
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const img = document.getElementById('previewImg');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
         // Client-side product filter
         const productSearch = document.getElementById('productSearch');
@@ -471,6 +179,5 @@
             });
         }
     </script>
-</body>
 
-</html>
+<%- include('partials/footer') %>
