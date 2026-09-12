@@ -43,12 +43,23 @@
 
         <% if (categories && categories.length> 0) { %>
             <p style="font-size: 0.85rem; color: var(--medium-gray); margin-bottom: 1rem;">
-                <i class="fas fa-arrows-alt"></i> اسحب أي تصنيف وغير مكانه لترتيبها زي ما تحب — الترتيب بيتحفظ تلقائي.
+                <i class="fas fa-arrows-alt"></i> رتّب زي ما تحب: اسحب الكارت على الكمبيوتر، أو استخدم أزرار <i class="fas fa-arrow-up"></i><i class="fas fa-arrow-down"></i> على الموبايل — الترتيب بيتحفظ تلقائي.
             </p>
             <div id="categoryGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
-                <% categories.forEach(category=> { %>
+                <% categories.forEach((category, idx)=> { %>
                     <div class="card category-card" draggable="true" data-id="<%= category.id %>" data-sort="<%= category.sort_order %>"
-                        style="margin: 0; transition: transform var(--transition-fast); cursor: grab;">
+                        style="margin: 0; transition: transform var(--transition-fast); cursor: grab; position: relative;">
+                        <div style="position: absolute; top: 0.75rem; right: 0.75rem; display: flex; gap: 0.35rem; z-index: 5;">
+                            <span class="order-badge" style="background: var(--primary-color); color: #fff; font-weight: bold; font-size: 0.75rem; border-radius: 999px; min-width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 0 8px;">#<%= idx + 1 %></span>
+                            <button type="button" class="btn btn-secondary btn-sm move-btn" data-dir="-1" title="انقل للأعلى"
+                                style="width: 28px; height: 28px; padding: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                            <button type="button" class="btn btn-secondary btn-sm move-btn" data-dir="1" title="انقل للأسفل"
+                                style="width: 28px; height: 28px; padding: 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                        </div>
                         <% if (category.image) { %>
                             <div
                                 style="height: 150px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1rem;">
@@ -128,11 +139,18 @@
             });
         }
 
-        // ===== Drag & drop reorder =====
+        // ===== Reorder (drag on desktop + arrow buttons on touch) =====
         (function () {
             const grid = document.getElementById('categoryGrid');
             if (!grid) return;
             let dragEl = null;
+
+            function refreshBadges() {
+                [...grid.querySelectorAll('.category-card')].forEach((c, i) => {
+                    const badge = c.querySelector('.order-badge');
+                    if (badge) badge.textContent = '#' + (i + 1);
+                });
+            }
 
             grid.addEventListener('dragstart', (e) => {
                 const card = e.target.closest('.category-card');
@@ -147,6 +165,7 @@
                 if (dragEl) {
                     dragEl.style.opacity = '';
                     dragEl = null;
+                    refreshBadges();
                     persistOrder();
                 }
             });
@@ -160,6 +179,24 @@
                 const rect = target.getBoundingClientRect();
                 const isAfter = (e.clientX - rect.left) > rect.width / 2;
                 grid.insertBefore(dragEl, isAfter ? target.nextSibling : target);
+            });
+
+            // Arrow buttons: work everywhere (touch + desktop)
+            grid.addEventListener('click', (e) => {
+                const btn = e.target.closest('.move-btn');
+                if (!btn) return;
+                const card = btn.closest('.category-card');
+                if (!card) return;
+                const dir = parseInt(btn.dataset.dir, 10);
+                if (dir < 0 && card.previousElementSibling) {
+                    grid.insertBefore(card, card.previousElementSibling);
+                } else if (dir > 0 && card.nextElementSibling) {
+                    grid.insertBefore(card.nextElementSibling, card);
+                } else {
+                    return;
+                }
+                refreshBadges();
+                persistOrder();
             });
 
             async function persistOrder() {
