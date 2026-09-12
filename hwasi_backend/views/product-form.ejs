@@ -774,22 +774,26 @@
                         }
                     }
 
-                    // 2. Prepare Cloudinary parameters
-                    const isVideoUpload = filesToUpload.some(img => img.file.type.startsWith('video/'));
+                    // 2. Prepare Cloudinary eager transform for videos
                     const videoTransform = 'w_1280,h_720,c_limit,br_500k,q_auto:eco,vc_h264,ac_aac,f_mp4';
-                    
-                    // 3. Get Cloudinary signature from backend
-                    // If we have videos, we need to sign the eager transformation
-                    const signUrl = `/api/cloudinary/sign?folder=products${isVideoUpload ? `&eager=${videoTransform}&resource_type=video` : ''}`;
-                    const signRes = await fetch(signUrl);
-                    const signData = await signRes.json();
 
-                    // 4. Upload each file directly to Cloudinary
+                    // 3. Upload each file directly to Cloudinary with its OWN
+                    // signature. Cloudinary requires the sent params to exactly
+                    // match the signed params, so images sign WITHOUT eager and
+                    // videos sign WITH eager — one shared signature breaks mixed
+                    // batches with "Invalid Signature".
                     for (let i = 0; i < filesToUpload.length; i++) {
                         submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> رفع ملف ${i + 1}/${filesToUpload.length}...`;
 
                         const file = filesToUpload[i].file;
                         const isVideo = file.type.startsWith('video/');
+
+                        const fileSignUrl = `/api/cloudinary/sign?folder=products${isVideo ? `&eager=${videoTransform}&resource_type=video` : ''}`;
+                        const signRes = await fetch(fileSignUrl);
+                        const signData = await signRes.json();
+                        if (!signRes.ok || !signData.success) {
+                            throw new Error(signData.message || 'فشل توقيع الرفع');
+                        }
 
                         const formData = new FormData();
                         formData.append('file', file);
@@ -797,7 +801,7 @@
                         formData.append('timestamp', signData.timestamp);
                         formData.append('signature', signData.signature);
                         formData.append('folder', signData.folder);
-                        
+
                         // Add eager transformations for videos
                         if (isVideo) {
                             formData.append('eager', videoTransform);
