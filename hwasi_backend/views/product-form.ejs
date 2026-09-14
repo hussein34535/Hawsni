@@ -175,6 +175,16 @@
                                     <small class="text-muted">أضف كل مقاس كخانة منفصلة — يمكنك حذفه بزر ×</small>
                                 </div>
 
+                                <div class="form-group">
+                                    <label class="form-label">📏 طبيعة مقاسات الموديل</label>
+                                    <select name="fit_type" id="fitTypeSelect" class="form-control">
+                                        <option value="true" <%= (!product || !product.fit_type || product.fit_type === 'true') ? 'selected' : '' %>>✅ مقاسات طبيعية</option>
+                                        <option value="small" <%= (product && product.fit_type === 'small') ? 'selected' : '' %>>⚠️ الموديل أصغر من المعتاد (ننصح بمقاس أكبر)</option>
+                                        <option value="large" <%= (product && product.fit_type === 'large') ? 'selected' : '' %>>⚠️ الموديل أكبر من المعتاد (ننصح بمقاس أصغر)</option>
+                                    </select>
+                                    <small class="text-muted">بتظهر للعميل تنبيه واقتراح تبديل المقاس بموافقته في صفحة المنتج.</small>
+                                </div>
+
                                 <div class="form-group" style="grid-column: 1 / -1;">
                                     <label class="form-label">دليل المقاسات</label>
                                     <textarea name="size_guide" class="form-control" rows="4"

@@ -57,6 +57,7 @@ export interface Product {
     isFeatured: boolean;
     is_vto_enabled?: boolean;
     vto_image_index?: number;
+    fit_type?: string;
     colors?: any[];
     sizes?: string[];
     rating?: number;

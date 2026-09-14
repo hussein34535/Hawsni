@@ -309,6 +309,8 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const [isUpsellOpen, setIsUpsellOpen] = useState(false);
     const [hasShownUpsell, setHasShownUpsell] = useState(false);
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
+    // Fit advisor: remembers sizes the customer already answered for (swap/keep)
+    const [fitDismissed, setFitDismissed] = useState<Record<string, boolean>>({});
     const reviewsRef = useRef<HTMLDivElement>(null);
     const relatedSectionRef = useRef<HTMLDivElement>(null);
     const items = useCartStore((state) => state.items);
@@ -356,6 +358,31 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     };
 
     const currentStockOut = selectedSize ? isSizeOutOfStock(selectedSize) : (stockCount <= 0);
+
+    // Fit advisor: 'small' = model runs small (recommend one size up),
+    // 'large' = model runs large (recommend one size down).
+    const fitType: string = ((product as any)?.fit_type === 'small' || (product as any)?.fit_type === 'large')
+        ? (product as any).fit_type
+        : 'true';
+    const sizeLadder: string[] = Array.isArray(product?.sizes) ? product.sizes : [];
+    const fitSuggestion: string | null = (() => {
+        if (!selectedSize || fitType === 'true' || sizeLadder.length < 2) return null;
+        const idx = sizeLadder.indexOf(selectedSize);
+        if (idx === -1) return null;
+        const target = fitType === 'small' ? sizeLadder[idx + 1] : sizeLadder[idx - 1];
+        if (!target || isSizeOutOfStock(target)) return null;
+        return target;
+    })();
+    const showFitOffer = !!selectedSize && fitType !== 'true' && !!fitSuggestion && !fitDismissed[selectedSize];
+    const acceptFitSwap = () => {
+        if (!selectedSize || !fitSuggestion) return;
+        setFitDismissed(prev => ({ ...prev, [selectedSize]: true, [fitSuggestion]: true }));
+        setSelectedSize(fitSuggestion);
+    };
+    const keepFitSize = () => {
+        if (!selectedSize) return;
+        setFitDismissed(prev => ({ ...prev, [selectedSize]: true }));
+    };
 
     const toggleAccessory = (acc: any) => {
         setSelectedAccessories(prev => {
@@ -966,6 +993,51 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                             </p>
                                         )}
                                     </div>
+
+                                    {/* Fit advisor: model fit note + optional size-swap approval */}
+                                    {selectedSize && fitType !== 'true' && (
+                                        <div className="mt-4 p-4 rounded-[20px] bg-amber-50 border border-amber-100/50">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
+                                                    <Ruler size={16} className="text-amber-600" />
+                                                </div>
+                                                <p className="text-xs font-black text-amber-900 font-cairo leading-relaxed">
+                                                    {fitType === 'small'
+                                                        ? (isRTL
+                                                            ? 'مقاسات هذا الموديل أصغر من المعتاد — يُرجى طلب مقاس أكبر من مقاسك الطبيعي لملاءمة أفضل.'
+                                                            : 'This model runs smaller than usual — please order a size up from your normal size for a better fit.')
+                                                        : (isRTL
+                                                            ? 'مقاسات هذا الموديل أكبر من المعتاد — يُرجى طلب مقاس أصغر من مقاسك الطبيعي لملاءمة أفضل.'
+                                                            : 'This model runs larger than usual — please order a size down from your normal size for a better fit.')}
+                                                </p>
+                                            </div>
+                                            {showFitOffer && fitSuggestion && (
+                                                <div className="mt-3 bg-white/70 rounded-2xl p-3 border border-amber-100">
+                                                    <p className="text-xs font-black text-gray-900 font-cairo mb-2.5">
+                                                        {isRTL
+                                                            ? `تحب نبدّل مقاسك من ${selectedSize} إلى ${fitSuggestion}؟`
+                                                            : `Switch your size from ${selectedSize} to ${fitSuggestion}?`}
+                                                    </p>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={acceptFitSwap}
+                                                            className="flex-1 h-11 bg-[#0E4435] text-white rounded-xl font-black text-xs active:scale-95 transition-all hover:bg-[#0a3126]"
+                                                        >
+                                                            {isRTL ? `أيوه، بدّل لـ ${fitSuggestion}` : `Yes, switch to ${fitSuggestion}`}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={keepFitSize}
+                                                            className="flex-1 h-11 bg-white text-gray-700 border border-gray-200 rounded-xl font-black text-xs active:scale-95 transition-all hover:bg-gray-50"
+                                                        >
+                                                            {isRTL ? `لا، خلّي ${selectedSize}` : `No, keep ${selectedSize}`}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

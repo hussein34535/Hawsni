@@ -6,19 +6,32 @@ const { cleanImageUrls } = require('../../utils/imageUtils');
 
 class ProductController {
     /**
-     * Insert a product, tolerating a missing vto_image_index column.
-     * If the 012 migration hasn't been applied yet, PostgREST rejects the
-     * write with a schema-cache error — in that case we retry without the
-     * field so product saves keep working (the VTO default just won't
-     * persist until the migration runs).
+     * Strip a missing column from a write payload when the DB migration
+     * hasn't been applied yet. PostgREST reports e.g.
+     * "Could not find the 'vto_image_index' column of 'products' in the
+     * schema cache". Returns true when a column was stripped (caller retries).
+     */
+    _stripMissingColumn(payload, error) {
+        const m = /Could not find the '(\w+)' column/.exec(error?.message || '');
+        if (m && m[1] && payload && Object.prototype.hasOwnProperty.call(payload, m[1])) {
+            console.warn(`[Products] ${m[1]} column missing — run pending migrations. Saving without it.`);
+            delete payload[m[1]];
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Insert a product, tolerating columns whose migrations haven't been
+     * applied yet (retries without each missing column, up to 3 attempts).
      */
     async _insertProductTolerant(payload) {
-        let { data, error } = await supabase.from('products').insert(payload).select().single();
-        if (error && /vto_image_index/.test(error.message || '')) {
-            console.warn('[Products] vto_image_index column missing — run migrations/012_add_vto_image_index.sql. Saving without it.');
-            delete payload.vto_image_index;
-            ({ data, error } = await supabase.from('products').insert(payload).select().single());
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const { data, error } = await supabase.from('products').insert(payload).select().single();
+            if (!error) return { data, error: null };
+            if (!this._stripMissingColumn(payload, error)) return { data: null, error };
         }
+        const { data, error } = await supabase.from('products').insert(payload).select().single();
         return { data, error };
     }
 
@@ -26,12 +39,12 @@ class ProductController {
      * Same tolerance for product updates.
      */
     async _updateProductTolerant(id, payload) {
-        let { error } = await supabase.from('products').update(payload).eq('id', id);
-        if (error && /vto_image_index/.test(error.message || '')) {
-            console.warn('[Products] vto_image_index column missing — run migrations/012_add_vto_image_index.sql. Saving without it.');
-            delete payload.vto_image_index;
-            ({ error } = await supabase.from('products').update(payload).eq('id', id));
+        for (let attempt = 0; attempt < 3; attempt++) {
+            const { error } = await supabase.from('products').update(payload).eq('id', id);
+            if (!error) return { error: null };
+            if (!this._stripMissingColumn(payload, error)) return { error };
         }
+        const { error } = await supabase.from('products').update(payload).eq('id', id);
         return { error };
     }
 
@@ -162,6 +175,7 @@ class ProductController {
             is_featured: isTrue(body.is_featured),
             is_vto_enabled: isTrue(body.is_vto_enabled),
             vto_image_index: Math.max(0, parseInt(body.vto_image_index) || 0),
+            fit_type: ['true', 'small', 'large'].includes(body.fit_type) ? body.fit_type : 'true',
             sizes: sizesArray.length > 0 ? sizesArray : null,
             colors: colorsArray.length > 0 ? colorsArray : null,
             accessories: body.accessories ? (typeof body.accessories === 'string' ? JSON.parse(body.accessories) : body.accessories) : null,
@@ -353,6 +367,7 @@ class ProductController {
                 is_featured: productData.is_featured,
                 is_vto_enabled: productData.is_vto_enabled,
                 vto_image_index: productData.vto_image_index,
+                fit_type: productData.fit_type,
                 sizes: productData.sizes,
                 colors: productData.colors,
                 accessories: productData.accessories,
@@ -454,6 +469,7 @@ class ProductController {
                 is_featured: productData.is_featured,
                 is_vto_enabled: productData.is_vto_enabled,
                 vto_image_index: productData.vto_image_index,
+                fit_type: productData.fit_type,
                 sizes: productData.sizes,
                 colors: productData.colors,
                 accessories: productData.accessories,
