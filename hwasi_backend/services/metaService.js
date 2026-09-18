@@ -6,6 +6,19 @@ class MetaService {
     constructor() {
         this.defaultPixelId = process.env.META_PIXEL_ID || '917878230740262';
         this.accessToken = process.env.META_ACCESS_TOKEN;
+        // Meta deprecates Graph API versions ~2 years after release. v18.0
+        // (2023) is dead — keep this configurable and default to a live one.
+        this.apiVersion = process.env.META_API_VERSION || 'v23.0';
+        this.warnedMissingToken = false;
+    }
+
+    /**
+     * True when server-side Conversions API is configured.
+     * When false, only the browser pixel tracks purchases — which loses every
+     * ad-blocker / iOS / ITP user and starves Meta's ad optimization.
+     */
+    isConfigured() {
+        return Boolean(this.accessToken);
     }
 
     /**
@@ -41,20 +54,27 @@ class MetaService {
 
     async trackPurchase(order, customerInfo) {
         if (!this.accessToken) {
-            console.warn('⚠️ Meta Access Token is missing. Skipping CAPI Purchase event.');
-            return;
+            // Log loudly but only once per instance so logs stay readable —
+            // this silently disabled tracking for every order before.
+            if (!this.warnedMissingToken) {
+                console.error('❌ [Meta CAPI] META_ACCESS_TOKEN is NOT configured — server-side Purchase tracking is DISABLED. Meta only sees browser-pixel events (blocked on ad-blockers/iOS), which inflates cost-per-result and stalls ad delivery. Add META_ACCESS_TOKEN in the backend environment.');
+                this.warnedMissingToken = true;
+            }
+            return { skipped: true, reason: 'META_ACCESS_TOKEN_MISSING' };
         }
 
         const pixelId = await this.getActivePixelId();
         if (!pixelId) {
             console.error('❌ No Meta Pixel ID configured. Skipping CAPI event.');
-            return;
+            return { skipped: true, reason: 'PIXEL_ID_MISSING' };
         }
 
         try {
-            const apiUrl = `https://graph.facebook.com/v18.0/${pixelId}/events`;
+            const apiUrl = `https://graph.facebook.com/${this.apiVersion}/${pixelId}/events`;
 
-            // Advanced Matching (Hashed User Data)
+            // Advanced Matching (hashed user data). fbp/fbc are the browser
+            // cookies Meta uses to stitch the server event to the click/session
+            // — including them raises Event Match Quality significantly.
             const userData = {
                 em: customerInfo.email ? [this.hashData(customerInfo.email)] : undefined,
                 ph: customerInfo.phone ? [this.hashData(customerInfo.phone.replace(/\D/g, ''))] : undefined,
@@ -62,8 +82,14 @@ class MetaService {
                 ln: customerInfo.name ? [this.hashData(customerInfo.name.split(' ').slice(1).join(' '))] : undefined,
                 client_ip_address: customerInfo.ip,
                 client_user_agent: customerInfo.userAgent,
+                fbp: customerInfo.fbp || undefined,
+                fbc: customerInfo.fbc || undefined,
             };
 
+            // Drop undefined keys — Meta rejects null-ish entries in some SDKs
+            Object.keys(userData).forEach(k => userData[k] === undefined && delete userData[k]);
+
+            const items = order.items || [];
             const eventData = {
                 data: [
                     {
@@ -77,9 +103,9 @@ class MetaService {
                         custom_data: {
                             value: order.total_amount || order.total,
                             currency: 'EGP',
-                            content_ids: order.items ? order.items.map(item => item.product_id) : [],
+                            content_ids: items.map(item => item.product_id).filter(Boolean),
                             content_type: 'product',
-                            num_items: order.items ? order.items.reduce((acc, item) => acc + item.quantity, 0) : 0
+                            num_items: items.reduce((acc, item) => acc + (item.quantity || 0), 0)
                         }
                     }
                 ],
@@ -93,16 +119,21 @@ class MetaService {
             });
 
             const result = await response.json();
-            
+
             if (result.error) {
-                console.error('❌ Meta CAPI API Error:', result.error.message);
+                console.error(`❌ [Meta CAPI] API error (${this.apiVersion}):`, result.error.message);
+                // Version deprecation is a silent killer — surface it explicitly
+                if (/version|deprecat/i.test(result.error.message || '')) {
+                    console.error(`❌ [Meta CAPI] Graph API ${this.apiVersion} looks deprecated — set META_API_VERSION to a current version.`);
+                }
             } else {
-                console.log(`✅ Meta CAPI Purchase event sent to Pixel [${pixelId}]:`, result);
+                console.log(`✅ Meta CAPI Purchase event sent to Pixel [${pixelId}] (${this.apiVersion}):`, JSON.stringify(result));
             }
-            
+
             return result;
         } catch (error) {
             console.error('❌ Meta CAPI System Error:', error.message);
+            return { error: error.message };
         }
     }
 }

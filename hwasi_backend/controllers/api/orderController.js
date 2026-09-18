@@ -52,7 +52,7 @@ class OrderController {
 
     async createOrder(req, res) {
         try {
-            const { items, shippingAddress, paymentMethod, discount, couponCode, notes, guestName, guestEmail, guestPhone, guestAlternativePhone, conversionEventId } = req.body;
+            const { items, shippingAddress, paymentMethod, discount, couponCode, notes, guestName, guestEmail, guestPhone, guestAlternativePhone, conversionEventId, fbp, fbc } = req.body;
 
             let finalShippingAddress = shippingAddress;
             if (typeof shippingAddress === 'string') {
@@ -189,6 +189,8 @@ class OrderController {
                 ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket?.remoteAddress,
                 userAgent: req.headers['user-agent'],
                 conversionEventId: conversionEventId || null, // From frontend for Meta CAPI dedup
+                fbp: fbp || null, // Meta browser cookie (_fbp) for Event Match Quality
+                fbc: fbc || null, // Meta click cookie (_fbc) for attribution
             };
             const order = await OrderService.createOrder(orderData, safeItems, guestInfo);
 

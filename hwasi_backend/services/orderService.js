@@ -286,6 +286,8 @@ class OrderService {
                 ip: guestInfo.ipAddress,
                 userAgent: guestInfo.userAgent,
                 eventId: guestInfo.conversionEventId, // For Browser Pixel deduplication
+                fbp: guestInfo.fbp, // Meta browser cookie for Event Match Quality
+                fbc: guestInfo.fbc, // Meta click cookie for attribution
             }).catch(err => console.error('Meta CAPI Purchase tracking failed:', err));
 
             // 🟢 Send WhatsApp Confirmation 📱

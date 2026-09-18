@@ -270,6 +270,14 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
         try {
             const eventId = `purchase_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
 
+            // Meta browser cookies — forwarded so the server-side Conversions API
+            // event matches the same user/click and dedupes correctly.
+            const readCookie = (name: string) => {
+                if (typeof document === 'undefined') return undefined;
+                const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+                return match ? decodeURIComponent(match[2]) : undefined;
+            };
+
             const orderData = {
                 items: items.map((i: any) => ({
                     product: i.productId,
@@ -299,6 +307,8 @@ function CheckoutForm({ isRTL, items, user, subtotal, shippingFee, discount, tot
                 guestEmail: email || undefined,
                 notes: notes || undefined,
                 conversionEventId: eventId,
+                fbp: readCookie('_fbp'),
+                fbc: readCookie('_fbc'),
             };
 
             const res = await checkoutService.placeOrder(orderData);
