@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Share2, Heart, ArrowRight, ArrowLeft, ShoppingBag, Star, Play, Pause, Maximize,
     Hand, Flame, Check, Ruler, Info, Copy, CheckCircle2, Minus, Plus, ChevronRight,
-    X, ChevronDown, Truck
+    X, ChevronDown
 } from 'lucide-react';
 import Image from 'next/image';
 import { useCartStore } from '@/store/cartStore';
@@ -1195,28 +1195,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                     animate={{ y: 0, opacity: 1 }}
                     className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-white/10"
                 >
-                    {product.free_delivery_offer && (
-                        <div className="flex items-center justify-center gap-2 px-4 py-2 border-b border-white/10 font-cairo">
-                            {quantity < 2 ? (
-                                <>
-                                    <Truck size={14} className="shrink-0 text-[#D4AF37]" />
-                                    <span className="text-[13px] font-black text-[#D4AF37] whitespace-nowrap">
-                                        {isRTL ? 'توصيل مجاني لقطعتين' : 'Free delivery for 2 items'}
-                                    </span>
-                                    <span className="text-[11.5px] font-semibold text-white/55 whitespace-nowrap">
-                                        {isRTL ? '• أضف قطعة تانية' : '• Add one more'}
-                                    </span>
-                                </>
-                            ) : (
-                                <>
-                                    <Check size={14} className="shrink-0 text-[#D4AF37]" />
-                                    <span className="text-[13px] font-black text-[#D4AF37] whitespace-nowrap">
-                                        {isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked'}
-                                    </span>
-                                </>
-                            )}
-                        </div>
-                    )}                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between">
                         <div className="flex flex-col px-6">
                             {quantity > 1 && (
                                 <motion.div
@@ -1239,10 +1218,21 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                     </button>
                                 </motion.div>
                             )}
-                            <span className="text-lg font-black text-white font-cairo">
+                            <span className="text-base font-black text-white font-cairo">
                                 {totalPrice.toLocaleString()}
                                 <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </span>
+                            {product.free_delivery_offer && (
+                                <span className="flex items-center gap-1 mt-0.5 text-[10px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
+                                    {quantity >= 2 && <Check size={11} className="shrink-0" />}
+                                    <span>
+                                        {quantity < 2
+                                            ? (isRTL ? 'توصيل مجاني لقطعتين' : 'Free delivery for 2 items')
+                                            : (isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked')}
+                                    </span>
+                                    <span>🎁</span>
+                                </span>
+                            )}
                         </div>
 
                         <button
