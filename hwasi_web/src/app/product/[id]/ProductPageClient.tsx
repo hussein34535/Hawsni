@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Share2, Heart, ArrowRight, ArrowLeft, ShoppingBag, Star, Play, Pause, Maximize,
     Hand, Flame, Check, Ruler, Info, Copy, CheckCircle2, Minus, Plus, ChevronRight,
-    X, ChevronDown
+    X, ChevronDown, Truck
 } from 'lucide-react';
 import Image from 'next/image';
 import { useCartStore } from '@/store/cartStore';
@@ -1193,69 +1193,91 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] flex items-center justify-between border border-white/10"
+                    className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-white/10"
                 >
-                    <div className="flex flex-col px-6">
-                        {quantity > 1 && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                className="flex items-center gap-2 mb-0.5"
-                            >
-                                <button
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="text-white/40 hover:text-white"
-                                >
-                                    <Minus size={14} />
-                                </button>
-                                <span className="text-white font-black text-sm w-4 text-center">{quantity}</span>
-                                <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    className="text-white/40 hover:text-white"
-                                >
-                                    <Plus size={14} />
-                                </button>
-                            </motion.div>
-                        )}
-                        <span className="text-lg font-black text-white font-cairo">
-                            {totalPrice.toLocaleString()}
-                            <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
-                        </span>
-                    </div>
-
-                    <button
-                        onClick={currentStockOut ? undefined : (isInCart ? () => router.push('/cart') : handleAddToCart)}
-                        className={`
-                            flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
-                            ${currentStockOut
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : (!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
-                                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                    : isInCart
-                                        ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'
-                                        : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
-                        `}
-                        disabled={currentStockOut}
-                    >
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={isInCart ? 'go_to_cart' : 'add_to_cart'}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                className="flex items-center gap-2"
-                            >
-                                <ShoppingBag size={18} />
-                                <span className="font-cairo">
-                                    {stockCount <= 0
-                                        ? 'نفدت الكمية'
-                                        : isInCart
-                                            ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
-                                            : (t.product?.add_to_cart || 'Add to Cart')}
+                    <div className="flex items-center justify-center gap-2 px-4 py-2 border-b border-white/10 font-cairo">
+                        {quantity < 2 ? (
+                            <>
+                                <Truck size={14} className="shrink-0 text-[#D4AF37]" />
+                                <span className="text-[13px] font-black text-[#D4AF37] whitespace-nowrap">
+                                    {isRTL ? 'توصيل مجاني لقطعتين' : 'Free delivery for 2 items'}
                                 </span>
-                            </motion.div>
-                        </AnimatePresence>
-                    </button>
+                                <span className="text-[11.5px] font-semibold text-white/55 whitespace-nowrap">
+                                    {isRTL ? '• أضف قطعة تانية' : '• Add one more'}
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <Check size={14} className="shrink-0 text-[#D4AF37]" />
+                                <span className="text-[13px] font-black text-[#D4AF37] whitespace-nowrap">
+                                    {isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked'}
+                                </span>
+                            </>
+                        )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <div className="flex flex-col px-6">
+                            {quantity > 1 && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="flex items-center gap-2 mb-0.5"
+                                >
+                                    <button
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="text-white/40 hover:text-white"
+                                    >
+                                        <Minus size={14} />
+                                    </button>
+                                    <span className="text-white font-black text-sm w-4 text-center">{quantity}</span>
+                                    <button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        className="text-white/40 hover:text-white"
+                                    >
+                                        <Plus size={14} />
+                                    </button>
+                                </motion.div>
+                            )}
+                            <span className="text-lg font-black text-white font-cairo">
+                                {totalPrice.toLocaleString()}
+                                <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
+                            </span>
+                        </div>
+
+                        <button
+                            onClick={currentStockOut ? undefined : (isInCart ? () => router.push('/cart') : handleAddToCart)}
+                            className={`
+                                flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
+                                ${currentStockOut
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : (!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
+                                        ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                        : isInCart
+                                            ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'
+                                            : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
+                            `}
+                            disabled={currentStockOut}
+                        >
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={isInCart ? 'go_to_cart' : 'add_to_cart'}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="flex items-center gap-2"
+                                >
+                                    <ShoppingBag size={18} />
+                                    <span className="font-cairo">
+                                        {stockCount <= 0
+                                            ? 'نفدت الكمية'
+                                            : isInCart
+                                                ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
+                                                : (t.product?.add_to_cart || 'Add to Cart')}
+                                    </span>
+                                </motion.div>
+                            </AnimatePresence>
+                        </button>
+                    </div>
                 </motion.div>
             </div>
 
