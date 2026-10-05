@@ -56,6 +56,7 @@ export interface Product {
     category: string | Category;
     isFeatured: boolean;
     is_vto_enabled?: boolean;
+    free_delivery_offer?: boolean;
     vto_image_index?: number;
     fit_type?: string;
     colors?: any[];

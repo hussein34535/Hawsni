@@ -302,6 +302,12 @@
                                         المنتج</span>
                                 </label>
                             </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                    <input type="checkbox" name="free_delivery_offer" <%= (product && product.free_delivery_offer === true) ? 'checked' : '' %>>
+                                    <span class="form-label" style="margin: 0;">عرض: توصيل مجاني عند طلب قطعتين (سطر ذهبي في شريط الزر العائم)</span>
+                                </label>
+                            </div>
                             <div class="form-group" id="vtoImageGroup" style="display: none;">
                                 <label class="form-label">🤖 صورة الذكاء الاصطناعي الافتراضية</label>
                                 <select name="vto_image_index" id="vtoImageSelect" class="form-control"
