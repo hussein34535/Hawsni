@@ -1218,7 +1218,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                     </button>
                                 </motion.div>
                             )}
-                            <span className="text-xl font-black text-white font-cairo">
+                            <span className="text-2xl leading-[28px] font-black text-white font-cairo">
                                 {totalPrice.toLocaleString()}
                                 <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </span>
