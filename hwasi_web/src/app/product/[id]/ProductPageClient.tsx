@@ -1196,7 +1196,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                     className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-white/10"
                 >
                     <div className="flex items-center justify-between">
-                        <div className="flex flex-col px-6">
+                        <div className={`flex flex-col px-6 ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
                             {quantity > 1 && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
@@ -1223,7 +1223,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                 <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </span>
                             {product.free_delivery_offer && (
-                                <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-tight font-black text-[#D4AF37] whitespace-nowrap font-cairo">
+                                <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-[12px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
                                     {quantity >= 2 && <Check size={11} className="shrink-0" />}
                                     <span>
                                         {quantity < 2
