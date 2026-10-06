@@ -309,6 +309,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const [isUpsellOpen, setIsUpsellOpen] = useState(false);
     const [hasShownUpsell, setHasShownUpsell] = useState(false);
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
+    const [justAdded, setJustAdded] = useState(false);
+    const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => () => { if (addedTimer.current) clearTimeout(addedTimer.current); }, []);
     // Fit advisor: remembers sizes the customer already answered for (swap/keep)
     const [fitDismissed, setFitDismissed] = useState<Record<string, boolean>>({});
     const reviewsRef = useRef<HTMLDivElement>(null);
@@ -613,6 +616,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
         } else {
             showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
         }
+        if (addedTimer.current) clearTimeout(addedTimer.current);
+        setJustAdded(true);
+        addedTimer.current = setTimeout(() => setJustAdded(false), 1600);
         setIsUpsellOpen(false);
         setHasShownUpsell(true);
     };
@@ -1271,12 +1277,32 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                 flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
                                 ${currentStockOut
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    : (!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
-                                        ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                        : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
+                                    : justAdded
+                                        ? 'bg-green-500 text-white shadow-lg'
+                                        : (!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
+                                            ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                                            : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
                             `}
                             disabled={currentStockOut}
                         >
+                            {justAdded ? (
+                                <motion.div
+                                    key="added_ok"
+                                    initial={{ scale: 0.7, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    className="flex items-center gap-2"
+                                >
+                                    <motion.span
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+                                        className="flex"
+                                    >
+                                        <Check size={20} strokeWidth={3} />
+                                    </motion.span>
+                                    <span className="font-cairo">{isRTL ? 'تمت الإضافة' : 'Added'}</span>
+                                </motion.div>
+                            ) : (
                             <div className="flex items-center gap-2">
                                 <ShoppingBag size={18} />
                                 <span className="font-cairo">
@@ -1285,6 +1311,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                         : (t.product?.add_to_cart || 'Add to Cart')}
                                 </span>
                             </div>
+                            )}
                         </button>
                     </div>
                 </motion.div>
