@@ -324,7 +324,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const activeAccStr = selectedAccessories.map(a => a.name).join('_');
     const currentItemId = product ? `${product.id || product._id}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}` : null;
     const isInCart = items.some((item) => item.id === currentItemId);
-    const cartQty = items.find((item) => item.id === currentItemId)?.quantity ?? 0;
+    const prodIdForCart = product ? (product.id || product._id) : null;
+    const productQty = prodIdForCart ? items.filter((item) => item.productId === prodIdForCart).reduce((sum, item) => sum + item.quantity, 0) : 0;
+    const showBagBtn = productQty > 0;
     const bagCount = getItemCount();
 
     const getBasePrice = () => {
@@ -578,8 +580,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
         const prodId = product.id || product._id;
         const activeAccStr = selectedAccs.map(a => a.name).join('_');
-        const addedId = `${prodId}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}`;
-        const prevQty = items.find((i) => i.id === addedId)?.quantity ?? 0;
+        const prevProdQty = items.filter((i) => i.productId === prodId).reduce((sum, i) => sum + i.quantity, 0);
 
         addItem({
             id: `${prodId}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}`,
@@ -612,7 +613,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             }]
         });
 
-        if (product.free_delivery_offer && prevQty < 2 && prevQty + quantity >= 2) {
+        if (product.free_delivery_offer && prevProdQty < 2 && prevProdQty + quantity >= 2) {
             showToast(isRTL ? 'الشحن المجاني اتفعّل 🎁' : 'Free shipping unlocked 🎁', 'success');
         } else {
             showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
@@ -1216,7 +1217,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                     className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-white/10"
                 >
                     <div className="flex items-center justify-between">
-                        <div className={`flex flex-col ${isInCart ? 'px-4' : 'px-6'} text-start ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
+                        <div className={`flex flex-col ${showBagBtn ? 'px-4' : 'px-6'} text-start ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
                             {quantity > 1 && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
@@ -1244,11 +1245,11 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             </span>
                             {product.free_delivery_offer && (
                                 <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-[12px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
-                                    {(cartQty >= 2 || (cartQty === 0 && quantity >= 2)) && <Check size={11} className="shrink-0" />}
+                                    {(productQty >= 2 || (productQty === 0 && quantity >= 2)) && <Check size={11} className="shrink-0" />}
                                     <span>
-                                        {cartQty >= 2 || (cartQty === 0 && quantity >= 2)
+                                        {productQty >= 2 || (productQty === 0 && quantity >= 2)
                                             ? (isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked')
-                                            : cartQty === 1
+                                            : productQty === 1
                                                 ? (isRTL ? 'باقي قطعة والشحن مجاني' : 'One more, free shipping')
                                                 : (isRTL ? 'توصيل مجاني لقطعتين' : 'Free delivery for 2 items')}
                                     </span>
@@ -1259,7 +1260,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
                         <div className="flex items-center gap-2">
                         <AnimatePresence>
-                            {isInCart && (
+                            {showBagBtn && (
                                 <motion.button
                                     initial={{ scale: 0, opacity: 0 }}
                                     animate={{ scale: 1, opacity: 1 }}
@@ -1281,7 +1282,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                         <button
                             onClick={currentStockOut ? undefined : handleAddToCart}
                             className={`
-                                flex items-center gap-2 ${isInCart ? 'px-5' : 'px-8'} py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
+                                flex items-center gap-2 ${showBagBtn ? 'px-5' : 'px-8'} py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
                                 ${currentStockOut
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : justAdded
