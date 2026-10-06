@@ -320,6 +320,8 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const activeAccStr = selectedAccessories.map(a => a.name).join('_');
     const currentItemId = product ? `${product.id || product._id}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}` : null;
     const isInCart = items.some((item) => item.id === currentItemId);
+    const cartQty = items.find((item) => item.id === currentItemId)?.quantity ?? 0;
+    const bagCount = getItemCount();
 
     const getBasePrice = () => {
         if (!product) return 0;
@@ -572,6 +574,8 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
         const prodId = product.id || product._id;
         const activeAccStr = selectedAccs.map(a => a.name).join('_');
+        const addedId = `${prodId}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}`;
+        const prevQty = items.find((i) => i.id === addedId)?.quantity ?? 0;
 
         addItem({
             id: `${prodId}_${selectedSize}_${selectedColor || 'default'}_${activeAccStr}`,
@@ -604,7 +608,11 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             }]
         });
 
-        showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
+        if (product.free_delivery_offer && prevQty < 2 && prevQty + quantity >= 2) {
+            showToast(isRTL ? 'الشحن المجاني اتفعّل 🎁' : 'Free shipping unlocked 🎁', 'success');
+        } else {
+            showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
+        }
         setIsUpsellOpen(false);
         setHasShownUpsell(true);
     };
@@ -1190,6 +1198,26 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             </main>
 
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
+                <AnimatePresence>
+                    {isInCart && (
+                        <motion.button
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                            onClick={() => router.push('/cart')}
+                            aria-label={isRTL ? 'ذهاب للحقيبة' : 'Go to Cart'}
+                            className="absolute -top-5 right-6 z-10 w-11 h-11 rounded-full bg-white text-gray-950 shadow-[0_8px_24px_rgba(0,0,0,0.35)] border border-gray-100 flex items-center justify-center active:scale-95"
+                        >
+                            <ShoppingBag size={18} />
+                            {bagCount > 0 && (
+                                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-[#D4AF37] text-[#0E4435] text-[10px] font-black flex items-center justify-center font-cairo">
+                                    {bagCount > 99 ? '99+' : bagCount}
+                                </span>
+                            )}
+                        </motion.button>
+                    )}
+                </AnimatePresence>
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -1224,11 +1252,13 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             </span>
                             {product.free_delivery_offer && (
                                 <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-[12px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
-                                    {quantity >= 2 && <Check size={11} className="shrink-0" />}
+                                    {(cartQty >= 2 || (cartQty === 0 && quantity >= 2)) && <Check size={11} className="shrink-0" />}
                                     <span>
-                                        {quantity < 2
-                                            ? (isRTL ? 'توصيل مجاني لقطعتين' : 'Free delivery for 2 items')
-                                            : (isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked')}
+                                        {cartQty >= 2 || (cartQty === 0 && quantity >= 2)
+                                            ? (isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked')
+                                            : cartQty === 1
+                                                ? (isRTL ? 'فاضل قطعة واحدة على الشحن المجاني' : 'One more item for free shipping')
+                                                : (isRTL ? 'توصيل مجاني لقطعتين' : 'Free delivery for 2 items')}
                                     </span>
                                     <span>🎁</span>
                                 </span>
@@ -1236,37 +1266,25 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                         </div>
 
                         <button
-                            onClick={currentStockOut ? undefined : (isInCart ? () => router.push('/cart') : handleAddToCart)}
+                            onClick={currentStockOut ? undefined : handleAddToCart}
                             className={`
                                 flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
                                 ${currentStockOut
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : (!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
                                         ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                        : isInCart
-                                            ? 'bg-[var(--color-brand-primary)] text-white shadow-lg'
-                                            : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
+                                        : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
                             `}
                             disabled={currentStockOut}
                         >
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={isInCart ? 'go_to_cart' : 'add_to_cart'}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="flex items-center gap-2"
-                                >
-                                    <ShoppingBag size={18} />
-                                    <span className="font-cairo">
-                                        {stockCount <= 0
-                                            ? 'نفدت الكمية'
-                                            : isInCart
-                                                ? (isRTL ? 'ذهاب للحقيبة' : 'Go to Cart')
-                                                : (t.product?.add_to_cart || 'Add to Cart')}
-                                    </span>
-                                </motion.div>
-                            </AnimatePresence>
+                            <div className="flex items-center gap-2">
+                                <ShoppingBag size={18} />
+                                <span className="font-cairo">
+                                    {stockCount <= 0
+                                        ? 'نفدت الكمية'
+                                        : (t.product?.add_to_cart || 'Add to Cart')}
+                                </span>
+                            </div>
                         </button>
                     </div>
                 </motion.div>
