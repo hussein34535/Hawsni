@@ -1218,12 +1218,12 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                     </button>
                                 </motion.div>
                             )}
-                            <span className="text-base font-black text-white font-cairo">
+                            <span className="text-lg font-black text-white font-cairo">
                                 {totalPrice.toLocaleString()}
                                 <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </span>
                             {product.free_delivery_offer && (
-                                <span className="flex items-center gap-1 mt-0.5 text-[10px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
+                                <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-tight font-black text-[#D4AF37] whitespace-nowrap font-cairo">
                                     {quantity >= 2 && <Check size={11} className="shrink-0" />}
                                     <span>
                                         {quantity < 2
