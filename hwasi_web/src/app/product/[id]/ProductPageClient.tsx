@@ -1196,7 +1196,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                     className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-white/10"
                 >
                     <div className="flex items-center justify-between">
-                        <div className={`flex flex-col px-6 ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
+                        <div className={`flex flex-col px-6 text-start ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
                             {quantity > 1 && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
