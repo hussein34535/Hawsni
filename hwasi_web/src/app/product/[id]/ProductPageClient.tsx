@@ -1210,33 +1210,13 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             </main>
 
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
-                <AnimatePresence>
-                    {isInCart && (
-                        <motion.button
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0, opacity: 0 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-                            onClick={() => router.push('/cart')}
-                            aria-label={isRTL ? 'ذهاب للحقيبة' : 'Go to Cart'}
-                            className="absolute -top-5 right-6 z-10 w-11 h-11 rounded-full bg-white text-gray-950 shadow-[0_8px_24px_rgba(0,0,0,0.35)] border border-gray-100 flex items-center justify-center active:scale-95"
-                        >
-                            <ShoppingBag size={18} />
-                            {bagCount > 0 && (
-                                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-[#D4AF37] text-[#0E4435] text-[10px] font-black flex items-center justify-center font-cairo">
-                                    {bagCount > 99 ? '99+' : bagCount}
-                                </span>
-                            )}
-                        </motion.button>
-                    )}
-                </AnimatePresence>
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-white/10"
                 >
                     <div className="flex items-center justify-between">
-                        <div className={`flex flex-col px-6 text-start ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
+                        <div className={`flex flex-col ${isInCart ? 'px-4' : 'px-6'} text-start ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
                             {quantity > 1 && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
@@ -1269,7 +1249,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                         {cartQty >= 2 || (cartQty === 0 && quantity >= 2)
                                             ? (isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked')
                                             : cartQty === 1
-                                                ? (isRTL ? 'فاضل قطعة واحدة على الشحن المجاني' : 'One more item for free shipping')
+                                                ? (isRTL ? 'باقي قطعة والشحن مجاني' : 'One more, free shipping')
                                                 : (isRTL ? 'توصيل مجاني لقطعتين' : 'Free delivery for 2 items')}
                                     </span>
                                     <span>🎁</span>
@@ -1277,10 +1257,31 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             )}
                         </div>
 
+                        <div className="flex items-center gap-2">
+                        <AnimatePresence>
+                            {isInCart && (
+                                <motion.button
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+                                    onClick={() => router.push('/cart')}
+                                    aria-label={isRTL ? 'ذهاب للحقيبة' : 'Go to Cart'}
+                                    className="relative w-11 h-11 shrink-0 rounded-full bg-white/10 text-white border border-white/10 flex items-center justify-center active:scale-95"
+                                >
+                                    <ShoppingBag size={18} />
+                                    {bagCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-[#D4AF37] text-[#0E4435] text-[10px] font-black flex items-center justify-center font-cairo">
+                                            {bagCount > 99 ? '99+' : bagCount}
+                                        </span>
+                                    )}
+                                </motion.button>
+                            )}
+                        </AnimatePresence>
                         <button
                             onClick={currentStockOut ? undefined : handleAddToCart}
                             className={`
-                                flex items-center gap-2 px-8 py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
+                                flex items-center gap-2 ${isInCart ? 'px-5' : 'px-8'} py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
                                 ${currentStockOut
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : justAdded
@@ -1357,6 +1358,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             </div>
                             )}
                         </button>
+                        </div>
                     </div>
                 </motion.div>
             </div>
