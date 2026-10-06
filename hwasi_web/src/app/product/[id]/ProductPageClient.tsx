@@ -310,8 +310,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const [hasShownUpsell, setHasShownUpsell] = useState(false);
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
     const [justAdded, setJustAdded] = useState(false);
-    const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    useEffect(() => () => { if (addedTimer.current) clearTimeout(addedTimer.current); }, []);
+    const [adding, setAdding] = useState(false);
+    const animTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+    useEffect(() => () => { animTimers.current.forEach(clearTimeout); }, []);
     // Fit advisor: remembers sizes the customer already answered for (swap/keep)
     const [fitDismissed, setFitDismissed] = useState<Record<string, boolean>>({});
     const reviewsRef = useRef<HTMLDivElement>(null);
@@ -616,9 +617,14 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
         } else {
             showToast(isRTL ? 'تمت الإضافة إلى السلة' : 'Added to cart successfully', 'success');
         }
-        if (addedTimer.current) clearTimeout(addedTimer.current);
-        setJustAdded(true);
-        addedTimer.current = setTimeout(() => setJustAdded(false), 1600);
+        animTimers.current.forEach(clearTimeout);
+        animTimers.current = [];
+        setAdding(true);
+        animTimers.current.push(setTimeout(() => {
+            setAdding(false);
+            setJustAdded(true);
+            animTimers.current.push(setTimeout(() => setJustAdded(false), 1800));
+        }, 650));
         setIsUpsellOpen(false);
         setHasShownUpsell(true);
     };
@@ -1283,9 +1289,18 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                             ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
                                             : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
                             `}
-                            disabled={currentStockOut}
+                            disabled={currentStockOut || adding}
                         >
-                            {justAdded ? (
+                            {adding ? (
+                                <div className="flex items-center gap-2">
+                                    <motion.span
+                                        className="w-[18px] h-[18px] rounded-full border-2 border-gray-300 border-t-gray-950"
+                                        animate={{ rotate: 360 }}
+                                        transition={{ repeat: Infinity, duration: 0.7, ease: 'linear' }}
+                                    />
+                                    <span className="font-cairo">{isRTL ? 'جاري الإضافة...' : 'Adding...'}</span>
+                                </div>
+                            ) : justAdded ? (
                                 <motion.div
                                     key="added_ok"
                                     initial={{ scale: 0.7, opacity: 0 }}
@@ -1293,13 +1308,42 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                     className="flex items-center gap-2"
                                 >
                                     <motion.span
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        transition={{ type: 'spring', stiffness: 500, damping: 14 }}
-                                        className="flex"
+                                        className="absolute inset-0 rounded-[1.75rem] bg-white pointer-events-none"
+                                        initial={{ opacity: 0.45, scale: 0.9 }}
+                                        animate={{ opacity: 0, scale: 1.3 }}
+                                        transition={{ duration: 0.7, ease: 'easeOut' }}
+                                    />
+                                    <motion.svg
+                                        width="22"
+                                        height="22"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        initial="hidden"
+                                        animate="shown"
                                     >
-                                        <Check size={20} strokeWidth={3} />
-                                    </motion.span>
+                                        <motion.circle
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth={2.5}
+                                            variants={{
+                                                hidden: { pathLength: 0, opacity: 0 },
+                                                shown: { pathLength: 1, opacity: 1, transition: { duration: 0.4, ease: [0.65, 0, 0.35, 1] } },
+                                            }}
+                                        />
+                                        <motion.path
+                                            d="M8 12.5l2.5 2.5L16 9.5"
+                                            stroke="currentColor"
+                                            strokeWidth={3}
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            variants={{
+                                                hidden: { pathLength: 0 },
+                                                shown: { pathLength: 1, transition: { duration: 0.3, delay: 0.32, ease: [0.65, 0, 0.35, 1] } },
+                                            }}
+                                        />
+                                    </motion.svg>
                                     <span className="font-cairo">{isRTL ? 'تمت الإضافة' : 'Added'}</span>
                                 </motion.div>
                             ) : (
