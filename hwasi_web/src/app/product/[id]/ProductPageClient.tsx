@@ -1248,7 +1248,6 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             </span>
                             {product.free_delivery_offer && (
                                 <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-[12px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
-                                    {(productQty >= 2 || (productQty === 0 && quantity >= 2)) && <Check size={11} className="shrink-0" />}
                                     <span>
                                         {productQty >= 2 || (productQty === 0 && quantity >= 2)
                                             ? (isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked')
@@ -1285,7 +1284,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                         <button
                             onClick={currentStockOut ? undefined : handleAddToCart}
                             className={`
-                                flex items-center gap-2 ${showBagBtn ? 'px-5' : 'px-8'} py-4 rounded-[1.75rem] font-black text-base transition-all active:scale-95 overflow-hidden relative
+                                flex items-center gap-2 ${showBagBtn ? 'px-5' : 'px-8'} py-4 rounded-[1.75rem] font-black text-base whitespace-nowrap transition-all active:scale-95 overflow-hidden relative
                                 ${currentStockOut
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : justAdded
