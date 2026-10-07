@@ -1015,8 +1015,11 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                         )}
                                     </div>
 
-                                    {/* Fit advisor: model fit note + optional size-swap approval */}
-                                    {selectedSize && fitType !== 'true' && (
+                                    {/* Fit advisor: model fit note + optional size-swap approval.
+                                        Hidden when no valid swap target exists (e.g. selected size is already
+                                        the largest/smallest available, or the suggested size is out of stock)
+                                        — no point advising a move that can't be made. */}
+                                    {selectedSize && fitType !== 'true' && !!fitSuggestion && (
                                         <div className="mt-4 p-4 rounded-[20px] bg-amber-50 border border-amber-100/50">
                                             <div className="flex items-start gap-3">
                                                 <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm shrink-0">
