@@ -1220,7 +1220,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                     className="bg-gray-950 p-1.5 rounded-[2rem] shadow-[0_15px_40px_rgba(0,0,0,0.3)] border border-white/10"
                 >
                     <div className="flex items-center justify-between">
-                        <div className={`flex flex-col ${showBagBtn ? 'px-4' : 'px-6'} text-start ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
+                        <div className={`flex flex-col ${showBagBtn ? 'px-4 max-[350px]:px-2' : 'px-6'} text-start ${product.free_delivery_offer ? 'mt-[7px]' : ''}`}>
                             {quantity > 1 && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
@@ -1247,7 +1247,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                 <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
                             </span>
                             {product.free_delivery_offer && (
-                                <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-[12px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
+                                <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-[12px] max-[350px]:text-[9px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
                                     <span>
                                         {productQty >= 2 || (productQty === 0 && quantity >= 2)
                                             ? (isRTL ? 'الشحن المجاني اتفعّل' : 'Free shipping unlocked')
@@ -1270,7 +1270,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                     transition={{ type: 'spring', stiffness: 400, damping: 22 }}
                                     onClick={() => router.push('/cart')}
                                     aria-label={isRTL ? 'ذهاب للحقيبة' : 'Go to Cart'}
-                                    className="relative w-11 h-11 shrink-0 rounded-full bg-white/10 text-white border border-white/10 flex items-center justify-center active:scale-95"
+                                    className="relative w-11 h-11 max-[350px]:w-10 max-[350px]:h-10 shrink-0 rounded-full bg-white/10 text-white border border-white/10 flex items-center justify-center active:scale-95"
                                 >
                                     <ShoppingBag size={18} />
                                     {bagCount > 0 && (
@@ -1284,7 +1284,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                         <button
                             onClick={currentStockOut ? undefined : handleAddToCart}
                             className={`
-                                flex items-center gap-2 ${showBagBtn ? 'px-5' : 'px-8'} py-4 rounded-[1.75rem] font-black text-base whitespace-nowrap transition-all active:scale-95 overflow-hidden relative
+                                flex items-center gap-2 ${showBagBtn ? 'px-4' : 'px-8'} py-4 rounded-[1.75rem] font-black text-base whitespace-nowrap transition-all active:scale-95 overflow-hidden relative
                                 ${currentStockOut
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : justAdded
@@ -1352,7 +1352,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                 </motion.div>
                             ) : (
                             <div className="flex items-center gap-2">
-                                <ShoppingBag size={18} />
+                                {!showBagBtn && <ShoppingBag size={18} />}
                                 <span className="font-cairo">
                                     {stockCount <= 0
                                         ? 'نفدت الكمية'
