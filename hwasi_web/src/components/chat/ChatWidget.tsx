@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -232,7 +232,7 @@ export default function ChatWidget() {
       setInput('');
 
       // Add optimistic message (USER ONLY)
-      const optimisticMsg: ChatMessage = { sender_type: 'user', content: text, isOptimistic: true };
+      const optimisticMsg: ChatMessage = { sender_type: 'user', content: text, isOptimistic: true, created_at: new Date().toISOString() };
       setMessages(prev => [...prev, optimisticMsg]);
       setIsLoading(true);
 
@@ -269,6 +269,29 @@ export default function ChatWidget() {
       return text
         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
         .replace(/\n/g, '<br/>');
+    };
+
+    const formatTime = (iso?: string) => {
+      try {
+        return new Date(iso || Date.now()).toLocaleTimeString(isRTL ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+      } catch { return ''; }
+    };
+
+    const dayKey = (iso?: string) => {
+      const d = new Date(iso || Date.now());
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    };
+
+    const dateLabel = (iso?: string) => {
+      const d = new Date(iso || Date.now());
+      const now = new Date();
+      const yest = new Date();
+      yest.setDate(now.getDate() - 1);
+      const sameDay = (a: Date, b: Date) =>
+        a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+      if (sameDay(d, now)) return isRTL ? 'اليوم' : 'Today';
+      if (sameDay(d, yest)) return isRTL ? 'أمس' : 'Yesterday';
+      return d.toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' });
     };
 
     if (shouldHideCompletely) return null;
@@ -313,6 +336,8 @@ export default function ChatWidget() {
             color: #1f2937; 
             border-radius: 20px 20px 20px 4px; 
           }
+          .hwsni-time { display: block; font-size: 10px; font-weight: 700; margin-top: 4px; opacity: 0.55; text-align: end; }
+          .hwsni-date-sep { display: inline-block; font-size: 11px; font-weight: 800; color: #6b7280; background: #eef0f2; padding: 4px 14px; border-radius: 999px; }
           
           .hwsni-typing { display: flex; gap: 4px; padding: 12px 16px; background: #f3f4f6; border-radius: 20px; width: fit-content; }
           .hwsni-typing span { width: 6px; height: 6px; background: #9ca3af; border-radius: 50%; animation: hwsniBounce 1.4s infinite; }
@@ -434,20 +459,32 @@ export default function ChatWidget() {
                   </div>
                 )}
   
-                {messages.map((msg, i) => (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    key={msg.id || i} 
-                    className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div 
-                      className={`hwsni-bubble ${msg.sender_type}`}
-                      style={{ opacity: 1 }}
-                      dangerouslySetInnerHTML={{ __html: formatText(msg.content) }}
-                    />
-                  </motion.div>
-                ))}
+                {messages.map((msg, i) => {
+                  const prev = messages[i - 1];
+                  const showSep = i === 0 || dayKey(msg.created_at) !== dayKey(prev?.created_at);
+                  return (
+                    <Fragment key={msg.id || `m-${i}`}>
+                      {showSep && (
+                        <div className="flex justify-center">
+                          <span className="hwsni-date-sep">{dateLabel(msg.created_at)}</span>
+                        </div>
+                      )}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`hwsni-bubble ${msg.sender_type}`}
+                          style={{ opacity: 1 }}
+                        >
+                          <div dangerouslySetInnerHTML={{ __html: formatText(msg.content) }} />
+                          <span className="hwsni-time">{formatTime(msg.created_at)}</span>
+                        </div>
+                      </motion.div>
+                    </Fragment>
+                  );
+                })}
   
                 {isLoading && (
                   <div className="flex justify-start">
