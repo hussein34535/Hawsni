@@ -1296,13 +1296,12 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             disabled={currentStockOut || adding}
                         >
                             {adding ? (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2" aria-label={isRTL ? 'جاري الإضافة...' : 'Adding...'}>
                                     <motion.span
                                         className="w-[18px] h-[18px] rounded-full border-2 border-gray-300 border-t-gray-950"
                                         animate={{ rotate: 360 }}
                                         transition={{ repeat: Infinity, duration: 0.7, ease: 'linear' }}
                                     />
-                                    <span className="font-cairo">{isRTL ? 'جاري الإضافة...' : 'Adding...'}</span>
                                 </div>
                             ) : justAdded ? (
                                 <motion.div
@@ -1348,7 +1347,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                             }}
                                         />
                                     </motion.svg>
-                                    <span className="font-cairo">{isRTL ? 'تمت الإضافة' : 'Added'}</span>
+                                    <span className="font-cairo text-sm max-[350px]:hidden">{isRTL ? 'تمت الإضافة' : 'Added'}</span>
                                 </motion.div>
                             ) : (
                             <div className="flex items-center gap-2">
