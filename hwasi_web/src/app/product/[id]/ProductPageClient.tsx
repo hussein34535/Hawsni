@@ -775,7 +775,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                     fill
                                                     priority={i === 0}
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                                    className="object-contain object-top select-none"
+                                                    className="object-contain select-none"
                                                 />
                                             )}
                                         </div>
@@ -1213,7 +1213,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                 </div>
             </main>
 
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50">
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-lg z-50 lg:left-[calc(50%_+_1.5rem)] lg:right-[max(1.5rem,calc((100vw_-_80rem)/2_+_1.5rem))] lg:translate-x-0 lg:w-auto lg:max-w-none">
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
