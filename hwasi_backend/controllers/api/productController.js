@@ -181,7 +181,8 @@ class ProductController {
             colors: colorsArray.length > 0 ? colorsArray : null,
             accessories: body.accessories ? (typeof body.accessories === 'string' ? JSON.parse(body.accessories) : body.accessories) : null,
             images: imageUrls,
-            size_guide: body.size_guide || ''
+            size_guide: body.size_guide || '',
+            size_guide_image: isTrue(body.remove_size_guide_image) ? '' : (body.size_guide_image || ''),
         };
     }
 
@@ -374,7 +375,8 @@ class ProductController {
                 colors: productData.colors,
                 accessories: productData.accessories,
                 images: productData.images,
-                size_guide: productData.size_guide
+                size_guide: productData.size_guide,
+                size_guide_image: productData.size_guide_image,
             });
 
             if (error) throw error;
@@ -477,7 +479,8 @@ class ProductController {
                 colors: productData.colors,
                 accessories: productData.accessories,
                 images: productData.images,
-                size_guide: productData.size_guide
+                size_guide: productData.size_guide,
+                size_guide_image: productData.size_guide_image,
             });
 
             if (updateError) throw updateError;

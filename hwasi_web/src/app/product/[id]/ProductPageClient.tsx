@@ -1371,6 +1371,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                 isOpen={isSizeGuideOpen}
                 onClose={() => setIsSizeGuideOpen(false)}
                 sizeGuide={product.size_guide}
+                sizeGuideImage={product.size_guide_image}
             />
 
             <VirtualTryOnModal

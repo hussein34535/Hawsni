@@ -8,15 +8,18 @@ interface SizeGuideModalProps {
     isOpen: boolean;
     onClose: () => void;
     sizeGuide?: string;
+    sizeGuideImage?: string;
 }
 
-export default function SizeGuideModal({ isOpen, onClose, sizeGuide }: SizeGuideModalProps) {
+export default function SizeGuideModal({ isOpen, onClose, sizeGuide, sizeGuideImage }: SizeGuideModalProps) {
     const { t, isRTL } = useLanguage();
 
-    // Default guide if none provided
-    const guideContent = sizeGuide || (isRTL
+    const hasText = !!(sizeGuide && sizeGuide.trim());
+    // Default guide if none provided (and no image to show instead)
+    const fallbackGuide = (isRTL
         ? "S = الصدر 50 سم، الطول 70 سم\nM = الصدر 52 سم، الطول 72 سم\nL = الصدر 54 سم، الطول 74 سم\nXL = الصدر 56 سم، الطول 76 سم"
         : "S = Chest 50cm, Length 70cm\nM = Chest 52cm, Length 72cm\nL = Chest 54cm, Length 74cm\nXL = Chest 56cm, Length 76cm");
+    const guideContent = hasText ? (sizeGuide as string) : (sizeGuideImage ? '' : fallbackGuide);
 
     const items = guideContent
         .split(/[,،\n]/)
@@ -66,6 +69,16 @@ export default function SizeGuideModal({ isOpen, onClose, sizeGuide }: SizeGuide
 
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                            {sizeGuideImage ? (
+                                <div className="rounded-[16px] overflow-hidden border border-gray-100">
+                                    <img
+                                        src={sizeGuideImage}
+                                        alt={isRTL ? 'دليل المقاسات' : 'Size guide'}
+                                        className="w-full h-auto"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            ) : null}
                             {items.map((item, idx) => {
                                 const parts = item.split('=');
                                 const hasKeyVal = parts.length > 1;

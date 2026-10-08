@@ -192,6 +192,23 @@
                                     <small class="text-muted">أدخل كل مقاس مع تفاصيله في سطر منفصل</small>
                                 </div>
 
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label class="form-label">صورة دليل المقاسات (اختياري)</label>
+                                    <% if (product && product.size_guide_image) { %>
+                                        <div style="margin-bottom:0.5rem">
+                                            <img id="sizeGuidePreview" src="<%= product.size_guide_image %>" alt="size guide" style="max-width:220px;border-radius:12px;border:1px solid #eee;display:block">
+                                        </div>
+                                        <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;font-size:.85rem;color:#b91c1c;margin-bottom:.4rem">
+                                            <input type="checkbox" name="remove_size_guide_image" id="removeSizeGuideImage"> إزالة الصورة الحالية
+                                        </label>
+                                    <% } else { %>
+                                        <img id="sizeGuidePreview" style="display:none;max-width:220px;border-radius:12px;border:1px solid #eee;margin-bottom:.5rem">
+                                    <% } %>
+                                    <input type="hidden" name="size_guide_image" id="sizeGuideImageUrl" value="<%= product && product.size_guide_image ? product.size_guide_image : '' %>">
+                                    <input type="file" id="sizeGuideFileInput" accept="image/*" class="form-control" onchange="previewSizeGuide(this)">
+                                    <small class="text-muted">هتظهر في نافذة دليل المقاسات فوق النص (لو موجود)</small>
+                                </div>
+
                                 <div class="form-group">
                                     <label class="form-label">الألوان</label>
                                     <div
@@ -826,6 +843,16 @@
         }
 
         // === Direct Cloudinary Upload on Submit ===
+        function previewSizeGuide(input) {
+            const img = document.getElementById('sizeGuidePreview');
+            if (input.files && input.files[0]) {
+                img.src = URL.createObjectURL(input.files[0]);
+                img.style.display = 'block';
+                const rm = document.getElementById('removeSizeGuideImage');
+                if (rm) rm.checked = false;
+            }
+        }
+
         async function handleProductSubmit(e) {
             e.preventDefault();
             if (!validateForm('productForm')) return false;
@@ -944,6 +971,34 @@
                     }
                     // Sync the inputs into the JSON payload
                     updateAccessoriesInput();
+                }
+
+                // 4.5. Size guide image upload (direct to Cloudinary, URL goes to hidden input)
+                const sizeGuideFileInput = document.getElementById('sizeGuideFileInput');
+                const sizeGuideUrlInput = document.getElementById('sizeGuideImageUrl');
+                if (sizeGuideFileInput && sizeGuideUrlInput && sizeGuideFileInput.files && sizeGuideFileInput.files.length > 0) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> رفع صورة دليل المقاسات...';
+                    let sgFile = sizeGuideFileInput.files[0];
+                    if (sgFile.size > 4 * 1024 * 1024) sgFile = await compressImage(sgFile);
+                    const sgSignRes = await fetch('/api/cloudinary/sign?folder=size-guides');
+                    const sgSignData = await sgSignRes.json();
+                    if (!sgSignRes.ok || !sgSignData.success) {
+                        throw new Error(sgSignData.message || 'فشل توقيع الرفع');
+                    }
+                    const sgFormData = new FormData();
+                    sgFormData.append('file', sgFile);
+                    sgFormData.append('api_key', sgSignData.api_key);
+                    sgFormData.append('timestamp', sgSignData.timestamp);
+                    sgFormData.append('signature', sgSignData.signature);
+                    sgFormData.append('folder', sgSignData.folder);
+                    const sgUploadEndpoint = `https://api.cloudinary.com/v1_1/${sgSignData.cloud_name}/image/upload`;
+                    const sgCloudRes = await fetch(sgUploadEndpoint, { method: 'POST', body: sgFormData });
+                    const sgCloudData = await sgCloudRes.json();
+                    if (sgCloudData.secure_url) {
+                        sizeGuideUrlInput.value = sgCloudData.secure_url;
+                    } else {
+                        throw new Error(sgCloudData.error?.message || 'فشل رفع صورة دليل المقاسات');
+                    }
                 }
 
                 // 5. Preserve perfect drag-and-drop sort order.

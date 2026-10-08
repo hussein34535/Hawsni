@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS products (
   vto_image_index INTEGER DEFAULT 0,
   fit_type TEXT DEFAULT 'true',
   size_guide TEXT,
+  size_guide_image TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
