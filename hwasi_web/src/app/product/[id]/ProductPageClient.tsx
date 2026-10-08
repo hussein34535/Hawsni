@@ -775,7 +775,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                     fill
                                                     priority={i === 0}
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                                    className="object-contain select-none"
+                                                    className="object-contain object-top select-none"
                                                 />
                                             )}
                                         </div>
