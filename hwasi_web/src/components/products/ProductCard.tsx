@@ -183,7 +183,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 fill
                                 loading="lazy"
                                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                className="object-contain group-hover:scale-110 transition-transform duration-500"
                             />
                             {/* Video Play Icon Overlay */}
                             {isCurrentlyVideo && (
