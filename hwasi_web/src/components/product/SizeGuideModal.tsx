@@ -70,11 +70,11 @@ export default function SizeGuideModal({ isOpen, onClose, sizeGuide, sizeGuideIm
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-4">
                             {sizeGuideImage ? (
-                                <div className="rounded-[16px] overflow-hidden border border-gray-100">
+                                <div className="rounded-[16px] overflow-hidden border border-gray-100 bg-gray-50 flex justify-center">
                                     <img
                                         src={sizeGuideImage}
                                         alt={isRTL ? 'دليل المقاسات' : 'Size guide'}
-                                        className="w-full h-auto"
+                                        className="w-auto max-w-full max-h-[55vh] object-contain"
                                         loading="lazy"
                                     />
                                 </div>
