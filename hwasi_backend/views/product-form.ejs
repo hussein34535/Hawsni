@@ -237,13 +237,13 @@
                                                 بدون صورة (اختياري) ▼
                                             </button>
                                             <div id="imageDropdown"
-                                                style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--dm-surface, white); border: 1px solid var(--dm-border, #dee2e6); border-radius: 8px; max-height: 300px; overflow-y: auto; z-index: 1000; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                                                style="display: none; position: absolute; top: 100%; inset-inline-end: 0; min-width: 280px; max-width: min(360px, 80vw); max-height: 320px; overflow-y: auto; background: var(--dm-surface, white); border: 1px solid var(--dm-border, #dee2e6); border-radius: 12px; padding: 10px; z-index: 1000; margin-top: 4px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); grid-template-columns: repeat(4, 1fr); gap: 8px;">
                                                 <!-- Images will be added here -->
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-secondary" onclick="addColor()"
-                                            style="padding: 0.5rem 1rem; flex-shrink: 0; height: 40px;">
-                                            <i class="fas fa-plus"></i> إضافة
+                                        <button type="button" id="colorSubmitBtn" class="btn btn-secondary" onclick="addColor()"
+                                            style="padding: 0.5rem 1rem; flex-shrink: 0; height: 40px; white-space: nowrap;">
+                                            <i class="fas fa-plus"></i> <span id="colorSubmitLabel">إضافة</span>
                                         </button>
                                     </div>
                                     <input type="hidden" name="colors" id="colorsInput"
@@ -498,6 +498,7 @@
         let imageState = [];
         let colors = [];
         let selectedImageIndex = null;
+        let editingColorIndex = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             // 1. Initialize Sortable
@@ -595,6 +596,15 @@
                 renderColors();
                 updateColorsInput();
             }
+
+            // Close the color-image dropdown when clicking anywhere outside it
+            document.addEventListener('click', (e) => {
+                const cont = document.getElementById('imageSelectorContainer');
+                const dd = document.getElementById('imageDropdown');
+                if (cont && dd && dd.style.display !== 'none' && !cont.contains(e.target)) {
+                    dd.style.display = 'none';
+                }
+            });
         });
 
         // === Image Actions ===
@@ -1033,31 +1043,45 @@
         // === Color Picker Logic (Adapted) ===
         function updateImageDropdown() {
             const dropdown = document.getElementById('imageDropdown');
-            dropdown.innerHTML = '<div style="padding: 8px; border-bottom: 1px solid #dee2e6; cursor: pointer;" onclick="selectImage(null, null)"><i class="fas fa-times-circle"></i> بدون صورة</div>';
+            dropdown.innerHTML = '';
+
+            // "No image" tile
+            const none = document.createElement('div');
+            none.style.cssText = 'aspect-ratio: 1; border-radius: 8px; border: 1.5px dashed #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; color: #999; font-size: 11px;';
+            none.innerHTML = '<i class="fas fa-times-circle" style="font-size: 18px;"></i>بدون';
+            none.onclick = () => selectImage(null, null);
+            dropdown.appendChild(none);
 
             imageState.forEach((img, index) => {
-                const item = document.createElement('div');
-                item.style.cssText = 'padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; border-bottom: 1px solid #eee;';
-                item.onmouseover = () => item.style.background = '#f8f9fa';
-                item.onmouseout = () => item.style.background = 'white';
-                item.onclick = () => selectImage(index, img.url);
-
-                const thumb = document.createElement('img');
-                thumb.src = img.url;
-                thumb.style.cssText = 'width: 40px; height: 40px; object-fit: cover; border-radius: 4px;';
-
-                const label = document.createElement('span');
-                label.textContent = `صورة ${index + 1}`;
-
-                item.appendChild(thumb);
-                item.appendChild(label);
-                dropdown.appendChild(item);
+                const tile = document.createElement('img');
+                tile.src = img.url;
+                tile.title = `صورة ${index + 1}`;
+                const sel = index === selectedImageIndex;
+                tile.style.cssText = `width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; cursor: pointer; border: 2px solid ${sel ? 'var(--primary, #0d6efd)' : 'transparent'};`;
+                tile.onclick = () => selectImage(index, img.url);
+                dropdown.appendChild(tile);
             });
         }
 
         function toggleImageDropdown() {
             const dropdown = document.getElementById('imageDropdown');
-            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            dropdown.style.display = dropdown.style.display === 'none' ? 'grid' : 'none';
+        }
+
+        function highlightEditingSwatch() {
+            const container = document.getElementById('colorsContainer');
+            if (!container) return;
+            Array.from(container.children).forEach((child, i) => {
+                if (i === editingColorIndex) {
+                    child.style.background = '#eef2ff';
+                    child.style.borderColor = 'var(--primary)';
+                    child.style.boxShadow = '0 0 0 2px rgba(79, 70, 229, 0.2)';
+                } else {
+                    child.style.background = 'var(--dm-surface, #f8f9fa)';
+                    child.style.borderColor = 'var(--dm-border, #ddd)';
+                    child.style.boxShadow = 'none';
+                }
+            });
         }
 
         function selectImage(index, imageSrc) {
@@ -1073,6 +1097,15 @@
                 thumb.src = imageSrc;
                 preview.style.display = 'block';
                 noImageBtn.style.display = 'none';
+            }
+            // Instant-apply when editing an existing color: the image change
+            // saves immediately into the swatch, no need to press add again.
+            if (editingColorIndex !== null && colors[editingColorIndex]) {
+                colors[editingColorIndex].imageIndex = index;
+                updateColorsInput();
+                renderColors();
+                highlightEditingSwatch();
+                showToast('تم تحديث صورة اللون', 'success');
             }
             toggleImageDropdown();
         }
@@ -1221,30 +1254,33 @@
 
             // Load into picker
             document.getElementById('colorPicker').value = c.color.toLowerCase();
-            
-            // Load image mapping
+
+            // Load the saved name back into the name field
+            const nameInput = document.getElementById('colorNameInput');
+            if (nameInput) nameInput.value = c.name || '';
+
+            // Load image mapping (before marking as editing so this initial
+            // load doesn't trigger an instant-apply toast)
             selectImage(c.imageIndex, (c.imageIndex !== null && imageState[c.imageIndex]) ? imageState[c.imageIndex].url : null);
-            
+
+            // Mark as being edited (image picks apply instantly to this swatch)
+            editingColorIndex = index;
+            const submitLabel = document.getElementById('colorSubmitLabel');
+            if (submitLabel) submitLabel.textContent = 'حفظ التعديل';
+
             // Visual feedback - highlight the active swatch
-            const container = document.getElementById('colorsContainer');
-            Array.from(container.children).forEach((child, i) => {
-                if (i === index) {
-                    child.style.background = '#eef2ff';
-                    child.style.borderColor = 'var(--primary)';
-                    child.style.boxShadow = '0 0 0 2px rgba(79, 70, 229, 0.2)';
-                } else {
-                    child.style.background = '#f8f9fa';
-                    child.style.borderColor = '#ddd';
-                    child.style.boxShadow = 'none';
-                }
-            });
-            
+            highlightEditingSwatch();
+
             // Scroll to picker for better visibility
             document.getElementById('colorPicker').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function removeColor(index) {
             colors.splice(index, 1);
+            // Any edit session is void after a removal (indexes shift)
+            editingColorIndex = null;
+            const submitLabel = document.getElementById('colorSubmitLabel');
+            if (submitLabel) submitLabel.textContent = 'إضافة';
             updateColorsInput();
             renderColors();
             if (typeof generateVariantsTable === 'function') generateVariantsTable();
@@ -1280,6 +1316,11 @@
 
             // Clear the color name input
             if (nameInput) nameInput.value = '';
+
+            // End any edit session
+            editingColorIndex = null;
+            const submitLabel = document.getElementById('colorSubmitLabel');
+            if (submitLabel) submitLabel.textContent = 'إضافة';
 
             // Reset visual feedback on swatches
             const container = document.getElementById('colorsContainer');
