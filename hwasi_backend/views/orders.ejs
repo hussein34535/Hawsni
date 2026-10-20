@@ -1967,6 +1967,10 @@
                 background: #fff !important;
                 border: 1px solid #e2e8f0;
             }
+            body.dark .header-actions .status-pill-group {
+                background: var(--dm-surface-2) !important;
+                border-color: var(--dm-border) !important;
+            }
             .header-actions .status-pill-group #modalStatusBadge { display: none !important; }
             .header-actions .status-pill-group .status-select {
                 flex: 1 1 auto;
@@ -1998,6 +2002,7 @@
             .modal-grid { grid-template-columns: 1fr !important; }
             .modal-body { padding: 0 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
             .column-main, .column-side { padding: 16px !important; gap: 22px !important; }
+            .column-side { padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important; }
             .section-title { margin-bottom: 14px !important; }
             .payment-grid { padding: 14px !important; }
             .premium-item-row { gap: 10px !important; padding: 10px !important; }
