@@ -100,7 +100,13 @@
     }
     .sp-header { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; }
     .sp-header-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-    .sp-header h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--primary); }
+    .sp-header h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 7px; }
+    .sp-needs-count {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
+        background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa;
+        font-size: 10px; font-weight: 800;
+    }
     .header-menu-btn {
         width: 30px; height: 30px; border-radius: 8px; border: none;
         background: #f0f2f5; color: var(--primary); cursor: pointer;
@@ -361,6 +367,7 @@
     body.dark .sessions-panel,
     body.dark .chat-footer { background: #1a1a1a !important; border-color: #2a2a2a !important; }
     body.dark .sp-header h3 { color: #25d366; }
+    body.dark .sp-needs-count { background: rgba(255,159,10,0.12); color: #ffb340; border-color: rgba(255,159,10,0.25); }
     body.dark .sp-search input { background: #2a2a2a; color: #ddd; }
     body.dark .tab-btn { background: #2a2a2a; color: #aaa; }
     body.dark .tab-btn.active { background: var(--primary); color: white; }
@@ -431,7 +438,7 @@
         <div class="sp-header">
             <div class="sp-header-top">
                 <button class="header-menu-btn" onclick="toggleAdminMenu()" title="القائمة"><i class="fas fa-bars"></i></button>
-                <h3>المحادثات</h3>
+                <h3>المحادثات <span class="sp-needs-count" id="needs-count" style="display:none;">0</span></h3>
             </div>
             <div class="sp-search">
                 <i class="fas fa-search"></i>
@@ -440,6 +447,7 @@
         </div>
         <div class="sp-filters">
             <button class="tab-btn active" data-filter="all">الكل</button>
+            <button class="tab-btn" data-filter="needs"><i class="fas fa-exclamation-circle"></i> تحتاج رد</button>
             <button class="tab-btn" data-filter="whatsapp"><i class="fab fa-whatsapp"></i> واتساب</button>
             <button class="tab-btn" data-filter="web"><i class="fas fa-globe"></i> الموقع</button>
         </div>
@@ -616,10 +624,16 @@
 
     function renderSessions(keepScroll = false) {
         const prevScroll = elSessionList.scrollTop;
+        const needsCount = sessions.filter(s => s.status === 'human_requested').length;
+        const needsEl = el('needs-count');
+        needsEl.textContent = needsCount;
+        needsEl.style.display = needsCount ? 'inline-flex' : 'none';
         const q = el('search-input').value.toLowerCase();
         const qDigits = q.replace(/\D/g, '');
         const list = sessions.filter(s => {
-            if (filter !== 'all' && s.platform !== filter) return false;
+            if (filter === 'needs') {
+                if (s.status !== 'human_requested') return false;
+            } else if (filter !== 'all' && s.platform !== filter) return false;
             if (!q) return true;
             return s.session_id.toLowerCase().includes(q)
                 || displayName(s).toLowerCase().includes(q)
