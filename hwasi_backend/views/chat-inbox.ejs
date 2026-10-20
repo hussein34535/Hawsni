@@ -132,22 +132,31 @@
     }
     .s-item:hover { background: #f8fafc; }
     .s-item.active { background: #e8f4ef; }
+    .s-item.unread { background: #f7fdf9; }
+    .s-item.active.unread { background: #e8f4ef; }
+    .s-item.unread .s-name-text { font-weight: 800; color: #0f172a; }
     .s-avatar {
         width: 46px; height: 46px; border-radius: 50%; background: #e2e8f0;
         display: flex; align-items: center; justify-content: center;
         font-weight: 700; color: var(--primary); font-size: 16px; position: relative; flex-shrink: 0;
     }
-    .s-avatar-badge {
-        position: absolute; bottom: -1px; left: -1px; width: 18px; height: 18px;
-        border-radius: 50%; background: white; border: 2px solid #fff;
-        display: flex; align-items: center; justify-content: center; font-size: 9px;
-    }
+    .s-avatar i { font-size: 18px; }
+    .s-avatar.wa { color: #25d366; }
+    .s-avatar.web { color: #3b82f6; }
     .s-unread-dot {
         width: 11px; height: 11px; border-radius: 50%; background: #25d366;
         position: absolute; bottom: 0; right: 0; border: 2px solid #fff;
     }
     .s-info { flex: 1; min-width: 0; }
-    .s-name { font-weight: 600; font-size: 14px; color: #111; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; }
+    .s-name { font-weight: 600; font-size: 14px; color: #111; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .s-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .s-status {
+        flex: 0 0 auto; font-size: 9px; font-weight: 800; padding: 2px 7px;
+        border-radius: 20px; line-height: 1.4; white-space: nowrap;
+    }
+    .s-status.req { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    .s-status.act { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .s-status.closed { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
     .s-preview { font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .s-time { font-size: 10px; color: #94a3b8; flex-shrink: 0; }
     .unread-count {
@@ -187,7 +196,7 @@
         font-weight: 700; font-size: 14px; flex-shrink: 0; color: white;
     }
     .chat-top-info { flex: 1; min-width: 0; }
-    .chat-top-name { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chat-top-name { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
     .chat-top-sub { font-size: 11px; opacity: 0.7; }
     .chat-top-actions { display: flex; gap: 4px; flex-shrink: 0; }
     .chat-top-btn {
@@ -356,10 +365,17 @@
     body.dark .tab-btn.active { background: var(--primary); color: white; }
     body.dark .s-item { border-color: #222 !important; }
     body.dark .s-item.active { background: #1a2a22 !important; }
+    body.dark .s-item.unread { background: rgba(37,211,102,0.06) !important; }
+    body.dark .s-item.active.unread { background: #1a2a22 !important; }
+    body.dark .s-item.unread .s-name-text { color: #f0fff4 !important; }
     body.dark .s-name { color: #ddd !important; }
+    body.dark .s-status.req { background: rgba(255,159,10,0.12); color: #ffb340; border-color: rgba(255,159,10,0.25); }
+    body.dark .s-status.act { background: rgba(37,211,102,0.12); color: #25d366; border-color: rgba(37,211,102,0.25); }
+    body.dark .s-status.closed { background: rgba(148,163,184,0.12); color: #94a3b8; border-color: rgba(148,163,184,0.2); }
     body.dark .s-preview { color: #888 !important; }
     body.dark .s-time { color: #666 !important; }
     body.dark .s-avatar { background: #333; color: #25d366; }
+    body.dark .s-avatar.web { color: #60a5fa !important; }
     body.dark .msgs-area { background: #0a0a0a !important; }
     body.dark .by-agent .bubble { background: #1e1e1e !important; color: #ddd !important; }
     body.dark .by-user .bubble { background: #054d33 !important; color: #eee !important; }
@@ -372,18 +388,29 @@
 
     @media (max-width: 768px) {
         /* Mobile: sessions takes full width */
-        .sessions-panel { width: 100% !important; flex-shrink: 0; }
+        .sessions-panel { width: 100% !important; min-width: 100% !important; max-width: 100% !important; flex-shrink: 0; }
         /* Chat hidden by default on mobile — slides in */
-        .chat-main { display: none; position: fixed; inset: 0; z-index: 50; flex-direction: column; }
+        .chat-main { display: none; position: fixed; inset: 0; z-index: 50; flex-direction: column; width: 100% !important; max-width: 100% !important; }
         .chat-main.active { display: flex !important; }
         /* When chat is open, hide sessions behind */
         .chat-wrap.chat-open .sessions-panel { display: none; }
         .s-item { padding: 10px 14px; }
         .s-avatar { width: 42px; height: 42px; font-size: 14px; }
         .bubble { max-width: 85%; font-size: 15px; }
-        .chat-top { height: 50px; }
+        .chat-top {
+            height: calc(50px + env(safe-area-inset-top)) !important;
+            padding-top: env(safe-area-inset-top);
+            box-sizing: border-box;
+        }
         .chat-top-back { width: 36px; height: 36px; }
         .chat-top-avatar { width: 34px; height: 34px; font-size: 12px; }
+        .sp-header { padding-top: calc(14px + env(safe-area-inset-top)); }
+        .header-menu-btn { width: 40px; height: 40px; }
+        .sp-search input { font-size: 16px; }
+        .tab-btn { min-height: 32px; padding: 6px 14px; }
+        .session-list { padding-bottom: calc(8px + env(safe-area-inset-bottom)); }
+        .chat-footer { padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+        .input-pill input { font-size: 16px; }
     }
     @media (max-width: 480px) {
         .s-avatar { width: 38px; height: 38px; }
@@ -401,7 +428,7 @@
             </div>
             <div class="sp-search">
                 <i class="fas fa-search"></i>
-                <input type="text" id="search-input" placeholder="بحث...">
+                <input type="text" id="search-input" placeholder="ابحث برقم العميل...">
             </div>
         </div>
         <div class="sp-filters">
@@ -500,8 +527,8 @@
         const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
         document.documentElement.style.setProperty('--real-vh', vh + 'px');
         const chatMain = document.querySelector('.chat-main');
-        if (chatMain && window.innerWidth <= 768) {
-            chatMain.style.height = vh + 'px';
+        if (chatMain) {
+            chatMain.style.height = window.innerWidth <= 768 ? vh + 'px' : '';
         }
     }
     if (window.visualViewport) {
@@ -520,17 +547,17 @@
         if (sid) { localStorage.setItem('chatSessionId', sid); setTimeout(() => openSession(sid), 500); }
     })();
 
-    async function loadSessions() {
+    async function loadSessions(keepScroll = false) {
         try {
             const r = await fetch('/admin/chat/sessions');
             rawSessions = (await r.json()).sessions || [];
         } catch (e) { rawSessions = []; }
         sessions = rawSessions;
-        renderSessions();
+        renderSessions(keepScroll);
     }
 
     function previewText(s) {
-        if (!s.last_message) return s.status === 'human_requested' ? 'طلب التحدث لموظف' : s.status === 'human_active' ? 'محادثة جارية' : 'رسالة جديدة';
+        if (!s.last_message) return s.status === 'human_requested' ? 'طلب التحدث لموظف' : s.status === 'human_active' ? 'محادثة جارية' : s.status === 'closed' ? 'محادثة مغلقة' : 'رسالة جديدة';
         let t = s.last_message;
         if (t.startsWith('[IMAGE:') || t.startsWith('[IMAGE_URL:')) return '📷 صورة';
         if (t.startsWith('[TEMPLATE:')) return '📋 قالب';
@@ -542,27 +569,71 @@
         return t.length > 55 ? t.slice(0, 52) + '...' : t;
     }
 
-    function renderSessions() {
+    function fmtPhone(id) {
+        const d = String(id || '').replace(/\D/g, '');
+        if (d.length === 12 && d.startsWith('20')) return '+20 ' + d.slice(2, 5) + ' ' + d.slice(5, 8) + ' ' + d.slice(8);
+        if (d.length === 11) return d.slice(0, 4) + ' ' + d.slice(4, 7) + ' ' + d.slice(7);
+        if (d.length === 10) return d.slice(0, 3) + ' ' + d.slice(3, 6) + ' ' + d.slice(6);
+        return id;
+    }
+
+    function displayName(s) {
+        return s.platform === 'whatsapp' ? fmtPhone(s.session_id) : 'زائر الموقع';
+    }
+
+    function escHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function fmtSessionTime(value) {
+        if (!value) return '';
+        const d = new Date(value);
+        if (isNaN(d)) return '';
+        const now = new Date();
+        const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const days = Math.round((startToday - startDay) / 86400000);
+        if (days <= 0) return d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+        if (days === 1) return 'أمس';
+        if (days < 7) return d.toLocaleDateString('ar-EG', { weekday: 'long' });
+        return d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric' });
+    }
+
+    function renderSessions(keepScroll = false) {
+        const prevScroll = elSessionList.scrollTop;
         const q = el('search-input').value.toLowerCase();
+        const qDigits = q.replace(/\D/g, '');
         const list = sessions.filter(s => {
             if (filter !== 'all' && s.platform !== filter) return false;
-            return !q || s.session_id.toLowerCase().includes(q);
+            if (!q) return true;
+            return s.session_id.toLowerCase().includes(q)
+                || displayName(s).toLowerCase().includes(q)
+                || (qDigits && s.session_id.replace(/\D/g, '').includes(qDigits));
         });
-        if (!list.length) return elSessionList.innerHTML = '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:13px;">لا توجد محادثات</div>';
+        if (!list.length) {
+            elSessionList.innerHTML = '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:13px;">لا توجد محادثات</div>';
+            return;
+        }
         elSessionList.innerHTML = list.map(s => {
             const wa = s.platform === 'whatsapp';
-            const init = s.session_id.charAt(0).toUpperCase();
-            const icon = wa ? '<i class="fab fa-whatsapp" style="color:#25d366"></i>' : '<i class="fas fa-globe" style="color:#3b82f6"></i>';
+            const icon = wa ? '<i class="fab fa-whatsapp"></i>' : '<i class="fas fa-globe"></i>';
             const u = s.unread_count || 0;
-            return `<div class="s-item ${s.session_id === activeId ? 'active' : ''}" onclick="openSession('${s.session_id}')">
-                <div class="s-avatar">${init}${u > 0 ? '<span class="s-unread-dot"></span>' : '<span class="s-avatar-badge">' + icon + '</span>'}</div>
+            const status = s.status === 'human_requested'
+                ? '<span class="s-status req">ينتظر رد</span>'
+                : s.status === 'human_active' ? '<span class="s-status act">جارية</span>'
+                : s.status === 'closed' ? '<span class="s-status closed">مغلقة</span>' : '';
+            const count = u > 0 ? '<span class="unread-count">' + (u > 99 ? '99+' : u) + '</span>' : '';
+            const cls = [s.session_id === activeId ? 'active' : '', u > 0 ? 'unread' : ''].filter(Boolean).join(' ');
+            return `<div class="s-item ${cls}" onclick="openSession('${s.session_id}')">
+                <div class="s-avatar ${wa ? 'wa' : 'web'}">${icon}${u > 0 ? '<span class="s-unread-dot"></span>' : ''}</div>
                 <div class="s-info">
-                    <div class="s-name">${wa ? s.session_id : 'زائر الموقع'}${u > 0 ? ' <span class="unread-count">' + (u > 99 ? '99+' : u) + '</span>' : ''}</div>
-                    <div class="s-preview">${previewText(s)}</div>
+                    <div class="s-name"><span class="s-name-text"${wa ? ' dir="ltr"' : ''}>${escHtml(displayName(s))}</span>${status}${count}</div>
+                    <div class="s-preview">${escHtml(previewText(s))}</div>
                 </div>
-                <span class="s-time">${new Date(s.updated_at).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</span>
+                <span class="s-time">${fmtSessionTime(s.updated_at)}</span>
             </div>`;
         }).join('');
+        if (keepScroll) elSessionList.scrollTop = prevScroll;
     }
 
     async function openSession(id) {
@@ -571,14 +642,15 @@
         const s = sessions.find(x => x.session_id === id);
         if (!s) return;
         el('chat-top').style.display = 'flex';
-        el('h-avatar').textContent = id.charAt(0).toUpperCase();
-        el('h-name').textContent = s.platform === 'whatsapp' ? id : 'زائر الموقع';
+        el('h-avatar').innerHTML = s.platform === 'whatsapp' ? '<i class="fab fa-whatsapp"></i>' : '<i class="fas fa-globe"></i>';
+        el('h-name').textContent = displayName(s);
+        el('h-name').dir = s.platform === 'whatsapp' ? 'ltr' : 'rtl';
         el('h-sub').textContent = s.platform === 'whatsapp' ? 'واتساب' : 'الموقع';
 
         // Show order button only for WhatsApp (has phone number)
         el('btn-orders').style.display = s.platform === 'whatsapp' ? 'flex' : 'none';
 
-        renderSessions();
+        renderSessions(true);
         updateBtns(s);
         await loadMessages(id);
         subMessages(id);
@@ -589,7 +661,7 @@
                 body: JSON.stringify({ sessionId: id })
             });
             const ss = sessions.find(x => x.session_id === id);
-            if (ss) { ss.unread_count = 0; renderSessions(); }
+            if (ss) { ss.unread_count = 0; renderSessions(true); }
         } catch (e) {}
 
         elFooter.style.display = 'flex';
@@ -619,7 +691,7 @@
             localStorage.removeItem('chatSessionId');
             elFooter.style.display = 'none';
             el('chat-top').style.display = 'none';
-            renderSessions();
+            renderSessions(true);
         } else {
             document.querySelector('.chat-wrap').classList.toggle('panel-hidden');
         }
@@ -627,12 +699,15 @@
 
     function updateBtns(s) {
         const human = s.status === 'human_active';
+        const closed = s.status === 'closed';
         el('btn-take').style.display = human ? 'none' : 'flex';
         el('btn-end').style.display  = human ? 'flex' : 'none';
         el('btn-bot').style.display  = human ? 'flex' : 'none';
         elInputRow.style.display = human ? 'flex' : 'none';
         elStatus.style.display = human ? 'none' : 'block';
-        elStatus.textContent = s.status === 'human_requested' ? '⚠️ ينتظر رد' : '🤖 البوت يرد آلياً';
+        elStatus.textContent = s.status === 'human_requested'
+            ? '⚠️ ينتظر رد'
+            : closed ? '🔒 المحادثة مغلقة' : '🤖 البوت يرد آلياً';
     }
 
     async function loadMessages(id) {
@@ -893,7 +968,7 @@
 
     function subSessions() {
         db.channel('c-sessions').on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions' }, async () => {
-            await loadSessions();
+            await loadSessions(true);
             if (activeId) { const s = sessions.find(x => x.session_id === activeId); if (s) updateBtns(s); }
         }).subscribe();
     }
@@ -911,8 +986,8 @@
                 fetch('/admin/chat/mark-read', {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
                     body: JSON.stringify({ sessionId: id })
-                }).catch(() => {}).then(() => loadSessions());
-            } else { loadSessions(); }
+                }).catch(() => {}).then(() => loadSessions(true));
+            } else { loadSessions(true); }
         })
         // Also listen for UPDATE events to catch wa_status changes (delivery ticks)
         .on('postgres_changes', {
@@ -933,7 +1008,7 @@
         filter = b.dataset.filter;
         renderSessions();
     }));
-    el('search-input').addEventListener('input', renderSessions);
+    el('search-input').addEventListener('input', () => renderSessions());
     elMsgInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMsg(); });
 
     function toggleDark() {
