@@ -17,7 +17,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-icon" style="background: var(--warning-bg); color: var(--warning);"><i class="fas fa-clock"></i></div>
+                    <div class="stat-icon" style="background: rgba(251, 191, 36, 0.18); color: var(--warning);"><i class="fas fa-clock"></i></div>
                     <div class="stat-label">طلبات قيد المعالجة</div>
                 </div>
                 <div class="stat-value">
@@ -26,7 +26,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-icon" style="background: var(--success-bg); color: var(--success);"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-icon" style="background: rgba(52, 211, 153, 0.18); color: var(--success);"><i class="fas fa-check-circle"></i></div>
                     <div class="stat-label">طلبات مكتملة</div>
                 </div>
                 <div class="stat-value">
@@ -288,6 +288,11 @@
                     <label style="display:flex; align-items:center; gap:4px; justify-content: flex-end; margin-top:5px; font-size: 0.75rem; color:#64748b; cursor: pointer;">
                         <input type="checkbox" id="modalSkipEmail" style="cursor: pointer;"> بدون إيميل
                     </label>
+                    <button type="button" class="modal-copy-btn" onclick="copyOrderDetails()" title="نسخ تفاصيل الطلب" aria-label="نسخ تفاصيل الطلب">
+                        <i class="fas fa-copy"></i>
+                        <span class="copy-label">نسخ التفاصيل</span>
+                        <span class="copy-label-short">نسخ</span>
+                    </button>
                     <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
                 </div>
             </div>
@@ -296,7 +301,7 @@
                 <div class="modal-grid">
                     <!-- Left Column: Products & Payment -->
                     <div class="column-main">
-                        <div class="detail-section">
+                        <div class="detail-section order-items">
                             <h4 class="section-title"><i class="fas fa-shopping-bag"></i> منتجات الطلب</h4>
                             <div id="modalItemsList" class="items-container">
                                 <!-- Populated by JS -->
@@ -322,9 +327,9 @@
                         </div>
 
                         <!-- AI Email Box (Moved here based on request) -->
-                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-top: 16px;">
+                        <div class="ai-email-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-top: 16px;">
                             <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #475569; font-weight: 800;"><i class="fas fa-magic" style="color: #8b5cf6;"></i> إيميل AI مخصص للتواصل</h5>
-                            <div style="display: flex; gap: 8px;">
+                            <div class="ai-email-input-row" style="display: flex; gap: 8px;">
                                 <input type="text" id="aiEmailPrompt" placeholder="أكتب توجيه للذكاء الاصطناعي... (مثال: اعتذر عن التأخير وأبلغهم بشحن الطلب غداً)" style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 0.8rem; outline: none;">
                                 <button id="generateAiBtn" onclick="generateAiEmail()" style="background: #8b5cf6; color: white; border: none; padding: 0 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-family: 'Cairo', sans-serif;">
                                     توليد رسالة
@@ -348,9 +353,18 @@
                                 <div id="modalAvatar" class="profile-avatar" style="width: 50px; height: 50px; font-size: 1.2rem;"></div>
                                 <div class="profile-details">
                                     <h5 id="modalCustomerName" style="font-size: 1rem;"></h5>
-                                    <p id="modalCustomerPhone" style="direction: ltr; text-align: right; margin-bottom: 2px; font-weight: 800; color: #334155; font-size: 0.9rem;"></p>
-                                    <p id="modalCustomerPhone2" style="direction: ltr; text-align: right; font-size: 0.75rem; color: #94a3b8; display: none;"></p>
-                                    <p id="modalCustomerEmail" class="email-text" style="font-size: 0.8rem;"></p>
+                                    <div class="contact-line">
+                                        <p id="modalCustomerPhone" style="direction: ltr; text-align: right; margin-bottom: 2px; font-weight: 800; color: #334155; font-size: 0.9rem;"></p>
+                                        <button type="button" class="copy-mini" onclick="copyText(document.getElementById('modalCustomerPhone').textContent, 'تم نسخ رقم الهاتف')" title="نسخ رقم الهاتف" aria-label="نسخ رقم الهاتف"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="contact-line" id="modalCustomerPhone2Row" style="display: none;">
+                                        <p id="modalCustomerPhone2" style="text-align: right; font-size: 0.75rem; color: #94a3b8;"></p>
+                                        <button type="button" class="copy-mini" onclick="copyText(document.getElementById('modalCustomerPhone2').textContent.replace('هاتف بديل: ', ''), 'تم نسخ رقم الهاتف البديل')" title="نسخ الرقم البديل" aria-label="نسخ الرقم البديل"><i class="fas fa-copy"></i></button>
+                                    </div>
+                                    <div class="contact-line">
+                                        <p id="modalCustomerEmail" class="email-text" style="font-size: 0.8rem;"></p>
+                                        <button type="button" class="copy-mini" onclick="copyText(document.getElementById('modalCustomerEmail').textContent, 'تم نسخ الإيميل')" title="نسخ الإيميل" aria-label="نسخ الإيميل"><i class="fas fa-copy"></i></button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -358,7 +372,7 @@
                         <div class="detail-section shipping-info">
                             <h4 class="section-title"><i class="fas fa-map-marker-alt"></i> عنوان التوصيل</h4>
                             <div class="address-card" style="padding: 20px; border: 1px solid rgba(0,0,0,0.05);">
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                <div class="address-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                                     <div class="address-item">
                                         <label>المحافظة:</label>
                                         <p id="shipState"></p>
@@ -390,7 +404,7 @@
                         </div>
 
                         <!-- Action Control Center -->
-                        <div class="detail-section">
+                        <div class="detail-section order-actions">
                             <h4 class="section-title"><i class="fas fa-bolt"></i> خيارات وإجراءات</h4>
                             
                             <!-- Payment Method Box -->
@@ -419,7 +433,7 @@
                             <!-- AI Email Box (Moved to left column) -->
 
                             <!-- Bosta Shipping Box -->
-                            <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 16px; padding: 16px;">
+                            <div class="bosta-box" style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 16px; padding: 16px;">
                                 <h5 style="margin: 0 0 12px 0; font-size: 0.85rem; color: #e11d48; font-weight: 800;"><i class="fas fa-truck-fast"></i> الشحن (بوسطة)</h5>
                                 
                                 <div id="bostaNotSentBox" style="display: none;">
@@ -459,6 +473,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div id="copyToast" class="copy-toast" role="status" aria-live="polite">
+        <i class="fas fa-check-circle"></i><span>تم النسخ</span>
     </div>
     <script id="orders-data" type="application/json">
         <%- JSON.stringify(orders) %>
@@ -539,7 +556,7 @@
             if (order.bosta_id || order.tracking_number) {
                 document.getElementById('bostaNotSentBox').style.display = 'none';
                 document.getElementById('bostaSentBox').style.display = 'block';
-                document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + order.tracking_number;
+                document.getElementById('bostaTrackingNumber').textContent = order.tracking_number || '';
                 document.getElementById('bostaTrackingNumber').dataset.trackingNum = order.tracking_number;
                 document.getElementById('sendBostaBtn').disabled = false;
                 document.getElementById('sendBostaBtn').innerHTML = '<i class="fas fa-box-open"></i> إرسال الطلب إلى بوسطة';
@@ -561,7 +578,7 @@
             }
 
             // Update Header & Badge
-            document.getElementById('modalOrderId').textContent = 'طلب رقم #' + order.id.substring(0, 8);
+            document.getElementById('modalOrderId').textContent = 'طلب رقم ' + order.id.substring(0, 8);
             document.getElementById('modalOrderDate').textContent = new Date(order.created_at).toLocaleString('ar-EG', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
             });
@@ -645,11 +662,13 @@
             document.getElementById('modalCustomerPhone').textContent = cPhone;
             
             const phone2Elem = document.getElementById('modalCustomerPhone2');
+            const phone2Row = document.getElementById('modalCustomerPhone2Row');
             if (ship && ship.alternative_phone) {
                 phone2Elem.textContent = 'هاتف بديل: ' + ship.alternative_phone;
-                phone2Elem.style.display = 'block';
+                if (phone2Row) phone2Row.style.display = 'flex';
             } else {
-                phone2Elem.style.display = 'none';
+                phone2Elem.textContent = '';
+                if (phone2Row) phone2Row.style.display = 'none';
             }
 
             document.getElementById('modalCustomerEmail').textContent = cEmail;
@@ -801,10 +820,97 @@
             document.body.style.overflow = '';
         }
 
+        function showCopyToast(message) {
+            const toast = document.getElementById('copyToast');
+            if (!toast) return;
+            const text = toast.querySelector('span');
+            if (text) text.textContent = message || 'تم النسخ';
+            toast.classList.add('show');
+            clearTimeout(showCopyToast.timer);
+            showCopyToast.timer = setTimeout(() => toast.classList.remove('show'), 1800);
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+        }
+
+        function copyText(text, message) {
+            if (!text) return;
+            const done = () => showCopyToast(message || 'تم النسخ');
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done).catch(() => {
+                    fallbackCopy(text);
+                    done();
+                });
+            } else {
+                fallbackCopy(text);
+                done();
+            }
+        }
+
         function copyAddress() {
-            const addr = document.getElementById('modalAddressFull').textContent;
-            navigator.clipboard.writeText(addr);
-            alert('تم نسخ العنوان بنجاح');
+            copyText(document.getElementById('modalAddressFull').textContent, 'تم نسخ العنوان');
+        }
+
+        function copyOrderDetails() {
+            if (!currentOrderId) return;
+            const order = ordersData.find(o => o.id === currentOrderId);
+            if (!order) return;
+
+            const money = n => Number(n || 0).toFixed(2) + ' ج.م';
+            const shortId = (order.id || '').substring(0, 8);
+            const phone = document.getElementById('modalCustomerPhone').textContent.trim();
+            const phone2 = document.getElementById('modalCustomerPhone2').textContent.replace('هاتف بديل: ', '').trim();
+            const email = document.getElementById('modalCustomerEmail').textContent.trim();
+            const items = order.order_items || order.items || [];
+
+            const lines = [
+                'تفاصيل الطلب ' + shortId,
+                'الحالة: ' + (tMap[order.status] || order.status || 'قيد المعالجة'),
+                'التاريخ: ' + new Date(order.created_at).toLocaleString('ar-EG', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                }),
+                '',
+                'العميل: ' + document.getElementById('modalCustomerName').textContent.trim(),
+                'الهاتف: ' + phone
+            ];
+            if (phone2) lines.push('هاتف بديل: ' + phone2);
+            if (email && email !== 'لا يوجد إيميل') lines.push('الإيميل: ' + email);
+            lines.push('العنوان: ' + document.getElementById('modalAddressFull').textContent.trim());
+            lines.push('', 'المنتجات:');
+
+            if (items.length === 0) {
+                lines.push('• لا توجد منتجات');
+            } else {
+                items.forEach(item => {
+                    const p = item.products || {};
+                    const name = p.name || item.name || 'منتج غير معروف';
+                    const specs = [];
+                    if (item.size) specs.push('مقاس ' + item.size);
+                    if (item.color) specs.push('لون ' + item.color);
+                    const qty = parseInt(item.quantity || 1, 10) || 1;
+                    const price = parseFloat(item.price || 0) || 0;
+                    lines.push('• ' + name + (specs.length ? ' (' + specs.join(' - ') + ')' : '') + ' — ' + qty + ' × ' + money(price) + ' = ' + money(qty * price));
+                });
+            }
+
+            lines.push('', 'المجموع الفرعي: ' + document.getElementById('modalSubtotal').textContent.trim());
+            if (parseFloat(order.discount || 0) > 0) {
+                lines.push('الخصم: ' + document.getElementById('modalDiscount').textContent.trim());
+            }
+            lines.push('الإجمالي: ' + document.getElementById('modalTotalAmount').textContent.trim());
+            if (order.notes && order.notes.trim()) lines.push('', 'ملاحظات: ' + order.notes.trim());
+            if (order.tracking_number) lines.push('رقم البوليصة: ' + order.tracking_number);
+
+            copyText(lines.join('\n'), 'تم نسخ تفاصيل الطلب');
         }
 
         // Bulk Actions
@@ -1107,7 +1213,7 @@
                     // Update Modal UI successfully
                     document.getElementById('bostaNotSentBox').style.display = 'none';
                     document.getElementById('bostaSentBox').style.display = 'block';
-                    document.getElementById('bostaTrackingNumber').textContent = 'رقم التتبع: ' + data.trackingNumber;
+                    document.getElementById('bostaTrackingNumber').textContent = data.trackingNumber || '';
                     document.getElementById('bostaTrackingNumber').dataset.trackingNum = data.trackingNumber;
                     
                     alert('تم إنشاء الشحنة في بوسطة بنجاح!');
@@ -1202,13 +1308,13 @@
 
         .product-title {
             font-weight: 700;
-            color: var(--dark);
+            color: var(--text-main);
             font-size: 0.95rem;
         }
 
         .product-count {
             font-size: 0.75rem;
-            color: var(--medium-gray);
+            color: var(--text-muted);
             font-weight: 600;
         }
 
@@ -1233,21 +1339,21 @@
 
         .customer-name {
             font-weight: 700;
-            color: var(--dark);
+            color: var(--text-main);
             font-size: 0.9rem;
         }
 
         .customer-phone {
             font-size: 0.75rem;
-            color: var(--medium-gray);
+            color: var(--text-muted);
             font-weight: 600;
         }
 
         .order-id {
             font-family: monospace;
             font-weight: 700;
-            color: var(--primary-color);
-            background: var(--primary-light);
+            color: var(--brand-primary);
+            background: var(--brand-light);
             padding: 4px 8px;
             border-radius: 6px;
             font-size: 0.85rem;
@@ -1255,7 +1361,7 @@
 
         .order-amount {
             font-weight: 800;
-            color: var(--dark);
+            color: var(--text-main);
             font-size: 1rem;
         }
 
@@ -1264,7 +1370,7 @@
             flex-direction: column;
             font-weight: 700;
             font-size: 0.85rem;
-            color: var(--medium-gray);
+            color: var(--text-muted);
         }
 
         .date-cell span {
@@ -1279,7 +1385,7 @@
         }
 
         .status-select {
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-soft);
             background: #fff;
             font-weight: 700;
             font-size: 0.8rem;
@@ -1291,8 +1397,8 @@
         }
 
         .status-select:hover {
-            border-color: var(--primary-color);
-            background: var(--primary-light);
+            border-color: var(--brand-primary);
+            background: var(--brand-light);
         }
 
         .status-select.select-warning {
@@ -1412,7 +1518,7 @@
         .modal-title {
             font-size: 1.8rem;
             font-weight: 900;
-            color: var(--dark);
+            color: var(--text-main);
             margin: 0;
             letter-spacing: -0.5px;
             font-family: 'Cairo', sans-serif;
@@ -1440,6 +1546,19 @@
             gap: 8px;
         }
 
+        .status-pill-group #modalStatusBadge { display: none !important; }
+
+        .status-pill-group::before {
+            content: 'الحالة';
+            flex: 0 0 auto;
+            padding: 0 4px 0 2px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #64748b;
+        }
+
+        body.dark .status-pill-group::before { color: var(--dm-text-muted); }
+
         .modal-close {
             width: 44px;
             height: 44px;
@@ -1459,6 +1578,112 @@
             background: #ffe4e6;
             color: #e11d48;
             transform: rotate(90deg);
+        }
+
+        .modal-copy-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 44px;
+            padding: 0 16px;
+            border-radius: 14px;
+            border: 1px solid var(--brand-primary);
+            background: var(--brand-primary);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 800;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .modal-copy-btn:hover {
+            background: var(--brand-secondary);
+            border-color: var(--brand-secondary);
+            color: #fff;
+        }
+
+        .modal-copy-btn .copy-label-short { display: none; }
+
+        .contact-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .contact-line p {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .copy-mini {
+            flex: 0 0 auto;
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.75rem;
+        }
+
+        .copy-mini:hover {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+            color: #fff;
+        }
+
+        .copy-toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(24px + env(safe-area-inset-bottom));
+            transform: translate(-50%, 14px);
+            opacity: 0;
+            pointer-events: none;
+            background: #0f172a;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 800;
+            font-size: 0.85rem;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .copy-toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        body.dark .modal-copy-btn {
+            background: var(--dm-accent);
+            border-color: var(--dm-accent);
+            color: #fff;
+        }
+
+        body.dark .modal-copy-btn:hover {
+            background: var(--dm-accent-hover);
+            border-color: var(--dm-accent-hover);
+        }
+
+        body.dark .copy-mini {
+            background: var(--dm-surface-2);
+            border-color: var(--dm-border);
+            color: var(--dm-text);
         }
 
         .modal-body {
@@ -1541,13 +1766,13 @@
             gap: 20px;
             padding: 16px;
             background: #fff;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-soft);
             border-radius: 16px;
             transition: all 0.2s;
         }
 
         .premium-item-row:hover {
-            border-color: var(--primary-color);
+            border-color: var(--brand-primary);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
@@ -1578,14 +1803,14 @@
 
         .item-main-name {
             font-weight: 800;
-            color: var(--dark);
+            color: var(--text-main);
             font-size: 0.95rem;
         }
 
         .item-qty {
             font-weight: 800;
-            color: var(--primary-color);
-            background: var(--primary-light);
+            color: var(--brand-primary);
+            background: var(--brand-light);
             padding: 2px 8px;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -1598,7 +1823,7 @@
 
         .spec-tag {
             font-size: 0.75rem;
-            color: var(--medium-gray);
+            color: var(--text-muted);
             background: #f1f5f9;
             padding: 3px 10px;
             border-radius: 6px;
@@ -1612,13 +1837,13 @@
 
         .unit-price {
             font-size: 0.75rem;
-            color: var(--medium-gray);
+            color: var(--text-muted);
             font-weight: 600;
         }
 
         .total-line {
             font-weight: 900;
-            color: var(--dark);
+            color: var(--text-main);
             font-size: 1rem;
         }
 
@@ -1655,7 +1880,7 @@
             display: flex;
             justify-content: space-between;
             font-weight: 700;
-            color: var(--dark-gray);
+            color: var(--text-main);
             font-size: 0.9rem;
         }
 
@@ -1666,10 +1891,10 @@
         .payment-item.total {
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 2px dashed var(--border-color);
+            border-top: 2px dashed var(--border-soft);
             font-size: 1.25rem;
             font-weight: 900;
-            color: var(--dark);
+            color: var(--text-main);
         }
 
         /* Profile Card */
@@ -1681,14 +1906,19 @@
             background: white;
             border-radius: 20px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-soft);
+            min-width: 0;
+        }
+
+        .profile-details {
+            min-width: 0;
         }
 
         .profile-avatar {
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-color), #4f46e5);
+            background: linear-gradient(135deg, var(--brand-primary), #4f46e5);
             color: white;
             display: flex;
             align-items: center;
@@ -1707,14 +1937,16 @@
         .profile-details p {
             margin: 0;
             font-size: 0.85rem;
-            color: var(--medium-gray);
+            color: var(--text-muted);
             font-weight: 600;
         }
 
         .email-text {
-            color: var(--primary-color) !important;
+            color: var(--brand-primary) !important;
             text-decoration: underline;
             margin-top: 2px !important;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         /* Address Card */
@@ -1722,7 +1954,7 @@
             background: white;
             border-radius: 20px;
             padding: 24px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-soft);
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -1737,14 +1969,14 @@
         .address-item label {
             font-size: 0.7rem;
             text-transform: uppercase;
-            color: var(--medium-gray);
+            color: var(--text-muted);
             font-weight: 800;
         }
 
         .address-item p {
             margin: 0;
             font-weight: 700;
-            color: var(--dark);
+            color: var(--text-main);
             font-size: 0.95rem;
         }
 
@@ -1757,7 +1989,7 @@
         .address-full label {
             font-size: 0.7rem;
             text-transform: uppercase;
-            color: var(--medium-gray);
+            color: var(--text-muted);
             font-weight: 800;
             display: block;
             margin-bottom: 6px;
@@ -1767,18 +1999,18 @@
             margin: 0;
             font-weight: 600;
             line-height: 1.6;
-            color: var(--dark-gray);
+            color: var(--text-main);
         }
 
         .btn-copy-address {
             margin-top: 12px;
             background: #f8fafc;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border-soft);
             border-radius: 12px;
             padding: 10px;
             font-weight: 800;
             font-size: 0.8rem;
-            color: var(--primary-color);
+            color: var(--brand-primary);
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -1788,7 +2020,7 @@
         }
 
         .btn-copy-address:hover {
-            background: var(--primary-color);
+            background: var(--brand-primary);
             color: white;
         }
 
@@ -1812,7 +2044,7 @@
         .empty-state {
             padding: 60px;
             text-align: center;
-            color: var(--medium-gray);
+            color: var(--text-muted);
         }
 
         .empty-state i {
@@ -1939,75 +2171,261 @@
             .modal-content {
                 width: 100% !important;
                 max-width: 100% !important;
-                max-height: 92dvh !important;
+                height: 92% !important;
+                max-height: 92% !important;
                 margin: 0 !important;
                 border-radius: 24px 24px 0 0 !important;
             }
             .modal-header {
                 padding: 14px 16px 12px !important;
-                gap: 10px !important;
+                gap: 8px !important;
                 flex-wrap: wrap !important;
-                align-items: flex-start !important;
+                align-items: center !important;
             }
-            .modal-header .header-main { min-width: 0; flex: 1 1 100%; }
-            .header-id-group { flex-wrap: wrap; gap: 8px; }
-            .modal-title { font-size: 1.1rem !important; }
-            .modal-subtitle { font-size: 0.72rem !important; }
+            .modal-header .header-main { min-width: 0; flex: 1 1 100%; gap: 2px; }
+            .header-id-group { flex-wrap: nowrap; gap: 8px; align-items: center; min-width: 0; }
+            .header-badge { flex: 0 0 auto; font-size: 0.58rem !important; padding: 3px 9px !important; }
+            .modal-title { font-size: 1.05rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+            .modal-subtitle { font-size: 0.7rem !important; }
             .header-actions {
                 width: 100% !important;
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) auto auto !important;
+                grid-template-areas: "status status status" "skip copy close" !important;
                 align-items: center !important;
-                justify-content: space-between !important;
-                gap: 10px !important;
-                flex-wrap: wrap !important;
+                gap: 8px !important;
             }
             .header-actions .status-pill-group {
-                flex: 1 1 100% !important;
-                justify-content: space-between !important;
+                grid-area: status;
+                width: 100%;
                 min-width: 0;
+                justify-content: space-between !important;
                 background: #fff !important;
                 border: 1px solid #e2e8f0;
             }
-            body.dark .header-actions .status-pill-group {
-                background: var(--dm-surface-2) !important;
-                border-color: var(--dm-border) !important;
+            .header-actions .status-pill-group::before {
+                content: 'الحالة';
+                flex: 0 0 auto;
+                padding: 0 4px 0 2px;
+                font-size: 0.72rem;
+                font-weight: 800;
+                color: #64748b;
             }
             .header-actions .status-pill-group #modalStatusBadge { display: none !important; }
             .header-actions .status-pill-group .status-select {
                 flex: 1 1 auto;
                 width: 100% !important;
                 height: 40px !important;
-                font-size: 0.85rem !important;
+                font-size: 16px !important;
             }
             .header-actions > label {
-                flex: 1 1 auto !important;
+                grid-area: skip;
+                justify-self: start;
                 margin: 0 !important;
                 justify-content: flex-start !important;
                 font-size: 0.75rem !important;
+                white-space: nowrap;
             }
-            .header-actions > label input {
-                width: 20px !important;
-                height: 20px !important;
-                min-width: 0 !important;
+            .header-actions > label input { width: 20px !important; height: 20px !important; }
+            .header-actions .modal-copy-btn {
+                grid-area: copy;
+                height: 40px;
+                padding: 0 12px;
+                border-radius: 12px;
+                font-size: 0.78rem;
+                gap: 6px;
             }
+            .header-actions .modal-copy-btn .copy-label { display: none; }
+            .header-actions .modal-copy-btn .copy-label-short { display: inline; }
             .header-actions .modal-close {
+                grid-area: close;
                 position: static !important;
                 top: auto !important;
                 left: auto !important;
-                width: 38px !important;
-                height: 38px !important;
-                flex: 0 0 38px;
-                margin-inline-start: auto;
+                width: 40px !important;
+                height: 40px !important;
+                flex: 0 0 40px;
+                margin: 0 !important;
             }
             .status-pill-group { padding: 4px !important; border-radius: 12px !important; }
-            .modal-grid { grid-template-columns: 1fr !important; }
-            .modal-body { padding: 0 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
-            .column-main, .column-side { padding: 16px !important; gap: 22px !important; }
-            .column-side { padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important; }
-            .section-title { margin-bottom: 14px !important; }
-            .payment-grid { padding: 14px !important; }
-            .premium-item-row { gap: 10px !important; padding: 10px !important; }
-            .item-visual { width: 52px !important; height: 52px !important; }
-            .item-price-col { min-width: 64px !important; }
+            .modal-body {
+                padding: 0 !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+                background: #f7f9fb !important;
+            }
+            .modal-grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                padding: 14px !important;
+                min-height: 0 !important;
+                min-width: 0 !important;
+            }
+            .column-main, .column-side { display: contents !important; }
+            .modal-grid .detail-section,
+            .modal-grid .ai-email-box {
+                min-width: 0 !important;
+                max-width: 100% !important;
+            }
+            .modal-grid .detail-section {
+                background: #fff !important;
+                border: 1px solid #e9eef3 !important;
+                border-radius: 16px !important;
+                padding: 14px !important;
+                margin: 0 !important;
+            }
+            .detail-section.customer-info { order: 1; }
+            .detail-section.shipping-info { order: 2; }
+            #modalNotesSection { order: 3; }
+            .detail-section.order-items { order: 4; }
+            .detail-section.payment-summary { order: 5; }
+            .detail-section.order-actions { order: 6; }
+            .ai-email-box { order: 7; }
+            .section-title { margin: 0 0 12px !important; font-size: 0.88rem !important; gap: 8px !important; }
+            .section-title i { font-size: 1rem !important; }
+
+            /* بيانات العميل */
+            .customer-info .profile-card {
+                display: flex !important;
+                align-items: flex-start !important;
+                gap: 12px !important;
+                padding: 0 !important;
+                background: transparent !important;
+                border: 0 !important;
+                box-shadow: none !important;
+                min-width: 0;
+            }
+            .profile-avatar { width: 44px !important; height: 44px !important; font-size: 1rem !important; flex: 0 0 44px; }
+            .profile-details { flex: 1 1 auto; min-width: 0; }
+            .profile-details h5 { font-size: 0.95rem !important; margin-bottom: 6px !important; overflow-wrap: anywhere; }
+            .contact-line { gap: 6px; }
+            .contact-line p { font-size: 0.82rem !important; }
+            .email-text { white-space: normal !important; text-align: right; }
+            .copy-mini { width: 30px; height: 30px; flex: 0 0 30px; }
+
+            /* عنوان التوصيل */
+            .shipping-info .address-card {
+                padding: 0 !important;
+                border: 0 !important;
+                background: transparent !important;
+                min-width: 0;
+            }
+            .address-grid { grid-template-columns: 1fr 1fr !important; gap: 10px 12px !important; margin-bottom: 12px !important; }
+            .address-item label { font-size: 0.66rem !important; }
+            .address-item p { font-size: 0.86rem !important; overflow-wrap: anywhere; }
+            .address-full { margin-top: 2px !important; padding-top: 10px !important; }
+            .address-full p { font-size: 0.84rem !important; overflow-wrap: anywhere; }
+            .btn-copy-address { width: 100%; height: 42px; margin-top: 12px !important; font-size: 0.82rem !important; }
+
+            /* منتجات الطلب */
+            .order-items .items-container { gap: 10px !important; }
+            .premium-item-row {
+                display: grid !important;
+                grid-template-columns: 48px minmax(0, 1fr) !important;
+                align-items: start !important;
+                gap: 8px 10px !important;
+                padding: 10px !important;
+                border-radius: 12px !important;
+            }
+            .item-visual { width: 48px !important; height: 48px !important; border-radius: 10px !important; }
+            .item-info { min-width: 0 !important; }
+            .item-name-row { align-items: flex-start !important; gap: 8px !important; margin-bottom: 4px !important; }
+            .item-main-name { font-size: 0.85rem !important; line-height: 1.45; overflow-wrap: anywhere; }
+            .item-qty { flex: 0 0 auto; font-size: 0.7rem !important; padding: 2px 7px !important; }
+            .item-specs { flex-wrap: wrap; gap: 4px !important; }
+            .spec-tag { font-size: 0.68rem !important; padding: 2px 8px !important; }
+            .item-price-col {
+                grid-column: 1 / -1 !important;
+                min-width: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                text-align: right !important;
+                border-top: 1px dashed #e5eaf0 !important;
+                margin-top: 2px !important;
+                padding-top: 8px !important;
+            }
+            .item-price-col .unit-price { order: 2; font-size: 0.72rem !important; }
+            .item-price-col .total-line { order: 1; font-size: 0.9rem !important; }
+
+            /* ملخص الدفع */
+            .payment-summary .payment-grid { padding: 12px !important; gap: 10px !important; border-radius: 12px !important; }
+            .payment-item { font-size: 0.84rem !important; gap: 12px; align-items: baseline; }
+            .payment-item span:last-child { white-space: nowrap; }
+            .payment-item.total { margin-top: 4px !important; padding-top: 10px !important; font-size: 1.05rem !important; }
+
+            /* الإجراءات */
+            .order-actions .method-card { padding: 12px !important; margin-bottom: 10px !important; font-size: 0.85rem; }
+            .order-actions #noAnswerBtn { padding: 10px !important; font-size: 0.82rem !important; margin-bottom: 10px !important; }
+            .order-actions .bosta-box { padding: 12px !important; }
+            .bosta-box select { height: 40px !important; }
+            .bosta-box button { min-height: 42px; font-size: 0.82rem !important; }
+
+            /* إيميل AI */
+            .ai-email-box {
+                background: #fff !important;
+                border: 1px solid #e9eef3 !important;
+                border-radius: 16px !important;
+                padding: 14px !important;
+                margin: 0 !important;
+            }
+            .ai-email-box h5 { font-size: 0.82rem !important; margin-bottom: 10px !important; }
+            .ai-email-input-row { flex-direction: column !important; gap: 8px !important; }
+            .ai-email-input-row input { width: 100% !important; min-width: 0 !important; height: 42px; font-size: 16px !important; }
+            .ai-email-input-row button { width: 100% !important; height: 42px; }
+            #aiPreviewBox { max-height: none !important; }
+
+            /* منع تكبير iOS عند الكتابة */
+            .modal-content input:not([type="checkbox"]):not([type="radio"]),
+            .modal-content select,
+            .modal-content textarea { font-size: 16px !important; }
+
+            .modal-content input[type="checkbox"] {
+                min-width: 22px !important;
+                min-height: 22px !important;
+                width: 22px !important;
+                height: 22px !important;
+                accent-color: var(--brand-primary);
+            }
+            body.dark .modal-content { color-scheme: dark; }
+
+            /* الوضع الليلي */
+            body.dark .header-actions .status-pill-group {
+                background: var(--dm-surface-2) !important;
+                border-color: var(--dm-border) !important;
+            }
+            body.dark .header-actions .status-pill-group::before { color: var(--dm-text-muted); }
+            body.dark .modal-grid .detail-section {
+                background: var(--dm-surface) !important;
+                border-color: var(--dm-border) !important;
+            }
+            body.dark .customer-info .profile-card,
+            body.dark .shipping-info .address-card {
+                background: transparent !important;
+                border: 0 !important;
+                box-shadow: none !important;
+            }
+            body.dark .ai-email-box {
+                background: var(--dm-surface) !important;
+                border-color: var(--dm-border) !important;
+            }
+            body.dark .ai-email-box h5 { color: var(--dm-text) !important; }
+            body.dark .ai-email-input-row input {
+                background: var(--dm-surface-2) !important;
+                border-color: var(--dm-border) !important;
+                color: var(--dm-text) !important;
+            }
+            body.dark .address-grid .address-item p,
+            body.dark .address-full p,
+            body.dark .contact-line p { color: var(--dm-text) !important; }
+            body.dark .payment-grid { background: var(--dm-surface-2) !important; }
+            body.dark .premium-item-row { background: var(--dm-surface) !important; border-color: var(--dm-border) !important; }
+            body.dark .item-main-name { color: var(--dm-text) !important; }
+            body.dark .item-price-col { border-top-color: var(--dm-border) !important; }
+            body.dark .copy-toast { background: var(--dm-surface-3, #2c2c2e); }
 
             /* ── ترقيم الصفحات ── */
             .pagination-container { gap: 8px !important; padding: 14px 0 4px !important; }
@@ -2030,7 +2448,48 @@
             border-left-color: var(--dm-border);
         }
         body.dark .product-img-lg {
-            border-color: var(--dm-surface-3);
+            border-color: var(--dm-border);
+        }
+        body.dark .ai-email-box {
+            background: var(--dm-surface) !important;
+            border-color: var(--dm-border) !important;
+        }
+        body.dark .ai-email-box h5 { color: var(--dm-text) !important; }
+        body.dark .ai-email-input-row input,
+        body.dark #aiPreviewBox {
+            background: var(--dm-surface-2) !important;
+            border-color: var(--dm-border) !important;
+            color: var(--dm-text) !important;
+        }
+        body.dark #modalNotesSection .address-card {
+            background: rgba(255, 159, 10, 0.1) !important;
+            border-color: rgba(255, 159, 10, 0.35) !important;
+        }
+        body.dark #modalNotesText { color: var(--dm-text) !important; }
+        body.dark .bosta-box {
+            background: rgba(255, 69, 58, 0.08) !important;
+            border-color: rgba(255, 69, 58, 0.25) !important;
+        }
+        body.dark .bosta-box h5 { color: var(--dm-danger) !important; }
+        body.dark #bostaPackageSize {
+            background: var(--dm-surface-2) !important;
+            border-color: var(--dm-border) !important;
+            color: var(--dm-text) !important;
+        }
+        body.dark #receiptBox {
+            background: rgba(10, 132, 255, 0.08) !important;
+            border-color: rgba(10, 132, 255, 0.25) !important;
+        }
+        body.dark #receiptBox h5 { color: var(--dm-info) !important; }
+        body.dark #noAnswerBtn {
+            background: rgba(255, 159, 10, 0.1) !important;
+            border-color: rgba(255, 159, 10, 0.35) !important;
+            color: var(--dm-warning) !important;
+        }
+        body.dark .btn-copy-address {
+            background: rgba(10, 132, 255, 0.12) !important;
+            border-color: rgba(10, 132, 255, 0.25) !important;
+            color: var(--dm-info) !important;
         }
     </style>
 
