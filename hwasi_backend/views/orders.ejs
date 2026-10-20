@@ -390,8 +390,8 @@
                                     <label>العنوان بالكامل:</label>
                                     <p id="modalAddressFull"></p>
                                 </div>
-                                <button class="btn-copy-address" onclick="copyAddress()" style="margin-top: 16px; border: none; background: #e0f2fe; color: #0284c7;">
-                                    <i class="fas fa-copy"></i> نسخ العنوان
+                                <button class="btn-copy-address" onclick="copyAddress()" title="نسخ الشارع" aria-label="نسخ الشارع" style="margin-top: 16px; border: none; background: #e0f2fe; color: #0284c7;">
+                                    <i class="fas fa-copy"></i> نسخ الشارع
                                 </button>
                             </div>
                         </div>
@@ -857,7 +857,7 @@
         }
 
         function copyAddress() {
-            copyText(document.getElementById('modalAddressFull').textContent, 'تم نسخ العنوان');
+            copyText(document.getElementById('shipStreet').textContent, 'تم نسخ الشارع');
         }
 
         function copyOrderDetails() {
