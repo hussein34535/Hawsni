@@ -1231,6 +1231,12 @@ tr:hover td {
         min-width: 600px;
     }
 
+    /* Cardified tables must never inherit the wide-table min-width */
+    .table-responsive .modern-table {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
     th, td {
         padding: 0.75rem 0.6rem;
         font-size: 0.8rem;
@@ -1546,71 +1552,101 @@ tr:hover td {
         gap: 0.75rem !important;
     }
 
-    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       MOBILE ORDERS TABLE â†’ CARDS
-       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
-    .table-responsive { overflow-x: hidden !important; }
-    
-    .modern-table thead { display: none !important; }
+    /* ═══════════════════════════════════════════════════════════════
+       MOBILE TABLES → CARDS (orders / users)
+       ═══════════════════════════════════════════════════════════════ */
+    .table-responsive { overflow-x: auto !important; }
 
-    .modern-table tr {
+    .table-responsive .modern-table {
         display: block !important;
-        background: var(--surface) !important;
-        border-radius: 16px !important;
-        margin-bottom: 1rem !important;
-        padding: 1rem !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
-        border: 1px solid rgba(255,255,255,0.5) !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        border-spacing: 0 !important;
+    }
+    .table-responsive .modern-table thead { display: none !important; }
+    .table-responsive .modern-table tbody { display: block !important; width: 100% !important; }
+
+    .table-responsive .modern-table > tbody > tr {
+        display: block !important;
+        width: 100% !important;
         position: relative !important;
+        margin: 0 0 0.85rem !important;
+        padding: 0.9rem 1rem !important;
+        background: var(--bg-card) !important;
+        border: 1px solid rgba(15, 23, 42, 0.08) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
     }
-    body.dark .modern-table tr {
-        background: rgba(15,20,25,0.7) !important;
-        border-color: rgba(255,255,255,0.08) !important;
+    body.dark .table-responsive .modern-table > tbody > tr {
+        background: var(--dm-surface) !important;
+        border-color: var(--dm-border) !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
     }
 
-    .modern-table td {
+    .table-responsive .modern-table > tbody > tr > td {
         display: flex !important;
-        justify-content: space-between !important;
         align-items: center !important;
-        padding: 6px 0 !important;
-        border: none !important;
-        font-size: 0.85rem !important;
-        border-bottom: 1px solid rgba(0,0,0,0.05) !important;
-    }
-    body.dark .modern-table td { border-bottom-color: rgba(255,255,255,0.05) !important; }
-    .modern-table td:last-child { border-bottom: none !important; padding-bottom: 0 !important; }
-
-    .modern-table td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: var(--text-muted);
-        font-size: 0.75rem;
-        flex-shrink: 0;
-        margin-left: 8px;
-    }
-
-    /* Checkbox column: hide label and center it */
-    .modern-table td:first-child {
-        position: absolute !important;
-        top: 1rem !important;
-        left: 1rem !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
         width: auto !important;
+        padding: 7px 0 !important;
         border: none !important;
-        padding: 0 !important;
-        justify-content: flex-start !important;
+        border-radius: 0 !important;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.05) !important;
+        background: transparent !important;
+        white-space: normal !important;
+        font-size: 0.85rem !important;
+        text-align: right !important;
     }
-    .modern-table td:first-child::before { display: none !important; }
+    .table-responsive .modern-table > tbody > tr > td:last-child {
+        border-bottom: none !important;
+    }
+    body.dark .table-responsive .modern-table > tbody > tr > td {
+        border-bottom-color: var(--dm-border) !important;
+    }
 
-    /* Actions column */
-    .modern-table td:last-child {
-        justify-content: flex-end !important;
-        margin-top: 0.5rem !important;
-        gap: 0.5rem !important;
+    .table-responsive .modern-table td::before {
+        content: attr(data-label);
+        position: static !important;
+        right: auto !important;
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        flex: 0 0 auto;
+        font-weight: 700 !important;
+        color: var(--text-muted) !important;
+        font-size: 0.72rem !important;
+        white-space: nowrap !important;
+        text-align: right !important;
     }
-    .modern-table td:last-child::before { display: none !important; }
+
+    /* Orders only: checkbox cell becomes a floating control */
+    .table-responsive .modern-table .order-row > td:first-child {
+        position: absolute !important;
+        top: 0.9rem !important;
+        left: 0.9rem !important;
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        z-index: 2;
+    }
+    .table-responsive .modern-table .order-row > td:first-child::before { display: none !important; }
+    .table-responsive .modern-table .order-row > td:first-child input {
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 0 !important;
+    }
+
+    .table-responsive .modern-table .order-row > td:last-child {
+        margin-top: 0.55rem !important;
+    }
+    .table-responsive .modern-table .order-row > td:last-child::before { display: none !important; }
 
     /* Fix button sizes in table on mobile */
-    .modern-table .btn, .modern-table button { min-height: 36px !important; font-size: 0.8rem !important; }
+    .table-responsive .modern-table .btn,
+    .table-responsive .modern-table button { min-height: 38px !important; font-size: 0.8rem !important; }
 
     /* Filter bar on mobile */
     .filter-bar { flex-direction: column !important; gap: 0.5rem !important; }

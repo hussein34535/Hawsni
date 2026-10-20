@@ -1827,56 +1827,186 @@
         }
 
         @media (max-width: 768px) {
-            .modal-grid {
-                grid-template-columns: 1fr;
+            /* ── ملخص الطلبات: 2×2 مضغوط ── */
+            .stats-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.65rem !important;
+                margin-bottom: 1.1rem !important;
+            }
+            .stat-card {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                justify-content: flex-start !important;
+                padding: 0.8rem 0.85rem !important;
+                gap: 0 !important;
+            }
+            .stat-icon {
+                width: 34px !important;
+                height: 34px !important;
+                font-size: 0.9rem !important;
+                margin-bottom: 0.4rem !important;
+            }
+            .stat-label { font-size: 0.68rem !important; line-height: 1.35 !important; }
+            .stat-value { font-size: 1.15rem !important; line-height: 1.25 !important; }
+
+            /* ── بطاقة الطلب ── */
+            .order-row {
+                cursor: pointer;
+            }
+            .order-row > td:nth-child(2) {
+                display: block !important;
+                padding: 0 0 10px 30px !important;
+                border-bottom: 1px solid rgba(15, 23, 42, 0.07) !important;
+            }
+            .order-row > td:nth-child(2)::before { display: none !important; }
+            .product-cell { align-items: flex-start !important; gap: 10px !important; }
+            .product-img-lg,
+            .product-img-placeholder {
+                width: 46px !important;
+                height: 46px !important;
+                border-radius: 12px !important;
+            }
+            .product-title { font-size: 0.92rem !important; line-height: 1.4 !important; word-break: break-word; }
+            .product-count { font-size: 0.7rem !important; }
+            .receipt-badge { font-size: 0.65rem !important; }
+
+            .customer-cell { gap: 8px !important; min-width: 0; }
+            .customer-cell > div { min-width: 0; }
+            .avatar-small {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 0.72rem !important;
+                border-radius: 9px !important;
+            }
+            .customer-name { font-size: 0.82rem !important; overflow-wrap: anywhere; }
+            .customer-phone { font-size: 0.72rem !important; }
+
+            .order-id { font-size: 0.75rem !important; padding: 3px 7px !important; }
+            .order-amount { font-size: 1rem !important; }
+            .date-cell {
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 4px !important;
+                font-size: 0.8rem !important;
+            }
+            .date-cell span { font-size: 0.72rem !important; }
+
+            /* ── الإجراءات داخل البطاقة ── */
+            .order-row > td:last-child {
+                display: block !important;
+                margin-top: 0.6rem !important;
+                padding-top: 0.1rem !important;
+            }
+            .action-cell { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
+            .action-cell form { flex: 1 1 100% !important; margin: 0 !important; }
+            .action-cell .status-select {
+                width: 100% !important;
+                min-width: 0 !important;
+                height: 42px !important;
+                font-size: 0.85rem !important;
+                padding: 0 12px !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                background: #f8fafc !important;
+            }
+            .action-cell .btn-icon {
+                flex: 1 1 0 !important;
+                width: auto !important;
+                min-width: 44px !important;
+                height: 44px !important;
+                border-radius: 12px !important;
+                background: #f8fafc !important;
+                border: 1px solid #e8edf3 !important;
+            }
+            body.dark .action-cell .status-select {
+                background: var(--dm-surface-2) !important;
+                border-color: var(--dm-border) !important;
+                color: var(--dm-text) !important;
+            }
+            body.dark .action-cell .btn-icon {
+                background: var(--dm-surface-2) !important;
+                border-color: var(--dm-border) !important;
             }
 
+            /* ── الشريط العلوي للقائمة ── */
+            .card-header { align-items: stretch !important; }
+            .bulk-actions-bar { width: 100% !important; }
+            .bulk-actions-bar > div { width: 100% !important; }
+            .bulk-actions-bar select { flex: 1 1 100% !important; width: 100% !important; }
+
+            /* ── نافذة التفاصيل ── */
+            .modal { padding: 0 !important; align-items: flex-end !important; }
             .modal-content {
-                width: 95%;
-                margin-top: 20px;
+                width: 100% !important;
+                max-width: 100% !important;
+                max-height: 92dvh !important;
+                margin: 0 !important;
+                border-radius: 24px 24px 0 0 !important;
             }
+            .modal-header {
+                padding: 14px 16px 12px !important;
+                gap: 10px !important;
+                flex-wrap: wrap !important;
+                align-items: flex-start !important;
+            }
+            .modal-header .header-main { min-width: 0; flex: 1 1 100%; }
+            .header-id-group { flex-wrap: wrap; gap: 8px; }
+            .modal-title { font-size: 1.1rem !important; }
+            .modal-subtitle { font-size: 0.72rem !important; }
+            .header-actions {
+                width: 100% !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 10px !important;
+                flex-wrap: wrap !important;
+            }
+            .header-actions .status-pill-group {
+                flex: 1 1 100% !important;
+                justify-content: space-between !important;
+                min-width: 0;
+                background: #fff !important;
+                border: 1px solid #e2e8f0;
+            }
+            .header-actions .status-pill-group #modalStatusBadge { display: none !important; }
+            .header-actions .status-pill-group .status-select {
+                flex: 1 1 auto;
+                width: 100% !important;
+                height: 40px !important;
+                font-size: 0.85rem !important;
+            }
+            .header-actions > label {
+                flex: 1 1 auto !important;
+                margin: 0 !important;
+                justify-content: flex-start !important;
+                font-size: 0.75rem !important;
+            }
+            .header-actions > label input {
+                width: 20px !important;
+                height: 20px !important;
+                min-width: 0 !important;
+            }
+            .header-actions .modal-close {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                width: 38px !important;
+                height: 38px !important;
+                flex: 0 0 38px;
+                margin-inline-start: auto;
+            }
+            .status-pill-group { padding: 4px !important; border-radius: 12px !important; }
+            .modal-grid { grid-template-columns: 1fr !important; }
+            .modal-body { padding: 0 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
+            .column-main, .column-side { padding: 16px !important; gap: 22px !important; }
+            .section-title { margin-bottom: 14px !important; }
+            .payment-grid { padding: 14px !important; }
+            .premium-item-row { gap: 10px !important; padding: 10px !important; }
+            .item-visual { width: 52px !important; height: 52px !important; }
+            .item-price-col { min-width: 64px !important; }
 
-            .modal-body {
-                padding: 20px;
-            }
-
-            .modern-table thead {
-                display: none;
-            }
-
-            .modern-table tr {
-                display: block;
-                margin-bottom: 16px;
-                border-radius: 16px;
-                border: 1px solid var(--border-color);
-                overflow: hidden;
-            }
-
-            .modern-table td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                border: none;
-                padding: 12px 16px;
-            }
-
-            .modern-table td:first-child,
-            .modern-table td:last-child {
-                border: none;
-                border-radius: 0;
-            }
-
-            .modern-table td::before {
-                content: attr(data-label);
-                font-weight: 700;
-                color: var(--medium-gray);
-                font-size: 0.8rem;
-            }
-
-            .modern-table td:first-child {
-                background: #fafafa;
-                border-bottom: 1px solid var(--border-color);
-            }
+            /* ── ترقيم الصفحات ── */
+            .pagination-container { gap: 8px !important; padding: 14px 0 4px !important; }
+            .pagination-info { font-size: 0.8rem !important; }
         }
 
         /* === Dark Mode === */
