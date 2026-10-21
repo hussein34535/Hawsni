@@ -50,7 +50,7 @@ class AdminChatController {
                             seen.add(m.session_id);
                             lastMap[m.session_id] = { content: m.content, sender_type: m.sender_type };
                         }
-                        if (m.is_read !== true) {
+                        if (m.sender_type === 'user' && m.is_read !== true) {
                             unreadMap[m.session_id] = (unreadMap[m.session_id] || 0) + 1;
                         }
                     }

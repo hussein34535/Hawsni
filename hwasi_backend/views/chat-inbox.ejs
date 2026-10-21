@@ -559,7 +559,7 @@
         await loadSessions();
         subSessions();
         const sid = new URLSearchParams(window.location.search).get('sessionId') || localStorage.getItem('chatSessionId');
-        if (sid) { localStorage.setItem('chatSessionId', sid); setTimeout(() => openSession(sid), 500); }
+        if (sid) { localStorage.setItem('chatSessionId', sid); openSession(sid); }
     })();
 
     async function loadSessions(keepScroll = false) {
@@ -601,7 +601,7 @@
         if (s.status === 'human_requested') return base + ' · ينتظر رد';
         if (s.status === 'human_active') return base + ' · موظف';
         if (s.status === 'closed') return base + ' · مغلقة';
-        return base + ' · بوت';
+        return base + ' · جديدة';
     }
 
     function escHtml(value) {
@@ -681,26 +681,27 @@
 
         renderSessions(true);
         updateBtns(s);
-        await loadMessages(id);
-        subMessages(id);
-
-        try {
-            await fetch('/admin/chat/mark-read', {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
-                body: JSON.stringify({ sessionId: id })
-            });
-            const ss = sessions.find(x => x.session_id === id);
-            if (ss) { ss.unread_count = 0; renderSessions(true); }
-        } catch (e) {}
 
         elFooter.style.display = 'flex';
         elFooter.style.flexDirection = 'column';
         el('order-panel').classList.remove('active');
-
         if (window.innerWidth <= 768) {
             document.querySelector('.chat-main').classList.add('active');
             document.querySelector('.chat-wrap').classList.add('chat-open');
         }
+
+        elMsgs.innerHTML = '<div class="empty-chat"><i class="fas fa-spinner fa-spin"></i><p style="color:#94a3b8;">جاري تحميل الرسائل...</p></div>';
+        await loadMessages(id);
+        if (activeId !== id) return;
+        subMessages(id);
+
+        fetch('/admin/chat/mark-read', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+            body: JSON.stringify({ sessionId: id })
+        }).then(() => {
+            const ss = sessions.find(x => x.session_id === id);
+            if (ss) { ss.unread_count = 0; renderSessions(true); }
+        }).catch(() => {});
     }
 
     function toggleAdminMenu() {
@@ -732,16 +733,20 @@
         const closed = s.status === 'closed';
         el('btn-take').style.display = human ? 'none' : 'flex';
         el('btn-end').style.display  = human ? 'flex' : 'none';
-        el('btn-bot').style.display  = human ? 'flex' : 'none';
+        el('btn-bot').style.display  = 'none';
         elInputRow.style.display = human ? 'flex' : 'none';
         elStatus.style.display = human ? 'none' : 'block';
         elStatus.textContent = s.status === 'human_requested'
             ? '⚠️ ينتظر رد'
-            : closed ? '🔒 المحادثة مغلقة' : '🤖 البوت يرد آلياً';
+            : closed ? '🔒 المحادثة مغلقة' : '💬 محادثة جديدة';
     }
 
     async function loadMessages(id) {
-        const { data } = await db.from('chat_messages').select('*').eq('session_id', id).order('created_at', { ascending: true });
+        const { data } = await db.from('chat_messages')
+            .select('id, session_id, sender_type, content, created_at, wa_status, is_read')
+            .eq('session_id', id)
+            .order('created_at', { ascending: true });
+        if (activeId !== id) return;
         messages = data || [];
         renderMsgs();
     }

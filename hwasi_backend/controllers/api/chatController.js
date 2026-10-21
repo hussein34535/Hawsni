@@ -2,6 +2,9 @@ const aiChatbotService = require('../../services/aiChatbotService');
 const supabase = require('../../config/supabase');
 const emailService = require('../../services/emailService');
 
+// Auto-replies are disabled by default. Set AI_AUTO_REPLY_ENABLED=true to re-enable.
+const AI_AUTO_REPLY_ENABLED = process.env.AI_AUTO_REPLY_ENABLED === 'true';
+
 class ChatController {
     /**
      * GET /api/chat/session/:sessionId
@@ -74,45 +77,11 @@ class ChatController {
                 const diffHours = (nowDate.getTime() - lastActive.getTime()) / (1000 * 3600);
 
                 if (diffHours >= 24) {
-                    console.log(`[Chat] ⏳ Session ${sessionId} expired (${diffHours.toFixed(1)}h). Summarizing...`);
-                    
-                    // 1. Fetch current messages for summary
-                    const { data: oldMsgs } = await supabase
-                        .from('chat_messages')
-                        .select('*')
-                        .eq('session_id', sessionId)
-                        .order('created_at', { ascending: true });
-
-                    if (oldMsgs && oldMsgs.length > 5) {
-                        const formattedHistory = oldMsgs.map(m => ({
-                            role: m.sender_type === 'user' ? 'user' : 'model',
-                            parts: [{ text: m.content }]
-                        }));
-                        const newSummary = await aiChatbotService.summarizeChat(formattedHistory);
-                        
-                        // 2. Update session with summary and reset status
-                        await supabase.from('chat_sessions')
-                            .update({ 
-                                summary: newSummary, 
-                                updated_at: now,
-                                status: 'bot_active' 
-                            })
-                            .eq('session_id', sessionId);
-                        
-                        // 3. Clear old messages to save space
-                        await supabase.from('chat_messages').delete().eq('session_id', sessionId);
-
-                        // 4. Send fresh greeting
-                        const greetingStr = 'أهلاً بك مجدداً في هَوَسي ✨\nكيف يمكنني مساعدتك اليوم؟';
-                        await supabase.from('chat_messages').insert([
-                            { session_id: sessionId, sender_type: 'bot', content: greetingStr }
-                        ]);
-                    } else {
-                        // Just update time if not enough history to summarize
-                        await supabase.from('chat_sessions')
-                            .update({ updated_at: now })
-                            .eq('session_id', sessionId);
-                    }
+                    // Do not call AI here: summarizing on open made the chat slow.
+                    // Keep the history and only refresh the activity timestamp.
+                    await supabase.from('chat_sessions')
+                        .update({ updated_at: now })
+                        .eq('session_id', sessionId);
                 }
             }
 
@@ -164,14 +133,24 @@ class ChatController {
                 await emailService.sendNewChatNotification(sessionId, message);
             }
 
-            // 1. Insert user message to DB (always marked as read)
+            // 1. Insert user message to DB (unread until an admin opens the chat)
             const { data: userMsg, error: insertErr } = await supabase
                 .from('chat_messages')
-                .insert([{ session_id: sessionId, sender_type: 'user', content: message, is_read: true }])
+                .insert([{ session_id: sessionId, sender_type: 'user', content: message, is_read: false }])
                 .select().single();
             if (insertErr) throw insertErr;
 
-            // 1.5. Reactivate bot automatically if 24 hours passed
+            // 1.5. Auto-replies disabled: route the conversation to manual support.
+            if (!AI_AUTO_REPLY_ENABLED) {
+                const nextStatus = session.status === 'human_active' ? 'human_active' : 'human_requested';
+                await supabase.from('chat_sessions')
+                    .update({ status: nextStatus, updated_at: new Date().toISOString() })
+                    .eq('session_id', sessionId);
+                console.log(`[Chat] Auto-reply disabled; session ${sessionId} marked ${nextStatus}.`);
+                return res.status(200).json({ success: true, botSkipped: true, reply: '' });
+            }
+
+            // 1.6. Reactivate bot automatically if 24 hours passed
             const lastActive = new Date(session.updated_at || session.created_at);
             const diffHours = (new Date().getTime() - lastActive.getTime()) / (1000 * 3600);
             if (diffHours >= 24 && session.status !== 'bot_active') {
@@ -307,7 +286,7 @@ class ChatController {
                 .order('created_at', { ascending: true });
 
             let newSummary = "";
-            if (oldMsgs && oldMsgs.length > 3) {
+            if (AI_AUTO_REPLY_ENABLED && oldMsgs && oldMsgs.length > 3) {
                 const formattedHistory = oldMsgs.map(m => ({
                     role: m.sender_type === 'user' ? 'user' : 'model',
                     parts: [{ text: m.content }]

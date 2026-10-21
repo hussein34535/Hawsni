@@ -631,6 +631,13 @@ class WhatsAppService {
             return;
         }
 
+        // 3.5. No AI auto-reply: mark the conversation for manual support.
+        if (session) {
+            await supabase.from('chat_sessions')
+                .update({ status: 'human_requested', updated_at: new Date().toISOString() })
+                .eq('session_id', phone);
+        }
+
         // 4. AI Handling (DISABLED BY USER REQUEST)
         /*
         try {
