@@ -139,7 +139,7 @@
                             <a href="/admin/products/<%= product.id %>/edit" class="btn btn-secondary btn-sm" style="padding: 8px; width: 36px; height: 36px;" title="تعديل">
                                 <i class="fas fa-pen" style="font-size: 0.8rem;"></i>
                             </a>
-                            <button onclick="handleDelete('/admin/products/<%= product.id %>', '<%= product.name %>')" class="btn btn-danger btn-sm" style="padding: 8px; width: 36px; height: 36px;" title="حذف">
+                            <button type="button" data-delete-url="/admin/products/<%= product.id %>" data-delete-name="<%= product.name %>" class="btn btn-danger btn-sm js-delete-product" style="padding: 8px; width: 36px; height: 36px;" title="حذف">
                                 <i class="fas fa-trash" style="font-size: 0.8rem;"></i>
                             </button>
                         </div>
@@ -158,6 +158,12 @@
     </div>
 
     <script>
+        document.addEventListener('click', (event) => {
+            const button = event.target.closest('.js-delete-product');
+            if (!button) return;
+            handleDelete(button.dataset.deleteUrl, button.dataset.deleteName || '');
+        });
+
         function getSelectedIds() {
             return [...document.querySelectorAll('.product-checkbox:checked')].map(cb => cb.value);
         }

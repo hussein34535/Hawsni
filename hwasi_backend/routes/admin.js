@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 
 // Middleware
@@ -20,11 +21,22 @@ const financeController = require('../controllers/admin/financeController');
 const { adminProtect } = require('../middleware/adminAuth');
 const { csrfProtection } = require('../middleware/csrf');
 
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 8,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    handler: (req, res) => res.status(429).render('admin-login', {
+        error: 'محاولات كثيرة. حاول مرة أخرى بعد 15 دقيقة.'
+    })
+});
+
 // Auth Routes (Public for Admin)
-// These will be available at /admin/login and /admin/logout
 router.get('/login', adminAuthController.renderLogin);
-router.post('/login', adminAuthController.login);
-router.get('/logout', adminAuthController.logout);
+router.post('/login', loginLimiter, adminAuthController.login);
+router.post('/logout', adminAuthController.logout);
+router.get('/logout', (req, res) => res.redirect('/admin/dashboard'));
 
 // Redirect /admin to /admin/dashboard
 router.get('/', (req, res) => {
@@ -106,6 +118,7 @@ router.post('/settings', settingsController.update);
 
 // Reviews Management Routes
 router.get('/reviews', adminReviewsController.index);
+router.post('/reviews/upload', upload.array('images', 4), csrfProtection, adminReviewsController.uploadImages);
 router.post('/reviews', adminReviewsController.create);
 router.delete('/reviews/:id', adminReviewsController.delete);
 
@@ -120,6 +133,7 @@ router.post('/finance/orders/:id/collected', financeController.toggleCollected);
 // Live Chat Inbox
 router.get('/chat', adminChatController.renderChatInbox);
 router.get('/chat/sessions', adminChatController.getSessions);
+router.get('/chat/messages/:sessionId', adminChatController.getMessages);
 router.get('/chat/unread-count', adminChatController.getUnreadCount);
 router.post('/chat/send', adminChatController.sendMessage);
 router.post('/chat/send-image', upload.single('image'), csrfProtection, adminChatController.sendImage);

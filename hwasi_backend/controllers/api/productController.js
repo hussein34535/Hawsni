@@ -1,6 +1,6 @@
 const ProductService = require('../../services/productService');
 const uploadToSupabase = require('../../utils/fileUpload');
-const supabase = require('../../config/supabase');
+const { supabaseAdmin: supabase } = require('../../config/supabase');
 const { cleanImageUrls } = require('../../utils/imageUtils');
 
 

@@ -46,6 +46,10 @@
             color: #1B4D3E;
             font-weight: bold;
         }
+
+        .description {
+            white-space: pre-line;
+        }
     </style>
 </head>
 
@@ -60,7 +64,7 @@
                 <%= price %>
             </p>
             <div class="description">
-                <%- description.replace(/\n/g, '<br>' ) %>
+                <%= description %>
             </div>
             <hr>
             <p>View this product on <a href="<%= url %>">Hwasi App</a></p>

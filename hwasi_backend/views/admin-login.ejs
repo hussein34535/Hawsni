@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>تسجيل دخول | hwasi Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,8 +23,8 @@
             padding: 1.5rem;
             background: #f0f2f5;
             background-image: 
-                radial-gradient(at 20% 80%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
-                radial-gradient(at 80% 20%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+                radial-gradient(at 20% 80%, rgba(27, 77, 62, 0.08) 0%, transparent 50%),
+                radial-gradient(at 80% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
         }
 
         .login-container {
@@ -40,13 +40,13 @@
         .login-brand-icon {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #1B4D3E 0%, #0E4435 100%);
             border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1rem;
-            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 8px 24px rgba(14, 68, 53, 0.25);
         }
 
         .login-brand-icon i {
@@ -62,7 +62,7 @@
         }
 
         .login-brand h1 span {
-            color: #2563eb;
+            color: #D4AF37;
         }
 
         .login-brand p {
@@ -144,20 +144,20 @@
 
         .form-input:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: #D4AF37;
             background: white;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+            box-shadow: 0 0 0 4px rgba(27, 77, 62, 0.12);
         }
 
         .form-input:focus + i,
         .form-input:focus ~ i {
-            color: #2563eb;
+            color: #D4AF37;
         }
 
         .submit-btn {
             width: 100%;
             height: 52px;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: linear-gradient(135deg, #1B4D3E 0%, #0E4435 100%);
             color: white;
             border: none;
             border-radius: 14px;
@@ -170,20 +170,20 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 4px 12px rgba(14, 68, 53, 0.25);
             margin-top: 0.5rem;
             -webkit-tap-highlight-color: transparent;
         }
 
         .submit-btn:hover {
-            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+            background: linear-gradient(135deg, #0E4435 0%, #092f25 100%);
+            box-shadow: 0 6px 20px rgba(14, 68, 53, 0.35);
             transform: translateY(-1px);
         }
 
         .submit-btn:active {
             transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 2px 8px rgba(14, 68, 53, 0.2);
         }
 
         .login-footer {
@@ -232,8 +232,8 @@
 
         <div class="login-card">
             <% if (typeof error !== 'undefined') { %>
-                <div class="error-alert">
-                    <i class="fas fa-exclamation-circle"></i>
+                <div class="error-alert" role="alert">
+                    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
                     <%= error %>
                 </div>
             <% } %>
@@ -241,18 +241,18 @@
             <form action="/admin/login" method="POST">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <div class="form-group">
-                    <label class="form-label">البريد الإلكتروني</label>
+                    <label class="form-label" for="admin-email">البريد الإلكتروني</label>
                     <div class="input-wrapper">
-                        <input type="email" name="email" required class="form-input" placeholder="admin@example.com" autocomplete="email">
-                        <i class="fas fa-envelope"></i>
+                        <input id="admin-email" type="email" name="email" required class="form-input" placeholder="admin@example.com" autocomplete="username" inputmode="email">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">كلمة المرور</label>
+                    <label class="form-label" for="admin-password">كلمة المرور</label>
                     <div class="input-wrapper">
-                        <input type="password" name="password" required class="form-input" placeholder="••••••••" autocomplete="current-password">
-                        <i class="fas fa-lock"></i>
+                        <input id="admin-password" type="password" name="password" required class="form-input" placeholder="••••••••" autocomplete="current-password">
+                        <i class="fas fa-lock" aria-hidden="true"></i>
                     </div>
                 </div>
 

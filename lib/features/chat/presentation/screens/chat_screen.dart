@@ -1,10 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:hwasi_app/core/themes/app_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -21,9 +21,11 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Map<String, dynamic>> _messages = [];
   bool _isLoading = false;
   String? _sessionId;
-  RealtimeChannel? _subscription;
+  String? _lastMessageAt;
+  Timer? _pollTimer;
 
   static const String _sessionApiUrl = 'https://hwasibackend.vercel.app/api/chat/session';
+  static const String _messagesApiUrl = 'https://hwasibackend.vercel.app/api/chat/messages';
   static const String _chatApiUrl = 'https://hwasibackend.vercel.app/api/chat';
 
   @override
@@ -46,18 +48,23 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     await _fetchSessionHistory(sid);
-    _subscribeToMessages(sid);
+    _startPolling(sid);
   }
 
   Future<void> _fetchSessionHistory(String sid) async {
     try {
       final response = await http.get(Uri.parse('$_sessionApiUrl/$sid'));
+      if (response.statusCode != 200) return;
       final data = jsonDecode(response.body);
 
       if (data['success'] == true && data['messages'] != null) {
+        final fetched = List<Map<String, dynamic>>.from(data['messages']);
         setState(() {
-          _messages = List<Map<String, dynamic>>.from(data['messages']);
+          _messages = fetched;
         });
+        if (fetched.isNotEmpty) {
+          _lastMessageAt = fetched.last['created_at']?.toString();
+        }
         _scrollToBottom();
       }
     } catch (e) {
@@ -65,30 +72,43 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _subscribeToMessages(String sid) {
-    _subscription = Supabase.instance.client
-        .channel('public:chat_messages:$sid')
-        .onPostgresChanges(
-          event: PostgresChangeEvent.insert,
-          schema: 'public',
-          table: 'chat_messages',
-          filter: PostgresChangeFilter(
-            type: PostgresChangeFilterType.eq, 
-            column: 'session_id', 
-            value: sid,
-          ),
-          callback: (payload) {
-            final newMessage = payload.newRecord;
-            setState(() {
-                // Check for optimism duplicate
-                if (!_messages.any((m) => m['id'] == newMessage['id'])) {
-                  _messages.add(newMessage);
-                }
-              });
-              _scrollToBottom();
-          },
-        )
-        .subscribe();
+  void _startPolling(String sid) {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 4), (_) => _pollMessages(sid));
+  }
+
+  Future<void> _pollMessages(String sid) async {
+    try {
+      final after = _lastMessageAt;
+      final uri = Uri.parse('$_messagesApiUrl/$sid').replace(
+        queryParameters: after == null || after.isEmpty ? null : {'after': after},
+      );
+      final response = await http.get(uri);
+      if (response.statusCode != 200) return;
+      final data = jsonDecode(response.body);
+      final incoming = data['success'] == true && data['messages'] is List
+          ? List<Map<String, dynamic>>.from(data['messages'])
+          : <Map<String, dynamic>>[];
+      if (incoming.isEmpty || !mounted) return;
+
+      setState(() {
+        for (final message in incoming) {
+          final id = message['id'];
+          final isUser = message['sender_type'] == 'user';
+          if (isUser && id != null) {
+            _messages.removeWhere((m) => m['isOptimistic'] == true && m['content'] == message['content']);
+          }
+          if (id == null || !_messages.any((m) => m['id'] == id)) {
+            _messages.add(message);
+          }
+        }
+        final maxDate = incoming.last['created_at']?.toString();
+        if (maxDate != null) _lastMessageAt = maxDate;
+      });
+      _scrollToBottom();
+    } catch (e) {
+      debugPrint('Polling failed: $e');
+    }
   }
 
   void _scrollToBottom() {
@@ -130,17 +150,25 @@ class _ChatScreenState extends State<ChatScreen> {
       final data = jsonDecode(response.body);
 
       if (data['success'] != true) {
+        if (!mounted) return;
         setState(() {
+          _messages.removeWhere((m) => m['isOptimistic'] == true && m['content'] == text);
           _messages.add({'sender_type': 'bot', 'content': 'عذراً، حدث خطأ. يرجى المحاولة لاحقاً.'});
         });
+      } else if (_sessionId != null) {
+        await _pollMessages(_sessionId!);
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
+        _messages.removeWhere((m) => m['isOptimistic'] == true && m['content'] == text);
         _messages.add({'sender_type': 'bot', 'content': 'لا يمكن الاتصال بالخادم الآن. يرجى المحاولة لاحقاً.'});
       });
     } finally {
-      setState(() => _isLoading = false);
-      _scrollToBottom();
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _scrollToBottom();
+      }
     }
   }
 
@@ -148,7 +176,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
-    _subscription?.unsubscribe();
+    _pollTimer?.cancel();
     super.dispose();
   }
 
@@ -243,16 +271,15 @@ class _ChatScreenState extends State<ChatScreen> {
                               ],
                             ),
                             child: () {
-                              final content = msg['content'] ?? '';
-                              final isImage = content.startsWith('[IMAGE_URL:');
+                              final content = (msg['content'] ?? '').toString();
+                              final isImage = content.startsWith('[IMAGE_URL:') && content.endsWith(']');
                               final imageUrl = isImage ? content.substring(11, content.length - 1) : '';
-                              final isWhatsAppImage = content.startsWith('[IMAGE:');
-                              final waImageId = isWhatsAppImage ? content.substring(7, content.length - 1) : '';
-                              final waImageUrl = isWhatsAppImage 
-                                  ? 'https://hwasibackend.vercel.app/api/admin/chat/media/$waImageId' 
-                                  : '';
+                              final parsedImageUrl = Uri.tryParse(imageUrl);
+                              final isValidImage = parsedImageUrl != null &&
+                                  parsedImageUrl.scheme == 'https' &&
+                                  parsedImageUrl.host == 'res.cloudinary.com';
 
-                              if (isImage || isWhatsAppImage) {
+                              if (isValidImage) {
                                 return ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: GestureDetector(
@@ -270,7 +297,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                             body: Center(
                                               child: InteractiveViewer(
                                                 child: CachedNetworkImage(
-                                                  imageUrl: isImage ? imageUrl : waImageUrl,
+                                                  imageUrl: imageUrl,
                                                   placeholder: (context, url) => const CircularProgressIndicator(color: Colors.white),
                                                   errorWidget: (context, url, error) => const Icon(Icons.broken_image, color: Colors.white, size: 60),
                                                 ),
@@ -281,7 +308,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       );
                                     },
                                     child: CachedNetworkImage(
-                                      imageUrl: isImage ? imageUrl : waImageUrl,
+                                      imageUrl: imageUrl,
                                       placeholder: (context, url) => const SizedBox(
                                         width: 150,
                                         height: 150,

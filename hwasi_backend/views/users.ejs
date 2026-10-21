@@ -5,8 +5,18 @@
             <h2 class="card-title">
                 <i class="fas fa-users"></i> جميع المستخدمين
             </h2>
-            <span class="badge badge-info" style="font-size:0.85rem;"><%= users ? users.length : 0 %> مستخدم</span>
+            <span class="badge badge-info" style="font-size:0.85rem;"><%= pagination ? pagination.total : (users ? users.length : 0) %> مستخدم</span>
         </div>
+
+        <form method="GET" action="/admin/users" class="users-toolbar" role="search">
+            <label for="users-search" class="visually-hidden">بحث عن مستخدم</label>
+            <input id="users-search" type="search" name="q" value="<%= search || '' %>"
+                class="form-control" placeholder="ابحث بالاسم أو البريد أو الهاتف">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> بحث</button>
+            <% if (search) { %>
+                <a href="/admin/users" class="btn btn-secondary">مسح</a>
+            <% } %>
+        </form>
 
         <% if (users && users.length > 0) { %>
             <div class="table-responsive">
@@ -57,6 +67,17 @@
                     </tbody>
                 </table>
             </div>
+            <% if (pagination && pagination.totalPages > 1) { %>
+                <nav class="pagination-bar" aria-label="صفحات المستخدمين">
+                    <a class="btn btn-secondary <%= pagination.page <= 1 ? 'disabled' : '' %>"
+                        href="/admin/users?page=<%= pagination.page - 1 %>&q=<%= encodeURIComponent(search || '') %>"
+                        <%= pagination.page <= 1 ? 'aria-disabled="true" tabindex="-1"' : '' %>>السابق</a>
+                    <span>صفحة <%= pagination.page %> من <%= pagination.totalPages %></span>
+                    <a class="btn btn-secondary <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>"
+                        href="/admin/users?page=<%= pagination.page + 1 %>&q=<%= encodeURIComponent(search || '') %>"
+                        <%= pagination.page >= pagination.totalPages ? 'aria-disabled="true" tabindex="-1"' : '' %>>التالي</a>
+                </nav>
+            <% } %>
         <% } else { %>
             <div class="text-center" style="padding: 3rem; color: var(--text-muted);">
                 <i class="fas fa-users" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3; display:block;"></i>

@@ -1,5 +1,5 @@
 
-const supabase = require('../config/supabase');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 
 async function findLostImages() {
     const productId = '7b669edc-3c88-4a26-9f07-993ec23408dc';

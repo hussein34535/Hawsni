@@ -13,6 +13,10 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error(errorMsg);
 }
 
+if (!supabaseServiceKey && process.env.NODE_ENV === 'production') {
+  throw new Error('❌ CRITICAL ERROR: SUPABASE_SERVICE_ROLE_KEY is required in production.');
+}
+
 // Anon Key client — for general use (enforces RLS)
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {

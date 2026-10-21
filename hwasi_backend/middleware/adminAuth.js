@@ -1,33 +1,25 @@
-const jwt = require('jsonwebtoken');
-const supabase = require('../config/supabase');
+const { supabaseAdmin, supabaseAuth } = require('../config/supabase');
 
-/**
- * Middleware to protect Admin SSR routes (EJS)
- */
 exports.adminProtect = async (req, res, next) => {
     try {
-        // 1. Get token from Cookie or Authorization header
         let token = req.cookies?.admin_token;
 
-        if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        if (!token && req.headers.authorization?.startsWith('Bearer')) {
             token = req.headers.authorization.split(' ')[1];
         }
 
         if (!token) {
-            if (req.headers.accept && req.headers.accept.includes('text/html')) {
+            if (req.headers.accept?.includes('text/html')) {
                 return res.redirect('/admin/login');
             }
             return res.status(401).json({ success: false, message: 'يرجى تسجيل الدخول كمسؤول' });
         }
 
-        // 2. Verify with Supabase
-        let { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+        let { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
-        // 2.5 Attempt to Refresh if Expired
         if (authError || !authUser) {
             const refreshToken = req.cookies?.admin_refresh_token;
             if (refreshToken) {
-                const { supabaseAuth } = require('../config/supabase');
                 const { data: refreshData, error: refreshError } = await supabaseAuth.auth.setSession({
                     access_token: token || '',
                     refresh_token: refreshToken
@@ -38,7 +30,8 @@ exports.adminProtect = async (req, res, next) => {
                     const cookieOptions = {
                         httpOnly: true,
                         secure: isSecure,
-                        sameSite: isSecure ? 'None' : 'Lax',
+                        sameSite: 'Lax',
+                        path: '/',
                         maxAge: 7 * 24 * 60 * 60 * 1000
                     };
                     res.cookie('admin_token', refreshData.session.access_token, cookieOptions);
@@ -50,20 +43,19 @@ exports.adminProtect = async (req, res, next) => {
         }
 
         if (authError || !authUser) {
-            res.clearCookie('admin_token');
-            res.clearCookie('admin_refresh_token');
-            if (req.headers.accept && req.headers.accept.includes('text/html')) {
+            res.clearCookie('admin_token', { path: '/' });
+            res.clearCookie('admin_refresh_token', { path: '/' });
+            if (req.headers.accept?.includes('text/html')) {
                 return res.redirect('/admin/login');
             }
             return res.status(401).json({ success: false, message: 'انتهت صلاحية الجلسة' });
         }
 
-        // 3. Check Role in DB
-        const { data: userProfile, error: profileError } = await supabase
+        const { data: userProfile, error: profileError } = await supabaseAdmin
             .from('users')
-            .select('*')
+            .select('id, name, email, role, avatar_url')
             .eq('id', authUser.id)
-            .single();
+            .maybeSingle();
 
         if (profileError || !userProfile || userProfile.role !== 'admin') {
             return res.status(403).render('error', {
@@ -75,10 +67,10 @@ exports.adminProtect = async (req, res, next) => {
         req.user = userProfile;
         next();
     } catch (error) {
-        console.error('Admin Auth Error:', error);
+        console.error('Admin auth error:', error.message);
         res.status(500).render('error', {
             message: 'حدث خطأ في المصادقة',
-            error: error
+            error: { status: 500 }
         });
     }
 };

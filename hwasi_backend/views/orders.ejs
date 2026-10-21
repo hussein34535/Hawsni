@@ -478,11 +478,12 @@
         <i class="fas fa-check-circle"></i><span>تم النسخ</span>
     </div>
     <script id="orders-data" type="application/json">
-        <%- JSON.stringify(orders) %>
+        <%- JSON.stringify(orders).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') %>
     </script>
     <script>
         const ordersData = JSON.parse(document.getElementById('orders-data').textContent || '[]');
         const CSRF_TOKEN = '<%= csrfToken %>';
+        const escHtml = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         const sMap = {
             'Processing': 'warning',
             'Confirmed': 'primary',
@@ -689,42 +690,80 @@
             const itemsList = document.getElementById('modalItemsList');
             itemsList.innerHTML = '';
 
+            const safeImage = (value) => {
+                try {
+                    const url = new URL(String(value || ''), window.location.origin);
+                    if (url.protocol === 'https:' || url.protocol === 'http:') return url.href;
+                } catch {}
+                return '/placeholder.png';
+            };
+
             (order.order_items || order.items || []).forEach(item => {
                 const p = item.products || {};
                 let img = item.image_url || ((p.images && p.images.length > 0) ? p.images[0] : '/placeholder.png');
-
-                // Final safety: if the stored URL is a placeholder, try product gallery again
                 if (img.includes('placeholder.png') && p.images && p.images.length > 0) {
                     img = p.images[0];
                 }
 
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'premium-item-row';
-                itemDiv.innerHTML = `
-                    <div class="item-visual">
-                        <img src="${img}" onerror="this.onerror=null; this.src='/placeholder.png';" class="item-img-detailed">
-                    </div>
-                    <div class="item-info">
-                        <div class="item-name-row">
-                            <span class="item-main-name">${p.name || item.name || 'منتج غير معروف'}</span>
-                            <span class="item-qty">x${item.quantity}</span>
-                        </div>
-                        <div class="item-specs">
-                            ${item.size ? `<span class="spec-tag">المقاس: ${item.size}</span>` : ''}
-                            ${item.color ? `
-                                <span class="spec-tag">
-                                    اللون: 
-                                    ${item.color.startsWith('#') ? `<span class="color-circle" style="background-color: ${item.color}"></span>` : ''}
-                                    ${item.color}
-                                </span>
-                            ` : ''}
-                        </div>
-                    </div>
-                    <div class="item-price-col">
-                        <div class="unit-price">${parseFloat(item.price).toFixed(2)} ج.م</div>
-                        <div class="total-line">${(item.quantity * item.price).toFixed(2)} ج.م</div>
-                    </div>
-                `;
+
+                const visual = document.createElement('div');
+                visual.className = 'item-visual';
+                const image = document.createElement('img');
+                image.className = 'item-img-detailed';
+                image.src = safeImage(img);
+                image.alt = String(p.name || item.name || '');
+                image.onerror = () => { image.onerror = null; image.src = '/placeholder.png'; };
+                visual.appendChild(image);
+
+                const info = document.createElement('div');
+                info.className = 'item-info';
+
+                const nameRow = document.createElement('div');
+                nameRow.className = 'item-name-row';
+                const name = document.createElement('span');
+                name.className = 'item-main-name';
+                name.textContent = p.name || item.name || 'منتج غير معروف';
+                const qty = document.createElement('span');
+                qty.className = 'item-qty';
+                qty.textContent = 'x' + (parseInt(item.quantity, 10) || 1);
+                nameRow.append(name, qty);
+
+                const specs = document.createElement('div');
+                specs.className = 'item-specs';
+                if (item.size) {
+                    const size = document.createElement('span');
+                    size.className = 'spec-tag';
+                    size.textContent = 'المقاس: ' + item.size;
+                    specs.appendChild(size);
+                }
+                if (item.color) {
+                    const color = document.createElement('span');
+                    color.className = 'spec-tag';
+                    color.appendChild(document.createTextNode('اللون: '));
+                    if (/^#[0-9a-f]{3,8}$/i.test(String(item.color))) {
+                        const dot = document.createElement('span');
+                        dot.className = 'color-circle';
+                        dot.style.backgroundColor = item.color;
+                        color.appendChild(dot);
+                    }
+                    color.appendChild(document.createTextNode(' ' + item.color));
+                    specs.appendChild(color);
+                }
+                info.append(nameRow, specs);
+
+                const priceCol = document.createElement('div');
+                priceCol.className = 'item-price-col';
+                const unitPrice = document.createElement('div');
+                unitPrice.className = 'unit-price';
+                unitPrice.textContent = (parseFloat(item.price) || 0).toFixed(2) + ' ج.م';
+                const totalLine = document.createElement('div');
+                totalLine.className = 'total-line';
+                totalLine.textContent = ((parseInt(item.quantity, 10) || 1) * (parseFloat(item.price) || 0)).toFixed(2) + ' ج.م';
+                priceCol.append(unitPrice, totalLine);
+
+                itemDiv.append(visual, info, priceCol);
                 itemsList.appendChild(itemDiv);
             });
 
@@ -2545,7 +2584,7 @@
             const json = await res.json();
 
             if (!res.ok || !json.success) {
-                body.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;"><div style="font-size:2rem; margin-bottom:8px;">⚠️</div><div style="font-weight:700;">' + (json.message || 'لم يتم العثور على الشحنة') + '</div></div>';
+                body.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;"><div style="font-size:2rem; margin-bottom:8px;">⚠️</div><div style="font-weight:700;">' + escHtml(json.message || 'لم يتم العثور على الشحنة') + '</div></div>';
                 return;
             }
 
@@ -2561,7 +2600,7 @@
                     timelineHtml += `<div style="display:flex; gap:12px; margin-bottom:12px; align-items:flex-start;">
                         <div style="width:9px; height:9px; border-radius:50%; background:${dot}; flex-shrink:0; margin-top:5px;"></div>
                         <div>
-                            <div style="font-size:0.85rem; font-weight:800; color:${i===0?'#0E4435':'#475569'};">${ev.status}</div>
+                            <div style="font-size:0.85rem; font-weight:800; color:${i===0?'#0E4435':'#475569'};">${escHtml(ev.status || '')}</div>
                             ${dateStr ? `<div style="font-size:0.72rem; color:#94a3b8; margin-top:2px;">${dateStr}</div>` : ''}
                         </div>
                     </div>`;
@@ -2574,8 +2613,8 @@
             body.innerHTML = `
                 <div>
                     <div style="background:#f8fffe; border:1.5px solid #e0f0ea; border-radius:14px; padding:16px; margin-bottom:4px;">
-                        <div style="font-size:1rem; font-weight:900; color:${statusColor}; margin-bottom:6px;">${t.status}</div>
-                        ${t.city ? `<div style="font-size:0.8rem; color:#64748b;">📍 ${t.city}</div>` : ''}
+                        <div style="font-size:1rem; font-weight:900; color:${statusColor}; margin-bottom:6px;">${escHtml(t.status || '')}</div>
+                        ${t.city ? `<div style="font-size:0.8rem; color:#64748b;">📍 ${escHtml(t.city)}</div>` : ''}
                     </div>
                     ${timelineHtml}
                 </div>`;
@@ -2820,88 +2859,24 @@
             return `
                 <div style="display:grid; grid-template-columns:1fr 80px 70px 80px 36px; gap:8px; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
                     <div>
-                        <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${item.name}</div>
+                        <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${escHtml(item.name)}</div>
                         <div style="display:flex; gap:6px; margin-top:4px;">
-                            <select onchange="updateEditItem(${actualIdx},'size',this.value)" style="padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem; background:#fff;">
+                            <select onchange="updateEditItem(${Number(actualIdx)},'size',this.value)" style="padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem; background:#fff;">
                                 <option value="">مقاس</option>
-                                ${(item._sizes || []).map(s => `<option value="${s}" ${item.size === s ? 'selected' : ''}>${s}</option>`).join('')}
+                                ${(item._sizes || []).map(s => `<option value="${escHtml(s)}" ${item.size === s ? 'selected' : ''}>${escHtml(s)}</option>`).join('')}
                                 <option value="__custom__" ${!['','XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? 'selected' : ''}>أخرى...</option>
                             </select>
-                            ${!['XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? `<input type="text" value="${item.size}" onchange="updateEditItem(${actualIdx},'size',this.value)" style="width:50px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">` : ''}
-                            <input type="text" placeholder="لون" value="${item.color}" onchange="updateEditItem(${actualIdx},'color',this.value)" style="width:60px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">
+                            ${!['XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? `<input type="text" value="${escHtml(item.size)}" onchange="updateEditItem(${Number(actualIdx)},'size',this.value)" style="width:50px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">` : ''}
+                            <input type="text" placeholder="لون" value="${escHtml(item.color)}" onchange="updateEditItem(${Number(actualIdx)},'color',this.value)" style="width:60px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">
                         </div>
                     </div>
                     <div>
                         <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">الكمية</label>
-                        <input type="number" min="1" value="${item.quantity}" onchange="updateEditItem(${actualIdx},'quantity',parseInt(this.value)||1)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                        <input type="number" min="1" value="${Number(item.quantity) || 1}" onchange="updateEditItem(${Number(actualIdx)},'quantity',parseInt(this.value)||1)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
                     </div>
                     <div>
                         <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">السعر</label>
-                        <input type="number" min="0" step="0.01" value="${item.price}" onchange="updateEditItem(${actualIdx},'price',parseFloat(this.value)||0)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
-                    </div>
-                    <div style="text-align:center;">
-                        <button type="button" onclick="removeEditItem(${actualIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem; padding:4px;" title="حذف المنتج">&times;</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function updateEditItem(idx, field, value) {
-        if (editItemsData[idx]) {
-            editItemsData[idx][field] = value;
-        }
-    }
-
-    function removeEditItem(idx) {
-        if (editItemsData[idx]) {
-            if (editItemsData[idx].id) {
-                editItemsData[idx]._removed = true; // Mark for deletion on save
-            } else {
-                editItemsData.splice(idx, 1); // New item, just remove
-            }
-            renderEditItems();
-        }
-    }
-
-    function closeEditModal() {
-        document.getElementById('editOrderModal').style.display = 'none';
-    }
-    document.getElementById('editOrderModal').addEventListener('click', function(e) {
-        if (e.target === this) closeEditModal();
-    });
-
-    // ===== Items Rendering =====
-    function renderEditItems() {
-        const container = document.getElementById('editItemsContainer');
-        const activeItems = editItemsData.filter(i => !i._removed);
-        if (activeItems.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem; font-weight:600;">لا توجد منتجات — أضف أول منتج</div>';
-            return;
-        }
-        container.innerHTML = activeItems.map((item, idx) => {
-            const actualIdx = editItemsData.indexOf(item);
-            return `
-                <div style="display:grid; grid-template-columns:1fr 80px 70px 80px 36px; gap:8px; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
-                    <div>
-                        <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${item.name}</div>
-                        <div style="display:flex; gap:6px; margin-top:4px;">
-                            <select onchange="updateEditItem(${actualIdx},'size',this.value)" style="padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem; background:#fff;">
-                                <option value="">مقاس</option>
-                                ${(item._sizes || []).map(s => `<option value="${s}" ${item.size === s ? 'selected' : ''}>${s}</option>`).join('')}
-                                <option value="__custom__" ${!['','XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? 'selected' : ''}>أخرى...</option>
-                            </select>
-                            ${!['XS','S','M','L','XL','XXL','3XL','4XL','5XL', ...(item._sizes||[])].includes(item.size) && item.size ? `<input type="text" value="${item.size}" onchange="updateEditItem(${actualIdx},'size',this.value)" style="width:50px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">` : ''}
-                            <input type="text" placeholder="لون" value="${item.color}" onchange="updateEditItem(${actualIdx},'color',this.value)" style="width:60px; padding:2px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.72rem;">
-                        </div>
-                    </div>
-                    <div>
-                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">الكمية</label>
-                        <input type="number" min="1" value="${item.quantity}" onchange="updateEditItem(${actualIdx},'quantity',parseInt(this.value)||1)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
-                    </div>
-                    <div>
-                        <label style="display:block; font-size:0.65rem; color:#94a3b8; font-weight:600; margin-bottom:2px;">السعر</label>
-                        <input type="number" min="0" step="0.01" value="${item.price}" onchange="updateEditItem(${actualIdx},'price',parseFloat(this.value)||0)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                        <input type="number" min="0" step="0.01" value="${Number(item.price) || 0}" onchange="updateEditItem(${Number(actualIdx)},'price',parseFloat(this.value)||0)" style="width:100%; padding:4px 6px; border:1px solid #e2e8f0; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
                     </div>
                     <div style="text-align:center;">
                         <button type="button" onclick="removeEditItem(${actualIdx})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem; padding:4px;" title="حذف المنتج">&times;</button>
@@ -2968,15 +2943,16 @@
             container.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem;">لا توجد منتجات</div>';
             return;
         }
+        const safeProductImage = (value) => /^https?:\/\//i.test(String(value || '')) ? escHtml(value) : '/placeholder.png';
         container.innerHTML = products.map(p => `
-            <div onclick="selectProductForEdit('${p.id}')" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; cursor:pointer; transition:0.15s; margin-bottom:4px; border:1px solid transparent;" 
+            <div data-product-id="${escHtml(p.id)}" onclick="selectProductForEdit(this.dataset.productId)" style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; cursor:pointer; transition:0.15s; margin-bottom:4px; border:1px solid transparent;"
                  onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#e2e8f0'" 
                  onmouseout="this.style.background='transparent'; this.style.borderColor='transparent'">
                 <div style="width:36px; height:36px; border-radius:8px; overflow:hidden; flex-shrink:0; background:#f1f5f9;">
-                    ${p.images && p.images[0] ? `<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;"><i class="fas fa-box"></i></div>'}
+                    ${p.images && p.images[0] ? `<img src="${safeProductImage(p.images[0])}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;"><i class="fas fa-box"></i></div>'}
                 </div>
                 <div style="flex:1;">
-                    <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${p.name}</div>
+                    <div style="font-weight:700; font-size:0.85rem; color:#1e293b;">${escHtml(p.name)}</div>
                     <div style="font-size:0.72rem; color:#64748b;">${parseFloat(p.price).toFixed(2)} ج.م</div>
                 </div>
                 <div style="color:#0E4435; font-size:0.75rem; font-weight:700;"><i class="fas fa-plus-circle"></i> إضافة</div>
@@ -3117,40 +3093,6 @@
         }
     }
 
-    // ===== Supabase Realtime for Deposits =====
-    try {
-        if (typeof sbClient !== 'undefined') {
-            sbClient.channel('orders-receipts')
-                .on('postgres_changes',
-                    { event: 'UPDATE', schema: 'public', table: 'orders' },
-                    async (payload) => {
-                        const oldOrder = payload.old;
-                        const newOrder = payload.new;
-                        // Only notify if receipt_url changed from null → non-null
-                        if (oldOrder && !oldOrder.deposit_receipt_url && newOrder.deposit_receipt_url) {
-                            if (newOrder.status !== 'Confirmed' && newOrder.status !== 'Cancelled' && newOrder.status !== 'Delivered') {
-                            // Update counter
-                            const countEl = document.getElementById('pendingReceiptCount');
-                            if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
-                            // Highlight row
-                            const row = document.getElementById('row-' + newOrder.id);
-                            if (row) {
-                                row.classList.add('pending-receipt');
-                                row.dataset.hasPendingReceipt = 'true';
-                            }
-                            // Toast
-                            const t = document.createElement('div');
-                            t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;background:#c2410c;color:#fff;padding:14px 20px;border-radius:14px;font-size:0.9rem;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,0.25);animation:fadeInUp 0.3s ease;font-family:"Cairo",sans-serif;max-width:350px;direction:rtl;';
-                            t.innerHTML = '<i class="fas fa-file-invoice-dollar"></i> إيصال جديد بانتظار التأكيد — <span style="opacity:0.8;">#' + (newOrder.id ? newOrder.id.substring(0,6) : '') + '</span>';
-                            document.body.appendChild(t);
-                            setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 400); }, 5000);
-                            }
-                        }
-                    }
-                )
-                .subscribe();
-        }
-    } catch (e) { console.log('[Receipt] Realtime init skipped:', e.message); }
     </script>
 
 <%- include('partials/footer') %>

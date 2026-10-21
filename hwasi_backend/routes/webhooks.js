@@ -1,8 +1,7 @@
 const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
-const supabase = require('../config/supabase');
-const { supabaseAdmin } = require('../config/supabase');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 const emailService = require('../services/emailService');
 const whatsappService = require('../services/whatsappService');
 

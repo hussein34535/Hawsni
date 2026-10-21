@@ -522,12 +522,11 @@
     <img id="lightbox-img" alt="">
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    const db = supabase.createClient('<%= supabaseUrl %>', '<%= supabaseAnonKey %>');
     const CSRF_TOKEN = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>';
 
-    let rawSessions = [], sessions = [], messages = [], activeId = null, filter = 'all', msgCh = null;
+    let rawSessions = [], sessions = [], messages = [], activeId = null, filter = 'all';
+    let messagesTimer = null, lastMessageAt = null;
     const el = id => document.getElementById(id);
     const elSessionList = el('session-list');
     const elMsgs = el('msgs-area');
@@ -557,7 +556,7 @@
         document.body.style.margin = '0';
         document.body.style.padding = '0';
         await loadSessions();
-        subSessions();
+        startSessionPolling();
         const sid = new URLSearchParams(window.location.search).get('sessionId') || localStorage.getItem('chatSessionId');
         if (sid) { localStorage.setItem('chatSessionId', sid); openSession(sid); }
     })();
@@ -565,10 +564,21 @@
     async function loadSessions(keepScroll = false) {
         try {
             const r = await fetch('/admin/chat/sessions');
-            rawSessions = (await r.json()).sessions || [];
+            const data = await r.json();
+            rawSessions = data.sessions || [];
         } catch (e) { rawSessions = []; }
         sessions = rawSessions;
         renderSessions(keepScroll);
+    }
+
+    function startSessionPolling() {
+        window.setInterval(async () => {
+            await loadSessions(true);
+            if (activeId) {
+                const current = sessions.find(x => x.session_id === activeId);
+                if (current) updateBtns(current);
+            }
+        }, 8000);
     }
 
     function previewText(s) {
@@ -653,7 +663,7 @@
                 : s.status === 'closed' ? '<span class="s-status closed">مغلقة</span>' : '';
             const count = u > 0 ? '<span class="unread-count">' + (u > 99 ? '99+' : u) + '</span>' : '';
             const cls = [s.session_id === activeId ? 'active' : '', u > 0 ? 'unread' : ''].filter(Boolean).join(' ');
-            return `<div class="s-item ${cls}" onclick="openSession('${s.session_id}')">
+            return `<div class="s-item ${cls}" data-session-id="${escHtml(s.session_id)}">
                 <div class="s-avatar ${wa ? 'wa' : 'web'}">${icon}${u > 0 ? '<span class="s-unread-dot"></span>' : ''}</div>
                 <div class="s-info">
                     <div class="s-name"><span class="s-name-text"${wa ? ' dir="ltr"' : ''}>${escHtml(displayName(s))}</span>${status}${count}</div>
@@ -693,7 +703,7 @@
         elMsgs.innerHTML = '<div class="empty-chat"><i class="fas fa-spinner fa-spin"></i><p style="color:#94a3b8;">جاري تحميل الرسائل...</p></div>';
         await loadMessages(id);
         if (activeId !== id) return;
-        subMessages(id);
+        startMessagesPolling(id);
 
         fetch('/admin/chat/mark-read', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
@@ -718,6 +728,7 @@
             document.querySelector('.chat-wrap').classList.remove('chat-open');
             el('order-panel').classList.remove('active');
             activeId = null;
+            if (messagesTimer) { window.clearInterval(messagesTimer); messagesTimer = null; }
             localStorage.removeItem('chatSessionId');
             elFooter.style.display = 'none';
             el('chat-top').style.display = 'none';
@@ -742,13 +753,52 @@
     }
 
     async function loadMessages(id) {
-        const { data } = await db.from('chat_messages')
-            .select('id, session_id, sender_type, content, created_at, wa_status, is_read')
-            .eq('session_id', id)
-            .order('created_at', { ascending: true });
-        if (activeId !== id) return;
-        messages = data || [];
+        try {
+            const r = await fetch('/admin/chat/messages/' + encodeURIComponent(id));
+            const data = await r.json();
+            if (activeId !== id) return;
+            messages = data.success ? (data.messages || []) : [];
+            lastMessageAt = messages.length ? messages[messages.length - 1].created_at : null;
+        } catch (e) {
+            if (activeId === id) messages = [];
+        }
         renderMsgs();
+    }
+
+    function startMessagesPolling(id) {
+        if (messagesTimer) window.clearInterval(messagesTimer);
+        messagesTimer = window.setInterval(() => pollMessages(id), 4000);
+    }
+
+    async function pollMessages(id) {
+        if (activeId !== id) return;
+        try {
+            const query = lastMessageAt ? '?after=' + encodeURIComponent(lastMessageAt) : '';
+            const r = await fetch('/admin/chat/messages/' + encodeURIComponent(id) + query);
+            if (!r.ok) return;
+            const data = await r.json();
+            if (activeId !== id || !data.success || !Array.isArray(data.messages) || !data.messages.length) return;
+
+            let hasUserMessage = false;
+            data.messages.forEach(m => {
+                if (m.sender_type === 'user') hasUserMessage = true;
+                const idx = messages.findIndex(x => x.id === m.id);
+                if (idx === -1) messages.push(m);
+                else messages[idx] = { ...messages[idx], ...m };
+                if (!lastMessageAt || m.created_at > lastMessageAt) lastMessageAt = m.created_at;
+            });
+            renderMsgs();
+
+            if (hasUserMessage) {
+                fetch('/admin/chat/mark-read', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
+                    body: JSON.stringify({ sessionId: id })
+                }).catch(() => {});
+                loadSessions(true);
+            }
+        } catch (e) {
+            // Retry on the next interval.
+        }
     }
 
     function openLightbox(src) { el('lightbox-img').src = src; el('lightbox').classList.add('active'); }
@@ -790,14 +840,14 @@
             const icon = u ? '👤' : b ? '🤖' : '🧑\u200d💼';
             const label = u ? 'عميل' : b ? 'هَوَسي' : 'موظف';
             const time = d.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
-            let txt = (m.content || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-            const img = txt.match(/\[IMAGE:(.+?)\]/);
-            if (img) {
-                txt = txt.replace(img[0], `<img src="/admin/chat/media/${img[1]}" onclick="openLightbox(this.src)" onerror="this.outerHTML='<span style=color:#999;font-size:12px;>🖼️ الصورة غير متاحة</span>'">`);
-            }
-            const imgUrl = txt.match(/\[IMAGE_URL:(.+?)\]/);
-            if (imgUrl) {
-                txt = txt.replace(imgUrl[0], `<img src="${imgUrl[1]}" onclick="openLightbox(this.src)" onerror="this.outerHTML='<span style=color:#999;font-size:12px;>️ الصورة غير متاحة</span>'" style="max-width:200px;border-radius:8px;margin:4px 0;">`);
+            const rawContent = String(m.content || '');
+            let txt = escHtml(rawContent).replace(/\n/g, '<br>');
+            const waImage = rawContent.match(/^\[IMAGE:(\d{5,40})\]$/);
+            const cloudImage = rawContent.match(/^\[IMAGE_URL:(https:\/\/res\.cloudinary\.com\/[^\]\s]+)\]$/);
+            if (waImage) {
+                txt = `<img src="/admin/chat/media/${waImage[1]}" alt="مرفق" loading="lazy" onclick="openLightbox(this.src)" onerror="this.style.display='none'" style="max-width:200px;border-radius:8px;margin:4px 0;">`;
+            } else if (cloudImage) {
+                txt = `<img src="${escHtml(cloudImage[1])}" alt="مرفق" loading="lazy" onclick="openLightbox(this.src)" onerror="this.style.display='none'" style="max-width:200px;border-radius:8px;margin:4px 0;">`;
             }
 
             // Message status ticks (only for admin/bot outgoing messages)
@@ -815,7 +865,7 @@
                 }
             }
 
-            html += `<div class="msg-row ${cls}" data-msg-id="${m.id || ''}"><div class="bubble"><span class="b-label">${icon} ${label}</span>${txt}<div class="b-time"><span>${time}</span>${statusTick}</div></div></div>`;
+            html += `<div class="msg-row ${cls}" data-msg-id="${escHtml(m.id || '')}"><div class="bubble"><span class="b-label">${icon} ${label}</span>${txt}<div class="b-time"><span>${time}</span>${statusTick}</div></div></div>`;
         });
         elMsgs.innerHTML = html;
         elMsgs.scrollTop = elMsgs.scrollHeight;
@@ -879,6 +929,7 @@
             const data = await response.json();
             if (data.success) {
                 showToast('تم إرسال الصورة بنجاح', 'success');
+                if (activeId) pollMessages(activeId);
             } else {
                 showToast(data.message || 'فشل إرسال الصورة', 'danger');
             }
@@ -915,6 +966,7 @@
                 } else if (d.fallback) {
                     showToast('تم الإرسال عبر القالب (قد يختلف الشكل عن النص الأصلي)', 'info');
                 }
+                if (activeId) pollMessages(activeId);
             })
             .catch(() => {});
         }
@@ -951,95 +1003,29 @@
         if (!activeId) { alert('لا توجد محادثة مفتوحة'); return; }
         panel.classList.add('active');
         el('order-body').innerHTML = '<div style="text-align:center;padding:40px 0;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:24px;margin-bottom:12px;display:block;"></i>جاري التحميل...</div>';
-        const digits = activeId.replace(/\D/g, '');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
         try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 15000);
-            const { data, error } = await db
-                .from('orders')
-                .select('id, order_number, status, total, created_at, shipping_address')
-                .gte('created_at', new Date(Date.now() - 90*24*60*60*1000).toISOString())
-                .order('created_at', { ascending: false })
-                .limit(50)
-                .abortSignal(controller.signal);
-            clearTimeout(timeout);
-            if (error) throw error;
-            const matched = (data || []).filter(o => {
-                const phone = (o.shipping_address?.phone || '').replace(/\D/g, '');
-                return phone.includes(digits) || digits.includes(phone);
-            });
-            if (!matched.length) {
+            const r = await fetch('/admin/chat/orders/' + encodeURIComponent(activeId), { signal: controller.signal });
+            const data = await r.json();
+            if (!data.success || !data.orders?.length) {
                 el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-box-open" style="font-size:40px;margin-bottom:12px;display:block;opacity:0.3;"></i>لا توجد طلبات لهذا الرقم</div>';
                 return;
             }
-            el('order-body').innerHTML = matched.map(o => {
-                    const statusColor = o.status === 'Delivered' ? '#16a34a' : o.status === 'Shipped' || o.status === 'In Transit' ? '#2563eb' : o.status === 'Cancelled' ? '#dc2626' : '#d97706';
+            el('order-body').innerHTML = data.orders.map(o => {
+                const statusColor = o.status === 'Delivered' ? '#16a34a' : o.status === 'Shipped' || o.status === 'In Transit' ? '#2563eb' : o.status === 'Cancelled' ? '#dc2626' : '#d97706';
                 return `<div class="order-card">
-                    <h4><span>طلب #${o.order_number || o.id?.slice(0,8)}</span><span class="status-badge" style="background:${statusColor}20;color:${statusColor};">${o.status || 'قيد الانتظار'}</span></h4>
-                    <div class="row"><span>العميل</span><span>${o.shipping_address?.name || '—'}</span></div>
-                    <div class="row"><span>الإجمالي</span><span>${o.total || 0} ج.م</span></div>
+                    <h4><span>طلب #${escHtml(o.order_number || String(o.id || '').slice(0, 8))}</span><span class="status-badge" style="background:${statusColor}20;color:${statusColor};">${escHtml(o.status || 'قيد الانتظار')}</span></h4>
+                    <div class="row"><span>العميل</span><span>${escHtml(o.customer_name || '—')}</span></div>
+                    <div class="row"><span>الإجمالي</span><span>${Number(o.total) || 0} ج.م</span></div>
                     <div class="row"><span>التاريخ</span><span>${new Date(o.created_at).toLocaleDateString('ar-EG')}</span></div>
                 </div>`;
             }).join('');
         } catch (e) {
-            console.error('Orders direct query failed, trying backend fallback:', e);
-            try {
-                const r = await fetch('/admin/chat/orders/' + encodeURIComponent(activeId));
-                const d = await r.json();
-                if (!d.success || !d.orders?.length) {
-                    el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-box-open" style="font-size:40px;margin-bottom:12px;display:block;opacity:0.3;"></i>لا توجد طلبات لهذا الرقم</div>';
-                    return;
-                }
-                el('order-body').innerHTML = d.orders.map(o => {
-                const statusColor = o.status === 'Delivered' ? '#16a34a' : o.status === 'Shipped' || o.status === 'In Transit' ? '#2563eb' : o.status === 'Cancelled' ? '#dc2626' : '#d97706';
-                    return `<div class="order-card">
-                        <h4><span>طلب #${o.order_number || o.id?.slice(0,8)}</span><span class="status-badge" style="background:${statusColor}20;color:${statusColor};">${o.status || 'قيد الانتظار'}</span></h4>
-                        <div class="row"><span>العميل</span><span>${o.customer_name || '—'}</span></div>
-                        <div class="row"><span>الإجمالي</span><span>${o.total || 0} ج.م</span></div>
-                        <div class="row"><span>التاريخ</span><span>${new Date(o.created_at).toLocaleDateString('ar-EG')}</span></div>
-                    </div>`;
-                }).join('');
-            } catch (e2) {
-                console.error('Orders fallback also failed:', e2);
-                el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">تعذر تحميل الطلبات. حاول مرة أخرى.</div>';
-            }
+            el('order-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">تعذر تحميل الطلبات. حاول مرة أخرى.</div>';
+        } finally {
+            clearTimeout(timeout);
         }
-    }
-
-    function subSessions() {
-        db.channel('c-sessions').on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions' }, async () => {
-            await loadSessions(true);
-            if (activeId) { const s = sessions.find(x => x.session_id === activeId); if (s) updateBtns(s); }
-        }).subscribe();
-    }
-
-    function subMessages(id) {
-        if (msgCh) db.removeChannel(msgCh);
-        msgCh = db.channel('c-msgs-' + id).on('postgres_changes', {
-            event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${id}`
-        }, p => {
-            if (!messages.find(m => m.id === p.new.id)) {
-                messages.push(p.new);
-                renderMsgs();
-            }
-            if (activeId === id) {
-                fetch('/admin/chat/mark-read', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'CSRF-Token': CSRF_TOKEN },
-                    body: JSON.stringify({ sessionId: id })
-                }).catch(() => {}).then(() => loadSessions(true));
-            } else { loadSessions(true); }
-        })
-        // Also listen for UPDATE events to catch wa_status changes (delivery ticks)
-        .on('postgres_changes', {
-            event: 'UPDATE', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${id}`
-        }, p => {
-            const idx = messages.findIndex(m => m.id === p.new.id);
-            if (idx !== -1) {
-                messages[idx] = { ...messages[idx], ...p.new };
-                renderMsgs();
-            }
-        })
-        .subscribe();
     }
 
     document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
@@ -1048,6 +1034,10 @@
         filter = b.dataset.filter;
         renderSessions();
     }));
+    elSessionList.addEventListener('click', e => {
+        const item = e.target.closest('.s-item');
+        if (item && item.dataset.sessionId) openSession(item.dataset.sessionId);
+    });
     el('search-input').addEventListener('input', () => renderSessions());
     elMsgInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMsg(); });
 

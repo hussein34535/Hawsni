@@ -3,6 +3,8 @@ const { supabaseAdmin: supabase } = require('../../config/supabase');
 const whatsappService = require('../../services/whatsappService');
 const uploadToCloudinary = require('../../utils/fileUpload');
 
+const SESSION_RE = /^[A-Za-z0-9_-]{8,100}$/;
+
 class AdminChatController {
     async renderChatInbox(req, res) {
         try {
@@ -10,9 +12,7 @@ class AdminChatController {
                 title: 'شات الدعم المباشر',
                 page: 'chat',
                 path: '/admin/chat',
-                user: req.user,
-                supabaseUrl: process.env.SUPABASE_URL,
-                supabaseAnonKey: process.env.SUPABASE_ANON_KEY
+                user: req.user
             });
         } catch (error) {
             console.error('Error rendering chat inbox:', error);
@@ -26,20 +26,22 @@ class AdminChatController {
             const { data: sessions, error } = await supabase
                 .from('chat_sessions')
                 .select('*')
-                .order('updated_at', { ascending: false });
+                .order('updated_at', { ascending: false })
+                .limit(200);
 
             if (error) throw error;
 
-            const ids = sessions.map(s => s.session_id);
+            const ids = (sessions || []).map(s => s.session_id);
             const enriched = [];
 
             if (ids.length > 0) {
-                // Fetch all messages for these sessions (latest first) to build last-message map
+                // Fetch recent messages for these sessions to build the last-message map.
                 const { data: allMsgs } = await supabase
                     .from('chat_messages')
                     .select('session_id, content, sender_type, created_at, is_read')
                     .in('session_id', ids)
-                    .order('created_at', { ascending: false });
+                    .order('created_at', { ascending: false })
+                    .limit(5000);
 
                 let lastMap = {};
                 let unreadMap = {};
@@ -90,6 +92,42 @@ class AdminChatController {
         }
     }
 
+    // ── 0.7 Get messages for a session (polling + initial load) ──
+    async getMessages(req, res) {
+        try {
+            const { sessionId } = req.params;
+            if (!SESSION_RE.test(sessionId)) {
+                return res.status(400).json({ success: false, error: 'Invalid sessionId' });
+            }
+
+            const after = String(req.query.after || '').trim();
+            const afterDate = after ? new Date(after) : null;
+            if (afterDate && Number.isNaN(afterDate.getTime())) {
+                return res.status(400).json({ success: false, error: 'Invalid after value' });
+            }
+
+            let query = supabase
+                .from('chat_messages')
+                .select('id, session_id, sender_type, content, created_at, is_read, wa_message_id, wa_status')
+                .eq('session_id', sessionId)
+                .order('created_at', { ascending: Boolean(afterDate) })
+                .limit(500);
+
+            if (afterDate) {
+                query = query.gt('created_at', afterDate.toISOString());
+            }
+
+            const { data, error } = await query;
+            if (error) throw error;
+
+            const messages = !afterDate && data ? data.slice().reverse() : (data || []);
+            return res.json({ success: true, messages });
+        } catch (error) {
+            console.error('[AdminChatController getMessages] Error:', error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    }
+
     // ── 1. Admin takes over session ─────────────────────────────
     async takeOver(req, res) {
         try {
@@ -116,20 +154,23 @@ class AdminChatController {
     async sendMessage(req, res) {
         try {
             const { sessionId, content } = req.body;
-            if (!sessionId || !content) {
-                return res.status(400).json({ success: false, error: 'Missing sessionId or content' });
+            const text = String(content || '').trim();
+            if (!SESSION_RE.test(String(sessionId || '')) || !text || text.length > 4000) {
+                return res.status(400).json({ success: false, error: 'Invalid sessionId or content' });
             }
 
             // Get session platform
-            const { data: session } = await supabase
-                .from('chat_sessions').select('platform').eq('session_id', sessionId).single();
+            const { data: session, error: sessionError } = await supabase
+                .from('chat_sessions').select('platform').eq('session_id', sessionId).maybeSingle();
+            if (sessionError) throw sessionError;
+            if (!session) return res.status(404).json({ success: false, error: 'Session not found' });
 
             // Send via WhatsApp only if WhatsApp session
             if (session?.platform === 'whatsapp') {
-                const waResult = await whatsappService.sendTextMessage(sessionId, content);
+                const waResult = await whatsappService.sendTextMessage(sessionId, text);
                 
                 // Save to DB always (for history)
-                const msgRow = { session_id: sessionId, sender_type: 'admin', content };
+                const msgRow = { session_id: sessionId, sender_type: 'admin', content: text };
                 if (waResult.wamid) {
                     msgRow.wa_message_id = waResult.wamid;
                     msgRow.wa_status = 'sent';
@@ -160,7 +201,7 @@ class AdminChatController {
             // Save to DB for web sessions
             if (session?.platform === 'web') {
                 await supabase.from('chat_messages').insert([{
-                    session_id: sessionId, sender_type: 'admin', content
+                    session_id: sessionId, sender_type: 'admin', content: text
                 }]);
             }
 
@@ -179,11 +220,11 @@ class AdminChatController {
     async sendImage(req, res) {
         try {
             const { sessionId } = req.body;
-            if (!sessionId) {
-                return res.status(400).json({ success: false, error: 'Missing sessionId' });
+            if (!SESSION_RE.test(String(sessionId || ''))) {
+                return res.status(400).json({ success: false, error: 'Invalid sessionId' });
             }
-            if (!req.file) {
-                return res.status(400).json({ success: false, error: 'Missing image file' });
+            if (!req.file || !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(req.file.mimetype)) {
+                return res.status(400).json({ success: false, error: 'Invalid image file' });
             }
 
             // 1. Upload image to Cloudinary
@@ -326,9 +367,12 @@ class AdminChatController {
     async getSessionOrders(req, res) {
         try {
             const { sessionId } = req.params;
-            if (!sessionId) return res.status(400).json({ success: false, error: 'Missing sessionId' });
+            if (!SESSION_RE.test(sessionId)) return res.status(400).json({ success: false, error: 'Invalid sessionId' });
 
             const digits = sessionId.replace(/\D/g, '');
+            if (digits.length < 8) {
+                return res.json({ success: true, orders: [] });
+            }
 
             // Fetch recent orders and filter by phone in JS (avoids JSONB query issues)
             const threeMonthsAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
@@ -370,6 +414,9 @@ class AdminChatController {
     async getWhatsAppMedia(req, res) {
         try {
             const mediaId = req.params.mediaId;
+            if (!/^\d{5,40}$/.test(mediaId)) {
+                return res.status(400).send('Invalid media id');
+            }
             const token = process.env.WHATSAPP_TOKEN;
             const apiVersion = process.env.WHATSAPP_API_VERSION || 'v20.0';
 

@@ -1,5 +1,5 @@
 const { GoogleGenAI } = require("@google/genai");
-const supabase = require('../config/supabase');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 
 // ─────────────────────────────────────────────
 //  CONSTANTS

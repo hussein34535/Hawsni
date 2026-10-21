@@ -69,8 +69,8 @@
             transition: all 0.2s !important;
         }
         .gov-row input:focus {
-            border-color: var(--primary-color) !important;
-            box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1) !important;
+            border-color: var(--brand-primary) !important;
+            box-shadow: 0 0 0 4px rgba(14, 68, 53, 0.1) !important;
             background: white !important;
             outline: none !important;
         }
@@ -108,10 +108,41 @@
             cursor: pointer;
         }
         .add-gov-btn:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-            background: rgba(var(--primary-rgb), 0.02);
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
+            background: rgba(14, 68, 53, 0.03);
         }
+        .shipping-page { padding: 1.5rem 0; }
+        .shipping-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .shipping-form-grid .form-group { margin: 0; }
+        .shipping-field-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .shipping-field-help {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0.5rem 0 0;
+        }
+        .shipping-count {
+            display: inline-flex;
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(14, 68, 53, 0.08);
+            color: var(--brand-primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        body.dark .shipping-count {
+            background: rgba(10, 132, 255, 0.14);
+            color: #64d2ff;
+        }
+        .save-bar .btn { margin: 0; }
         .info-pill {
             display: inline-flex;
             align-items: center;
@@ -201,10 +232,20 @@
             }
             .gov-row input:first-child { grid-column: span 2; }
             .remove-btn { grid-column: span 2; width: 100%; }
+            .shipping-form-grid { grid-template-columns: 1fr; }
+            .save-bar { bottom: 1rem; padding: 1rem; }
+            .save-bar .btn { width: 100%; }
         }
     </style>
 
-    <div class="container-fluid py-4">
+    <div class="shipping-page">
+        <% if (locals.success) { %>
+            <div class="alert alert-success" role="status">تم حفظ إعدادات الشحن بنجاح.</div>
+        <% } %>
+        <% if (locals.error) { %>
+            <div class="alert alert-danger" role="alert"><%= error %></div>
+        <% } %>
+
         <form method="POST" action="/admin/shipping">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             
@@ -212,54 +253,46 @@
             <div class="shipping-card">
                 <div class="shipping-card-header">
                     <h2 class="shipping-card-title">
-                        <i class="fas fa-globe-africa" style="color: var(--primary-color);"></i>
+                        <i class="fas fa-globe-africa" style="color: var(--brand-primary);"></i>
                         الإعدادات الافتراضية العامة
                     </h2>
                 </div>
                 <div class="shipping-card-body">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="form-group mb-0">
-                                <label class="form-label d-flex align-items-center gap-2">
-                                    <i class="fas fa-truck-loading text-primary"></i>
-                                    تكلفة الشحن الأساسية (ج.م)
-                                </label>
-                                <input type="number" name="delivery_cost" class="form-control form-control-lg"
-                                    value="<%= settings.delivery_cost || 0 %>" min="0" step="0.5" placeholder="0 = شحن مجاني">
-                                <p class="small text-muted mt-2">تُطبق هذه التكلفة على أي محافظة غير مذكورة في القائمة بالأسفل.</p>
-                            </div>
+                    <div class="shipping-form-grid">
+                        <div class="form-group">
+                            <label class="form-label shipping-field-label" for="delivery-cost">
+                                <i class="fas fa-truck-loading" style="color: var(--brand-primary);"></i>
+                                تكلفة الشحن الأساسية (ج.م)
+                            </label>
+                            <input id="delivery-cost" type="number" name="delivery_cost" class="form-control"
+                                value="<%= settings.delivery_cost || 0 %>" min="0" step="0.5" placeholder="0 = شحن مجاني">
+                            <p class="shipping-field-help">تُطبق هذه التكلفة على أي محافظة غير مذكورة في القائمة بالأسفل.</p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-0">
-                                <label class="form-label d-flex align-items-center gap-2">
-                                    <i class="fas fa-gift text-success"></i>
-                                    حد الشحن المجاني (ج.م)
-                                </label>
-                                <input type="number" name="free_shipping_threshold" class="form-control form-control-lg"
-                                    value="<%= settings.free_shipping_threshold || 0 %>" min="0" step="1"
-                                    placeholder="0 = لا يوجد حد">
-                                <p class="small text-muted mt-2">يُلغى سعر الشحن تماماً إذا تجاوز إجمالي الطلب هذا المبلغ.</p>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label shipping-field-label" for="free-shipping-threshold">
+                                <i class="fas fa-gift" style="color: #10b981;"></i>
+                                حد الشحن المجاني (ج.م)
+                            </label>
+                            <input id="free-shipping-threshold" type="number" name="free_shipping_threshold" class="form-control"
+                                value="<%= settings.free_shipping_threshold || 0 %>" min="0" step="1"
+                                placeholder="0 = لا يوجد حد">
+                            <p class="shipping-field-help">يُلغى سعر الشحن تماماً إذا تجاوز إجمالي الطلب هذا المبلغ.</p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-0">
-                                <label class="form-label d-flex align-items-center gap-2">
-                                    <i class="far fa-clock text-warning"></i>
-                                    أقل أيام توصيل
-                                </label>
-                                <input type="number" name="default_days_min" class="form-control"
-                                    value="<%= settings.default_days_min || 3 %>" min="1" max="30">
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label shipping-field-label" for="default-days-min">
+                                <i class="far fa-clock" style="color: #d97706;"></i>
+                                أقل أيام توصيل
+                            </label>
+                            <input id="default-days-min" type="number" name="default_days_min" class="form-control"
+                                value="<%= settings.default_days_min || 3 %>" min="1" max="30">
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-0">
-                                <label class="form-label d-flex align-items-center gap-2">
-                                    <i class="fas fa-history text-warning"></i>
-                                    أكثر أيام توصيل
-                                </label>
-                                <input type="number" name="default_days_max" class="form-control"
-                                    value="<%= settings.default_days_max || 7 %>" min="1" max="30">
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label shipping-field-label" for="default-days-max">
+                                <i class="fas fa-history" style="color: #d97706;"></i>
+                                أكثر أيام توصيل
+                            </label>
+                            <input id="default-days-max" type="number" name="default_days_max" class="form-control"
+                                value="<%= settings.default_days_max || 7 %>" min="1" max="30">
                         </div>
                     </div>
                 </div>
@@ -269,10 +302,10 @@
             <div class="shipping-card">
                 <div class="shipping-card-header">
                     <h2 class="shipping-card-title">
-                        <i class="fas fa-map-marked-alt text-danger"></i>
+                        <i class="fas fa-map-marked-alt" style="color: #ef4444;"></i>
                         تكاليف المحافظات المخصصة
                     </h2>
-                    <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill font-weight-bold" style="background-color: rgba(var(--primary-rgb), 0.1);">
+                    <span class="shipping-count">
                         <%= Object.keys(settings.governorate_settings || {}).length %> محافظات مخصصة
                     </span>
                 </div>
@@ -289,10 +322,10 @@
                         <% const govSettings = settings.governorate_settings || {}; %>
                         <% if (Object.keys(govSettings).length === 0) { %>
                             <div class="gov-row">
-                                <input type="text" name="gov_name[]" class="form-control" placeholder="مثال: القاهرة">
-                                <input type="number" name="gov_cost[]" class="form-control" placeholder="50" min="0" step="0.5">
-                                <input type="number" name="gov_days_min[]" class="form-control" placeholder="1" min="1">
-                                <input type="number" name="gov_days_max[]" class="form-control" placeholder="3" min="1">
+                                <input type="text" name="gov_name[]" class="form-control" placeholder="مثال: القاهرة" aria-label="اسم المحافظة">
+                                <input type="number" name="gov_cost[]" class="form-control" placeholder="50" min="0" step="0.5" aria-label="سعر الشحن">
+                                <input type="number" name="gov_days_min[]" class="form-control" placeholder="1" min="1" aria-label="أقل أيام توصيل">
+                                <input type="number" name="gov_days_max[]" class="form-control" placeholder="3" min="1" aria-label="أكثر أيام توصيل">
                                 <button type="button" onclick="removeRow(this)" class="remove-btn" title="حذف">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
@@ -300,10 +333,10 @@
                         <% } else { %>
                             <% Object.entries(govSettings).forEach(([name, cfg]) => { %>
                                 <div class="gov-row">
-                                    <input type="text" name="gov_name[]" class="form-control" value="<%= name %>">
-                                    <input type="number" name="gov_cost[]" class="form-control" value="<%= cfg.cost || 0 %>" min="0" step="0.5">
-                                    <input type="number" name="gov_days_min[]" class="form-control" value="<%= cfg.days_min || 1 %>" min="1">
-                                    <input type="number" name="gov_days_max[]" class="form-control" value="<%= cfg.days_max || 3 %>" min="1">
+                                    <input type="text" name="gov_name[]" class="form-control" value="<%= name %>" aria-label="اسم المحافظة">
+                                    <input type="number" name="gov_cost[]" class="form-control" value="<%= cfg.cost || 0 %>" min="0" step="0.5" aria-label="سعر الشحن">
+                                    <input type="number" name="gov_days_min[]" class="form-control" value="<%= cfg.days_min || 1 %>" min="1" aria-label="أقل أيام توصيل">
+                                    <input type="number" name="gov_days_max[]" class="form-control" value="<%= cfg.days_max || 3 %>" min="1" aria-label="أكثر أيام توصيل">
                                     <button type="button" onclick="removeRow(this)" class="remove-btn">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>
@@ -325,8 +358,8 @@
             </div>
 
             <div class="save-bar">
-                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow-lg" style="background-color: var(--primary-color); border: none;">
-                    <i class="fas fa-save me-2"></i>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save" style="margin-inline-end: 0.5rem;"></i>
                     حفظ كافة التغييرات
                 </button>
             </div>
@@ -339,10 +372,10 @@
             const row = document.createElement('div');
             row.className = 'gov-row';
             row.innerHTML = `
-                <input type="text" name="gov_name[]" class="form-control" placeholder="اسم المحافظة">
-                <input type="number" name="gov_cost[]" class="form-control" placeholder="0" min="0" step="0.5">
-                <input type="number" name="gov_days_min[]" class="form-control" placeholder="1" min="1">
-                <input type="number" name="gov_days_max[]" class="form-control" placeholder="3" min="1">
+                <input type="text" name="gov_name[]" class="form-control" placeholder="اسم المحافظة" aria-label="اسم المحافظة">
+                <input type="number" name="gov_cost[]" class="form-control" placeholder="0" min="0" step="0.5" aria-label="سعر الشحن">
+                <input type="number" name="gov_days_min[]" class="form-control" placeholder="1" min="1" aria-label="أقل أيام توصيل">
+                <input type="number" name="gov_days_max[]" class="form-control" placeholder="3" min="1" aria-label="أكثر أيام توصيل">
                 <button type="button" onclick="removeRow(this)" class="remove-btn">
                     <i class="fas fa-trash-alt"></i>
                 </button>

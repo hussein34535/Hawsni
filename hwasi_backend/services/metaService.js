@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const crypto = require('crypto');
-const supabase = require('../config/supabase');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 
 class MetaService {
     constructor() {

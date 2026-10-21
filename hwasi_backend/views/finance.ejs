@@ -56,10 +56,48 @@
     .fin-modal-actions { display: flex; gap: 10px; margin-top: 18px; }
     .fin-empty { text-align: center; padding: 2rem; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; }
     .fin-progress-note { background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.3); color: #92400e; border-radius: 12px; padding: 10px 14px; font-size: 0.8rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; gap: 8px; align-items: center; }
+    body.dark .fin-hero h2 { color: var(--dm-accent); }
+    body.dark .fin-stat,
+    body.dark .fin-card {
+        background: var(--dm-surface);
+        border-color: var(--dm-border);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    body.dark .fin-table th {
+        background: var(--dm-surface-2);
+        border-bottom-color: var(--dm-border);
+        color: var(--dm-text-muted);
+    }
+    body.dark .fin-table td { border-bottom-color: var(--dm-border); color: var(--dm-text); }
+    body.dark .fin-total-row td { background: rgba(10,132,255,0.08); }
+    body.dark .fin-btn-outline { background: var(--dm-surface-2); color: var(--dm-text-muted); }
+    body.dark .fin-btn-outline:hover { background: var(--dm-surface-3); }
+    body.dark .fin-btn-danger { background: rgba(255,69,58,0.15); color: #ff6961; }
+    body.dark .fin-modal { background: var(--dm-surface); border: 1px solid var(--dm-border); }
+    body.dark .fin-modal h3 { color: var(--dm-accent); }
+    body.dark .fin-field label { color: var(--dm-text-muted); }
+    body.dark .fin-field input,
+    body.dark .fin-field select,
+    body.dark .fin-field textarea {
+        background: var(--dm-surface-2);
+        border-color: var(--dm-border);
+        color: var(--dm-text);
+    }
+    body.dark .fin-progress-note {
+        background: rgba(255,159,10,0.12);
+        border-color: rgba(255,159,10,0.3);
+        color: #ffd60a;
+    }
     @media (max-width: 768px) {
         .fin-grid { grid-template-columns: 1fr 1fr; }
         .fin-stat-value { font-size: 1.15rem; }
         .fin-modal { max-width: 100%; }
+    }
+    @media (max-width: 420px) {
+        .fin-grid { grid-template-columns: 1fr; }
+        .fin-form-grid { grid-template-columns: 1fr; }
+        .fin-chart { gap: 4px; }
+        .fin-chart-label { font-size: 0.6rem; }
     }
 </style>
 
@@ -96,8 +134,8 @@
     <div class="fin-stat">
         <div class="fin-stat-icon" style="background: rgba(245,158,11,0.12); color: #d97706;"><i class="fas fa-clock"></i></div>
         <div class="fin-stat-value" style="color: #d97706;"><%= Number(pending).toLocaleString('en-EG', {maximumFractionDigits: 0}) %> ج.م</div>
-        <div class="fin-stat-label">مستحق عليك (تحصيل لسه)</div>
-        <div class="fin-stat-sub">طلبات متوصلة/في الطريق</div>
+        <div class="fin-stat-label">مستحق لك (غير محصل)</div>
+        <div class="fin-stat-sub">طلبات مؤكدة/متوصلة لم تُحصّل بعد</div>
     </div>
     <div class="fin-stat">
         <div class="fin-stat-icon" style="background: rgba(139,92,246,0.1); color: #8b5cf6;"><i class="fas fa-boxes-stacked"></i></div>

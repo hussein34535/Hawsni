@@ -5,7 +5,6 @@ const path = require('path');
 const cookies = require('cookie-parser');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const supabase = require('./config/supabase');
 const upload = require('./middleware/upload');
 const methodOverride = require('method-override');
 
@@ -61,7 +60,7 @@ const generalLimiter = rateLimit({
   max: 30, // Conservative safeguard for Serverless (approx 30 req/min per IP)
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => req.path === '/health',
+  skip: (req) => req.path === '/health' || req.originalUrl.startsWith('/api/chat/messages'),
   message: { success: false, message: 'Too many requests, please slow down.' }
 });
 
@@ -165,8 +164,8 @@ app.get('/track-order', async (req, res) => {
     const { id, order_number } = req.query;
     if (!id && !order_number) return res.render('track-order', { order: null, tracking: null });
 
-    const supabase = require('./config/supabase');
-    let query = supabase.from('orders').select('*, order_items(*, products(name, images))');
+    const { supabaseAdmin } = require('./config/supabase');
+    let query = supabaseAdmin.from('orders').select('*, order_items(*, products(name, images))');
 
     if (id) {
         query = query.eq('id', id);

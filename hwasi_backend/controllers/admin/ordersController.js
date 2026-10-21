@@ -6,9 +6,9 @@ class OrdersController {
     // List all orders - with pagination
     async index(req, res) {
         try {
-            const { page = 1, limit = 1000 } = req.query;
+            const { page = 1, limit = 50 } = req.query;
             const pageNum = parseInt(page) || 1;
-            const limitNum = Math.min(parseInt(limit) || 1000, 2000); // max 2000 at once
+            const limitNum = Math.min(Math.max(parseInt(limit, 10) || 50, 10), 200);
             const from = (pageNum - 1) * limitNum;
             const to = from + limitNum - 1;
 
@@ -72,8 +72,7 @@ class OrdersController {
                     limit: limitNum,
                     totalPages: Math.ceil(totalCount / limitNum)
                 },
-                supabaseUrl: process.env.SUPABASE_URL,
-                supabaseAnonKey: process.env.SUPABASE_ANON_KEY
+
             });
         } catch (err) {
             console.error('Error fetching orders:', err);

@@ -1,5 +1,4 @@
-const supabase = require('../config/supabase');
-const { supabaseAdmin } = require('../config/supabase');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 const { supabaseAuth } = require('../config/supabase');
 const jwt = require('jsonwebtoken');
 const emailService = require('./emailService');

@@ -1,4 +1,4 @@
-const supabase = require('../config/supabase');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 
 // Banner crop/responsive config is stored self-contained in `subtitle`
 // as JSON: {"_cfg":{fx,fy,bo,bl,mi,mfx,mfy,ti,tfx,tfy}}

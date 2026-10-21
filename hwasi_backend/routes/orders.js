@@ -3,7 +3,7 @@ const router = express.Router();
 const OrderController = require('../controllers/api/orderController');
 const { protect, protectOptional } = require('../middleware/auth');
 const { orderSchema } = require('../middleware/validation');
-const supabase = require('../config/supabase');
+const { supabaseAdmin: supabase } = require('../config/supabase');
 
 // Get user orders
 router.get('/', protect, OrderController.getUserOrders);

@@ -1,22 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Sparkles, Settings, RotateCcw } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
-// Environment variables
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://hwasibackend.vercel.app/api';
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-// Supabase instance — only created if credentials are available
-let supabase: ReturnType<typeof createClient> | null = null;
-if (SUPABASE_URL && SUPABASE_KEY) {
-  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-}
 
 interface ChatMessage {
   id?: number;
@@ -24,6 +14,51 @@ interface ChatMessage {
   content: string;
   created_at?: string;
   isOptimistic?: boolean;
+}
+
+function safeImageUrl(content: string): string | null {
+  const match = content.match(/^\[IMAGE_URL:(https:\/\/[^\]\s]+)\]$/);
+  if (!match) return null;
+  try {
+    const url = new URL(match[1]);
+    if (url.protocol !== 'https:' || url.hostname !== 'res.cloudinary.com') return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function MessageContent({ content }: { content: string }) {
+  const imageUrl = safeImageUrl(content);
+  if (imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt="Chat attachment"
+        className="max-w-full max-h-48 rounded-lg mt-2 cursor-pointer"
+        loading="lazy"
+        onClick={() => window.open(imageUrl, '_blank', 'noopener,noreferrer')}
+      />
+    );
+  }
+  return <span className="whitespace-pre-wrap">{content}</span>;
+}
+
+function mergeMessages(previous: ChatMessage[], incoming: ChatMessage[]): ChatMessage[] {
+  const next = [...previous];
+  for (const message of incoming) {
+    if (message.sender_type === 'user' && message.id != null) {
+      const optimisticIndex = next.findIndex(item => item.isOptimistic && item.content === message.content);
+      if (optimisticIndex !== -1) next.splice(optimisticIndex, 1);
+    }
+    if (message.id != null && next.some(item => item.id === message.id)) continue;
+    next.push(message);
+  }
+  return next.sort((a, b) => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : Date.now();
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : Date.now();
+    return aTime - bTime;
+  });
 }
 
 export default function ChatWidget() {
@@ -41,6 +76,7 @@ export default function ChatWidget() {
   const pathname = usePathname();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastMessageAtRef = useRef<string>('');
 
   // Scroll tracking to hide/show FAB (Legendary UX)
   useEffect(() => {
@@ -111,10 +147,12 @@ export default function ChatWidget() {
       const res = await fetch(`${API_URL}/chat/session/${sid}`);
       const data = await res.json();
       if (data.success && data.messages) {
-        setMessages(data.messages);
+        setMessages(prev => mergeMessages(prev.filter(m => !m.isOptimistic), data.messages));
+        const last = data.messages[data.messages.length - 1];
+        if (last?.created_at) lastMessageAtRef.current = last.created_at;
       }
-    } catch (e) {
-      console.error('Failed to load chat history', e);
+    } catch {
+      // Network errors are retried by the polling loop.
     }
   };
 
@@ -138,51 +176,43 @@ export default function ChatWidget() {
         body: JSON.stringify({ sessionId: sid })
       });
       setUnreadCount(0);
-    } catch (e) {
-      console.error('Failed to mark messages as read', e);
+    } catch {
+      // Non-critical.
     }
   };
 
-    // 2. Real-time Subscription to Supabase
-    useEffect(() => {
-      if (!sessionId || !supabase) return;
-      
-      // Listen for new messages
-      const channel = supabase
-        .channel(`public:chat_messages:${sessionId}`)
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `session_id=eq.${sessionId}` },
-          (payload) => {
-            const newMessage = payload.new as ChatMessage & { is_read?: boolean };
-            
-            setMessages((prev) => {
-              // 1. If it's a message from 'user', we might have an optimistic version
-              if (newMessage.sender_type === 'user') {
-                // Find and remove the optimistic message
-                const filtered = prev.filter(m => !m.isOptimistic || m.content !== newMessage.content);
-                // If it was already added by realtime (unlikely but safe), skip
-                if (filtered.some(m => m.id === newMessage.id)) return filtered;
-                return [...filtered, newMessage];
-              }
+  const pollMessages = useCallback(async (sid: string) => {
+    try {
+      const after = lastMessageAtRef.current;
+      const query = after ? `?after=${encodeURIComponent(after)}` : '';
+      const res = await fetch(`${API_URL}/chat/messages/${sid}${query}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success || !Array.isArray(data.messages) || data.messages.length === 0) return;
 
-              // 2. For bot/admin messages, just prevent ID duplication
-              if (prev.some(m => m.id === newMessage.id)) return prev;
-              return [...prev, newMessage];
-            });
+      setMessages(prev => mergeMessages(prev, data.messages));
+      const maxDate = data.messages.reduce((latest: string, message: ChatMessage) => {
+        if (!message.created_at) return latest;
+        return !latest || message.created_at > latest ? message.created_at : latest;
+      }, lastMessageAtRef.current);
+      lastMessageAtRef.current = maxDate;
+    } catch {
+      // Network errors are retried by the polling loop.
+    }
+  }, []);
 
-            // 3. Increment unread count if chat is closed and message is from bot/admin
-            if (!isOpen && (newMessage.sender_type === 'bot' || newMessage.sender_type === 'admin')) {
-              setUnreadCount(prev => prev + 1);
-            }
-          }
-        )
-        .subscribe();
-  
-      return () => {
-        supabase!.removeChannel(channel);
-      };
-    }, [sessionId, isOpen]);
+  useEffect(() => {
+    if (!sessionId || !isOpen) return;
+    pollMessages(sessionId);
+    const interval = window.setInterval(() => pollMessages(sessionId), 4000);
+    return () => window.clearInterval(interval);
+  }, [sessionId, isOpen, pollMessages]);
+
+  useEffect(() => {
+    if (!sessionId || isOpen) return;
+    const interval = window.setInterval(() => fetchUnreadCount(sessionId), 20000);
+    return () => window.clearInterval(interval);
+  }, [sessionId, isOpen]);
 
     // Auto-scroll to latest message
     useEffect(() => {
@@ -245,13 +275,14 @@ export default function ChatWidget() {
         const data = await res.json();
 
         if (!data.success) {
-          // If API fails, remove optimistic and show error
           setMessages(prev => {
             const filtered = prev.filter(m => m !== optimisticMsg);
             return [...filtered, { sender_type: 'bot', content: 'عذراً، حدث خطأ. حاول تاني.' }];
           });
+        } else {
+          window.setTimeout(() => pollMessages(sessionId), 300);
         }
-      } catch (error) {
+      } catch {
         setMessages(prev => {
           const filtered = prev.filter(m => m !== optimisticMsg);
           return [...filtered, { sender_type: 'bot', content: 'حدث خطأ في الاتصال بالسيرفر.' }];
@@ -259,17 +290,7 @@ export default function ChatWidget() {
       } finally {
         setIsLoading(false);
       }
-    }, [input, isLoading, sessionId]);
-
-    const formatText = (text: string) => {
-      const imageUrlMatch = text.match(/\[IMAGE_URL:(.+?)\]/);
-      if (imageUrlMatch) {
-        return `<img src="${imageUrlMatch[1]}" alt="image" class="max-w-full max-h-48 rounded-lg mt-2 cursor-pointer" onclick="window.open('${imageUrlMatch[1]}', '_blank')" />`;
-      }
-      return text
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        .replace(/\n/g, '<br/>');
-    };
+    }, [input, isLoading, sessionId, pollMessages]);
 
     const formatTime = (iso?: string) => {
       try {
@@ -478,7 +499,7 @@ export default function ChatWidget() {
                           className={`hwsni-bubble ${msg.sender_type}`}
                           style={{ opacity: 1 }}
                         >
-                          <div dangerouslySetInnerHTML={{ __html: formatText(msg.content) }} />
+                          <MessageContent content={msg.content} />
                           <span className="hwsni-time">{formatTime(msg.created_at)}</span>
                         </div>
                       </motion.div>

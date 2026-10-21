@@ -13,7 +13,7 @@
                 </div>
                 <% } %>
 
-                    <div style="display:grid; grid-template-columns:1fr 1.5fr; gap:24px; align-items:start;">
+                    <div class="review-layout" style="display:grid; grid-template-columns:1fr 1.5fr; gap:24px; align-items:start;">
 
                         <!-- ── Add Review Form ── -->
                         <div class="card">
@@ -26,8 +26,8 @@
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
 
                                     <div class="form-group">
-                                        <label class="form-label">المنتج</label>
-                                        <select name="product_id" class="form-control" required>
+                                        <label class="form-label" for="review-product">المنتج</label>
+                                        <select id="review-product" name="product_id" class="form-control" required>
                                             <option value="">— اختر منتج —</option>
                                             <% products.forEach(p=> { %>
                                                 <option value="<%= p.id %>">
@@ -38,17 +38,18 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="form-label">اسم المراجع (مخصص)</label>
-                                        <input type="text" name="custom_name" class="form-control" required
-                                            placeholder="مثال: الاسم بالكامل">
+                                        <label class="form-label" for="review-name">اسم المراجع (مخصص)</label>
+                                        <input id="review-name" type="text" name="custom_name" class="form-control" required
+                                            maxlength="80" placeholder="مثال: الاسم بالكامل">
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="form-label">التقييم</label>
-                                        <div id="starPicker"
+                                        <label class="form-label" id="rating-label">التقييم</label>
+                                        <div id="starPicker" role="radiogroup" aria-labelledby="rating-label"
                                             style="display:flex; gap:8px; font-size:2rem; cursor:pointer; margin-bottom:4px;">
                                             <% [1,2,3,4,5].forEach(s=> { %>
-                                                <span class="star-btn" data-val="<%= s %>"
+                                                <span class="star-btn" data-val="<%= s %>" role="radio" tabindex="<%= s === 1 ? '0' : '-1' %>"
+                                                    aria-checked="false" aria-label="<%= s %> من 5"
                                                     style="color:#D1D5DB; transition:color .15s;">★</span>
                                                 <% }) %>
                                         </div>
@@ -57,8 +58,8 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label class="form-label">التعليق (اختياري)</label>
-                                        <textarea name="comment" class="form-control" rows="4"
+                                        <label class="form-label" for="review-comment">التعليق (اختياري)</label>
+                                        <textarea id="review-comment" name="comment" class="form-control" rows="4" maxlength="1000"
                                             placeholder="اكتب التعليق هنا (اختياري)..."></textarea>
                                     </div>
 
@@ -79,7 +80,7 @@
                                             onclick="document.getElementById('imgFileInput').click()">
                                             <i class="fas fa-cloud-upload-alt"></i> اختر صور
                                         </button>
-                                        <input type="file" id="imgFileInput" accept="image/*" multiple hidden>
+                                        <input type="file" id="imgFileInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple hidden>
 
                                         <!-- Upload progress -->
                                         <div id="uploadStatus"
@@ -155,7 +156,7 @@
                                                             <%= new Date(r.created_at).toLocaleDateString('ar-EG') %>
                                                         </td>
                                                         <td>
-                                                            <button onclick="deleteReview('<%= r.id %>')"
+                                                            <button type="button" onclick="deleteReview('<%= r.id %>')"
                                                                 style="background:none; border:none; color:#EF4444; cursor:pointer; padding:4px;"
                                                                 title="حذف">
                                                                 <i class="fas fa-trash"></i>
@@ -172,10 +173,9 @@
                     </div>
 
                     <script>
-                        // ── Cloudinary Config ─────────────────────────────────────────────────────────
-                        const CLOUD_NAME = 'djxkwged9';
-                        const UPLOAD_PRESET = 'hawsni_reviews';
-
+                        const CSRF_TOKEN = '<%= csrfToken %>';
+                        const MAX_IMAGES = 4;
+                        const ALLOWED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
                         let selectedFiles = [];
 
                         const fileInput = document.getElementById('imgFileInput');
@@ -186,90 +186,134 @@
                         const reviewForm = submitBtn.closest('form');
 
                         fileInput.addEventListener('change', () => {
-                            const newFiles = Array.from(fileInput.files);
-                            const remaining = 4 - selectedFiles.length;
-                            selectedFiles = [...selectedFiles, ...newFiles.slice(0, remaining)].slice(0, 4);
+                            const newFiles = Array.from(fileInput.files)
+                                .filter(file => ALLOWED_IMAGE_TYPES.has(file.type) && file.size <= 4.5 * 1024 * 1024);
+                            const remaining = MAX_IMAGES - selectedFiles.length;
+                            selectedFiles = [...selectedFiles, ...newFiles.slice(0, remaining)].slice(0, MAX_IMAGES);
                             fileInput.value = '';
                             renderPreviews();
                         });
 
                         function renderPreviews() {
-                            previews.innerHTML = '';
-                            selectedFiles.forEach((file, i) => {
+                            previews.textContent = '';
+                            selectedFiles.forEach((file, index) => {
                                 const reader = new FileReader();
-                                reader.onload = e => {
+                                reader.onload = event => {
                                     const wrap = document.createElement('div');
                                     wrap.style.cssText = 'position:relative; width:72px; height:72px;';
-                                    wrap.innerHTML = `
-                                        <img src="${e.target.result}" style="width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid #E5E7EB;">
-                                        <button type="button" onclick="removeFile(${i})"
-                                            style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#EF4444;border:none;border-radius:50%;color:white;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
-                                    `;
+                                    const img = document.createElement('img');
+                                    img.src = String(event.target.result || '');
+                                    img.alt = file.name;
+                                    img.style.cssText = 'width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid #E5E7EB;';
+                                    const remove = document.createElement('button');
+                                    remove.type = 'button';
+                                    remove.textContent = '✕';
+                                    remove.setAttribute('aria-label', 'إزالة الصورة');
+                                    remove.style.cssText = 'position:absolute;top:-6px;right:-6px;width:18px;height:18px;background:#EF4444;border:none;border-radius:50%;color:white;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;';
+                                    remove.addEventListener('click', () => removeFile(index));
+                                    wrap.append(img, remove);
                                     previews.appendChild(wrap);
                                 };
                                 reader.readAsDataURL(file);
                             });
                         }
 
-                        function removeFile(idx) {
-                            selectedFiles.splice(idx, 1);
+                        function removeFile(index) {
+                            selectedFiles.splice(index, 1);
                             renderPreviews();
                         }
 
-                        async function uploadSingle(file) {
-                            const fd = new FormData();
-                            fd.append('file', file);
-                            fd.append('upload_preset', UPLOAD_PRESET);
-                            const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-                                method: 'POST', body: fd
+                        async function uploadSelectedImages(files) {
+                            const formData = new FormData();
+                            files.forEach(file => formData.append('images', file));
+                            const response = await fetch('/admin/reviews/upload', {
+                                method: 'POST',
+                                headers: { 'X-CSRF-Token': CSRF_TOKEN },
+                                body: formData
                             });
-                            const data = await res.json();
-                            if (!data.secure_url) throw new Error(data.error?.message || 'Upload failed');
-                            return data.secure_url;
+                            const data = await response.json().catch(() => ({}));
+                            if (!response.ok || !data.success || !Array.isArray(data.urls)) {
+                                throw new Error(data.message || 'تعذر رفع الصور');
+                            }
+                            return data.urls;
                         }
 
-                        reviewForm.addEventListener('submit', async function (e) {
-                            if (selectedFiles.length === 0) return; // no images → submit normally
-                            e.preventDefault();
+                        reviewForm.addEventListener('submit', async function (event) {
+                            if (Number(ratingInput.value) < 1) {
+                                event.preventDefault();
+                                statusDiv.style.display = 'block';
+                                statusDiv.textContent = 'يرجى اختيار تقييم من 1 إلى 5 قبل الإرسال.';
+                                statusDiv.style.color = '#EF4444';
+                                return;
+                            }
+                            if (selectedFiles.length === 0) return;
+                            event.preventDefault();
 
                             submitBtn.disabled = true;
                             statusDiv.style.display = 'block';
+                            statusDiv.style.color = '#6366F1';
+                            statusDiv.textContent = 'جاري رفع الصور...';
 
                             try {
-                                const urls = await Promise.all(selectedFiles.map(uploadSingle));
-                                hiddenDiv.innerHTML = '';
+                                const urls = await uploadSelectedImages(selectedFiles);
+                                hiddenDiv.textContent = '';
                                 urls.forEach(url => {
-                                    const inp = document.createElement('input');
-                                    inp.type = 'hidden';
-                                    inp.name = 'images[]';
-                                    inp.value = url;
-                                    hiddenDiv.appendChild(inp);
+                                    const input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = 'images[]';
+                                    input.value = url;
+                                    hiddenDiv.appendChild(input);
                                 });
                                 reviewForm.submit();
                             } catch (err) {
-                                statusDiv.innerHTML = `<span style="color:#EF4444;">❌ فشل الرفع: ${err.message}</span>`;
+                                statusDiv.style.color = '#EF4444';
+                                statusDiv.textContent = 'فشل الرفع: ' + (err.message || 'حاول مرة أخرى');
                                 submitBtn.disabled = false;
                             }
                         });
 
                         // ── Star Picker ───────────────────────────────────────────────────────────────
-                        const stars = document.querySelectorAll('.star-btn');
+                        const stars = Array.from(document.querySelectorAll('.star-btn'));
                         const ratingInput = document.getElementById('ratingInput');
+
+                        function highlight(value) {
+                            const selected = parseInt(value, 10) || 0;
+                            stars.forEach(star => {
+                                const starValue = parseInt(star.dataset.val, 10);
+                                star.style.color = starValue <= selected ? '#F59E0B' : '#D1D5DB';
+                                star.setAttribute('aria-checked', String(starValue === selected));
+                                star.tabIndex = starValue === (selected || 1) ? 0 : -1;
+                            });
+                        }
 
                         stars.forEach(star => {
                             star.addEventListener('mouseover', () => highlight(star.dataset.val));
-                            star.addEventListener('mouseout', () => highlight(ratingInput.value || 0));
+                            star.addEventListener('mouseout', () => highlight(ratingInput.value));
                             star.addEventListener('click', () => {
                                 ratingInput.value = star.dataset.val;
                                 highlight(star.dataset.val);
                             });
-                        });
-
-                        function highlight(val) {
-                            stars.forEach(s => {
-                                s.style.color = parseInt(s.dataset.val) <= parseInt(val) ? '#F59E0B' : '#D1D5DB';
+                            star.addEventListener('keydown', event => {
+                                const current = parseInt(ratingInput.value, 10) || 0;
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    ratingInput.value = star.dataset.val;
+                                    highlight(star.dataset.val);
+                                } else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+                                    event.preventDefault();
+                                    const next = Math.min(current + 1, 5);
+                                    ratingInput.value = String(next);
+                                    highlight(next);
+                                    stars[next - 1].focus();
+                                } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+                                    event.preventDefault();
+                                    const next = Math.max(current - 1, 1);
+                                    ratingInput.value = String(next);
+                                    highlight(next);
+                                    stars[next - 1].focus();
+                                }
                             });
-                        }
+                        });
 
                         // ── Delete Review ─────────────────────────────────────────────────────────────
                         async function deleteReview(id) {

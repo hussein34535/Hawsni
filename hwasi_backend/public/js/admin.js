@@ -2,10 +2,13 @@
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        <span>${message}</span>
-    `;
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    const icon = document.createElement('i');
+    icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
+    const text = document.createElement('span');
+    text.textContent = String(message ?? '');
+    toast.append(icon, text);
 
     // Add styles
     toast.style.cssText = `
@@ -37,16 +40,19 @@ function showToast(message, type = 'success') {
 function showConfirm(message, onConfirm) {
     const overlay = document.createElement('div');
     overlay.className = 'confirm-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
     overlay.innerHTML = `
         <div class="confirm-dialog">
-            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f39c12; margin-bottom: 1rem;"></i>
-            <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">${message}</p>
+            <i class="fas fa-exclamation-triangle" aria-hidden="true" style="font-size: 3rem; color: #f39c12; margin-bottom: 1rem;"></i>
+            <p class="confirm-message" style="font-size: 1.1rem; margin-bottom: 1.5rem;"></p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn btn-secondary confirm-cancel">إلغاء</button>
-                <button class="btn btn-danger confirm-ok">تأكيد</button>
+                <button type="button" class="btn btn-secondary confirm-cancel">إلغاء</button>
+                <button type="button" class="btn btn-danger confirm-ok">تأكيد</button>
             </div>
         </div>
     `;
+    overlay.querySelector('.confirm-message').textContent = String(message ?? '');
 
     overlay.style.cssText = `
         position: fixed;
@@ -73,13 +79,23 @@ function showConfirm(message, onConfirm) {
     `;
 
     document.body.appendChild(overlay);
+    const cancelButton = overlay.querySelector('.confirm-cancel');
+    const okButton = overlay.querySelector('.confirm-ok');
+    cancelButton.focus();
 
-    overlay.querySelector('.confirm-cancel').addEventListener('click', () => {
+    const close = () => {
+        document.removeEventListener('keydown', onKeyDown);
         overlay.remove();
-    });
+    };
+    const onKeyDown = (event) => {
+        if (event.key === 'Escape') close();
+    };
+    document.addEventListener('keydown', onKeyDown);
 
-    overlay.querySelector('.confirm-ok').addEventListener('click', () => {
-        overlay.remove();
+    cancelButton.addEventListener('click', close);
+
+    okButton.addEventListener('click', () => {
+        close();
         if (typeof onConfirm === 'function') onConfirm();
     });
 }

@@ -1,5 +1,12 @@
 <%- include('partials/header', { title: 'الإعدادات' , pageTitle: 'الإعدادات' , page: 'settings' }) %>
 
+    <% if (locals.success) { %>
+        <div class="alert alert-success" role="status">تم حفظ الإعدادات بنجاح.</div>
+    <% } %>
+    <% if (locals.error) { %>
+        <div class="alert alert-danger" role="alert"><%= error %></div>
+    <% } %>
+
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">
@@ -16,20 +23,20 @@
                 </div>
                 <div style="padding: 1.5rem;">
                     <div class="form-group">
-                        <label class="form-label">اسم المتجر</label>
-                        <input type="text" name="store_name" class="form-control"
+                        <label class="form-label" for="store-name">اسم المتجر</label>
+                        <input type="text" name="store_name" id="store-name" class="form-control"
                             value="<%= settings.store_name || 'Hwasi Store' %>" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">وصف المتجر</label>
-                        <textarea name="store_description" class="form-control"
+                        <label class="form-label" for="store-description">وصف المتجر</label>
+                        <textarea id="store-description" name="store_description" class="form-control"
                             rows="3"><%= settings.store_description || '' %></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">رابط الشعار (URL)</label>
-                        <input type="url" name="logo_url" class="form-control" value="<%= settings.logo_url || '' %>"
+                        <label class="form-label" for="logo-url">رابط الشعار (URL)</label>
+                        <input type="url" name="logo_url" id="logo-url" class="form-control" value="<%= settings.logo_url || '' %>"
                             placeholder="https://example.com/logo.png">
                     </div>
                 </div>
@@ -40,22 +47,22 @@
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-address-card"></i> معلومات الاتصال</h2>
                 </div>
-                <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-grid-2" style="padding: 1.5rem;">
                     <div class="form-group">
-                        <label class="form-label">البريد الإلكتروني</label>
-                        <input type="email" name="contact_email" class="form-control"
+                        <label class="form-label" for="contact-email">البريد الإلكتروني</label>
+                        <input type="email" name="contact_email" id="contact-email" class="form-control"
                             value="<%= settings.contact_email || '' %>">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">رقم الهاتف</label>
-                        <input type="tel" name="contact_phone" class="form-control"
+                        <label class="form-label" for="contact-phone">رقم الهاتف</label>
+                        <input type="tel" name="contact_phone" id="contact-phone" class="form-control"
                             value="<%= settings.contact_phone || '' %>">
                     </div>
 
-                    <div class="form-group" style="grid-column: span 2;">
-                        <label class="form-label">العنوان</label>
-                        <input type="text" name="address" class="form-control" value="<%= settings.address || '' %>">
+                    <div class="form-group form-span-2">
+                        <label class="form-label" for="store-address">العنوان</label>
+                        <input type="text" name="address" id="store-address" class="form-control" value="<%= settings.address || '' %>">
                     </div>
                 </div>
             </div>
@@ -65,33 +72,33 @@
                 <div class="card-header">
                     <h2 class="card-title"><i class="fas fa-share-alt"></i> روابط التواصل الاجتماعي</h2>
                 </div>
-                <div style="padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="form-grid-2" style="padding: 1.5rem;">
                     <% const social=settings.social_links || {}; %>
 
                         <div class="form-group">
-                            <label class="form-label"><i class="fab fa-facebook" style="color: #1877F2;"></i>
+                            <label class="form-label" for="social-facebook"><i class="fab fa-facebook" style="color: #1877F2;"></i>
                                 Facebook</label>
-                            <input type="url" name="facebook" class="form-control" value="<%= social.facebook || '' %>">
+                            <input type="url" name="facebook" id="social-facebook" class="form-control" value="<%= social.facebook || '' %>">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label"><i class="fab fa-instagram" style="color: #E4405F;"></i>
+                            <label class="form-label" for="social-instagram"><i class="fab fa-instagram" style="color: #E4405F;"></i>
                                 Instagram</label>
-                            <input type="url" name="instagram" class="form-control"
+                            <input type="url" name="instagram" id="social-instagram" class="form-control"
                                 value="<%= social.instagram || '' %>">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label"><i class="fab fa-whatsapp" style="color: #25D366;"></i>
+                            <label class="form-label" for="social-whatsapp"><i class="fab fa-whatsapp" style="color: #25D366;"></i>
                                 WhatsApp</label>
-                            <input type="text" name="whatsapp" class="form-control" value="<%= social.whatsapp || '' %>"
+                            <input type="text" name="whatsapp" id="social-whatsapp" class="form-control" value="<%= social.whatsapp || '' %>"
                                 placeholder="+20...">
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label"><i class="fab fa-tiktok" style="color: #000000;"></i>
+                            <label class="form-label" for="social-tiktok"><i class="fab fa-tiktok" style="color: #000000;"></i>
                                 TikTok</label>
-                            <input type="url" name="tiktok" class="form-control" value="<%= social.tiktok || '' %>">
+                            <input type="url" name="tiktok" id="social-tiktok" class="form-control" value="<%= social.tiktok || '' %>">
                         </div>
                 </div>
             </div>
@@ -103,10 +110,10 @@
                 </div>
                 <div style="padding: 1.5rem;">
                     <div class="form-group">
-                        <label class="form-label">
+                        <label class="form-label" for="meta-pixel-id">
                             <i class="fab fa-facebook-f" style="color: #1877F2;"></i> Meta Pixel ID
                         </label>
-                        <input type="text" name="meta_pixel_id" class="form-control"
+                        <input type="text" name="meta_pixel_id" id="meta-pixel-id" class="form-control"
                             value="<%= settings.meta_pixel_id || '' %>" placeholder="مثال: 123456789012345">
                         <small style="color: #666; margin-top: 0.5rem; display: block;">
                             تستخدم Meta Pixel لتتبع التحويلات وتحسين الحملات الإعلانية على فيسبوك وإنستجرام.
