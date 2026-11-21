@@ -498,6 +498,14 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
     const safeImages = Array.isArray(product?.images) ? product.images : [];
     const [galleryAspectRatio, setGalleryAspectRatio] = useState<number | null>(null);
+    const [isDesktop, setIsDesktop] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (!safeImages || safeImages.length === 0) return;
@@ -512,20 +520,23 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             vid.src = firstImgUrl;
             vid.onloadedmetadata = () => {
                 if (vid.videoWidth && vid.videoHeight) {
-                    setGalleryAspectRatio(vid.videoWidth / vid.videoHeight);
+                    const ratio = vid.videoWidth / vid.videoHeight;
+                    setGalleryAspectRatio(Math.min(Math.max(ratio, 0.7), 1.5));
                 }
             };
         } else {
             const img = new window.Image();
             img.src = firstImgUrl;
+            const updateRatio = () => {
+                if (img.naturalWidth && img.naturalHeight) {
+                    const ratio = img.naturalWidth / img.naturalHeight;
+                    setGalleryAspectRatio(Math.min(Math.max(ratio, 0.7), 1.5));
+                }
+            };
             if (img.complete && img.naturalWidth && img.naturalHeight) {
-                setGalleryAspectRatio(img.naturalWidth / img.naturalHeight);
+                updateRatio();
             } else {
-                img.onload = () => {
-                    if (img.naturalWidth && img.naturalHeight) {
-                        setGalleryAspectRatio(img.naturalWidth / img.naturalHeight);
-                    }
-                };
+                img.onload = updateRatio;
             }
         }
     }, [safeImages]);
@@ -751,7 +762,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
 
     return (
-        <div className={`w-full bg-[#FAFAFA] min-h-screen lg:mt-0 -mt-20 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
+        <div className={`w-full bg-[#FAFAFA] min-h-screen ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
 
             {/* Header / AppBar - Transparent Overlay */}
             <div className={`fixed top-0 left-0 right-0 z-[60] p-4 flex ${isRTL ? 'flex-row-reverse' : 'flex-row'} justify-between items-start bg-gradient-to-b from-black/10 to-transparent pointer-events-none h-24 pt-2`}>
@@ -788,9 +799,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                     <div
                         ref={galleryRef}
                         style={{
-                            '--gallery-aspect': galleryAspectRatio ? `${galleryAspectRatio}` : '4/5',
-                        } as React.CSSProperties}
-                        className="relative aspect-[var(--gallery-aspect)] bg-[#FAFAFA] overflow-hidden group lg:aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
+                            aspectRatio: isDesktop ? undefined : (galleryAspectRatio ? `${galleryAspectRatio}` : undefined),
+                        }}
+                        className={`relative ${!galleryAspectRatio ? 'aspect-[4/5]' : ''} bg-[#FAFAFA] overflow-hidden group lg:!aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]`}
                     >
                         <div
                             ref={sliderRef}
@@ -835,11 +846,12 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                     fill
                                                     priority={i === 0}
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                                    className="object-contain select-none"
+                                                    className="w-full h-full object-contain select-none"
                                                     onLoad={i === 0 ? (e) => {
                                                         const { naturalWidth, naturalHeight } = e.currentTarget;
                                                         if (naturalWidth && naturalHeight) {
-                                                            setGalleryAspectRatio(naturalWidth / naturalHeight);
+                                                            const ratio = naturalWidth / naturalHeight;
+                                                            setGalleryAspectRatio(Math.min(Math.max(ratio, 0.7), 1.5));
                                                         }
                                                     } : undefined}
                                                 />
