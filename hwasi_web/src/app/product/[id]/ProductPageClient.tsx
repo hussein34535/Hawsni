@@ -311,14 +311,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
     const [justAdded, setJustAdded] = useState(false);
     const [adding, setAdding] = useState(false);
-    const [highlightSize, setHighlightSize] = useState(false);
     const sizeSectionRef = useRef<HTMLDivElement>(null);
-    const highlightTimerRef = useRef<NodeJS.Timeout | null>(null);
     const animTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
-    useEffect(() => () => { 
-        animTimers.current.forEach(clearTimeout); 
-        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-    }, []);
+    useEffect(() => () => { animTimers.current.forEach(clearTimeout); }, []);
     // Fit advisor: remembers sizes the customer already answered for (swap/keep)
     const [fitDismissed, setFitDismissed] = useState<Record<string, boolean>>({});
     const reviewsRef = useRef<HTMLDivElement>(null);
@@ -679,19 +674,14 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
         setHasShownUpsell(true);
     };
 
-    const triggerHighlightSize = () => {
+    const scrollToSizeSection = () => {
         sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setHighlightSize(true);
-        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-        highlightTimerRef.current = setTimeout(() => {
-            setHighlightSize(false);
-        }, 900);
     };
 
     const handleAddToCart = (e?: React.MouseEvent) => {
         if (!product) return;
         if (product.sizes && product.sizes.length > 0 && !selectedSize) {
-            triggerHighlightSize();
+            scrollToSizeSection();
             showToast(isRTL ? 'يرجى اختيار المقاس' : 'Please select a size', 'error');
             return;
         }
@@ -717,7 +707,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const handleBottomBarClick = (e: React.MouseEvent) => {
         if (currentStockOut || adding) return;
         if (product && product.sizes && product.sizes.length > 0 && !selectedSize) {
-            triggerHighlightSize();
+            scrollToSizeSection();
             return;
         }
         handleAddToCart(e);
@@ -1072,21 +1062,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             )}
 
                             {product.sizes && product.sizes.length > 0 && (
-                                <div
-                                    ref={sizeSectionRef}
-                                    className={`transition-all duration-300 rounded-2xl p-2.5 -m-2.5 ${
-                                        highlightSize ? 'bg-amber-50 ring-1 ring-amber-300' : ''
-                                    }`}
-                                >
-                                    <div className="flex justify-between items-center mb-2.5 sm:mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <h3 className="text-base font-black text-gray-900 font-cairo">
-                                                {isRTL ? 'المقاس:' : 'Size:'}
-                                            </h3>
-                                            <span className={`text-xs font-bold font-cairo ${selectedSize ? 'text-[#0E4435] font-black' : 'text-amber-600'}`}>
-                                                {selectedSize || (isRTL ? 'اختر المقاس' : 'Select Size')}
-                                            </span>
-                                        </div>
+                                <div ref={sizeSectionRef}>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.sizes || 'Sizes'}</h3>
                                         <button
                                             onClick={() => setIsSizeGuideOpen(true)}
                                             className="text-[11px] font-black text-[var(--color-brand-primary)] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)]/5 hover:bg-[var(--color-brand-primary)]/10 transition-colors"
