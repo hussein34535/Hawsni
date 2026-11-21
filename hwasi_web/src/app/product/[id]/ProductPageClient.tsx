@@ -755,7 +755,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
                     <div
                         ref={galleryRef}
-                        className="relative aspect-[4/3.6] bg-[#F4F4F4] overflow-hidden group lg:aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
+                        className="relative aspect-[4/5] bg-white overflow-hidden group lg:aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
                     >
                         <div
                             ref={sliderRef}
@@ -800,7 +800,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                     fill
                                                     priority={i === 0}
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                                    className="object-cover lg:object-contain object-center select-none"
+                                                    className="object-contain select-none"
                                                 />
                                             )}
                                         </div>
