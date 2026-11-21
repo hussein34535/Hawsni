@@ -497,6 +497,38 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     }, [productId, initialProduct]);
 
     const safeImages = Array.isArray(product?.images) ? product.images : [];
+    const [galleryAspectRatio, setGalleryAspectRatio] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (!safeImages || safeImages.length === 0) return;
+        const firstImgUrl = formatImageUrl(safeImages[0]);
+        if (!firstImgUrl) return;
+
+        const lower = firstImgUrl.toLowerCase();
+        const isVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(lower) || lower.includes('/video/upload/');
+
+        if (isVideo) {
+            const vid = document.createElement('video');
+            vid.src = firstImgUrl;
+            vid.onloadedmetadata = () => {
+                if (vid.videoWidth && vid.videoHeight) {
+                    setGalleryAspectRatio(vid.videoWidth / vid.videoHeight);
+                }
+            };
+        } else {
+            const img = new window.Image();
+            img.src = firstImgUrl;
+            if (img.complete && img.naturalWidth && img.naturalHeight) {
+                setGalleryAspectRatio(img.naturalWidth / img.naturalHeight);
+            } else {
+                img.onload = () => {
+                    if (img.naturalWidth && img.naturalHeight) {
+                        setGalleryAspectRatio(img.naturalWidth / img.naturalHeight);
+                    }
+                };
+            }
+        }
+    }, [safeImages]);
 
     // Garments for the AI try-on: per-color images when colors exist,
     // otherwise the full gallery. The admin-chosen default index only
@@ -755,7 +787,10 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
                     <div
                         ref={galleryRef}
-                        className="relative aspect-[4/5] bg-white overflow-hidden group lg:aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
+                        style={{
+                            '--gallery-aspect': galleryAspectRatio ? `${galleryAspectRatio}` : '4/5',
+                        } as React.CSSProperties}
+                        className="relative aspect-[var(--gallery-aspect)] bg-[#FAFAFA] overflow-hidden group lg:aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
                     >
                         <div
                             ref={sliderRef}
@@ -801,6 +836,12 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                     priority={i === 0}
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
                                                     className="object-contain select-none"
+                                                    onLoad={i === 0 ? (e) => {
+                                                        const { naturalWidth, naturalHeight } = e.currentTarget;
+                                                        if (naturalWidth && naturalHeight) {
+                                                            setGalleryAspectRatio(naturalWidth / naturalHeight);
+                                                        }
+                                                    } : undefined}
                                                 />
                                             )}
                                         </div>
