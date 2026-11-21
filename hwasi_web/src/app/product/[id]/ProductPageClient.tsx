@@ -311,8 +311,14 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
     const [showGallerySwipeHint, setShowGallerySwipeHint] = useState(false);
     const [justAdded, setJustAdded] = useState(false);
     const [adding, setAdding] = useState(false);
+    const [highlightSize, setHighlightSize] = useState(false);
+    const sizeSectionRef = useRef<HTMLDivElement>(null);
+    const highlightTimerRef = useRef<NodeJS.Timeout | null>(null);
     const animTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
-    useEffect(() => () => { animTimers.current.forEach(clearTimeout); }, []);
+    useEffect(() => () => { 
+        animTimers.current.forEach(clearTimeout); 
+        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    }, []);
     // Fit advisor: remembers sizes the customer already answered for (swap/keep)
     const [fitDismissed, setFitDismissed] = useState<Record<string, boolean>>({});
     const reviewsRef = useRef<HTMLDivElement>(null);
@@ -630,9 +636,19 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
         setHasShownUpsell(true);
     };
 
+    const triggerHighlightSize = () => {
+        sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setHighlightSize(true);
+        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+        highlightTimerRef.current = setTimeout(() => {
+            setHighlightSize(false);
+        }, 900);
+    };
+
     const handleAddToCart = (e?: React.MouseEvent) => {
         if (!product) return;
-        if (!selectedSize) {
+        if (product.sizes && product.sizes.length > 0 && !selectedSize) {
+            triggerHighlightSize();
             showToast(isRTL ? 'يرجى اختيار المقاس' : 'Please select a size', 'error');
             return;
         }
@@ -642,7 +658,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
             return;
         }
 
-        if (currentStockOut || isSizeOutOfStock(selectedSize)) {
+        if (currentStockOut || (selectedSize && isSizeOutOfStock(selectedSize))) {
             showToast(isRTL ? 'الكمية نفدت' : 'Out of stock', 'error');
             return;
         }
@@ -653,6 +669,15 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
         }
 
         performAddToCart(selectedAccessories);
+    };
+
+    const handleBottomBarClick = (e: React.MouseEvent) => {
+        if (currentStockOut || adding) return;
+        if (product && product.sizes && product.sizes.length > 0 && !selectedSize) {
+            triggerHighlightSize();
+            return;
+        }
+        handleAddToCart(e);
     };
 
     const handleFavoriteClick = async () => {
@@ -730,7 +755,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
 
                     <div
                         ref={galleryRef}
-                        className="relative aspect-[4/5] bg-[#F4F4F4] overflow-hidden group lg:aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
+                        className="relative aspect-[4/3.6] bg-[#F4F4F4] overflow-hidden group lg:aspect-auto lg:sticky lg:top-24 lg:h-[min(680px,calc(100vh-9rem))] lg:rounded-[2.5rem] lg:border lg:border-gray-100 lg:shadow-[0_20px_50px_rgba(0,0,0,0.06)]"
                     >
                         <div
                             ref={sliderRef}
@@ -775,7 +800,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                                     fill
                                                     priority={i === 0}
                                                     sizes="(max-width: 1024px) 100vw, 50vw"
-                                                    className="object-contain select-none"
+                                                    className="object-cover lg:object-contain object-center select-none"
                                                 />
                                             )}
                                         </div>
@@ -801,6 +826,27 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             </button>
                         )}
 
+                        {safeImages.length > 1 && (
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 bg-black/25 backdrop-blur-sm px-2.5 py-1.5 rounded-full pointer-events-auto">
+                                {safeImages.map((_, idx) => (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            scrollToImage(idx);
+                                        }}
+                                        aria-label={`Slide ${idx + 1}`}
+                                        className={`transition-all duration-300 rounded-full ${
+                                            selectedImage === idx
+                                                ? 'w-5 h-1.5 bg-white'
+                                                : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
+                                        }`}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
                         <AnimatePresence>
                             {showGallerySwipeHint && safeImages.length > 1 && (
                                 <motion.div
@@ -824,16 +870,17 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                         </AnimatePresence>
                     </div>
 
-                    <div className={`p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
-                        <div className="flex flex-col gap-6 mb-10">
-                            <h1 className="text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight mb-2.5">{product.name}</h1>
+                    <div className={`p-4 sm:p-6 md:p-10 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className="flex flex-col gap-2.5 sm:gap-4 mb-4 sm:mb-8">
+                            <h1 className="text-xl sm:text-2xl font-black text-gray-900 font-cairo leading-tight tracking-tight">{product.name}</h1>
                             
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex flex-col">
                                     {product.discount ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-sm text-gray-400 line-through font-bold">
-                                                {product.price.toLocaleString('en-US')} {isRTL ? 'ج.م' : 'EGP'}
+                                            <span className="flex items-baseline gap-1 text-sm text-gray-400 line-through font-bold">
+                                                <span>{product.price.toLocaleString('en-US')}</span>
+                                                <span className="text-[10px]">{isRTL ? 'ج.م' : 'EGP'}</span>
                                             </span>
                                             <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md" dir="ltr">
                                                 -{product.discount}%
@@ -881,7 +928,7 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             <motion.div
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => setIsVTOOpen(true)}
-                                className={`mb-8 p-4 rounded-3xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
+                                className={`mb-4 sm:mb-8 p-4 rounded-3xl bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-100 flex items-center justify-between cursor-pointer group overflow-hidden relative ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
                             >
                                 <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-2xl" />
                                 <div className={`flex items-center gap-4 relative z-10 ${isRTL ? 'flex-row-reverse' : 'flex-row text-right'}`}>
@@ -899,11 +946,11 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             </motion.div>
                         )}
 
-                        <div className="space-y-10">
+                        <div className="space-y-6 sm:space-y-10">
                             {product.colors && product.colors.length > 1 && (
                                 <div>
-                                    <h3 className="text-base font-black text-gray-900 mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
-                                    <div className={`flex flex-wrap gap-2 pb-4 pt-2 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                                    <h3 className="text-base font-black text-gray-900 mb-2 sm:mb-4 font-cairo">{t.product?.colors || 'Colors'}</h3>
+                                    <div className={`flex flex-wrap gap-2 pb-2 sm:pb-4 pt-1 px-1 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                                         {parseColors(product.colors).map((c, i) => {
                                             const rawImage = c.image
                                                 ? formatImageUrl(c.image)
@@ -972,9 +1019,21 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             )}
 
                             {product.sizes && product.sizes.length > 0 && (
-                                <div>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-base font-black text-gray-900 font-cairo">{t.product?.sizes || 'Sizes'}</h3>
+                                <div
+                                    ref={sizeSectionRef}
+                                    className={`transition-all duration-300 rounded-2xl p-2.5 -m-2.5 ${
+                                        highlightSize ? 'bg-amber-50 ring-1 ring-amber-300' : ''
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-center mb-2.5 sm:mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-base font-black text-gray-900 font-cairo">
+                                                {isRTL ? 'المقاس:' : 'Size:'}
+                                            </h3>
+                                            <span className={`text-xs font-bold font-cairo ${selectedSize ? 'text-[#0E4435] font-black' : 'text-amber-600'}`}>
+                                                {selectedSize || (isRTL ? 'اختر المقاس' : 'Select Size')}
+                                            </span>
+                                        </div>
                                         <button
                                             onClick={() => setIsSizeGuideOpen(true)}
                                             className="text-[11px] font-black text-[var(--color-brand-primary)] flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-brand-primary)]/5 hover:bg-[var(--color-brand-primary)]/10 transition-colors"
@@ -1242,10 +1301,10 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                     </button>
                                 </motion.div>
                             )}
-                            <span className="text-2xl leading-[28px] font-black text-white font-cairo">
-                                {totalPrice.toLocaleString()}
-                                <span className="text-[10px] ml-1 opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
-                            </span>
+                            <div className="flex items-baseline gap-1 font-black text-white font-cairo">
+                                <span className="text-2xl leading-[28px]">{totalPrice.toLocaleString()}</span>
+                                <span className="text-[10px] opacity-50">{isRTL ? 'ج.م' : 'EGP'}</span>
+                            </div>
                             {product.free_delivery_offer && (
                                 <span className="flex items-center gap-1 mt-0.5 text-[10px] leading-[12px] max-[400px]:text-[9px] font-black text-[#D4AF37] whitespace-nowrap font-cairo">
                                     <span>
@@ -1282,23 +1341,23 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                             )}
                         </AnimatePresence>
                         <button
-                            onClick={currentStockOut ? undefined : handleAddToCart}
+                            onClick={currentStockOut ? undefined : handleBottomBarClick}
                             className={`
                                 flex items-center gap-2 ${showBagBtn ? 'px-4' : (product.free_delivery_offer ? 'px-8 max-[400px]:px-5' : 'px-8')} py-4 rounded-[1.75rem] font-black text-base whitespace-nowrap transition-all active:scale-95 overflow-hidden relative
                                 ${currentStockOut
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : justAdded
                                         ? 'bg-green-500 text-white shadow-lg'
-                                        : (!selectedSize || (product.colors && product.colors.length > 0 && !selectedColor))
-                                            ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
-                                            : 'bg-white text-gray-950 shadow-lg hover:bg-gray-100'}
+                                        : (!selectedSize && product.sizes && product.sizes.length > 0)
+                                            ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white shadow-md'
+                                            : 'bg-[#0E4435] text-white shadow-lg hover:bg-[#0a3126]'}
                             `}
                             disabled={currentStockOut || adding}
                         >
                             {adding ? (
                                 <div className="flex items-center gap-2" aria-label={isRTL ? 'جاري الإضافة...' : 'Adding...'}>
                                     <motion.span
-                                        className="w-[18px] h-[18px] rounded-full border-2 border-gray-300 border-t-gray-950"
+                                        className="w-[18px] h-[18px] rounded-full border-2 border-gray-300 border-t-white"
                                         animate={{ rotate: 360 }}
                                         transition={{ repeat: Infinity, duration: 0.7, ease: 'linear' }}
                                     />
@@ -1355,7 +1414,9 @@ export default function ProductPageClient({ initialProduct }: { initialProduct?:
                                 <span className="font-cairo">
                                     {stockCount <= 0
                                         ? 'نفدت الكمية'
-                                        : (t.product?.add_to_cart || 'Add to Cart')}
+                                        : (!selectedSize && product.sizes && product.sizes.length > 0)
+                                            ? (isRTL ? 'اختر المقاس أولاً' : 'Select Size First')
+                                            : (isRTL ? 'إضافة للسلة' : (t.product?.add_to_cart || 'Add to Cart'))}
                                 </span>
                             </div>
                             )}
